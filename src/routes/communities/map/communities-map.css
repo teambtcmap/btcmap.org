@@ -1,0 +1,101 @@
+/*
+ * Polish for MapLibre popups on /communities/map. The default popup
+ * styling is cramped, the close X sits awkwardly inside the content
+ * padding, and dark mode isn't handled at all — the popup stays white
+ * against a dark basemap. Scoped to this route via the
+ * communities-map-page class on the wrapper so /map's drawer isn't
+ * touched.
+ *
+ * Lives outside the component's <style> block because Svelte's scoped
+ * CSS doesn't reach DOM nodes MapLibre creates at runtime.
+ */
+
+.communities-map-page .maplibregl-popup-content {
+	padding: 18px 16px 16px;
+	border-radius: 12px;
+	box-shadow: 0 8px 24px rgba(0, 0, 0, 0.2);
+}
+
+/* MapLibre's stock close button sits flush with the popup's text-top
+   without its own dimensions, which makes a small "x" character squeeze
+   against the avatar in the popup body. Pull it out into a proper
+   button square in the corner. */
+.communities-map-page .maplibregl-popup-close-button {
+	position: absolute;
+	top: 6px;
+	right: 6px;
+	width: 26px;
+	height: 26px;
+	padding: 0;
+	font-size: 20px;
+	line-height: 1;
+	border: none;
+	border-radius: 6px;
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	color: #4b5563; /* gray-600 */
+	cursor: pointer;
+	background: transparent;
+}
+.communities-map-page .maplibregl-popup-close-button:hover {
+	background-color: rgba(0, 0, 0, 0.06);
+	color: #111827; /* gray-900 */
+}
+
+/* Dark mode: dark popup body, the tip triangle has to be re-colored too
+   (it's a CSS triangle built from border colors — anchor direction picks
+   which border edge is the "fill", so all four are overridden). */
+.dark .communities-map-page .maplibregl-popup-content {
+	background-color: #06171c;
+	color: #f3f4f6; /* gray-100 */
+}
+/* MapLibre builds the tip as a CSS triangle: three of the four borders
+   are transparent and only the "facing" border is colored to make the
+   visible arrow. Coloring all four sides would collapse the triangle
+   into a square — so the dark-mode override targets exactly the same
+   border-X-color that MapLibre's stock CSS sets per anchor direction. */
+.dark .communities-map-page .maplibregl-popup-anchor-top .maplibregl-popup-tip,
+.dark
+	.communities-map-page
+	.maplibregl-popup-anchor-top-left
+	.maplibregl-popup-tip,
+.dark
+	.communities-map-page
+	.maplibregl-popup-anchor-top-right
+	.maplibregl-popup-tip {
+	border-bottom-color: #06171c;
+}
+.dark
+	.communities-map-page
+	.maplibregl-popup-anchor-bottom
+	.maplibregl-popup-tip,
+.dark
+	.communities-map-page
+	.maplibregl-popup-anchor-bottom-left
+	.maplibregl-popup-tip,
+.dark
+	.communities-map-page
+	.maplibregl-popup-anchor-bottom-right
+	.maplibregl-popup-tip {
+	border-top-color: #06171c;
+}
+.dark
+	.communities-map-page
+	.maplibregl-popup-anchor-left
+	.maplibregl-popup-tip {
+	border-right-color: #06171c;
+}
+.dark
+	.communities-map-page
+	.maplibregl-popup-anchor-right
+	.maplibregl-popup-tip {
+	border-left-color: #06171c;
+}
+.dark .communities-map-page .maplibregl-popup-close-button {
+	color: #d1d5db; /* gray-300 */
+}
+.dark .communities-map-page .maplibregl-popup-close-button:hover {
+	background-color: rgba(255, 255, 255, 0.1);
+	color: #ffffff;
+}

@@ -1,182 +1,365 @@
 <script lang="ts">
-import type { FeatureGroup, Map } from "leaflet";
+import "maplibre-gl/dist/maplibre-gl.css";
+
+import type {
+	GeoJSONSource,
+	MapLayerMouseEvent,
+	Map as MapLibreMap,
+} from "maplibre-gl";
 import { onDestroy, onMount } from "svelte";
 
 import AreaMerchantDrawer from "$components/area/AreaMerchantDrawer.svelte";
 import MapLoadingEmbed from "$components/MapLoadingEmbed.svelte";
-import { loadMapDependencies } from "$lib/map/imports";
+import MapUnsupportedFallback from "$components/MapUnsupportedFallback.svelte";
+import { CLUSTERING_DISABLED_ZOOM } from "$lib/constants";
+import { computeBbox } from "$lib/map/bbox";
 import {
-	applyThemeToBaseMaps,
-	attribution,
-	changeDefaultIcons,
-	disposeMarker,
-	generateIcon,
-	generateMarker,
-	geolocate,
-	layers,
-} from "$lib/map/setup";
+	ensureSprite,
+	installPlaceholderHandler,
+} from "$lib/map/maplibreSprites";
+import { hasWebGL } from "$lib/map/webgl";
 import { theme } from "$lib/theme";
-import type { BaseMaps, DomEventType, Leaflet, SavedPlace } from "$lib/types";
+import type { SavedPlace } from "$lib/types";
 
 import { browser } from "$app/environment";
 
 export let places: SavedPlace[];
 
+type PlaceFeature = {
+	type: "Feature";
+	geometry: { type: "Point"; coordinates: [number, number] };
+	properties: {
+		id: number;
+		icon: string;
+	};
+};
+
+type PlaceFeatureCollection = {
+	type: "FeatureCollection";
+	features: PlaceFeature[];
+};
+
+const EMPTY_COLLECTION: PlaceFeatureCollection = {
+	type: "FeatureCollection",
+	features: [],
+};
+
+const STYLE_LIGHT = "https://tiles.openfreemap.org/styles/liberty";
+const STYLE_DARK = "https://static.btcmap.org/map-styles/dark.json";
+
 let selectedMerchantId: number | null = null;
 
-const openDrawer = (id: number | string) => {
-	selectedMerchantId = Number(id);
+const openDrawer = (id: number) => {
+	selectedMerchantId = id;
 };
 
 const closeDrawer = () => {
 	selectedMerchantId = null;
 };
 
-let mapElement: HTMLDivElement;
-let map: Map;
+let mapContainer: HTMLDivElement;
+let map: MapLibreMap | undefined;
 let mapLoaded = false;
-let destroyed = false;
+let styleLoaded = false;
+let lastAppliedTheme: "light" | "dark" | undefined;
 
-let baseMaps: BaseMaps;
+// Saved places are always rendered with the bitcoin icon — mirrors the legacy
+// Leaflet MultiPlaceMap which hardcodes generateIcon(..., "currency_bitcoin").
+const SAVED_PLACE_ICON = "currency_bitcoin";
 
-let leaflet: Leaflet;
-let DomEvent: DomEventType;
-let LocateControl: typeof import("leaflet.locatecontrol").LocateControl;
+const buildFeatureCollection = (
+	list: SavedPlace[],
+): PlaceFeatureCollection => ({
+	type: "FeatureCollection",
+	features: list.map((p) => ({
+		type: "Feature",
+		geometry: { type: "Point", coordinates: [p.lon, p.lat] },
+		properties: {
+			id: p.id,
+			icon: SAVED_PLACE_ICON,
+		},
+	})),
+});
 
-const closePopup = () => {
-	map.closePopup();
+const addPlacesLayers = (m: MapLibreMap) => {
+	if (!m.getSource("places")) {
+		m.addSource("places", {
+			type: "geojson",
+			data: EMPTY_COLLECTION,
+			// Source-side clustering. A user with 200 saved places otherwise
+			// renders 200 stacked pins at low zoom — the legacy Leaflet
+			// MultiPlaceMap used L.markerClusterGroup().
+			cluster: true,
+			clusterRadius: 80,
+			clusterMaxZoom: CLUSTERING_DISABLED_ZOOM - 1,
+		});
+	}
+
+	if (!m.getLayer("cluster-discs")) {
+		m.addLayer({
+			id: "cluster-discs",
+			type: "circle",
+			source: "places",
+			filter: ["has", "point_count"],
+			paint: {
+				"circle-color": [
+					"step",
+					["get", "point_count"],
+					"#22c55e",
+					25,
+					"#eab308",
+					100,
+					"#f97316",
+				],
+				"circle-radius": ["step", ["get", "point_count"], 16, 25, 22, 100, 28],
+				"circle-stroke-width": 2,
+				"circle-stroke-color": "rgba(255, 255, 255, 0.85)",
+				"circle-opacity": 0.85,
+			},
+		});
+	}
+
+	if (!m.getLayer("cluster-count")) {
+		m.addLayer({
+			id: "cluster-count",
+			type: "symbol",
+			source: "places",
+			filter: ["has", "point_count"],
+			layout: {
+				"text-field": ["get", "point_count_abbreviated"],
+				"text-font": ["Noto Sans Bold"],
+				"text-size": 12,
+				"text-allow-overlap": true,
+				"text-ignore-placement": true,
+			},
+			paint: {
+				"text-color": "#000",
+			},
+		});
+	}
+
+	if (!m.getLayer("unclustered-point")) {
+		m.addLayer({
+			id: "unclustered-point",
+			type: "symbol",
+			source: "places",
+			filter: ["!", ["has", "point_count"]],
+			layout: {
+				"icon-image": [
+					"concat",
+					"pin-r-",
+					["coalesce", ["get", "icon"], "currency_bitcoin"],
+				],
+				"icon-size": 1,
+				"icon-anchor": "bottom",
+				"icon-allow-overlap": true,
+				"icon-ignore-placement": true,
+				"icon-rotation-alignment": "viewport",
+				"icon-pitch-alignment": "viewport",
+			},
+		});
+	}
 };
 
-$: $theme !== undefined && mapLoaded && closePopup();
+const syncPlacesSource = (m: MapLibreMap, list: SavedPlace[]) => {
+	const source = m.getSource("places") as GeoJSONSource | undefined;
+	if (!source) return;
+	source.setData(buildFeatureCollection(list));
+	ensureSprite(m, SAVED_PLACE_ICON, false);
+};
 
-$: $theme !== undefined &&
-	mapLoaded &&
-	applyThemeToBaseMaps($theme, baseMaps, map);
+// Register sprites + sources + layers once per style. Called from both the
+// initial `load` event and from subsequent `style.load` events fired after
+// `setStyle()` on theme change. Camera placement is intentionally NOT done
+// here — see fitToPlaces below; theme swaps must preserve the user's
+// pan/zoom.
+const initializeMapContents = (m: MapLibreMap) => {
+	addPlacesLayers(m);
+	syncPlacesSource(m, places);
+};
 
-onMount(async () => {
+const fitToPlaces = (m: MapLibreMap) => {
+	// computeBbox walks the same Point FeatureCollection we feed the source,
+	// so an empty/invalid list yields null and we fall back to the world view.
+	const bbox = computeBbox(buildFeatureCollection(places));
+	if (bbox) {
+		m.fitBounds(
+			[
+				[bbox[0], bbox[1]],
+				[bbox[2], bbox[3]],
+			],
+			{ padding: 40, maxZoom: 14, animate: false },
+		);
+	} else {
+		m.jumpTo({ center: [0, 20], zoom: 1 });
+	}
+};
+
+const handleMarkerClick = (e: MapLayerMouseEvent) => {
+	const feature = e.features?.[0];
+	const placeId = feature?.properties?.id;
+	if (typeof placeId !== "number") return;
+	openDrawer(placeId);
+	e.originalEvent?.stopPropagation?.();
+};
+
+const setPointerCursor = () => {
+	if (map) map.getCanvas().style.cursor = "pointer";
+};
+const resetCursor = () => {
+	if (map) map.getCanvas().style.cursor = "";
+};
+
+const attachInteractions = (m: MapLibreMap) => {
+	m.on("click", "unclustered-point", handleMarkerClick);
+	m.on("mouseenter", "unclustered-point", setPointerCursor);
+	m.on("mouseleave", "unclustered-point", resetCursor);
+
+	// Cluster click → zoom into the cluster's expansionZoom so the user
+	// can drill down to individual saved places.
+	m.on("click", "cluster-discs", async (e: MapLayerMouseEvent) => {
+		const feature = e.features?.[0];
+		if (!feature) return;
+		const clusterId = feature.properties?.cluster_id;
+		if (typeof clusterId !== "number") return;
+		const source = m.getSource("places") as GeoJSONSource | undefined;
+		if (!source) return;
+		try {
+			const zoom = await source.getClusterExpansionZoom(clusterId);
+			const geom = feature.geometry as unknown as {
+				coordinates: [number, number];
+			};
+			m.easeTo({ center: geom.coordinates, zoom, duration: 300 });
+		} catch (err) {
+			console.error("MultiPlaceMap cluster expansion failed", err);
+		}
+		e.originalEvent?.stopPropagation?.();
+	});
+	m.on("mouseenter", "cluster-discs", setPointerCursor);
+	m.on("mouseleave", "cluster-discs", resetCursor);
+
+	// Bare map click → close any open drawer (mirrors legacy Leaflet behavior).
+	m.on("click", (e: MapLayerMouseEvent) => {
+		if (!map) return;
+		const hits = map.queryRenderedFeatures(e.point, {
+			layers: ["unclustered-point", "cluster-discs"],
+		});
+		if (hits.length > 0) return;
+		if (selectedMerchantId !== null) closeDrawer();
+	});
+};
+
+const styleUrlForTheme = (t: "light" | "dark" | undefined): string =>
+	t === "dark" ? STYLE_DARK : STYLE_LIGHT;
+
+let initialRenderComplete = false;
+let dataInitialized = false;
+let destroyed = false;
+let webglUnsupported = false;
+
+onMount(() => {
 	if (browser) {
-		const deps = await loadMapDependencies();
-		// User may have navigated away while the dynamic imports were in
-		// flight; bail out before touching component state.
-		if (destroyed) return;
-		leaflet = deps.leaflet;
-		DomEvent = deps.leaflet.DomEvent;
-		LocateControl = deps.LocateControl;
-
 		initialRenderComplete = true;
 	}
 });
 
 onDestroy(() => {
 	destroyed = true;
-	if (map) {
-		// Dispose all marker Icon components before tearing down the map;
-		// map.remove() drops the DOM but leaves Svelte components alive.
-		if (markers) {
-			markers.eachLayer((layer) =>
-				disposeMarker(layer as import("leaflet").Marker),
-			);
-		}
-		console.info("Unloading Leaflet map.");
-		map.remove();
-	}
+	map?.remove();
+	map = undefined;
 });
 
-let initialRenderComplete = false;
-let dataInitialized = false;
-let hasFitBoundsOnce = false;
-// markerClusterGroup extends FeatureGroup; its own type isn't bundled
-let markers: FeatureGroup;
+const initializeMap = async () => {
+	if (dataInitialized) return;
+	dataInitialized = true;
 
-// Re-render markers for the current places. Only fit bounds on the first
-// render (or when the caller explicitly asks) so that removing a saved
-// place doesn't yank the user out of the view they just panned/zoomed to.
-const renderPlaces = ({ fit }: { fit?: boolean } = {}) => {
-	const shouldFit = fit ?? !hasFitBoundsOnce;
+	if (!hasWebGL()) {
+		webglUnsupported = true;
+		return;
+	}
+	const maplibre = await import("maplibre-gl");
+	// Component may have been destroyed while the dynamic import was in
+	// flight (fast navigation away). Bail before binding to a stale
+	// container — otherwise we leak a Map instance that onDestroy can't
+	// clean up because it already ran with `map` undefined.
+	if (destroyed) return;
 
-	// Dispose Icon component instances of the markers we are about to drop;
-	// clearLayers alone removes the DOM but leaks the Svelte components.
-	markers.eachLayer((layer) =>
-		disposeMarker(layer as import("leaflet").Marker),
-	);
-	markers.clearLayers();
+	lastAppliedTheme = $theme;
 
-	places.forEach((place) => {
-		const divIcon = generateIcon(leaflet, "currency_bitcoin", false, 0);
-
-		const marker = generateMarker({
-			lat: place.lat,
-			long: place.lon,
-			icon: divIcon,
-			placeId: place.id,
-			leaflet,
-			verify: false,
-			onMarkerClick: (id) => openDrawer(id),
-		});
-
-		markers.addLayer(marker);
+	map = new maplibre.Map({
+		container: mapContainer,
+		style: styleUrlForTheme($theme),
+		maxZoom: 21,
+		dragRotate: true,
+		touchZoomRotate: true,
+		pitchWithRotate: false,
+		attributionControl: { compact: true },
 	});
 
-	if (shouldFit) {
-		if (places.length > 0) {
-			const coords = places.map((p) => [p.lat, p.lon] as [number, number]);
-			map.fitBounds(leaflet.latLngBounds(coords), {
-				maxZoom: 14,
-				padding: [20, 20],
-			});
-			hasFitBoundsOnce = true;
-		} else {
-			map.setView([20, 0], 2);
-		}
-	}
+	map.addControl(
+		new maplibre.NavigationControl({
+			showCompass: true,
+			showZoom: true,
+			visualizePitch: false,
+		}),
+		"top-right",
+	);
 
-	// If the currently-open drawer's place was removed from the list,
-	// close it — the user's context is gone.
+	const geolocate = new maplibre.GeolocateControl({
+		positionOptions: { enableHighAccuracy: true },
+		trackUserLocation: true,
+		showUserLocation: true,
+		showAccuracyCircle: true,
+		fitBoundsOptions: { maxZoom: 15, linear: true },
+	});
+	map.addControl(geolocate, "top-right");
+
+	installPlaceholderHandler(map);
+
+	map.on("load", () => {
+		if (!map) return;
+		initializeMapContents(map);
+		fitToPlaces(map);
+		attachInteractions(map);
+		styleLoaded = true;
+		mapLoaded = true;
+	});
+};
+
+// Theme reactivity — swap the basemap, then re-register places overlay on the
+// resulting style.load event. The shared sprite cache evicts resolved promises
+// on completion, so any sprites that didn't survive the style swap regenerate
+// lazily on first render against the new style.
+const applyTheme = (next: "light" | "dark" | undefined) => {
+	if (!map) return;
+	if (!styleLoaded) return;
+	if (next === lastAppliedTheme) return;
+	lastAppliedTheme = next;
+	styleLoaded = false;
+	const onStyleLoad = () => {
+		if (!map) return;
+		initializeMapContents(map);
+		styleLoaded = true;
+	};
+	map.once("style.load", onStyleLoad);
+	map.setStyle(styleUrlForTheme(next));
+};
+
+$: if (initialRenderComplete && places && !dataInitialized) {
+	initializeMap();
+} else if (places && dataInitialized && map && styleLoaded) {
+	syncPlacesSource(map, places);
+	// If the currently-open drawer's place was removed, close the drawer.
 	if (
 		selectedMerchantId !== null &&
 		!places.some((p) => p.id === selectedMerchantId)
 	) {
 		closeDrawer();
 	}
-};
+}
 
-const initializeData = () => {
-	if (dataInitialized) return;
-	if (destroyed) return;
-
-	map = leaflet.map(mapElement, { attributionControl: false, maxZoom: 19 });
-
-	const layersResult = layers(leaflet, map);
-	baseMaps = layersResult.baseMaps;
-
-	leaflet.Icon.Default.prototype.options.imagePath = "/icons/";
-
-	attribution(leaflet, map);
-
-	// @ts-expect-error L is injected globally by leaflet.markercluster
-	markers = L.markerClusterGroup();
-	map.addLayer(markers);
-
-	geolocate(leaflet, map, LocateControl);
-
-	changeDefaultIcons(true, leaflet, mapElement, DomEvent);
-
-	map.on("click", () => {
-		if (selectedMerchantId !== null) {
-			closeDrawer();
-		}
-	});
-
-	renderPlaces();
-
-	mapLoaded = true;
-	dataInitialized = true;
-};
-
-$: if (places && initialRenderComplete && !dataInitialized) {
-	initializeData();
-} else if (places && dataInitialized) {
-	renderPlaces();
+$: if (map && styleLoaded) {
+	applyTheme($theme);
 }
 </script>
 
@@ -185,10 +368,12 @@ $: if (places && initialRenderComplete && !dataInitialized) {
 		<div class="overflow-hidden rounded-3xl">
 			<!-- prettier-ignore -->
 			<div
-				bind:this={mapElement}
+				bind:this={mapContainer}
 				class="z-10 h-[300px] rounded-3xl border border-gray-300 !bg-teal text-left md:h-[500px] dark:border-white/95 dark:!bg-[#202f33]"
 			/>
-			{#if !mapLoaded}
+			{#if webglUnsupported}
+				<MapUnsupportedFallback />
+			{:else if !mapLoaded}
 				<MapLoadingEmbed
 					style="h-[300px] md:h-[500px] rounded-3xl border border-gray-300 dark:border-white/95"
 				/>

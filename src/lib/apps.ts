@@ -119,6 +119,25 @@ export const appConfigs: AppConfig[] = [
 		],
 	},
 	{
+		id: "blitz-wallet",
+		name: "Blitz Wallet",
+		logo: "/images/apps/blitz-wallet.png",
+		tag: "powered-by-btcmap",
+		sponsor: false,
+		stores: [
+			{
+				store: "google-play",
+				platform: "android",
+				url: "https://play.google.com/store/apps/details?id=com.blitzwallet",
+			},
+			{
+				store: "app-store",
+				platform: "ios",
+				url: "https://apps.apple.com/us/app/blitz-wallet/id6476810582",
+			},
+		],
+	},
+	{
 		id: "wos",
 		name: "Wallet of Satoshi",
 		logo: "/images/apps/wos.png",

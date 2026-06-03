@@ -194,13 +194,13 @@ export const getIssueHelpLink = (issue_code: string) => {
 		issue_code === "out_of_date_soon" ||
 		issue_code === "not_verified"
 	) {
-		return "https://gitea.btcmap.org/teambtcmap/btcmap-general/wiki/Verifying-Existing-Merchants";
+		return "https://wiki.btcmap.org/Verifying-Existing-Merchants";
 	}
 	if (issue_code.startsWith("invalid_tag_value")) {
-		return "https://gitea.btcmap.org/teambtcmap/btcmap-general/wiki/Tagging-Merchants#tagging-guidance";
+		return "https://wiki.btcmap.org/Tagging-Merchants#tagging-guidance";
 	}
 	if (issue_code.startsWith("misspelled_tag_name")) {
-		return "https://gitea.btcmap.org/teambtcmap/btcmap-general/wiki/Tagging-Merchants#tagging-guidance";
+		return "https://wiki.btcmap.org/Tagging-Merchants#tagging-guidance";
 	}
 	return undefined;
 };

@@ -75,19 +75,16 @@
 		"noMatches": "Keine Ergebnisse in dieser Kategorie"
 	},
 	"mapControls": {
-		"fullScreen": "Vollbild",
 		"goToHome": "Zur Startseite gehen",
 		"addLocation": "Ort hinzufügen",
 		"communityMap": "Communitykarte",
 		"merchantMap": "Händlerkarte",
 		"dataRefreshAvailable": "Datenaktualisierung verfügbar",
-		"support": "Unterstützung",
-		"supportWithSats": "Mit Sats unterstützen",
 		"zoomIn": "Vergrößern",
 		"zoomOut": "Verkleinern",
+		"basemapTitle": "Hintergrundkarte",
 		"locate": "Zeige mir meinen Standort",
 		"boostAlt": "Boost",
-		"fullScreenAlt": "Vollbild",
 		"locateAlt": "Zeige mir meinen Standort",
 		"goToHomeAlt": "Zur Startseite gehen",
 		"addLocationAlt": "Ort hinzufügen",
@@ -212,10 +209,7 @@
 	"status": {
 		"loading": "Laden...",
 		"loadingMap": "Karte laden...",
-		"loadingPlaces": "Orte laden...",
 		"initializing": "Initialisieren...",
-		"initializingMarkers": "Marker initialisieren...",
-		"loadingPlacesInView": "Orte im Bereich laden...",
 		"downloading": "Ortsdaten herunterladen...",
 		"processing": "Ortsdaten verarbeiten...",
 		"complete": "Fertig!",
@@ -275,10 +269,8 @@
 		"formSubmission": "Formularübermittlung fehlgeschlagen, bitte versuche es erneut oder kontaktiere BTC Map.",
 		"locationSearch": "Ortssuche fehlgeschlagen, bitte versuche es erneut oder kontaktiere BTC Map.",
 		"mapView": "Kartenansicht konnte nicht auf die angegebenen Koordinaten gesetzt werden, bitte versuche es erneut oder kontaktiere BTC Map.",
-		"mapViewCachedCoords": "Kartenansicht konnte nicht auf zwischengespeicherte Koordinaten gesetzt werden, bitte versuche es erneut oder kontaktiere BTC Map.",
 		"merchantDetailsLoadError": "Fehler beim Laden der Händlerdetails. Bitte versuche es erneut.",
-		"boostLoadError": "Boost-Informationen konnten nicht geladen werden. Bitte versuche es erneut.",
-		"fullscreenError": "Fehler beim Versuch, den Vollbildmodus zu aktivieren: {message} ({name})"
+		"boostLoadError": "Boost-Informationen konnten nicht geladen werden. Bitte versuche es erneut."
 	},
 	"success": {
 		"locationSelected": "Ort ausgewählt!",
@@ -358,7 +350,6 @@
 		"submittingApplication": "Bewerbung wird übermittelt...",
 		"submitButton": "Bewerbung absenden",
 		"captchaPlaceholder": "Bitte gib den Captcha-Text ein.",
-		"honeyPlaceholder": "Ein nettes Töpfchen Honig.",
 		"successType": "Bewerbung",
 		"successMessage": "Danke für dein Interesse, Tagger zu werden! Wir werden deine Bewerbung prüfen und einer aus dem Team wird sich über die von dir angegebene E-Mail melden. Kontaktiere hello@btcmap.org, wenn du nachhaken möchtest."
 	},
@@ -399,10 +390,8 @@
 		"submitLocation": "Standort melden",
 		"submitReport": "Bericht einreichen",
 		"selectLocation": "Standort auswählen",
-		"locationSelected": "Standort ausgewählt!",
 		"searchButton": "Suchen 🔍",
 		"address": "Adresse",
-		"honeyPlaceholder": "Ein nettes Töpfchen Honig.",
 		"captchaPlaceholder": "Bitte gib den Captcha-Text ein."
 	},
 	"addLocation": {
@@ -474,7 +463,8 @@
 		"verifyLabel": "Wie hast du das verifiziert?",
 		"verifyPlaceholder": "Bitte gib hier zusätzliche Infos an",
 		"successType": "Bericht",
-		"successMessage": "Danke, dass du dir die Zeit genommen hast, diesen Bericht auszufüllen. Wir werden deine Informationen prüfen und so bald wie möglich aktualisieren."
+		"successMessage": "Danke, dass du dir die Zeit genommen hast, diesen Bericht auszufüllen. Wir werden deine Informationen prüfen und so bald wie möglich aktualisieren.",
+		"submitReport": "Bericht einreichen"
 	},
 	"dashboard": {
 		"hero": "Übersicht",
@@ -591,7 +581,6 @@
 		"captchaLabel": "Bot-Schutz",
 		"captchaCaseSensitive": "(groß-/kleinschreibung beachten)",
 		"captchaPlaceholder": "Bitte gib den Captcha-Text ein.",
-		"honeyPlaceholder": "Ein nettes Töpfchen Honig.",
 		"submitButton": "Community einreichen",
 		"successType": "Community",
 		"successMessage": "Danke für deine Initiative, eine Bitcoin-Community zu gründen. Wir werden deine Informationen prüfen und uns melden, wenn wir mehr Details benötigen.",
@@ -730,7 +719,6 @@
 		"botProtection": "Bot-Schutz",
 		"caseSensitive": "(groß-/kleinschreibung beachten)",
 		"captchaPlaceholder": "Bitte gib den Captcha-Text ein.",
-		"honeyPlaceholder": "Ein nettes Töpfchen Honig.",
 		"submitReport": "Bericht einreichen",
 		"successType": "Bericht",
 		"successMessage": "Danke für das Verifizieren der Communitysinformationen. Wir werden deinen Bericht prüfen und so bald wie möglich aktualisieren."

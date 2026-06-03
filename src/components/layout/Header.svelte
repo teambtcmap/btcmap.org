@@ -44,7 +44,7 @@ $: navLinks = [
 	{
 		id: "wiki",
 		title: $_("nav.wiki"),
-		url: "https://gitea.btcmap.org/teambtcmap/btcmap-general/wiki",
+		url: "https://wiki.btcmap.org/",
 		icon: "wiki" as MobileNavIconName,
 	},
 	{

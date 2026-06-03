@@ -168,6 +168,7 @@ When editing locale files in `src/lib/i18n/locales/*.json`:
 - **Never translate proper names or usernames.** Personal names (e.g. `Nathan Day`), brand names, and online handles (e.g. `secondl1ght`, `karnage`) must be kept verbatim across all locales. Translating them produces incorrect, sometimes nonsensical output (e.g. "Nathan Dag", "tweedelig").
 - **Keep keys aligned with `en.json`.** When adding or renaming keys, update every locale file so the key sets match. Missing keys silently fall back to English at runtime.
 - **Use the file's existing HTML-entity style for diacritics** (`&euml;`, `&ouml;`, `&uuml;`, `&eacute;`, `&mdash;`) rather than mixing literal Unicode and entity forms within the same locale.
+- **Don't translate honeypot fields.** Anti-spam honeypot inputs (the `name="honey"` fields on add-location, verify-location, communities/add, tagger-onboarding, and VerifyCommunityForm) are rendered with `class="hidden"` and never seen by humans, so translating their `placeholder` provides zero UX value while bloating every locale. Inline the placeholder as a hardcoded English string at the call site instead of referencing an i18n key.
 
 ## API Base URL
 

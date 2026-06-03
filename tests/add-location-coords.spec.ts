@@ -4,10 +4,10 @@ test.describe('Add Location — manual coordinate entry', () => {
 	test.beforeEach(async ({ page }) => {
 		await page.goto('/add-location');
 		await page.waitForLoadState('domcontentloaded');
-		// The Leaflet/MapLibre deps load async on mount. Wait for the
-		// map container to render so placeMarker() doesn't no-op.
-		await expect(page.locator('.leaflet-container')).toBeVisible();
-		await expect(page.locator('.leaflet-control-zoom')).toBeVisible();
+		// MapLibre loads async on mount. Wait for the map container + the
+		// zoom controls so placeMarker() and click handlers are attached.
+		await expect(page.locator('.maplibregl-map')).toBeVisible();
+		await expect(page.locator('.maplibregl-ctrl-zoom-in')).toBeVisible();
 	});
 
 	test('lat/long inputs are read-only by default', async ({ page }) => {
@@ -36,9 +36,7 @@ test.describe('Add Location — manual coordinate entry', () => {
 		);
 	});
 
-	test('typing valid coords drops a marker and shows "Location selected"', async ({
-		page
-	}) => {
+	test('typing valid coords drops a marker', async ({ page }) => {
 		await page
 			.getByRole('button', { name: /Advanced — enter coordinates manually/ })
 			.click();
@@ -47,8 +45,7 @@ test.describe('Add Location — manual coordinate entry', () => {
 		await page.getByLabel('Latitude').fill('52.5200');
 		await page.getByLabel('Longitude').fill('13.4050');
 
-		await expect(page.getByText('Location selected!')).toBeVisible();
-		await expect(page.locator('.leaflet-marker-icon')).toHaveCount(1);
+		await expect(page.locator('.maplibregl-marker')).toHaveCount(1);
 	});
 
 	test('out-of-range latitude shows inline error', async ({ page }) => {
@@ -65,7 +62,7 @@ test.describe('Add Location — manual coordinate entry', () => {
 			'aria-invalid',
 			'true'
 		);
-		await expect(page.locator('.leaflet-marker-icon')).toHaveCount(0);
+		await expect(page.locator('.maplibregl-marker')).toHaveCount(0);
 	});
 
 	test('out-of-range longitude shows inline error', async ({ page }) => {
@@ -79,7 +76,7 @@ test.describe('Add Location — manual coordinate entry', () => {
 		await expect(
 			page.getByText('Longitude must be a number between -180 and 180.')
 		).toBeVisible();
-		await expect(page.locator('.leaflet-marker-icon')).toHaveCount(0);
+		await expect(page.locator('.maplibregl-marker')).toHaveCount(0);
 	});
 
 	test('non-numeric input shows error', async ({ page }) => {
@@ -104,7 +101,7 @@ test.describe('Add Location — manual coordinate entry', () => {
 
 		await page.getByLabel('Latitude').fill('52.5200');
 		await page.getByLabel('Longitude').fill('13.4050');
-		await expect(page.locator('.leaflet-marker-icon')).toHaveCount(1);
+		await expect(page.locator('.maplibregl-marker')).toHaveCount(1);
 
 		// Close advanced — fields go back to read-only but keep the values.
 		await toggle.click();
@@ -112,6 +109,6 @@ test.describe('Add Location — manual coordinate entry', () => {
 		await expect(page.getByLabel('Latitude')).toHaveValue('52.52000');
 		await expect(page.getByLabel('Longitude')).toHaveValue('13.40500');
 		// Marker still on the map.
-		await expect(page.locator('.leaflet-marker-icon')).toHaveCount(1);
+		await expect(page.locator('.maplibregl-marker')).toHaveCount(1);
 	});
 });

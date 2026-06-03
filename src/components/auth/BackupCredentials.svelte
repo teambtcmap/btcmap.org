@@ -1,5 +1,6 @@
 <script lang="ts">
 import Icon from "$components/Icon.svelte";
+import IconButton from "$components/IconButton.svelte";
 import { trackEvent } from "$lib/analytics";
 import { _ } from "$lib/i18n";
 import { errToast, successToast } from "$lib/utils";
@@ -39,11 +40,12 @@ async function copyToClipboard(text: string, field: "username" | "password") {
 				value={username}
 				class="w-full rounded-lg border border-gray-300 bg-gray-50 px-3 py-2 text-sm text-primary dark:border-white/20 dark:bg-white/5 dark:text-white"
 			/>
-			<button
+			<IconButton
 				type="button"
 				on:click={() => copyToClipboard(username, "username")}
-				class="shrink-0 rounded-lg border border-gray-300 p-2 transition-colors hover:bg-gray-100 dark:border-white/20 dark:hover:bg-white/10"
+				style="shrink-0"
 				title={$_("backup.copy")}
+				aria-label={$_("backup.copy")}
 			>
 				<Icon
 					type="material"
@@ -52,7 +54,7 @@ async function copyToClipboard(text: string, field: "username" | "password") {
 					h="16"
 					class="text-primary dark:text-white"
 				/>
-			</button>
+			</IconButton>
 		</div>
 	</div>
 	<div>
@@ -70,11 +72,13 @@ async function copyToClipboard(text: string, field: "username" | "password") {
 				value={password || $_("backup.unavailable")}
 				class="w-full rounded-lg border border-gray-300 bg-gray-50 px-3 py-2 text-sm text-primary dark:border-white/20 dark:bg-white/5 dark:text-white"
 			/>
-			<button
+			<IconButton
 				type="button"
 				on:click={() => (showPassword = !showPassword)}
-				class="shrink-0 rounded-lg border border-gray-300 p-2 transition-colors hover:bg-gray-100 dark:border-white/20 dark:hover:bg-white/10"
+				style="shrink-0"
 				title={showPassword ? $_("backup.hide") : $_("backup.show")}
+				aria-label={showPassword ? $_("backup.hide") : $_("backup.show")}
+				aria-pressed={showPassword}
 			>
 				<Icon
 					type="material"
@@ -83,13 +87,14 @@ async function copyToClipboard(text: string, field: "username" | "password") {
 					h="16"
 					class="text-primary dark:text-white"
 				/>
-			</button>
+			</IconButton>
 			{#if password}
-				<button
+				<IconButton
 					type="button"
 					on:click={() => copyToClipboard(password ?? "", "password")}
-					class="shrink-0 rounded-lg border border-gray-300 p-2 transition-colors hover:bg-gray-100 dark:border-white/20 dark:hover:bg-white/10"
+					style="shrink-0"
 					title={$_("backup.copy")}
+					aria-label={$_("backup.copy")}
 				>
 					<Icon
 						type="material"
@@ -98,7 +103,7 @@ async function copyToClipboard(text: string, field: "username" | "password") {
 						h="16"
 						class="text-primary dark:text-white"
 					/>
-				</button>
+				</IconButton>
 			{/if}
 		</div>
 	</div>

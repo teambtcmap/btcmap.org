@@ -5,6 +5,8 @@ import { get } from "svelte/store";
 import BackupCredentials from "$components/auth/BackupCredentials.svelte";
 import LoginForm from "$components/auth/LoginForm.svelte";
 import Modal from "$components/Modal.svelte";
+import PrimaryButton from "$components/PrimaryButton.svelte";
+import TextLink from "$components/TextLink.svelte";
 import { trackEvent } from "$lib/analytics";
 import { _ } from "$lib/i18n";
 import type { SavedItemType } from "$lib/savedItems";
@@ -141,14 +143,14 @@ function handleDone() {
 			{$_(promptDescriptionKey)}
 		</p>
 		<div class="space-y-3">
-			<button
+			<PrimaryButton
 				type="button"
 				on:click={handleCreateAccount}
 				disabled={creating}
-				class="w-full rounded-lg bg-link px-4 py-2 font-semibold text-white transition-colors hover:bg-hover disabled:opacity-50"
+				style="w-full rounded-lg px-4 py-2 disabled:opacity-50"
 			>
 				{$_("save.prompt.createAccount")}
-			</button>
+			</PrimaryButton>
 			<button
 				type="button"
 				on:click={() => {
@@ -162,13 +164,13 @@ function handleDone() {
 		</div>
 	{:else if view === "login"}
 		<LoginForm compact onSuccess={handleLoginSuccess} />
-		<button
+		<TextLink
 			type="button"
 			on:click={() => (view = "choice")}
-			class="mt-4 text-sm text-link transition-colors hover:text-hover"
+			style="mt-4 text-sm"
 		>
 			← {$_("save.prompt.back")}
-		</button>
+		</TextLink>
 	{:else if view === "backup" && $session}
 		<p class="mb-4 text-sm text-body dark:text-white/70">
 			{$_("backup.description")}
@@ -178,12 +180,12 @@ function handleDone() {
 			username={$session.username}
 			password={$session.password}
 		/>
-		<button
+		<PrimaryButton
 			type="button"
 			on:click={handleDone}
-			class="mt-6 w-full rounded-lg bg-link px-4 py-2 font-semibold text-white transition-colors hover:bg-hover"
+			style="mt-6 w-full rounded-lg px-4 py-2"
 		>
 			{$_("save.prompt.done")}
-		</button>
+		</PrimaryButton>
 	{/if}
 </Modal>

@@ -1,6 +1,7 @@
 <script lang="ts">
 import HeaderPlaceholder from "$components/layout/HeaderPlaceholder.svelte";
 import OpenTicket from "$components/OpenTicket.svelte";
+import TextLink from "$components/TextLink.svelte";
 import TopButton from "$components/TopButton.svelte";
 import { GITEA_LABELS } from "$lib/constants";
 import { _ } from "$lib/i18n";
@@ -80,9 +81,8 @@ const isMaintenance = data.maintenance ?? false;
 	</h2>
 
 	<p class="text-center text-xl text-primary lg:text-left dark:text-white">
-		{$_('maintain.taggingInstructionsIntro')} <a
-			href="https://gitea.btcmap.org/teambtcmap/btcmap-general/wiki/Tagging-Merchants#shadowy-supertaggers"
-			class="text-link transition-colors hover:text-hover">{$_('maintain.taggingInstructionsLink')}</a
+		{$_('maintain.taggingInstructionsIntro')} <TextLink
+			link="https://wiki.btcmap.org/Tagging-Merchants#shadowy-supertaggers">{$_('maintain.taggingInstructionsLink')}</TextLink
 		>.
 	</p>
 
@@ -90,11 +90,9 @@ const isMaintenance = data.maintenance ?? false;
 		<div class="w-full rounded-3xl border border-gray-300 dark:border-white/95 dark:bg-white/10">
 			{#if isMaintenance}
 				<p class="p-5 text-center text-body dark:text-white">
-					{$_('maintain.underMaintenance')} <a
-						href="https://gitea.btcmap.org/teambtcmap/btcmap-data/issues"
-						target="_blank"
-						rel="noreferrer"
-						class="text-link transition-colors hover:text-hover">{$_('maintain.viewOnGitea')}</a
+					{$_('maintain.underMaintenance')} <TextLink
+						link="https://gitea.btcmap.org/teambtcmap/btcmap-data/issues"
+						external>{$_('maintain.viewOnGitea')}</TextLink
 					>
 				</p>
 			{:else}
@@ -181,11 +179,9 @@ const isMaintenance = data.maintenance ?? false;
 						<p
 							class="border-t border-gray-300 p-5 text-center font-semibold text-primary dark:border-white/95 dark:text-white"
 						>
-							{$_('maintain.viewAllOnGitea')} <a
-								href="https://gitea.btcmap.org/teambtcmap/btcmap-data/issues"
-								target="_blank"
-								rel="noreferrer"
-								class="text-link transition-colors hover:text-hover">{$_('maintain.giteaLinkText')}</a
+							{$_('maintain.viewAllOnGitea')} <TextLink
+								link="https://gitea.btcmap.org/teambtcmap/btcmap-data/issues"
+								external>{$_('maintain.giteaLinkText')}</TextLink
 							>.
 						</p>
 					{/if}

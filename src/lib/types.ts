@@ -1,12 +1,4 @@
 import type { GeoJSON, MultiPolygon, Polygon } from "geojson";
-import type leaflet from "leaflet";
-import type {
-	DomEvent,
-	FeatureGroup,
-	LayerGroup,
-	MaplibreGL,
-	TileLayer,
-} from "leaflet";
 
 import type { MobileNavIconName } from "$lib/icons/types";
 
@@ -281,22 +273,6 @@ export type Tagger = {
 };
 
 // FRONTEND
-
-// leaflet
-
-export type Leaflet = typeof leaflet;
-
-export type DomEventType = typeof DomEvent;
-
-export type MapGroups = { [key: string]: LayerGroup | FeatureGroup.SubGroup };
-
-export type BaseMaps = {
-	"OpenFreeMap Liberty": MaplibreGL;
-	"OpenFreeMap Dark": MaplibreGL;
-	"Carto Positron": MaplibreGL;
-	"Carto Dark Matter": MaplibreGL;
-	OpenStreetMap: TileLayer;
-};
 
 // map
 

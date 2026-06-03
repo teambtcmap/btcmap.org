@@ -11,6 +11,7 @@ import Icon from "$components/Icon.svelte";
 import InfoTooltip from "$components/InfoTooltip.svelte";
 import HeaderPlaceholder from "$components/layout/HeaderPlaceholder.svelte";
 import PrimaryButton from "$components/PrimaryButton.svelte";
+import TextLink from "$components/TextLink.svelte";
 import { _ } from "$lib/i18n";
 import { placesError } from "$lib/store";
 import { theme } from "$lib/theme";
@@ -145,17 +146,13 @@ onMount(async () => {
 		</h2>
 
 		<p class="mb-10 w-full text-center text-primary dark:text-white">
-			{$_('verifyLocation.descriptionPart1')} <a
-				href="https://www.openstreetmap.org"
-				target="_blank"
-				rel="noreferrer"
-				class="text-link transition-colors hover:text-hover">{$_('verifyLocation.osmLinkText')}</a
+			{$_('verifyLocation.descriptionPart1')} <TextLink
+				link="https://www.openstreetmap.org"
+				external>{$_('verifyLocation.osmLinkText')}</TextLink
 			>{$_('verifyLocation.descriptionPart2')}
-			<a
-				href="https://gitea.btcmap.org/teambtcmap/btcmap-general/wiki/Tagging-Merchants#shadowy-supertaggers"
-				target="_blank"
-				rel="noreferrer"
-				class="text-link transition-colors hover:text-hover">{$_('verifyLocation.wikiLinkText')}</a
+			<TextLink
+				link="https://wiki.btcmap.org/Tagging-Merchants#shadowy-supertaggers"
+				external>{$_('verifyLocation.wikiLinkText')}</TextLink
 			>
 			{$_('verifyLocation.descriptionPart3')} <InfoTooltip
 				tooltip={$_('verifyLocation.tooltip')}
@@ -258,7 +255,7 @@ onMount(async () => {
 			<input
 				type="text"
 				name="honey"
-				placeholder={$_('forms.honeyPlaceholder')}
+				placeholder="A nice pot of honey."
 				class="hidden"
 				bind:this={honeyInput}
 			/>

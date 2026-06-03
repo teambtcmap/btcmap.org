@@ -6,6 +6,7 @@ import OutClick from "svelte-outclick";
 import CloseButton from "$components/CloseButton.svelte";
 import Icon from "$components/Icon.svelte";
 import IssueIcon from "$components/IssueIcon.svelte";
+import TextLink from "$components/TextLink.svelte";
 import { taggingIssues } from "$lib/store";
 import { getIssueHelpLink, getIssueIcon } from "$lib/utils";
 
@@ -27,14 +28,9 @@ const closeModal = () => ($taggingIssues = undefined);
 							<IssueIcon icon={getIssueIcon(issue.type)} />
 							<p>{issue.description}</p>
 							{#if getIssueHelpLink(issue.type)}
-								<a
-									href={getIssueHelpLink(issue.type)}
-									target="_blank"
-									rel="noreferrer"
-									class="text-link transition-colors hover:text-hover"
-								>
+								<TextLink link={getIssueHelpLink(issue.type)} external>
 									{$_(`maintain.help`)}
-								</a>
+								</TextLink>
 							{/if}
 						</div>
 					{/each}

@@ -18,13 +18,14 @@ $: combinedStyles = `${baseStyles} ${style}`;
 	<a
 		href={link}
 		target={external ? '_blank' : undefined}
-		rel={external ? 'noreferrer' : undefined}
+		rel={external ? 'noopener noreferrer' : undefined}
 		class={combinedStyles}
+		{...$$restProps}
 	>
 		<slot />
 	</a>
 {:else}
-	<button on:click {type} {disabled} class={combinedStyles}>
+	<button on:click {type} {disabled} class={combinedStyles} {...$$restProps}>
 		{#if loading}
 			<LoadingSpinner />
 		{:else}

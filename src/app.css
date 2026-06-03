@@ -11,6 +11,7 @@
 	html {
 		font-family: Manrope, sans-serif;
 		@apply text-base;
+		scrollbar-gutter: stable;
 	}
 
 	::selection {
@@ -169,153 +170,9 @@
 			filter: drop-shadow(0 0 6px #f7931a) drop-shadow(0 0 12px #f7931a);
 		}
 	}
-
-	/* Fix for Leaflet controls not visible on mobile Firefox/Brave */
-	/* Only apply to fullscreen map to avoid breaking embedded maps */
-	.map-fullscreen .leaflet-bottom {
-		position: fixed !important;
-		bottom: 0 !important;
-	}
-}
-
-/* Center icons in Leaflet control buttons */
-.leaflet-bar a {
-	display: flex;
-	align-items: center;
-	justify-content: center;
-}
-
-/* Invert custom button icons in dark mode */
-.dark .leaflet-bar a img {
-	filter: invert(1);
-}
-
-/* Dark mode for Leaflet controls - Tailwind gray palette */
-:root {
-	/* Marker label colors - Light mode (Tailwind palette references) */
-	--marker-label-color: #0e7490; /* cyan-700 - better contrast on varied map backgrounds */
-	--marker-label-shadow: #ffffff; /* white */
-	--marker-label-boosted-color: #f97316; /* orange-500 - warmer, more prominent */
-	--marker-label-boosted-shadow: #ffffff; /* white */
-}
-
-.dark {
-	--leaflet-bg: #1f2937; /* gray-800 */
-	--leaflet-bg-transparent: rgba(31, 41, 55, 0.8);
-	--leaflet-border: #374151; /* gray-700 */
-	--leaflet-border-muted: #6b7280; /* gray-500 */
-	--leaflet-text: #f3f4f6; /* gray-100 */
-	--leaflet-text-muted: #9ca3af; /* gray-400 */
-	--leaflet-link: #60a5fa; /* blue-400 */
-	--marker-label-color: #22d3ee; /* cyan-400 - bright for dark backgrounds */
-	--marker-label-shadow: rgba(0, 0, 0, 0.95); /* near-black */
-	--marker-label-boosted-color: #fb923c; /* orange-400 - bright warm tone */
-	--marker-label-boosted-shadow: rgba(0, 0, 0, 0.95); /* near-black */
-}
-
-.dark .leaflet-bar,
-.dark .leaflet-control-layers {
-	background-color: var(--leaflet-bg);
-	border-color: var(--leaflet-border);
-}
-
-.dark .leaflet-bar a {
-	color: var(--leaflet-text);
-	background-color: var(--leaflet-bg);
-	border-bottom-color: var(--leaflet-border);
-}
-
-.dark .leaflet-bar a:hover {
-	background-color: var(--leaflet-border);
-}
-
-.dark .leaflet-control-layers-toggle {
-	background-color: var(--leaflet-bg);
-}
-
-.dark .leaflet-control-layers-list {
-	background-color: var(--leaflet-bg);
-	color: var(--leaflet-text);
-}
-
-.dark .leaflet-control-attribution {
-	background-color: var(--leaflet-bg-transparent);
-	color: var(--leaflet-text-muted);
-}
-
-.dark .leaflet-control-attribution a {
-	color: var(--leaflet-link);
-}
-
-.dark .leaflet-control-scale-line {
-	background-color: var(--leaflet-bg-transparent);
-	color: var(--leaflet-text);
-	border-color: var(--leaflet-border-muted);
-	text-shadow: none;
 }
 
 /* Dark mode for select dropdown options (Windows/Linux native rendering fix) */
 .dark select option {
 	background-color: rgb(55 65 81); /* gray-700 */
-}
-
-/* Marker label styles for Leaflet permanent tooltips */
-.leaflet-tooltip.marker-label,
-.leaflet-tooltip.marker-label-boosted {
-	background: none !important;
-	border: none !important;
-	outline: none !important;
-	box-shadow: none !important;
-	font-size: 14px;
-	padding: 2px 4px;
-	margin: 0;
-	border-radius: 0;
-	text-align: left;
-	white-space: nowrap;
-	overflow: hidden;
-	text-overflow: ellipsis;
-	display: inline-block;
-	max-width: 160px;
-	min-width: unset;
-	width: auto;
-	height: auto;
-	font-weight: 500;
-	line-height: 1.2;
-}
-
-.leaflet-tooltip.marker-label {
-	color: var(--marker-label-color);
-	text-shadow:
-		-1px -1px 0 var(--marker-label-shadow),
-		1px -1px 0 var(--marker-label-shadow),
-		-1px 1px 0 var(--marker-label-shadow),
-		1px 1px 0 var(--marker-label-shadow);
-}
-
-.leaflet-tooltip.marker-label-boosted {
-	color: var(--marker-label-boosted-color);
-	font-weight: 600;
-	text-shadow:
-		-1px -1px 0 var(--marker-label-boosted-shadow),
-		1px -1px 0 var(--marker-label-boosted-shadow),
-		-1px 1px 0 var(--marker-label-boosted-shadow),
-		1px 1px 0 var(--marker-label-boosted-shadow);
-	filter: drop-shadow(0 1px 2px rgba(249, 115, 22, 0.35));
-}
-
-/* Z-index layering for marker labels and tooltips
- * - Tooltips (350): Below markers to prevent interaction blocking
- * - Markers: Use Leaflet's default z-index management for proper interaction states
- * - Clusters: Default Leaflet z-index (higher, not modified)
- */
-.leaflet-map-pane .leaflet-tooltip-pane {
-	z-index: 350 !important;
-}
-
-/* Hide the tooltip arrow/pointer for permanent labels */
-.leaflet-tooltip.marker-label::before,
-.leaflet-tooltip.marker-label .leaflet-tooltip-tip-container,
-.leaflet-tooltip.marker-label-boosted::before,
-.leaflet-tooltip.marker-label-boosted .leaflet-tooltip-tip-container {
-	display: none !important;
 }

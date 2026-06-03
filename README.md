@@ -79,7 +79,7 @@ This website is a progressive web app, meaning you can install it on your mobile
 
 ## Embedding
 
-For information on how to embed the BTC Map web map onto your own website or application please reference our [Wiki](https://gitea.btcmap.org/teambtcmap/btcmap-general/wiki/Embedding).
+For information on how to embed the BTC Map web map onto your own website or application please reference our [Wiki](https://wiki.btcmap.org/Embedding).
 
 ---
 

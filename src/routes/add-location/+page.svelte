@@ -1,30 +1,37 @@
 <script lang="ts">
 import axios from "axios";
 import DOMPurify from "dompurify";
-import type { Map, MaplibreGL, Marker } from "leaflet";
+import type {
+	Map as MapLibreMap,
+	Marker as MapLibreMarker,
+	MapMouseEvent,
+} from "maplibre-gl";
+import "maplibre-gl/dist/maplibre-gl.css";
 import { onDestroy, onMount, tick } from "svelte";
 import { get } from "svelte/store";
 
 import FormSuccess from "$components/FormSuccess.svelte";
+import AddressSearch from "$components/form/AddressSearch.svelte";
 import FormSelect from "$components/form/FormSelect.svelte";
 import Icon from "$components/Icon.svelte";
 import InfoTooltip from "$components/InfoTooltip.svelte";
 import HeaderPlaceholder from "$components/layout/HeaderPlaceholder.svelte";
 import MapLoadingEmbed from "$components/MapLoadingEmbed.svelte";
+import MapUnsupportedFallback from "$components/MapUnsupportedFallback.svelte";
 import PrimaryButton from "$components/PrimaryButton.svelte";
-import { _ } from "$lib/i18n";
-import { loadMapDependencies } from "$lib/map/imports";
-import {
-	attribution,
-	changeDefaultIcons,
-	generateLocationIcon,
-	geolocate,
-} from "$lib/map/setup";
+import TextLink from "$components/TextLink.svelte";
+import { _, locale } from "$lib/i18n";
+import { hasWebGL } from "$lib/map/webgl";
 import { theme } from "$lib/theme";
-import type { Leaflet } from "$lib/types";
 import { errToast, isValidLatitude, isValidLongitude } from "$lib/utils";
 
 import { browser } from "$app/environment";
+
+const STYLE_LIGHT = "https://tiles.openfreemap.org/styles/liberty";
+const STYLE_DARK = "https://static.btcmap.org/map-styles/dark.json";
+
+const styleUrlForTheme = (t: "light" | "dark" | undefined): string =>
+	t === "dark" ? STYLE_DARK : STYLE_LIGHT;
 
 let captchaContent = "";
 let isCaptchaLoading = true;
@@ -90,69 +97,72 @@ function resetForm() {
 	});
 }
 
-/**
- * Initialize the map with all required settings and controls
- */
 async function initializeMap() {
-	const deps = await loadMapDependencies();
-	const leaflet = deps.leaflet;
-	leafletRef = leaflet;
-	const DomEvent = deps.DomEvent;
-	const LocateControl = deps.LocateControl;
-
-	// Create map instance
-	if (map) map.remove(); // Clean up any existing map
+	// Clean up any existing map (e.g. resetForm re-init).
+	if (map) {
+		map.remove();
+		map = undefined;
+	}
+	marker?.remove();
 	marker = undefined;
-	map = leaflet
-		.map(mapElement, { attributionControl: false, maxZoom: 19 })
-		.setView([0, 0], 2);
+	mapLoaded = false;
 
-	// Create map styles
-	openFreeMapLiberty = window.L.maplibreGL({
-		style: "https://tiles.openfreemap.org/styles/liberty",
-	});
-
-	openFreeMapDark = window.L.maplibreGL({
-		style: "https://static.btcmap.org/map-styles/dark.json",
-	});
-
-	// Apply appropriate theme
-	const currentTheme = theme.current;
-
-	if (currentTheme === "dark") {
-		openFreeMapDark.addTo(map);
-	} else {
-		openFreeMapLiberty.addTo(map);
+	if (!hasWebGL()) {
+		webglUnsupported = true;
+		return;
 	}
+	const maplibre = await import("maplibre-gl");
+	maplibreRef = maplibre;
+	if (destroyed) return;
 
-	map.on("click", (e) => {
-		if (captchaSecret) {
-			placeMarker(e.latlng.lat, e.latlng.lng, {
-				fly: false,
-				syncInputs: true,
-			});
-		}
+	lastAppliedTheme = $theme;
+
+	map = new maplibre.Map({
+		container: mapElement,
+		style: styleUrlForTheme($theme),
+		center: [0, 0],
+		zoom: 2,
+		maxZoom: 21,
+		dragRotate: true,
+		touchZoomRotate: true,
+		pitchWithRotate: false,
+		attributionControl: { compact: true },
 	});
 
-	// Add map controls and settings
-	try {
-		geolocate(leaflet, map, LocateControl);
-	} catch (e) {
-		console.error("Error adding locate control:", e);
-	}
+	map.addControl(
+		new maplibre.NavigationControl({
+			showCompass: true,
+			showZoom: true,
+			visualizePitch: false,
+		}),
+		"top-right",
+	);
 
-	changeDefaultIcons(false, leaflet, mapElement, DomEvent);
-	attribution(leaflet, map);
+	const geolocateControl = new maplibre.GeolocateControl({
+		positionOptions: { enableHighAccuracy: true },
+		trackUserLocation: true,
+		showUserLocation: true,
+		showAccuracyCircle: true,
+		fitBoundsOptions: { maxZoom: 15, linear: true },
+	});
+	map.addControl(geolocateControl, "top-right");
 
-	// Force a resize to ensure proper rendering
-	map.invalidateSize();
+	map.on("click", (e: MapMouseEvent) => {
+		if (!captchaSecret) return;
+		placeMarker(e.lngLat.lat, e.lngLat.lng, {
+			fly: false,
+			syncInputs: true,
+		});
+	});
 
-	mapLoaded = true;
-	return leaflet; // Return leaflet for any additional setup
+	map.on("load", () => {
+		mapLoaded = true;
+	});
 }
 
 let name: HTMLInputElement;
 let address: HTMLInputElement;
+let addressFilledBySearch = false;
 let lat: number | undefined;
 let long: number | undefined;
 let selected = false;
@@ -161,8 +171,8 @@ let latInput = "";
 let longInput = "";
 let latError = "";
 let longError = "";
-let marker: Marker | undefined;
-let leafletRef: Leaflet | undefined;
+let marker: MapLibreMarker | undefined;
+let maplibreRef: typeof import("maplibre-gl") | undefined;
 
 function placeMarker(
 	newLat: number,
@@ -184,16 +194,29 @@ function placeMarker(
 	long = finalLong;
 	selected = true;
 	noLocationSelected = false;
-	if (!leafletRef || !map) return;
+	if (!maplibreRef || !map) return;
 	if (marker) {
-		map.removeLayer(marker);
+		marker.setLngLat([finalLong, finalLat]);
+	} else {
+		marker = new maplibreRef.Marker()
+			.setLngLat([finalLong, finalLat])
+			.addTo(map);
 	}
-	const locationIcon = generateLocationIcon(leafletRef);
-	marker = leafletRef
-		.marker([finalLat, finalLong], { icon: locationIcon })
-		.addTo(map);
 	if (fly) {
-		map.flyTo([finalLat, finalLong], 17);
+		map.flyTo({ center: [finalLong, finalLat], zoom: 17, duration: 800 });
+	}
+}
+
+function handleAddressSelect(
+	e: CustomEvent<{ lat: number; lng: number; displayName: string }>,
+) {
+	const { lat, lng, displayName } = e.detail;
+	placeMarker(lat, lng, { fly: true, syncInputs: true });
+	// Fill the Address field if it's empty or was last filled by a previous
+	// search. If the user has typed their own address, leave it alone.
+	if (address && (address.value.trim() === "" || addressFilledBySearch)) {
+		address.value = displayName;
+		addressFilledBySearch = true;
 	}
 }
 
@@ -248,8 +271,8 @@ $: if (showAdvanced) {
 }
 
 // If the user typed valid coords before the map finished loading,
-// placeMarker() returned early (no leafletRef/map). Once the map is
-// ready, drop the marker that's owed.
+// placeMarker() returned early (no map yet). Once the map is ready,
+// drop the marker that's owed.
 $: if (mapLoaded && lat !== undefined && long !== undefined && !marker) {
 	placeMarker(lat, long, { fly: true, syncInputs: false });
 }
@@ -317,11 +340,11 @@ const submitForm = (event: SubmitEvent) => {
 
 // location picker map
 let mapElement: HTMLDivElement;
-let map: Map;
+let map: MapLibreMap | undefined;
 let mapLoaded = false;
-
-let openFreeMapLiberty: MaplibreGL;
-let openFreeMapDark: MaplibreGL;
+let webglUnsupported = false;
+let destroyed = false;
+let lastAppliedTheme: "light" | "dark" | undefined;
 
 onMount(async () => {
 	if (browser) {
@@ -333,24 +356,27 @@ onMount(async () => {
 	}
 });
 
-onDestroy(async () => {
+onDestroy(() => {
+	destroyed = true;
 	if (map) {
-		console.info("Unloading Leaflet map.");
 		map.remove();
+		map = undefined;
 	}
 });
 
-const toggleTheme = () => {
-	if ($theme === "dark") {
-		openFreeMapLiberty.remove();
-		openFreeMapDark.addTo(map);
-	} else {
-		openFreeMapDark.remove();
-		openFreeMapLiberty.addTo(map);
-	}
+const applyTheme = (next: "light" | "dark" | undefined) => {
+	if (!map || !mapLoaded) return;
+	if (next === lastAppliedTheme) return;
+	lastAppliedTheme = next;
+	// setStyle preserves added markers (managed outside the style) but drops
+	// any source/layer overrides. We don't add custom layers here, so a plain
+	// setStyle() is sufficient.
+	map.setStyle(styleUrlForTheme(next));
 };
 
-$: $theme !== undefined && mapLoaded === true && toggleTheme();
+$: if (map && mapLoaded) {
+	applyTheme($theme);
+}
 </script>
 
 <svelte:head>
@@ -379,11 +405,9 @@ $: $theme !== undefined && mapLoaded === true && toggleTheme();
 	</p>
 
 	<p class="mt-10 text-center text-lg font-semibold text-primary md:text-xl dark:text-white">
-		{$_('addLocation.businessOwner')} <a
-			href="https://gitea.btcmap.org/teambtcmap/btcmap-general/wiki/Merchant-Best-Practices"
-			target="_blank"
-			rel="noreferrer"
-				class="text-link transition-colors hover:text-hover">{$_('addLocation.bestPractices')}</a
+		{$_('addLocation.businessOwner')} <TextLink
+			link="https://wiki.btcmap.org/Merchant-Best-Practices"
+			external>{$_('addLocation.bestPractices')}</TextLink
 		> {$_('addLocation.guide')}
 	</p>
 
@@ -419,17 +443,30 @@ $: $theme !== undefined && mapLoaded === true && toggleTheme();
 
 				<div>
 					<label for="location-picker" class="mb-2 block font-semibold">{$_('forms.selectLocation')}</label>
-					{#if selected}
-						<span class="font-semibold text-green-500">{$_('forms.locationSelected')}</span>
-					{:else if noLocationSelected}
+					{#if noLocationSelected}
 						<span class="font-semibold text-error">{$_('addLocation.noLocationError')}</span>
 					{/if}
+						<p class="mt-2 mb-1 text-sm font-semibold text-primary/80 dark:text-white/80">
+							{$_('addLocation.searchByAddressLabel')}
+						</p>
+						<div class="mb-3">
+							<AddressSearch
+								disabled={!captchaSecret || !mapLoaded}
+								locale={$locale ?? 'en'}
+								on:select={handleAddressSelect}
+							/>
+						</div>
+						<p class="mt-2 mb-1 text-sm font-semibold text-primary/80 dark:text-white/80">
+							{$_('addLocation.orSelectOnMapLabel')}
+						</p>
 						<div class="relative mb-2">
 							<div
 								bind:this={mapElement}
 								class="z-10 h-[300px] !cursor-crosshair rounded-2xl border-2 border-input !bg-teal md:h-[400px] dark:!bg-dark"
 							/>
-							{#if !mapLoaded}
+							{#if webglUnsupported}
+								<MapUnsupportedFallback />
+							{:else if !mapLoaded}
 								<MapLoadingEmbed style="h-[300px] md:h-[400px] border-2 border-input rounded-2xl" />
 							{/if}
 						</div>
@@ -506,6 +543,7 @@ $: $theme !== undefined && mapLoaded === true && toggleTheme();
 						placeholder={$_('addLocation.addressPlaceholder')}
 						class="w-full rounded-2xl border-2 border-input p-3 transition-all focus:outline-link disabled:cursor-not-allowed disabled:bg-gray-100 disabled:text-gray-500 dark:bg-white/[0.15] dark:disabled:bg-gray-700 dark:disabled:text-gray-400"
 						bind:this={address}
+						on:input={() => (addressFilledBySearch = false)}
 					/>
 				</div>
 
@@ -742,7 +780,7 @@ $: $theme !== undefined && mapLoaded === true && toggleTheme();
 					<input
 						type="text"
 						name="honey"
-						placeholder={$_('forms.honeyPlaceholder')}
+						placeholder="A nice pot of honey."
 						class="hidden"
 						bind:this={honeyInput}
 					/>
@@ -775,7 +813,7 @@ $: $theme !== undefined && mapLoaded === true && toggleTheme();
 					/>
 					<PrimaryButton
 						style="w-full py-3 rounded-xl"
-						link="https://gitea.btcmap.org/teambtcmap/btcmap-general/wiki/Tagging-Merchants#shadowy-supertaggers-"
+						link="https://wiki.btcmap.org/Tagging-Merchants#shadowy-supertaggers-"
 						external={true}
 					>
 						{$_('addLocation.supertaggerWikiButton')}

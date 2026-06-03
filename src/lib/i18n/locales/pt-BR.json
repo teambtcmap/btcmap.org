@@ -75,19 +75,16 @@
 		"noMatches": "Nenhum resultado nesta categoria"
 	},
 	"mapControls": {
-		"fullScreen": "Tela cheia",
 		"goToHome": "Ir para a página inicial",
 		"addLocation": "Adicionar local",
 		"communityMap": "Mapa da comunidade",
 		"merchantMap": "Mapa de comerciantes",
 		"dataRefreshAvailable": "Atualização de dados disponível",
-		"support": "Apoiar",
-		"supportWithSats": "Apoiar com sats",
 		"zoomIn": "Aumentar zoom",
 		"zoomOut": "Diminuir zoom",
+		"basemapTitle": "Mapa base",
 		"locate": "Mostrar onde estou",
 		"boostAlt": "Impulsionar",
-		"fullScreenAlt": "Tela cheia",
 		"locateAlt": "Mostrar onde estou",
 		"goToHomeAlt": "Ir para a página inicial",
 		"addLocationAlt": "Adicionar local",
@@ -208,10 +205,7 @@
 	"status": {
 		"loading": "Carregando...",
 		"loadingMap": "Carregando mapa...",
-		"loadingPlaces": "Carregando locais...",
 		"initializing": "Inicializando...",
-		"initializingMarkers": "Inicializando marcadores...",
-		"loadingPlacesInView": "Carregando locais na visualização...",
 		"downloading": "Baixando dados de locais...",
 		"processing": "Processando dados de locais...",
 		"complete": "Completo!",
@@ -270,10 +264,8 @@
 		"noPaymentMethod": "Por favor, selecione pelo menos um método de pagamento...",
 		"formSubmission": "Falha no envio do formulário. Tente novamente ou entre em contato com o BTC Map.",
 		"mapView": "Não foi possível definir a visualização do mapa para as coordenadas fornecidas. Tente novamente ou entre em contato com o BTC Map.",
-		"mapViewCachedCoords": "Não foi possível definir a visualização do mapa para as coordenadas em cache. Tente novamente ou entre em contato com o BTC Map.",
 		"merchantDetailsLoadError": "Erro ao carregar detalhes do comerciante. Tente novamente.",
-		"boostLoadError": "Falha ao carregar informações de boost. Tente novamente.",
-		"fullscreenError": "Erro ao tentar ativar o modo tela cheia: {message} ({name})"
+		"boostLoadError": "Falha ao carregar informações de boost. Tente novamente."
 	},
 	"aria": {
 		"logoAlt": "Logo do BTC Map",
@@ -359,7 +351,6 @@
 		"submittingApplication": "Enviando sua candidatura...",
 		"submitButton": "Enviar Candidatura",
 		"captchaPlaceholder": "Por favor, digite o texto do captcha.",
-		"honeyPlaceholder": "Um pote de mel.",
 		"successType": "Candidatura",
 		"successMessage": "Obrigado pelo seu interesse em se tornar um etiquetador! Revisaremos sua candidatura e alguém da equipe entrará em contato pelo e-mail fornecido. Entre em contato em hello@btcmap.org se precisar de acompanhamento."
 	},
@@ -400,10 +391,8 @@
 		"submitLocation": "Enviar Local",
 		"submitReport": "Enviar Relatório",
 		"selectLocation": "Selecionar Local",
-		"locationSelected": "Local selecionado!",
 		"searchButton": "Pesquisar 🔍",
 		"address": "Endereço",
-		"honeyPlaceholder": "Um pote de mel.",
 		"captchaPlaceholder": "Por favor insira o texto do captcha."
 	},
 	"addLocation": {
@@ -584,7 +573,6 @@
 		"captchaLabel": "Proteção contra bots",
 		"captchaCaseSensitive": "(diferencia maiúsculas)",
 		"captchaPlaceholder": "Por favor, digite o texto do captcha.",
-		"honeyPlaceholder": "Um pote de mel.",
 		"submitButton": "Enviar Comunidade",
 		"successType": "Comunidade",
 		"successMessage": "Obrigado pela sua iniciativa em criar uma comunidade bitcoin. Revisaremos suas informações e entraremos em contato se precisarmos de mais detalhes.",
@@ -723,7 +711,6 @@
 		"botProtection": "Proteção contra bots",
 		"caseSensitive": "(diferencia maiúsculas)",
 		"captchaPlaceholder": "Por favor digite o texto do captcha.",
-		"honeyPlaceholder": "Um pote de mel.",
 		"submitReport": "Enviar Relatório",
 		"successType": "Relatório",
 		"successMessage": "Obrigado por verificar as informações desta comunidade. Analisaremos seu relatório e atualizaremos o mais rápido possível."

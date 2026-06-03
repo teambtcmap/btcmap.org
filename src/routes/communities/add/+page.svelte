@@ -10,6 +10,7 @@ import Icon from "$components/Icon.svelte";
 import InfoTooltip from "$components/InfoTooltip.svelte";
 import HeaderPlaceholder from "$components/layout/HeaderPlaceholder.svelte";
 import PrimaryButton from "$components/PrimaryButton.svelte";
+import TextLink from "$components/TextLink.svelte";
 import { theme } from "$lib/theme";
 import type { NominatimResponse } from "$lib/types";
 import { errToast, successToast, warningToast } from "$lib/utils";
@@ -110,7 +111,7 @@ const submitForm = (event: SubmitEvent) => {
 				type: "community",
 				captchaSecret,
 				captchaTest: captchaValue,
-				honey: honeyInput,
+				honey: honeyInput.value,
 				location,
 				name,
 				icon: icon ? icon : "",
@@ -307,18 +308,14 @@ onMount(async () => {
 					>{$_('addCommunityForm.lightningLabel')} <span class="font-normal">({$_('addCommunityForm.iconOptional')})</span></label
 				>
 				<p class="mb-2 text-sm">
-					{$_('addCommunityForm.lightningHint')} <a
-						href="https://lightningaddress.com/"
-						target="_blank"
-						rel="noreferrer"
-						class="text-link transition-colors hover:text-hover">{$_('addCommunityForm.lightningAddress')}</a
+					{$_('addCommunityForm.lightningHint')} <TextLink
+						link="https://lightningaddress.com/"
+						external>{$_('addCommunityForm.lightningAddress')}</TextLink
 					>
 					{$_('addCommunityForm.lightningOr')}
-					<a
-						href="https://github.com/fiatjaf/lnurl-rfc#lnurl-documents"
-						target="_blank"
-						rel="noreferrer"
-						class="text-link transition-colors hover:text-hover">{$_('addCommunityForm.lightningLnurl')}</a
+					<TextLink
+						link="https://github.com/fiatjaf/lnurl-rfc#lnurl-documents"
+						external>{$_('addCommunityForm.lightningLnurl')}</TextLink
 					> {$_('addCommunityForm.lightningSuffix')}
 				</p>
 				<input
@@ -416,9 +413,9 @@ onMount(async () => {
 			<input
 				type="text"
 				name="honey"
-				placeholder={$_('addCommunityForm.honeyPlaceholder')}
+				placeholder="A nice pot of honey."
 				class="hidden"
-				bind:value={honeyInput}
+				bind:this={honeyInput}
 			/>
 
 			<PrimaryButton

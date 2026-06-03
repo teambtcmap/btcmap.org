@@ -1,6 +1,7 @@
 <script lang="ts">
 import IssuesTable from "$components/IssuesTable.svelte";
 import HeaderPlaceholder from "$components/layout/HeaderPlaceholder.svelte";
+import TextLink from "$components/TextLink.svelte";
 import { _ } from "$lib/i18n";
 import { theme } from "$lib/theme";
 import type { RpcIssue } from "$lib/types";
@@ -36,9 +37,8 @@ let issues: RpcIssue[] = data.rpcResult.requested_issues;
 	</h2>
 
 	<p class="text-center text-xl text-primary lg:text-left dark:text-white">
-		{$_("taggingIssues.descriptionPart1")}<a
-			href="https://gitea.btcmap.org/teambtcmap/btcmap-general/wiki/Tagging-Merchants"
-			class="text-link transition-colors hover:text-hover">{$_("taggingIssues.linkText")}</a
+		{$_("taggingIssues.descriptionPart1")}<TextLink
+			link="https://wiki.btcmap.org/Tagging-Merchants">{$_("taggingIssues.linkText")}</TextLink
 		>{$_("taggingIssues.descriptionPart2")}
 	</p>
 	<IssuesTable title={$_("taggingIssues.tableTitle")} {issues} loading={false} initialPageSize={50} />

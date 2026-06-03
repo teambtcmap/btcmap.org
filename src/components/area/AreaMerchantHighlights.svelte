@@ -1,5 +1,6 @@
 <script lang="ts">
 import MerchantCard from "$components/area/MerchantCard.svelte";
+import TextLink from "$components/TextLink.svelte";
 import { _ } from "$lib/i18n";
 import type { Place } from "$lib/types";
 import { isBoosted } from "$lib/utils";
@@ -79,9 +80,8 @@ $: latest = filteredPlaces?.toSorted((a, b) => b.id - a.id).slice(0, 6);
 				</div>
 			{:else}
 				<p class="text-center text-primary sm:text-left dark:text-white">
-					{$_('areaHighlights.noLatest')} <a
-						href={resolve('/add-location')}
-						class="text-link transition-colors hover:text-hover">{$_('areaHighlights.addNewMerchant')}</a
+					{$_('areaHighlights.noLatest')} <TextLink
+						link={resolve('/add-location')}>{$_('areaHighlights.addNewMerchant')}</TextLink
 					> {$_('areaHighlights.now')}
 				</p>
 			{/if}

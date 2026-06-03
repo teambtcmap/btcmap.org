@@ -5,6 +5,7 @@ import { _ } from "svelte-i18n";
 
 import Icon from "$components/Icon.svelte";
 import ProfileStat from "$components/ProfileStat.svelte";
+import TextLink from "$components/TextLink.svelte";
 import { theme } from "$lib/theme";
 import type { AreaTags, Report } from "$lib/types.js";
 import { updateChartThemes } from "$lib/utils";
@@ -399,11 +400,9 @@ onMount(async () => {
 </section>
 
 <p class="text-center text-sm text-body md:text-left dark:text-white">
-	{$_(`areaStats.tagsInfo`)} <a
-		href="https://gitea.btcmap.org/teambtcmap/btcmap-general/wiki/Tagging-Merchants#tagging-guidance"
-		target="_blank"
-		rel="noreferrer"
-		class="text-link transition-colors hover:text-hover">{$_(`areaStats.here`)}</a
+	{$_(`areaStats.tagsInfo`)} <TextLink
+		link="https://wiki.btcmap.org/Tagging-Merchants#tagging-guidance"
+		external>{$_(`areaStats.here`)}</TextLink
 	>.
 	<br />
 	{$_(`areaStats.chartDataNote`)}
