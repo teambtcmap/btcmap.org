@@ -4,6 +4,7 @@ import "maplibre-gl/dist/maplibre-gl.css";
 import type { Map as MapLibreMap } from "maplibre-gl";
 import { onDestroy, onMount } from "svelte";
 
+import { previewStyleForTheme } from "$lib/map/basemaps";
 import { hasWebGL } from "$lib/map/webgl";
 import { theme } from "$lib/theme";
 
@@ -19,14 +20,9 @@ let className = "";
 
 export { className as class };
 
-// Carto Positron / Dark Matter — clean, low-contrast basemaps that keep
-// the merchant identity overlay legible behind the hero.
-const STYLE_LIGHT =
-	"https://basemaps.cartocdn.com/gl/positron-gl-style/style.json";
-const STYLE_DARK =
-	"https://basemaps.cartocdn.com/gl/dark-matter-gl-style/style.json";
-const styleUrlForTheme = (t: "light" | "dark"): string =>
-	t === "dark" ? STYLE_DARK : STYLE_LIGHT;
+// Carto Positron / Dark Matter, from the shared basemap catalog — clean,
+// low-contrast backdrops that keep the merchant identity overlay legible.
+const styleUrlForTheme = previewStyleForTheme;
 
 let mapElement: HTMLDivElement;
 let map: MapLibreMap | undefined;
