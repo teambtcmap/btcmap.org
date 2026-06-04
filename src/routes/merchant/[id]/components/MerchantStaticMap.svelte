@@ -50,7 +50,17 @@ const init = async () => {
 	});
 	map.on("style.load", () => {
 		styleLoaded = true;
+		collapseAttribution();
 	});
+};
+
+// MapLibre's compact attribution still renders expanded on first paint.
+// Collapse it so the hero defaults to just the "ⓘ" toggle, which keeps
+// the map preview clean while leaving attribution one tap away.
+const collapseAttribution = () => {
+	mapElement
+		?.querySelector(".maplibregl-ctrl-attrib.maplibregl-compact-show")
+		?.classList.remove("maplibregl-compact-show");
 };
 
 onMount(() => {
@@ -65,6 +75,7 @@ $: if (map && styleLoaded && $theme !== lastTheme) {
 	styleLoaded = false;
 	map.once("style.load", () => {
 		styleLoaded = true;
+		collapseAttribution();
 	});
 	map.setStyle(styleUrlForTheme($theme));
 }
