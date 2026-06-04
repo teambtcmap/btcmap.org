@@ -19,8 +19,12 @@ let className = "";
 
 export { className as class };
 
-const STYLE_LIGHT = "https://tiles.openfreemap.org/styles/liberty";
-const STYLE_DARK = "https://static.btcmap.org/map-styles/dark.json";
+// Carto Positron / Dark Matter — clean, low-contrast basemaps that keep
+// the merchant identity overlay legible behind the hero.
+const STYLE_LIGHT =
+	"https://basemaps.cartocdn.com/gl/positron-gl-style/style.json";
+const STYLE_DARK =
+	"https://basemaps.cartocdn.com/gl/dark-matter-gl-style/style.json";
 const styleUrlForTheme = (t: "light" | "dark"): string =>
 	t === "dark" ? STYLE_DARK : STYLE_LIGHT;
 
