@@ -9,6 +9,7 @@ import {
 	formatDistance,
 	getCommunitiesAtCoordinates,
 	isValidLatitude,
+	isValidLightningTip,
 	isValidLongitude,
 	sanitizeUrl,
 	stripLightningScheme,
@@ -704,5 +705,37 @@ describe("stripLightningScheme", () => {
 		expect(stripLightningScheme("  lightning:alice@getalby.com  ")).toBe(
 			"alice@getalby.com",
 		);
+	});
+});
+
+describe("isValidLightningTip", () => {
+	it("accepts a well-formed lightning address", () => {
+		expect(isValidLightningTip("alice@getalby.com")).toBe(true);
+	});
+
+	it("accepts an address that still carries the lightning: scheme", () => {
+		expect(isValidLightningTip("lightning:alice@getalby.com")).toBe(true);
+	});
+
+	it("rejects undefined/empty input", () => {
+		expect(isValidLightningTip(undefined)).toBe(false);
+		expect(isValidLightningTip("")).toBe(false);
+	});
+
+	it("rejects an undefined username leaked from missing data", () => {
+		expect(isValidLightningTip("undefined@zbd.gg")).toBe(false);
+		expect(isValidLightningTip("lightning:undefined@zbd.gg")).toBe(false);
+	});
+
+	it("rejects a null username", () => {
+		expect(isValidLightningTip("null@zbd.gg")).toBe(false);
+	});
+
+	it("rejects an address with no domain dot", () => {
+		expect(isValidLightningTip("alice@localhost")).toBe(false);
+	});
+
+	it("rejects an address containing whitespace", () => {
+		expect(isValidLightningTip("alice @getalby.com")).toBe(false);
 	});
 });
