@@ -93,6 +93,12 @@
 		"dataRefreshAlt": "Datenaktualisierung verfügbar"
 	},
 	"merchant": {
+		"tagsNote": "Weitere Informationen zu Bitcoin-Mapping-Tags finden Sie",
+		"tagsNoteHere": "hier",
+		"details": "Details",
+		"activityShort": "Aktivität",
+		"taggerTools": "Tagger-Tools",
+		"links": "Links",
 		"navigate": "Navigieren",
 		"edit": "Bearbeiten",
 		"share": "Teilen",
@@ -122,12 +128,10 @@
 		"closed": "Geschlossen",
 		"closesAt": "Schließt {time}",
 		"opensAt": "Öffnet {time}",
-		"location": "{name} Standort",
 		"activity": "{name} Aktivität",
 		"communities": "{name} Communities"
 	},
 	"verification": {
-		"lastSurveyed": "Zuletzt überprüft",
 		"verified": "Verifiziert",
 		"outdated": "Veraltet",
 		"notSurveyed": "Dieser Ort muss überprüft werden!",
@@ -153,13 +157,11 @@
 		"thirdPartyRequired": "Drittanbieter-App erforderlich"
 	},
 	"boost": {
-		"title": "Boost",
 		"boosted": "Geboostet",
 		"boostAction": "Boosten",
 		"extend": "Verlängern",
 		"boosting": "Booste...",
 		"expires": "Boost läuft ab",
-		"isBoosted": "Dieser Ort ist geboostet!",
 		"improveVisibility": "Boost diesen Ort, um seine Sichtbarkeit auf der Karte zu verbessern.",
 		"locations": "Geboostete Orte",
 		"boostLocation": "Ort boosten",
@@ -238,18 +240,12 @@
 		"hours": "Öffnungszeiten",
 		"noActivity": "Keine Aktivität anzuzeigen.",
 		"loadMore": "Mehr laden",
-		"viewOnMainMap": "Auf Hauptkarte anzeigen",
-		"noCommunity": "Dieser Ort ist nicht Teil einer Community, aber eine kann erstellt werden, um dieses lokale Gebiet zu pflegen.",
-		"created": "erstellt",
-		"loadingCommunities": "Communities laden..."
+		"viewOnMainMap": "Auf Hauptkarte anzeigen"
 	},
 	"comments": {
 		"title": "Kommentare",
 		"add": "Kommentar hinzufügen",
-		"none": "Noch keine Kommentare.",
-		"beFirst": "Noch keine Kommentare. Sei der Erste!",
-		"view": "Kommentare anzeigen",
-		"shareThoughts": "Lass andere wissen, was du über diesen Händler denkst."
+		"none": "Noch keine Kommentare."
 	},
 	"errorPage": {
 		"title": "BTC Map - Fehler",

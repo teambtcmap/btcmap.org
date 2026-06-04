@@ -93,6 +93,12 @@
 		"dataRefreshAlt": "Actualización de datos disponible"
 	},
 	"merchant": {
+		"tagsNote": "Más información sobre etiquetas de mapeo de bitcoin se puede encontrar",
+		"tagsNoteHere": "aquí",
+		"details": "Detalles",
+		"activityShort": "Actividad",
+		"taggerTools": "Herramientas de tagger",
+		"links": "Enlaces",
 		"navigate": "Navegar",
 		"edit": "Editar",
 		"share": "Compartir",
@@ -122,12 +128,10 @@
 		"closed": "Cerrado",
 		"closesAt": "Cierra a las {time}",
 		"opensAt": "Abre a las {time}",
-		"location": "Ubicación de {name}",
 		"activity": "Actividad de {name}",
 		"communities": "Comunidades de {name}"
 	},
 	"verification": {
-		"lastSurveyed": "Último Relevamiento",
 		"verified": "Verificado",
 		"outdated": "Desactualizado",
 		"notSurveyed": "¡Esta ubicación necesita ser verificada!",
@@ -153,13 +157,11 @@
 		"thirdPartyRequired": "Se requiere aplicación de terceros"
 	},
 	"boost": {
-		"title": "Impulsar",
 		"boosted": "Impulsado",
 		"boostAction": "Impulsar",
 		"extend": "Extender",
 		"boosting": "Impulsando...",
 		"expires": "El impulso expira",
-		"isBoosted": "¡Esta ubicación está impulsada!",
 		"improveVisibility": "Impulsa esta ubicación para mejorar su visibilidad en el mapa.",
 		"locations": "Ubicaciones impulsadas",
 		"boostLocation": "Impulsar Ubicación",
@@ -238,18 +240,12 @@
 		"hours": "Horario",
 		"noActivity": "No hay actividad para mostrar.",
 		"loadMore": "Cargar Más",
-		"viewOnMainMap": "Ver en el mapa principal",
-		"noCommunity": "Esta ubicación no forma parte de una comunidad, pero se puede {createLink} una para ayudar a mantener esta área local.",
-		"created": "crear",
-		"loadingCommunities": "Cargando comunidades..."
+		"viewOnMainMap": "Ver en el mapa principal"
 	},
 	"comments": {
 		"title": "Comentarios",
 		"add": "Agregar Comentario",
-		"none": "Aún no hay comentarios.",
-		"beFirst": "Aún no hay comentarios. ¡Sé el primero en dejar un comentario!",
-		"view": "Ver Comentarios",
-		"shareThoughts": "Comparte tu opinión sobre este comercio."
+		"none": "Aún no hay comentarios."
 	},
 	"errorPage": {
 		"title": "BTC Map - Error",

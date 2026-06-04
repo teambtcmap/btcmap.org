@@ -119,3 +119,13 @@ export const buildRasterStyle = (): StyleSpecification => ({
 // inline raster style for the URL-less (OSM) basemap.
 export const styleForBasemap = (id: BasemapId): StyleSpecification | string =>
 	BASEMAP_DEFS.find((b) => b.id === id)?.style ?? buildRasterStyle();
+
+// Fixed theme→style pairing for the non-interactive previews (e.g. the
+// merchant hero backdrop): Carto Positron in light, Dark Matter in dark —
+// clean, low-contrast basemaps that keep an identity overlay legible. These
+// previews have no picker, so they just follow the site theme. Derived from
+// BASEMAP_DEFS so the URLs stay defined in one place.
+export const previewStyleForTheme = (theme: "light" | "dark"): string =>
+	styleForBasemap(
+		theme === "dark" ? "carto-dark-matter" : "carto-positron",
+	) as string;

@@ -1,439 +1,118 @@
 <script lang="ts">
 export let data: MerchantPageData;
 
-import "maplibre-gl/dist/maplibre-gl.css";
-
-import type { GeoJSONSource, Map as MapLibreMap } from "maplibre-gl";
-import { onDestroy, onMount } from "svelte";
-import Time from "svelte-time";
-import tippy from "tippy.js";
+import { onMount } from "svelte";
 
 import Boost from "$components/Boost.svelte";
-import BoostButton from "$components/BoostButton.svelte";
-import Card from "$components/Card.svelte";
+import BoostCard from "$components/BoostCard.svelte";
 import CompanionAppPill from "$components/CompanionAppPill.svelte";
 import Icon from "$components/Icon.svelte";
-import MapLoadingEmbed from "$components/MapLoadingEmbed.svelte";
-import MapUnsupportedFallback from "$components/MapUnsupportedFallback.svelte";
+import OpenStatusPill from "$components/OpenStatusPill.svelte";
 import PaymentMethodPills from "$components/PaymentMethodPills.svelte";
-import PrimaryButton from "$components/PrimaryButton.svelte";
-import SaveButton from "$components/SaveButton.svelte";
 import ShowTags from "$components/ShowTags.svelte";
-import TaggerSkeleton from "$components/TaggerSkeleton.svelte";
 import TaggingIssues from "$components/TaggingIssues.svelte";
-import TopButton from "$components/TopButton.svelte";
 import { _, getDisplayLang, locale } from "$lib/i18n";
-import {
-	ensureSprite,
-	installPlaceholderHandler,
-} from "$lib/map/maplibreSprites";
-import { hasWebGL } from "$lib/map/webgl";
-import { placesById, showTags, taggingIssues } from "$lib/store";
-import { theme } from "$lib/theme";
-import type {
-	MerchantActivityEvent,
-	MerchantArea,
-	MerchantPageData,
-	PayMerchant,
-} from "$lib/types";
-import {
-	areaIconSrc,
-	formatOpeningHours,
-	formatVerifiedHuman,
-	isBoosted,
-	shareMerchant,
-} from "$lib/utils";
-import { isRecentlyVerified } from "$lib/verification";
+import { boost, placesById, resetBoost } from "$lib/store";
+import type { MerchantActivityEvent, MerchantPageData } from "$lib/types";
+import { isBoosted } from "$lib/utils";
 
 import CommentAddButton from "./components/CommentAddButton.svelte";
-import MerchantAction from "./components/MerchantAction.svelte";
+import MerchantActionChips from "./components/MerchantActionChips.svelte";
 import MerchantComment from "./components/MerchantComment.svelte";
+import MerchantDetailsPanel from "./components/MerchantDetailsPanel.svelte";
 import MerchantEvent from "./components/MerchantEvent.svelte";
+import MerchantHero from "./components/MerchantHero.svelte";
+import MerchantTabs from "./components/MerchantTabs.svelte";
+import MerchantVerifyRow from "./components/MerchantVerifyRow.svelte";
 import { browser } from "$app/environment";
-import { resolve } from "$app/paths";
 
-// Scroll indicator thresholds
-const SCROLL_INDICATOR_MIN_ITEMS = 5;
-const TOP_BUTTON_MIN_ITEMS = 10;
-
-const STYLE_LIGHT = "https://tiles.openfreemap.org/styles/liberty";
-const STYLE_DARK = "https://static.btcmap.org/map-styles/dark.json";
-
-const styleUrlForTheme = (t: "light" | "dark" | undefined): string =>
-	t === "dark" ? STYLE_DARK : STYLE_LIGHT;
-
-type MerchantFeatureProps = {
-	id: number;
-	icon: string;
-	boosted: boolean;
-	comments: number;
-};
-
-type MerchantFeatureCollection = {
-	type: "FeatureCollection";
-	features: Array<{
-		type: "Feature";
-		geometry: { type: "Point"; coordinates: [number, number] };
-		properties: MerchantFeatureProps;
-	}>;
-};
-
-const EMPTY_COLLECTION: MerchantFeatureCollection = {
-	type: "FeatureCollection",
-	features: [],
-};
-
-let dataInitialized = false;
-let initialRenderComplete = false;
-let destroyed = false;
-let styleLoaded = false;
-let lastAppliedTheme: "light" | "dark" | undefined;
-
-const currentIcon = (): string =>
-	data.placeData.deleted_at
-		? "skull"
-		: icon && icon !== "question_mark"
-			? icon
-			: "currency_bitcoin";
-
-const buildFeatureCollection = (): MerchantFeatureCollection => {
-	if (typeof lat !== "number" || typeof long !== "number")
-		return EMPTY_COLLECTION;
-	return {
-		type: "FeatureCollection",
-		features: [
-			{
-				type: "Feature",
-				geometry: { type: "Point", coordinates: [long, lat] },
-				properties: {
-					id: Number(data.id),
-					icon: currentIcon(),
-					boosted: !!boosted,
-					comments: comments.length,
-				},
-			},
-		],
-	};
-};
-
-const loadCommentBadgeSprite = (m: MapLibreMap): void => {
-	if (m.hasImage("comment-badge-bg")) return;
-	// 2× rasterization for crispness on retina/phone DPRs — see /map's
-	// equivalent for rationale.
-	const SIZE = 16;
-	const SCALE = 2;
-	const canvas = document.createElement("canvas");
-	canvas.width = SIZE * SCALE;
-	canvas.height = SIZE * SCALE;
-	const ctx = canvas.getContext("2d");
-	if (!ctx) return;
-	ctx.fillStyle = "#16A34A";
-	ctx.beginPath();
-	ctx.arc(
-		(SIZE * SCALE) / 2,
-		(SIZE * SCALE) / 2,
-		(SIZE * SCALE) / 2,
-		0,
-		Math.PI * 2,
-	);
-	ctx.fill();
-	m.addImage(
-		"comment-badge-bg",
-		ctx.getImageData(0, 0, SIZE * SCALE, SIZE * SCALE),
-		{ pixelRatio: SCALE },
-	);
-};
-
-const addMerchantLayers = (m: MapLibreMap) => {
-	if (!m.getSource("merchant")) {
-		m.addSource("merchant", {
-			type: "geojson",
-			data: EMPTY_COLLECTION,
-		});
-	}
-
-	if (!m.getLayer("merchant-pin")) {
-		m.addLayer({
-			id: "merchant-pin",
-			type: "symbol",
-			source: "merchant",
-			layout: {
-				"icon-image": [
-					"concat",
-					"pin-",
-					["case", ["coalesce", ["get", "boosted"], false], "b", "r"],
-					"-",
-					["coalesce", ["get", "icon"], "currency_bitcoin"],
-				],
-				"icon-size": 1,
-				"icon-anchor": "bottom",
-				"icon-allow-overlap": true,
-				"icon-ignore-placement": true,
-				"icon-rotation-alignment": "viewport",
-				"icon-pitch-alignment": "viewport",
-			},
-		});
-	}
-
-	if (!m.getLayer("merchant-comment-badge")) {
-		m.addLayer({
-			id: "merchant-comment-badge",
-			type: "symbol",
-			source: "merchant",
-			filter: [">", ["coalesce", ["get", "comments"], 0], 0],
-			layout: {
-				"icon-image": "comment-badge-bg",
-				"icon-size": 1,
-				"icon-allow-overlap": true,
-				"icon-ignore-placement": true,
-				"icon-rotation-alignment": "viewport",
-				"icon-pitch-alignment": "viewport",
-				"icon-offset": [10, -36],
-			},
-		});
-	}
-
-	if (!m.getLayer("merchant-comment-badge-count")) {
-		m.addLayer({
-			id: "merchant-comment-badge-count",
-			type: "symbol",
-			source: "merchant",
-			filter: [">", ["coalesce", ["get", "comments"], 0], 0],
-			layout: {
-				"text-field": ["to-string", ["coalesce", ["get", "comments"], 0]],
-				"text-font": ["Noto Sans Bold"],
-				"text-size": 11,
-				"text-allow-overlap": true,
-				"text-ignore-placement": true,
-				"text-rotation-alignment": "viewport",
-				"text-pitch-alignment": "viewport",
-				"text-offset": [10 / 11, -36 / 11],
-			},
-			paint: {
-				"text-color": "#fff",
-			},
-		});
-	}
-};
-
-const syncMerchantSource = (m: MapLibreMap) => {
-	const source = m.getSource("merchant") as GeoJSONSource | undefined;
-	if (!source) return;
-	source.setData(buildFeatureCollection());
-	ensureSprite(m, currentIcon(), !!boosted);
-};
-
-// Sources + layers + sprites — called both on initial load AND on
-// theme-driven style.load. Camera placement is intentionally NOT done
-// here so theme swaps preserve the user's pan/zoom; centerOnMerchant
-// is called from the initial-load path only.
-const initializeMapContents = (m: MapLibreMap) => {
-	loadCommentBadgeSprite(m);
-	addMerchantLayers(m);
-	syncMerchantSource(m);
-};
-
-const centerOnMerchant = (m: MapLibreMap) => {
-	if (typeof lat === "number" && typeof long === "number") {
-		m.jumpTo({ center: [long, lat], zoom: 16 });
-	}
-};
-
-const applyTheme = (next: "light" | "dark" | undefined) => {
-	if (!map) return;
-	if (!styleLoaded) return;
-	if (next === lastAppliedTheme) return;
-	lastAppliedTheme = next;
-	styleLoaded = false;
-	const onStyleLoad = () => {
-		if (!map) return;
-		initializeMapContents(map);
-		styleLoaded = true;
-	};
-	map.once("style.load", onStyleLoad);
-	map.setStyle(styleUrlForTheme(next));
-};
-
-const initializeMap = async () => {
-	if (dataInitialized) return;
-	dataInitialized = true;
-
-	if (!hasWebGL()) {
-		webglUnsupported = true;
-		return;
-	}
-	const maplibre = await import("maplibre-gl");
-	if (destroyed) return;
-
-	lastAppliedTheme = $theme;
-
-	map = new maplibre.Map({
-		container: mapElement,
-		style: styleUrlForTheme($theme),
-		maxZoom: 21,
-		dragRotate: true,
-		touchZoomRotate: true,
-		pitchWithRotate: false,
-		attributionControl: { compact: true },
-	});
-
-	map.addControl(
-		new maplibre.NavigationControl({
-			showCompass: true,
-			showZoom: true,
-			visualizePitch: false,
-		}),
-		"top-right",
-	);
-
-	const geolocateControl = new maplibre.GeolocateControl({
-		positionOptions: { enableHighAccuracy: true },
-		trackUserLocation: true,
-		showUserLocation: true,
-		showAccuracyCircle: true,
-		fitBoundsOptions: { maxZoom: 15, linear: true },
-	});
-	map.addControl(geolocateControl, "top-right");
-
-	installPlaceholderHandler(map);
-
-	map.on("load", () => {
-		if (!map) return;
-		initializeMapContents(map);
-		centerOnMerchant(map);
-		styleLoaded = true;
-		mapLoaded = true;
-	});
-};
-
-// Kick off map init once the component has mounted in the browser.
-$: if (initialRenderComplete && !dataInitialized) {
-	initializeMap();
-}
-
-$: if (map && styleLoaded) {
-	applyTheme($theme);
-}
-
-// merchant variable no longer needed - using server data directly
-
-// Use server data directly via reactive declarations
+// Server data is consumed directly; only the fields the page itself renders
+// (hero, payment indicator, action chips, activity) are mirrored here.
 let icon: string | undefined;
 let address: string | undefined;
 let description: string | undefined;
-let hours: string | undefined;
-let payment: PayMerchant | undefined;
 let phone: string | undefined;
-let website: string | undefined;
-let email: string | undefined;
-let twitter: string | undefined;
-let instagram: string | undefined;
-let facebook: string | undefined;
-let thirdParty: boolean | undefined;
-let paymentMethod: string | undefined;
+let hours: string | undefined;
 let lat: number;
 let long: number;
-let filteredCommunities: MerchantArea[] = [];
 let merchantEvents: MerchantActivityEvent[] = [];
 let name: string | undefined;
-
 let localizedName: string | undefined;
 
 $: localizedName = data.localizedName?.[getDisplayLang($locale)];
-
 $: icon = data.icon;
 $: address = data.address;
 $: description = data.description;
-$: hours = data.hours;
-$: payment = data.payment;
 $: phone = data.phone;
-$: website = data.website;
-$: email = data.email;
-$: twitter = data.twitter;
-$: instagram = data.instagram;
-$: facebook = data.facebook;
-$: thirdParty = data.thirdParty;
+$: hours = data.hours;
 $: companionAppUrl =
 	data.osmTags?.["payment:lightning:companion_app_url"] ||
 	data.placeData.required_app_url;
-$: paymentMethod = data.paymentMethod;
+// Only "yes" payment tags render a pill; gate the box on that (not on
+// getPaymentMethod() truthiness, which is also true for payment:*=no).
+$: hasPaymentPill =
+	data.osmTags?.["payment:onchain"] === "yes" ||
+	data.osmTags?.["payment:lightning"] === "yes" ||
+	data.osmTags?.["payment:lightning_contactless"] === "yes";
 $: lat = data.lat;
 $: long = data.lon;
-$: filteredCommunities = data.areas;
 $: merchantEvents = data.activity;
 $: name = data.name;
-let boosted: string | undefined;
-let shareConfirm = false;
-let shareTimeout: ReturnType<typeof setTimeout>;
+
+$: displayName = localizedName || name || "BTC Map Merchant";
+$: deletedAt = data.placeData.deleted_at;
+$: heroIcon = deletedAt
+	? "skull"
+	: icon && icon !== "question_mark"
+		? icon
+		: "currency_bitcoin";
 
 // Make comments reactive to server data updates (from invalidateAll() after adding comment)
 let comments: typeof data.comments;
 $: comments = data.comments;
 
 $: verifiedAt = data.placeData?.verified_at;
-// Make boosted reactive to both server data and store updates, but only if boost is still active
+
+// Boost reflects both server data and store updates, but only while active.
+let boosted: string | undefined;
 $: {
 	const placeInStore = $placesById.get(Number(data.id));
 	const mergedPlace = placeInStore || data.placeData;
-	// Only set boosted if the place is actually boosted (expiry in future)
 	boosted =
 		mergedPlace && isBoosted(mergedPlace)
 			? mergedPlace.boosted_until
 			: undefined;
 }
-let verifiedTooltip: HTMLSpanElement;
-let outdatedTooltip: HTMLSpanElement;
 
-$: verifiedTooltip &&
-	tippy([verifiedTooltip], {
-		content: $_("verification.verifiedTooltip"),
-	});
-
-$: outdatedTooltip &&
-	tippy([outdatedTooltip], {
-		content: $_("verification.outdatedTooltip"),
-	});
-
-let hideArrow = false;
-let activityDiv: HTMLElement;
-
-let hideCommentsArrow = false;
-let commentsDiv: HTMLElement;
+// Open the boost modal via the $boost store (same trigger BoostButton uses);
+// $resetBoost clears the loading state when the modal flow finishes.
+let boostLoading = false;
+const resetBoostLoading = () => {
+	boostLoading = false;
+};
+$: $resetBoost && resetBoostLoading();
+const handleBoost = () => {
+	boostLoading = true;
+	$boost = {
+		id: data.placeData.id,
+		name: data.placeData.name || "",
+		boost: boosted || "",
+	};
+};
 
 let eventCount = 50;
 $: eventsPaginated = merchantEvents.slice(0, eventCount);
 
-let mapElement: HTMLDivElement;
-let map: MapLibreMap | undefined;
-let mapLoaded = false;
-let webglUnsupported = false;
-
 onMount(async () => {
 	if (browser) {
-		initialRenderComplete = true;
-
-		// Update localforage with fresh place data to sync comment counts, boosts, etc.
-		// This ensures the map shows current data when navigating back
+		// Refresh localforage so the main map / saved lists reflect current data.
 		try {
 			const { updatePlaceInCache } = await import("$lib/sync/places");
 			await updatePlaceInCache(data.placeData);
 		} catch (error) {
-			// Silent failure - page still works with server data even if cache update fails
 			console.error("Could not update place in localforage:", error);
 		}
 	}
-});
-
-// Update marker source when boost / comment / icon state changes.
-$: if (map && styleLoaded && (icon || boosted || comments)) {
-	syncMerchantSource(map);
-}
-
-onDestroy(() => {
-	clearTimeout(shareTimeout);
-	destroyed = true;
-	map?.remove();
-	map = undefined;
 });
 
 const ogImage = `https://api.btcmap.org/og/element/${data.id}`;
@@ -456,105 +135,28 @@ const ogImage = `https://api.btcmap.org/og/element/${data.id}`;
 		<p class="mt-1 text-sm">{$_('merchant.deletedDetail')}</p>
 	</div>
 {/if}
-<div class="my-10 space-y-16 text-center md:my-20">
-	<section id="profile" class="space-y-8">
-		<div class="space-y-2">
-			{#if icon}
-				<div
-					class="mx-auto flex h-32 w-32 items-center justify-center rounded-full {data.placeData
-						.deleted_at
-						? 'bg-gray-400 dark:bg-gray-600'
-						: boosted
-							? 'bg-bitcoin hover:animate-wiggle'
-							: 'bg-link'}"
-				>
-					<Icon
-						w="60"
-						h="60"
-						class="text-white"
-						icon={data.placeData.deleted_at
-							? 'skull'
-							: icon !== 'question_mark'
-								? icon
-								: 'currency_bitcoin'}
-						type="material"
-					/>
-				</div>
-			{:else}
-				<div class="mx-auto h-32 w-32 animate-pulse rounded-full bg-link/50" />
-			{/if}
 
-			<h1 class="text-4xl !leading-tight font-semibold text-primary dark:text-white">
-				{localizedName || name || 'BTC Map Merchant'}
-				{#if data.placeData.deleted_at}
-					<span class="text-2xl text-red-600 dark:text-red-400">(Deleted)</span>
-				{/if}
-			</h1>
-			{#if !data.placeData.deleted_at}
-				<SaveButton id={Number(data.id)} type="place" />
-			{/if}
+<div class="mx-auto my-10 max-w-5xl px-4 text-left md:my-16">
+	<div
+		class="space-y-4 lg:grid lg:grid-cols-[minmax(0,360px)_minmax(0,1fr)] lg:items-start lg:gap-8 lg:space-y-0"
+	>
+		<!-- identity + primary actions -->
+		<div class="space-y-4">
+			<MerchantHero
+				id={data.id}
+				name={displayName}
+				{address}
+				icon={heroIcon}
+				{lat}
+				{long}
+				boosted={!!boosted}
+				deleted={!!deletedAt}
+			/>
 
-			{#if address}
-				<h2 class="text-xl text-primary dark:text-white">
-					{address}
-				</h2>
-			{/if}
-
-			{#if lat && long}
-				<a
-					href={`/map#18/${lat}/${long}&merchant=${data.id}`}
-					class="inline-flex items-center justify-center text-xs text-link transition-colors hover:text-hover"
-				>
-					{$_('info.viewOnMainMap')}
-					<svg
-						class="ml-1 w-3"
-						width="16"
-						height="16"
-						viewBox="0 0 16 16"
-						fill="none"
-						xmlns="http://www.w3.org/2000/svg"
-					>
-						<path
-							d="M3 13L13 3M13 3H5.5M13 3V10.5"
-							stroke="currentColor"
-							stroke-width="1.5"
-							stroke-linecap="round"
-							stroke-linejoin="round"
-						/>
-					</svg>
-				</a>
-			{:else}
-				<div class="mx-auto h-4 w-28 animate-pulse rounded bg-link/50" />
-			{/if}
-		</div>
-
-		<div class="grid-cols-3 gap-12 space-y-12 lg:grid lg:space-y-0">
-			{#if phone}
-				<div class="text-primary dark:text-white">
-					<h4 class="text-primary uppercase dark:text-white">
-						<Icon
-							w="16"
-							h="16"
-							class="inline-block text-primary dark:text-white"
-							icon="phone"
-							type="material"
-						/>
-						{$_('info.contact')}
-					</h4>
-
-					<div class="flex items-center justify-center">
-						{phone}
-					</div>
-				</div>
-			{:else}
-				<div></div>
-				<!-- Placeholder for alignment -->
-			{/if}
-
-			{#if (paymentMethod || companionAppUrl) && data}
-				<div class="text-primary dark:text-white">
-					<div class="flex flex-wrap items-center justify-center gap-2">
-						{#if paymentMethod}
+			{#if hasPaymentPill || companionAppUrl}
+				<div class="rounded-2xl border border-gray-300 p-4 dark:border-white/20 dark:bg-white/5">
+					<div class="flex flex-wrap items-center gap-2">
+						{#if hasPaymentPill}
 							<PaymentMethodPills
 								onchain={data.osmTags?.['payment:onchain']}
 								lightning={data.osmTags?.['payment:lightning']}
@@ -569,430 +171,87 @@ const ogImage = `https://api.btcmap.org/og/element/${data.id}`;
 			{/if}
 
 			{#if hours}
-				<div class="text-primary dark:text-white">
-					<h4 class="text-primary uppercase dark:text-white">
-						<Icon
-							w="16"
-							h="16"
-							class="inline text-primary dark:text-white"
-							icon="schedule"
-							type="material"
-						/>
-						{$_('info.hours')}
-					</h4>
+				<div><OpenStatusPill {hours} {lat} {long} /></div>
+			{/if}
 
-					<div class="flex items-start justify-center">
-						<time class="flex flex-col items-start">{@html formatOpeningHours(hours)}</time>
+			<MerchantActionChips
+				merchantId={data.id}
+				{lat}
+				{long}
+				{phone}
+				osmEditUrl={data.osmEditUrl}
+			/>
+
+			{#if description}
+				<p class="text-primary dark:text-white">{description}</p>
+			{/if}
+
+			<!-- Last surveyed / verify -->
+			<MerchantVerifyRow id={data.id} verifiedAt={verifiedAt} />
+
+			<!-- Boost -->
+			<BoostCard
+				boosted={!!boosted}
+				boostedUntil={boosted}
+				loading={boostLoading}
+				onClick={handleBoost}
+			/>
+		</div>
+
+		<!-- content: static details (pinned) + comments / activity feed -->
+		<div class="space-y-6">
+			<!-- Semi-static reference info pinned above the feed so it never
+			     scrolls away behind dynamic comments/activity. -->
+			<section>
+				<h3 class="mb-4 text-lg font-semibold text-primary dark:text-white">
+					{$_('merchant.details')}
+				</h3>
+				<MerchantDetailsPanel {data} />
+			</section>
+
+			<MerchantTabs commentsCount={comments.length} activityCount={merchantEvents.length}>
+				<svelte:fragment slot="comments">
+					<div class="mb-4 flex justify-center lg:justify-start">
+						<CommentAddButton elementId={data.id} />
 					</div>
-				</div>
-			{/if}
-		</div>
-
-		<div class="flex flex-wrap items-center justify-center gap-4">
-			{#if dataInitialized}
-				<MerchantAction link={`geo:${lat},${long}`} icon="compass" text={$_('merchant.navigate')} />
-
-				<MerchantAction
-					link={`${data.osmEditUrl}`}
-					icon="pencil"
-					text={$_('merchant.edit')}
-				/>
-
-				<MerchantAction
-					on:click={() => {
-						shareMerchant(data.id);
-						clearTimeout(shareTimeout);
-						shareConfirm = true;
-						shareTimeout = setTimeout(() => (shareConfirm = false), 2000);
-					}}
-					icon={shareConfirm ? 'check_circle' : 'share'}
-					text={$_('merchant.share')}
-				/>
-
-				{#if payment}
-					<MerchantAction
-						link={payment.type === 'uri'
-							? payment.url || '#'
-							: payment.type === 'pouch'
-								? `https://app.pouch.ph/${payment.username}`
-								: payment.type === 'coinos'
-									? `https://coinos.io/${payment.username}`
-									: '#'}
-						icon="bolt"
-						text={$_('merchant.pay')}
-					/>
-				{/if}
-
-				{#if phone}
-					<MerchantAction link={`tel:${phone}`} icon="phone" text={$_('merchant.call')} />
-				{/if}
-
-				{#if email}
-					<MerchantAction link={`mailto:${email}`} icon="email" text={$_('merchant.email')} />
-				{/if}
-
-				{#if website}
-					<MerchantAction
-						link={website.startsWith('http') ? website : `https://${website}`}
-						icon="globe"
-						text={$_('merchant.website')}
-					/>
-				{/if}
-
-				{#if twitter}
-					<MerchantAction
-						link={twitter.startsWith('http') ? twitter : `https://twitter.com/${twitter}`}
-						icon="x"
-						text={$_('merchant.socialX')}
-					/>
-				{/if}
-
-				{#if instagram}
-					<MerchantAction
-						link={instagram.startsWith('http') ? instagram : `https://instagram.com/${instagram}`}
-						icon="instagram"
-						text={$_('merchant.socialInstagram')}
-					/>
-				{/if}
-
-				{#if facebook}
-					<MerchantAction
-						link={facebook.startsWith('http') ? facebook : `https://facebook.com/${facebook}`}
-						icon="facebook"
-						text={$_('merchant.socialFacebook')}
-					/>
-				{/if}
-
-				<span id="show-tags">
-					<MerchantAction
-						on:click={() => ($showTags = data.osmTags)}
-						icon="tags"
-						text={$_('merchant.showTags')}
-					/>
-				</span>
-
-				{#if data.issues.length}
-					<span id="tagging-issues">
-						<MerchantAction
-							on:click={() => ($taggingIssues = data.issues)}
-							icon="issues"
-							text={$_('merchant.tagIssues')}
-						/>
-					</span>
-				{/if}
-
-				<MerchantAction
-					link={`${data.osmViewUrl}`}
-					icon="external"
-					text={$_('merchant.viewOSM')}
-				/>
-			{:else}
-				{#each Array(5) as _, i (i)}
-					<div class="h-20 w-24 animate-pulse rounded-lg bg-link/50" />
-				{/each}
-			{/if}
-		</div>
-
-		{#if description}
-			<p class="mx-auto max-w-[600px] text-primary dark:text-white">{description}</p>
-		{/if}
-
-		<!-- Three cards: Last Surveyed, Boost, Comments (use server data, don't wait for store sync) -->
-		<div class="grid-cols-3 gap-12 space-y-12 lg:grid lg:space-y-0">
-			<Card headerAlign="center">
-				<h3 slot="header" class="text-2xl font-semibold">{$_('verification.lastSurveyed')}</h3>
-
-				<div slot="body" class="p-4">
-					{#if verifiedAt}
-						<div class="flex items-center justify-center dark:text-white">
-							{#if isRecentlyVerified(verifiedAt)}
-								<span bind:this={verifiedTooltip}>
-									<Icon
-										w="30"
-										h="30"
-										class="mr-2 text-primary dark:text-white"
-										icon="verified"
-										type="material"
-									/>
-								</span>
-							{:else}
-								<span bind:this={outdatedTooltip}>
-									<Icon
-										w="30"
-										h="30"
-										class="mr-2 text-primary dark:text-white"
-										icon="error_outline"
-										type="material"
-									/>
-								</span>
-							{/if}
-							<strong>{formatVerifiedHuman(verifiedAt)}</strong>
+					{#if comments && comments.length}
+						<div class="divide-y divide-gray-200 dark:divide-white/10">
+							{#each [...comments].reverse() as comment (comment.id)}
+								<MerchantComment text={comment.text} time={comment['created_at']} compact />
+							{/each}
 						</div>
 					{:else}
-						<p class="font-semibold dark:text-white">{$_('verification.notSurveyed')}</p>
+						<p class="text-body dark:text-white">{$_('comments.none')}</p>
 					{/if}
-				</div>
+				</svelte:fragment>
 
-				<PrimaryButton
-					slot="footer"
-					link={`/verify-location?id=${data.id}`}
-					style="rounded-xl p-3 w-40"
-				>
-					{$_('verification.verifyLocation')}
-				</PrimaryButton>
-			</Card>
-
-			<div
-				class="flex w-full flex-col rounded-3xl border border-amber-200 bg-amber-50/50 dark:border-amber-700/30 dark:bg-amber-900/10"
-			>
-				<div
-					class="flex items-center justify-center gap-2 border-b border-amber-200 p-5 dark:border-amber-700/30"
-				>
-					<Icon
-						w="20"
-						h="20"
-						class="text-amber-800 dark:text-amber-300"
-						icon={boosted ? 'auto_awesome' : 'rocket_launch'}
-						type="material"
-					/>
-					<h3 class="text-2xl font-semibold text-amber-800 dark:text-amber-300">
-						{$_('boost.title')}
-					</h3>
-				</div>
-
-				<div class="flex flex-1 flex-col justify-between gap-4">
-					<div class="flex flex-col items-center gap-4 p-4">
-						<p class="font-semibold text-amber-800 dark:text-amber-300">
-							{boosted ? $_('boost.isBoosted') : $_('boost.getVisibility')}
-						</p>
-						{#if !boosted}
-							<p class="text-sm text-amber-700 dark:text-amber-400/80">
-								{$_('boost.boostPromo')}
-							</p>
-						{/if}
-
-						{#if boosted}
-							<p class="text-amber-700 dark:text-amber-400/80">
-								{$_('boost.expires')}:
-								<span class="font-semibold">
-									<Time live={3000} relative={true} timestamp={boosted} />
-								</span>
-							</p>
-						{/if}
-					</div>
-
-					<div class="flex justify-center pb-4">
-						<BoostButton merchant={data.placeData} {boosted} />
-					</div>
-				</div>
-			</div>
-
-			<Card headerAlign="center">
-				<h3 slot="header" class="text-2xl font-semibold">
-					{$_('merchant.comments')}
-					{#if comments.length}({comments.length}){/if}
-				</h3>
-
-				<div slot="body" class="p-4">
-					<p class="mx-auto font-semibold dark:text-white">
-						{#if comments.length}
-							{$_('comments.shareThoughts')}
-						{:else}
-							{$_('comments.beFirst')}
-						{/if}
-					</p>
-				</div>
-
-				<div slot="footer">
-					{#if comments.length}
-						<PrimaryButton link="#comments" style="w-40 rounded-xl p-3">
-							{$_('comments.view')}
-						</PrimaryButton>
-					{:else}
-						<CommentAddButton elementId={data.id} />
-					{/if}
-				</div>
-			</Card>
-		</div>
-	</section>
-
-	<section id="map-section">
-		<Card>
-			<h3 slot="header" class="text-lg font-semibold">
-				{$_('merchant.location', { values: { name: localizedName || name || $_('merchant.unknown') } })}
-			</h3>
-
-			<div slot="body" class="w-full">
-				<div class="relative overflow-hidden">
-					<div
-						bind:this={mapElement}
-						class="z-10 h-[300px] rounded-b-3xl !bg-teal text-left md:h-[600px] dark:!bg-[#202f33]"
-					/>
-					{#if webglUnsupported}
-						<MapUnsupportedFallback />
-					{:else if !mapLoaded}
-						<MapLoadingEmbed style="h-[300px] md:h-[600px]  rounded-b-3xl" />
-					{/if}
-				</div>
-			</div>
-		</Card>
-	</section>
-
-	<section id="comments">
-		<Card>
-			<div slot="header" class="flex items-center justify-between">
-				<h3 class="text-lg font-semibold">
-					{$_('merchant.comments')}
-				</h3>
-				<CommentAddButton elementId={data.id} />
-			</div>
-
-			<div slot="body" class="w-full">
-				<div
-					bind:this={commentsDiv}
-					class="hide-scroll relative max-h-[300px] space-y-2 overflow-y-scroll"
-					on:scroll={() => {
-						if (dataInitialized && !hideCommentsArrow) {
-							hideCommentsArrow = true;
-						}
-					}}
-				>
-					{#if comments && comments.length}
-						{#each [...comments].reverse() as comment (comment.id)}
-							<MerchantComment text={comment.text} time={comment['created_at']} />
-						{/each}
-
-						{#if comments.length > SCROLL_INDICATOR_MIN_ITEMS}
-							<TopButton scroll={commentsDiv} style="!mb-5" />
-						{/if}
-
-						{#if !hideCommentsArrow && comments.length > SCROLL_INDICATOR_MIN_ITEMS}
-							<Icon
-								type="fa"
-								icon="chevron-down"
-								w="16"
-								h="16"
-								class="absolute bottom-4 left-[calc(50%-8px)] z-20 animate-bounce text-primary dark:text-white"
-							/>
-						{/if}
-					{:else}
-						<p class="p-5 text-body dark:text-white">{$_('comments.none')}</p>
-					{/if}
-				</div>
-			</div>
-		</Card>
-	</section>
-
-	<section id="activity">
-		<Card>
-			<h3 slot="header" class="text-lg font-semibold">
-				{$_('merchant.activity', { values: { name: localizedName || name || $_('merchant.unknown') } })}
-			</h3>
-
-			<div slot="body" class="w-full">
-				<div
-					bind:this={activityDiv}
-					class="hide-scroll relative max-h-[300px] space-y-2 overflow-y-scroll"
-					on:scroll={() => {
-						if (dataInitialized && !hideArrow) {
-							hideArrow = true;
-						}
-					}}
-				>
+				<svelte:fragment slot="activity">
 					{#if merchantEvents && merchantEvents.length}
-						{#each eventsPaginated as event (event['created_at'])}
-							<MerchantEvent
-								action={event.type}
-								user_id={event.user_id}
-								user_name={event.user_name}
-								user_tip={event.user_tip}
-								time={event['created_at']}
-								latest={event === merchantEvents[0] ? true : false}
-							/>
-						{/each}
+						<div class="divide-y divide-gray-200 dark:divide-white/10">
+							{#each eventsPaginated as event (event.id)}
+								<MerchantEvent
+									action={event.type}
+									user_id={event.user_id}
+									user_name={event.user_name}
+									user_tip={event.user_tip}
+									time={event['created_at']}
+								/>
+							{/each}
+						</div>
 
 						{#if eventsPaginated.length !== merchantEvents.length}
 							<button
-								class="mx-auto !mb-5 block text-xl font-semibold text-link transition-colors hover:text-hover"
+								class="mx-auto mt-4 block text-xl font-semibold text-link transition-colors hover:text-hover"
 								on:click={() => (eventCount = eventCount + 50)}>{$_('info.loadMore')}</button
 							>
-						{:else if merchantEvents.length > TOP_BUTTON_MIN_ITEMS}
-							<TopButton scroll={activityDiv} style="!mb-5" />
 						{/if}
-
-						{#if !hideArrow && merchantEvents.length > SCROLL_INDICATOR_MIN_ITEMS}
-							<Icon
-								type="fa"
-								icon="chevron-down"
-								w="16"
-								h="16"
-								class="absolute bottom-4 left-[calc(50%-8px)] z-20 animate-bounce text-primary dark:text-white"
-							/>
-						{/if}
-					{:else if !dataInitialized}
-						{#each Array(5) as _, i (i)}
-							<TaggerSkeleton />
-						{/each}
 					{:else}
-						<p class="p-5 text-body dark:text-white">{$_('info.noActivity')}</p>
+						<p class="text-body dark:text-white">{$_('info.noActivity')}</p>
 					{/if}
-				</div>
-			</div>
-		</Card>
-	</section>
-
-	<section id="communities">
-		<Card>
-			<h3 slot="header" class="text-lg font-semibold">
-				{$_('merchant.communities', { values: { name: localizedName || name || $_('merchant.unknown') } })}
-			</h3>
-
-			<div slot="body" class="w-full">
-				<div
-					class="hide-scroll flex max-h-[300px] flex-wrap items-center justify-center overflow-scroll"
-				>
-					{#if filteredCommunities && filteredCommunities.length}
-						{#each filteredCommunities as community (community.id)}
-							<div class="m-4 space-y-1 transition-transform hover:scale-110">
-								<a href={resolve(`/community/${encodeURIComponent(community.id)}`)}>
-									<img
-										src={areaIconSrc(community.tags['icon:square'])}
-										alt={$_('aria.logoAlt')}
-										class="mx-auto h-20 w-20 rounded-full object-cover"
-										on:error={function () {
-											this.src = '/images/bitcoin.svg';
-										}}
-									/>
-									<p class="text-center font-semibold text-body dark:text-white">
-										{community.tags.name}
-									</p>
-								</a>
-							</div>
-						{/each}
-					{:else if !dataInitialized}
-						<p class="p-5 text-body dark:text-white">{$_('info.loadingCommunities')}</p>
-					{:else}
-						<p class="p-5 text-body dark:text-white">
-							{@html $_('info.noCommunity', {
-								values: {
-									createLink: `<a href="${resolve('/communities')}" class="text-link transition-colors hover:text-hover">${$_('info.created')}</a>`
-								}
-							})}
-						</p>
-					{/if}
-				</div>
-			</div>
-		</Card>
-	</section>
-
-	<p class="text-center text-sm text-body md:text-left dark:text-white">
-		*More information on bitcoin mapping tags can be found <a
-			href="https://wiki.btcmap.org/Tagging-Merchants#tagging-guidance"
-			target="_blank"
-			rel="noreferrer"
-			class="text-link transition-colors hover:text-hover">here</a
-		>.
-	</p>
+				</svelte:fragment>
+			</MerchantTabs>
+		</div>
+	</div>
 </div>
 
 {#if browser}
