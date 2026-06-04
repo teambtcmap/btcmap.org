@@ -59,7 +59,7 @@ const chip =
 			<a
 				href="https://wiki.btcmap.org/Tagging-Merchants#tagging-guidance"
 				target="_blank"
-				rel="noreferrer"
+				rel="noopener noreferrer"
 				class="text-link transition-colors hover:text-hover">{$_('merchant.tagsNoteHere')}</a
 			>.
 		</p>
