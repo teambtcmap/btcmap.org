@@ -73,7 +73,7 @@ const onKeydown = (event: KeyboardEvent, index: number) => {
 				{t.label}
 				{#if t.count}
 					<span
-						class="rounded-full px-1.5 py-0.5 text-[10px] font-bold {tab === t.key
+						class="inline-flex h-[18px] min-w-[18px] items-center justify-center rounded-full px-1 text-[10px] leading-none font-bold {tab === t.key
 							? 'bg-link text-white'
 							: 'bg-gray-200 text-body dark:bg-white/10 dark:text-white/60'}"
 					>
