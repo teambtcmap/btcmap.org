@@ -56,15 +56,27 @@ const init = async () => {
 		styleLoaded = true;
 		collapseAttribution();
 	});
+	// MapLibre re-opens the attribution <details> whenever it rebuilds the
+	// credit text: _updateAttributions() (fired on every sourcedata/styledata
+	// as tiles stream in) and resize both call _updateCompact(), which sets
+	// the `open` attr again. Re-collapse after each — our handlers are
+	// registered after MapLibre's internal ones, so they win — with `idle`
+	// as a final guarantee once loading settles.
+	map.on("sourcedata", collapseAttribution);
+	map.on("styledata", collapseAttribution);
+	map.on("resize", collapseAttribution);
+	map.on("idle", collapseAttribution);
 };
 
-// MapLibre's compact attribution still renders expanded on first paint.
-// Collapse it so the hero defaults to just the "ⓘ" toggle, which keeps
-// the map preview clean while leaving attribution one tap away.
+// MapLibre 5 renders attribution as a <details> and opens it by default
+// (sets the `open` attribute + `maplibregl-compact-show`); it only
+// minimizes on `drag`, which a non-interactive hero never fires. Force it
+// closed so the hero shows just the "ⓘ" toggle, attribution one tap away.
 const collapseAttribution = () => {
-	mapElement
-		?.querySelector(".maplibregl-ctrl-attrib.maplibregl-compact-show")
-		?.classList.remove("maplibregl-compact-show");
+	const el = mapElement?.querySelector(".maplibregl-ctrl-attrib");
+	if (!el) return;
+	el.classList.remove("maplibregl-compact-show");
+	el.removeAttribute("open");
 };
 
 onMount(() => {
