@@ -144,7 +144,7 @@ export let data;
 	{#if !['/', '/map', '/communities/map', '/communities', '/countries'].includes(data.pathname)}
 		<div class="bg-teal dark:bg-dark">
 			<Header />
-			<main class="mx-auto w-10/12 xl:w-[1200px]">
+			<main class="mx-auto w-full px-4 xl:w-[1200px] xl:px-0">
 				<LoadingIndicator visible={layoutSyncVisible} status={layoutLoadingStatus} progress={$placesLoadingProgress} />
 				<slot />
 				<Footer />
