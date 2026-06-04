@@ -136,7 +136,7 @@ const ogImage = `https://api.btcmap.org/og/element/${data.id}`;
 	</div>
 {/if}
 
-<div class="mx-auto my-10 max-w-5xl px-4 text-left md:my-16">
+<div class="mx-auto my-10 max-w-5xl text-left md:my-16">
 	<div
 		class="space-y-4 lg:grid lg:grid-cols-[minmax(0,360px)_minmax(0,1fr)] lg:items-start lg:gap-8 lg:space-y-0"
 	>

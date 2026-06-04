@@ -11,7 +11,7 @@ import { _ } from "$lib/i18n";
 	<meta name="twitter:image" content="https://btcmap.org/images/og/home.png" />
 </svelte:head>
 
-<div class="mt-10 mb-20 space-y-5 text-body dark:text-white">
+<div class="mx-auto mt-10 mb-20 max-w-4xl space-y-5 text-body dark:text-white">
 	<p class="text-center font-semibold text-primary dark:text-white">
 		BTC Map - Easily find places to spend sats anywhere on the planet.
 		<br />
