@@ -360,6 +360,26 @@ export const formatOpeningHours = (str: string): string => {
 		.join("");
 };
 
+// Tip values from the v4 activity API arrive with the `lightning:` URI scheme
+// already attached (e.g. "lightning:alice@getalby.com"). Tip.svelte prepends
+// its own `lightning:`, so strip the incoming scheme first to avoid a doubled
+// `lightning:lightning:` href that no wallet can resolve. Also consume any
+// whitespace after the scheme so the normalized address is never space-padded.
+export const stripLightningScheme = (value: string): string =>
+	value.trim().replace(/^lightning:\s*/i, "");
+
+// A lightning address is `localpart@domain.tld`. Guard against malformed
+// values that leak from missing upstream data — most notably
+// "undefined@zbd.gg", where a missing username serialised to the literal
+// string "undefined" — so a dead Tip button is never rendered.
+export const isValidLightningTip = (value: string | undefined): boolean => {
+	if (!value) return false;
+	const address = stripLightningScheme(value);
+	if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(address)) return false;
+	const localPart = address.split("@")[0].toLowerCase();
+	return localPart !== "undefined" && localPart !== "null";
+};
+
 // Escapes HTML special characters to prevent XSS in text content
 // Use this for plain text inserted into innerHTML contexts (e.g., Leaflet tooltips)
 export function escapeHtml(text: string): string {
