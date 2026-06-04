@@ -706,6 +706,12 @@ describe("stripLightningScheme", () => {
 			"alice@getalby.com",
 		);
 	});
+
+	it("strips whitespace following the scheme", () => {
+		expect(stripLightningScheme("lightning: alice@getalby.com")).toBe(
+			"alice@getalby.com",
+		);
+	});
 });
 
 describe("isValidLightningTip", () => {
@@ -715,6 +721,10 @@ describe("isValidLightningTip", () => {
 
 	it("accepts an address that still carries the lightning: scheme", () => {
 		expect(isValidLightningTip("lightning:alice@getalby.com")).toBe(true);
+	});
+
+	it("accepts an address with whitespace after the scheme", () => {
+		expect(isValidLightningTip("lightning: alice@getalby.com")).toBe(true);
 	});
 
 	it("rejects undefined/empty input", () => {

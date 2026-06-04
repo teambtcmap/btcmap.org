@@ -363,9 +363,10 @@ export const formatOpeningHours = (str: string): string => {
 // Tip values from the v4 activity API arrive with the `lightning:` URI scheme
 // already attached (e.g. "lightning:alice@getalby.com"). Tip.svelte prepends
 // its own `lightning:`, so strip the incoming scheme first to avoid a doubled
-// `lightning:lightning:` href that no wallet can resolve.
+// `lightning:lightning:` href that no wallet can resolve. Also consume any
+// whitespace after the scheme so the normalized address is never space-padded.
 export const stripLightningScheme = (value: string): string =>
-	value.trim().replace(/^lightning:/i, "");
+	value.trim().replace(/^lightning:\s*/i, "");
 
 // A lightning address is `localpart@domain.tld`. Guard against malformed
 // values that leak from missing upstream data — most notably
