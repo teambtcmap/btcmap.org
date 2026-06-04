@@ -11,6 +11,7 @@ import {
 	isValidLatitude,
 	isValidLongitude,
 	sanitizeUrl,
+	stripLightningScheme,
 } from "./utils";
 
 describe("sanitizeUrl", () => {
@@ -679,5 +680,29 @@ describe("areaIconSrc", () => {
 		expect(areaIconSrc(null)).toBe("/images/bitcoin.svg");
 		expect(areaIconSrc(undefined)).toBe("/images/bitcoin.svg");
 		expect(areaIconSrc("")).toBe("/images/bitcoin.svg");
+	});
+});
+
+describe("stripLightningScheme", () => {
+	it("removes a leading lightning: scheme", () => {
+		expect(stripLightningScheme("lightning:alice@getalby.com")).toBe(
+			"alice@getalby.com",
+		);
+	});
+
+	it("leaves a bare address untouched", () => {
+		expect(stripLightningScheme("alice@getalby.com")).toBe("alice@getalby.com");
+	});
+
+	it("strips the scheme case-insensitively", () => {
+		expect(stripLightningScheme("LIGHTNING:alice@getalby.com")).toBe(
+			"alice@getalby.com",
+		);
+	});
+
+	it("trims surrounding whitespace", () => {
+		expect(stripLightningScheme("  lightning:alice@getalby.com  ")).toBe(
+			"alice@getalby.com",
+		);
 	});
 });

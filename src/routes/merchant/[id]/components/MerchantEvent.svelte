@@ -3,6 +3,7 @@ import Time from "svelte-time";
 
 import Tip from "$components/Tip.svelte";
 import type { EventType, User } from "$lib/types";
+import { stripLightningScheme } from "$lib/utils";
 
 import { resolve } from "$app/paths";
 
@@ -11,6 +12,10 @@ export let user_id: number | undefined;
 export let user_name: string | undefined;
 export let user_tip: string | undefined;
 export let time: string;
+
+// The API ships user_tip with its own `lightning:` scheme; strip it so
+// Tip.svelte (which re-adds the scheme) can't emit `lightning:lightning:`.
+$: tipDestination = user_tip ? stripLightningScheme(user_tip) : undefined;
 </script>
 
 <div class="py-3 text-left text-base">
@@ -33,7 +38,7 @@ export let time: string;
 
 			<!-- time ago -->
 			<span
-				class="block font-semibold text-taggerTime lg:inline dark:text-white/70 {user_tip
+				class="block font-semibold text-taggerTime lg:inline dark:text-white/70 {tipDestination
 					? 'lg:mr-5'
 					: ''}"
 			>
@@ -42,8 +47,8 @@ export let time: string;
 		</div>
 
 		<!-- lightning tip button -->
-		{#if user_tip}
-			<Tip destination={user_tip} class="block lg:inline" />
+		{#if tipDestination}
+			<Tip destination={tipDestination} class="block lg:inline" />
 		{/if}
 	</div>
 </div>

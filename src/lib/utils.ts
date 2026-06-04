@@ -360,6 +360,13 @@ export const formatOpeningHours = (str: string): string => {
 		.join("");
 };
 
+// Tip values from the v4 activity API arrive with the `lightning:` URI scheme
+// already attached (e.g. "lightning:alice@getalby.com"). Tip.svelte prepends
+// its own `lightning:`, so strip the incoming scheme first to avoid a doubled
+// `lightning:lightning:` href that no wallet can resolve.
+export const stripLightningScheme = (value: string): string =>
+	value.trim().replace(/^lightning:/i, "");
+
 // Escapes HTML special characters to prevent XSS in text content
 // Use this for plain text inserted into innerHTML contexts (e.g., Leaflet tooltips)
 export function escapeHtml(text: string): string {
