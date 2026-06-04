@@ -40,7 +40,7 @@
 		"@turf/convex": "^7.3.5",
 		"@turf/helpers": "^7.3.5",
 		"@zerodevx/svelte-toast": "^0.9.6",
-		"axios": "^1.15.0",
+		"axios": "^1.17.0",
 		"axios-retry": "^4.5.0",
 		"chart.js": "^4.5.1",
 		"d3-geo": "^3.1.1",
