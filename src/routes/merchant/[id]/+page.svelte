@@ -198,8 +198,17 @@ const ogImage = `https://api.btcmap.org/og/element/${data.id}`;
 			/>
 		</div>
 
-		<!-- content: comments / activity / details -->
-		<div>
+		<!-- content: static details (pinned) + comments / activity feed -->
+		<div class="space-y-6">
+			<!-- Semi-static reference info pinned above the feed so it never
+			     scrolls away behind dynamic comments/activity. -->
+			<section>
+				<h3 class="mb-4 text-lg font-semibold text-primary dark:text-white">
+					{$_('merchant.details')}
+				</h3>
+				<MerchantDetailsPanel {data} />
+			</section>
+
 			<MerchantTabs commentsCount={comments.length} activityCount={merchantEvents.length}>
 				<svelte:fragment slot="comments">
 					<div class="mb-4 flex justify-center lg:justify-start">
@@ -239,10 +248,6 @@ const ogImage = `https://api.btcmap.org/og/element/${data.id}`;
 					{:else}
 						<p class="text-body dark:text-white">{$_('info.noActivity')}</p>
 					{/if}
-				</svelte:fragment>
-
-				<svelte:fragment slot="details">
-					<MerchantDetailsPanel {data} />
 				</svelte:fragment>
 			</MerchantTabs>
 		</div>

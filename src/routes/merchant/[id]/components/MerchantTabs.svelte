@@ -1,10 +1,11 @@
 <script lang="ts">
 import { _ } from "$lib/i18n";
 
-// Comments / Activity / Details. On mobile only the active panel is shown
-// behind a tab bar (fixes the cramped scroll-boxes). At lg+ the tab bar is
-// hidden and all three render as stacked, headed sections.
-type TabKey = "comments" | "activity" | "details";
+// Comments / Activity. On mobile only the active panel is shown behind a
+// tab bar (fixes the cramped scroll-boxes). At lg+ the tab bar is hidden
+// and both render as stacked, headed sections. Static details are pinned
+// above this component, not in a tab.
+type TabKey = "comments" | "activity";
 
 export let commentsCount = 0;
 export let activityCount = 0;
@@ -22,7 +23,6 @@ $: tabs = [
 		label: $_("merchant.activityShort"),
 		count: activityCount,
 	},
-	{ key: "details" as TabKey, label: $_("merchant.details"), count: 0 },
 ];
 
 const headingClass =
@@ -67,10 +67,5 @@ const headingClass =
 	<section class="pt-5 lg:block" class:hidden={tab !== 'activity'}>
 		<h3 class={headingClass}>{$_('merchant.activityShort')}</h3>
 		<slot name="activity" />
-	</section>
-
-	<section class="pt-5 lg:block" class:hidden={tab !== 'details'}>
-		<h3 class={headingClass}>{$_('merchant.details')}</h3>
-		<slot name="details" />
 	</section>
 </div>
