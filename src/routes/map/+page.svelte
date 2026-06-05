@@ -6,7 +6,6 @@ import convex from "@turf/convex";
 import { featureCollection, point } from "@turf/helpers";
 import type { Feature, FeatureCollection, Point, Polygon } from "geojson";
 import type {
-	ExpressionSpecification,
 	FilterSpecification,
 	GeoJSONSource,
 	LngLatBounds,
@@ -195,9 +194,6 @@ const panToPlace = (lat: number, lon: number) => {
 let maplibreNs: typeof import("maplibre-gl") | null = null;
 let pulseMarker: Marker | null = null;
 let pulsePinId: number | null = null; // merchant the pulse overlay is on
-let liftedPinId: number | null | undefined; // merchant the size-lift is applied to
-const PIN_LAYER_IDS = ["unclustered-point", "boosted-point"];
-const SELECTED_PIN_SCALE = 1.3;
 
 const buildPulseElement = (): HTMLDivElement => {
 	const el = document.createElement("div");
@@ -208,23 +204,6 @@ const buildPulseElement = (): HTMLDivElement => {
 		'<span class="bm-pulse-ring bm-pulse-ring--delay"></span>' +
 		'<span class="bm-pulse-dot"></span>';
 	return el;
-};
-
-// Lift the selected pin above its neighbours via icon-size. Applied once per
-// selection change (icon-size is a layout property) to avoid relayout churn.
-const setSelectedPinLift = (selectedId: number | null) => {
-	if (!map) return;
-	const sizeExpr: ExpressionSpecification = [
-		"case",
-		["==", ["get", "id"], selectedId ?? -1],
-		SELECTED_PIN_SCALE,
-		1,
-	];
-	for (const layerId of PIN_LAYER_IDS) {
-		if (map.getLayer(layerId)) {
-			map.setLayoutProperty(layerId, "icon-size", sizeExpr);
-		}
-	}
 };
 
 // Hide the pulse when the selected merchant has been rolled into a cluster at
@@ -806,13 +785,6 @@ $: if (map && styleLoaded && $places) {
 $: if (map && styleLoaded && $lastUpdatedPlaceId) {
 	syncPlacesToSource($places);
 	lastUpdatedPlaceId.set(undefined);
-}
-
-// Lift the selected pin on selection change (guarded so the icon-size relayout
-// runs only when the selected merchant actually changes).
-$: if (map && styleLoaded && $merchantDrawer.merchantId !== liftedPinId) {
-	liftedPinId = $merchantDrawer.merchantId;
-	setSelectedPinLift(liftedPinId);
 }
 
 // Position the locator pulse. Depends on $places too so a deep-linked merchant
