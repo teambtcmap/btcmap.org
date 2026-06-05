@@ -142,7 +142,9 @@
 
 	/* Selected-merchant locator pulse — the DOM overlay marker dropped on the
 	   selected pin's geo point (design C). --bm-pulse-color is set per
-	   selection to match the pin (teal / bitcoin orange). */
+	   selection (in +page.svelte) to PIN_FILL_REGULAR / PIN_FILL_BOOSTED so it
+	   matches the pin; the #0e95af fallback below just mirrors PIN_FILL_REGULAR
+	   as a last resort and is never used in practice. */
 	.bm-selected-pulse {
 		position: relative;
 		width: 0;

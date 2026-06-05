@@ -52,6 +52,8 @@ import {
 	ensureSpritesForPlaces,
 	installPlaceholderHandler,
 	loadSvgImage,
+	PIN_FILL_BOOSTED,
+	PIN_FILL_REGULAR,
 } from "$lib/map/maplibreSprites";
 import { parseLatLongQuery } from "$lib/map/queryViewport";
 import {
@@ -257,20 +259,29 @@ const syncSelectionPulse = (selectedId: number | null) => {
 		pulsePinId = null;
 		return;
 	}
-	if (pulsePinId === selectedId && pulseMarker) return; // already placed
 	const place = get(placesById).get(selectedId);
 	if (!place) return; // not loaded yet
+	const isNewSelection = pulsePinId !== selectedId;
 	if (!pulseMarker) {
 		pulseMarker = new maplibreNs.Marker({
 			element: buildPulseElement(),
 			anchor: "center",
 		});
 	}
-	const color = isBoosted(place) ? "#F7931A" : "#0E95AF";
+	// Keep colour + position in sync with the place even when the selection is
+	// unchanged: boosting from the drawer recolours the pin (teal → orange) and
+	// fires the $places reactive, and the pulse must follow. setProperty,
+	// setLngLat and addTo are idempotent on an already-added marker, so this
+	// stays cheap on every $places tick. Colours come from the same source of
+	// truth as the GL pin sprite so the two can't desync.
+	const color = isBoosted(place) ? PIN_FILL_BOOSTED : PIN_FILL_REGULAR;
 	pulseMarker.getElement().style.setProperty("--bm-pulse-color", color);
 	pulseMarker.setLngLat([place.lon, place.lat]).addTo(map);
 	pulsePinId = selectedId;
-	updatePulseVisibility();
+	// Reconcile cluster-based visibility only on a real selection change;
+	// moveend/idle handle it thereafter (avoids a querySourceFeatures per
+	// $places tick).
+	if (isNewSelection) updatePulseVisibility();
 };
 
 // Reactive zoom level for the panel — drives the "zoom in" prompt and the
@@ -1623,7 +1634,6 @@ onMount(async () => {
 			currentLat = c.lat;
 			currentLon = c.lng;
 			debouncedUpdateMerchantList();
-			updatePulseVisibility();
 		});
 
 		// Tile-loading indicator — debounced to avoid flicker on quick pans.
