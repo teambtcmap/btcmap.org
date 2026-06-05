@@ -81,5 +81,8 @@ export function buildMerchantMapHref(
 	lng: number,
 	zoom = 18,
 ): string {
-	return `/map?merchant=${merchantId}#${zoom}/${lat}/${lng}`;
+	// Encode the id so a non-numeric/crafted id can never split into extra
+	// query params or break the URL. Place ids are numeric today (so this
+	// encodes to itself), making it purely defensive.
+	return `/map?merchant=${encodeURIComponent(String(merchantId))}#${zoom}/${lat}/${lng}`;
 }
