@@ -117,6 +117,10 @@ export let data;
 			name="twitter:description"
 			content="Find places to spend sats wherever you are."
 		/>
+		<meta
+			property="og:description"
+			content="Find places to spend sats wherever you are."
+		/>
 	{/if}
 	{#if ['/map', '/communities/map'].includes(data.pathname)}
 		<!-- Fullscreen map routes have no scrollbar; skip the reserved gutter so the map fills the viewport -->
