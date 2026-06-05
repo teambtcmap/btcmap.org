@@ -6,11 +6,13 @@ import convex from "@turf/convex";
 import { featureCollection, point } from "@turf/helpers";
 import type { Feature, FeatureCollection, Point, Polygon } from "geojson";
 import type {
+	ExpressionSpecification,
 	GeoJSONSource,
 	LngLatBounds,
 	MapGeoJSONFeature,
 	MapLayerMouseEvent,
 	Map as MapLibreMap,
+	Marker,
 } from "maplibre-gl";
 import { onDestroy, onMount } from "svelte";
 import { get } from "svelte/store";
@@ -173,6 +175,73 @@ let deepLinkPanTimer: ReturnType<typeof setTimeout> | null = null;
 const panToPlace = (lat: number, lon: number) => {
 	if (!map) return;
 	map.easeTo({ center: [lon, lat], zoom: DEFAULT_MAP_ZOOM, duration: 300 });
+};
+
+// Selected-merchant highlight (design "C — centered pulsing locator"): the GL
+// pin scales up, and a single DOM overlay marker — a pulsing ring + a center
+// dot in the pin's own hue — sits on the selected pin's geo point. The pulse
+// is pure CSS (composited, honors prefers-reduced-motion), so the GL pin layer
+// stays untouched and fast. `maplibre` is imported dynamically in onMount, so
+// we stash the namespace here to construct the Marker reactively.
+let maplibreNs: typeof import("maplibre-gl") | null = null;
+let pulseMarker: Marker | null = null;
+let pulsePinId: number | null = null; // merchant the pulse overlay is on
+let liftedPinId: number | null | undefined; // merchant the size-lift is applied to
+const PIN_LAYER_IDS = ["unclustered-point", "boosted-point"];
+const SELECTED_PIN_SCALE = 1.3;
+
+const buildPulseElement = (): HTMLDivElement => {
+	const el = document.createElement("div");
+	el.className = "bm-selected-pulse";
+	el.style.pointerEvents = "none";
+	el.innerHTML =
+		'<span class="bm-pulse-ring"></span>' +
+		'<span class="bm-pulse-ring bm-pulse-ring--delay"></span>' +
+		'<span class="bm-pulse-dot"></span>';
+	return el;
+};
+
+// Lift the selected pin above its neighbours via icon-size. Applied once per
+// selection change (icon-size is a layout property) to avoid relayout churn.
+const setSelectedPinLift = (selectedId: number | null) => {
+	if (!map) return;
+	const sizeExpr: ExpressionSpecification = [
+		"case",
+		["==", ["get", "id"], selectedId ?? -1],
+		SELECTED_PIN_SCALE,
+		1,
+	];
+	for (const layerId of PIN_LAYER_IDS) {
+		if (map.getLayer(layerId)) {
+			map.setLayoutProperty(layerId, "icon-size", sizeExpr);
+		}
+	}
+};
+
+// Show / move / hide the locator pulse for the selected merchant. Needs the
+// place's coordinates, so it no-ops until the place is in $placesById — a
+// deep-linked merchant gets its pulse once places sync in (the reactive below
+// re-runs on $places).
+const syncSelectionPulse = (selectedId: number | null) => {
+	if (!map || !maplibreNs) return;
+	if (selectedId === null) {
+		pulseMarker?.remove();
+		pulsePinId = null;
+		return;
+	}
+	if (pulsePinId === selectedId && pulseMarker) return; // already placed
+	const place = get(placesById).get(selectedId);
+	if (!place) return; // not loaded yet
+	if (!pulseMarker) {
+		pulseMarker = new maplibreNs.Marker({
+			element: buildPulseElement(),
+			anchor: "center",
+		});
+	}
+	const color = isBoosted(place) ? "#F7931A" : "#0E95AF";
+	pulseMarker.getElement().style.setProperty("--bm-pulse-color", color);
+	pulseMarker.setLngLat([place.lon, place.lat]).addTo(map);
+	pulsePinId = selectedId;
 };
 
 // Reactive zoom level for the panel — drives the "zoom in" prompt and the
@@ -687,6 +756,21 @@ $: if (map && styleLoaded && $lastUpdatedPlaceId) {
 	lastUpdatedPlaceId.set(undefined);
 }
 
+// Lift the selected pin on selection change (guarded so the icon-size relayout
+// runs only when the selected merchant actually changes).
+$: if (map && styleLoaded && $merchantDrawer.merchantId !== liftedPinId) {
+	liftedPinId = $merchantDrawer.merchantId;
+	setSelectedPinLift(liftedPinId);
+}
+
+// Position the locator pulse. Depends on $places too so a deep-linked merchant
+// gets its pulse once the place data syncs in; syncSelectionPulse no-ops when
+// the target is unchanged or not yet loaded.
+$: if (map && styleLoaded) {
+	void $places;
+	syncSelectionPulse($merchantDrawer.merchantId);
+}
+
 // The custom sources + layers we add on top of whatever basemap is
 // active. applyBasemap() carries these across a setStyle() so the pins,
 // clusters, and labels survive a basemap/theme swap untouched (MapLibre's
@@ -769,6 +853,8 @@ onMount(async () => {
 	// User may have navigated away while the dynamic import was in
 	// flight; bail before instantiating against an unmounted container.
 	if (destroyed) return;
+	// Stash the namespace so the selection-pulse helpers can build a Marker.
+	maplibreNs = maplibre;
 
 	// Five basemaps (legacy parity): four vector styles + the OSM raster
 	// style. A stored picker choice wins; otherwise the first-visit default
@@ -1634,6 +1720,8 @@ onDestroy(() => {
 	if (deepLinkPanTimer) clearTimeout(deepLinkPanTimer);
 	deepLinkPanUnsub?.();
 	deepLinkPanUnsub = null;
+	pulseMarker?.remove();
+	pulseMarker = null;
 	if (tilesLoadingTimer) clearTimeout(tilesLoadingTimer);
 	if (tilesLoadingFallback) clearTimeout(tilesLoadingFallback);
 	spiderfier?.unspiderfyAll();
