@@ -7,6 +7,7 @@ import { featureCollection, point } from "@turf/helpers";
 import type { Feature, FeatureCollection, Point, Polygon } from "geojson";
 import type {
 	ExpressionSpecification,
+	FilterSpecification,
 	GeoJSONSource,
 	LngLatBounds,
 	MapGeoJSONFeature,
@@ -172,9 +173,15 @@ let latestHullClusterId: number | null = null;
 let deepLinkPanUnsub: (() => void) | null = null;
 let deepLinkPanTimer: ReturnType<typeof setTimeout> | null = null;
 
+// Zoom level that reveals a single selected merchant: just past
+// CLUSTERING_DISABLED_ZOOM (17) so it declusters into its own pin (with the
+// selection pulse on top) rather than being absorbed into a cluster. The
+// DEFAULT_MAP_ZOOM (15) the deep-link pan used to land on still clusters.
+const REVEAL_ZOOM = 17.5;
+
 const panToPlace = (lat: number, lon: number) => {
 	if (!map) return;
-	map.easeTo({ center: [lon, lat], zoom: DEFAULT_MAP_ZOOM, duration: 300 });
+	map.easeTo({ center: [lon, lat], zoom: REVEAL_ZOOM, duration: 300 });
 };
 
 // Selected-merchant highlight (design "C — centered pulsing locator"): the GL
@@ -218,6 +225,27 @@ const setSelectedPinLift = (selectedId: number | null) => {
 	}
 };
 
+// Hide the pulse when the selected merchant has been rolled into a cluster at
+// the current zoom (there's no individual pin to sit on, so the pulse would
+// float orphaned); show it again once the pin renders individually. The
+// regular `places` source clusters; the boosted source never does. We query
+// the live source state rather than a zoom threshold — whether a point
+// clusters depends on its neighbours, not just the zoom level.
+const updatePulseVisibility = () => {
+	if (!map || !pulseMarker || pulsePinId === null) return;
+	const place = get(placesById).get(pulsePinId);
+	let visible = true;
+	if (place && !isBoosted(place)) {
+		const filter: FilterSpecification = [
+			"all",
+			["!", ["has", "point_count"]],
+			["==", ["get", "id"], pulsePinId],
+		];
+		visible = map.querySourceFeatures("places", { filter }).length > 0;
+	}
+	pulseMarker.getElement().style.display = visible ? "" : "none";
+};
+
 // Show / move / hide the locator pulse for the selected merchant. Needs the
 // place's coordinates, so it no-ops until the place is in $placesById — a
 // deep-linked merchant gets its pulse once places sync in (the reactive below
@@ -242,6 +270,7 @@ const syncSelectionPulse = (selectedId: number | null) => {
 	pulseMarker.getElement().style.setProperty("--bm-pulse-color", color);
 	pulseMarker.setLngLat([place.lon, place.lat]).addTo(map);
 	pulsePinId = selectedId;
+	updatePulseVisibility();
 };
 
 // Reactive zoom level for the panel — drives the "zoom in" prompt and the
@@ -396,7 +425,19 @@ const debouncedUpdateMerchantList = debounce(
 
 const panToNearbyMerchant = (place: Place) => {
 	if (!map) return;
-	map.easeTo({ center: [place.lon, place.lat], duration: 300 });
+	// Below the clustering threshold the picked merchant may be absorbed into a
+	// cluster, leaving the selection pulse floating with no pin under it. Zoom
+	// past the threshold to reveal its individual pin (same intent as
+	// zoomToSearchResult); once we're already zoomed in, just pan.
+	if (map.getZoom() < CLUSTERING_DISABLED_ZOOM) {
+		map.easeTo({
+			center: [place.lon, place.lat],
+			zoom: REVEAL_ZOOM,
+			duration: 400,
+		});
+	} else {
+		map.easeTo({ center: [place.lon, place.lat], duration: 300 });
+	}
 };
 
 const zoomToSearchResult = (place: Place) => {
@@ -1582,6 +1623,7 @@ onMount(async () => {
 			currentLat = c.lat;
 			currentLon = c.lng;
 			debouncedUpdateMerchantList();
+			updatePulseVisibility();
 		});
 
 		// Tile-loading indicator — debounced to avoid flicker on quick pans.
@@ -1606,6 +1648,9 @@ onMount(async () => {
 			}
 			tilesLoading = false;
 			mapTilesLoaded = true;
+			// Clustering is settled on idle — reconcile the pulse with whether the
+			// selected pin is currently rendered individually or inside a cluster.
+			updatePulseVisibility();
 		});
 
 		// Persist viewport in the URL hash. Preserves any merchant=… params
@@ -1652,11 +1697,14 @@ onMount(async () => {
 		window.addEventListener(MERCHANT_URL_CHANGE_EVENT, handleHashChange);
 		window.addEventListener("popstate", handleHashChange);
 
-		// Deep link: URL had a merchant= param but the hash carried no
-		// viewport coords. Pan the camera to the merchant once it's in the
-		// places store. If places are still loading, subscribe and wait —
-		// 10s safety unsubscribe so we never leak.
-		if (!hashCoords) {
+		// Deep link: the URL selected a merchant. Reveal it as an individual
+		// pin — pan/zoom to it once it's in the places store — when the URL
+		// carried no viewport, OR carried one whose zoom is below the clustering
+		// threshold (where the pin would be absorbed into a cluster, leaving the
+		// selection pulse floating with nothing under it). A hash zoom at/above
+		// the threshold is honoured as-is. If places are still loading,
+		// subscribe and wait — 10s safety unsubscribe so we never leak.
+		if (!hashCoords || hashCoords.zoom < CLUSTERING_DISABLED_ZOOM) {
 			const { merchantId, isOpen } = parseMerchantHash();
 			if (isOpen && merchantId) {
 				const place = get(placesById).get(merchantId);
