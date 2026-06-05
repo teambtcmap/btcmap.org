@@ -1,7 +1,7 @@
 {
 	"name": "BTC Map",
 	"short_name": "BTC Map",
-	"description": "Easily find places to spend sats anywhere on the planet.",
+	"description": "Find places to spend sats wherever you are.",
 	"scope": "/",
 	"start_url": "/map",
 	"display": "standalone",

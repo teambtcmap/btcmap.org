@@ -13,7 +13,7 @@ import { _ } from "$lib/i18n";
 
 <div class="mx-auto mt-10 mb-20 max-w-4xl space-y-5 text-body dark:text-white">
 	<p class="text-center font-semibold text-primary dark:text-white">
-		BTC Map - Easily find places to spend sats anywhere on the planet.
+		BTC Map - Find places to spend sats wherever you are.
 		<br />
 		Copyright &#169; 2022-{new Date().getFullYear()} BTC Map
 		<br />
