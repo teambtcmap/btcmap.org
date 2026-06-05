@@ -140,34 +140,66 @@
 		animation: wiggle 2s ease-in-out infinite;
 	}
 
-	/* Selected marker highlight */
-	.selected-marker {
-		filter: drop-shadow(0 0 4px #00b7d2) drop-shadow(0 0 8px #00b7d2) !important;
-		animation: pulse-glow 2s ease-in-out infinite;
+	/* Selected-merchant locator pulse — the DOM overlay marker dropped on the
+	   selected pin's geo point (design C). --bm-pulse-color is set per
+	   selection (in +page.svelte) to PIN_FILL_REGULAR / PIN_FILL_BOOSTED so it
+	   matches the pin; the #0e95af fallback below just mirrors PIN_FILL_REGULAR
+	   as a last resort and is never used in practice. */
+	.bm-selected-pulse {
+		position: relative;
+		width: 0;
+		height: 0;
 	}
 
-	.selected-marker-boosted {
-		filter: drop-shadow(0 0 4px #f7931a) drop-shadow(0 0 8px #f7931a) !important;
-		animation: pulse-glow-boosted 2s ease-in-out infinite;
+	.bm-pulse-ring,
+	.bm-pulse-dot {
+		position: absolute;
+		left: 0;
+		top: 0;
+		transform: translate(-50%, -50%);
+		border-radius: 50%;
 	}
 
-	@keyframes pulse-glow {
-		0%,
+	.bm-pulse-ring {
+		border: 3px solid var(--bm-pulse-color, #0e95af);
+		opacity: 0;
+		animation: bm-pulse 1.8s ease-out infinite;
+	}
+
+	.bm-pulse-ring--delay {
+		animation-delay: 0.9s;
+	}
+
+	.bm-pulse-dot {
+		width: 8px;
+		height: 8px;
+		background: var(--bm-pulse-color, #0e95af);
+		box-shadow: 0 0 0 2px #fff;
+	}
+
+	@keyframes bm-pulse {
+		0% {
+			width: 18px;
+			height: 18px;
+			opacity: 0.55;
+		}
 		100% {
-			filter: drop-shadow(0 0 4px #00b7d2) drop-shadow(0 0 8px #00b7d2);
-		}
-		50% {
-			filter: drop-shadow(0 0 6px #00b7d2) drop-shadow(0 0 12px #00b7d2);
+			width: 70px;
+			height: 70px;
+			opacity: 0;
 		}
 	}
 
-	@keyframes pulse-glow-boosted {
-		0%,
-		100% {
-			filter: drop-shadow(0 0 4px #f7931a) drop-shadow(0 0 8px #f7931a);
+	@media (prefers-reduced-motion: reduce) {
+		.bm-pulse-ring {
+			animation: none;
+			opacity: 0.4;
+			width: 44px;
+			height: 44px;
 		}
-		50% {
-			filter: drop-shadow(0 0 6px #f7931a) drop-shadow(0 0 12px #f7931a);
+
+		.bm-pulse-ring--delay {
+			display: none;
 		}
 	}
 }

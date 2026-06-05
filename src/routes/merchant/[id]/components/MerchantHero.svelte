@@ -2,6 +2,7 @@
 import Icon from "$components/Icon.svelte";
 import SaveButton from "$components/SaveButton.svelte";
 import { _ } from "$lib/i18n";
+import { buildMerchantMapHref } from "$lib/merchantDrawerHash";
 
 import MerchantStaticMap from "./MerchantStaticMap.svelte";
 
@@ -44,7 +45,7 @@ export let deleted = false;
 		{/if}
 
 		<a
-			href={`/map#18/${lat}/${long}&merchant=${id}`}
+			href={buildMerchantMapHref(id, lat, long)}
 			class="absolute top-3 right-3 z-10 inline-flex items-center gap-1 rounded-lg border border-gray-300 bg-white/90 px-2.5 py-1.5 text-xs font-semibold text-primary shadow-sm backdrop-blur transition-colors hover:text-link dark:border-white/20 dark:bg-black/40 dark:text-white"
 		>
 			{$_('info.viewOnMainMap')}
