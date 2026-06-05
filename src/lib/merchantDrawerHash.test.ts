@@ -4,7 +4,12 @@ vi.mock("$app/environment", () => ({
 	browser: true,
 }));
 
-import { parseMerchantHash, updateMerchantHash } from "./merchantDrawerHash";
+import { parseHashCoords } from "./map/mapHash";
+import {
+	buildMerchantMapHref,
+	parseMerchantHash,
+	updateMerchantHash,
+} from "./merchantDrawerHash";
 
 describe("parseMerchantHash", () => {
 	beforeEach(() => {
@@ -242,6 +247,44 @@ describe("updateMerchantHash", () => {
 				"",
 				expect.not.stringContaining("merchant"),
 			);
+		});
+	});
+});
+
+describe("buildMerchantMapHref deep-link round-trip", () => {
+	const setLocationFromHref = (href: string) => {
+		const url = new URL(href, "http://localhost");
+		delete (window as unknown as { location: unknown }).location;
+		(
+			window as unknown as { location: { search: string; hash: string } }
+		).location = { search: url.search, hash: url.hash };
+	};
+
+	it("produces a link parseMerchantHash and parseHashCoords can both read", () => {
+		setLocationFromHref(buildMerchantMapHref(1128, 32.6489863, -16.9101835));
+		expect(parseMerchantHash().merchantId).toBe(1128);
+		expect(parseHashCoords()).toMatchObject({
+			zoom: 18,
+			lat: 32.6489863,
+			lng: -16.9101835,
+		});
+	});
+
+	it("keeps the merchant in the query string, not the hash", () => {
+		expect(buildMerchantMapHref(1128, 1, 2)).toBe("/map?merchant=1128#18/1/2");
+	});
+
+	it("regression: the pre-#1019 hash format leaves the merchant unreadable", () => {
+		// `#z/lat/lng&merchant=…` leaves the query string empty, so
+		// parseMerchantHash returns null — the exact reason the old
+		// "View on main map" link selected nothing.
+		setLocationFromHref("/map#18/32.6489863/-16.9101835&merchant=1128");
+		expect(parseMerchantHash().merchantId).toBeNull();
+		// The viewport still parses, which is why the map opened at the right
+		// place but with no marker selected or drawer open.
+		expect(parseHashCoords()).toMatchObject({
+			lat: 32.6489863,
+			lng: -16.9101835,
 		});
 	});
 });
