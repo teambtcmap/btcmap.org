@@ -34,6 +34,15 @@ describe("shouldClusterBoostedAtZoom", () => {
 		);
 		expect(shouldClusterBoostedAtZoom(15)).toBe(false);
 	});
+
+	it("keys on the integer zoom level, not the fractional value", () => {
+		// MapLibre zoom is fractional; clustering transitions on integer levels.
+		// The whole z5 band stays clustered; declustering happens at exactly z6.
+		expect(shouldClusterBoostedAtZoom(5.01)).toBe(true);
+		expect(shouldClusterBoostedAtZoom(5.99)).toBe(true);
+		expect(shouldClusterBoostedAtZoom(6)).toBe(false);
+		expect(shouldClusterBoostedAtZoom(6.01)).toBe(false);
+	});
 });
 
 describe("routePlacesByBoostAndZoom", () => {
@@ -44,6 +53,12 @@ describe("routePlacesByBoostAndZoom", () => {
 			places,
 			BOOSTED_CLUSTERING_MAX_ZOOM,
 		);
+		expect(clustered.map((p) => p.id).sort()).toEqual([1, 2, 3, 4]);
+		expect(standalone).toEqual([]);
+	});
+
+	it("keeps boosted clustered at fractional zoom within the z5 band", () => {
+		const { clustered, standalone } = routePlacesByBoostAndZoom(places, 5.5);
 		expect(clustered.map((p) => p.id).sort()).toEqual([1, 2, 3, 4]);
 		expect(standalone).toEqual([]);
 	});

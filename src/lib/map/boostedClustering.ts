@@ -9,8 +9,15 @@ import { isBoosted } from "$lib/utils";
 // MapLibre's `cluster` flag is a static per-source property, so we reproduce
 // that zoom gate by routing boosted places into the clustered source at/below
 // the threshold and into the non-clustered source above it.
+//
+// MapLibre zoom is fractional, but clustering (including the regular `places`
+// source's clusterMaxZoom gate) transitions on integer zoom levels. Floor the
+// zoom so boosted markers stay clustered across the whole integer-5 band
+// (display zoom [5, 6)) and only break out at integer zoom 6 — matching the
+// legacy "zoom 1-5 clustered, 6+ standalone" intent — rather than declustering
+// early at 5.x while regular places are still clustered at the z5 level.
 export const shouldClusterBoostedAtZoom = (zoom: number): boolean =>
-	zoom <= BOOSTED_CLUSTERING_MAX_ZOOM;
+	Math.floor(zoom) <= BOOSTED_CLUSTERING_MAX_ZOOM;
 
 export type BoostedPlaceRouting = {
 	// → the cluster:true "places" source
