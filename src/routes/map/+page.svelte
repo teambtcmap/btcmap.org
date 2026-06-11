@@ -43,6 +43,10 @@ import {
 	styleForBasemap,
 } from "$lib/map/basemaps";
 import {
+	routePlacesByBoostAndZoom,
+	shouldClusterBoostedAtZoom,
+} from "$lib/map/boostedClustering";
+import {
 	type HashCoords,
 	parseHashCoords,
 	writeHashCoords,
@@ -129,6 +133,13 @@ let lastAppliedLabelTheme: "light" | "dark" | undefined;
 // search may have the same result count as the previous one.
 let lastSearchModeSig = "";
 
+// Last place list fed to the sources, kept so the boosted-clustering boundary
+// re-sync (on zoom crossing BOOSTED_CLUSTERING_MAX_ZOOM) can rebuild without a
+// $places change. `boostedAreClustered` mirrors the routing decision of the
+// most recent sync so the moveend handler only re-syncs when it actually flips.
+let lastSyncedList: Place[] = [];
+let boostedAreClustered = false;
+
 // Place-label colors. MapLibre paint expressions can't read CSS custom
 // properties, so the values are inlined here.
 const LABEL_PALETTE = {
@@ -208,15 +219,19 @@ const buildPulseElement = (): HTMLDivElement => {
 
 // Hide the pulse when the selected merchant has been rolled into a cluster at
 // the current zoom (there's no individual pin to sit on, so the pulse would
-// float orphaned); show it again once the pin renders individually. The
-// regular `places` source clusters; the boosted source never does. We query
+// float orphaned); show it again once the pin renders individually. Regular
+// places live in the clustered `places` source; boosted places do too, but
+// only at/below BOOSTED_CLUSTERING_MAX_ZOOM — above it they ride the
+// non-clustered boosted source and are always individually visible. We query
 // the live source state rather than a zoom threshold — whether a point
 // clusters depends on its neighbours, not just the zoom level.
 const updatePulseVisibility = () => {
 	if (!map || !pulseMarker || pulsePinId === null) return;
 	const place = get(placesById).get(pulsePinId);
 	let visible = true;
-	if (place && !isBoosted(place)) {
+	const inClusteredSource =
+		!!place && (!isBoosted(place) || shouldClusterBoostedAtZoom(map.getZoom()));
+	if (inClusteredSource) {
 		const filter: FilterSpecification = [
 			"all",
 			["!", ["has", "point_count"]],
@@ -555,31 +570,15 @@ const EMPTY_COLLECTION: PlaceFeatureCollection = {
 	features: [],
 };
 
-// Boosted places render via a separate non-clustered source so they stay
-// individually visible above cluster discs at every zoom — the legacy /map
-// did this via a dedicated boostedLayer + BOOSTED_CLUSTERING_MAX_ZOOM
-// constant; here we just route boosted features to a sibling source that
-// has cluster:false.
-const partitionPlacesForFeatures = (
-	list: Place[],
-): {
-	regular: Place[];
-	boosted: Place[];
-} => {
-	const regular: Place[] = [];
-	const boosted: Place[] = [];
-	for (const p of list) {
-		if (p.deleted_at) continue;
-		if (isBoosted(p)) boosted.push(p);
-		else regular.push(p);
-	}
-	return { regular, boosted };
-};
+// Boosted places ride a separate non-clustered source so they stay
+// individually visible above cluster discs — but only above
+// BOOSTED_CLUSTERING_MAX_ZOOM. At/below it they fold into the clustered
+// `places` source (matching the legacy /map's dedicated boostedLayer +
+// BOOSTED_CLUSTERING_MAX_ZOOM behavior) so the zoomed-out world view isn't
+// littered with overlapping orange pins. Routing lives in
+// $lib/map/boostedClustering; see syncPlacesToSource for the wiring.
 
-const buildFeatureCollectionFor = (
-	list: Place[],
-	includeBoosted: boolean,
-): PlaceFeatureCollection => {
+const buildFeatureCollectionFor = (list: Place[]): PlaceFeatureCollection => {
 	const saved = get(savedPlaceIds);
 	// Snapshot the enriched cache once per build — names arrive lazily as
 	// the viewport-bound /v4/places/search fetch resolves.
@@ -605,7 +604,9 @@ const buildFeatureCollectionFor = (
 			geometry: { type: "Point", coordinates: [p.lon, p.lat] },
 			properties: {
 				id: p.id,
-				boosted: includeBoosted,
+				// Per-place so a boosted marker folded into the clustered source at
+				// low zoom still renders its orange pin when it sits unclustered.
+				boosted: !!isBoosted(p),
 				icon: p.icon ?? "question_mark",
 				comments: p.comments ?? 0,
 				saved: saved.has(p.id),
@@ -700,9 +701,14 @@ const syncPlacesToSource = (list: Place[]) => {
 		| GeoJSONSource
 		| undefined;
 	if (!source || !boostedSource) return;
-	const { regular, boosted } = partitionPlacesForFeatures(list);
-	source.setData(buildFeatureCollectionFor(regular, false));
-	boostedSource.setData(buildFeatureCollectionFor(boosted, true));
+	lastSyncedList = list;
+	boostedAreClustered = shouldClusterBoostedAtZoom(map.getZoom());
+	const { clustered, standalone } = routePlacesByBoostAndZoom(
+		list,
+		map.getZoom(),
+	);
+	source.setData(buildFeatureCollectionFor(clustered));
+	boostedSource.setData(buildFeatureCollectionFor(standalone));
 	ensureSpritesForPlaces(map, list);
 	if (list.length > 0) elementsLoaded = true;
 	// E2E test hook: Playwright can't probe WebGL canvas pins like it
@@ -1083,10 +1089,13 @@ onMount(async () => {
 			clusterMaxZoom: CLUSTERING_DISABLED_ZOOM - 1,
 		});
 
-		// Separate non-clustered source for boosted places. Routing boosted
-		// features here keeps them visually prominent above cluster discs at
-		// every zoom — they never get absorbed into a cluster icon. Matches
-		// the legacy /map's dedicated boostedLayer behavior.
+		// Separate non-clustered source for boosted places. Above
+		// BOOSTED_CLUSTERING_MAX_ZOOM, syncPlacesToSource routes boosted
+		// features here so they stay visually prominent above cluster discs and
+		// never get absorbed into a cluster icon. At/below that zoom they're
+		// routed into the clustered `places` source instead (see
+		// $lib/map/boostedClustering) — the MapLibre analogue of the legacy
+		// /map's dedicated boostedLayer + BOOSTED_CLUSTERING_MAX_ZOOM swap.
 		map.addSource("places-boosted", {
 			type: "geojson",
 			data: EMPTY_COLLECTION,
@@ -1605,6 +1614,12 @@ onMount(async () => {
 			const c = map.getCenter();
 			currentLat = c.lat;
 			currentLon = c.lng;
+			// Re-route boosted places when zoom crosses BOOSTED_CLUSTERING_MAX_ZOOM
+			// — the MapLibre analogue of the legacy boostedLayer swap. Only re-syncs
+			// on an actual flip, so steady-state pans stay cheap.
+			if (shouldClusterBoostedAtZoom(currentZoom) !== boostedAreClustered) {
+				syncPlacesToSource(lastSyncedList);
+			}
 			debouncedUpdateMerchantList();
 		});
 
