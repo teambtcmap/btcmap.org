@@ -261,11 +261,6 @@ $: if (browser && isOpen !== undefined) {
 	}
 }
 
-// Focus search input when panel opens (always, since we now have unified search)
-$: if (browser && isOpen && searchInputComponent) {
-	tick().then(() => searchInputComponent?.focus());
-}
-
 function handleItemClick(place: Place) {
 	trackEvent("merchant_list_item_click", { mode });
 	merchantDrawer.open(place.id, "details");
@@ -415,11 +410,12 @@ onDestroy(() => {
 					role="radio"
 					on:click={() => handleModeSwitch('nearby')}
 					aria-checked={mode === 'nearby'}
-					class="flex-1 rounded-md px-3 py-1.5 text-xs font-medium transition-colors
+					class="flex flex-1 items-center justify-center gap-1.5 rounded-md px-3 py-1.5 text-xs font-medium transition-colors
 						{mode === 'nearby'
 						? 'bg-white text-primary shadow-sm dark:bg-white/10 dark:text-white'
 						: 'text-body hover:text-primary dark:text-white/70 dark:hover:text-white'}"
 				>
+					<Icon type="fa" icon="list" w="14" h="14" />
 					{$_('search.nearby')}{#if isLoadingList}<span class="opacity-60">
 							...</span
 						>{:else}{formatNearbyCount(totalCount)}{/if}
