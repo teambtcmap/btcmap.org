@@ -75,7 +75,7 @@ function handleClear() {
 						<button
 							type="button"
 							on:click={handleClear}
-							class="p-1 text-gray-600 hover:text-gray-800 dark:text-white/70 dark:hover:text-white"
+							class="pointer-events-auto p-1 text-gray-600 hover:text-gray-800 dark:text-white/70 dark:hover:text-white"
 							aria-label={$_('aria.clearSearch')}
 						>
 							<Icon w="20" h="20" icon="close" type="material" />

@@ -179,6 +179,7 @@ export function createDrawerGestureController(
 				totalDelta,
 				finalHeight,
 				maxHeight,
+				peekHeight,
 			);
 			// Track swipe expand/collapse only when state changes
 			if (snapState.expanded !== isExpanded) {
@@ -270,6 +271,7 @@ export function createDrawerGestureController(
 				totalDelta,
 				finalHeight,
 				maxHeight,
+				peekHeight,
 			);
 			// Track collapse from content swipe (can only collapse, not expand, from content drag)
 			if (!snapState.expanded) {

@@ -42,7 +42,7 @@
 		"noResults": "Keine Ergebnisse gefunden",
 		"noResultsFor": "Keine Ergebnisse für \"{query}\"",
 		"noNearbyMatches": "Keine Orte in der Nähe für \"{query}\"",
-		"noNearbyMatchesHint": "In deiner Nähe passt nichts zu dieser Suche. Erweitere die Suche auf weltweit.",
+		"noNearbyMatchesHint": "In deiner Nähe passt nichts zu dieser Suche. Erweitere die Suche auf die ganze Welt.",
 		"prompt": "Suche nach Händlern bei Namen",
 		"resultsCount": "{count} Ergebnis(se)",
 		"showingNearest": "Zeige nächste {count}",

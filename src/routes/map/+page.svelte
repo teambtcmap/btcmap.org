@@ -23,6 +23,7 @@ import MapUnsupportedFallback from "$components/MapUnsupportedFallback.svelte";
 import { trackEvent } from "$lib/analytics";
 import { filterMerchantsByCategory } from "$lib/categoryMapping";
 import {
+	BREAKPOINTS,
 	CLUSTERING_DISABLED_ZOOM,
 	DEFAULT_MAP_LAT,
 	DEFAULT_MAP_LNG,
@@ -33,6 +34,7 @@ import {
 	MERCHANT_LIST_MIN_ZOOM,
 	NEARBY_RADIUS_MULTIPLIER,
 } from "$lib/constants";
+import { SEARCH_SHEET_PEEK_HEIGHT } from "$lib/drawerConfig";
 import { _, getDisplayLang, locale } from "$lib/i18n";
 import {
 	BASEMAPS,
@@ -95,8 +97,14 @@ import { BasemapsControl } from "./controls/BasemapsControl";
 import { BoostToggleControl } from "./controls/BoostToggleControl";
 import { DataRefreshControl } from "./controls/DataRefreshControl";
 import { NavButtonsControl } from "./controls/NavButtonsControl";
+import { browser } from "$app/environment";
 
 export let data: PageData;
+
+// Layout decision locked at init (same pattern as MerchantDrawerHash): the
+// mobile search sheet and the desktop floating bar derive from one value so
+// a viewport resize can never leave zero or two search surfaces
+const isMobileLayout = browser && window.innerWidth < BREAKPOINTS.md;
 
 type PlaceFeature = {
 	type: "Feature";
@@ -1794,7 +1802,11 @@ onDestroy(() => {
 
 <h1 class="sr-only">{$_('map.bitcoinMerchantMapTitle')}</h1>
 
-<div bind:this={mapContainer} class="map-container"></div>
+<div
+	bind:this={mapContainer}
+	class="map-container"
+	style="--search-sheet-peek: {SEARCH_SHEET_PEEK_HEIGHT}px"
+></div>
 
 {#if webglUnsupported}
 	<MapUnsupportedFallback />
@@ -1808,8 +1820,8 @@ onDestroy(() => {
 	single search input instead. The bar itself hides when the list panel
 	is open (the panel renders its own search input in the same slot).
 -->
-{#if styleLoaded}
-	<div class="pointer-events-none absolute top-3 left-3 z-[1000] hidden md:block">
+{#if styleLoaded && !isMobileLayout}
+	<div class="pointer-events-none absolute top-3 left-3 z-[1000]">
 		<MapSearchBar
 			onSearch={handlePanelSearch}
 			onFocus={() => {
@@ -1838,6 +1850,7 @@ onDestroy(() => {
 	onRefresh={() => updateMerchantList({ force: true })}
 	{currentZoom}
 	mapReady={styleLoaded}
+	isMobile={isMobileLayout}
 />
 
 {#if styleLoaded}
@@ -1865,12 +1878,14 @@ onDestroy(() => {
 	   gets the popup positioning + anchor button styles. */
 
 	/* Mobile: lift the scale bar and OSM attribution above the search
-	   peek sheet (SEARCH_SHEET_PEEK_HEIGHT) so the license credit stays
-	   visible. Scoped to this page — /communities/map has no sheet. */
+	   peek sheet so the license credit stays visible. The height comes
+	   from SEARCH_SHEET_PEEK_HEIGHT via the --search-sheet-peek custom
+	   property on .map-container. Scoped to this page — /communities/map
+	   has no sheet. */
 	@media (max-width: 767px) {
 		.map-container :global(.maplibregl-ctrl-bottom-left),
 		.map-container :global(.maplibregl-ctrl-bottom-right) {
-			bottom: 110px;
+			bottom: var(--search-sheet-peek);
 		}
 	}
 </style>

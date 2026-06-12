@@ -13,7 +13,7 @@ import {
 	type CategoryKey,
 	placeMatchesCategory,
 } from "$lib/categoryMapping";
-import { BREAKPOINTS, MERCHANT_LIST_LOW_ZOOM } from "$lib/constants";
+import { MERCHANT_LIST_LOW_ZOOM } from "$lib/constants";
 import { SEARCH_SHEET_PEEK_HEIGHT } from "$lib/drawerConfig";
 import { createDrawerGestureController } from "$lib/drawerGestureController";
 import { _ } from "$lib/i18n";
@@ -67,10 +67,9 @@ export let onRefresh: (() => void) | undefined = undefined;
 export let onFitSearchResultBounds: (() => void) | undefined = undefined;
 // Map style readiness — gates the mobile peek sheet so it doesn't show over the loading screen
 export let mapReady = false;
-
-// Mobile is locked at init (same pattern as MerchantDrawerHash) to prevent
-// the panel swapping between sheet and card layouts mid-session
-const isMobile = browser && window.innerWidth < BREAKPOINTS.md;
+// Layout decision locked at page init (same pattern as MerchantDrawerHash);
+// shared with the floating search bar so exactly one search surface exists
+export let isMobile = false;
 
 // On mobile the panel is a bottom sheet mirroring the merchant drawer's
 // snap behavior: peek (grabber + single input) <-> full panel. The store's
@@ -104,6 +103,9 @@ const unsubscribeSheet = sheetGesture.expanded.subscribe((expanded) => {
 });
 
 function handlePeekTap() {
+	// A drag on the facade can fire a click after the gesture already
+	// expanded the sheet — don't double-open or double-track
+	if (get(merchantList).isOpen) return;
 	trackEvent("search_sheet_tap_expand");
 	merchantList.open();
 	onRefresh?.();
@@ -125,6 +127,14 @@ function onSheetPointerDown(event: PointerEvent) {
 }
 function onSheetPointerUp(event: PointerEvent) {
 	sheetGesture.handlePointerUp(event, grabberElement);
+}
+// The whole peek facade is a swipe surface, not just the grabber strip
+let facadeElement: HTMLElement;
+function onFacadePointerDown(event: PointerEvent) {
+	sheetGesture.handlePointerDown(event, facadeElement);
+}
+function onFacadePointerUp(event: PointerEvent) {
+	sheetGesture.handlePointerUp(event, facadeElement);
 }
 function onContentTouchStart(event: TouchEvent) {
 	if (isMobile) sheetGesture.handleContentTouchStart(event);
@@ -160,6 +170,10 @@ let scrollLockActive = false;
 
 // Reference for focus trap
 let panelElement: HTMLElement;
+
+function handleSearchFocus() {
+	trackEvent("search_input_focus", { source: "panel" });
+}
 
 // Unified input handler - behaves differently based on mode
 function handleUnifiedInput(e: Event) {
@@ -263,6 +277,14 @@ $: if (isMobile) {
 // Peek sheet is the mobile resting state; it yields the bottom edge to the
 // merchant drawer (mirrors the old floating bar's max-md:hidden rule)
 $: showPeekSheet = isMobile && mapReady && !$merchantDrawer.isOpen;
+
+// The drawer taking the bottom edge can unmount the sheet mid-drag, which
+// would strand the captured pointer and the spring height. Reset so the
+// sheet remounts cleanly at peek (mirrors MerchantDrawerMobile's
+// resetToPeek-on-merchant-change).
+$: if (isMobile && $merchantDrawer.isOpen) {
+	sheetGesture.resetToPeek();
+}
 $: pillCount = formatNearbyPillCount(totalCount);
 $: placeDetailsCache = $merchantList.placeDetailsCache;
 $: isLoadingList = $merchantList.isLoadingList;
@@ -368,7 +390,6 @@ $: isTruncated = totalCount > merchants.length;
 
 // Body scroll lock on mobile when panel is open
 $: if (browser && isOpen !== undefined) {
-	const isMobile = window.innerWidth < BREAKPOINTS.md;
 	const shouldLock = isOpen && isMobile;
 	if (shouldLock && !scrollLockActive) {
 		lockBodyScroll();
@@ -393,7 +414,7 @@ function handleItemClick(place: Place) {
 
 	// On mobile, close panel so drawer is visible (panel is fullscreen)
 	// On desktop, keep panel open (list and drawer coexist side by side)
-	if (browser && window.innerWidth < BREAKPOINTS.md) {
+	if (isMobile) {
 		merchantList.close();
 	}
 }
@@ -414,7 +435,7 @@ function handleClose() {
 function handleZoomToNearbyLevel() {
 	onZoomToNearbyLevel?.();
 	// Close panel on mobile so the user can see the map zoom in
-	if (browser && window.innerWidth < BREAKPOINTS.md) {
+	if (isMobile) {
 		handleClose();
 	}
 }
@@ -462,7 +483,7 @@ onDestroy(() => {
 		bind:this={panelElement}
 		class="z-[1001] flex flex-col overflow-hidden bg-white dark:bg-dark
 			{isMobile
-			? 'pb-safe fixed right-0 bottom-0 left-0 shadow-2xl'
+			? 'fixed right-0 bottom-0 left-0 pb-[max(1rem,env(safe-area-inset-bottom))] shadow-2xl'
 			: 'absolute top-3 bottom-[max(3rem,env(safe-area-inset-bottom))] left-3 w-80 rounded-lg shadow-lg dark:shadow-black/30'}"
 		class:rounded-t-3xl={isMobile && !isOpen}
 		style={isMobile ? `height: ${$sheetHeight}px; will-change: height;` : ''}
@@ -483,6 +504,7 @@ onDestroy(() => {
 				role="button"
 				aria-label={isOpen ? $_('aria.closeMerchantList') : $_('aria.expandMerchantList')}
 				aria-expanded={isOpen}
+				aria-controls="merchant-sheet-content"
 			>
 				<div class="mx-auto mt-2 mb-1 h-1.5 w-12 rounded-full bg-gray-300 dark:bg-white/30"></div>
 			</div>
@@ -502,13 +524,14 @@ onDestroy(() => {
 				ariaLabel={mode === 'search' ? $_('search.switchToWorldwide') : $_('search.filterResults')}
 				on:input={handleUnifiedInput}
 				on:keydown={handleUnifiedKeyDown}
+				on:focus={handleSearchFocus}
 			>
 				<svelte:fragment slot="trailing">
 					{#if (mode === 'search' && searchQuery) || (mode === 'nearby' && nearbyFilter)}
 						<button
 							type="button"
 							on:click={handleClearInput}
-							class="p-1 text-gray-600 hover:text-gray-800 dark:text-white/70 dark:hover:text-white"
+							class="pointer-events-auto p-1 text-gray-600 hover:text-gray-800 dark:text-white/70 dark:hover:text-white"
 							aria-label={$_('aria.clearSearch')}
 						>
 							<Icon w="20" h="20" icon="close" type="material" />
@@ -522,7 +545,7 @@ onDestroy(() => {
 						<button
 							type="button"
 							on:click={handleClose}
-							class="p-1 text-gray-600 hover:text-gray-800 dark:text-white/70 dark:hover:text-white"
+							class="pointer-events-auto p-1 text-gray-600 hover:text-gray-800 dark:text-white/70 dark:hover:text-white"
 							aria-label={$_('aria.closeMerchantList')}
 						>
 							<Icon w="20" h="20" icon="close" type="material" />
@@ -677,12 +700,14 @@ onDestroy(() => {
 		<!-- List content (touch handlers: Google-Maps-style collapse drag from scroll top on mobile) -->
 		<div
 			bind:this={merchantListContainer}
+			id="merchant-sheet-content"
 			class="flex-1 overflow-y-auto"
 			style="overscroll-behavior-y: contain; touch-action: pan-y;"
 			tabindex="-1"
 			on:touchstart={onContentTouchStart}
 			on:touchmove={onContentTouchMove}
 			on:touchend={onContentTouchEnd}
+			on:touchcancel={onContentTouchEnd}
 		>
 			{#if mode === 'search'}
 				<!-- Search results -->
@@ -806,13 +831,19 @@ onDestroy(() => {
 		</div>
 		{:else}
 			<!-- Peek: input facade — opens the sheet without focusing a real input
-			     (keyboard stays down until the user taps the real input and types) -->
-			<div class="px-3 pt-1">
+			     (keyboard stays down until the user taps the real input and types).
+			     The whole facade is also a swipe surface like the drawer's peek. -->
+			<div id="merchant-sheet-content" class="px-3 pt-1">
 				<button
+					bind:this={facadeElement}
 					type="button"
 					on:click={handlePeekTap}
-					class="relative flex w-full items-center rounded-lg py-3 pr-3 pl-10 text-left"
-					aria-label={$_('aria.searchInput')}
+					on:pointerdown={onFacadePointerDown}
+					on:pointermove={sheetGesture.handlePointerMove}
+					on:pointerup={onFacadePointerUp}
+					on:pointercancel={sheetGesture.handlePointerCancel}
+					class="relative flex w-full touch-none items-center rounded-lg py-3 pr-3 pl-10 text-left"
+					aria-expanded="false"
 				>
 					<Icon
 						w="18"

@@ -33,7 +33,10 @@ export function focus() {
 		class="w-full border-0 bg-transparent py-3 pr-10 pl-10 text-base text-primary outline-none placeholder:text-gray-400 dark:text-white dark:placeholder:text-white/50 [&::-webkit-search-cancel-button]:hidden
 			{rounded ? 'rounded-lg' : ''}"
 	/>
-	<div class="absolute top-1/2 right-3 -translate-y-1/2">
+	<!-- pointer-events-none so passive content (count pill, spinner) doesn't
+	     block taps on the input underneath; interactive slotted buttons must
+	     re-enable with pointer-events-auto -->
+	<div class="pointer-events-none absolute top-1/2 right-3 -translate-y-1/2">
 		<slot name="trailing" />
 	</div>
 </div>
