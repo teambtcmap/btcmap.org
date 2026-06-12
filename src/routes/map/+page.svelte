@@ -1819,12 +1819,7 @@ onDestroy(() => {
 				merchantList.open();
 				updateMerchantList({ force: true });
 			}}
-			onNearbyClick={() => {
-				merchantList.open();
-				updateMerchantList({ force: true });
-			}}
 			nearbyCount={$merchantList.totalCount}
-			isLoadingCount={$merchantList.isLoadingList}
 		/>
 	</div>
 {/if}

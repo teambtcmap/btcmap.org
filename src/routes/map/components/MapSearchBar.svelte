@@ -3,55 +3,32 @@ import Icon from "$components/Icon.svelte";
 import SearchInput from "$components/SearchInput.svelte";
 import { trackEvent } from "$lib/analytics";
 import { _ } from "$lib/i18n";
-import type { MerchantListMode } from "$lib/merchantListStore";
 import { merchantList } from "$lib/merchantListStore";
-import { formatNearbyCount } from "$lib/utils";
+import { formatNearbyPillCount } from "$lib/utils";
+
+import NearbyCountPill from "./NearbyCountPill.svelte";
 
 // Callback when search is used (opens panel)
 export let onSearch: ((query: string) => void) | undefined = undefined;
 export let onFocus: (() => void) | undefined = undefined;
-export let onNearbyClick: (() => void) | undefined = undefined;
 export let nearbyCount = 0;
-export let isLoadingCount = false;
-
-$: formattedCount = formatNearbyCount(nearbyCount);
 
 let searchInputComponent: SearchInput;
 
 // Store subscriptions
 $: searchQuery = $merchantList.searchQuery;
-$: mode = $merchantList.mode;
 $: isSearching = $merchantList.isSearching;
 $: isOpen = $merchantList.isOpen;
 
-// Placeholder based on mode
-$: placeholder =
-	mode === "search"
-		? $_("search.placeholderWorldwide")
-		: $_("search.placeholderNearby");
+// Count rides a pill inside the input while at rest; it disappears as soon
+// as the user types (the clear button takes the slot)
+$: pillCount = formatNearbyPillCount(nearbyCount);
 
 function handleInput(e: Event) {
 	const value = (e.target as HTMLInputElement).value;
 	merchantList.setSearchQuery(value);
 	// Stay in current mode - no auto-switch
 	onSearch?.(value);
-}
-
-function handleModeSwitch(newMode: MerchantListMode) {
-	const isSameMode = newMode === mode;
-	if (!isSameMode) {
-		trackEvent(
-			newMode === "nearby" ? "nearby_mode_click" : "worldwide_mode_click",
-			{
-				source: "floating_bar",
-			},
-		);
-		merchantList.setMode(newMode);
-	}
-	// Always open panel when clicking Nearby tab (shows guidance if empty)
-	if (newMode === "nearby") {
-		onNearbyClick?.();
-	}
 }
 
 function handleFocus() {
@@ -78,15 +55,15 @@ function handleClear() {
 }
 </script>
 
-<!-- Floating search bar - hidden when panel is open (panel has its own search in same position) -->
+<!-- Floating search bar - hidden when panel is open (panel has its own search in same position).
+     Single input: the Worldwide/Nearby scope toggle lives inside the panel only. -->
 {#if !isOpen}
-	<div class="pointer-events-auto flex w-full flex-col-reverse gap-2 md:w-80 md:flex-col">
-		<!-- Search input -->
+	<div class="pointer-events-auto w-full md:w-80">
 		<div class="rounded-lg bg-white shadow-lg dark:bg-dark dark:shadow-black/30">
 			<SearchInput
 				bind:this={searchInputComponent}
 				value={searchQuery}
-				{placeholder}
+				placeholder={$_('search.placeholderPlaces')}
 				ariaLabel={$_('aria.searchInput')}
 				rounded
 				on:input={handleInput}
@@ -109,42 +86,11 @@ function handleClear() {
 								class="h-4 w-4 animate-spin rounded-full border-2 border-gray-300 border-t-link dark:border-white/30 dark:border-t-white"
 							></div>
 						</div>
+					{:else if pillCount}
+						<NearbyCountPill count={pillCount} />
 					{/if}
 				</svelte:fragment>
 			</SearchInput>
-		</div>
-
-		<!-- Segmented tabs (order matches panel: Worldwide, Nearby) -->
-		<div class="flex gap-1.5 md:gap-1.5" role="radiogroup" aria-label={$_('aria.switchMode')}>
-			<button
-				type="button"
-				role="radio"
-				aria-checked={mode === 'search'}
-				on:click={() => handleModeSwitch('search')}
-				class="inline-flex items-center gap-1.5 whitespace-nowrap rounded-full px-4 py-2.5 text-sm font-medium shadow-sm transition-colors md:px-3 md:py-1.5 md:text-xs
-					{mode === 'search'
-					? 'bg-link text-white'
-					: 'bg-white text-gray-600 hover:bg-gray-50 dark:bg-dark dark:text-white/70 dark:hover:bg-gray-700'}"
-			>
-				<Icon type="fa" icon="globe" w="14" h="14" />
-				{$_('search.worldwide')}
-			</button>
-			<button
-				type="button"
-				role="radio"
-				aria-checked={mode === 'nearby'}
-				on:click={() => handleModeSwitch('nearby')}
-				class="inline-flex items-center gap-1.5 whitespace-nowrap rounded-full px-4 py-2.5 text-sm font-medium shadow-sm transition-colors md:px-3 md:py-1.5 md:text-xs
-					{mode === 'nearby'
-					? 'bg-link text-white'
-					: 'bg-white text-gray-600 hover:bg-gray-50 dark:bg-dark dark:text-white/70 dark:hover:bg-gray-700'}"
-			>
-				<Icon type="fa" icon="list" w="14" h="14" />
-				{$_('search.nearby')}{#if isLoadingCount}<span class="opacity-60">
-						...</span
-					>{:else if formattedCount}
-					{formattedCount}{/if}
-			</button>
 		</div>
 	</div>
 {/if}
