@@ -66,7 +66,7 @@ export function setTrigger(el: HTMLElement) {
 		role="dialog"
 		aria-modal="true"
 		aria-labelledby={titleId}
-		class="fixed inset-x-4 bottom-4 z-[2000] flex max-h-[85dvh] flex-col overflow-hidden rounded-2xl border border-gray-300 bg-white px-5 py-5 shadow-2xl dark:border-white/95 dark:bg-dark sm:inset-auto sm:top-1/2 sm:left-1/2 sm:h-auto sm:w-80 sm:max-h-[90vh] sm:translate-x-[-50%] sm:translate-y-[-50%] sm:rounded-xl sm:px-6 sm:py-6"
+		class="fixed inset-x-4 bottom-[max(1rem,env(safe-area-inset-bottom))] z-[2000] flex max-h-[85dvh] flex-col overflow-hidden rounded-2xl border border-gray-300 bg-white px-5 py-5 shadow-2xl dark:border-white/95 dark:bg-dark sm:inset-auto sm:top-1/2 sm:left-1/2 sm:h-auto sm:w-80 sm:max-h-[90dvh] sm:translate-x-[-50%] sm:translate-y-[-50%] sm:rounded-xl sm:px-6 sm:py-6"
 	>
 		<div class="mb-4 flex items-center justify-between">
 			<h2 id={titleId} class="text-lg font-semibold text-primary dark:text-white">
