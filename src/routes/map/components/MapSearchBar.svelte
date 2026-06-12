@@ -121,11 +121,12 @@ function handleClear() {
 				role="radio"
 				aria-checked={mode === 'search'}
 				on:click={() => handleModeSwitch('search')}
-				class="rounded-full px-4 py-2.5 text-sm font-medium shadow-sm transition-colors md:px-3 md:py-1.5 md:text-xs
+				class="inline-flex items-center gap-1.5 rounded-full px-4 py-2.5 text-sm font-medium shadow-sm transition-colors md:px-3 md:py-1.5 md:text-xs
 					{mode === 'search'
 					? 'bg-link text-white'
 					: 'bg-white text-gray-600 hover:bg-gray-50 dark:bg-dark dark:text-white/70 dark:hover:bg-gray-700'}"
 			>
+				<Icon type="fa" icon="globe" w="14" h="14" />
 				{$_('search.worldwide')}
 			</button>
 			<button
