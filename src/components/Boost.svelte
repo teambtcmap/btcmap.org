@@ -33,7 +33,7 @@ const handleBoostComplete = () => {
 	<OutClick on:outclick={handleOutClick}>
 		<div
 			transition:fly={{ y: 200, duration: 300 }}
-			class="center-fixed z-[2000] max-h-[90vh] w-[90vw] overflow-auto rounded-xl border border-gray-300 bg-white p-6 text-left shadow-2xl md:w-[430px] dark:border-white/95 dark:bg-dark"
+			class="center-fixed z-[2000] max-h-[90dvh] w-[90vw] overflow-auto rounded-xl border border-gray-300 bg-white p-6 text-left shadow-2xl md:w-[430px] dark:border-white/95 dark:bg-dark"
 		>
 			<CloseButton on:click={closeModal} />
 
