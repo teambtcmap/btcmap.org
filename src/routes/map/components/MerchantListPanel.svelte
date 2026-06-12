@@ -524,7 +524,9 @@ onDestroy(() => {
 			? 'fixed right-0 bottom-0 left-0 pb-[max(1rem,env(safe-area-inset-bottom))] shadow-2xl'
 			: 'absolute top-3 bottom-[max(3rem,env(safe-area-inset-bottom))] left-3 w-80 rounded-lg shadow-lg dark:shadow-black/30'}"
 		class:rounded-t-3xl={isMobile && !isOpen}
-		style={isMobile ? `height: ${$sheetHeight}px; will-change: height;` : ''}
+		style={isMobile
+			? `height: calc(${$sheetHeight}px + env(safe-area-inset-bottom)); max-height: 100dvh; will-change: height;`
+			: ''}
 		role="complementary"
 		aria-label={$_('aria.merchantList')}
 	>
@@ -886,7 +888,7 @@ onDestroy(() => {
 			<!-- Peek: input facade — opens the sheet without focusing a real input
 			     (keyboard stays down until the user taps the real input and types).
 			     The whole facade is also a swipe surface like the drawer's peek. -->
-			<div id="merchant-sheet-content" class="px-3 pt-1">
+			<div id="merchant-sheet-content" class="px-3">
 				<button
 					bind:this={facadeElement}
 					type="button"

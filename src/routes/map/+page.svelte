@@ -1885,7 +1885,8 @@ onDestroy(() => {
 	@media (max-width: 767px) {
 		.map-container :global(.maplibregl-ctrl-bottom-left),
 		.map-container :global(.maplibregl-ctrl-bottom-right) {
-			bottom: var(--search-sheet-peek);
+			/* the sheet renders at peek + safe-area inset, mirror that */
+			bottom: calc(var(--search-sheet-peek) + env(safe-area-inset-bottom));
 		}
 	}
 </style>
