@@ -12,11 +12,7 @@ import {
 	type CategoryKey,
 	placeMatchesCategory,
 } from "$lib/categoryMapping";
-import {
-	BREAKPOINTS,
-	MERCHANT_LIST_LOW_ZOOM,
-	MERCHANT_LIST_MIN_ZOOM,
-} from "$lib/constants";
+import { BREAKPOINTS, MERCHANT_LIST_LOW_ZOOM } from "$lib/constants";
 import { _ } from "$lib/i18n";
 import { merchantDrawer } from "$lib/merchantDrawerStore";
 import type { MerchantListMode } from "$lib/merchantListStore";
@@ -240,12 +236,15 @@ function getCategoryButtonClass(
 	return "cursor-not-allowed bg-gray-100 text-gray-400 dark:bg-white/5 dark:text-white/30";
 }
 
-// Show "zoom in" message when:
-// 1. Below zoom 11 (always - no data fetched at this level)
-// 2. Between zoom 11-14 with no merchants (too many results in dense area)
+// Show "zoom in" prompt when:
+// 1. Below the list floor (no data fetched at this zoom)
+// 2. Results were blanked because the area is too dense (>fetch ceiling):
+//    an empty list but a non-zero total count
+// A genuinely empty area (totalCount === 0) falls through to the
+// "No merchants visible in current view" body state instead.
 $: showZoomInMessage =
 	currentZoom < MERCHANT_LIST_LOW_ZOOM ||
-	(currentZoom < MERCHANT_LIST_MIN_ZOOM && merchants.length === 0);
+	(merchants.length === 0 && totalCount > 0);
 $: isTruncated = totalCount > merchants.length;
 
 // Body scroll lock on mobile when panel is open
