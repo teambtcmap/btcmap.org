@@ -41,8 +41,8 @@ export const MAP_FIT_BOUNDS_PADDING = 50;
 
 // MERCHANT LIST ZOOM BEHAVIOR:
 // ┌─────────────────────────────────────────────────────────────────────────┐
-// │ Zoom < 11  │ No data shown - "zoom in" message                          │
-// │ Zoom 11-14 │ API search with 1.5x radius, max 99 results                │
+// │ Zoom < 10  │ No data shown - "zoom in" message                          │
+// │ Zoom 10-14 │ API search (1.5x radius): nearest 99; "zoom in" if >750     │
 // │ Zoom 15+   │ Use loaded markers with 1.5x bounds, names visible, enrich when open      │
 // └─────────────────────────────────────────────────────────────────────────┘
 // All zoom levels use 1.5x radius multiplier for consistent "nearby" count.
@@ -61,20 +61,26 @@ export const BOOSTED_CLUSTERING_MAX_ZOOM = 5;
 // Fetches enriched Place data (icons, addresses) only when panel is open
 export const MERCHANT_LIST_MIN_ZOOM = 15;
 
-// Zoom 11-14: "Low density" mode - use API search with result limit
-// If results exceed MERCHANT_LIST_MAX_ITEMS, we hide the list and show "zoom in"
-export const MERCHANT_LIST_LOW_ZOOM = 11;
+// Zoom 10-14: "Low density" mode - use API search.
+// Shows the nearest MERCHANT_LIST_MAX_ITEMS; only blanks to "zoom in" when
+// matches exceed MERCHANT_LIST_FETCH_CEILING (a payload guard).
+export const MERCHANT_LIST_LOW_ZOOM = 10;
 
 // Max merchants to display in list and count shown on button
 // When count exceeds this, button shows ">99" and list shows 99 items
 export const MERCHANT_LIST_MAX_ITEMS = 99;
+
+// Payload guard for the low-zoom API search: if more than this many places
+// match, skip rendering and show "zoom in" instead of downloading them all.
+// Distinct from MERCHANT_LIST_MAX_ITEMS (the display/slice cap) and far higher,
+// so dense areas show the nearest 99 rather than blanking.
+export const MERCHANT_LIST_FETCH_CEILING = 750;
 
 // Radius multiplier for "nearby" search (extends beyond viewport for context)
 // Used consistently across all zoom levels for predictable count behavior
 export const NEARBY_RADIUS_MULTIPLIER = 1.5;
 
 // Map viewport marker loading
-export const MAX_LOADED_MARKERS = 200;
 export const VIEWPORT_BATCH_SIZE = 25;
 export const VIEWPORT_BUFFER_PERCENT = 0.2;
 export const MAP_DEBOUNCE_DELAY = 300;
