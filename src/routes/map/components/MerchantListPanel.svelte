@@ -578,8 +578,9 @@ onDestroy(() => {
 						{/each}
 					</ul>
 				{/if}
-			{:else if showZoomInMessage}
-				<!-- Nearby mode: clickable zoom in prompt -->
+			{:else if showZoomInMessage && !isLoadingList}
+				<!-- Nearby mode: clickable zoom in prompt (loading spinner takes
+				     precedence so a stale count-only state can't flash this) -->
 				<button
 					type="button"
 					on:click={handleZoomToNearbyLevel}

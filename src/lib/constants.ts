@@ -70,10 +70,12 @@ export const MERCHANT_LIST_LOW_ZOOM = 10;
 // When count exceeds this, button shows ">99" and list shows 99 items
 export const MERCHANT_LIST_MAX_ITEMS = 99;
 
-// Payload guard for the low-zoom API search: if more than this many places
-// match, skip rendering and show "zoom in" instead of downloading them all.
-// Distinct from MERCHANT_LIST_MAX_ITEMS (the display/slice cap) and far higher,
-// so dense areas show the nearest 99 rather than blanking.
+// Relevance/render guard for the low-zoom API search: above this many matches
+// we blank the list and show "zoom in" rather than render an unhelpfully dense
+// set. Applied client-side AFTER the full response is fetched, so it does not
+// reduce the download — a server-side distance-sorted limit would be needed for
+// that. Distinct from MERCHANT_LIST_MAX_ITEMS (the display/slice cap) and far
+// higher, so dense areas show the nearest 99 rather than blanking.
 export const MERCHANT_LIST_FETCH_CEILING = 750;
 
 // Radius multiplier for "nearby" search (extends beyond viewport for context)
