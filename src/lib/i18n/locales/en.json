@@ -112,9 +112,7 @@
 		}
 	},
 	"search": {
-		"placeholderWorldwide": "Search worldwide...",
 		"placeholderPlaces": "Search places...",
-		"placeholderNearby": "Search nearby...",
 		"searching": "Searching...",
 		"noResults": "No results found",
 		"noResultsFor": "No results found for \"{query}\"",

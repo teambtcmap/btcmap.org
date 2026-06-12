@@ -37,9 +37,7 @@
 		"countries": "Pays"
 	},
 	"search": {
-		"placeholderWorldwide": "Rechercher dans le monde entier...",
 		"placeholderPlaces": "Rechercher des lieux...",
-		"placeholderNearby": "Rechercher à proximité...",
 		"searching": "Recherche en cours...",
 		"noResults": "Aucun résultat trouvé",
 		"noResultsFor": "Aucun résultat trouvé pour « {query} »",

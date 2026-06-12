@@ -144,6 +144,11 @@ function handleModeSwitch(newMode: MerchantListMode) {
 	}
 }
 
+function handleSearchWorldwideCta() {
+	trackEvent("search_worldwide_cta_click");
+	handleModeSwitch("search");
+}
+
 function handleCategorySelect(category: CategoryKey) {
 	// Guard against clicks on disabled buttons (Svelte fires click even when disabled)
 	if (!hasMatchingMerchants(category, categoryCounts)) return;
@@ -210,6 +215,19 @@ $: filteredSearchResults =
 	selectedCategory === "all"
 		? searchResults
 		: searchResults.filter((p) => placeMatchesCategory(p, selectedCategory));
+
+// Nearby-mode client-side name filter (also drives the Nearby tab count while typing)
+$: filteredMerchants = nearbyFilter
+	? merchants.filter((m) => {
+			const enriched = placeDetailsCache.get(m.id);
+			const name = enriched?.name || m.name || "";
+			return name.toLowerCase().includes(nearbyFilter.toLowerCase());
+		})
+	: merchants;
+// While filtering, the tab shows the filtered count — even (0), which signals "try worldwide"
+$: nearbyTabCount = nearbyFilter
+	? `(${filteredMerchants.length})`
+	: formatNearbyCount(totalCount);
 
 // Helper function to check if a category has matching merchants
 // Note: counts param required for Svelte reactivity (indirect deps aren't tracked)
@@ -353,9 +371,7 @@ onDestroy(() => {
 			<SearchInput
 				bind:this={searchInputComponent}
 				value={mode === 'search' ? searchQuery : nearbyFilter}
-				placeholder={mode === 'search'
-					? $_('search.placeholderWorldwide')
-					: $_('search.placeholderNearby')}
+				placeholder={$_('search.placeholderPlaces')}
 				ariaLabel={mode === 'search' ? $_('search.switchToWorldwide') : $_('search.filterResults')}
 				on:input={handleUnifiedInput}
 				on:keydown={handleUnifiedKeyDown}
@@ -418,7 +434,7 @@ onDestroy(() => {
 					<Icon type="fa" icon="list" w="14" h="14" />
 					{$_('search.nearby')}{#if isLoadingList}<span class="opacity-60">
 							...</span
-						>{:else}{formatNearbyCount(totalCount)}{/if}
+						>{:else}{nearbyTabCount}{/if}
 				</button>
 			</div>
 
@@ -611,20 +627,30 @@ onDestroy(() => {
 				</div>
 			{:else}
 				<!-- Nearby mode: merchant list -->
-				{@const filteredMerchants = nearbyFilter
-					? merchants.filter((m) => {
-							const enriched = placeDetailsCache.get(m.id);
-							const name = enriched?.name || m.name || '';
-							return name.toLowerCase().includes(nearbyFilter.toLowerCase());
-						})
-					: merchants}
 				{#if merchants.length === 0}
 					<div class="px-3 py-8 text-center text-sm text-body dark:text-white/70">
 						{$_('search.noVisible')}
 					</div>
 				{:else if filteredMerchants.length === 0 && nearbyFilter}
-					<div class="px-3 py-8 text-center text-sm text-body dark:text-white/70">
-						{$_('search.noResultsFor', { values: { query: nearbyFilter } })}
+					<!-- Filter matched nothing nearby: nudge toward worldwide instead of a blank list -->
+					<div class="flex flex-col items-center justify-center gap-1 px-9 py-12 text-center">
+						<div class="mb-2 grid h-14 w-14 place-items-center rounded-full bg-gray-100 dark:bg-white/5">
+							<Icon w="26" h="26" icon="search" type="material" class="text-gray-400 dark:text-white/40" />
+						</div>
+						<p class="text-base font-semibold text-primary dark:text-white">
+							{$_('search.noNearbyMatches', { values: { query: nearbyFilter } })}
+						</p>
+						<p class="mb-3 text-sm text-body dark:text-white/70">
+							{$_('search.noNearbyMatchesHint')}
+						</p>
+						<button
+							type="button"
+							on:click={handleSearchWorldwideCta}
+							class="inline-flex items-center gap-2 rounded-full bg-link px-4 py-2.5 text-sm font-semibold text-white transition-colors hover:bg-hover"
+						>
+							<Icon type="fa" icon="globe" w="16" h="16" />
+							{$_('search.searchWorldwide')}
+						</button>
 					</div>
 				{:else}
 					<ul class="flex flex-col gap-2 bg-neutral-50 p-2 dark:bg-white/10">

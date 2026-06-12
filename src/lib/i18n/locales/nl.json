@@ -112,9 +112,7 @@
 		}
 	},
 	"search": {
-		"placeholderWorldwide": "Zoek wereldwijd...",
 		"placeholderPlaces": "Zoek plaatsen...",
-		"placeholderNearby": "Zoek in de buurt...",
 		"searching": "Aan het zoeken...",
 		"noResults": "Geen resultaten gevonden",
 		"noResultsFor": "Er zijn geen resultaten gevonden voor \"{query}\"",

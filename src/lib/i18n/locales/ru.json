@@ -37,9 +37,7 @@
 		"countries": "Страны"
 	},
 	"search": {
-		"placeholderWorldwide": "Поиск по всему миру...",
 		"placeholderPlaces": "Поиск мест...",
-		"placeholderNearby": "Поиск поблизости...",
 		"searching": "Поиск...",
 		"noResults": "Результатов не найдено",
 		"noResultsFor": "Результатов не найдено по запросу \"{query}\"",

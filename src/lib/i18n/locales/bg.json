@@ -643,8 +643,6 @@
 		"noNearbyMatchesHint": "Няма места близо до вас за това търсене. Опитайте да разширите до целия свят.",
 		"noVisible": "Няма видими търговци в текущия изглед",
 		"placeholder": "Търсене...",
-		"placeholderNearby": "Търсене наблизо...",
-		"placeholderWorldwide": "Търсене по целия свят...",
 		"placeholderPlaces": "Търсене на места...",
 		"prompt": "Търсете търговци по име",
 		"resultsCount": "{count} резултат(а)",
