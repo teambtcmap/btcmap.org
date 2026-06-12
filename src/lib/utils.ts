@@ -65,6 +65,13 @@ export const formatNearbyCount = (count: number): string => {
 	return `(${count})`;
 };
 
+// Formats the nearby count for the badge pill: '' when 0, '>99' above the list cap, 'N' otherwise
+export const formatNearbyPillCount = (count: number): string => {
+	if (count <= 0) return "";
+	if (count > MERCHANT_LIST_MAX_ITEMS) return `>${MERCHANT_LIST_MAX_ITEMS}`;
+	return String(count);
+};
+
 // Yields to main thread to prevent UI freezes during heavy operations (browser-only)
 export function yieldToMain(): Promise<void> {
 	// SSR guard - window not available during server rendering

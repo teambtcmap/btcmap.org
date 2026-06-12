@@ -7,6 +7,7 @@ import {
 	buildMetaDescription,
 	calculateDistance,
 	formatDistance,
+	formatNearbyPillCount,
 	getCommunitiesAtCoordinates,
 	isValidLatitude,
 	isValidLightningTip,
@@ -390,6 +391,22 @@ describe("sanitizeUrl", () => {
 		it("should handle phone numbers", () => {
 			expect(sanitizeUrl("tel:+15551234567")).toBe("tel:+15551234567");
 		});
+	});
+});
+
+describe("formatNearbyPillCount", () => {
+	it("returns empty string for zero or negative counts", () => {
+		expect(formatNearbyPillCount(0)).toBe("");
+		expect(formatNearbyPillCount(-1)).toBe("");
+	});
+
+	it("returns plain number within limit", () => {
+		expect(formatNearbyPillCount(1)).toBe("1");
+		expect(formatNearbyPillCount(99)).toBe("99");
+	});
+
+	it("caps at >99 above the list limit", () => {
+		expect(formatNearbyPillCount(100)).toBe(">99");
 	});
 });
 
