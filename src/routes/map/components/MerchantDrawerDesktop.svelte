@@ -113,7 +113,7 @@ export function openDrawer(id: number) {
 	<div
 		bind:this={drawerElement}
 		in:fly={{ x: -MERCHANT_DRAWER_WIDTH, duration: 300 }}
-		class="absolute top-3 z-[1002] max-h-[calc(100%-1.5rem)] w-full overflow-y-auto rounded-lg bg-white shadow-lg transition-[left] duration-200 dark:bg-dark"
+		class="absolute top-3 z-[1002] max-h-[calc(100%-0.75rem-max(3rem,env(safe-area-inset-bottom)))] w-full overflow-y-auto rounded-lg bg-white shadow-lg transition-[left] duration-200 dark:bg-dark"
 		style="left: {drawerLeft}px; max-width: {MERCHANT_DRAWER_WIDTH}px"
 		role="dialog"
 		aria-label={$_("mapDrawer.merchantDetails")}
