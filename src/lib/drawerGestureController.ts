@@ -4,6 +4,7 @@
 import { spring } from "svelte/motion";
 import { derived, get, writable } from "svelte/store";
 
+import type { EventName } from "$lib/analytics";
 import { trackEvent } from "$lib/analytics";
 
 import {
@@ -36,20 +37,45 @@ interface InternalGestureState {
 	isInCollapseDrag: boolean;
 }
 
-function createDrawerGestureController() {
+type DrawerGestureEvents = {
+	dismiss: EventName;
+	expand: EventName;
+	collapse: EventName;
+};
+
+export type DrawerGestureOptions = {
+	peekHeight?: number;
+	// When false the sheet cannot be dragged below peek (no dismiss gesture)
+	canDismiss?: boolean;
+	events?: DrawerGestureEvents;
+};
+
+export function createDrawerGestureController(
+	options: DrawerGestureOptions = {},
+) {
+	const {
+		peekHeight = PEEK_HEIGHT,
+		canDismiss = true,
+		events = {
+			dismiss: "drawer_swipe_dismiss",
+			expand: "drawer_swipe_expand",
+			collapse: "drawer_swipe_collapse",
+		},
+	} = options;
+
 	// Public state (exposed to component)
 	const expanded = writable(false);
 	const isDragging = writable(false);
 	const expandedHeight = writable(500);
 
 	// Spring-animated height
-	const drawerHeight = spring(PEEK_HEIGHT, SPRING_CONFIG);
+	const drawerHeight = spring(peekHeight, SPRING_CONFIG);
 
 	// Internal gesture tracking (not exposed)
 	const internal: InternalGestureState = {
 		activePointerId: null,
 		startY: 0,
-		initialHeight: PEEK_HEIGHT,
+		initialHeight: peekHeight,
 		velocityState: createVelocityState(0, 0),
 		touchStartY: null,
 		isInCollapseDrag: false,
@@ -107,7 +133,7 @@ function createDrawerGestureController() {
 		const isExpanded = get(expanded);
 		const maxHeight = get(expandedHeight);
 		const deltaY = internal.startY - currentY;
-		const minHeight = isExpanded ? PEEK_HEIGHT : 0;
+		const minHeight = isExpanded || !canDismiss ? peekHeight : 0;
 		const newHeight = Math.max(
 			minHeight,
 			Math.min(maxHeight, internal.initialHeight + deltaY),
@@ -139,12 +165,13 @@ function createDrawerGestureController() {
 		// Check for dismiss gesture when in peek state
 		const velocity = internal.velocityState.velocity;
 		const shouldDismiss =
+			canDismiss &&
 			!isExpanded &&
 			(velocity < -VELOCITY_THRESHOLD ||
-				finalHeight < PEEK_HEIGHT - DISMISS_THRESHOLD);
+				finalHeight < peekHeight - DISMISS_THRESHOLD);
 
 		if (shouldDismiss) {
-			trackEvent("drawer_swipe_dismiss");
+			trackEvent(events.dismiss);
 			onDismiss?.();
 		} else {
 			const snapState = determineSnapState(
@@ -155,9 +182,7 @@ function createDrawerGestureController() {
 			);
 			// Track swipe expand/collapse only when state changes
 			if (snapState.expanded !== isExpanded) {
-				trackEvent(
-					snapState.expanded ? "drawer_swipe_expand" : "drawer_swipe_collapse",
-				);
+				trackEvent(snapState.expanded ? events.expand : events.collapse);
 			}
 			expanded.set(snapState.expanded);
 			drawerHeight.set(snapState.height);
@@ -173,7 +198,7 @@ function createDrawerGestureController() {
 		const maxHeight = get(expandedHeight);
 
 		// Snap back to previous state
-		drawerHeight.set(isExpanded ? maxHeight : PEEK_HEIGHT);
+		drawerHeight.set(isExpanded ? maxHeight : peekHeight);
 		resetInternalState();
 	}
 
@@ -220,7 +245,7 @@ function createDrawerGestureController() {
 				const maxHeight = get(expandedHeight);
 				const dragDelta = internal.startY - currentY;
 				const newHeight = Math.max(
-					PEEK_HEIGHT,
+					peekHeight,
 					Math.min(maxHeight, internal.initialHeight + dragDelta),
 				);
 				drawerHeight.set(newHeight, { hard: true });
@@ -248,7 +273,7 @@ function createDrawerGestureController() {
 			);
 			// Track collapse from content swipe (can only collapse, not expand, from content drag)
 			if (!snapState.expanded) {
-				trackEvent("drawer_swipe_collapse");
+				trackEvent(events.collapse);
 			}
 			expanded.set(snapState.expanded);
 			drawerHeight.set(snapState.height);
@@ -264,7 +289,7 @@ function createDrawerGestureController() {
 
 	function collapse() {
 		expanded.set(false);
-		drawerHeight.set(PEEK_HEIGHT);
+		drawerHeight.set(peekHeight);
 	}
 
 	function toggle() {
@@ -277,7 +302,7 @@ function createDrawerGestureController() {
 
 	function resetToPeek() {
 		expanded.set(false);
-		drawerHeight.set(PEEK_HEIGHT, { hard: true });
+		drawerHeight.set(peekHeight, { hard: true });
 		resetInternalState();
 	}
 
