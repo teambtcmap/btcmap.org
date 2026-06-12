@@ -398,11 +398,12 @@ onDestroy(() => {
 					role="radio"
 					on:click={() => handleModeSwitch('search')}
 					aria-checked={mode === 'search'}
-					class="flex-1 rounded-md px-3 py-1.5 text-xs font-medium transition-colors
+					class="flex flex-1 items-center justify-center gap-1.5 rounded-md px-3 py-1.5 text-xs font-medium transition-colors
 						{mode === 'search'
 						? 'bg-white text-primary shadow-sm dark:bg-white/10 dark:text-white'
 						: 'text-body hover:text-primary dark:text-white/70 dark:hover:text-white'}"
 				>
+					<Icon type="fa" icon="globe" w="14" h="14" />
 					{$_('search.worldwide')}
 				</button>
 				<button
