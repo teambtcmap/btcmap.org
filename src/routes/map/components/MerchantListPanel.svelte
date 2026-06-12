@@ -136,6 +136,44 @@ function onFacadePointerDown(event: PointerEvent) {
 function onFacadePointerUp(event: PointerEvent) {
 	sheetGesture.handlePointerUp(event, facadeElement);
 }
+
+// Expanded header (input row + toggle/chips) drags the sheet too. A small
+// vertical slop decides tap-vs-drag so the input, mode toggle and category
+// chips stay tappable; past the slop the gesture controller takes over and
+// captures the pointer (so releasing a drag over a chip doesn't click it).
+const HEADER_DRAG_SLOP = 8;
+let headerDragStartY: number | null = null;
+let headerDragging = false;
+
+function onHeaderPointerDown(event: PointerEvent) {
+	if (!isMobile) return;
+	headerDragStartY = event.clientY;
+	headerDragging = false;
+}
+function onHeaderPointerMove(event: PointerEvent) {
+	if (!isMobile || headerDragStartY === null) return;
+	if (!headerDragging) {
+		if (Math.abs(event.clientY - headerDragStartY) < HEADER_DRAG_SLOP) return;
+		headerDragging = true;
+		sheetGesture.handlePointerDown(event, event.currentTarget as HTMLElement);
+	} else {
+		sheetGesture.handlePointerMove(event);
+	}
+}
+function onHeaderPointerUp(event: PointerEvent) {
+	if (headerDragging) {
+		sheetGesture.handlePointerUp(event, event.currentTarget as HTMLElement);
+	}
+	headerDragStartY = null;
+	headerDragging = false;
+}
+function onHeaderPointerCancel(event: PointerEvent) {
+	if (headerDragging) {
+		sheetGesture.handlePointerCancel(event);
+	}
+	headerDragStartY = null;
+	headerDragging = false;
+}
 function onContentTouchStart(event: TouchEvent) {
 	if (isMobile) sheetGesture.handleContentTouchStart(event);
 }
@@ -515,8 +553,16 @@ onDestroy(() => {
 		{#if locationAnnouncement}
 			<p class="sr-only" aria-live="polite">{locationAnnouncement}</p>
 		{/if}
-		<!-- Search input - uses shared SearchInput component -->
-		<div class="shrink-0 border-b border-gray-100 dark:border-white/10">
+		<!-- Search input - uses shared SearchInput component.
+		     On mobile the row doubles as a sheet drag surface (tap-vs-drag slop). -->
+		<div
+			class="shrink-0 border-b border-gray-100 dark:border-white/10"
+			class:touch-none={isMobile}
+			on:pointerdown={onHeaderPointerDown}
+			on:pointermove={onHeaderPointerMove}
+			on:pointerup={onHeaderPointerUp}
+			on:pointercancel={onHeaderPointerCancel}
+		>
 			<SearchInput
 				bind:this={searchInputComponent}
 				value={mode === 'search' ? searchQuery : nearbyFilter}
@@ -555,8 +601,15 @@ onDestroy(() => {
 			</SearchInput>
 		</div>
 
-		<!-- Filters and controls -->
-		<div class="shrink-0 border-b border-gray-100 px-3 py-3 dark:border-white/10">
+		<!-- Filters and controls — also a sheet drag surface on mobile -->
+		<div
+			class="shrink-0 border-b border-gray-100 px-3 py-3 dark:border-white/10"
+			class:touch-none={isMobile}
+			on:pointerdown={onHeaderPointerDown}
+			on:pointermove={onHeaderPointerMove}
+			on:pointerup={onHeaderPointerUp}
+			on:pointercancel={onHeaderPointerCancel}
+		>
 			<!-- Mode toggle buttons -->
 			<div
 				class="flex rounded-lg bg-gray-100 p-1 dark:bg-white/5"
