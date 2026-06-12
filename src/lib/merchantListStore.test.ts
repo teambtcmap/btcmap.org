@@ -2,6 +2,7 @@ import { get } from "svelte/store";
 import type { Mock } from "vitest";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 
+import { MERCHANT_LIST_FETCH_CEILING } from "$lib/constants";
 import type { Place } from "$lib/types";
 
 // Mock the centralized axios instance
@@ -358,6 +359,37 @@ describe("merchantListStore", () => {
 
 			expect(state.merchants).toEqual([]);
 			expect(state.totalCount).toBe(60);
+		});
+
+		it("shows nearest items when matches are under the fetch ceiling", async () => {
+			const mockPlaces = Array.from({ length: 150 }, (_, i) =>
+				createMockPlace({ id: i }),
+			);
+			(api.get as Mock).mockResolvedValueOnce({ data: mockPlaces });
+
+			await merchantList.fetchAndReplaceList({ lat: 0, lon: 0 }, 10, {
+				hideIfExceeds: MERCHANT_LIST_FETCH_CEILING,
+			});
+			const state = get(merchantList);
+
+			expect(state.merchants.length).toBe(99); // MERCHANT_LIST_MAX_ITEMS
+			expect(state.totalCount).toBe(150);
+		});
+
+		it("blanks the list when matches exceed the fetch ceiling", async () => {
+			const mockPlaces = Array.from(
+				{ length: MERCHANT_LIST_FETCH_CEILING + 1 },
+				(_, i) => createMockPlace({ id: i }),
+			);
+			(api.get as Mock).mockResolvedValueOnce({ data: mockPlaces });
+
+			await merchantList.fetchAndReplaceList({ lat: 0, lon: 0 }, 10, {
+				hideIfExceeds: MERCHANT_LIST_FETCH_CEILING,
+			});
+			const state = get(merchantList);
+
+			expect(state.merchants).toEqual([]);
+			expect(state.totalCount).toBe(MERCHANT_LIST_FETCH_CEILING + 1);
 		});
 
 		it("should store totalCount even when hiding results", async () => {
