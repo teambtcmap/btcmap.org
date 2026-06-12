@@ -209,7 +209,7 @@ function createMerchantListStore() {
 		},
 
 		// Fetch merchants from API and replace the current list
-		// Used at high zoom (17+) and low zoom (11-14) where we can't rely on loaded markers
+		// Used at high zoom (17+) and low zoom (10-14) where we can't rely on loaded markers
 		// hideIfExceeds: if API returns more than this, clear the list (shows "zoom in" message)
 		async fetchAndReplaceList(
 			center: { lat: number; lon: number },
@@ -292,7 +292,7 @@ function createMerchantListStore() {
 		},
 
 		// Fetch only IDs to get count (minimal payload for button badge)
-		// Used at zoom 11-14 when panel is closed - avoids fetching full data unnecessarily
+		// Used at zoom 10-14 when panel is closed - avoids fetching full data unnecessarily
 		async fetchCountOnly(
 			center: { lat: number; lon: number },
 			radiusKm: number,
