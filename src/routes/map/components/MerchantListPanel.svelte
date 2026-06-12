@@ -1,5 +1,6 @@
 <script lang="ts">
-import { onDestroy, tick } from "svelte";
+import { onDestroy, onMount, tick } from "svelte";
+import { get } from "svelte/store";
 
 import Icon from "$components/Icon.svelte";
 import LoadingSpinner from "$components/LoadingSpinner.svelte";
@@ -13,15 +14,18 @@ import {
 	placeMatchesCategory,
 } from "$lib/categoryMapping";
 import { BREAKPOINTS, MERCHANT_LIST_LOW_ZOOM } from "$lib/constants";
+import { SEARCH_SHEET_PEEK_HEIGHT } from "$lib/drawerConfig";
+import { createDrawerGestureController } from "$lib/drawerGestureController";
 import { _ } from "$lib/i18n";
 import { merchantDrawer } from "$lib/merchantDrawerStore";
 import type { MerchantListMode } from "$lib/merchantListStore";
 import { merchantList } from "$lib/merchantListStore";
 import type { Place } from "$lib/types";
 import { userLocation } from "$lib/userLocationStore";
-import { errToast, formatNearbyCount } from "$lib/utils";
+import { errToast, formatNearbyCount, formatNearbyPillCount } from "$lib/utils";
 
 import MerchantListItem from "./MerchantListItem.svelte";
+import NearbyCountPill from "./NearbyCountPill.svelte";
 import { browser } from "$app/environment";
 
 // Get translated category label
@@ -61,6 +65,89 @@ export let onModeChange: ((mode: MerchantListMode) => void) | undefined =
 export let onRefresh: (() => void) | undefined = undefined;
 // Callback to fit map bounds to all search results
 export let onFitSearchResultBounds: (() => void) | undefined = undefined;
+// Map style readiness — gates the mobile peek sheet so it doesn't show over the loading screen
+export let mapReady = false;
+
+// Mobile is locked at init (same pattern as MerchantDrawerHash) to prevent
+// the panel swapping between sheet and card layouts mid-session
+const isMobile = browser && window.innerWidth < BREAKPOINTS.md;
+
+// On mobile the panel is a bottom sheet mirroring the merchant drawer's
+// snap behavior: peek (grabber + single input) <-> full panel. The store's
+// isOpen IS the expanded state; peek = closed, so close() keeping
+// merchants/totalCount keeps the count pill populated at rest.
+const sheetGesture = createDrawerGestureController({
+	peekHeight: SEARCH_SHEET_PEEK_HEIGHT,
+	canDismiss: false,
+	events: {
+		dismiss: "search_sheet_swipe_collapse",
+		expand: "search_sheet_swipe_expand",
+		collapse: "search_sheet_swipe_collapse",
+	},
+});
+const sheetHeight = sheetGesture.drawerHeight;
+const sheetExpanded = sheetGesture.expanded;
+
+let grabberElement: HTMLElement;
+
+// gesture → store (sheet snapped by finger)
+const unsubscribeSheet = sheetGesture.expanded.subscribe((expanded) => {
+	if (!isMobile) return;
+	const open = get(merchantList).isOpen;
+	if (expanded && !open) {
+		merchantList.open();
+		onRefresh?.();
+	} else if (!expanded && open) {
+		nearbyFilter = "";
+		merchantList.close();
+	}
+});
+
+function handlePeekTap() {
+	trackEvent("search_sheet_tap_expand");
+	merchantList.open();
+	onRefresh?.();
+}
+
+function handleGrabberKeydown(event: KeyboardEvent) {
+	if (event.key === "Enter" || event.key === " ") {
+		event.preventDefault();
+		if (isOpen) {
+			handleClose();
+		} else {
+			handlePeekTap();
+		}
+	}
+}
+
+function onSheetPointerDown(event: PointerEvent) {
+	sheetGesture.handlePointerDown(event, grabberElement);
+}
+function onSheetPointerUp(event: PointerEvent) {
+	sheetGesture.handlePointerUp(event, grabberElement);
+}
+function onContentTouchStart(event: TouchEvent) {
+	if (isMobile) sheetGesture.handleContentTouchStart(event);
+}
+function onContentTouchMove(event: TouchEvent) {
+	if (isMobile)
+		sheetGesture.handleContentTouchMove(
+			event,
+			merchantListContainer?.scrollTop ?? 0,
+		);
+}
+function onContentTouchEnd() {
+	if (isMobile) sheetGesture.handleContentTouchEnd();
+}
+
+onMount(() => {
+	if (!isMobile) return;
+	const updateExpandedHeight = () =>
+		sheetGesture.setExpandedHeight(window.innerHeight);
+	updateExpandedHeight();
+	window.addEventListener("resize", updateExpandedHeight);
+	return () => window.removeEventListener("resize", updateExpandedHeight);
+});
 
 // Reference for search input component
 let searchInputComponent: SearchInput;
@@ -163,6 +250,20 @@ function handleCategorySelect(category: CategoryKey) {
 $: isOpen = $merchantList.isOpen;
 $: merchants = $merchantList.merchants;
 $: totalCount = $merchantList.totalCount;
+
+// store → gesture (open/close from peek tap, item click, Escape, search)
+$: if (isMobile) {
+	if (isOpen && !$sheetExpanded) {
+		sheetGesture.expand();
+	} else if (!isOpen && $sheetExpanded) {
+		sheetGesture.collapse();
+	}
+}
+
+// Peek sheet is the mobile resting state; it yields the bottom edge to the
+// merchant drawer (mirrors the old floating bar's max-md:hidden rule)
+$: showPeekSheet = isMobile && mapReady && !$merchantDrawer.isOpen;
+$: pillCount = formatNearbyPillCount(totalCount);
 $: placeDetailsCache = $merchantList.placeDetailsCache;
 $: isLoadingList = $merchantList.isLoadingList;
 $: selectedId = $merchantDrawer.merchantId;
@@ -346,6 +447,7 @@ function handleWindowKeydown(event: KeyboardEvent) {
 
 // Cleanup scroll lock when component is destroyed
 onDestroy(() => {
+	unsubscribeSheet();
 	if (browser && scrollLockActive) {
 		unlockBodyScroll();
 		scrollLockActive = false;
@@ -355,13 +457,38 @@ onDestroy(() => {
 
 <svelte:window on:keydown={handleWindowKeydown} />
 
-{#if isOpen}
+{#if isOpen || showPeekSheet}
 	<section
 		bind:this={panelElement}
-		class="pb-safe absolute inset-0 z-[1001] flex flex-col overflow-hidden bg-white md:absolute md:inset-auto md:top-3 md:bottom-[max(3rem,env(safe-area-inset-bottom))] md:left-3 md:w-80 md:rounded-lg md:pb-0 md:shadow-lg dark:bg-dark dark:shadow-black/30"
+		class="z-[1001] flex flex-col overflow-hidden bg-white dark:bg-dark
+			{isMobile
+			? 'pb-safe fixed right-0 bottom-0 left-0 shadow-2xl'
+			: 'absolute top-3 bottom-[max(3rem,env(safe-area-inset-bottom))] left-3 w-80 rounded-lg shadow-lg dark:shadow-black/30'}"
+		class:rounded-t-3xl={isMobile && !isOpen}
+		style={isMobile ? `height: ${$sheetHeight}px; will-change: height;` : ''}
 		role="complementary"
 		aria-label={$_('aria.merchantList')}
 	>
+		<!-- Drag handle (mobile sheet only) -->
+		{#if isMobile}
+			<div
+				bind:this={grabberElement}
+				class="flex-shrink-0 touch-none"
+				on:pointerdown={onSheetPointerDown}
+				on:pointermove={sheetGesture.handlePointerMove}
+				on:pointerup={onSheetPointerUp}
+				on:pointercancel={sheetGesture.handlePointerCancel}
+				on:keydown={handleGrabberKeydown}
+				tabindex="0"
+				role="button"
+				aria-label={isOpen ? $_('aria.closeMerchantList') : $_('aria.expandMerchantList')}
+				aria-expanded={isOpen}
+			>
+				<div class="mx-auto mt-2 mb-1 h-1.5 w-12 rounded-full bg-gray-300 dark:bg-white/30"></div>
+			</div>
+		{/if}
+
+		{#if isOpen}
 		<!-- Screen reader announcement for location changes -->
 		{#if locationAnnouncement}
 			<p class="sr-only" aria-live="polite">{locationAnnouncement}</p>
@@ -386,6 +513,11 @@ onDestroy(() => {
 						>
 							<Icon w="20" h="20" icon="close" type="material" />
 						</button>
+					{:else if isMobile}
+						<!-- Sheet collapses via grabber/drag; the count pill rides the input at rest -->
+						{#if pillCount}
+							<NearbyCountPill count={pillCount} />
+						{/if}
 					{:else}
 						<button
 							type="button"
@@ -542,11 +674,15 @@ onDestroy(() => {
 			{/if}
 		</div>
 
-		<!-- List content -->
+		<!-- List content (touch handlers: Google-Maps-style collapse drag from scroll top on mobile) -->
 		<div
 			bind:this={merchantListContainer}
 			class="flex-1 overflow-y-auto"
+			style="overscroll-behavior-y: contain; touch-action: pan-y;"
 			tabindex="-1"
+			on:touchstart={onContentTouchStart}
+			on:touchmove={onContentTouchMove}
+			on:touchend={onContentTouchEnd}
 		>
 			{#if mode === 'search'}
 				<!-- Search results -->
@@ -668,5 +804,31 @@ onDestroy(() => {
 				{/if}
 			{/if}
 		</div>
+		{:else}
+			<!-- Peek: input facade — opens the sheet without focusing a real input
+			     (keyboard stays down until the user taps the real input and types) -->
+			<div class="px-3 pt-1">
+				<button
+					type="button"
+					on:click={handlePeekTap}
+					class="relative flex w-full items-center rounded-lg py-3 pr-3 pl-10 text-left"
+					aria-label={$_('aria.searchInput')}
+				>
+					<Icon
+						w="18"
+						h="18"
+						icon="search"
+						type="material"
+						class="pointer-events-none absolute top-1/2 left-3 -translate-y-1/2 text-gray-600 dark:text-white/70"
+					/>
+					<span class="flex-1 truncate text-base text-gray-400 dark:text-white/50">
+						{$_('search.placeholderPlaces')}
+					</span>
+					{#if pillCount}
+						<NearbyCountPill count={pillCount} />
+					{/if}
+				</button>
+			</div>
+		{/if}
 	</section>
 {/if}

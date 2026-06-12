@@ -1803,16 +1803,13 @@ onDestroy(() => {
 <MapLoadingMain progress={mapLoading} status={mapLoadingStatus} />
 
 <!--
-	Floating search bar — desktop: top-left, mobile: bottom-center.
-	Hidden on mobile while the merchant drawer is open so the drawer
-	gets the full bottom area. The bar itself hides when the list panel
+	Floating search bar — desktop only, top-left. On mobile the merchant
+	list panel renders as a bottom sheet whose peek state carries the
+	single search input instead. The bar itself hides when the list panel
 	is open (the panel renders its own search input in the same slot).
 -->
 {#if styleLoaded}
-	<div
-		class="pointer-events-none z-[1000] max-md:fixed max-md:right-3 max-md:bottom-[calc(5rem+env(safe-area-inset-bottom))] max-md:left-3 md:absolute md:top-3 md:left-3
-			{$merchantDrawer.isOpen ? 'max-md:hidden' : ''}"
-	>
+	<div class="pointer-events-none absolute top-3 left-3 z-[1000] hidden md:block">
 		<MapSearchBar
 			onSearch={handlePanelSearch}
 			onFocus={() => {
@@ -1840,6 +1837,7 @@ onDestroy(() => {
 	onModeChange={handleModeChange}
 	onRefresh={() => updateMerchantList({ force: true })}
 	{currentZoom}
+	mapReady={styleLoaded}
 />
 
 {#if styleLoaded}
@@ -1865,4 +1863,14 @@ onDestroy(() => {
 	/* IControl-related rules moved to ./controls/controls.css so any page
 	   that mounts these controls (currently /map and /communities/map)
 	   gets the popup positioning + anchor button styles. */
+
+	/* Mobile: lift the scale bar and OSM attribution above the search
+	   peek sheet (SEARCH_SHEET_PEEK_HEIGHT) so the license credit stays
+	   visible. Scoped to this page — /communities/map has no sheet. */
+	@media (max-width: 767px) {
+		.map-container :global(.maplibregl-ctrl-bottom-left),
+		.map-container :global(.maplibregl-ctrl-bottom-right) {
+			bottom: 110px;
+		}
+	}
 </style>
