@@ -29,7 +29,7 @@ import {
 	DEFAULT_MAP_ZOOM,
 	LABEL_VISIBLE_ZOOM,
 	MAP_DEBOUNCE_DELAY,
-	MERCHANT_LIST_MAX_ITEMS,
+	MERCHANT_LIST_FETCH_CEILING,
 	MERCHANT_LIST_MIN_ZOOM,
 	NEARBY_RADIUS_MULTIPLIER,
 } from "$lib/constants";
@@ -394,7 +394,7 @@ const updateMerchantList = (opts?: { force?: boolean }) => {
 			break;
 		}
 		case "api-with-limit": {
-			// Zoom 11-14: API search; count-only when panel is closed.
+			// Zoom 10-14: API search; count-only when panel is closed.
 			const radiusKm =
 				calculateRadiusKmFromLngLatBounds(bounds) * NEARBY_RADIUS_MULTIPLIER;
 			if (!listOpen || !allowHeavyFetch) {
@@ -406,7 +406,7 @@ const updateMerchantList = (opts?: { force?: boolean }) => {
 				merchantList.fetchAndReplaceList(
 					{ lat: center.lat, lon: center.lng },
 					radiusKm,
-					{ hideIfExceeds: MERCHANT_LIST_MAX_ITEMS },
+					{ hideIfExceeds: MERCHANT_LIST_FETCH_CEILING },
 				);
 			}
 			break;
