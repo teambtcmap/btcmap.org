@@ -309,6 +309,13 @@ $: placeDetailsCache = $merchantList.placeDetailsCache;
 $: isLoadingList = $merchantList.isLoadingList;
 $: selectedId = $merchantDrawer.merchantId;
 $: mode = $merchantList.mode;
+// Nearby count line shown inside the open panel on desktop, which (unlike the
+// mobile peek/input pills) has nowhere else to carry it once the floating bar
+// unmounts. Empty in search mode, while loading, or when there's nothing nearby.
+$: nearbyCountLabel =
+	mode === "nearby" && !isLoadingList && totalCount > 0 && pillCount
+		? $_("search.nearbyCount", { values: { count: pillCount } })
+		: "";
 $: searchResults = $merchantList.searchResults;
 $: isSearching = $merchantList.isSearching;
 $: searchQuery = $merchantList.searchQuery;
@@ -569,6 +576,11 @@ onDestroy(() => {
 					{/if}
 				</svelte:fragment>
 			</SearchInput>
+			{#if !isMobile && nearbyCountLabel}
+				<p class="px-1 pt-1.5 text-xs text-body dark:text-white/60" aria-live="polite">
+					{nearbyCountLabel}
+				</p>
+			{/if}
 		</div>
 
 		<!-- Filters and controls — also a sheet drag surface on mobile -->
