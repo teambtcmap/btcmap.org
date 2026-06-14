@@ -88,6 +88,41 @@ const sheetGesture = createDrawerGestureController({
 });
 const sheetHeight = sheetGesture.drawerHeight;
 const sheetExpanded = sheetGesture.expanded;
+const sheetExpandedHeight = sheetGesture.expandedHeight;
+
+// Floating-card geometry at rest (peek). As the sheet is dragged up it
+// "docks": side/bottom margins and corner radius interpolate to 0 so the
+// floating input grows into the full-width bottom sheet.
+const FLOAT_MARGIN = 12; // px side inset at peek
+const FLOAT_BOTTOM_MIN = 16; // px min bottom inset at peek (more on notched phones)
+const PEEK_RADIUS = 24; // px corner radius at peek (rounded-3xl)
+
+// 0 at peek (fully floating) → 1 at full expand (fully docked)
+$: dockT =
+	isMobile && $sheetExpandedHeight > SEARCH_SHEET_PEEK_HEIGHT
+		? Math.min(
+				1,
+				Math.max(
+					0,
+					($sheetHeight - SEARCH_SHEET_PEEK_HEIGHT) /
+						($sheetExpandedHeight - SEARCH_SHEET_PEEK_HEIGHT),
+				),
+			)
+		: 0;
+
+$: mobileSheetStyle = isMobile
+	? [
+			`height:${$sheetHeight}px`,
+			"max-height:100dvh",
+			`left:${FLOAT_MARGIN * (1 - dockT)}px`,
+			`right:${FLOAT_MARGIN * (1 - dockT)}px`,
+			`bottom:calc(max(${FLOAT_BOTTOM_MIN}px, env(safe-area-inset-bottom)) * ${1 - dockT})`,
+			`border-radius:${PEEK_RADIUS * (1 - dockT)}px`,
+			// safe-area padding only matters once docked (bottom touches the edge)
+			`padding-bottom:calc(max(0.75rem, env(safe-area-inset-bottom)) * ${dockT})`,
+			"will-change:height,left,right,bottom,border-radius",
+		].join(";")
+	: "";
 
 let grabberElement: HTMLElement;
 
@@ -534,16 +569,15 @@ onDestroy(() => {
 		bind:this={panelElement}
 		class="z-[1001] flex flex-col overflow-hidden bg-white dark:bg-dark
 			{isMobile
-			? 'fixed right-0 bottom-0 left-0 pb-[max(1rem,env(safe-area-inset-bottom))] shadow-2xl'
+			? 'fixed shadow-2xl'
 			: 'absolute top-3 bottom-[max(3rem,env(safe-area-inset-bottom))] left-3 w-80 rounded-lg shadow-lg dark:shadow-black/30'}"
-		class:rounded-t-3xl={isMobile && !isOpen}
-		style={isMobile
-			? `height: calc(${$sheetHeight}px + env(safe-area-inset-bottom)); max-height: 100dvh; will-change: height;`
-			: ''}
+		style={mobileSheetStyle}
 		role="complementary"
 		aria-label={$_('aria.merchantList')}
 	>
-		<!-- Drag handle (mobile sheet only) -->
+		<!-- Drag handle. At peek it's a decorative drag affordance (aria-hidden,
+		     non-focusable — the input facade below is the keyboard control);
+		     when expanded it's the focusable collapse control. -->
 		{#if isMobile}
 			<div
 				bind:this={grabberElement}
@@ -560,7 +594,7 @@ onDestroy(() => {
 				aria-controls="merchant-sheet-content"
 				aria-hidden={!isOpen}
 			>
-				<div class="mx-auto mt-2 mb-1 h-1.5 w-12 rounded-full bg-gray-300 dark:bg-white/30"></div>
+				<div class="mx-auto mt-2 mb-0.5 h-1.5 w-10 rounded-full bg-gray-300 dark:bg-white/30"></div>
 			</div>
 		{/if}
 
@@ -902,7 +936,7 @@ onDestroy(() => {
 			<!-- Peek: input facade — opens the sheet without focusing a real input
 			     (keyboard stays down until the user taps the real input and types).
 			     The whole facade is also a swipe surface like the drawer's peek. -->
-			<div id="merchant-sheet-content" class="px-3">
+			<div id="merchant-sheet-content" class="flex flex-1 items-center px-3 pb-2.5">
 				<button
 					bind:this={facadeElement}
 					type="button"
@@ -911,7 +945,7 @@ onDestroy(() => {
 					on:pointermove={sheetGesture.handlePointerMove}
 					on:pointerup={onFacadePointerUp}
 					on:pointercancel={sheetGesture.handlePointerCancel}
-					class="relative flex w-full touch-none items-center rounded-lg py-3 pr-3 pl-10 text-left"
+					class="relative flex w-full touch-none items-center rounded-xl bg-gray-100 py-2 pr-2.5 pl-10 text-left dark:bg-white/5"
 					aria-expanded="false"
 				>
 					<Icon

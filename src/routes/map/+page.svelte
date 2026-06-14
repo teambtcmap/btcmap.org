@@ -1885,16 +1885,18 @@ onDestroy(() => {
 	   that mounts these controls (currently /map and /communities/map)
 	   gets the popup positioning + anchor button styles. */
 
-	/* Mobile: lift the scale bar and OSM attribution above the search
-	   peek sheet so the license credit stays visible. The height comes
-	   from SEARCH_SHEET_PEEK_HEIGHT via the --search-sheet-peek custom
-	   property on .map-container. Scoped to this page — /communities/map
-	   has no sheet. */
+	/* Mobile: lift the scale bar and OSM attribution above the floating
+	   search peek card so the license credit stays visible. The card top
+	   sits at peek height + its float gap (16px) above the safe-area
+	   inset. Peek height comes from SEARCH_SHEET_PEEK_HEIGHT via the
+	   --search-sheet-peek custom property on .map-container. Scoped to
+	   this page — /communities/map has no sheet. */
 	@media (max-width: 767px) {
 		.map-container :global(.maplibregl-ctrl-bottom-left),
 		.map-container :global(.maplibregl-ctrl-bottom-right) {
-			/* the sheet renders at peek + safe-area inset, mirror that */
-			bottom: calc(var(--search-sheet-peek) + env(safe-area-inset-bottom));
+			bottom: calc(
+				var(--search-sheet-peek) + 1.5rem + env(safe-area-inset-bottom)
+			);
 		}
 	}
 </style>
