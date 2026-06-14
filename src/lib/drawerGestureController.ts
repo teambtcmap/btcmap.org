@@ -38,7 +38,8 @@ interface InternalGestureState {
 }
 
 type DrawerGestureEvents = {
-	dismiss: EventName;
+	// Only fired when canDismiss is true
+	dismiss?: EventName;
 	expand: EventName;
 	collapse: EventName;
 };
@@ -171,7 +172,7 @@ export function createDrawerGestureController(
 				finalHeight < peekHeight - DISMISS_THRESHOLD);
 
 		if (shouldDismiss) {
-			trackEvent(events.dismiss);
+			if (events.dismiss) trackEvent(events.dismiss);
 			onDismiss?.();
 		} else {
 			const snapState = determineSnapState(

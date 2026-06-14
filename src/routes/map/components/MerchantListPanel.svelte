@@ -13,7 +13,10 @@ import {
 	type CategoryKey,
 	placeMatchesCategory,
 } from "$lib/categoryMapping";
-import { MERCHANT_LIST_LOW_ZOOM } from "$lib/constants";
+import {
+	MERCHANT_LIST_LOW_ZOOM,
+	MERCHANT_LIST_MAX_ITEMS,
+} from "$lib/constants";
 import { SEARCH_SHEET_PEEK_HEIGHT } from "$lib/drawerConfig";
 import { createDrawerGestureController } from "$lib/drawerGestureController";
 import { _ } from "$lib/i18n";
@@ -79,7 +82,6 @@ const sheetGesture = createDrawerGestureController({
 	peekHeight: SEARCH_SHEET_PEEK_HEIGHT,
 	canDismiss: false,
 	events: {
-		dismiss: "search_sheet_swipe_collapse",
 		expand: "search_sheet_swipe_expand",
 		collapse: "search_sheet_swipe_collapse",
 	},
@@ -97,7 +99,6 @@ const unsubscribeSheet = sheetGesture.expanded.subscribe((expanded) => {
 		merchantList.open();
 		onRefresh?.();
 	} else if (!expanded && open) {
-		nearbyFilter = "";
 		merchantList.close();
 	}
 });
@@ -301,7 +302,14 @@ function handleCategorySelect(category: CategoryKey) {
 
 $: isOpen = $merchantList.isOpen;
 $: merchants = $merchantList.merchants;
+$: allMerchants = $merchantList.allMerchants;
 $: totalCount = $merchantList.totalCount;
+
+// Any close path (Escape, X button, item tap, swipe-collapse) resets the
+// local name filter so reopening always starts clean
+$: if (!isOpen) {
+	nearbyFilter = "";
+}
 
 // store → gesture (open/close from peek tap, item click, Escape, search)
 $: if (isMobile) {
@@ -377,17 +385,23 @@ $: filteredSearchResults =
 		? searchResults
 		: searchResults.filter((p) => placeMatchesCategory(p, selectedCategory));
 
-// Nearby-mode client-side name filter (also drives the Nearby tab count while typing)
+// Nearby-mode client-side name filter — searches the full fetched set
+// (allMerchants, up to the fetch ceiling), not just the 99 displayed rows,
+// so a match ranked beyond the display cap isn't reported as "nothing nearby"
 $: filteredMerchants = nearbyFilter
-	? merchants.filter((m) => {
+	? allMerchants.filter((m) => {
 			const enriched = placeDetailsCache.get(m.id);
 			const name = enriched?.name || m.name || "";
 			return name.toLowerCase().includes(nearbyFilter.toLowerCase());
 		})
 	: merchants;
-// While filtering, the tab shows the filtered count — even (0), which signals "try worldwide"
+// Display stays capped at the usual list size
+$: displayedMerchants = nearbyFilter
+	? filteredMerchants.slice(0, MERCHANT_LIST_MAX_ITEMS)
+	: filteredMerchants;
+// While filtering, the tab shows the true match count — even (0), which signals "try worldwide"
 $: nearbyTabCount = nearbyFilter
-	? `(${filteredMerchants.length})`
+	? `(${formatNearbyPillCount(filteredMerchants.length) || "0"})`
 	: formatNearbyCount(totalCount);
 
 // Helper function to check if a category has matching merchants
@@ -466,7 +480,6 @@ function handleMouseLeave(place: Place) {
 }
 
 function handleClose() {
-	nearbyFilter = ""; // Clear filter when closing
 	merchantList.close();
 }
 
@@ -540,11 +553,12 @@ onDestroy(() => {
 				on:pointerup={onSheetPointerUp}
 				on:pointercancel={sheetGesture.handlePointerCancel}
 				on:keydown={handleGrabberKeydown}
-				tabindex="0"
+				tabindex={isOpen ? 0 : -1}
 				role="button"
 				aria-label={isOpen ? $_('aria.closeMerchantList') : $_('aria.expandMerchantList')}
 				aria-expanded={isOpen}
 				aria-controls="merchant-sheet-content"
+				aria-hidden={!isOpen}
 			>
 				<div class="mx-auto mt-2 mb-1 h-1.5 w-12 rounded-full bg-gray-300 dark:bg-white/30"></div>
 			</div>
@@ -870,7 +884,7 @@ onDestroy(() => {
 					</div>
 				{:else}
 					<ul class="flex flex-col gap-2 bg-neutral-50 p-2 dark:bg-white/10">
-						{#each filteredMerchants as merchant (merchant.id)}
+						{#each displayedMerchants as merchant (merchant.id)}
 							<MerchantListItem
 								{merchant}
 								enrichedData={placeDetailsCache.get(merchant.id) || null}

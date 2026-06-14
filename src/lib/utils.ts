@@ -58,18 +58,17 @@ export const humanizeIconName = (icon: string): string => {
 		.replace(/\b\w/g, (c) => c.toUpperCase());
 };
 
-// Formats nearby merchant count for display: '' when 0, '(>99)' when exceeds max, '(N)' otherwise
-export const formatNearbyCount = (count: number): string => {
-	if (count === 0) return "";
-	if (count > MERCHANT_LIST_MAX_ITEMS) return `(>${MERCHANT_LIST_MAX_ITEMS})`;
-	return `(${count})`;
-};
-
 // Formats the nearby count for the badge pill: '' when 0, '>99' above the list cap, 'N' otherwise
 export const formatNearbyPillCount = (count: number): string => {
 	if (count <= 0) return "";
 	if (count > MERCHANT_LIST_MAX_ITEMS) return `>${MERCHANT_LIST_MAX_ITEMS}`;
 	return String(count);
+};
+
+// Parenthesized variant for the Nearby tab label: '' when 0, '(>99)', '(N)'
+export const formatNearbyCount = (count: number): string => {
+	const pill = formatNearbyPillCount(count);
+	return pill ? `(${pill})` : "";
 };
 
 // Yields to main thread to prevent UI freezes during heavy operations (browser-only)

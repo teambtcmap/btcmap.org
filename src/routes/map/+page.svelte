@@ -552,6 +552,14 @@ const handlePanelSearch = (query: string) => {
 	debouncedPanelSearch(query);
 };
 
+// Closing/collapsing the list discards any pending or in-flight worldwide
+// search — otherwise a late response calls openSearchMode/openWithSearchResults
+// and pops the panel (or the mobile sheet) back open on its own
+$: if (!$merchantList.isOpen) {
+	debouncedPanelSearch.cancel();
+	searchAbortController?.abort();
+}
+
 const handleModeChange = (mode: MerchantListMode) => {
 	if (mode === "nearby") {
 		searchAbortController?.abort();

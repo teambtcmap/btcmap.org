@@ -167,6 +167,73 @@ describe("merchantListStore", () => {
 		});
 	});
 
+	describe("allMerchants (unsliced backing list)", () => {
+		it("setMerchants keeps the full sorted list beyond the display cap", () => {
+			const merchants = Array.from({ length: 150 }, (_, i) =>
+				createMockPlace({ id: i, name: `Place ${i}` }),
+			);
+
+			merchantList.setMerchants(merchants, 0, 0);
+			const state = get(merchantList);
+
+			expect(state.merchants.length).toBe(99);
+			expect(state.allMerchants.length).toBe(150);
+		});
+
+		it("fetchAndReplaceList keeps the full list under the ceiling", async () => {
+			const mockPlaces = Array.from({ length: 150 }, (_, i) =>
+				createMockPlace({ id: i }),
+			);
+			(api.get as Mock).mockResolvedValueOnce({ data: mockPlaces });
+
+			await merchantList.fetchAndReplaceList({ lat: 0, lon: 0 }, 10, {
+				hideIfExceeds: MERCHANT_LIST_FETCH_CEILING,
+			});
+			const state = get(merchantList);
+
+			expect(state.merchants.length).toBe(99);
+			expect(state.allMerchants.length).toBe(150);
+		});
+
+		it("hideIfExceeds blanks allMerchants along with merchants", async () => {
+			const mockPlaces = Array.from({ length: 60 }, (_, i) =>
+				createMockPlace({ id: i }),
+			);
+			(api.get as Mock).mockResolvedValueOnce({ data: mockPlaces });
+
+			await merchantList.fetchAndReplaceList({ lat: 0, lon: 0 }, 10, {
+				hideIfExceeds: 50,
+			});
+			const state = get(merchantList);
+
+			expect(state.allMerchants).toEqual([]);
+		});
+
+		it("fetchCountOnly clears allMerchants (ids only, no data)", async () => {
+			merchantList.setMerchants([createMockPlace()], 0, 0);
+			(api.get as Mock).mockResolvedValueOnce({ data: [{ id: 1 }, { id: 2 }] });
+
+			await merchantList.fetchCountOnly({ lat: 0, lon: 0 }, 10);
+			const state = get(merchantList);
+
+			expect(state.allMerchants).toEqual([]);
+		});
+
+		it("close() keeps allMerchants; reset() clears them", () => {
+			merchantList.setMerchants(
+				Array.from({ length: 5 }, (_, i) => createMockPlace({ id: i })),
+				0,
+				0,
+			);
+
+			merchantList.close();
+			expect(get(merchantList).allMerchants.length).toBe(5);
+
+			merchantList.reset();
+			expect(get(merchantList).allMerchants).toEqual([]);
+		});
+	});
+
 	describe("merchant sorting", () => {
 		it("should place boosted merchants first", () => {
 			const futureDate = new Date(Date.now() + 86400000).toISOString(); // Tomorrow

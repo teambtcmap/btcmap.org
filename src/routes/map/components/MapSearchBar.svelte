@@ -17,7 +17,6 @@ let searchInputComponent: SearchInput;
 
 // Store subscriptions
 $: searchQuery = $merchantList.searchQuery;
-$: isSearching = $merchantList.isSearching;
 $: isOpen = $merchantList.isOpen;
 
 // Count rides a pill inside the input while at rest; it disappears as soon
@@ -80,12 +79,6 @@ function handleClear() {
 						>
 							<Icon w="20" h="20" icon="close" type="material" />
 						</button>
-					{:else if isSearching}
-						<div role="status" aria-label={$_('search.searching')}>
-							<div
-								class="h-4 w-4 animate-spin rounded-full border-2 border-gray-300 border-t-link dark:border-white/30 dark:border-t-white"
-							></div>
-						</div>
 					{:else if pillCount}
 						<NearbyCountPill count={pillCount} />
 					{/if}
