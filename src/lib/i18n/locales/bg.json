@@ -26,6 +26,8 @@
 		"lightningLabel": "Lightning",
 		"longitude": "Географска дължина",
 		"merchantNamePlaceholder": "Комикси на Сатоши",
+		"nameEnLabel": "Английско име",
+		"nameEnTooltip": "Ако бизнесът има различно английско наименование, въведете го тук. Ще бъде отбелязано като name:en в OpenStreetMap.",
 		"nfcLabel": "Без контакт",
 		"noLocationError": "Моля, изберете място...",
 		"notesPlaceholder": "Моля, добавете допълнителни детайли като контакти, социални мрежи и т.н.",

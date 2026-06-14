@@ -404,6 +404,8 @@
 		"description": "Remplissez le formulaire suivant et l'un de nos bénévoles ajoutera votre lieu sur la carte.",
 		"tooltip": "Tous les ajouts sont effectués par des bénévoles, nous ne pouvons donc pas garantir le délai d'ajout de votre lieu.",
 		"merchantNamePlaceholder": "Comics de Satoshi",
+		"nameEnLabel": "Nom en anglais",
+		"nameEnTooltip": "Si l'entreprise a un nom différent en anglais, saisissez-le ici. Il sera enregistré en tant que name:en dans OpenStreetMap.",
 		"noLocationError": "Veuillez sélectionner un lieu...",
 		"latitude": "Latitude",
 		"longitude": "Longitude",

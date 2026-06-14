@@ -405,6 +405,8 @@
 		"description": "Preencha o formulário abaixo e um dos membros voluntários da nossa comunidade adicionará o seu local ao mapa.",
 		"tooltip": "Todas as adições são feitas por voluntários, portanto não podemos garantir quando seu local será adicionado.",
 		"merchantNamePlaceholder": "HQ da Satoshi",
+		"nameEnLabel": "Nome em inglês",
+		"nameEnTooltip": "Se o negócio tiver um nome diferente em inglês, insira-o aqui. Ele será marcado como name:en no OpenStreetMap.",
 		"noLocationError": "Por favor selecione um local...",
 		"latitude": "Latitude",
 		"longitude": "Longitude",
