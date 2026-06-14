@@ -51,7 +51,7 @@ const fetchMerchantData = async (
 ): Promise<{ name: string; placeId?: number }> => {
 	try {
 		const response = await fetch(
-			`${API_BASE}/v4/places/${encodeURIComponent(elementId)}?fields=id,name`,
+			`${API_BASE}/v4/places/${encodeURIComponent(elementId)}?fields=id,name&include_deleted=true`,
 		);
 		if (!response.ok) throw new Error("API call failed");
 		const data = await response.json();
@@ -93,7 +93,7 @@ const supertaggerSync = async (
 		try {
 			supertaggers = await Promise.all(supertaggerPromises);
 		} catch (error) {
-			console.error("Error fetching merchant names:", error);
+			console.error("Error fetching merchant data:", error);
 			// Fallback: create entries with element IDs only
 			supertaggers = recentEvents.map((event) => ({
 				...event,
