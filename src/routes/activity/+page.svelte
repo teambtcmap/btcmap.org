@@ -20,7 +20,7 @@ import { batchSync } from "$lib/sync/batchSync";
 import { eventsSync } from "$lib/sync/events";
 import { usersSync } from "$lib/sync/users";
 import { theme } from "$lib/theme";
-import type { ActivityEvent, Event, User } from "$lib/types";
+import type { ActivityEvent, Event, Place, User } from "$lib/types";
 import { errToast, formatElementID } from "$lib/utils";
 
 onMount(() => {
@@ -46,14 +46,18 @@ const findUser = (tagger: Event) => {
 	}
 };
 
-const fetchMerchantName = async (elementId: string): Promise<string> => {
+const fetchMerchantData = async (
+	elementId: string,
+): Promise<{ name: string; placeId?: number }> => {
 	try {
-		const response = await fetch(`${API_BASE}/v2/elements/${elementId}`);
+		const response = await fetch(
+			`${API_BASE}/v4/places/${encodeURIComponent(elementId)}?fields=id,name&include_deleted=true`,
+		);
 		if (!response.ok) throw new Error("API call failed");
-		const data = await response.json();
-		return data.osm_json?.tags?.name || formatElementID(elementId);
+		const data: Place = await response.json();
+		return { name: data.name || formatElementID(elementId), placeId: data.id };
 	} catch {
-		return formatElementID(elementId);
+		return { name: formatElementID(elementId) };
 	}
 };
 
@@ -70,15 +74,18 @@ const supertaggerSync = async (
 		elementsLoading = true;
 		supertaggers = [];
 
-		// Fetch merchant names concurrently
+		// Fetch merchant names and BTC Map IDs concurrently
 		const supertaggerPromises = recentEvents.map(async (event) => {
-			const location = await fetchMerchantName(event.element_id);
+			const { name: location, placeId } = await fetchMerchantData(
+				event.element_id,
+			);
 			const tagger = findUser(event);
 
 			return {
 				...event,
 				location,
 				merchantId: event.element_id,
+				placeId,
 				tagger,
 			};
 		});
@@ -86,12 +93,13 @@ const supertaggerSync = async (
 		try {
 			supertaggers = await Promise.all(supertaggerPromises);
 		} catch (error) {
-			console.error("Error fetching merchant names:", error);
+			console.error("Error fetching merchant data:", error);
 			// Fallback: create entries with element IDs only
 			supertaggers = recentEvents.map((event) => ({
 				...event,
 				location: formatElementID(event.element_id),
 				merchantId: event.element_id,
+				placeId: undefined,
 				tagger: findUser(event),
 			}));
 		}
@@ -156,6 +164,7 @@ $: latestTaggers = !!(supertaggers?.length && !elementsLoading);
 							time={tagger['created_at']}
 							latest={tagger === supertaggers[0] ? true : false}
 							merchantId={tagger.merchantId}
+							placeId={tagger.placeId}
 						/>
 					{/each}
 				{:else}
