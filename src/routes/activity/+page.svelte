@@ -20,7 +20,7 @@ import { batchSync } from "$lib/sync/batchSync";
 import { eventsSync } from "$lib/sync/events";
 import { usersSync } from "$lib/sync/users";
 import { theme } from "$lib/theme";
-import type { ActivityEvent, Event, User } from "$lib/types";
+import type { ActivityEvent, Event, Place, User } from "$lib/types";
 import { errToast, formatElementID } from "$lib/utils";
 
 onMount(() => {
@@ -54,7 +54,7 @@ const fetchMerchantData = async (
 			`${API_BASE}/v4/places/${encodeURIComponent(elementId)}?fields=id,name&include_deleted=true`,
 		);
 		if (!response.ok) throw new Error("API call failed");
-		const data = await response.json();
+		const data: Place = await response.json();
 		return { name: data.name || formatElementID(elementId), placeId: data.id };
 	} catch {
 		return { name: formatElementID(elementId) };
