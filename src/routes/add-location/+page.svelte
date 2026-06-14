@@ -77,6 +77,7 @@ function resetForm() {
 	tick().then(async () => {
 		// Clear form fields
 		if (name) name.value = "";
+		if (nameEn) nameEn.value = "";
 		if (address) address.value = "";
 		if (category) category.value = "";
 		if (website) website.value = "";
@@ -161,6 +162,7 @@ async function initializeMap() {
 }
 
 let name: HTMLInputElement;
+let nameEn: HTMLInputElement;
 let address: HTMLInputElement;
 let addressFilledBySearch = false;
 let lat: number | undefined;
@@ -304,6 +306,7 @@ const submitForm = (event: SubmitEvent) => {
 				captchaTest: captchaInput.value,
 				honey: honeyInput.value,
 				name: name.value,
+				nameEn: nameEn.value,
 				address: address.value,
 				lat: lat ? lat.toString() : "",
 				long: long ? long.toString() : "",
@@ -438,6 +441,22 @@ $: if (map && mapLoaded) {
 						required
 						class="w-full rounded-2xl border-2 border-input p-3 transition-all focus:outline-link disabled:cursor-not-allowed disabled:bg-gray-100 disabled:text-gray-500 dark:bg-white/[0.15] dark:disabled:bg-gray-700 dark:disabled:text-gray-400"
 						bind:this={name}
+					/>
+				</div>
+
+				<div>
+					<label for="name-en" class="mb-2 block font-semibold"
+						>{$_('addLocation.nameEnLabel')} <span class="font-normal">{$_('forms.optional')}</span>
+						<InfoTooltip tooltip={$_('addLocation.nameEnTooltip')} /></label
+					>
+					<input
+						disabled={!captchaSecret || !mapLoaded}
+						type="text"
+						name="name-en"
+						id="name-en"
+						placeholder={$_('addLocation.merchantNamePlaceholder')}
+						class="w-full rounded-2xl border-2 border-input p-3 transition-all focus:outline-link disabled:cursor-not-allowed disabled:bg-gray-100 disabled:text-gray-500 dark:bg-white/[0.15] dark:disabled:bg-gray-700 dark:disabled:text-gray-400"
+						bind:this={nameEn}
 					/>
 				</div>
 

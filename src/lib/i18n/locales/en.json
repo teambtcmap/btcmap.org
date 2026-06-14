@@ -490,6 +490,8 @@
 		"description": "Fill out the following form and one of our volunteer community members will add your location to the map.",
 		"tooltip": "All additions are completed on a volunteer basis and so we can't guarantee when your location will be added.",
 		"merchantNamePlaceholder": "Satoshi's Comics",
+		"nameEnLabel": "English Name",
+		"nameEnTooltip": "If the business has a different name in English, enter it here. It will be tagged as name:en in OpenStreetMap.",
 		"noLocationError": "Please select a location...",
 		"searchByAddressLabel": "Search for an address",
 		"orSelectOnMapLabel": "…or click on the map",

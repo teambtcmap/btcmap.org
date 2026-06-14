@@ -490,6 +490,8 @@
 		"description": "Compila il seguente modulo e uno dei membri volontari della nostra community aggiungerà la tua posizione alla mappa.",
 		"tooltip": "Tutte le aggiunte sono completate su base volontaria, pertanto non possiamo garantire quando la tua posizione verrà aggiunta.",
 		"merchantNamePlaceholder": "Satoshi's Comics",
+		"nameEnLabel": "Nome in inglese",
+		"nameEnTooltip": "Se l'attività ha un nome diverso in inglese, inseriscilo qui. Verrà taggato come name:en in OpenStreetMap.",
 		"noLocationError": "Seleziona una posizione...",
 		"searchByAddressLabel": "Cerca un indirizzo",
 		"orSelectOnMapLabel": "…o clicca sulla mappa",
