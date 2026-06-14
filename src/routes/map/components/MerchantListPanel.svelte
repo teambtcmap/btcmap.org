@@ -1,5 +1,6 @@
 <script lang="ts">
-import { onDestroy, tick } from "svelte";
+import { onDestroy, onMount, tick } from "svelte";
+import { get } from "svelte/store";
 
 import Icon from "$components/Icon.svelte";
 import LoadingSpinner from "$components/LoadingSpinner.svelte";
@@ -12,16 +13,18 @@ import {
 	type CategoryKey,
 	placeMatchesCategory,
 } from "$lib/categoryMapping";
-import { BREAKPOINTS, MERCHANT_LIST_LOW_ZOOM } from "$lib/constants";
+import { MERCHANT_LIST_LOW_ZOOM } from "$lib/constants";
+import { SEARCH_SHEET_PEEK_HEIGHT } from "$lib/drawerConfig";
+import { createDrawerGestureController } from "$lib/drawerGestureController";
 import { _ } from "$lib/i18n";
 import { merchantDrawer } from "$lib/merchantDrawerStore";
-import type { MerchantListMode } from "$lib/merchantListStore";
 import { merchantList } from "$lib/merchantListStore";
 import type { Place } from "$lib/types";
 import { userLocation } from "$lib/userLocationStore";
-import { errToast, formatNearbyCount } from "$lib/utils";
+import { errToast, formatNearbyPillCount } from "$lib/utils";
 
 import MerchantListItem from "./MerchantListItem.svelte";
+import NearbyCountPill from "./NearbyCountPill.svelte";
 import { browser } from "$app/environment";
 
 // Get translated category label
@@ -54,19 +57,181 @@ export let onHoverEnd: ((place: Place) => void) | undefined = undefined;
 export let currentZoom: number = 0;
 // Search callback - called when user types in search input
 export let onSearch: ((query: string) => void) | undefined = undefined;
-// Mode change callback (called for nearby mode switch)
-export let onModeChange: ((mode: MerchantListMode) => void) | undefined =
-	undefined;
 // Refresh callback for category filtering
 export let onRefresh: (() => void) | undefined = undefined;
 // Callback to fit map bounds to all search results
 export let onFitSearchResultBounds: (() => void) | undefined = undefined;
+// Map style readiness — gates the mobile peek sheet so it doesn't show over the loading screen
+export let mapReady = false;
+// Layout decision locked at page init (same pattern as MerchantDrawerHash);
+// shared with the floating search bar so exactly one search surface exists
+export let isMobile = false;
+
+// On mobile the panel is a bottom sheet mirroring the merchant drawer's
+// snap behavior: peek (grabber + single input) <-> full panel. The store's
+// isOpen IS the expanded state; peek = closed, so close() keeping
+// merchants/totalCount keeps the count pill populated at rest.
+const sheetGesture = createDrawerGestureController({
+	peekHeight: SEARCH_SHEET_PEEK_HEIGHT,
+	canDismiss: false,
+	events: {
+		expand: "search_sheet_swipe_expand",
+		collapse: "search_sheet_swipe_collapse",
+	},
+});
+const sheetHeight = sheetGesture.drawerHeight;
+const sheetExpanded = sheetGesture.expanded;
+const sheetExpandedHeight = sheetGesture.expandedHeight;
+
+// Floating-card geometry at rest (peek). As the sheet is dragged up it
+// "docks": side/bottom margins and corner radius interpolate to 0 so the
+// floating input grows into the full-width bottom sheet.
+const FLOAT_MARGIN = 12; // px side inset at peek
+// px min bottom inset at peek (more on notched phones). Tall enough that the
+// floating card clears the bottom map chrome — scale bar, the compact (i)
+// attribution, and the tile-loading indicator — which now sit at the very
+// bottom (like the search bar on main).
+const FLOAT_BOTTOM_MIN = 56;
+const PEEK_RADIUS = 24; // px corner radius at peek (rounded-3xl)
+
+// 0 at peek (fully floating) → 1 at full expand (fully docked)
+$: dockT =
+	isMobile && $sheetExpandedHeight > SEARCH_SHEET_PEEK_HEIGHT
+		? Math.min(
+				1,
+				Math.max(
+					0,
+					($sheetHeight - SEARCH_SHEET_PEEK_HEIGHT) /
+						($sheetExpandedHeight - SEARCH_SHEET_PEEK_HEIGHT),
+				),
+			)
+		: 0;
+
+$: mobileSheetStyle = isMobile
+	? [
+			`height:${$sheetHeight}px`,
+			"max-height:100dvh",
+			`left:${FLOAT_MARGIN * (1 - dockT)}px`,
+			`right:${FLOAT_MARGIN * (1 - dockT)}px`,
+			`bottom:calc(max(${FLOAT_BOTTOM_MIN}px, env(safe-area-inset-bottom)) * ${1 - dockT})`,
+			`border-radius:${PEEK_RADIUS * (1 - dockT)}px`,
+			// safe-area padding only matters once docked (bottom touches the edge)
+			`padding-bottom:calc(max(0.75rem, env(safe-area-inset-bottom)) * ${dockT})`,
+			"will-change:height,left,right,bottom,border-radius",
+		].join(";")
+	: "";
+
+let grabberElement: HTMLElement;
+
+// gesture → store (sheet snapped by finger)
+const unsubscribeSheet = sheetGesture.expanded.subscribe((expanded) => {
+	if (!isMobile) return;
+	const open = get(merchantList).isOpen;
+	if (expanded && !open) {
+		merchantList.open();
+		onRefresh?.();
+	} else if (!expanded && open) {
+		merchantList.close();
+	}
+});
+
+function handlePeekTap() {
+	// A drag on the facade can fire a click after the gesture already
+	// expanded the sheet — don't double-open or double-track
+	if (get(merchantList).isOpen) return;
+	trackEvent("search_sheet_tap_expand");
+	merchantList.open();
+	onRefresh?.();
+}
+
+function handleGrabberKeydown(event: KeyboardEvent) {
+	if (event.key === "Enter" || event.key === " ") {
+		event.preventDefault();
+		if (isOpen) {
+			handleClose();
+		} else {
+			handlePeekTap();
+		}
+	}
+}
+
+function onSheetPointerDown(event: PointerEvent) {
+	sheetGesture.handlePointerDown(event, grabberElement);
+}
+function onSheetPointerUp(event: PointerEvent) {
+	sheetGesture.handlePointerUp(event, grabberElement);
+}
+// The whole peek facade is a swipe surface, not just the grabber strip
+let facadeElement: HTMLElement;
+function onFacadePointerDown(event: PointerEvent) {
+	sheetGesture.handlePointerDown(event, facadeElement);
+}
+function onFacadePointerUp(event: PointerEvent) {
+	sheetGesture.handlePointerUp(event, facadeElement);
+}
+
+// Expanded header (input row + toggle/chips) drags the sheet too. A small
+// vertical slop decides tap-vs-drag so the input, mode toggle and category
+// chips stay tappable; past the slop the gesture controller takes over and
+// captures the pointer (so releasing a drag over a chip doesn't click it).
+const HEADER_DRAG_SLOP = 8;
+let headerDragStartY: number | null = null;
+let headerDragging = false;
+
+function onHeaderPointerDown(event: PointerEvent) {
+	if (!isMobile) return;
+	headerDragStartY = event.clientY;
+	headerDragging = false;
+}
+function onHeaderPointerMove(event: PointerEvent) {
+	if (!isMobile || headerDragStartY === null) return;
+	if (!headerDragging) {
+		if (Math.abs(event.clientY - headerDragStartY) < HEADER_DRAG_SLOP) return;
+		headerDragging = true;
+		sheetGesture.handlePointerDown(event, event.currentTarget as HTMLElement);
+	} else {
+		sheetGesture.handlePointerMove(event);
+	}
+}
+function onHeaderPointerUp(event: PointerEvent) {
+	if (headerDragging) {
+		sheetGesture.handlePointerUp(event, event.currentTarget as HTMLElement);
+	}
+	headerDragStartY = null;
+	headerDragging = false;
+}
+function onHeaderPointerCancel(event: PointerEvent) {
+	if (headerDragging) {
+		sheetGesture.handlePointerCancel(event);
+	}
+	headerDragStartY = null;
+	headerDragging = false;
+}
+function onContentTouchStart(event: TouchEvent) {
+	if (isMobile) sheetGesture.handleContentTouchStart(event);
+}
+function onContentTouchMove(event: TouchEvent) {
+	if (isMobile)
+		sheetGesture.handleContentTouchMove(
+			event,
+			merchantListContainer?.scrollTop ?? 0,
+		);
+}
+function onContentTouchEnd() {
+	if (isMobile) sheetGesture.handleContentTouchEnd();
+}
+
+onMount(() => {
+	if (!isMobile) return;
+	const updateExpandedHeight = () =>
+		sheetGesture.setExpandedHeight(window.innerHeight);
+	updateExpandedHeight();
+	window.addEventListener("resize", updateExpandedHeight);
+	return () => window.removeEventListener("resize", updateExpandedHeight);
+});
 
 // Reference for search input component
 let searchInputComponent: SearchInput;
-
-// Local filter for nearby mode (client-side filtering by name)
-let nearbyFilter = "";
 
 // Body scroll lock state for mobile (prevents iOS background scroll)
 let scrollLockActive = false;
@@ -74,74 +239,34 @@ let scrollLockActive = false;
 // Reference for focus trap
 let panelElement: HTMLElement;
 
-// Unified input handler - behaves differently based on mode
-function handleUnifiedInput(e: Event) {
-	const value = (e.target as HTMLInputElement).value;
-	if (mode === "search") {
-		merchantList.setSearchQuery(value);
-		onSearch?.($merchantList.searchQuery);
-	} else {
-		nearbyFilter = value;
-	}
+function handleSearchFocus() {
+	trackEvent("search_input_focus", { source: "panel" });
 }
 
-// Unified keydown handler
+// Single input: typing always drives a worldwide search (the page debounces
+// and, below 3 chars, falls back to the nearby browse list). No mode toggle.
+function handleUnifiedInput(e: Event) {
+	const value = (e.target as HTMLInputElement).value;
+	merchantList.setSearchQuery(value);
+	onSearch?.(value);
+}
+
 function handleUnifiedKeyDown(event: KeyboardEvent) {
 	if (event.key === "Escape") {
 		event.preventDefault();
 		event.stopPropagation();
-		if (mode === "search" && searchQuery) {
-			handleClearInput();
-		} else if (mode === "nearby" && nearbyFilter) {
+		if (searchQuery) {
 			handleClearInput();
 		} else {
 			handleClose();
 		}
-	} else if (
-		event.key === "Enter" &&
-		mode === "nearby" &&
-		nearbyFilter.length >= 3
-	) {
-		// Switch to worldwide search on Enter in nearby mode
-		trackEvent("search_query");
-		merchantList.setSearchQuery(nearbyFilter);
-		merchantList.setMode("search");
-		onSearch?.(nearbyFilter);
-		nearbyFilter = "";
 	}
 }
 
-// Clear the current input (works for both modes)
 function handleClearInput() {
-	if (mode === "search") {
-		merchantList.clearSearchInput();
-		onSearch?.("");
-	} else {
-		nearbyFilter = "";
-	}
+	merchantList.setSearchQuery("");
+	onSearch?.("");
 	searchInputComponent?.focus();
-}
-
-function handleModeSwitch(newMode: MerchantListMode) {
-	if (newMode === mode) return;
-	if (newMode === "nearby") {
-		trackEvent("nearby_mode_click", { source: "panel" });
-		const carryOver = $merchantList.searchQuery;
-		merchantList.exitSearchMode();
-		nearbyFilter = carryOver;
-		onModeChange?.(newMode);
-		tick().then(() => searchInputComponent?.focus());
-	} else {
-		trackEvent("worldwide_mode_click", { source: "panel" });
-		const carryOver = nearbyFilter;
-		nearbyFilter = "";
-		merchantList.setSearchQuery(carryOver);
-		merchantList.setMode("search");
-		if (carryOver.length >= 3) {
-			onSearch?.(carryOver);
-		}
-		tick().then(() => searchInputComponent?.focus());
-	}
 }
 
 function handleCategorySelect(category: CategoryKey) {
@@ -158,6 +283,28 @@ function handleCategorySelect(category: CategoryKey) {
 $: isOpen = $merchantList.isOpen;
 $: merchants = $merchantList.merchants;
 $: totalCount = $merchantList.totalCount;
+
+// store → gesture (open/close from peek tap, item click, Escape, search)
+$: if (isMobile) {
+	if (isOpen && !$sheetExpanded) {
+		sheetGesture.expand();
+	} else if (!isOpen && $sheetExpanded) {
+		sheetGesture.collapse();
+	}
+}
+
+// Peek sheet is the mobile resting state; it yields the bottom edge to the
+// merchant drawer (mirrors the old floating bar's max-md:hidden rule)
+$: showPeekSheet = isMobile && mapReady && !$merchantDrawer.isOpen;
+
+// The drawer taking the bottom edge can unmount the sheet mid-drag, which
+// would strand the captured pointer and the spring height. Reset so the
+// sheet remounts cleanly at peek (mirrors MerchantDrawerMobile's
+// resetToPeek-on-merchant-change).
+$: if (isMobile && $merchantDrawer.isOpen) {
+	sheetGesture.resetToPeek();
+}
+$: pillCount = formatNearbyPillCount(totalCount);
 $: placeDetailsCache = $merchantList.placeDetailsCache;
 $: isLoadingList = $merchantList.isLoadingList;
 $: selectedId = $merchantDrawer.merchantId;
@@ -249,7 +396,6 @@ $: isTruncated = totalCount > merchants.length;
 
 // Body scroll lock on mobile when panel is open
 $: if (browser && isOpen !== undefined) {
-	const isMobile = window.innerWidth < BREAKPOINTS.md;
 	const shouldLock = isOpen && isMobile;
 	if (shouldLock && !scrollLockActive) {
 		lockBodyScroll();
@@ -274,7 +420,7 @@ function handleItemClick(place: Place) {
 
 	// On mobile, close panel so drawer is visible (panel is fullscreen)
 	// On desktop, keep panel open (list and drawer coexist side by side)
-	if (browser && window.innerWidth < BREAKPOINTS.md) {
+	if (isMobile) {
 		merchantList.close();
 	}
 }
@@ -288,14 +434,13 @@ function handleMouseLeave(place: Place) {
 }
 
 function handleClose() {
-	nearbyFilter = ""; // Clear filter when closing
 	merchantList.close();
 }
 
 function handleZoomToNearbyLevel() {
 	onZoomToNearbyLevel?.();
 	// Close panel on mobile so the user can see the map zoom in
-	if (browser && window.innerWidth < BREAKPOINTS.md) {
+	if (isMobile) {
 		handleClose();
 	}
 }
@@ -328,6 +473,7 @@ function handleWindowKeydown(event: KeyboardEvent) {
 
 // Cleanup scroll lock when component is destroyed
 onDestroy(() => {
+	unsubscribeSheet();
 	if (browser && scrollLockActive) {
 		unlockBodyScroll();
 		scrollLockActive = false;
@@ -337,44 +483,85 @@ onDestroy(() => {
 
 <svelte:window on:keydown={handleWindowKeydown} />
 
-{#if isOpen}
+{#if isOpen || showPeekSheet}
 	<section
 		bind:this={panelElement}
-		class="pb-safe absolute inset-0 z-[1001] flex flex-col overflow-hidden bg-white md:absolute md:inset-auto md:top-3 md:bottom-[max(3rem,env(safe-area-inset-bottom))] md:left-3 md:w-80 md:rounded-lg md:pb-0 md:shadow-lg dark:bg-dark dark:shadow-black/30"
+		class="z-[1001] flex flex-col overflow-hidden bg-white dark:bg-dark
+			{isMobile
+			? 'fixed shadow-2xl'
+			: 'absolute top-3 bottom-[max(3rem,env(safe-area-inset-bottom))] left-3 w-80 rounded-lg shadow-lg dark:shadow-black/30'}"
+		style={mobileSheetStyle}
 		role="complementary"
 		aria-label={$_('aria.merchantList')}
 	>
+		<!-- Drag handle. At peek it's a decorative drag affordance (aria-hidden,
+		     non-focusable — the input facade below is the keyboard control);
+		     when expanded it's the focusable collapse control. -->
+		{#if isMobile}
+			<div
+				bind:this={grabberElement}
+				class="flex-shrink-0 touch-none"
+				on:pointerdown={onSheetPointerDown}
+				on:pointermove={sheetGesture.handlePointerMove}
+				on:pointerup={onSheetPointerUp}
+				on:pointercancel={sheetGesture.handlePointerCancel}
+				on:keydown={handleGrabberKeydown}
+				tabindex={isOpen ? 0 : -1}
+				role="button"
+				aria-label={isOpen ? $_('aria.closeMerchantList') : $_('aria.expandMerchantList')}
+				aria-expanded={isOpen}
+				aria-controls="merchant-sheet-content"
+				aria-hidden={!isOpen}
+			>
+				<div class="mx-auto mt-2 mb-0.5 h-1.5 w-10 rounded-full bg-gray-300 dark:bg-white/30"></div>
+			</div>
+		{/if}
+
+		{#if isOpen}
 		<!-- Screen reader announcement for location changes -->
 		{#if locationAnnouncement}
 			<p class="sr-only" aria-live="polite">{locationAnnouncement}</p>
 		{/if}
-		<!-- Search input - uses shared SearchInput component -->
-		<div class="shrink-0 border-b border-gray-100 dark:border-white/10">
+		<!-- Search input - uses shared SearchInput component.
+		     On mobile the row doubles as a sheet drag surface (tap-vs-drag slop). -->
+		<div
+			class="shrink-0 px-3 pt-2 pb-1"
+			class:touch-none={isMobile}
+			on:pointerdown={onHeaderPointerDown}
+			on:pointermove={onHeaderPointerMove}
+			on:pointerup={onHeaderPointerUp}
+			on:pointercancel={onHeaderPointerCancel}
+		>
 			<SearchInput
 				bind:this={searchInputComponent}
-				value={mode === 'search' ? searchQuery : nearbyFilter}
-				placeholder={mode === 'search'
-					? $_('search.placeholderWorldwide')
-					: $_('search.placeholderNearby')}
-				ariaLabel={mode === 'search' ? $_('search.switchToWorldwide') : $_('search.filterResults')}
+				filled
+				value={searchQuery}
+				placeholder={$_('search.placeholderPlaces')}
+				ariaLabel={$_('aria.searchInput')}
 				on:input={handleUnifiedInput}
 				on:keydown={handleUnifiedKeyDown}
+				on:focus={handleSearchFocus}
 			>
 				<svelte:fragment slot="trailing">
-					{#if (mode === 'search' && searchQuery) || (mode === 'nearby' && nearbyFilter)}
+					{#if searchQuery}
 						<button
 							type="button"
 							on:click={handleClearInput}
-							class="p-1 text-gray-600 hover:text-gray-800 dark:text-white/70 dark:hover:text-white"
+							class="pointer-events-auto p-1 text-gray-600 hover:text-gray-800 dark:text-white/70 dark:hover:text-white"
 							aria-label={$_('aria.clearSearch')}
 						>
 							<Icon w="20" h="20" icon="close" type="material" />
 						</button>
+					{:else if isMobile}
+						<!-- Sheet collapses via grabber/drag; the count pill rides the input at rest -->
+						{#if pillCount}
+							<NearbyCountPill count={pillCount} />
+						{/if}
 					{:else}
 						<button
 							type="button"
 							on:click={handleClose}
-							class="p-1 text-gray-600 hover:text-gray-800 dark:text-white/70 dark:hover:text-white"
+							class="pointer-events-auto p-1 text-gray-600 hover:text-gray-800 dark:text-white/70 dark:hover:text-white"
 							aria-label={$_('aria.closeMerchantList')}
 						>
 							<Icon w="20" h="20" icon="close" type="material" />
@@ -384,46 +571,17 @@ onDestroy(() => {
 			</SearchInput>
 		</div>
 
-		<!-- Filters and controls -->
-		<div class="shrink-0 border-b border-gray-100 px-3 py-3 dark:border-white/10">
-			<!-- Mode toggle buttons -->
-			<div
-				class="flex rounded-lg bg-gray-100 p-1 dark:bg-white/5"
-				role="radiogroup"
-				aria-label={$_('aria.switchMode')}
-			>
-				<button
-					type="button"
-					role="radio"
-					on:click={() => handleModeSwitch('search')}
-					aria-checked={mode === 'search'}
-					class="flex flex-1 items-center justify-center gap-1.5 rounded-md px-3 py-1.5 text-xs font-medium transition-colors
-						{mode === 'search'
-						? 'bg-white text-primary shadow-sm dark:bg-white/10 dark:text-white'
-						: 'text-body hover:text-primary dark:text-white/70 dark:hover:text-white'}"
-				>
-					<Icon type="fa" icon="globe" w="14" h="14" />
-					{$_('search.worldwide')}
-				</button>
-				<button
-					type="button"
-					role="radio"
-					on:click={() => handleModeSwitch('nearby')}
-					aria-checked={mode === 'nearby'}
-					class="flex flex-1 items-center justify-center gap-1.5 rounded-md px-3 py-1.5 text-xs font-medium transition-colors
-						{mode === 'nearby'
-						? 'bg-white text-primary shadow-sm dark:bg-white/10 dark:text-white'
-						: 'text-body hover:text-primary dark:text-white/70 dark:hover:text-white'}"
-				>
-					<Icon type="fa" icon="list" w="14" h="14" />
-					{$_('search.nearby')}{#if isLoadingList}<span class="opacity-60">
-							...</span
-						>{:else}{formatNearbyCount(totalCount)}{/if}
-				</button>
-			</div>
-
-			<!-- Category filter (shown in both nearby and search modes) -->
-			<div class="mt-3" role="radiogroup" aria-label={$_('aria.filterByCategory')}>
+		<!-- Filters and controls — also a sheet drag surface on mobile -->
+		<div
+			class="shrink-0 border-b border-gray-100 px-3 pt-1 pb-3 dark:border-white/10"
+			class:touch-none={isMobile}
+			on:pointerdown={onHeaderPointerDown}
+			on:pointermove={onHeaderPointerMove}
+			on:pointerup={onHeaderPointerUp}
+			on:pointercancel={onHeaderPointerCancel}
+		>
+			<!-- Category filter -->
+			<div role="radiogroup" aria-label={$_('aria.filterByCategory')}>
 				<h3 class="sr-only">{$_('categories.filter')}</h3>
 				<div class="flex flex-wrap gap-2">
 					{#each CATEGORY_ENTRIES as [key, _category] (key)}
@@ -526,11 +684,17 @@ onDestroy(() => {
 			{/if}
 		</div>
 
-		<!-- List content -->
+		<!-- List content (touch handlers: Google-Maps-style collapse drag from scroll top on mobile) -->
 		<div
 			bind:this={merchantListContainer}
+			id="merchant-sheet-content"
 			class="flex-1 overflow-y-auto"
+			style="overscroll-behavior-y: contain; touch-action: pan-y;"
 			tabindex="-1"
+			on:touchstart={onContentTouchStart}
+			on:touchmove={onContentTouchMove}
+			on:touchend={onContentTouchEnd}
+			on:touchcancel={onContentTouchEnd}
 		>
 			{#if mode === 'search'}
 				<!-- Search results -->
@@ -611,24 +775,13 @@ onDestroy(() => {
 				</div>
 			{:else}
 				<!-- Nearby mode: merchant list -->
-				{@const filteredMerchants = nearbyFilter
-					? merchants.filter((m) => {
-							const enriched = placeDetailsCache.get(m.id);
-							const name = enriched?.name || m.name || '';
-							return name.toLowerCase().includes(nearbyFilter.toLowerCase());
-						})
-					: merchants}
 				{#if merchants.length === 0}
 					<div class="px-3 py-8 text-center text-sm text-body dark:text-white/70">
 						{$_('search.noVisible')}
 					</div>
-				{:else if filteredMerchants.length === 0 && nearbyFilter}
-					<div class="px-3 py-8 text-center text-sm text-body dark:text-white/70">
-						{$_('search.noResultsFor', { values: { query: nearbyFilter } })}
-					</div>
 				{:else}
 					<ul class="flex flex-col gap-2 bg-neutral-50 p-2 dark:bg-white/10">
-						{#each filteredMerchants as merchant (merchant.id)}
+						{#each merchants as merchant (merchant.id)}
 							<MerchantListItem
 								{merchant}
 								enrichedData={placeDetailsCache.get(merchant.id) || null}
@@ -642,5 +795,37 @@ onDestroy(() => {
 				{/if}
 			{/if}
 		</div>
+		{:else}
+			<!-- Peek: input facade — opens the sheet without focusing a real input
+			     (keyboard stays down until the user taps the real input and types).
+			     The whole facade is also a swipe surface like the drawer's peek. -->
+			<div id="merchant-sheet-content" class="flex flex-1 items-center px-3 pb-2.5">
+				<button
+					bind:this={facadeElement}
+					type="button"
+					on:click={handlePeekTap}
+					on:pointerdown={onFacadePointerDown}
+					on:pointermove={sheetGesture.handlePointerMove}
+					on:pointerup={onFacadePointerUp}
+					on:pointercancel={sheetGesture.handlePointerCancel}
+					class="relative flex w-full touch-none items-center rounded-xl bg-gray-100 py-2 pr-2.5 pl-10 text-left dark:bg-white/5"
+					aria-expanded="false"
+				>
+					<Icon
+						w="18"
+						h="18"
+						icon="search"
+						type="material"
+						class="pointer-events-none absolute top-1/2 left-3 -translate-y-1/2 text-gray-600 dark:text-white/70"
+					/>
+					<span class="flex-1 truncate text-base text-gray-400 dark:text-white/50">
+						{$_('search.placeholderPlaces')}
+					</span>
+					{#if pillCount}
+						<NearbyCountPill count={pillCount} />
+					{/if}
+				</button>
+			</div>
+		{/if}
 	</section>
 {/if}

@@ -23,6 +23,7 @@ import MapUnsupportedFallback from "$components/MapUnsupportedFallback.svelte";
 import { trackEvent } from "$lib/analytics";
 import { filterMerchantsByCategory } from "$lib/categoryMapping";
 import {
+	BREAKPOINTS,
 	CLUSTERING_DISABLED_ZOOM,
 	DEFAULT_MAP_LAT,
 	DEFAULT_MAP_LNG,
@@ -70,7 +71,6 @@ import {
 	parseMerchantHash,
 } from "$lib/merchantDrawerHash";
 import { merchantDrawer } from "$lib/merchantDrawerStore";
-import type { MerchantListMode } from "$lib/merchantListStore";
 import { merchantList } from "$lib/merchantListStore";
 import { savedPlaceIds } from "$lib/session";
 import {
@@ -95,8 +95,14 @@ import { BasemapsControl } from "./controls/BasemapsControl";
 import { BoostToggleControl } from "./controls/BoostToggleControl";
 import { DataRefreshControl } from "./controls/DataRefreshControl";
 import { NavButtonsControl } from "./controls/NavButtonsControl";
+import { browser } from "$app/environment";
 
 export let data: PageData;
+
+// Layout decision locked at init (same pattern as MerchantDrawerHash): the
+// mobile search sheet and the desktop floating bar derive from one value so
+// a viewport resize can never leave zero or two search surfaces
+const isMobileLayout = browser && window.innerWidth < BREAKPOINTS.md;
 
 type PlaceFeature = {
 	type: "Feature";
@@ -540,16 +546,30 @@ const debouncedPanelSearch = debounce(
 	300,
 );
 
+// Single-input model: typing ≥3 chars searches worldwide; anything shorter
+// (incl. empty) falls back to the nearby browse list. No mode toggle.
 const handlePanelSearch = (query: string) => {
-	debouncedPanelSearch(query);
-};
-
-const handleModeChange = (mode: MerchantListMode) => {
-	if (mode === "nearby") {
-		searchAbortController?.abort();
-		updateMerchantList();
+	if (query.trim().length >= 3) {
+		debouncedPanelSearch(query);
+		return;
+	}
+	// Too short / empty → abort any search and return to nearby browse,
+	// keeping whatever the user has typed so far in the input
+	debouncedPanelSearch.cancel();
+	searchAbortController?.abort();
+	if (get(merchantList).mode !== "nearby") {
+		merchantList.setMode("nearby");
+		updateMerchantList({ force: true });
 	}
 };
+
+// Closing/collapsing the list discards any pending or in-flight worldwide
+// search — otherwise a late response calls openSearchMode/openWithSearchResults
+// and pops the panel (or the mobile sheet) back open on its own
+$: if (!$merchantList.isOpen) {
+	debouncedPanelSearch.cancel();
+	searchAbortController?.abort();
+}
 
 // Browser back/forward / external hash mutation → re-sync the drawer.
 // Highlight-state on markers isn't a concept here (MapLibre paints from
@@ -801,6 +821,21 @@ $: if (map && styleLoaded) {
 	syncSelectionPulse($merchantDrawer.merchantId);
 }
 
+// Populate the nearby list/count once on first load. The initial camera is
+// set programmatically (no moveend fires), so without this the peek pill and
+// nearby list stay empty until the user pans or opens the panel.
+let didInitialNearbyCount = false;
+$: if (
+	browser &&
+	map &&
+	styleLoaded &&
+	$places.length > 0 &&
+	!didInitialNearbyCount
+) {
+	didInitialNearbyCount = true;
+	updateMerchantList();
+}
+
 // The custom sources + layers we add on top of whatever basemap is
 // active. applyBasemap() carries these across a setStyle() so the pins,
 // clusters, and labels survive a basemap/theme swap untouched (MapLibre's
@@ -956,7 +991,9 @@ onMount(async () => {
 		// Show the "Support BTC Map" supporter link on every basemap (legacy
 		// /map guaranteed it regardless of basemap). Data-source credit
 		// (OSM / OpenFreeMap / Carto) comes from each style's own sources.
-		attributionControl: { customAttribution: SUPPORT_ATTR },
+		// compact: collapse to an (i) button by default — matches the merchant
+		// detail / area maps and keeps the bottom edge clear for the search.
+		attributionControl: { customAttribution: SUPPORT_ATTR, compact: true },
 		center: initialCenter,
 		zoom: initialZoom,
 		bearing: hashCoords?.bearing ?? 0,
@@ -997,6 +1034,13 @@ onMount(async () => {
 	// L.control.scale). Metric units only; imperial is added by the
 	// browser locale via MapLibre's bilingual variant if needed later.
 	map.addControl(new maplibre.ScaleControl({ unit: "metric" }), "bottom-left");
+
+	// The compact AttributionControl renders expanded on first load
+	// (maplibregl-compact-show). Collapse it to the (i) button by default so
+	// it doesn't cover the bottom edge; the user can still tap (i) to expand.
+	mapContainer
+		.querySelector(".maplibregl-ctrl-attrib")
+		?.classList.remove("maplibregl-compact-show");
 
 	// Geolocate control: pulse dot, accuracy circle, and heading arrow are
 	// built in. Heading uses the device's compass when available, falling
@@ -1803,28 +1847,20 @@ onDestroy(() => {
 <MapLoadingMain progress={mapLoading} status={mapLoadingStatus} />
 
 <!--
-	Floating search bar — desktop: top-left, mobile: bottom-center.
-	Hidden on mobile while the merchant drawer is open so the drawer
-	gets the full bottom area. The bar itself hides when the list panel
+	Floating search bar — desktop only, top-left. On mobile the merchant
+	list panel renders as a bottom sheet whose peek state carries the
+	single search input instead. The bar itself hides when the list panel
 	is open (the panel renders its own search input in the same slot).
 -->
-{#if styleLoaded}
-	<div
-		class="pointer-events-none z-[1000] max-md:fixed max-md:right-3 max-md:bottom-[calc(5rem+env(safe-area-inset-bottom))] max-md:left-3 md:absolute md:top-3 md:left-3
-			{$merchantDrawer.isOpen ? 'max-md:hidden' : ''}"
-	>
+{#if styleLoaded && !isMobileLayout}
+	<div class="pointer-events-none absolute top-3 left-3 z-[1000]">
 		<MapSearchBar
 			onSearch={handlePanelSearch}
 			onFocus={() => {
 				merchantList.open();
 				updateMerchantList({ force: true });
 			}}
-			onNearbyClick={() => {
-				merchantList.open();
-				updateMerchantList({ force: true });
-			}}
 			nearbyCount={$merchantList.totalCount}
-			isLoadingCount={$merchantList.isLoadingList}
 		/>
 	</div>
 {/if}
@@ -1842,9 +1878,10 @@ onDestroy(() => {
 		// See onHoverStart above.
 	}}
 	onSearch={handlePanelSearch}
-	onModeChange={handleModeChange}
 	onRefresh={() => updateMerchantList({ force: true })}
 	{currentZoom}
+	mapReady={styleLoaded}
+	isMobile={isMobileLayout}
 />
 
 {#if styleLoaded}

@@ -3,6 +3,10 @@
 
 // Drawer height states
 export const PEEK_HEIGHT = 140; // Collapsed state height - shows merchant name and quick info
+// Search sheet collapsed height — grabber + single input. The safe-area
+// inset is added on top via CSS (height: calc(... + env(safe-area-inset-bottom)))
+// so this stays the visual height on devices without a home indicator.
+export const SEARCH_SHEET_PEEK_HEIGHT = 72;
 
 // Gesture thresholds
 export const VELOCITY_THRESHOLD = 0.5; // px/ms - minimum velocity for flick gesture detection

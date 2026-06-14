@@ -57,6 +57,24 @@ describe("determineSnapState", () => {
 		// Falls through to position check: 300 > 298.1 → expanded
 		expect(result).toEqual({ expanded: true, height: EXPANDED });
 	});
+
+	it("snaps to a custom peek height when provided (search sheet)", () => {
+		// Collapse decisions must return the caller's peek height, not the
+		// merchant drawer's global PEEK_HEIGHT
+		expect(determineSnapState(-0.6, -50, 300, EXPANDED, 110)).toEqual({
+			expanded: false,
+			height: 110,
+		});
+		expect(determineSnapState(0.1, -10, 110, EXPANDED, 110)).toEqual({
+			expanded: false,
+			height: 110,
+		});
+		// Position threshold uses the custom peek: 110 + (667-110)*0.3 = 277.1
+		expect(determineSnapState(0.1, 10, 280, EXPANDED, 110)).toEqual({
+			expanded: true,
+			height: EXPANDED,
+		});
+	});
 });
 
 describe("updateVelocity", () => {
