@@ -340,6 +340,7 @@ export enum TipType {
 export interface ActivityEvent extends Event {
 	location: string;
 	merchantId: string;
+	placeId?: number;
 	tagger?: User;
 }
 
