@@ -35,7 +35,7 @@ export let compact = false;
 	>
 		<div class:space-y-2={!compact} class:space-y-1={compact} class:lg:space-y-0={!compact}>
 			<span
-				class="text-primary dark:text-white"
+				class="whitespace-pre-line text-primary dark:text-white"
 				class:lg:mr-5={!compact}
 			>
 				{text}
