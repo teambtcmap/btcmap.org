@@ -66,9 +66,11 @@ export const MERCHANT_LIST_MIN_ZOOM = 15;
 // matches exceed MERCHANT_LIST_FETCH_CEILING (a payload guard).
 export const MERCHANT_LIST_LOW_ZOOM = 10;
 
-// Max merchants to display in list and count shown on button
-// When count exceeds this, button shows ">99" and list shows 99 items
-export const MERCHANT_LIST_MAX_ITEMS = 99;
+// Max merchants to display in the nearby list and count shown on the badge.
+// When the count exceeds this, the badge shows ">250" and the list renders
+// the nearest 250 rows. (Worldwide search results are uncapped; this only
+// bounds the at-rest nearby browse list.)
+export const MERCHANT_LIST_MAX_ITEMS = 250;
 
 // Relevance/render guard for the low-zoom API search: above this many matches
 // we blank the list and show "zoom in" rather than render an unhelpfully dense

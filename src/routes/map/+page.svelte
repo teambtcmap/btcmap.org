@@ -72,7 +72,6 @@ import {
 	parseMerchantHash,
 } from "$lib/merchantDrawerHash";
 import { merchantDrawer } from "$lib/merchantDrawerStore";
-import type { MerchantListMode } from "$lib/merchantListStore";
 import { merchantList } from "$lib/merchantListStore";
 import { savedPlaceIds } from "$lib/session";
 import {
@@ -548,8 +547,21 @@ const debouncedPanelSearch = debounce(
 	300,
 );
 
+// Single-input model: typing ≥3 chars searches worldwide; anything shorter
+// (incl. empty) falls back to the nearby browse list. No mode toggle.
 const handlePanelSearch = (query: string) => {
-	debouncedPanelSearch(query);
+	if (query.trim().length >= 3) {
+		debouncedPanelSearch(query);
+		return;
+	}
+	// Too short / empty → abort any search and return to nearby browse,
+	// keeping whatever the user has typed so far in the input
+	debouncedPanelSearch.cancel();
+	searchAbortController?.abort();
+	if (get(merchantList).mode !== "nearby") {
+		merchantList.setMode("nearby");
+		updateMerchantList({ force: true });
+	}
 };
 
 // Closing/collapsing the list discards any pending or in-flight worldwide
@@ -559,13 +571,6 @@ $: if (!$merchantList.isOpen) {
 	debouncedPanelSearch.cancel();
 	searchAbortController?.abort();
 }
-
-const handleModeChange = (mode: MerchantListMode) => {
-	if (mode === "nearby") {
-		searchAbortController?.abort();
-		updateMerchantList();
-	}
-};
 
 // Browser back/forward / external hash mutation → re-sync the drawer.
 // Highlight-state on markers isn't a concept here (MapLibre paints from
@@ -1854,7 +1859,6 @@ onDestroy(() => {
 		// See onHoverStart above.
 	}}
 	onSearch={handlePanelSearch}
-	onModeChange={handleModeChange}
 	onRefresh={() => updateMerchantList({ force: true })}
 	{currentZoom}
 	mapReady={styleLoaded}

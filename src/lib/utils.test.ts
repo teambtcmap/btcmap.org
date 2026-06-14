@@ -1,5 +1,6 @@
 import { describe, expect, it } from "vitest";
 
+import { MERCHANT_LIST_MAX_ITEMS } from "$lib/constants";
 import type { Area } from "$lib/types";
 
 import {
@@ -402,11 +403,15 @@ describe("formatNearbyPillCount", () => {
 
 	it("returns plain number within limit", () => {
 		expect(formatNearbyPillCount(1)).toBe("1");
-		expect(formatNearbyPillCount(99)).toBe("99");
+		expect(formatNearbyPillCount(MERCHANT_LIST_MAX_ITEMS)).toBe(
+			String(MERCHANT_LIST_MAX_ITEMS),
+		);
 	});
 
-	it("caps at >99 above the list limit", () => {
-		expect(formatNearbyPillCount(100)).toBe(">99");
+	it("caps with a > prefix above the list limit", () => {
+		expect(formatNearbyPillCount(MERCHANT_LIST_MAX_ITEMS + 1)).toBe(
+			`>${MERCHANT_LIST_MAX_ITEMS}`,
+		);
 	});
 });
 

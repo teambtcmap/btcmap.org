@@ -13,19 +13,15 @@ import {
 	type CategoryKey,
 	placeMatchesCategory,
 } from "$lib/categoryMapping";
-import {
-	MERCHANT_LIST_LOW_ZOOM,
-	MERCHANT_LIST_MAX_ITEMS,
-} from "$lib/constants";
+import { MERCHANT_LIST_LOW_ZOOM } from "$lib/constants";
 import { SEARCH_SHEET_PEEK_HEIGHT } from "$lib/drawerConfig";
 import { createDrawerGestureController } from "$lib/drawerGestureController";
 import { _ } from "$lib/i18n";
 import { merchantDrawer } from "$lib/merchantDrawerStore";
-import type { MerchantListMode } from "$lib/merchantListStore";
 import { merchantList } from "$lib/merchantListStore";
 import type { Place } from "$lib/types";
 import { userLocation } from "$lib/userLocationStore";
-import { errToast, formatNearbyCount, formatNearbyPillCount } from "$lib/utils";
+import { errToast, formatNearbyPillCount } from "$lib/utils";
 
 import MerchantListItem from "./MerchantListItem.svelte";
 import NearbyCountPill from "./NearbyCountPill.svelte";
@@ -61,9 +57,6 @@ export let onHoverEnd: ((place: Place) => void) | undefined = undefined;
 export let currentZoom: number = 0;
 // Search callback - called when user types in search input
 export let onSearch: ((query: string) => void) | undefined = undefined;
-// Mode change callback (called for nearby mode switch)
-export let onModeChange: ((mode: MerchantListMode) => void) | undefined =
-	undefined;
 // Refresh callback for category filtering
 export let onRefresh: (() => void) | undefined = undefined;
 // Callback to fit map bounds to all search results
@@ -236,9 +229,6 @@ onMount(() => {
 // Reference for search input component
 let searchInputComponent: SearchInput;
 
-// Local filter for nearby mode (client-side filtering by name)
-let nearbyFilter = "";
-
 // Body scroll lock state for mobile (prevents iOS background scroll)
 let scrollLockActive = false;
 
@@ -249,79 +239,30 @@ function handleSearchFocus() {
 	trackEvent("search_input_focus", { source: "panel" });
 }
 
-// Unified input handler - behaves differently based on mode
+// Single input: typing always drives a worldwide search (the page debounces
+// and, below 3 chars, falls back to the nearby browse list). No mode toggle.
 function handleUnifiedInput(e: Event) {
 	const value = (e.target as HTMLInputElement).value;
-	if (mode === "search") {
-		merchantList.setSearchQuery(value);
-		onSearch?.($merchantList.searchQuery);
-	} else {
-		nearbyFilter = value;
-	}
+	merchantList.setSearchQuery(value);
+	onSearch?.(value);
 }
 
-// Unified keydown handler
 function handleUnifiedKeyDown(event: KeyboardEvent) {
 	if (event.key === "Escape") {
 		event.preventDefault();
 		event.stopPropagation();
-		if (mode === "search" && searchQuery) {
-			handleClearInput();
-		} else if (mode === "nearby" && nearbyFilter) {
+		if (searchQuery) {
 			handleClearInput();
 		} else {
 			handleClose();
 		}
-	} else if (
-		event.key === "Enter" &&
-		mode === "nearby" &&
-		nearbyFilter.length >= 3
-	) {
-		// Switch to worldwide search on Enter in nearby mode
-		trackEvent("search_query");
-		merchantList.setSearchQuery(nearbyFilter);
-		merchantList.setMode("search");
-		onSearch?.(nearbyFilter);
-		nearbyFilter = "";
 	}
 }
 
-// Clear the current input (works for both modes)
 function handleClearInput() {
-	if (mode === "search") {
-		merchantList.clearSearchInput();
-		onSearch?.("");
-	} else {
-		nearbyFilter = "";
-	}
+	merchantList.setSearchQuery("");
+	onSearch?.("");
 	searchInputComponent?.focus();
-}
-
-function handleModeSwitch(newMode: MerchantListMode) {
-	if (newMode === mode) return;
-	if (newMode === "nearby") {
-		trackEvent("nearby_mode_click", { source: "panel" });
-		const carryOver = $merchantList.searchQuery;
-		merchantList.exitSearchMode();
-		nearbyFilter = carryOver;
-		onModeChange?.(newMode);
-		tick().then(() => searchInputComponent?.focus());
-	} else {
-		trackEvent("worldwide_mode_click", { source: "panel" });
-		const carryOver = nearbyFilter;
-		nearbyFilter = "";
-		merchantList.setSearchQuery(carryOver);
-		merchantList.setMode("search");
-		if (carryOver.length >= 3) {
-			onSearch?.(carryOver);
-		}
-		tick().then(() => searchInputComponent?.focus());
-	}
-}
-
-function handleSearchWorldwideCta() {
-	trackEvent("search_worldwide_cta_click");
-	handleModeSwitch("search");
 }
 
 function handleCategorySelect(category: CategoryKey) {
@@ -337,14 +278,7 @@ function handleCategorySelect(category: CategoryKey) {
 
 $: isOpen = $merchantList.isOpen;
 $: merchants = $merchantList.merchants;
-$: allMerchants = $merchantList.allMerchants;
 $: totalCount = $merchantList.totalCount;
-
-// Any close path (Escape, X button, item tap, swipe-collapse) resets the
-// local name filter so reopening always starts clean
-$: if (!isOpen) {
-	nearbyFilter = "";
-}
 
 // store → gesture (open/close from peek tap, item click, Escape, search)
 $: if (isMobile) {
@@ -419,25 +353,6 @@ $: filteredSearchResults =
 	selectedCategory === "all"
 		? searchResults
 		: searchResults.filter((p) => placeMatchesCategory(p, selectedCategory));
-
-// Nearby-mode client-side name filter — searches the full fetched set
-// (allMerchants, up to the fetch ceiling), not just the 99 displayed rows,
-// so a match ranked beyond the display cap isn't reported as "nothing nearby"
-$: filteredMerchants = nearbyFilter
-	? allMerchants.filter((m) => {
-			const enriched = placeDetailsCache.get(m.id);
-			const name = enriched?.name || m.name || "";
-			return name.toLowerCase().includes(nearbyFilter.toLowerCase());
-		})
-	: merchants;
-// Display stays capped at the usual list size
-$: displayedMerchants = nearbyFilter
-	? filteredMerchants.slice(0, MERCHANT_LIST_MAX_ITEMS)
-	: filteredMerchants;
-// While filtering, the tab shows the true match count — even (0), which signals "try worldwide"
-$: nearbyTabCount = nearbyFilter
-	? `(${formatNearbyPillCount(filteredMerchants.length) || "0"})`
-	: formatNearbyCount(totalCount);
 
 // Helper function to check if a category has matching merchants
 // Note: counts param required for Svelte reactivity (indirect deps aren't tracked)
@@ -606,7 +521,7 @@ onDestroy(() => {
 		<!-- Search input - uses shared SearchInput component.
 		     On mobile the row doubles as a sheet drag surface (tap-vs-drag slop). -->
 		<div
-			class="shrink-0 border-b border-gray-100 dark:border-white/10"
+			class="shrink-0 px-3 pt-2 pb-1"
 			class:touch-none={isMobile}
 			on:pointerdown={onHeaderPointerDown}
 			on:pointermove={onHeaderPointerMove}
@@ -615,15 +530,16 @@ onDestroy(() => {
 		>
 			<SearchInput
 				bind:this={searchInputComponent}
-				value={mode === 'search' ? searchQuery : nearbyFilter}
+				filled
+				value={searchQuery}
 				placeholder={$_('search.placeholderPlaces')}
-				ariaLabel={mode === 'search' ? $_('search.switchToWorldwide') : $_('search.filterResults')}
+				ariaLabel={$_('aria.searchInput')}
 				on:input={handleUnifiedInput}
 				on:keydown={handleUnifiedKeyDown}
 				on:focus={handleSearchFocus}
 			>
 				<svelte:fragment slot="trailing">
-					{#if (mode === 'search' && searchQuery) || (mode === 'nearby' && nearbyFilter)}
+					{#if searchQuery}
 						<button
 							type="button"
 							on:click={handleClearInput}
@@ -653,51 +569,15 @@ onDestroy(() => {
 
 		<!-- Filters and controls — also a sheet drag surface on mobile -->
 		<div
-			class="shrink-0 border-b border-gray-100 px-3 py-3 dark:border-white/10"
+			class="shrink-0 border-b border-gray-100 px-3 pt-1 pb-3 dark:border-white/10"
 			class:touch-none={isMobile}
 			on:pointerdown={onHeaderPointerDown}
 			on:pointermove={onHeaderPointerMove}
 			on:pointerup={onHeaderPointerUp}
 			on:pointercancel={onHeaderPointerCancel}
 		>
-			<!-- Mode toggle buttons -->
-			<div
-				class="flex rounded-lg bg-gray-100 p-1 dark:bg-white/5"
-				role="radiogroup"
-				aria-label={$_('aria.switchMode')}
-			>
-				<button
-					type="button"
-					role="radio"
-					on:click={() => handleModeSwitch('search')}
-					aria-checked={mode === 'search'}
-					class="flex flex-1 items-center justify-center gap-1.5 rounded-md px-3 py-1.5 text-xs font-medium transition-colors
-						{mode === 'search'
-						? 'bg-white text-primary shadow-sm dark:bg-white/10 dark:text-white'
-						: 'text-body hover:text-primary dark:text-white/70 dark:hover:text-white'}"
-				>
-					<Icon type="fa" icon="globe" w="14" h="14" />
-					{$_('search.worldwide')}
-				</button>
-				<button
-					type="button"
-					role="radio"
-					on:click={() => handleModeSwitch('nearby')}
-					aria-checked={mode === 'nearby'}
-					class="flex flex-1 items-center justify-center gap-1.5 rounded-md px-3 py-1.5 text-xs font-medium transition-colors
-						{mode === 'nearby'
-						? 'bg-white text-primary shadow-sm dark:bg-white/10 dark:text-white'
-						: 'text-body hover:text-primary dark:text-white/70 dark:hover:text-white'}"
-				>
-					<Icon type="fa" icon="list" w="14" h="14" />
-					{$_('search.nearby')}{#if isLoadingList}<span class="opacity-60">
-							...</span
-						>{:else}{nearbyTabCount}{/if}
-				</button>
-			</div>
-
-			<!-- Category filter (shown in both nearby and search modes) -->
-			<div class="mt-3" role="radiogroup" aria-label={$_('aria.filterByCategory')}>
+			<!-- Category filter -->
+			<div role="radiogroup" aria-label={$_('aria.filterByCategory')}>
 				<h3 class="sr-only">{$_('categories.filter')}</h3>
 				<div class="flex flex-wrap gap-2">
 					{#each CATEGORY_ENTRIES as [key, _category] (key)}
@@ -895,30 +775,9 @@ onDestroy(() => {
 					<div class="px-3 py-8 text-center text-sm text-body dark:text-white/70">
 						{$_('search.noVisible')}
 					</div>
-				{:else if filteredMerchants.length === 0 && nearbyFilter}
-					<!-- Filter matched nothing nearby: nudge toward worldwide instead of a blank list -->
-					<div class="flex flex-col items-center justify-center gap-1 px-9 py-12 text-center">
-						<div class="mb-2 grid h-14 w-14 place-items-center rounded-full bg-gray-100 dark:bg-white/5">
-							<Icon w="26" h="26" icon="search" type="material" class="text-gray-400 dark:text-white/40" />
-						</div>
-						<p class="text-base font-semibold text-primary dark:text-white">
-							{$_('search.noNearbyMatches', { values: { query: nearbyFilter } })}
-						</p>
-						<p class="mb-3 text-sm text-body dark:text-white/70">
-							{$_('search.noNearbyMatchesHint')}
-						</p>
-						<button
-							type="button"
-							on:click={handleSearchWorldwideCta}
-							class="inline-flex items-center gap-2 rounded-full bg-link px-4 py-2.5 text-sm font-semibold text-white transition-colors hover:bg-hover"
-						>
-							<Icon type="fa" icon="globe" w="16" h="16" />
-							{$_('search.searchWorldwide')}
-						</button>
-					</div>
 				{:else}
 					<ul class="flex flex-col gap-2 bg-neutral-50 p-2 dark:bg-white/10">
-						{#each displayedMerchants as merchant (merchant.id)}
+						{#each merchants as merchant (merchant.id)}
 							<MerchantListItem
 								{merchant}
 								enrichedData={placeDetailsCache.get(merchant.id) || null}

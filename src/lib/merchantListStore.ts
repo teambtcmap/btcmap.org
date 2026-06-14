@@ -23,10 +23,6 @@ export type MerchantListMode = "nearby" | "search";
 export interface MerchantListState {
 	isOpen: boolean;
 	merchants: Place[];
-	// Full category-filtered, sorted list backing the capped `merchants` slice.
-	// Lets the nearby name filter search every fetched match (up to the fetch
-	// ceiling) instead of only the 99 displayed rows.
-	allMerchants: Place[];
 	totalCount: number;
 	// Cache of full Place data by ID, used to show icons/addresses without re-fetching
 	placeDetailsCache: Map<number, Place>;
@@ -48,7 +44,6 @@ export interface MerchantListState {
 const initialState: MerchantListState = {
 	isOpen: false,
 	merchants: [],
-	allMerchants: [],
 	totalCount: 0,
 	placeDetailsCache: new Map(),
 	isLoadingList: false,
@@ -206,7 +201,6 @@ function createMerchantListStore() {
 			update((state) => ({
 				...state,
 				merchants: limited,
-				allMerchants: sorted,
 				totalCount: filtered.length,
 				isLoadingList: false,
 				categoryCounts,
@@ -259,7 +253,6 @@ function createMerchantListStore() {
 					update((state) => ({
 						...state,
 						merchants: [],
-						allMerchants: [],
 						totalCount: validPlaces.length,
 						isLoadingList: false,
 						categoryCounts,
@@ -282,7 +275,6 @@ function createMerchantListStore() {
 					update((state) => ({
 						...state,
 						merchants: limited,
-						allMerchants: sorted,
 						totalCount: filtered.length,
 						placeDetailsCache,
 						isLoadingList: false,
@@ -327,7 +319,6 @@ function createMerchantListStore() {
 				update((state) => ({
 					...state,
 					merchants: [],
-					allMerchants: [],
 					totalCount: validItems.length,
 					isLoadingList: false,
 					// Preserve existing categoryCounts since we don't have actual merchant data to recalculate them
@@ -459,20 +450,13 @@ function createMerchantListStore() {
 		reSortByUserLocation() {
 			update((state) => {
 				if (state.merchants.length === 0) return state;
-				const loc = get(userLocation).location;
 				const sorted = sortMerchants(
 					state.merchants,
 					undefined,
 					undefined,
-					loc,
+					get(userLocation).location,
 				);
-				const sortedAll = sortMerchants(
-					state.allMerchants,
-					undefined,
-					undefined,
-					loc,
-				);
-				return { ...state, merchants: sorted, allMerchants: sortedAll };
+				return { ...state, merchants: sorted };
 			});
 		},
 
