@@ -821,6 +821,21 @@ $: if (map && styleLoaded) {
 	syncSelectionPulse($merchantDrawer.merchantId);
 }
 
+// Populate the nearby list/count once on first load. The initial camera is
+// set programmatically (no moveend fires), so without this the peek pill and
+// nearby list stay empty until the user pans or opens the panel.
+let didInitialNearbyCount = false;
+$: if (
+	browser &&
+	map &&
+	styleLoaded &&
+	$places.length > 0 &&
+	!didInitialNearbyCount
+) {
+	didInitialNearbyCount = true;
+	updateMerchantList();
+}
+
 // The custom sources + layers we add on top of whatever basemap is
 // active. applyBasemap() carries these across a setStyle() so the pins,
 // clusters, and labels survive a basemap/theme swap untouched (MapLibre's
@@ -1019,6 +1034,13 @@ onMount(async () => {
 	// L.control.scale). Metric units only; imperial is added by the
 	// browser locale via MapLibre's bilingual variant if needed later.
 	map.addControl(new maplibre.ScaleControl({ unit: "metric" }), "bottom-left");
+
+	// The compact AttributionControl renders expanded on first load
+	// (maplibregl-compact-show). Collapse it to the (i) button by default so
+	// it doesn't cover the bottom edge; the user can still tap (i) to expand.
+	mapContainer
+		.querySelector(".maplibregl-ctrl-attrib")
+		?.classList.remove("maplibregl-compact-show");
 
 	// Geolocate control: pulse dot, accuracy circle, and heading arrow are
 	// built in. Heading uses the device's compass when available, falling
