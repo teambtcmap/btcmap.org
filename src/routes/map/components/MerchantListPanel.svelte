@@ -87,7 +87,11 @@ const sheetExpandedHeight = sheetGesture.expandedHeight;
 // "docks": side/bottom margins and corner radius interpolate to 0 so the
 // floating input grows into the full-width bottom sheet.
 const FLOAT_MARGIN = 12; // px side inset at peek
-const FLOAT_BOTTOM_MIN = 16; // px min bottom inset at peek (more on notched phones)
+// px min bottom inset at peek (more on notched phones). Tall enough that the
+// floating card clears the bottom map chrome — scale bar, the compact (i)
+// attribution, and the tile-loading indicator — which now sit at the very
+// bottom (like the search bar on main).
+const FLOAT_BOTTOM_MIN = 56;
 const PEEK_RADIUS = 24; // px corner radius at peek (rounded-3xl)
 
 // 0 at peek (fully floating) → 1 at full expand (fully docked)

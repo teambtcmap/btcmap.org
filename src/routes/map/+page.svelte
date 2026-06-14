@@ -34,7 +34,6 @@ import {
 	MERCHANT_LIST_MIN_ZOOM,
 	NEARBY_RADIUS_MULTIPLIER,
 } from "$lib/constants";
-import { SEARCH_SHEET_PEEK_HEIGHT } from "$lib/drawerConfig";
 import { _, getDisplayLang, locale } from "$lib/i18n";
 import {
 	BASEMAPS,
@@ -977,7 +976,9 @@ onMount(async () => {
 		// Show the "Support BTC Map" supporter link on every basemap (legacy
 		// /map guaranteed it regardless of basemap). Data-source credit
 		// (OSM / OpenFreeMap / Carto) comes from each style's own sources.
-		attributionControl: { customAttribution: SUPPORT_ATTR },
+		// compact: collapse to an (i) button by default — matches the merchant
+		// detail / area maps and keeps the bottom edge clear for the search.
+		attributionControl: { customAttribution: SUPPORT_ATTR, compact: true },
 		center: initialCenter,
 		zoom: initialZoom,
 		bearing: hashCoords?.bearing ?? 0,
@@ -1815,11 +1816,7 @@ onDestroy(() => {
 
 <h1 class="sr-only">{$_('map.bitcoinMerchantMapTitle')}</h1>
 
-<div
-	bind:this={mapContainer}
-	class="map-container"
-	style="--search-sheet-peek: {SEARCH_SHEET_PEEK_HEIGHT}px"
-></div>
+<div bind:this={mapContainer} class="map-container"></div>
 
 {#if webglUnsupported}
 	<MapUnsupportedFallback />
@@ -1888,19 +1885,4 @@ onDestroy(() => {
 	/* IControl-related rules moved to ./controls/controls.css so any page
 	   that mounts these controls (currently /map and /communities/map)
 	   gets the popup positioning + anchor button styles. */
-
-	/* Mobile: lift the scale bar and OSM attribution above the floating
-	   search peek card so the license credit stays visible. The card top
-	   sits at peek height + its float gap (16px) above the safe-area
-	   inset. Peek height comes from SEARCH_SHEET_PEEK_HEIGHT via the
-	   --search-sheet-peek custom property on .map-container. Scoped to
-	   this page — /communities/map has no sheet. */
-	@media (max-width: 767px) {
-		.map-container :global(.maplibregl-ctrl-bottom-left),
-		.map-container :global(.maplibregl-ctrl-bottom-right) {
-			bottom: calc(
-				var(--search-sheet-peek) + 1.5rem + env(safe-area-inset-bottom)
-			);
-		}
-	}
 </style>
