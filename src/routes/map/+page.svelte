@@ -991,9 +991,12 @@ onMount(async () => {
 		// Show the "Support BTC Map" supporter link on every basemap (legacy
 		// /map guaranteed it regardless of basemap). Data-source credit
 		// (OSM / OpenFreeMap / Carto) comes from each style's own sources.
-		// compact: collapse to an (i) button by default — matches the merchant
-		// detail / area maps and keeps the bottom edge clear for the search.
-		attributionControl: { customAttribution: SUPPORT_ATTR, compact: true },
+		// Mobile: compact (i) button so it doesn't cover the bottom edge under
+		// the floating search. Desktop has room — show the full credit.
+		attributionControl: {
+			customAttribution: SUPPORT_ATTR,
+			compact: isMobileLayout,
+		},
 		center: initialCenter,
 		zoom: initialZoom,
 		bearing: hashCoords?.bearing ?? 0,
@@ -1035,12 +1038,15 @@ onMount(async () => {
 	// browser locale via MapLibre's bilingual variant if needed later.
 	map.addControl(new maplibre.ScaleControl({ unit: "metric" }), "bottom-left");
 
-	// The compact AttributionControl renders expanded on first load
-	// (maplibregl-compact-show). Collapse it to the (i) button by default so
-	// it doesn't cover the bottom edge; the user can still tap (i) to expand.
-	mapContainer
-		.querySelector(".maplibregl-ctrl-attrib")
-		?.classList.remove("maplibregl-compact-show");
+	// Mobile only: the compact AttributionControl renders expanded on first
+	// load (maplibregl-compact-show). Collapse it to the (i) button so it
+	// doesn't cover the bottom edge; the user can still tap (i) to expand.
+	// Desktop is not compact, so the full credit stays visible.
+	if (isMobileLayout) {
+		mapContainer
+			.querySelector(".maplibregl-ctrl-attrib")
+			?.classList.remove("maplibregl-compact-show");
+	}
 
 	// Geolocate control: pulse dot, accuracy circle, and heading arrow are
 	// built in. Heading uses the device's compass when available, falling
