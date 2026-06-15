@@ -54,7 +54,7 @@ const fetchMerchantData = async (
 			`${API_BASE}/v4/places/${encodeURIComponent(elementId)}?fields=id,name&include_deleted=true`,
 		);
 		if (!response.ok) throw new Error("API call failed");
-		const data: Place = await response.json();
+		const data: Pick<Place, "id" | "name"> = await response.json();
 		return { name: data.name || formatElementID(elementId), placeId: data.id };
 	} catch {
 		return { name: formatElementID(elementId) };
@@ -90,19 +90,7 @@ const supertaggerSync = async (
 			};
 		});
 
-		try {
-			supertaggers = await Promise.all(supertaggerPromises);
-		} catch (error) {
-			console.error("Error fetching merchant data:", error);
-			// Fallback: create entries with element IDs only
-			supertaggers = recentEvents.map((event) => ({
-				...event,
-				location: formatElementID(event.element_id),
-				merchantId: event.element_id,
-				placeId: undefined,
-				tagger: findUser(event),
-			}));
-		}
+		supertaggers = await Promise.all(supertaggerPromises);
 
 		elementsLoading = false;
 	}
