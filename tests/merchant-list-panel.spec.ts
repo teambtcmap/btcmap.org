@@ -68,6 +68,10 @@ test.describe('Merchant List Panel', () => {
 		// input → nearby), so merchant rows appear
 		await expect(listPanel).toBeVisible({ timeout: 10000 });
 		await expect(listPanel.locator('li button').first()).toBeVisible({ timeout: 15000 });
+
+		// Desktop surfaces the nearby count inside the open panel (the floating
+		// bar + its pill unmount when the panel opens)
+		await expect(listPanel.getByText(/\d+\s+nearby/i)).toBeVisible({ timeout: 10000 });
 	});
 
 	test('clicking merchant in list opens drawer with correct merchant', async ({ page }) => {
