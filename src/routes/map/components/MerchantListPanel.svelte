@@ -464,7 +464,9 @@ onDestroy(() => {
 						{:else}
 							{searchResults.length} result{searchResults.length !== 1 ? 's' : ''}
 						{/if}
-					{:else if showZoomInMessage}
+					{:else if showZoomInMessage && !isLoadingList}
+						<!-- Loading spinner takes precedence so a stale count-only state
+						     can't flash this link (mirrors the body branch below) -->
 						<button
 							on:click={handleZoomToNearbyLevel}
 							class="text-link underline-offset-2 hover:underline dark:text-white"
