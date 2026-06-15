@@ -55,7 +55,7 @@ function handleClear() {
 </script>
 
 <!-- Floating search bar - hidden when panel is open (panel has its own search in same position).
-     Single input: the Worldwide/Nearby scope toggle lives inside the panel only. -->
+     Single input, no scope toggle: an empty box browses nearby, typing searches worldwide. -->
 {#if !isOpen}
 	<div class="pointer-events-auto w-full md:w-80">
 		<div class="rounded-lg bg-white shadow-lg dark:bg-dark dark:shadow-black/30">

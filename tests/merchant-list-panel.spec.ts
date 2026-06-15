@@ -35,9 +35,10 @@ test.describe('Merchant List Panel', () => {
 		await expect(searchInput).toBeVisible({ timeout: 15000 });
 		await expect(searchInput).toHaveAttribute('placeholder', 'Search places...');
 
-		// The Worldwide/Nearby mode toggle has been removed entirely — there are
-		// no scope radios anywhere (typing searches worldwide automatically).
-		await expect(page.getByRole('radio', { name: 'Worldwide' })).not.toBeVisible();
+		// The Worldwide/Nearby mode toggle has been removed entirely — assert the
+		// scope radios are absent (not merely hidden) via toHaveCount(0).
+		await expect(page.getByRole('radio', { name: 'Worldwide' })).toHaveCount(0);
+		await expect(page.getByRole('radio', { name: /nearby/i })).toHaveCount(0);
 	});
 
 	test('list panel opens via search input focus and shows nearby merchants', async ({ page }) => {
@@ -152,9 +153,11 @@ test.describe('Merchant List Panel', () => {
 		// Tap the facade to expand the sheet into the full panel
 		await facade.click();
 
-		// Panel content appears: real search input + nearby list (no mode toggle)
+		// Panel content appears: real search input + nearby list (no mode toggle —
+		// assert the scope radios are absent, not merely hidden)
 		await expect(listPanel.locator('input[type="search"]')).toBeVisible({ timeout: 5000 });
-		await expect(listPanel.getByRole('radio', { name: 'Worldwide' })).not.toBeVisible();
+		await expect(listPanel.getByRole('radio', { name: 'Worldwide' })).toHaveCount(0);
+		await expect(listPanel.getByRole('radio', { name: /nearby/i })).toHaveCount(0);
 		await expect(listPanel.locator('li button').first()).toBeVisible({ timeout: 15000 });
 
 		// Collapse with Escape — the peek facade returns carrying the count pill
