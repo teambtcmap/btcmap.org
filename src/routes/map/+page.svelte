@@ -532,12 +532,18 @@ const executeSearch = async (query: string) => {
 		);
 		if (!response.ok) throw new Error("Search API error");
 		const results: Place[] = await response.json();
+		// The panel/sheet may have been closed while we were awaiting the
+		// response (abort only rejects the fetch, not the json() window). Don't
+		// let a late result reopen it.
+		if (!get(merchantList).isOpen) return;
 		merchantList.openWithSearchResults(query, results);
 	} catch (error) {
 		if (error instanceof Error && error.name === "AbortError") return;
 		console.error("Search error:", error);
 		errToast(get(_)("errors.searchUnavailable"));
-		merchantList.exitSearchMode();
+		// Keep the user's typed query (and search mode) — a transient failure
+		// shouldn't wipe the input or silently drop them back to nearby.
+		merchantList.openSearchMode(false);
 	}
 };
 
