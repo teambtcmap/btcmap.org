@@ -2,6 +2,7 @@
 import { onDestroy, onMount, tick } from "svelte";
 import { get } from "svelte/store";
 
+import CollapseButton from "$components/CollapseButton.svelte";
 import Icon from "$components/Icon.svelte";
 import LoadingSpinner from "$components/LoadingSpinner.svelte";
 import SearchInput from "$components/SearchInput.svelte";
@@ -123,17 +124,19 @@ $: mobileSheetStyle = isMobile
 
 let grabberElement: HTMLElement;
 
-// gesture → store (sheet snapped by finger)
-const unsubscribeSheet = sheetGesture.expanded.subscribe((expanded) => {
-	if (!isMobile) return;
-	const open = get(merchantList).isOpen;
-	if (expanded && !open) {
-		merchantList.open();
-		onRefresh?.();
-	} else if (!expanded && open) {
-		merchantList.close();
-	}
-});
+// gesture → store (sheet snapped by finger). Only wired on mobile — on desktop
+// the sheet doesn't exist, so there's no live subscription to keep around.
+const unsubscribeSheet = isMobile
+	? sheetGesture.expanded.subscribe((expanded) => {
+			const open = get(merchantList).isOpen;
+			if (expanded && !open) {
+				merchantList.open();
+				onRefresh?.();
+			} else if (!expanded && open) {
+				merchantList.close();
+			}
+		})
+	: () => {};
 
 function handlePeekTap() {
 	// A drag on the facade can fire a click after the gesture already
@@ -144,15 +147,11 @@ function handlePeekTap() {
 	onRefresh?.();
 }
 
-function handleGrabberKeydown(event: KeyboardEvent) {
-	if (event.key === "Enter" || event.key === " ") {
-		event.preventDefault();
-		if (isOpen) {
-			handleClose();
-		} else {
-			handlePeekTap();
-		}
-	}
+// Collapse the expanded sheet back to peek and move focus to the peek facade,
+// so a keyboard/AT user isn't stranded on the now-hidden collapse control.
+function collapseSheet() {
+	handleClose();
+	tick().then(() => facadeElement?.focus());
 }
 
 function onSheetPointerDown(event: PointerEvent) {
@@ -501,26 +500,31 @@ onDestroy(() => {
 		role="complementary"
 		aria-label={$_('aria.merchantList')}
 	>
-		<!-- Drag handle. At peek it's a decorative drag affordance (aria-hidden,
-		     non-focusable — the input facade below is the keyboard control);
-		     when expanded it's the focusable collapse control. -->
+		<!-- Drag handle — a decorative drag affordance only (aria-hidden,
+		     non-focusable). The keyboard/AT collapse control is the chevron
+		     button below when expanded; the input facade is the expand control
+		     at peek. -->
 		{#if isMobile}
 			<div
 				bind:this={grabberElement}
-				class="flex-shrink-0 touch-none"
+				class="relative flex-shrink-0 touch-none"
 				on:pointerdown={onSheetPointerDown}
 				on:pointermove={sheetGesture.handlePointerMove}
 				on:pointerup={onSheetPointerUp}
 				on:pointercancel={sheetGesture.handlePointerCancel}
-				on:keydown={handleGrabberKeydown}
-				tabindex={isOpen ? 0 : -1}
-				role="button"
-				aria-label={isOpen ? $_('aria.closeMerchantList') : $_('aria.expandMerchantList')}
-				aria-expanded={isOpen}
-				aria-controls="merchant-sheet-content"
-				aria-hidden={!isOpen}
+				aria-hidden="true"
 			>
 				<div class="mx-auto mt-2 mb-0.5 h-1.5 w-10 rounded-full bg-gray-300 dark:bg-white/30"></div>
+				<!-- Collapse chevron — shared with the merchant drawer -->
+				{#if isOpen}
+					<CollapseButton
+						class="absolute top-1 right-1.5"
+						onClick={collapseSheet}
+						ariaLabel={$_('aria.closeMerchantList')}
+						aria-controls="merchant-sheet-content"
+						aria-expanded="true"
+					/>
+				{/if}
 			</div>
 		{/if}
 
