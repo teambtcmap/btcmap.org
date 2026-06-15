@@ -1,11 +1,13 @@
 // Drawer gesture configuration constants
 // These values control the behavior of the mobile drawer's swipe gestures
 
-// Drawer height states
-export const PEEK_HEIGHT = 140; // Collapsed state height - shows merchant name and quick info
-// Search sheet collapsed height — grabber + single input. The safe-area
-// inset is added on top via CSS (height: calc(... + env(safe-area-inset-bottom)))
-// so this stays the visual height on devices without a home indicator.
+// Peek (collapsed) heights for the two bottom sheets.
+// Merchant drawer: bottom-anchored, full-width; shows name + quick info.
+export const PEEK_HEIGHT = 140;
+// Search sheet: a floating card (side + bottom margins) holding the grabber +
+// single input. This is the visual card height only — the home-indicator
+// clearance comes from the card's bottom inset (max(56px, env(...))), not from
+// this value.
 export const SEARCH_SHEET_PEEK_HEIGHT = 72;
 
 // Gesture thresholds
