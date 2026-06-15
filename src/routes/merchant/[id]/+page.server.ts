@@ -46,11 +46,28 @@ export const load: PageServerLoad<MerchantPageData> = async ({
 	}
 
 	try {
-		// Fetch complete data from v4 Places API (supports both numeric Place IDs and OSM-style IDs)
-		// include_deleted=true is required so deleted places return full field data instead of id-only
-		const placeResponse = await fetch(
-			`${API_BASE}/v4/places/${encodeURIComponent(id)}?fields=${buildFieldsParam(PLACE_FIELD_SETS.COMPLETE_PLACE)}&include_deleted=true`,
-		);
+		const encodedId = encodeURIComponent(id);
+
+		// Fetch place + comments + areas + activity in one parallel batch.
+		// comments/areas/activity only need the BTC Map id (from params), not placeData,
+		// so they can start immediately alongside the primary fetch — saving 1 RTT.
+		const [placeResponse, comments, areas, activity] = await Promise.all([
+			fetch(
+				`${API_BASE}/v4/places/${encodedId}?fields=${buildFieldsParam(PLACE_FIELD_SETS.COMPLETE_PLACE)}&include_deleted=true`,
+			),
+			fetchJson<MerchantComment[]>(
+				fetch,
+				`${API_BASE}/v4/places/${encodedId}/comments`,
+			).then((data) => data ?? []),
+			fetchJson<MerchantArea[]>(
+				fetch,
+				`${API_BASE}/v4/places/${encodedId}/areas?type=community`,
+			).then((data) => data ?? []),
+			fetchJson<MerchantActivityEvent[]>(
+				fetch,
+				`${API_BASE}/v4/places/${encodedId}/activity`,
+			).then((data) => data ?? []),
+		]);
 
 		if (!placeResponse.ok) {
 			if (placeResponse.status === 404 || placeResponse.status === 410) {
@@ -68,29 +85,14 @@ export const load: PageServerLoad<MerchantPageData> = async ({
 		const lat = placeData.lat;
 		const lon = placeData.lon;
 
-		const encodedId = encodeURIComponent(id);
-
-		// Fetch comments, areas, activity, and v2 element in parallel — failures return empty arrays / null
-		const [comments, areas, activity, elementV2] = await Promise.all([
-			fetchJson<MerchantComment[]>(
-				fetch,
-				`${API_BASE}/v4/places/${encodedId}/comments`,
-			).then((data) => data ?? []),
-			fetchJson<MerchantArea[]>(
-				fetch,
-				`${API_BASE}/v4/places/${encodedId}/areas?type=community`,
-			).then((data) => data ?? []),
-			fetchJson<MerchantActivityEvent[]>(
-				fetch,
-				`${API_BASE}/v4/places/${encodedId}/activity`,
-			).then((data) => data ?? []),
-			placeData.osm_id
-				? fetchJson<{ tags?: { issues?: Issue[] } }>(
-						fetch,
-						`${API_BASE}/v2/elements/${encodeURIComponent(placeData.osm_id)}`,
-					)
-				: Promise.resolve(null),
-		]);
+		// v4 /v4/places doesn't expose issues yet — fetch from v2 element using osm_id.
+		// This runs after the main batch since it depends on placeData.osm_id.
+		const elementV2 = placeData.osm_id
+			? await fetchJson<{ tags?: { issues?: Issue[] } }>(
+					fetch,
+					`${API_BASE}/v2/elements/${encodeURIComponent(placeData.osm_id)}`,
+				)
+			: null;
 
 		// Process all merchant data server-side
 		const icon = placeData.icon || "question_mark";
