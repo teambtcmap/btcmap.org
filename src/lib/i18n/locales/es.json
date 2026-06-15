@@ -405,7 +405,7 @@
 		"tooltip": "Todas las adiciones son realizadas por voluntarios, por lo que no podemos garantizar cuándo se agregará tu ubicación.",
 		"merchantNamePlaceholder": "Cómics de Satoshi",
 		"nameEnLabel": "Nombre en inglés",
-		"nameEnTooltip": "Si el negocio tiene un nombre diferente en inglés, ingréselo aquí. Se etiquetará como name:en en OpenStreetMap.",
+		"nameEnTooltip": "Si el negocio tiene un nombre diferente en inglés, ingrésalo aquí. Se etiquetará como name:en en OpenStreetMap.",
 		"noLocationError": "Por favor selecciona una ubicación...",
 		"latitude": "Latitud",
 		"longitude": "Longitud",

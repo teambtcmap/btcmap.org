@@ -405,7 +405,7 @@
 		"tooltip": "Alle Ergänzungen werden auf freiwilliger Basis erledigt, daher können wir nicht garantieren, wann dein Standort hinzugefügt wird.",
 		"merchantNamePlaceholder": "Satoshis Comics",
 		"nameEnLabel": "Englischer Name",
-		"nameEnTooltip": "Falls der Betrieb einen englischen Namen hat, tragen Sie ihn hier ein. Er wird als name:en in OpenStreetMap eingetragen.",
+		"nameEnTooltip": "Falls der Betrieb einen englischen Namen hat, trag ihn hier ein. Er wird als name:en in OpenStreetMap eingetragen.",
 		"noLocationError": "Bitte wähle einen Standort...",
 		"latitude": "Breitengrad",
 		"longitude": "Längengrad",

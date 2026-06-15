@@ -452,9 +452,9 @@ $: if (map && mapLoaded) {
 					<input
 						disabled={!captchaSecret || !mapLoaded}
 						type="text"
-						name="name-en"
+						name="nameEn"
 						id="name-en"
-						placeholder={$_('addLocation.merchantNamePlaceholder')}
+						placeholder="Satoshi's Comics"
 						class="w-full rounded-2xl border-2 border-input p-3 transition-all focus:outline-link disabled:cursor-not-allowed disabled:bg-gray-100 disabled:text-gray-500 dark:bg-white/[0.15] dark:disabled:bg-gray-700 dark:disabled:text-gray-400"
 						bind:this={nameEn}
 					/>
