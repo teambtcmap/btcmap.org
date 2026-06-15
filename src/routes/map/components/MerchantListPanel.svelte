@@ -826,6 +826,7 @@ onDestroy(() => {
 					on:pointercancel={sheetGesture.handlePointerCancel}
 					class="relative flex w-full touch-none items-center rounded-xl bg-gray-100 py-2 pr-2.5 pl-10 text-left dark:bg-white/5"
 					aria-expanded="false"
+					aria-controls="merchant-sheet-content"
 				>
 					<Icon
 						w="18"

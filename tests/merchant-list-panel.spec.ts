@@ -283,13 +283,15 @@ test.describe('Merchant List Panel', () => {
 		const showAll = listPanel.getByRole('button', { name: /show all|zoom map to show/i });
 		await expect(showAll).toHaveCount(0);
 
-		// Type a place far from here → worldwide search results appear
+		// Type a place far from here → worldwide search results appear. Arm the
+		// response waiter BEFORE typing so a fast response can't land first.
 		const panelInput = listPanel.locator('input[type="search"]');
-		await panelInput.fill('El Zonte');
-		await page.waitForResponse(
+		const searchResponse = page.waitForResponse(
 			(r) => r.url().includes('/api/search/places') && r.ok(),
 			{ timeout: 15000 }
 		);
+		await panelInput.fill('El Zonte');
+		await searchResponse;
 		// Search mode is active → the Show-all-on-map control appears
 		await expect(listPanel.getByRole('button', { name: /show all/i })).toBeVisible({
 			timeout: 10000
