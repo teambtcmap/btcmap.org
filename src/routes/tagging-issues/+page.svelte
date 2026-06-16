@@ -7,7 +7,7 @@ import { theme } from "$lib/theme";
 import type { RpcIssue } from "$lib/types";
 
 export let data;
-let issues: RpcIssue[] = data.rpcResult.requested_issues;
+let issues: RpcIssue[] = data.result.requested_issues;
 </script>
 
 <svelte:head>
