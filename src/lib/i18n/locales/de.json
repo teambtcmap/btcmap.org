@@ -409,7 +409,7 @@
 		"noLocationError": "Bitte wähle einen Standort...",
 		"latitude": "Breitengrad",
 		"longitude": "Längengrad",
-		"addressLabel": "Adresse (Optional)",
+		"addressLabel": "Adresse (optional)",
 		"addressTooltip": "Alle Standorte müssen eine physische Präsenz haben. Gib optional eine Adresse ein, wenn das für den Standort des Händlers sinnvoll ist. Dienste ohne Standorte können nicht auf der Karte angezeigt werden.",
 		"addressPlaceholder": "2100 Freedom Drive...",
 		"categoryPlaceholder": "Restaurant usw.",
