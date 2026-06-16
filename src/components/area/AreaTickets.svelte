@@ -1,6 +1,7 @@
 <script lang="ts">
 import { _ } from "svelte-i18n";
 
+import FormHelperText from "$components/FormHelperText.svelte";
 import InfoTooltip from "$components/InfoTooltip.svelte";
 import OpenTicket from "$components/OpenTicket.svelte";
 import TextLink from "$components/TextLink.svelte";
@@ -57,16 +58,15 @@ $: totalTickets = add.length + verify.length + community.length;
 <section id="tickets">
 	<div class="w-full rounded-3xl border border-gray-300 dark:border-white/95 dark:bg-white/10">
 		<div class="p-5 text-lg font-semibold text-primary dark:text-white">
-			<div class="mb-2 flex items-center justify-center md:justify-start gap-2">
-				<h3 class="m-0 text-center md:text-left">
+			<div class="mb-2 text-center md:text-left">
+				<h3>
 					{title}
 					{#if filteredTickets.length && !ticketError}
 						<span class="text-base">({totalTickets})</span>
 					{/if}
 				</h3>
-
-				<InfoTooltip tooltip={$_(`maintain.ticketsTooltip`)} />
-
+				<FormHelperText text={$_(`maintain.ticketsTooltip`)} />
+		
 			</div>
 
 			<div role="tablist" class="flex flex-col md:flex-row md:inline">

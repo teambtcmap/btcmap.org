@@ -10,6 +10,7 @@ import "maplibre-gl/dist/maplibre-gl.css";
 import { onDestroy, onMount, tick } from "svelte";
 import { get } from "svelte/store";
 
+import FormHelperText from "$components/FormHelperText.svelte";
 import FormSuccess from "$components/FormSuccess.svelte";
 import AddressSearch from "$components/form/AddressSearch.svelte";
 import FormSelect from "$components/form/FormSelect.svelte";
@@ -420,13 +421,12 @@ $: if (map && mapLoaded) {
 					{$_('addLocation.heading')}
 				</h2>
 
-				<div class="flex items-center gap-1.5 mb-10 w-full text-justify text-primary dark:text-white">
-					<p class="m-0">
+				<div class="mb-10 w-full text-justify text-primary dark:text-white">
+					<p>
 						{$_('addLocation.description')}
 					</p>
-					<InfoTooltip tooltip={$_('addLocation.tooltip')} />
+					<FormHelperText text={$_('addLocation.tooltip')} />
 				</div>
-
 				<form on:submit={submitForm} class="w-full space-y-5 text-primary dark:text-white">
 				<div>
 					<label for="name" class="mb-2 block font-semibold">{$_('forms.merchantName')}</label>
@@ -533,11 +533,11 @@ $: if (map && mapLoaded) {
 				<div>
 					
 					
-					<div class="mb-2 flex items-center gap-1.5">
-						<label for="address" class="block font-semibold">
+					<div class="mb-10 w-full text-justify text-primary dark:text-white">
+						<p>
 							{$_('addLocation.addressLabel')}
-						</label>
-						<InfoTooltip tooltip={$_('addLocation.addressTooltip')} />
+						</p>
+						<FormHelperText text={$_('addLocation.addressTooltip')} />
 					</div>
 					
 					<input
