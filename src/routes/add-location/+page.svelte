@@ -437,7 +437,7 @@ $: if (map && mapLoaded) {
 							type="text"
 							name="name"
 							id="name"
-							placeholder={$_('addLocation.merchantNamePlaceholder') + ' (local)'}
+							placeholder={$_('addLocation.merchantNamePlaceholder')}
 							required
 							class="w-full rounded-2xl border-2 border-input p-3 transition-all focus:outline-link disabled:cursor-not-allowed disabled:bg-gray-100 disabled:text-gray-500 dark:bg-white/[0.15] dark:disabled:bg-gray-700 dark:disabled:text-gray-400"
 							bind:this={name}
