@@ -145,19 +145,19 @@ onMount(async () => {
 			>
 		</h2>
 
-		<p class="mb-10 w-full text-center text-primary dark:text-white">
-			{$_('verifyLocation.descriptionPart1')} <TextLink
-				link="https://www.openstreetmap.org"
-				external>{$_('verifyLocation.osmLinkText')}</TextLink
-			>{$_('verifyLocation.descriptionPart2')}
-			<TextLink
-				link="https://wiki.btcmap.org/Tagging-Merchants#shadowy-supertaggers"
-				external>{$_('verifyLocation.wikiLinkText')}</TextLink
-			>
-			{$_('verifyLocation.descriptionPart3')} <InfoTooltip
-				tooltip={$_('verifyLocation.tooltip')}
-			/>
-		</p>
+		<div class="mb-10 flex items-center justify-center gap-1.5 w-full text-center text-primary dark:text-white">
+			<p class="m-0">
+				{$_('verifyLocation.descriptionPart1')} <TextLink
+					link="https://www.openstreetmap.org"
+					external>{$_('verifyLocation.osmLinkText')}</TextLink
+				>{$_('verifyLocation.descriptionPart2')}
+				<TextLink
+					link="https://wiki.btcmap.org/Tagging-Merchants#shadowy-supertaggers"
+					external>{$_('verifyLocation.wikiLinkText')}</TextLink
+				>{$_('verifyLocation.descriptionPart3')}
+			</p>
+			<InfoTooltip tooltip={$_('verifyLocation.tooltip')} />
+		</div>
 
 		<form on:submit={submitForm} class="w-full space-y-5 text-primary dark:text-white">
 			<div>

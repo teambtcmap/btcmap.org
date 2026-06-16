@@ -10,10 +10,11 @@ let infoTooltip: HTMLButtonElement;
 $: infoTooltip &&
 	tippy([infoTooltip], {
 		content: tooltip,
+		trigger: "click",
 	});
 </script>
 
-<button bind:this={infoTooltip}>
+<button type="button" aria-label="More Information" bind:this={infoTooltip}>
 	<Icon
 		type="fa"
 		icon="circle-info"

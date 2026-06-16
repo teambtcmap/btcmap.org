@@ -196,11 +196,12 @@ onMount(async () => {
 			{$_('addCommunityForm.heading')}
 		</h2>
 
-		<p class="mb-5 w-full text-center text-primary dark:text-white">
-			{$_('addCommunityForm.description')} <InfoTooltip
-				tooltip={$_('addCommunityForm.tooltip')}
-			/>
-		</p>
+		<div class="mb-5 flex items-center justify-center gap-1.5 w-full text-center text-primary dark:text-white">
+			<p class="m-0">
+				{$_('addCommunityForm.description')}
+			</p>
+			<InfoTooltip tooltip={$_('addCommunityForm.tooltip')} />
+		</div>
 
 		<div class="mb-10 w-full text-primary dark:text-white">
 			<p class="font-semibold">{$_('addCommunityForm.criteriaHeading')}</p>

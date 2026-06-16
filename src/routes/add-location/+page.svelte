@@ -420,11 +420,12 @@ $: if (map && mapLoaded) {
 					{$_('addLocation.heading')}
 				</h2>
 
-				<p class="mb-10 w-full text-justify text-primary dark:text-white">
-					{$_('addLocation.description')} <InfoTooltip
-						tooltip={$_('addLocation.tooltip')}
-					/>
-				</p>
+				<div class="flex items-center gap-1.5 mb-10 w-full text-justify text-primary dark:text-white">
+					<p class="m-0">
+						{$_('addLocation.description')}
+					</p>
+					<InfoTooltip tooltip={$_('addLocation.tooltip')} />
+				</div>
 
 				<form on:submit={submitForm} class="w-full space-y-5 text-primary dark:text-white">
 				<div>
@@ -530,11 +531,15 @@ $: if (map && mapLoaded) {
 					</div>
 
 				<div>
-					<label for="address" class="mb-2 block font-semibold"
-						>{$_('addLocation.addressLabel')} <InfoTooltip
-							tooltip={$_('addLocation.addressTooltip')}
-						/></label
-					>
+					
+					
+					<div class="mb-2 flex items-center gap-1.5">
+						<label for="address" class="block font-semibold">
+							{$_('addLocation.addressLabel')}
+						</label>
+						<InfoTooltip tooltip={$_('addLocation.addressTooltip')} />
+					</div>
+					
 					<input
 						disabled={!captchaSecret || !mapLoaded}
 						type="text"
