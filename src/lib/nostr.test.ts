@@ -1,6 +1,6 @@
 import { nip19 } from "nostr-tools";
 import { generateSecretKey, getPublicKey } from "nostr-tools/pure";
-import { describe, expect, it } from "vitest";
+import { describe, expect, it, vi } from "vitest";
 
 import { decodeNsec, signAuthWithSecretKey } from "./nostr";
 
@@ -67,13 +67,20 @@ describe("signAuthWithSecretKey", () => {
 		expect(event.created_at).toBeLessThanOrEqual(after);
 	});
 
-	it("produces distinct events for the same key (different created_at / id)", async () => {
-		const sk = generateSecretKey();
-		const a = signAuthWithSecretKey(sk);
-		// Force the wall clock to advance one second so created_at differs.
-		await new Promise((r) => setTimeout(r, 1100));
-		const b = signAuthWithSecretKey(sk);
-		expect(b.created_at).toBeGreaterThan(a.created_at);
-		expect(b.id).not.toBe(a.id);
+	it("produces distinct events for the same key (different created_at / id)", () => {
+		// Advance the wall clock deterministically with fake timers instead of
+		// a real 1.1s sleep — created_at is unix seconds, so it must tick over.
+		vi.useFakeTimers();
+		try {
+			vi.setSystemTime(new Date("2024-01-01T00:00:00Z"));
+			const sk = generateSecretKey();
+			const a = signAuthWithSecretKey(sk);
+			vi.advanceTimersByTime(1100);
+			const b = signAuthWithSecretKey(sk);
+			expect(b.created_at).toBeGreaterThan(a.created_at);
+			expect(b.id).not.toBe(a.id);
+		} finally {
+			vi.useRealTimers();
+		}
 	});
 });
