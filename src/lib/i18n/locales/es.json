@@ -457,6 +457,7 @@
 		"tooltip": "NOTA: Debido al volumen de solicitudes y a que las actualizaciones son realizadas por voluntarios, puede tomar varias semanas actualizar esta ubicación. Se recomienda actualizar la ubicación directamente en OpenStreetMap si deseas ver los cambios en el mapa de inmediato.",
 		"loadingPlaceholder": "Cargando Comercio...",
 		"merchantNamePlaceholder": "Nombre del Comercio (local)",
+		"merchantEnglishNamePlaceholder": "Satoshi's Comics (inglés)",
 		"currentInfoLabel": "La información actual es correcta",
 		"currentInfoDescription": "Marca esta casilla si has verificado que los datos existentes están actualizados.",
 		"outdatedLabel": "Información desactualizada",
