@@ -111,11 +111,15 @@ export let data;
 	{#if !data.pathname.startsWith('/community/') && !data.pathname.startsWith('/country/')}
 		<meta
 			name="description"
-			content="Easily find places to spend sats anywhere on the planet."
+			content="Find places to spend sats wherever you are."
 		/>
 		<meta
 			name="twitter:description"
-			content="Easily find places to spend sats anywhere on the planet."
+			content="Find places to spend sats wherever you are."
+		/>
+		<meta
+			property="og:description"
+			content="Find places to spend sats wherever you are."
 		/>
 	{/if}
 	{#if ['/map', '/communities/map'].includes(data.pathname)}
@@ -144,7 +148,7 @@ export let data;
 	{#if !['/', '/map', '/communities/map', '/communities', '/countries'].includes(data.pathname)}
 		<div class="bg-teal dark:bg-dark">
 			<Header />
-			<main class="mx-auto w-10/12 xl:w-[1200px]">
+			<main class="mx-auto w-full px-4 xl:w-[1200px] xl:px-0">
 				<LoadingIndicator visible={layoutSyncVisible} status={layoutLoadingStatus} progress={$placesLoadingProgress} />
 				<slot />
 				<Footer />

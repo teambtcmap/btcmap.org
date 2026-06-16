@@ -3,6 +3,7 @@ import Time from "svelte-time";
 
 import Tip from "$components/Tip.svelte";
 import type { EventType, User } from "$lib/types";
+import { isValidLightningTip, stripLightningScheme } from "$lib/utils";
 
 import { resolve } from "$app/paths";
 
@@ -11,32 +12,18 @@ export let user_id: number | undefined;
 export let user_name: string | undefined;
 export let user_tip: string | undefined;
 export let time: string;
-export let latest: boolean;
+
+// The API ships user_tip with its own `lightning:` scheme; strip it so
+// Tip.svelte (which re-adds the scheme) can't emit `lightning:lightning:`.
+// Skip malformed addresses (e.g. "undefined@zbd.gg") so the Tip button is
+// hidden rather than rendering a dead link.
+$: tipDestination =
+	user_tip && isValidLightningTip(user_tip)
+		? stripLightningScheme(user_tip)
+		: undefined;
 </script>
 
-<div
-	class="flex flex-col items-center gap-2 p-5 text-center text-xl lg:flex-row lg:gap-5 lg:text-left"
->
-	<!-- dot -->
-	<span class="relative mx-auto mb-2 flex h-3 w-3 lg:mx-0 lg:mb-0">
-		<span
-			class="{latest
-				? 'animate-ping'
-				: ''} absolute inline-flex h-full w-full rounded-full {action === 'create'
-				? 'bg-created'
-				: action === 'delete'
-					? 'bg-deleted'
-					: 'bg-link'} opacity-75"
-		/>
-		<span
-			class="relative inline-flex h-3 w-3 rounded-full {action === 'create'
-				? 'bg-created'
-				: action === 'delete'
-					? 'bg-deleted'
-					: 'bg-link'}"
-		/>
-	</span>
-
+<div class="py-3 text-left text-base">
 	<div class="w-full flex-wrap items-center justify-between space-y-2 lg:flex lg:space-y-0">
 		<!-- event information -->
 		<div class="space-y-2 lg:space-y-0">
@@ -56,7 +43,7 @@ export let latest: boolean;
 
 			<!-- time ago -->
 			<span
-				class="block text-center font-semibold text-taggerTime lg:inline dark:text-white/70 {user_tip
+				class="block font-semibold text-taggerTime lg:inline dark:text-white/70 {tipDestination
 					? 'lg:mr-5'
 					: ''}"
 			>
@@ -65,8 +52,8 @@ export let latest: boolean;
 		</div>
 
 		<!-- lightning tip button -->
-		{#if user_tip}
-			<Tip destination={user_tip} class="mx-auto block lg:mx-0 lg:inline" />
+		{#if tipDestination}
+			<Tip destination={tipDestination} class="block lg:inline" />
 		{/if}
 	</div>
 </div>

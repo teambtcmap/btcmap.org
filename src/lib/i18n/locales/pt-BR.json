@@ -51,7 +51,7 @@
 		"clear": "Limpar pesquisa",
 		"noVisible": "Nenhum comerciante visível na visualização atual",
 		"worldwide": "Mundial",
-		"nearby": "Próximo",
+		"nearby": "Próximos",
 		"switchToWorldwide": "Mudar para pesquisa mundial",
 		"filterResults": "Filtrar resultados próximos",
 		"placeholder": "Pesquisar...",
@@ -93,6 +93,12 @@
 		"dataRefreshAlt": "Atualização de dados disponível"
 	},
 	"merchant": {
+		"tagsNote": "Mais informações sobre tags de mapeamento bitcoin podem ser encontradas",
+		"tagsNoteHere": "aqui",
+		"details": "Detalhes",
+		"activityShort": "Atividade",
+		"taggerTools": "Ferramentas de tagger",
+		"links": "Links",
 		"navigate": "Navegar",
 		"edit": "Editar",
 		"share": "Compartilhar",
@@ -122,12 +128,10 @@
 		"closed": "Fechado",
 		"closesAt": "Fecha às {time}",
 		"opensAt": "Abre às {time}",
-		"location": "Localização de {name}",
 		"activity": "Atividade de {name}",
 		"communities": "Comunidades de {name}"
 	},
 	"verification": {
-		"lastSurveyed": "Última Verificação",
 		"verified": "Verificado",
 		"outdated": "Desatualizado",
 		"notSurveyed": "Este local precisa ser verificado!",
@@ -153,13 +157,15 @@
 		"thirdPartyRequired": "Aplicativo de terceiros necessário"
 	},
 	"boost": {
-		"title": "Impulsionar",
 		"boosted": "Impulsionado",
 		"boostAction": "Impulsionar",
 		"extend": "Estender",
 		"boosting": "Impulsionando...",
 		"expires": "Impulso Expira",
-		"isBoosted": "Este local está impulsionado!",
+		"getVisibility": "Dê um carinho para este local",
+		"boostPromo": "Seu impulso ajuda mais pessoas a encontrá-lo no mapa",
+		"boostThisPlace": "Impulsionar este local",
+		"extendBoost": "Estender Impulso",
 		"improveVisibility": "Impulsione este local para melhorar sua visibilidade no mapa.",
 		"locations": "Locais impulsionados",
 		"boostLocation": "Impulsionar Local",
@@ -234,18 +240,12 @@
 		"hours": "Horário",
 		"noActivity": "Nenhuma atividade para exibir.",
 		"loadMore": "Carregar Mais",
-		"viewOnMainMap": "Ver no mapa principal",
-		"noCommunity": "Este local não faz parte de uma comunidade, mas uma pode ser {createLink} para ajudar a manter esta área local.",
-		"created": "criada",
-		"loadingCommunities": "Carregando comunidades..."
+		"viewOnMainMap": "Ver no mapa principal"
 	},
 	"comments": {
 		"title": "Comentários",
 		"add": "Adicionar Comentário",
-		"none": "Ainda sem comentários.",
-		"beFirst": "Ainda sem comentários. Seja o primeiro a deixar um comentário!",
-		"view": "Ver Comentários",
-		"shareThoughts": "Deixe os outros saberem o que você pensa sobre este comerciante."
+		"none": "Ainda sem comentários."
 	},
 	"errorPage": {
 		"title": "BTC Map - Erro",

@@ -9,8 +9,10 @@ import {
 	formatDistance,
 	getCommunitiesAtCoordinates,
 	isValidLatitude,
+	isValidLightningTip,
 	isValidLongitude,
 	sanitizeUrl,
+	stripLightningScheme,
 } from "./utils";
 
 describe("sanitizeUrl", () => {
@@ -679,5 +681,71 @@ describe("areaIconSrc", () => {
 		expect(areaIconSrc(null)).toBe("/images/bitcoin.svg");
 		expect(areaIconSrc(undefined)).toBe("/images/bitcoin.svg");
 		expect(areaIconSrc("")).toBe("/images/bitcoin.svg");
+	});
+});
+
+describe("stripLightningScheme", () => {
+	it("removes a leading lightning: scheme", () => {
+		expect(stripLightningScheme("lightning:alice@getalby.com")).toBe(
+			"alice@getalby.com",
+		);
+	});
+
+	it("leaves a bare address untouched", () => {
+		expect(stripLightningScheme("alice@getalby.com")).toBe("alice@getalby.com");
+	});
+
+	it("strips the scheme case-insensitively", () => {
+		expect(stripLightningScheme("LIGHTNING:alice@getalby.com")).toBe(
+			"alice@getalby.com",
+		);
+	});
+
+	it("trims surrounding whitespace", () => {
+		expect(stripLightningScheme("  lightning:alice@getalby.com  ")).toBe(
+			"alice@getalby.com",
+		);
+	});
+
+	it("strips whitespace following the scheme", () => {
+		expect(stripLightningScheme("lightning: alice@getalby.com")).toBe(
+			"alice@getalby.com",
+		);
+	});
+});
+
+describe("isValidLightningTip", () => {
+	it("accepts a well-formed lightning address", () => {
+		expect(isValidLightningTip("alice@getalby.com")).toBe(true);
+	});
+
+	it("accepts an address that still carries the lightning: scheme", () => {
+		expect(isValidLightningTip("lightning:alice@getalby.com")).toBe(true);
+	});
+
+	it("accepts an address with whitespace after the scheme", () => {
+		expect(isValidLightningTip("lightning: alice@getalby.com")).toBe(true);
+	});
+
+	it("rejects undefined/empty input", () => {
+		expect(isValidLightningTip(undefined)).toBe(false);
+		expect(isValidLightningTip("")).toBe(false);
+	});
+
+	it("rejects an undefined username leaked from missing data", () => {
+		expect(isValidLightningTip("undefined@zbd.gg")).toBe(false);
+		expect(isValidLightningTip("lightning:undefined@zbd.gg")).toBe(false);
+	});
+
+	it("rejects a null username", () => {
+		expect(isValidLightningTip("null@zbd.gg")).toBe(false);
+	});
+
+	it("rejects an address with no domain dot", () => {
+		expect(isValidLightningTip("alice@localhost")).toBe(false);
+	});
+
+	it("rejects an address containing whitespace", () => {
+		expect(isValidLightningTip("alice @getalby.com")).toBe(false);
 	});
 });

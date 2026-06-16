@@ -128,7 +128,7 @@ function createSessionStore() {
 			if (stored) set(stored);
 		},
 
-		// Create a throwaway account via the existing RPC endpoints. Returns
+		// Create a throwaway account via the existing REST endpoints. Returns
 		// the new session on success. Stores everything in localStorage so the
 		// user stays "logged in" across reloads.
 		//

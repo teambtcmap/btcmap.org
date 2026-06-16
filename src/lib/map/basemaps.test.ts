@@ -6,6 +6,7 @@ import {
 	buildRasterStyle,
 	defaultBasemap,
 	isBasemapId,
+	previewStyleForTheme,
 	styleForBasemap,
 } from "./basemaps";
 
@@ -77,6 +78,17 @@ describe("styleForBasemap", () => {
 		expect(spec.sources.osm).toBeDefined();
 		expect(spec.layers).toHaveLength(1);
 		expect(spec.layers[0].id).toBe("osm");
+	});
+});
+
+describe("previewStyleForTheme", () => {
+	it("maps the site theme to the Carto preview styles", () => {
+		expect(previewStyleForTheme("light")).toBe(
+			styleForBasemap("carto-positron"),
+		);
+		expect(previewStyleForTheme("dark")).toBe(
+			styleForBasemap("carto-dark-matter"),
+		);
 	});
 });
 

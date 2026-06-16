@@ -4,10 +4,10 @@ import HeaderPlaceholder from "$components/layout/HeaderPlaceholder.svelte";
 import TextLink from "$components/TextLink.svelte";
 import { _ } from "$lib/i18n";
 import { theme } from "$lib/theme";
-import type { RpcIssue } from "$lib/types";
+import type { PlaceIssue } from "$lib/types";
 
 export let data;
-let issues: RpcIssue[] = data.rpcResult.requested_issues;
+let issues: PlaceIssue[] = data.result?.requested_issues ?? [];
 </script>
 
 <svelte:head>

@@ -227,7 +227,7 @@ afterNavigate(() => {
 	<nav
 		class="hide-scroll absolute top-[122.45px] z-30 {showMobileMenu
 			? 'left-0'
-			: 'left-[-100%]'} h-[calc(100dvh-122.45px)] w-full space-y-2 overflow-y-auto border-t border-[#BDD2D4] bg-teal p-8 transition-all ease-in-out dark:bg-dark"
+			: 'left-[-100%]'} h-[calc(100dvh-122.45px)] w-full space-y-2 overflow-y-auto border-t border-[#BDD2D4] bg-teal px-8 pt-8 pb-[max(3rem,env(safe-area-inset-bottom))] transition-all ease-in-out dark:bg-dark"
 	>
 		{#each navLinks as link (link.id)}
 			<!-- dropdown menu -->

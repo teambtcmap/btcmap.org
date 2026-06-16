@@ -6,11 +6,13 @@ import convex from "@turf/convex";
 import { featureCollection, point } from "@turf/helpers";
 import type { Feature, FeatureCollection, Point, Polygon } from "geojson";
 import type {
+	FilterSpecification,
 	GeoJSONSource,
 	LngLatBounds,
 	MapGeoJSONFeature,
 	MapLayerMouseEvent,
 	Map as MapLibreMap,
+	Marker,
 } from "maplibre-gl";
 import { onDestroy, onMount } from "svelte";
 import { get } from "svelte/store";
@@ -27,7 +29,7 @@ import {
 	DEFAULT_MAP_ZOOM,
 	LABEL_VISIBLE_ZOOM,
 	MAP_DEBOUNCE_DELAY,
-	MERCHANT_LIST_MAX_ITEMS,
+	MERCHANT_LIST_FETCH_CEILING,
 	MERCHANT_LIST_MIN_ZOOM,
 	NEARBY_RADIUS_MULTIPLIER,
 } from "$lib/constants";
@@ -41,6 +43,10 @@ import {
 	styleForBasemap,
 } from "$lib/map/basemaps";
 import {
+	routePlacesByBoostAndZoom,
+	shouldClusterBoostedAtZoom,
+} from "$lib/map/boostedClustering";
+import {
 	type HashCoords,
 	parseHashCoords,
 	writeHashCoords,
@@ -49,6 +55,8 @@ import {
 	ensureSpritesForPlaces,
 	installPlaceholderHandler,
 	loadSvgImage,
+	PIN_FILL_BOOSTED,
+	PIN_FILL_REGULAR,
 } from "$lib/map/maplibreSprites";
 import { parseLatLongQuery } from "$lib/map/queryViewport";
 import {
@@ -125,6 +133,13 @@ let lastAppliedLabelTheme: "light" | "dark" | undefined;
 // search may have the same result count as the previous one.
 let lastSearchModeSig = "";
 
+// Last place list fed to the sources, kept so the boosted-clustering boundary
+// re-sync (on zoom crossing BOOSTED_CLUSTERING_MAX_ZOOM) can rebuild without a
+// $places change. `boostedAreClustered` mirrors the routing decision of the
+// most recent sync so the moveend handler only re-syncs when it actually flips.
+let lastSyncedList: Place[] = [];
+let boostedAreClustered = false;
+
 // Place-label colors. MapLibre paint expressions can't read CSS custom
 // properties, so the values are inlined here.
 const LABEL_PALETTE = {
@@ -170,9 +185,97 @@ let latestHullClusterId: number | null = null;
 let deepLinkPanUnsub: (() => void) | null = null;
 let deepLinkPanTimer: ReturnType<typeof setTimeout> | null = null;
 
+// Zoom level that reveals a single selected merchant: just past
+// CLUSTERING_DISABLED_ZOOM (17) so it declusters into its own pin (with the
+// selection pulse on top) rather than being absorbed into a cluster. The
+// DEFAULT_MAP_ZOOM (15) the deep-link pan used to land on still clusters.
+const REVEAL_ZOOM = 17.5;
+
 const panToPlace = (lat: number, lon: number) => {
 	if (!map) return;
-	map.easeTo({ center: [lon, lat], zoom: DEFAULT_MAP_ZOOM, duration: 300 });
+	map.easeTo({ center: [lon, lat], zoom: REVEAL_ZOOM, duration: 300 });
+};
+
+// Selected-merchant highlight (design "C — centered pulsing locator"): the GL
+// pin scales up, and a single DOM overlay marker — a pulsing ring + a center
+// dot in the pin's own hue — sits on the selected pin's geo point. The pulse
+// is pure CSS (composited, honors prefers-reduced-motion), so the GL pin layer
+// stays untouched and fast. `maplibre` is imported dynamically in onMount, so
+// we stash the namespace here to construct the Marker reactively.
+let maplibreNs: typeof import("maplibre-gl") | null = null;
+let pulseMarker: Marker | null = null;
+let pulsePinId: number | null = null; // merchant the pulse overlay is on
+
+const buildPulseElement = (): HTMLDivElement => {
+	const el = document.createElement("div");
+	el.className = "bm-selected-pulse";
+	el.style.pointerEvents = "none";
+	el.innerHTML =
+		'<span class="bm-pulse-ring"></span>' +
+		'<span class="bm-pulse-ring bm-pulse-ring--delay"></span>' +
+		'<span class="bm-pulse-dot"></span>';
+	return el;
+};
+
+// Hide the pulse when the selected merchant has been rolled into a cluster at
+// the current zoom (there's no individual pin to sit on, so the pulse would
+// float orphaned); show it again once the pin renders individually. Regular
+// places live in the clustered `places` source; boosted places do too, but
+// only at/below BOOSTED_CLUSTERING_MAX_ZOOM — above it they ride the
+// non-clustered boosted source and are always individually visible. We query
+// the live source state rather than a zoom threshold — whether a point
+// clusters depends on its neighbours, not just the zoom level.
+const updatePulseVisibility = () => {
+	if (!map || !pulseMarker || pulsePinId === null) return;
+	const place = get(placesById).get(pulsePinId);
+	let visible = true;
+	const inClusteredSource =
+		!!place && (!isBoosted(place) || shouldClusterBoostedAtZoom(map.getZoom()));
+	if (inClusteredSource) {
+		const filter: FilterSpecification = [
+			"all",
+			["!", ["has", "point_count"]],
+			["==", ["get", "id"], pulsePinId],
+		];
+		visible = map.querySourceFeatures("places", { filter }).length > 0;
+	}
+	pulseMarker.getElement().style.display = visible ? "" : "none";
+};
+
+// Show / move / hide the locator pulse for the selected merchant. Needs the
+// place's coordinates, so it no-ops until the place is in $placesById — a
+// deep-linked merchant gets its pulse once places sync in (the reactive below
+// re-runs on $places).
+const syncSelectionPulse = (selectedId: number | null) => {
+	if (!map || !maplibreNs) return;
+	if (selectedId === null) {
+		pulseMarker?.remove();
+		pulsePinId = null;
+		return;
+	}
+	const place = get(placesById).get(selectedId);
+	if (!place) return; // not loaded yet
+	const isNewSelection = pulsePinId !== selectedId;
+	if (!pulseMarker) {
+		pulseMarker = new maplibreNs.Marker({
+			element: buildPulseElement(),
+			anchor: "center",
+		});
+	}
+	// Keep colour + position in sync with the place even when the selection is
+	// unchanged: boosting from the drawer recolours the pin (teal → orange) and
+	// fires the $places reactive, and the pulse must follow. setProperty,
+	// setLngLat and addTo are idempotent on an already-added marker, so this
+	// stays cheap on every $places tick. Colours come from the same source of
+	// truth as the GL pin sprite so the two can't desync.
+	const color = isBoosted(place) ? PIN_FILL_BOOSTED : PIN_FILL_REGULAR;
+	pulseMarker.getElement().style.setProperty("--bm-pulse-color", color);
+	pulseMarker.setLngLat([place.lon, place.lat]).addTo(map);
+	pulsePinId = selectedId;
+	// Reconcile cluster-based visibility only on a real selection change;
+	// moveend/idle handle it thereafter (avoids a querySourceFeatures per
+	// $places tick).
+	if (isNewSelection) updatePulseVisibility();
 };
 
 // Reactive zoom level for the panel — drives the "zoom in" prompt and the
@@ -291,7 +394,7 @@ const updateMerchantList = (opts?: { force?: boolean }) => {
 			break;
 		}
 		case "api-with-limit": {
-			// Zoom 11-14: API search; count-only when panel is closed.
+			// Zoom 10-14: API search; count-only when panel is closed.
 			const radiusKm =
 				calculateRadiusKmFromLngLatBounds(bounds) * NEARBY_RADIUS_MULTIPLIER;
 			if (!listOpen || !allowHeavyFetch) {
@@ -303,7 +406,7 @@ const updateMerchantList = (opts?: { force?: boolean }) => {
 				merchantList.fetchAndReplaceList(
 					{ lat: center.lat, lon: center.lng },
 					radiusKm,
-					{ hideIfExceeds: MERCHANT_LIST_MAX_ITEMS },
+					{ hideIfExceeds: MERCHANT_LIST_FETCH_CEILING },
 				);
 			}
 			break;
@@ -327,7 +430,19 @@ const debouncedUpdateMerchantList = debounce(
 
 const panToNearbyMerchant = (place: Place) => {
 	if (!map) return;
-	map.easeTo({ center: [place.lon, place.lat], duration: 300 });
+	// Below the clustering threshold the picked merchant may be absorbed into a
+	// cluster, leaving the selection pulse floating with no pin under it. Zoom
+	// past the threshold to reveal its individual pin (same intent as
+	// zoomToSearchResult); once we're already zoomed in, just pan.
+	if (map.getZoom() < CLUSTERING_DISABLED_ZOOM) {
+		map.easeTo({
+			center: [place.lon, place.lat],
+			zoom: REVEAL_ZOOM,
+			duration: 400,
+		});
+	} else {
+		map.easeTo({ center: [place.lon, place.lat], duration: 300 });
+	}
 };
 
 const zoomToSearchResult = (place: Place) => {
@@ -455,31 +570,15 @@ const EMPTY_COLLECTION: PlaceFeatureCollection = {
 	features: [],
 };
 
-// Boosted places render via a separate non-clustered source so they stay
-// individually visible above cluster discs at every zoom — the legacy /map
-// did this via a dedicated boostedLayer + BOOSTED_CLUSTERING_MAX_ZOOM
-// constant; here we just route boosted features to a sibling source that
-// has cluster:false.
-const partitionPlacesForFeatures = (
-	list: Place[],
-): {
-	regular: Place[];
-	boosted: Place[];
-} => {
-	const regular: Place[] = [];
-	const boosted: Place[] = [];
-	for (const p of list) {
-		if (p.deleted_at) continue;
-		if (isBoosted(p)) boosted.push(p);
-		else regular.push(p);
-	}
-	return { regular, boosted };
-};
+// Boosted places ride a separate non-clustered source so they stay
+// individually visible above cluster discs — but only above
+// BOOSTED_CLUSTERING_MAX_ZOOM. At/below it they fold into the clustered
+// `places` source (matching the legacy /map's dedicated boostedLayer +
+// BOOSTED_CLUSTERING_MAX_ZOOM behavior) so the zoomed-out world view isn't
+// littered with overlapping orange pins. Routing lives in
+// $lib/map/boostedClustering; see syncPlacesToSource for the wiring.
 
-const buildFeatureCollectionFor = (
-	list: Place[],
-	includeBoosted: boolean,
-): PlaceFeatureCollection => {
+const buildFeatureCollectionFor = (list: Place[]): PlaceFeatureCollection => {
 	const saved = get(savedPlaceIds);
 	// Snapshot the enriched cache once per build — names arrive lazily as
 	// the viewport-bound /v4/places/search fetch resolves.
@@ -505,7 +604,9 @@ const buildFeatureCollectionFor = (
 			geometry: { type: "Point", coordinates: [p.lon, p.lat] },
 			properties: {
 				id: p.id,
-				boosted: includeBoosted,
+				// Per-place so a boosted marker folded into the clustered source at
+				// low zoom still renders its orange pin when it sits unclustered.
+				boosted: !!isBoosted(p),
 				icon: p.icon ?? "question_mark",
 				comments: p.comments ?? 0,
 				saved: saved.has(p.id),
@@ -600,9 +701,14 @@ const syncPlacesToSource = (list: Place[]) => {
 		| GeoJSONSource
 		| undefined;
 	if (!source || !boostedSource) return;
-	const { regular, boosted } = partitionPlacesForFeatures(list);
-	source.setData(buildFeatureCollectionFor(regular, false));
-	boostedSource.setData(buildFeatureCollectionFor(boosted, true));
+	lastSyncedList = list;
+	boostedAreClustered = shouldClusterBoostedAtZoom(map.getZoom());
+	const { clustered, standalone } = routePlacesByBoostAndZoom(
+		list,
+		map.getZoom(),
+	);
+	source.setData(buildFeatureCollectionFor(clustered));
+	boostedSource.setData(buildFeatureCollectionFor(standalone));
 	ensureSpritesForPlaces(map, list);
 	if (list.length > 0) elementsLoaded = true;
 	// E2E test hook: Playwright can't probe WebGL canvas pins like it
@@ -687,6 +793,14 @@ $: if (map && styleLoaded && $lastUpdatedPlaceId) {
 	lastUpdatedPlaceId.set(undefined);
 }
 
+// Position the locator pulse. Depends on $places too so a deep-linked merchant
+// gets its pulse once the place data syncs in; syncSelectionPulse no-ops when
+// the target is unchanged or not yet loaded.
+$: if (map && styleLoaded) {
+	void $places;
+	syncSelectionPulse($merchantDrawer.merchantId);
+}
+
 // The custom sources + layers we add on top of whatever basemap is
 // active. applyBasemap() carries these across a setStyle() so the pins,
 // clusters, and labels survive a basemap/theme swap untouched (MapLibre's
@@ -769,6 +883,8 @@ onMount(async () => {
 	// User may have navigated away while the dynamic import was in
 	// flight; bail before instantiating against an unmounted container.
 	if (destroyed) return;
+	// Stash the namespace so the selection-pulse helpers can build a Marker.
+	maplibreNs = maplibre;
 
 	// Five basemaps (legacy parity): four vector styles + the OSM raster
 	// style. A stored picker choice wins; otherwise the first-visit default
@@ -973,10 +1089,13 @@ onMount(async () => {
 			clusterMaxZoom: CLUSTERING_DISABLED_ZOOM - 1,
 		});
 
-		// Separate non-clustered source for boosted places. Routing boosted
-		// features here keeps them visually prominent above cluster discs at
-		// every zoom — they never get absorbed into a cluster icon. Matches
-		// the legacy /map's dedicated boostedLayer behavior.
+		// Separate non-clustered source for boosted places. Above
+		// BOOSTED_CLUSTERING_MAX_ZOOM, syncPlacesToSource routes boosted
+		// features here so they stay visually prominent above cluster discs and
+		// never get absorbed into a cluster icon. At/below that zoom they're
+		// routed into the clustered `places` source instead (see
+		// $lib/map/boostedClustering) — the MapLibre analogue of the legacy
+		// /map's dedicated boostedLayer + BOOSTED_CLUSTERING_MAX_ZOOM swap.
 		map.addSource("places-boosted", {
 			type: "geojson",
 			data: EMPTY_COLLECTION,
@@ -1495,6 +1614,12 @@ onMount(async () => {
 			const c = map.getCenter();
 			currentLat = c.lat;
 			currentLon = c.lng;
+			// Re-route boosted places when zoom crosses BOOSTED_CLUSTERING_MAX_ZOOM
+			// — the MapLibre analogue of the legacy boostedLayer swap. Only re-syncs
+			// on an actual flip, so steady-state pans stay cheap.
+			if (shouldClusterBoostedAtZoom(currentZoom) !== boostedAreClustered) {
+				syncPlacesToSource(lastSyncedList);
+			}
 			debouncedUpdateMerchantList();
 		});
 
@@ -1520,6 +1645,9 @@ onMount(async () => {
 			}
 			tilesLoading = false;
 			mapTilesLoaded = true;
+			// Clustering is settled on idle — reconcile the pulse with whether the
+			// selected pin is currently rendered individually or inside a cluster.
+			updatePulseVisibility();
 		});
 
 		// Persist viewport in the URL hash. Preserves any merchant=… params
@@ -1566,11 +1694,14 @@ onMount(async () => {
 		window.addEventListener(MERCHANT_URL_CHANGE_EVENT, handleHashChange);
 		window.addEventListener("popstate", handleHashChange);
 
-		// Deep link: URL had a merchant= param but the hash carried no
-		// viewport coords. Pan the camera to the merchant once it's in the
-		// places store. If places are still loading, subscribe and wait —
-		// 10s safety unsubscribe so we never leak.
-		if (!hashCoords) {
+		// Deep link: the URL selected a merchant. Reveal it as an individual
+		// pin — pan/zoom to it once it's in the places store — when the URL
+		// carried no viewport, OR carried one whose zoom is below the clustering
+		// threshold (where the pin would be absorbed into a cluster, leaving the
+		// selection pulse floating with nothing under it). A hash zoom at/above
+		// the threshold is honoured as-is. If places are still loading,
+		// subscribe and wait — 10s safety unsubscribe so we never leak.
+		if (!hashCoords || hashCoords.zoom < CLUSTERING_DISABLED_ZOOM) {
 			const { merchantId, isOpen } = parseMerchantHash();
 			if (isOpen && merchantId) {
 				const place = get(placesById).get(merchantId);
@@ -1634,6 +1765,8 @@ onDestroy(() => {
 	if (deepLinkPanTimer) clearTimeout(deepLinkPanTimer);
 	deepLinkPanUnsub?.();
 	deepLinkPanUnsub = null;
+	pulseMarker?.remove();
+	pulseMarker = null;
 	if (tilesLoadingTimer) clearTimeout(tilesLoadingTimer);
 	if (tilesLoadingFallback) clearTimeout(tilesLoadingFallback);
 	spiderfier?.unspiderfyAll();

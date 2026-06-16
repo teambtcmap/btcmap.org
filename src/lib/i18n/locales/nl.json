@@ -136,7 +136,7 @@
 		"clear": "Zoekopdracht wissen",
 		"noVisible": "Er zijn geen ondernemers zichtbaar in deze weergave",
 		"worldwide": "Wereldwijd",
-		"nearby": "In de buurt",
+		"nearby": "Omgeving",
 		"switchToWorldwide": "Schakel over naar wereldwijd zoeken",
 		"filterResults": "Filter nabijgelegen resultaten",
 		"placeholder": "Zoeken...",
@@ -182,6 +182,12 @@
 		"dataRefreshAlt": "Nieuwe gegevens beschikbaar"
 	},
 	"merchant": {
+		"tagsNote": "Meer informatie over Bitcoin mapping tags vind je",
+		"tagsNoteHere": "hier",
+		"details": "Details",
+		"activityShort": "Activiteit",
+		"taggerTools": "Tagger-tools",
+		"links": "Links",
 		"navigate": "Navigeren",
 		"edit": "Bewerken",
 		"share": "Delen",
@@ -215,12 +221,10 @@
 		"closed": "Gesloten",
 		"closesAt": "Sluit {time}",
 		"opensAt": "Opent {time}",
-		"location": "{name} Locatie",
 		"activity": "{name} Activiteit",
 		"communities": "{name}-community's"
 	},
 	"verification": {
-		"lastSurveyed": "Laatst gecontroleerd",
 		"verified": "Geverifieerd",
 		"outdated": "Verouderd",
 		"notSurveyed": "Deze locatie moet worden gecontroleerd!",
@@ -246,17 +250,15 @@
 		"thirdPartyRequired": "App van derden vereist"
 	},
 	"boost": {
-		"title": "Boost",
 		"boosted": "Geboost",
 		"boostAction": "Boost",
 		"extend": "Verlengen",
 		"boosting": "Boosten...",
 		"expires": "Boost verloopt",
-		"getVisibility": "Vergroot je zichtbaarheid",
-		"boostPromo": "Boost deze vermelding om bovenaan te verschijnen bij lokale zoekopdrachten",
+		"getVisibility": "Geef deze locatie wat liefde",
+		"boostPromo": "Jouw boost helpt meer mensen om het op de kaart te vinden",
 		"boostThisPlace": "Boost deze locatie",
 		"extendBoost": "Boost verlengen",
-		"isBoosted": "Deze locatie is geboost!",
 		"improveVisibility": "Geef deze locatie een boost om de zichtbaarheid op de kaart te verbeteren.",
 		"locations": "Geboostte locaties",
 		"boostLocation": "Boost locatie",
@@ -335,19 +337,13 @@
 		"hours": "Uur",
 		"noActivity": "Geen activiteit om weer te geven.",
 		"loadMore": "Laad meer",
-		"viewOnMainMap": "Toon op hoofdkaart",
-		"noCommunity": "Deze locatie maakt geen deel uit van een community, maar er kan er een worden {createLink} om dit lokale gebied te helpen onderhouden.",
-		"created": "aangemaakt",
-		"loadingCommunities": "Community's laden..."
+		"viewOnMainMap": "Toon op hoofdkaart"
 	},
 	"comments": {
 		"title": "Reacties",
 		"add": "Reactie toevoegen",
 		"adding": "Bezig...",
-		"none": "Er zijn nog geen reacties.",
-		"beFirst": "Er zijn nog geen reacties. Laat als eerste een reactie achter!",
-		"view": "Reacties bekijken",
-		"shareThoughts": "Laat anderen weten wat je van deze ondernemer vindt."
+		"none": "Er zijn nog geen reacties."
 	},
 	"errorPage": {
 		"title": "BTC-kaart - Fout",

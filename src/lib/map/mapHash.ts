@@ -1,9 +1,15 @@
-// URL hash viewport sync for /map.
+// URL viewport sync for /map.
 //
-// Format: `#zoom/lat/lng&merchant=123&view=…`. We extend it
-// with optional `/bearing/pitch` segments after lng, written only when
-// non-zero. Drawer params after `&` are preserved untouched so a shared
-// URL combining a viewport + an open drawer round-trips.
+// The hash holds ONLY the viewport: `#zoom/lat/lng`, optionally extended with
+// `/bearing/pitch` segments (written only when non-zero). The merchant drawer
+// params (`merchant`, `view`) live in the QUERY STRING instead — see
+// $lib/merchantDrawerHash — so the server-side OG-image loader can read them
+// (the hash fragment is never sent to the server). Build the canonical
+// merchant deep link with buildMerchantMapHref().
+//
+// Any legacy `&`-suffixed hash params (the pre-#1019 `#z/lat/lng&merchant=…`
+// scheme) are still preserved untouched below for backward compatibility, but
+// nothing in the app reads merchant/view from the hash anymore.
 
 export type HashCoords = {
 	zoom: number;

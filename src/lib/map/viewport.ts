@@ -8,8 +8,8 @@ export type ZoomBehavior = "none" | "api-with-limit" | "local-markers";
 // See constants.ts for zoom behavior documentation
 export function getZoomBehavior(zoom: number): ZoomBehavior {
 	if (zoom >= MERCHANT_LIST_MIN_ZOOM) return "local-markers"; // Zoom 15+
-	if (zoom >= MERCHANT_LIST_LOW_ZOOM) return "api-with-limit"; // Zoom 11-14
-	return "none"; // Below zoom 11
+	if (zoom >= MERCHANT_LIST_LOW_ZOOM) return "api-with-limit"; // Zoom 10-14
+	return "none"; // Below zoom 10
 }
 
 // MapLibre-shaped haversine for the enrichment fetch radius. No 10%

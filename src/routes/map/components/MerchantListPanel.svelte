@@ -12,11 +12,7 @@ import {
 	type CategoryKey,
 	placeMatchesCategory,
 } from "$lib/categoryMapping";
-import {
-	BREAKPOINTS,
-	MERCHANT_LIST_LOW_ZOOM,
-	MERCHANT_LIST_MIN_ZOOM,
-} from "$lib/constants";
+import { BREAKPOINTS, MERCHANT_LIST_LOW_ZOOM } from "$lib/constants";
 import { _ } from "$lib/i18n";
 import { merchantDrawer } from "$lib/merchantDrawerStore";
 import type { MerchantListMode } from "$lib/merchantListStore";
@@ -240,12 +236,15 @@ function getCategoryButtonClass(
 	return "cursor-not-allowed bg-gray-100 text-gray-400 dark:bg-white/5 dark:text-white/30";
 }
 
-// Show "zoom in" message when:
-// 1. Below zoom 11 (always - no data fetched at this level)
-// 2. Between zoom 11-14 with no merchants (too many results in dense area)
+// Show "zoom in" prompt when:
+// 1. Below the list floor (no data fetched at this zoom)
+// 2. Results were blanked because the area is too dense (>fetch ceiling):
+//    an empty list but a non-zero total count
+// A genuinely empty area (totalCount === 0) falls through to the
+// "No merchants visible in current view" body state instead.
 $: showZoomInMessage =
 	currentZoom < MERCHANT_LIST_LOW_ZOOM ||
-	(currentZoom < MERCHANT_LIST_MIN_ZOOM && merchants.length === 0);
+	(merchants.length === 0 && totalCount > 0);
 $: isTruncated = totalCount > merchants.length;
 
 // Body scroll lock on mobile when panel is open
@@ -259,11 +258,6 @@ $: if (browser && isOpen !== undefined) {
 		unlockBodyScroll();
 		scrollLockActive = false;
 	}
-}
-
-// Focus search input when panel opens (always, since we now have unified search)
-$: if (browser && isOpen && searchInputComponent) {
-	tick().then(() => searchInputComponent?.focus());
 }
 
 function handleItemClick(place: Place) {
@@ -346,7 +340,7 @@ onDestroy(() => {
 {#if isOpen}
 	<section
 		bind:this={panelElement}
-		class="pb-safe absolute inset-0 z-[1001] flex flex-col overflow-hidden bg-white md:absolute md:inset-auto md:top-3 md:bottom-4 md:left-3 md:w-80 md:rounded-lg md:pb-0 md:shadow-lg dark:bg-dark dark:shadow-black/30"
+		class="pb-safe absolute inset-0 z-[1001] flex flex-col overflow-hidden bg-white md:absolute md:inset-auto md:top-3 md:bottom-[max(3rem,env(safe-area-inset-bottom))] md:left-3 md:w-80 md:rounded-lg md:pb-0 md:shadow-lg dark:bg-dark dark:shadow-black/30"
 		role="complementary"
 		aria-label={$_('aria.merchantList')}
 	>
@@ -403,11 +397,12 @@ onDestroy(() => {
 					role="radio"
 					on:click={() => handleModeSwitch('search')}
 					aria-checked={mode === 'search'}
-					class="flex-1 rounded-md px-3 py-1.5 text-xs font-medium transition-colors
+					class="flex flex-1 items-center justify-center gap-1.5 rounded-md px-3 py-1.5 text-xs font-medium transition-colors
 						{mode === 'search'
 						? 'bg-white text-primary shadow-sm dark:bg-white/10 dark:text-white'
 						: 'text-body hover:text-primary dark:text-white/70 dark:hover:text-white'}"
 				>
+					<Icon type="fa" icon="globe" w="14" h="14" />
 					{$_('search.worldwide')}
 				</button>
 				<button
@@ -415,11 +410,12 @@ onDestroy(() => {
 					role="radio"
 					on:click={() => handleModeSwitch('nearby')}
 					aria-checked={mode === 'nearby'}
-					class="flex-1 rounded-md px-3 py-1.5 text-xs font-medium transition-colors
+					class="flex flex-1 items-center justify-center gap-1.5 rounded-md px-3 py-1.5 text-xs font-medium transition-colors
 						{mode === 'nearby'
 						? 'bg-white text-primary shadow-sm dark:bg-white/10 dark:text-white'
 						: 'text-body hover:text-primary dark:text-white/70 dark:hover:text-white'}"
 				>
+					<Icon type="fa" icon="list" w="14" h="14" />
 					{$_('search.nearby')}{#if isLoadingList}<span class="opacity-60">
 							...</span
 						>{:else}{formatNearbyCount(totalCount)}{/if}
@@ -468,7 +464,9 @@ onDestroy(() => {
 						{:else}
 							{searchResults.length} result{searchResults.length !== 1 ? 's' : ''}
 						{/if}
-					{:else if showZoomInMessage}
+					{:else if showZoomInMessage && !isLoadingList}
+						<!-- Loading spinner takes precedence so a stale count-only state
+						     can't flash this link (mirrors the body branch below) -->
 						<button
 							on:click={handleZoomToNearbyLevel}
 							class="text-link underline-offset-2 hover:underline dark:text-white"
@@ -583,8 +581,9 @@ onDestroy(() => {
 						{/each}
 					</ul>
 				{/if}
-			{:else if showZoomInMessage}
-				<!-- Nearby mode: clickable zoom in prompt -->
+			{:else if showZoomInMessage && !isLoadingList}
+				<!-- Nearby mode: clickable zoom in prompt (loading spinner takes
+				     precedence so a stale count-only state can't flash this) -->
 				<button
 					type="button"
 					on:click={handleZoomToNearbyLevel}

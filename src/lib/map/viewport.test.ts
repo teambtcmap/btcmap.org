@@ -15,15 +15,15 @@ const stubBounds = (
 	}) as unknown as LngLatBounds;
 
 describe("getZoomBehavior", () => {
-	it('returns "none" for zoom levels below 11', () => {
+	it('returns "none" for zoom levels below 10', () => {
 		expect(getZoomBehavior(1)).toBe("none");
 		expect(getZoomBehavior(5)).toBe("none");
-		expect(getZoomBehavior(10)).toBe("none");
+		expect(getZoomBehavior(9)).toBe("none");
 	});
 
-	it('returns "api-with-limit" for zoom levels 11-14', () => {
+	it('returns "api-with-limit" for zoom levels 10-14', () => {
+		expect(getZoomBehavior(10)).toBe("api-with-limit");
 		expect(getZoomBehavior(11)).toBe("api-with-limit");
-		expect(getZoomBehavior(12)).toBe("api-with-limit");
 		expect(getZoomBehavior(14)).toBe("api-with-limit");
 	});
 
