@@ -24,11 +24,11 @@ import { _, locale } from "svelte-i18n";
 import Icon from "$components/Icon.svelte";
 import IssueCell from "$components/IssueCell.svelte";
 import { theme } from "$lib/theme";
-import type { RpcIssue } from "$lib/types";
+import type { PlaceIssue } from "$lib/types";
 import { debounce, getIssueHelpLink, getIssueIcon, isEven } from "$lib/utils";
 
 export let title: string;
-export let issues: RpcIssue[];
+export let issues: PlaceIssue[];
 export let loading: boolean;
 export let initialPageSize = 10;
 
