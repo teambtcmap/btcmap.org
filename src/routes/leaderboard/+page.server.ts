@@ -62,7 +62,7 @@ export const load: PageServerLoad = async ({ url, fetch }) => {
 		if (!response.ok) {
 			return {
 				error: `API Error: ${response.status}`,
-				rpcResult: null,
+				result: null,
 				period: resolvedPeriod,
 				periodOptions: PERIOD_OPTIONS,
 			};
@@ -71,14 +71,14 @@ export const load: PageServerLoad = async ({ url, fetch }) => {
 		const data = await response.json();
 
 		return {
-			rpcResult: { users: data },
+			result: { users: data },
 			period: resolvedPeriod,
 			periodOptions: PERIOD_OPTIONS,
 		};
 	} catch (err) {
 		return {
 			error: err instanceof Error ? err.message : "Failed to load leaderboard",
-			rpcResult: null,
+			result: null,
 			period: resolvedPeriod,
 			periodOptions: PERIOD_OPTIONS,
 		};

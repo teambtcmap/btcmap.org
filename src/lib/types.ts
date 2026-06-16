@@ -152,7 +152,7 @@ export type MerchantPageData = {
 	osmEditUrl: string;
 };
 
-export type RpcIssue = {
+export type PlaceIssue = {
 	element_osm_type: string;
 	element_osm_id: number;
 	element_name: string;
@@ -182,17 +182,6 @@ export type IssueIcon =
 	| "fa-hourglass-end"
 	| "fa-list-check"
 	| "fa-hourglass-half";
-
-export type RpcGetMostActiveUsersItem = {
-	id: number;
-	name: string;
-	image_url: string;
-	tip_address: string;
-	edits: number;
-	created: number;
-	updated: number;
-	deleted: number;
-};
 
 export type OSMTags = { [key: string]: any };
 
@@ -401,7 +390,7 @@ export type AreaPageProps = {
 	numericId: number;
 	name: string;
 	tickets: Tickets;
-	issues: RpcIssue[];
+	issues: PlaceIssue[];
 	verifiedDate?: string;
 	description?: string;
 	iconSquare?: string;

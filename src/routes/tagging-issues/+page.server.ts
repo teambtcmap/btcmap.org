@@ -11,7 +11,7 @@ export const load: PageServerLoad = async ({ fetch }) => {
 		if (!response.ok) {
 			return {
 				error: `HTTP Error: ${response.status}`,
-				rpcResult: null,
+				result: null,
 			};
 		}
 
@@ -24,7 +24,7 @@ export const load: PageServerLoad = async ({ fetch }) => {
 		return {
 			error:
 				err instanceof Error ? err.message : "Failed to load element issues",
-			rpcResult: null,
+			result: null,
 		};
 	}
 };

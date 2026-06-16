@@ -47,7 +47,7 @@ import type {
 	AreaPageProps,
 	AreaTags,
 	Place,
-	RpcIssue,
+	PlaceIssue,
 	Tagger,
 } from "$lib/types.js";
 import { TipType } from "$lib/types.js";
@@ -367,7 +367,7 @@ let lightning: { destination: string; type: TipType } | undefined;
 
 let taggers: Tagger[] = [];
 
-let issues: RpcIssue[] = [];
+let issues: PlaceIssue[] = [];
 </script>
 
 <main class="my-10 space-y-16 text-center md:my-20">
