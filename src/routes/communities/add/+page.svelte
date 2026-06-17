@@ -5,9 +5,9 @@ import { onMount } from "svelte";
 import { _ } from "svelte-i18n";
 
 import Breadcrumbs from "$components/Breadcrumbs.svelte";
+import FormHelperText from "$components/FormHelperText.svelte";
 import FormSuccess from "$components/FormSuccess.svelte";
 import Icon from "$components/Icon.svelte";
-import InfoTooltip from "$components/InfoTooltip.svelte";
 import HeaderPlaceholder from "$components/layout/HeaderPlaceholder.svelte";
 import PrimaryButton from "$components/PrimaryButton.svelte";
 import TextLink from "$components/TextLink.svelte";
@@ -196,11 +196,11 @@ onMount(async () => {
 			{$_('addCommunityForm.heading')}
 		</h2>
 
-		<div class="mb-5 flex items-center justify-center gap-1.5 w-full text-center text-primary dark:text-white">
+		<div class="mb-2 text-center md:text-left text-white text-center!">
 			<p class="m-0">
 				{$_('addCommunityForm.description')}
 			</p>
-			<InfoTooltip tooltip={$_('addCommunityForm.tooltip')} />
+			<FormHelperText text={$_(`addCommunityForm.tooltip`)} />
 		</div>
 
 		<div class="mb-10 w-full text-primary dark:text-white">
