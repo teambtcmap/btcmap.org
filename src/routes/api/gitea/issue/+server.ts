@@ -138,6 +138,7 @@ function generateBody(
 	switch (type) {
 		case "add-location":
 			return `Merchant name: ${data.name}
+English name (name:en): ${data.nameEn || ""}
 Address: ${data.address}
 Lat: ${data.lat}
 Long: ${data.long}

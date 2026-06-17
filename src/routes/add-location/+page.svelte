@@ -77,6 +77,7 @@ function resetForm() {
 	tick().then(async () => {
 		// Clear form fields
 		if (name) name.value = "";
+		if (nameEn) nameEn.value = "";
 		if (address) address.value = "";
 		if (category) category.value = "";
 		if (website) website.value = "";
@@ -161,6 +162,7 @@ async function initializeMap() {
 }
 
 let name: HTMLInputElement;
+let nameEn: HTMLInputElement;
 let address: HTMLInputElement;
 let addressFilledBySearch = false;
 let lat: number | undefined;
@@ -304,6 +306,7 @@ const submitForm = (event: SubmitEvent) => {
 				captchaTest: captchaInput.value,
 				honey: honeyInput.value,
 				name: name.value,
+				nameEn: nameEn.value,
 				address: address.value,
 				lat: lat ? lat.toString() : "",
 				long: long ? long.toString() : "",
@@ -405,10 +408,11 @@ $: if (map && mapLoaded) {
 	</p>
 
 	<p class="mt-10 text-center text-lg font-semibold text-primary md:text-xl dark:text-white">
-		{$_('addLocation.businessOwner')} <TextLink
-			link="https://wiki.btcmap.org/Merchant-Best-Practices"
-			external>{$_('addLocation.bestPractices')}</TextLink
-		> {$_('addLocation.guide')}
+		{$_('addLocation.businessOwner')}
+		<TextLink link="https://wiki.btcmap.org/Merchant-Best-Practices" external
+			>{$_('addLocation.bestPractices')}</TextLink
+		>
+		{$_('addLocation.guide')}
 	</p>
 
 	<div class="mt-16 pb-20 md:pb-32 lg:flex lg:justify-between lg:gap-10">
@@ -427,25 +431,44 @@ $: if (map && mapLoaded) {
 					<FormHelperText text={$_('addLocation.tooltip')} />
 				</div>
 				<form on:submit={submitForm} class="w-full space-y-5 text-primary dark:text-white">
-				<div>
-					<label for="name" class="mb-2 block font-semibold">{$_('forms.merchantName')}</label>
-					<input
-						disabled={!captchaSecret || !mapLoaded}
-						type="text"
-						name="name"
-						id="name"
-						placeholder={$_('addLocation.merchantNamePlaceholder')}
-						required
-						class="w-full rounded-2xl border-2 border-input p-3 transition-all focus:outline-link disabled:cursor-not-allowed disabled:bg-gray-100 disabled:text-gray-500 dark:bg-white/[0.15] dark:disabled:bg-gray-700 dark:disabled:text-gray-400"
-						bind:this={name}
-					/>
-				</div>
+					<div>
+						<label for="name" class="mb-2 block font-semibold">{$_('forms.merchantName')}</label>
+						<input
+							disabled={!captchaSecret || !mapLoaded}
+							type="text"
+							name="name"
+							id="name"
+							placeholder={$_('addLocation.merchantNamePlaceholder')}
+							required
+							class="w-full rounded-2xl border-2 border-input p-3 transition-all focus:outline-link disabled:cursor-not-allowed disabled:bg-gray-100 disabled:text-gray-500 dark:bg-white/[0.15] dark:disabled:bg-gray-700 dark:disabled:text-gray-400"
+							bind:this={name}
+						/>
+					</div>
 
-				<div>
-					<label for="location-picker" class="mb-2 block font-semibold">{$_('forms.selectLocation')}</label>
-					{#if noLocationSelected}
-						<span class="font-semibold text-error">{$_('addLocation.noLocationError')}</span>
-					{/if}
+					<div>
+						<label for="name-en" class="mb-2 block font-semibold"
+							>{$_('addLocation.nameEnLabel')}
+							<span class="font-normal">{$_('forms.optional')}</span>
+							<InfoTooltip tooltip={$_('addLocation.nameEnTooltip')} /></label
+						>
+						<input
+							disabled={!captchaSecret || !mapLoaded}
+							type="text"
+							name="nameEn"
+							id="name-en"
+							placeholder={$_('addLocation.merchantEnglishNamePlaceholder')}
+							class="w-full rounded-2xl border-2 border-input p-3 transition-all focus:outline-link disabled:cursor-not-allowed disabled:bg-gray-100 disabled:text-gray-500 dark:bg-white/[0.15] dark:disabled:bg-gray-700 dark:disabled:text-gray-400"
+							bind:this={nameEn}
+						/>
+					</div>
+
+					<div>
+						<label for="location-picker" class="mb-2 block font-semibold"
+							>{$_('forms.selectLocation')}</label
+						>
+						{#if noLocationSelected}
+							<span class="font-semibold text-error">{$_('addLocation.noLocationError')}</span>
+						{/if}
 						<p class="mt-2 mb-1 text-sm font-semibold text-primary/80 dark:text-white/80">
 							{$_('addLocation.searchByAddressLabel')}
 						</p>
@@ -519,7 +542,8 @@ $: if (map && mapLoaded) {
 								aria-expanded={showAdvanced}
 								on:click={toggleAdvanced}
 							>
-								{showAdvanced ? '▾' : '▸'} {$_('addLocation.advancedToggle')}
+								{showAdvanced ? '▾' : '▸'}
+								{$_('addLocation.advancedToggle')}
 							</button>
 							{#if showAdvanced}
 								<p class="mt-2 text-sm text-primary/80 dark:text-white/70">
@@ -551,235 +575,241 @@ $: if (map && mapLoaded) {
 					/>
 				</div>
 
-				<div>
-					<label for="category" class="mb-2 block font-semibold">{$_('forms.category')}</label>
-					<input
-						disabled={!captchaSecret || !mapLoaded}
-						type="text"
-						name="category"
-						id="category"
-						placeholder={$_('addLocation.categoryPlaceholder')}
-						class="w-full rounded-2xl border-2 border-input p-3 transition-all focus:outline-link disabled:cursor-not-allowed disabled:bg-gray-100 disabled:text-gray-500 dark:bg-white/[0.15] dark:disabled:bg-gray-700 dark:disabled:text-gray-400"
-						bind:this={category}
-					/>
-				</div>
-
-				<fieldset>
-					<legend class="mb-2 block font-semibold">{$_('addLocation.paymentMethodsLegend')}</legend>
-					{#if noMethodSelected}
-						<span class="font-semibold text-error">{$_('addLocation.paymentMethodError')}</span>
-					{/if}
-					<div class="space-y-4">
-						<div>
-							<input
-								class="h-4 w-4 accent-link"
-								disabled={!captchaSecret || !mapLoaded}
-								type="checkbox"
-								name="onchain"
-								id="onchain"
-								bind:this={onchain}
-								on:click={handleCheckboxClick}
-							/>
-							<label for="onchain" class="ml-1 cursor-pointer">
-								{#if typeof window !== 'undefined'}
-								<img
-									src={$theme === 'dark'
-										? '/icons/btc-highlight-dark.svg'
-										: '/icons/btc-primary.svg'}
-									alt=""
-									class="inline"
-								/>
-								{/if}
-								{$_('addLocation.onchainLabel')}
-							</label>
-						</div>
-						<div>
-							<input
-								class="h-4 w-4 accent-link"
-								disabled={!captchaSecret || !mapLoaded}
-								type="checkbox"
-								name="lightning"
-								id="lightning"
-								bind:this={lightning}
-								on:click={handleCheckboxClick}
-							/>
-							<label for="lightning" class="ml-1 cursor-pointer">
-								{#if typeof window !== 'undefined'}
-								<img
-									src={$theme === 'dark'
-										? '/icons/ln-highlight-dark.svg'
-										: '/icons/ln-primary.svg'}
-									alt=""
-									class="inline"
-								/>
-								{/if}
-								{$_('addLocation.lightningLabel')}
-							</label>
-						</div>
-						<div>
-							<input
-								class="h-4 w-4 accent-link"
-								disabled={!captchaSecret || !mapLoaded}
-								type="checkbox"
-								name="nfc"
-								id="nfc"
-								bind:this={nfc}
-								on:click={handleCheckboxClick}
-							/>
-							<label for="nfc" class="ml-1 cursor-pointer">
-								{#if typeof window !== 'undefined'}
-								<img
-									src={$theme === 'dark'
-										? '/icons/nfc-highlight-dark.svg'
-										: '/icons/nfc-primary.svg'}
-									alt=""
-									class="inline"
-								/>
-								{/if}
-								{$_('addLocation.nfcLabel')}
-							</label>
-						</div>
+					<div>
+						<label for="category" class="mb-2 block font-semibold">{$_('forms.category')}</label>
+						<input
+							disabled={!captchaSecret || !mapLoaded}
+							type="text"
+							name="category"
+							id="category"
+							placeholder={$_('addLocation.categoryPlaceholder')}
+							class="w-full rounded-2xl border-2 border-input p-3 transition-all focus:outline-link disabled:cursor-not-allowed disabled:bg-gray-100 disabled:text-gray-500 dark:bg-white/[0.15] dark:disabled:bg-gray-700 dark:disabled:text-gray-400"
+							bind:this={category}
+						/>
 					</div>
-				</fieldset>
 
-				<div>
-					<label for="website" class="mb-2 block font-semibold"
-						>{$_('forms.website')} <span class="font-normal">{$_('forms.optional')}</span></label
-					>
-					<input
-						disabled={!captchaSecret || !mapLoaded}
-						type="url"
-						name="website"
-						placeholder={$_('addLocation.websitePlaceholder')}
-						class="w-full rounded-2xl border-2 border-input p-3 transition-all focus:outline-link disabled:cursor-not-allowed disabled:bg-gray-100 disabled:text-gray-500 dark:bg-white/[0.15] dark:disabled:bg-gray-700 dark:disabled:text-gray-400"
-						bind:this={website}
-					/>
-				</div>
+					<fieldset>
+						<legend class="mb-2 block font-semibold"
+							>{$_('addLocation.paymentMethodsLegend')}</legend
+						>
+						{#if noMethodSelected}
+							<span class="font-semibold text-error">{$_('addLocation.paymentMethodError')}</span>
+						{/if}
+						<div class="space-y-4">
+							<div>
+								<input
+									class="h-4 w-4 accent-link"
+									disabled={!captchaSecret || !mapLoaded}
+									type="checkbox"
+									name="onchain"
+									id="onchain"
+									bind:this={onchain}
+									on:click={handleCheckboxClick}
+								/>
+								<label for="onchain" class="ml-1 cursor-pointer">
+									{#if typeof window !== 'undefined'}
+										<img
+											src={$theme === 'dark'
+												? '/icons/btc-highlight-dark.svg'
+												: '/icons/btc-primary.svg'}
+											alt=""
+											class="inline"
+										/>
+									{/if}
+									{$_('addLocation.onchainLabel')}
+								</label>
+							</div>
+							<div>
+								<input
+									class="h-4 w-4 accent-link"
+									disabled={!captchaSecret || !mapLoaded}
+									type="checkbox"
+									name="lightning"
+									id="lightning"
+									bind:this={lightning}
+									on:click={handleCheckboxClick}
+								/>
+								<label for="lightning" class="ml-1 cursor-pointer">
+									{#if typeof window !== 'undefined'}
+										<img
+											src={$theme === 'dark'
+												? '/icons/ln-highlight-dark.svg'
+												: '/icons/ln-primary.svg'}
+											alt=""
+											class="inline"
+										/>
+									{/if}
+									{$_('addLocation.lightningLabel')}
+								</label>
+							</div>
+							<div>
+								<input
+									class="h-4 w-4 accent-link"
+									disabled={!captchaSecret || !mapLoaded}
+									type="checkbox"
+									name="nfc"
+									id="nfc"
+									bind:this={nfc}
+									on:click={handleCheckboxClick}
+								/>
+								<label for="nfc" class="ml-1 cursor-pointer">
+									{#if typeof window !== 'undefined'}
+										<img
+											src={$theme === 'dark'
+												? '/icons/nfc-highlight-dark.svg'
+												: '/icons/nfc-primary.svg'}
+											alt=""
+											class="inline"
+										/>
+									{/if}
+									{$_('addLocation.nfcLabel')}
+								</label>
+							</div>
+						</div>
+					</fieldset>
 
-				<div>
-					<label for="phone" class="mb-2 block font-semibold"
-						>{$_('forms.phone')} <span class="font-normal">{$_('forms.optional')}</span></label
-					>
-					<input
-						disabled={!captchaSecret || !mapLoaded}
-						type="tel"
-						name="phone"
-						placeholder={$_('addLocation.phonePlaceholder')}
-						class="w-full rounded-2xl border-2 border-input p-3 transition-all focus:outline-link disabled:cursor-not-allowed disabled:bg-gray-100 disabled:text-gray-500 dark:bg-white/[0.15] dark:disabled:bg-gray-700 dark:disabled:text-gray-400"
-						bind:this={phone}
-					/>
-				</div>
+					<div>
+						<label for="website" class="mb-2 block font-semibold"
+							>{$_('forms.website')} <span class="font-normal">{$_('forms.optional')}</span></label
+						>
+						<input
+							disabled={!captchaSecret || !mapLoaded}
+							type="url"
+							name="website"
+							placeholder={$_('addLocation.websitePlaceholder')}
+							class="w-full rounded-2xl border-2 border-input p-3 transition-all focus:outline-link disabled:cursor-not-allowed disabled:bg-gray-100 disabled:text-gray-500 dark:bg-white/[0.15] dark:disabled:bg-gray-700 dark:disabled:text-gray-400"
+							bind:this={website}
+						/>
+					</div>
 
-				<div>
-					<label for="hours" class="mb-2 block font-semibold"
-						>{$_('forms.openingHours')} <span class="font-normal">{$_('forms.optional')}</span></label
-					>
-					<input
-						disabled={!captchaSecret || !mapLoaded}
-						type="text"
-						name="hours"
-						placeholder={$_('addLocation.hoursPlaceholder')}
-						class="w-full rounded-2xl border-2 border-input p-3 transition-all focus:outline-link disabled:cursor-not-allowed disabled:bg-gray-100 disabled:text-gray-500 dark:bg-white/[0.15] dark:disabled:bg-gray-700 dark:disabled:text-gray-400"
-						bind:this={hours}
-					/>
-				</div>
+					<div>
+						<label for="phone" class="mb-2 block font-semibold"
+							>{$_('forms.phone')} <span class="font-normal">{$_('forms.optional')}</span></label
+						>
+						<input
+							disabled={!captchaSecret || !mapLoaded}
+							type="tel"
+							name="phone"
+							placeholder={$_('addLocation.phonePlaceholder')}
+							class="w-full rounded-2xl border-2 border-input p-3 transition-all focus:outline-link disabled:cursor-not-allowed disabled:bg-gray-100 disabled:text-gray-500 dark:bg-white/[0.15] dark:disabled:bg-gray-700 dark:disabled:text-gray-400"
+							bind:this={phone}
+						/>
+					</div>
 
-				<div>
-					<label for="notes" class="mb-2 block font-semibold"
-						>{$_('forms.notes')} <span class="font-normal">{$_('forms.optional')}</span></label
-					>
-					<textarea
-						disabled={!captchaSecret || !mapLoaded}
-						name="notes"
-						placeholder={$_('addLocation.notesPlaceholder')}
-						rows="3"
-						class="w-full rounded-2xl border-2 border-input p-3 transition-all focus:outline-link disabled:cursor-not-allowed disabled:bg-gray-100 disabled:text-gray-500 dark:bg-white/[0.15] dark:disabled:bg-gray-700 dark:disabled:text-gray-400"
-						bind:this={notes}
-					/>
-				</div>
+					<div>
+						<label for="hours" class="mb-2 block font-semibold"
+							>{$_('forms.openingHours')}
+							<span class="font-normal">{$_('forms.optional')}</span></label
+						>
+						<input
+							disabled={!captchaSecret || !mapLoaded}
+							type="text"
+							name="hours"
+							placeholder={$_('addLocation.hoursPlaceholder')}
+							class="w-full rounded-2xl border-2 border-input p-3 transition-all focus:outline-link disabled:cursor-not-allowed disabled:bg-gray-100 disabled:text-gray-500 dark:bg-white/[0.15] dark:disabled:bg-gray-700 dark:disabled:text-gray-400"
+							bind:this={hours}
+						/>
+					</div>
 
-				<div>
-					<label for="source" class="mb-2 block font-semibold">{$_('addLocation.dataSourceLabel')}</label>
-					<FormSelect
-						id="source"
-						disabled={!captchaSecret || !mapLoaded}
-						name="source"
-						required
-						bind:value={source}
-						on:change={async () => {
-							if (source === 'Other') {
-								await tick();
-								sourceOtherElement.focus();
-							}
-						}}
-					>
-						<option value="">{$_('addLocation.dataSourcePlaceholder')}</option>
-						<option value="Business Owner">{$_('addLocation.dataSourceOwner')}</option>
-						<option value="Customer">{$_('addLocation.dataSourceCustomer')}</option>
-						<option value="Other">{$_('addLocation.dataSourceOther')}</option>
-					</FormSelect>
-					{#if source === 'Other'}
-						<p class="my-2 text-justify text-sm">
-							{$_('addLocation.dataSourceOtherPrompt')}
-						</p>
+					<div>
+						<label for="notes" class="mb-2 block font-semibold"
+							>{$_('forms.notes')} <span class="font-normal">{$_('forms.optional')}</span></label
+						>
 						<textarea
 							disabled={!captchaSecret || !mapLoaded}
-							required
-							name="source-other"
-							placeholder={$_('addLocation.dataSourceOtherPlaceholder')}
+							name="notes"
+							placeholder={$_('addLocation.notesPlaceholder')}
+							rows="3"
 							class="w-full rounded-2xl border-2 border-input p-3 transition-all focus:outline-link disabled:cursor-not-allowed disabled:bg-gray-100 disabled:text-gray-500 dark:bg-white/[0.15] dark:disabled:bg-gray-700 dark:disabled:text-gray-400"
-							bind:value={sourceOther}
-							bind:this={sourceOtherElement}
+							bind:this={notes}
 						/>
-					{/if}
-				</div>
+					</div>
 
-				<div>
-					<label for="contact" class="mb-2 block font-semibold">{$_('forms.contact')}</label>
-					<p class="mb-2 text-justify text-sm">
-						{$_('addLocation.contactDescription')}
-					</p>
-					<input
-						disabled={!captchaSecret || !mapLoaded}
-						required
-						type="email"
-						name="contact"
-						placeholder={$_('addLocation.contactPlaceholder')}
-						class="w-full rounded-2xl border-2 border-input p-3 transition-all focus:outline-link disabled:cursor-not-allowed disabled:bg-gray-100 disabled:text-gray-500 dark:bg-white/[0.15] dark:disabled:bg-gray-700 dark:disabled:text-gray-400"
-						bind:this={contact}
-					/>
-				</div>
-
-				<div>
-					<div class="mb-2 flex items-center space-x-2">
-						<label for="captcha" class="font-semibold"
-							>{$_('forms.captcha')} <span class="font-normal">({$_('forms.captchaCaseSensitive')})</span></label
+					<div>
+						<label for="source" class="mb-2 block font-semibold"
+							>{$_('addLocation.dataSourceLabel')}</label
 						>
-						{#if captchaSecret}
-							<button type="button" on:click={fetchCaptcha}>
-								<Icon type="fa" icon="arrows-rotate" w="16" h="16" />
-							</button>
+						<FormSelect
+							id="source"
+							disabled={!captchaSecret || !mapLoaded}
+							name="source"
+							required
+							bind:value={source}
+							on:change={async () => {
+								if (source === 'Other') {
+									await tick();
+									sourceOtherElement.focus();
+								}
+							}}
+						>
+							<option value="">{$_('addLocation.dataSourcePlaceholder')}</option>
+							<option value="Business Owner">{$_('addLocation.dataSourceOwner')}</option>
+							<option value="Customer">{$_('addLocation.dataSourceCustomer')}</option>
+							<option value="Other">{$_('addLocation.dataSourceOther')}</option>
+						</FormSelect>
+						{#if source === 'Other'}
+							<p class="my-2 text-justify text-sm">
+								{$_('addLocation.dataSourceOtherPrompt')}
+							</p>
+							<textarea
+								disabled={!captchaSecret || !mapLoaded}
+								required
+								name="source-other"
+								placeholder={$_('addLocation.dataSourceOtherPlaceholder')}
+								class="w-full rounded-2xl border-2 border-input p-3 transition-all focus:outline-link disabled:cursor-not-allowed disabled:bg-gray-100 disabled:text-gray-500 dark:bg-white/[0.15] dark:disabled:bg-gray-700 dark:disabled:text-gray-400"
+								bind:value={sourceOther}
+								bind:this={sourceOtherElement}
+							/>
 						{/if}
 					</div>
-					<div class="space-y-2">
-						<div class="flex items-center justify-center rounded-2xl border-2 border-input py-1">
-							{#if isCaptchaLoading}
-								<div class="h-[100px] w-[275px] animate-pulse bg-link/50" />
-							{:else}
-								{@html captchaContent}
-							{/if}
-						</div>
+
+					<div>
+						<label for="contact" class="mb-2 block font-semibold">{$_('forms.contact')}</label>
+						<p class="mb-2 text-justify text-sm">
+							{$_('addLocation.contactDescription')}
+						</p>
 						<input
 							disabled={!captchaSecret || !mapLoaded}
 							required
-							type="text"
-							name="captcha"
-							placeholder={$_('addLocation.captchaPlaceholder')}
+							type="email"
+							name="contact"
+							placeholder={$_('addLocation.contactPlaceholder')}
 							class="w-full rounded-2xl border-2 border-input p-3 transition-all focus:outline-link disabled:cursor-not-allowed disabled:bg-gray-100 disabled:text-gray-500 dark:bg-white/[0.15] dark:disabled:bg-gray-700 dark:disabled:text-gray-400"
-							bind:this={captchaInput}
+							bind:this={contact}
 						/>
 					</div>
-				</div>
+
+					<div>
+						<div class="mb-2 flex items-center space-x-2">
+							<label for="captcha" class="font-semibold"
+								>{$_('forms.captcha')}
+								<span class="font-normal">({$_('forms.captchaCaseSensitive')})</span></label
+							>
+							{#if captchaSecret}
+								<button type="button" on:click={fetchCaptcha}>
+									<Icon type="fa" icon="arrows-rotate" w="16" h="16" />
+								</button>
+							{/if}
+						</div>
+						<div class="space-y-2">
+							<div class="flex items-center justify-center rounded-2xl border-2 border-input py-1">
+								{#if isCaptchaLoading}
+									<div class="h-[100px] w-[275px] animate-pulse bg-link/50" />
+								{:else}
+									{@html captchaContent}
+								{/if}
+							</div>
+							<input
+								disabled={!captchaSecret || !mapLoaded}
+								required
+								type="text"
+								name="captcha"
+								placeholder={$_('addLocation.captchaPlaceholder')}
+								class="w-full rounded-2xl border-2 border-input p-3 transition-all focus:outline-link disabled:cursor-not-allowed disabled:bg-gray-100 disabled:text-gray-500 dark:bg-white/[0.15] dark:disabled:bg-gray-700 dark:disabled:text-gray-400"
+								bind:this={captchaInput}
+							/>
+						</div>
+					</div>
 
 					<input
 						type="text"
@@ -789,13 +819,13 @@ $: if (map && mapLoaded) {
 						bind:this={honeyInput}
 					/>
 
-				<PrimaryButton
-					loading={submitting}
-					disabled={submitting || !captchaSecret || !mapLoaded}
-					style="w-full py-3 rounded-xl"
-				>
-					{$_('forms.submitLocation')}
-				</PrimaryButton>
+					<PrimaryButton
+						loading={submitting}
+						disabled={submitting || !captchaSecret || !mapLoaded}
+						style="w-full py-3 rounded-xl"
+					>
+						{$_('forms.submitLocation')}
+					</PrimaryButton>
 				</form>
 			</div>
 		</section>
@@ -806,7 +836,9 @@ $: if (map && mapLoaded) {
 		>
 			<div class="lg:flex lg:justify-start">
 				<div class="mx-auto max-w-xl text-primary dark:text-white">
-					<h2 class="mb-5 text-center text-3xl font-semibold md:text-left">{$_('addLocation.supertaggerHeading')}</h2>
+					<h2 class="mb-5 text-center text-3xl font-semibold md:text-left">
+						{$_('addLocation.supertaggerHeading')}
+					</h2>
 					<p class="mb-10 w-full text-justify md:text-left">
 						{$_('addLocation.supertaggerDescription')}
 					</p>
@@ -828,8 +860,8 @@ $: if (map && mapLoaded) {
 	</div>
 {:else}
 	<FormSuccess
-		type={$_("addLocation.formSuccessType")}
-		text={$_("addLocation.formSuccessText")}
+		type={$_('addLocation.formSuccessType')}
+		text={$_('addLocation.formSuccessText')}
 		issue={submissionIssueNumber}
 		on:click={resetForm}
 	/>
