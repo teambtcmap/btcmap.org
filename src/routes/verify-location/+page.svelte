@@ -6,9 +6,9 @@ import DOMPurify from "dompurify";
 import { onMount } from "svelte";
 import { get } from "svelte/store";
 
+import FormHelperText from "$components/FormHelperText.svelte";
 import FormSuccess from "$components/FormSuccess.svelte";
 import Icon from "$components/Icon.svelte";
-import InfoTooltip from "$components/InfoTooltip.svelte";
 import HeaderPlaceholder from "$components/layout/HeaderPlaceholder.svelte";
 import PrimaryButton from "$components/PrimaryButton.svelte";
 import TextLink from "$components/TextLink.svelte";

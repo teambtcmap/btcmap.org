@@ -2,7 +2,6 @@
 import { _ } from "svelte-i18n";
 
 import FormHelperText from "$components/FormHelperText.svelte";
-import InfoTooltip from "$components/InfoTooltip.svelte";
 import OpenTicket from "$components/OpenTicket.svelte";
 import TextLink from "$components/TextLink.svelte";
 import { GITEA_LABELS } from "$lib/constants";
