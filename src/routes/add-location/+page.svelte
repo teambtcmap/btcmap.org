@@ -446,11 +446,13 @@ $: if (map && mapLoaded) {
 					</div>
 
 					<div>
-						<label for="name-en" class="mb-2 block font-semibold"
-							>{$_('addLocation.nameEnLabel')}
-							<span class="font-normal">{$_('forms.optional')}</span>
-							<InfoTooltip tooltip={$_('addLocation.nameEnTooltip')} /></label
-						>
+						<div>
+							<label for="name-en" class="mb-2 block font-semibold">
+								{$_('addLocation.nameEnLabel')}
+								<span class="font-normal">{$_('forms.optional')}</span>
+							</label>
+							<FormHelperText text={$_('addLocation.nameEnTooltip')} />
+						</div>
 						<input
 							disabled={!captchaSecret || !mapLoaded}
 							type="text"
