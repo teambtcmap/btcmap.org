@@ -45,22 +45,13 @@ export const load: PageServerLoad = async ({ params, fetch }) => {
 		// }));
 		const tickets = "maintenance";
 
-		const issuesResponse = await fetch(`${API_BASE}/rpc`, {
-			method: "POST",
-			headers: {
-				"Content-Type": "application/json",
-			},
-			body: JSON.stringify({
-				jsonrpc: "2.0",
-				id: 1,
-				method: "get_element_issues",
-				params: {
-					area_id: fetchedArea.id,
-					limit: 10_000,
-					offset: 0,
-				},
-			}),
-		});
+		const issuesResponse = await fetch(
+			`${API_BASE}/v4/place-issues?area_id=${fetchedArea.id}&limit=10000&offset=0`,
+		);
+
+		if (!issuesResponse.ok) {
+			throw error(502, "Upstream API error");
+		}
 
 		const issues = await issuesResponse.json();
 
@@ -69,7 +60,7 @@ export const load: PageServerLoad = async ({ params, fetch }) => {
 			numericId: fetchedArea.id,
 			name: fetchedArea.tags.name,
 			tickets: tickets,
-			issues: issues.result.requested_issues,
+			issues: issues.requested_issues,
 			verifiedDate: fetchedArea.tags["verified:date"],
 			description: fetchedArea.tags.description,
 			iconSquare: fetchedArea.tags["icon:square"],
