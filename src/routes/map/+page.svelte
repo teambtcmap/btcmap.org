@@ -2,9 +2,6 @@
 import "maplibre-gl/dist/maplibre-gl.css";
 
 import Spiderfy from "@nazka/map-gl-js-spiderfy";
-import convex from "@turf/convex";
-import { featureCollection, point } from "@turf/helpers";
-import type { Feature, FeatureCollection, Point, Polygon } from "geojson";
 import type {
 	FilterSpecification,
 	GeoJSONSource,
@@ -179,11 +176,6 @@ const applyLabelPalette = (m: MapLibreMap, t: "light" | "dark" | undefined) => {
 		m.setPaintProperty("boosted-place-label", "text-halo-color", palette.halo);
 	}
 };
-// Latest-wins guard for the async getClusterLeaves callback. Mouseenter
-// fires per-feature, so a quick sweep across multiple clusters can stack
-// pending leaf fetches; we only commit the hull whose cluster id is still
-// the one currently being hovered.
-let latestHullClusterId: number | null = null;
 // Deep-link pan: if the user lands on a URL with `merchant=…` but no
 // viewport coords, we wait for the place to appear in `$placesById`
 // then pan to it. Track the subscription + safety timer so onDestroy
@@ -586,11 +578,6 @@ const handleHashChange = () => {
 	merchantDrawer.syncFromHash();
 };
 
-const EMPTY_HULL_COLLECTION: FeatureCollection<Polygon> = {
-	type: "FeatureCollection",
-	features: [],
-};
-
 const EMPTY_COLLECTION: PlaceFeatureCollection = {
 	type: "FeatureCollection",
 	features: [],
@@ -847,10 +834,8 @@ $: if (
 // clusters, and labels survive a basemap/theme swap untouched (MapLibre's
 // style differ leaves byte-identical layers in place — only the basemap
 // layers below them get swapped).
-const CUSTOM_SOURCE_IDS = ["places", "places-boosted", "cluster-hull"];
+const CUSTOM_SOURCE_IDS = ["places", "places-boosted"];
 const CUSTOM_LAYER_IDS = [
-	"cluster-hull-fill",
-	"cluster-hull-outline",
 	"clusters-outer",
 	"clusters-inner",
 	"cluster-count",
@@ -1155,33 +1140,6 @@ onMount(async () => {
 		map.addSource("places-boosted", {
 			type: "geojson",
 			data: EMPTY_COLLECTION,
-		});
-
-		// Hover hull: convex polygon enclosing all leaves of the cluster the
-		// cursor is over. Added before the visible cluster discs so the
-		// translucent fill sits under, not on top of, the cluster discs.
-		map.addSource("cluster-hull", {
-			type: "geojson",
-			data: EMPTY_HULL_COLLECTION,
-		});
-
-		map.addLayer({
-			id: "cluster-hull-fill",
-			type: "fill",
-			source: "cluster-hull",
-			paint: {
-				"fill-color": "rgba(110, 204, 57, 0.15)",
-			},
-		});
-
-		map.addLayer({
-			id: "cluster-hull-outline",
-			type: "line",
-			source: "cluster-hull",
-			paint: {
-				"line-color": "rgba(110, 204, 57, 0.6)",
-				"line-width": 1.5,
-			},
 		});
 
 		// Translucent outer ring — green/yellow/orange tiers by point_count
@@ -1594,66 +1552,6 @@ onMount(async () => {
 			});
 			if (hit.length > 0) return;
 			merchantDrawer.close();
-		});
-
-		// Cluster hover → draw a convex hull around its leaves. Capped at 500
-		// leaves to keep convex computation cheap on dense clusters.
-		map.on("mouseenter", "clusters-outer", (e: MapLayerMouseEvent) => {
-			if (!map) return;
-			const feature = e.features?.[0] as MapGeoJSONFeature | undefined;
-			if (!feature) return;
-			const clusterId = feature.properties?.cluster_id as number | undefined;
-			const pointCount = feature.properties?.point_count as number | undefined;
-			if (clusterId === undefined) return;
-			latestHullClusterId = clusterId;
-			const source = map.getSource("places") as GeoJSONSource | undefined;
-			const hullSource = map.getSource("cluster-hull") as
-				| GeoJSONSource
-				| undefined;
-			if (!source || !hullSource) return;
-			const limit = Math.min(pointCount ?? 500, 500);
-			source
-				.getClusterLeaves(clusterId, limit, 0)
-				.then((leaves) => {
-					// Stale callback guard — bail if hover has moved to another
-					// cluster (or cleared entirely) by the time leaves resolve.
-					if (latestHullClusterId !== clusterId) return;
-					const points: Feature<Point>[] = [];
-					for (const leaf of leaves) {
-						if (leaf.geometry?.type !== "Point") continue;
-						const coords = leaf.geometry.coordinates as [number, number];
-						points.push(point(coords));
-					}
-					const hull = convex(featureCollection(points));
-					if (!hull) {
-						// Degenerate cluster (≤ 2 unique points / collinear) — clear
-						// any stale hull from a previous hover instead of leaving it on.
-						hullSource.setData(EMPTY_HULL_COLLECTION);
-						return;
-					}
-					hullSource.setData({
-						type: "FeatureCollection",
-						features: [hull],
-					});
-				})
-				.catch((err) => {
-					// Cluster id can become invalid mid-flight when syncPlacesToSource
-					// replaces the source data and the cluster index regenerates.
-					// Swallow that — the hover will redraw on the next mouseenter.
-					if (latestHullClusterId === clusterId) {
-						latestHullClusterId = null;
-					}
-					console.debug("hover-hull getClusterLeaves rejected", err);
-				});
-		});
-
-		map.on("mouseleave", "clusters-outer", () => {
-			if (!map) return;
-			latestHullClusterId = null;
-			const hullSource = map.getSource("cluster-hull") as
-				| GeoJSONSource
-				| undefined;
-			hullSource?.setData(EMPTY_HULL_COLLECTION);
 		});
 
 		// Refresh enriched details (and thus labels) on viewport changes
