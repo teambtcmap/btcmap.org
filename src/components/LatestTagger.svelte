@@ -12,6 +12,7 @@ export let user: User | undefined = undefined;
 export let time: string;
 export let latest: boolean;
 export let merchantId: string;
+export let placeId: number | undefined = undefined;
 
 $: deleteLink = merchantId.split(":");
 
@@ -53,7 +54,7 @@ $: username = profile?.display_name;
 				<a
 					href={action === 'delete'
 						? `https://www.openstreetmap.org/${deleteLink[0]}/${deleteLink[1]}`
-						: `/merchant/${merchantId}`}
+						: `/merchant/${placeId ?? merchantId}`}
 					target={action === 'delete' ? '_blank' : null}
 					rel={action === 'delete' ? 'noreferrer' : null}
 					class="break-all text-link transition-colors hover:text-hover"
