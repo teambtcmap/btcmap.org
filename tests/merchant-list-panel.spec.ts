@@ -206,8 +206,8 @@ test.describe('Merchant List Panel', () => {
 			console.error('API response wait failed, but continuing:', error);
 		}
 
-		// Mobile drawer should open in peek state (shows "Swipe up for details")
-		const mobileDrawer = page.locator('text="Swipe up for details"');
+		// Mobile drawer should open (the merchant details dialog)
+		const mobileDrawer = page.getByRole('dialog', { name: 'Merchant details' });
 		await expect(mobileDrawer).toBeVisible({ timeout: 10000 });
 
 		// The search sheet yields the bottom edge to the drawer entirely
@@ -240,8 +240,8 @@ test.describe('Merchant List Panel', () => {
 		await expect(firstMerchant).toBeVisible({ timeout: 15000 });
 		await firstMerchant.click();
 
-		// Wait for drawer to open
-		const mobileDrawer = page.locator('text="Swipe up for details"');
+		// Wait for drawer to open (the merchant details dialog)
+		const mobileDrawer = page.getByRole('dialog', { name: 'Merchant details' });
 		await expect(mobileDrawer).toBeVisible({ timeout: 10000 });
 
 		// Search sheet should be hidden while the drawer owns the bottom edge
