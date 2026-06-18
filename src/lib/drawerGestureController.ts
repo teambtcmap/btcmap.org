@@ -224,7 +224,9 @@ export function createDrawerGestureController(
 
 		// At scroll top AND dragging down → enter collapse drag mode
 		if (scrollTop <= SCROLL_TOP_THRESHOLD && deltaY > SCROLL_DRAG_THRESHOLD) {
-			event.preventDefault();
+			// Only cancelable while no native scroll/fling is in progress; calling
+			// preventDefault() otherwise is a no-op and logs a browser intervention.
+			if (event.cancelable) event.preventDefault();
 
 			if (!internal.isInCollapseDrag) {
 				internal.isInCollapseDrag = true;
