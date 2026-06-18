@@ -82,43 +82,15 @@ const sheetGesture = createDrawerGestureController({
 });
 const sheetHeight = sheetGesture.drawerHeight;
 const sheetExpanded = sheetGesture.expanded;
-const sheetExpandedHeight = sheetGesture.expandedHeight;
 
-// Floating-card geometry at rest (peek). As the sheet is dragged up it
-// "docks": side/bottom margins and corner radius interpolate to 0 so the
-// floating input grows into the full-width bottom sheet.
-const FLOAT_MARGIN = 12; // px side inset at peek
-// px min bottom inset at peek (more on notched phones). Tall enough that the
-// floating card clears the bottom map chrome — scale bar, the compact (i)
-// attribution, and the tile-loading indicator — which now sit at the very
-// bottom (like the search bar on main).
-const FLOAT_BOTTOM_MIN = 56;
-const PEEK_RADIUS = 24; // px corner radius at peek (rounded-3xl)
-
-// 0 at peek (fully floating) → 1 at full expand (fully docked)
-$: dockT =
-	isMobile && $sheetExpandedHeight > SEARCH_SHEET_PEEK_HEIGHT
-		? Math.min(
-				1,
-				Math.max(
-					0,
-					($sheetHeight - SEARCH_SHEET_PEEK_HEIGHT) /
-						($sheetExpandedHeight - SEARCH_SHEET_PEEK_HEIGHT),
-				),
-			)
-		: 0;
-
+// Anchored bottom sheet (like the merchant drawer and Google Maps): full
+// width, latched to the bottom edge. The top corners are rounded at peek and
+// square off once expanded (handled by a class toggle in the markup).
 $: mobileSheetStyle = isMobile
 	? [
 			`height:${$sheetHeight}px`,
 			"max-height:100dvh",
-			`left:${FLOAT_MARGIN * (1 - dockT)}px`,
-			`right:${FLOAT_MARGIN * (1 - dockT)}px`,
-			`bottom:calc(max(${FLOAT_BOTTOM_MIN}px, env(safe-area-inset-bottom)) * ${1 - dockT})`,
-			`border-radius:${PEEK_RADIUS * (1 - dockT)}px`,
-			// safe-area padding only matters once docked (bottom touches the edge)
-			`padding-bottom:calc(max(0.75rem, env(safe-area-inset-bottom)) * ${dockT})`,
-			"will-change:height,left,right,bottom,border-radius",
+			"will-change:height",
 		].join(";")
 	: "";
 
@@ -494,8 +466,9 @@ onDestroy(() => {
 		bind:this={panelElement}
 		class="z-[1001] flex flex-col overflow-hidden bg-white dark:bg-dark
 			{isMobile
-			? 'fixed shadow-2xl'
+			? 'fixed right-0 bottom-0 left-0 shadow-2xl'
 			: 'absolute top-3 bottom-[max(3rem,env(safe-area-inset-bottom))] left-3 w-80 rounded-lg shadow-lg dark:shadow-black/30'}"
+		class:rounded-t-[10px]={isMobile && !$sheetExpanded}
 		style={mobileSheetStyle}
 		role="complementary"
 		aria-label={$_('aria.merchantList')}
@@ -706,7 +679,7 @@ onDestroy(() => {
 		<div
 			bind:this={merchantListContainer}
 			id="merchant-sheet-content"
-			class="flex-1 overflow-y-auto"
+			class="flex-1 overflow-y-auto pb-[env(safe-area-inset-bottom)]"
 			style="overscroll-behavior-y: contain; touch-action: pan-y;"
 			tabindex="-1"
 			on:touchstart={onContentTouchStart}

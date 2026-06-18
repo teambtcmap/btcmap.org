@@ -4,10 +4,9 @@
 // Peek (collapsed) heights for the two bottom sheets.
 // Merchant drawer: bottom-anchored, full-width; shows name + quick info.
 export const PEEK_HEIGHT = 140;
-// Search sheet: a floating card (side + bottom margins) holding the grabber +
-// single input. This is the visual card height only — the home-indicator
-// clearance comes from the card's bottom inset (max(56px, env(...))), not from
-// this value.
+// Search sheet: bottom-anchored, full-width (like the merchant drawer and
+// Google Maps); peek shows the grabber + single input. Rounded top corners at
+// peek, square once expanded.
 export const SEARCH_SHEET_PEEK_HEIGHT = 72;
 
 // Gesture thresholds

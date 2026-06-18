@@ -1919,4 +1919,15 @@ onDestroy(() => {
 	/* IControl-related rules moved to ./controls/controls.css so any page
 	   that mounts these controls (currently /map and /communities/map)
 	   gets the popup positioning + anchor button styles. */
+
+	/* Mobile: the search sheet is anchored to the bottom edge, so lift the
+	   bottom map chrome (scale bar + attribution) above its 72px peek
+	   (SEARCH_SHEET_PEEK_HEIGHT) so the credit stays visible — mirrors Google
+	   Maps placing attribution above the bottom sheet. */
+	@media (max-width: 767px) {
+		.map-container :global(.maplibregl-ctrl-bottom-left),
+		.map-container :global(.maplibregl-ctrl-bottom-right) {
+			bottom: calc(env(safe-area-inset-bottom) + 72px);
+		}
+	}
 </style>
