@@ -2,7 +2,7 @@
 import Icon from "$components/Icon.svelte";
 import { _ } from "$lib/i18n";
 
-// Pre-formatted count from formatNearbyPillCount, e.g. "14" or ">99"
+// Pre-formatted count from formatNearbyPillCount, e.g. "14" or ">250"
 export let count: string;
 </script>
 
