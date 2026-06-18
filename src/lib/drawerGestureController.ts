@@ -204,7 +204,7 @@ export function createDrawerGestureController(
 		resetInternalState();
 	}
 
-	// Touch event handlers (for expanded content area - Google Maps style)
+	// Touch event handlers (for expanded content area - swipe-to-collapse from scroll top)
 	function handleContentTouchStart(event: TouchEvent) {
 		if (!get(expanded) || event.touches.length !== 1) return;
 		internal.touchStartY = event.touches[0].clientY;

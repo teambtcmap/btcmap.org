@@ -83,7 +83,7 @@ const sheetGesture = createDrawerGestureController({
 const sheetHeight = sheetGesture.drawerHeight;
 const sheetExpanded = sheetGesture.expanded;
 
-// Anchored bottom sheet (like the merchant drawer and Google Maps): full
+// Anchored bottom sheet (like the merchant drawer): full
 // width, latched to the bottom edge. The top corners are rounded at peek and
 // square off once expanded (handled by a class toggle in the markup).
 $: mobileSheetStyle = isMobile
@@ -675,7 +675,7 @@ onDestroy(() => {
 			{/if}
 		</div>
 
-		<!-- List content (touch handlers: Google-Maps-style collapse drag from scroll top on mobile) -->
+		<!-- List content (touch handlers: collapse drag from scroll top on mobile) -->
 		<div
 			bind:this={merchantListContainer}
 			id="merchant-sheet-content"

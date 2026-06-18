@@ -1820,8 +1820,7 @@ onDestroy(() => {
 
 	/* Mobile: the search sheet is anchored to the bottom edge, so lift the
 	   bottom map chrome (scale bar + attribution) above its 72px peek
-	   (SEARCH_SHEET_PEEK_HEIGHT) so the credit stays visible — mirrors Google
-	   Maps placing attribution above the bottom sheet. */
+	   (SEARCH_SHEET_PEEK_HEIGHT) so the credit stays visible above the sheet. */
 	@media (max-width: 767px) {
 		.map-container :global(.maplibregl-ctrl-bottom-left),
 		.map-container :global(.maplibregl-ctrl-bottom-right) {

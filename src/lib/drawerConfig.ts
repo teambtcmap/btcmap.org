@@ -5,9 +5,9 @@
 // Merchant drawer: bottom-anchored, full-width; shows name + payment/verify row
 // (snug — no trailing swipe hint).
 export const PEEK_HEIGHT = 110;
-// Search sheet: bottom-anchored, full-width (like the merchant drawer and
-// Google Maps); peek shows the grabber + single input. Rounded top corners at
-// peek, square once expanded.
+// Search sheet: bottom-anchored, full-width (like the merchant drawer); peek
+// shows the grabber + single input. Rounded top corners at peek, square once
+// expanded.
 export const SEARCH_SHEET_PEEK_HEIGHT = 72;
 
 // Gesture thresholds
