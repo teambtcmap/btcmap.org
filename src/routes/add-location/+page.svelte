@@ -10,11 +10,11 @@ import "maplibre-gl/dist/maplibre-gl.css";
 import { onDestroy, onMount, tick } from "svelte";
 import { get } from "svelte/store";
 
+import FormHelperText from "$components/FormHelperText.svelte";
 import FormSuccess from "$components/FormSuccess.svelte";
 import AddressSearch from "$components/form/AddressSearch.svelte";
 import FormSelect from "$components/form/FormSelect.svelte";
 import Icon from "$components/Icon.svelte";
-import InfoTooltip from "$components/InfoTooltip.svelte";
 import HeaderPlaceholder from "$components/layout/HeaderPlaceholder.svelte";
 import MapLoadingEmbed from "$components/MapLoadingEmbed.svelte";
 import MapUnsupportedFallback from "$components/MapUnsupportedFallback.svelte";
@@ -424,11 +424,12 @@ $: if (map && mapLoaded) {
 					{$_('addLocation.heading')}
 				</h2>
 
-				<p class="mb-10 w-full text-justify text-primary dark:text-white">
-					{$_('addLocation.description')}
-					<InfoTooltip tooltip={$_('addLocation.tooltip')} />
-				</p>
-
+				<div class="mb-10 w-full text-justify text-primary dark:text-white">
+					<p>
+						{$_('addLocation.description')}
+					</p>
+					<FormHelperText text={$_('addLocation.tooltip')} />
+				</div>
 				<form on:submit={submitForm} class="w-full space-y-5 text-primary dark:text-white">
 					<div>
 						<label for="name" class="mb-2 block font-semibold">{$_('forms.merchantName')}</label>
@@ -445,11 +446,13 @@ $: if (map && mapLoaded) {
 					</div>
 
 					<div>
-						<label for="name-en" class="mb-2 block font-semibold"
-							>{$_('addLocation.nameEnLabel')}
-							<span class="font-normal">{$_('forms.optional')}</span>
-							<InfoTooltip tooltip={$_('addLocation.nameEnTooltip')} /></label
-						>
+						<div>
+							<label for="name-en" class="mb-2 block font-semibold">
+								{$_('addLocation.nameEnLabel')}
+								<span class="font-normal">{$_('forms.optional')}</span>
+							</label>
+							<FormHelperText text={$_('addLocation.nameEnTooltip')} />
+						</div>
 						<input
 							disabled={!captchaSecret || !mapLoaded}
 							type="text"
@@ -552,22 +555,23 @@ $: if (map && mapLoaded) {
 						</div>
 					</div>
 
-					<div>
-						<label for="address" class="mb-2 block font-semibold"
-							>{$_('addLocation.addressLabel')}
-							<InfoTooltip tooltip={$_('addLocation.addressTooltip')} /></label
-						>
-						<input
-							disabled={!captchaSecret || !mapLoaded}
-							type="text"
-							name="address"
-							id="address"
-							placeholder={$_('addLocation.addressPlaceholder')}
-							class="w-full rounded-2xl border-2 border-input p-3 transition-all focus:outline-link disabled:cursor-not-allowed disabled:bg-gray-100 disabled:text-gray-500 dark:bg-white/[0.15] dark:disabled:bg-gray-700 dark:disabled:text-gray-400"
-							bind:this={address}
-							on:input={() => (addressFilledBySearch = false)}
-						/>
+				<div>
+					<div class="mb-2">
+						<label for="address" class="block font-semibold">{$_('addLocation.addressLabel')}</label>
+						<FormHelperText text={$_('addLocation.addressTooltip')} />
 					</div>
+					
+					<input
+						disabled={!captchaSecret || !mapLoaded}
+						type="text"
+						name="address"
+						id="address"
+						placeholder={$_('addLocation.addressPlaceholder')}
+						class="w-full rounded-2xl border-2 border-input p-3 transition-all focus:outline-link disabled:cursor-not-allowed disabled:bg-gray-100 disabled:text-gray-500 dark:bg-white/[0.15] dark:disabled:bg-gray-700 dark:disabled:text-gray-400"
+						bind:this={address}
+						on:input={() => (addressFilledBySearch = false)}
+					/>
+				</div>
 
 					<div>
 						<label for="category" class="mb-2 block font-semibold">{$_('forms.category')}</label>

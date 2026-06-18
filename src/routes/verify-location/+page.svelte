@@ -6,9 +6,9 @@ import DOMPurify from "dompurify";
 import { onMount } from "svelte";
 import { get } from "svelte/store";
 
+import FormHelperText from "$components/FormHelperText.svelte";
 import FormSuccess from "$components/FormSuccess.svelte";
 import Icon from "$components/Icon.svelte";
-import InfoTooltip from "$components/InfoTooltip.svelte";
 import HeaderPlaceholder from "$components/layout/HeaderPlaceholder.svelte";
 import PrimaryButton from "$components/PrimaryButton.svelte";
 import TextLink from "$components/TextLink.svelte";
@@ -145,20 +145,21 @@ onMount(async () => {
 			>
 		</h2>
 
-		<p class="mb-10 w-full text-center text-primary dark:text-white">
-			{$_('verifyLocation.descriptionPart1')} <TextLink
-				link="https://www.openstreetmap.org"
-				external>{$_('verifyLocation.osmLinkText')}</TextLink
-			>{$_('verifyLocation.descriptionPart2')}
-			<TextLink
-				link="https://wiki.btcmap.org/Tagging-Merchants#shadowy-supertaggers"
-				external>{$_('verifyLocation.wikiLinkText')}</TextLink
-			>
-			{$_('verifyLocation.descriptionPart3')} <InfoTooltip
-				tooltip={$_('verifyLocation.tooltip')}
-			/>
-		</p>
-
+		<div class="mb-10 w-full text-center text-primary dark:text-white">
+			<p>
+				{$_('verifyLocation.descriptionPart1')} 
+				<TextLink link="https://www.openstreetmap.org" external>
+					{$_('verifyLocation.osmLinkText')}
+				</TextLink>
+				{$_('verifyLocation.descriptionPart2')}
+				<TextLink link="https://wiki.btcmap.org/Tagging-Merchants#shadowy-supertaggers" external>
+					{$_('verifyLocation.wikiLinkText')}
+				</TextLink>
+				{$_('verifyLocation.descriptionPart3')}
+			</p>
+			
+			<FormHelperText text={$_('verifyLocation.tooltip')} />
+		</div>
 		<form on:submit={submitForm} class="w-full space-y-5 text-primary dark:text-white">
 			<div>
 				<input
