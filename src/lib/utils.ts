@@ -303,7 +303,8 @@ export function getCommunitiesAtCoordinates(
 	allAreas: Area[],
 ): Area[] {
 	return allAreas.filter((area) => {
-		if (area.tags.type !== "community") return false;
+		// Some area records can come back without a tags object; guard before access
+		if (area.tags?.type !== "community") return false;
 		if (!area.tags.geo_json) return false;
 		const bbox = getBbox(area.tags.geo_json);
 		if (bbox) {
