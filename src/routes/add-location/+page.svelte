@@ -556,12 +556,8 @@ $: if (map && mapLoaded) {
 					</div>
 
 				<div>
-					
-					
-					<div class="mb-10 w-full text-justify text-primary dark:text-white">
-						<p>
-							{$_('addLocation.addressLabel')}
-						</p>
+					<div class="mb-2">
+						<label for="address" class="block font-semibold">{$_('addLocation.addressLabel')}</label>
 						<FormHelperText text={$_('addLocation.addressTooltip')} />
 					</div>
 					

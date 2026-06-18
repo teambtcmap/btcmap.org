@@ -5,7 +5,7 @@ const NAMED_ENTITIES: Record<string, string> = {
 	"&amp;": "&",
 	"&lt;": "<",
 	"&gt;": ">",
-	"&quot;": "\"",
+	"&quot;": '"',
 	"&apos;": "'",
 	"&nbsp;": " ",
 	"&mdash;": "—",
