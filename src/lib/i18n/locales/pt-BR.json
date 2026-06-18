@@ -224,9 +224,7 @@
 		"collapseDrawer": "Recolher painel",
 		"merchantDetails": "Detalhes do comerciante",
 		"viewBoost": "Impulsionar",
-		"viewDetails": "Detalhes",
-		"swipeUpForDetails": "Deslize para cima para ver detalhes",
-		"swipeDownToClose": "Deslize para baixo para fechar"
+		"viewDetails": "Detalhes"
 	},
 	"map": {
 		"bitcoinMerchantMapTitle": "Mapa de Comerciantes Bitcoin"

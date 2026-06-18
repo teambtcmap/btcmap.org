@@ -228,9 +228,7 @@
 		"collapseDrawer": "Réduire le panneau",
 		"merchantDetails": "Détails du commerce",
 		"viewBoost": "Boost",
-		"viewDetails": "Détails",
-		"swipeUpForDetails": "Glissez vers le haut pour les détails",
-		"swipeDownToClose": "Glissez vers le bas pour fermer"
+		"viewDetails": "Détails"
 	},
 	"map": {
 		"bitcoinMerchantMapTitle": "Carte des commerces Bitcoin"

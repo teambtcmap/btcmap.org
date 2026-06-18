@@ -311,9 +311,7 @@
 		"collapseDrawer": "Riduci riquadro",
 		"merchantDetails": "Dettagli commerciante",
 		"viewBoost": "Boost",
-		"viewDetails": "Dettagli",
-		"swipeUpForDetails": "Scorri verso l'alto per i dettagli",
-		"swipeDownToClose": "Scorri verso il basso per chiudere"
+		"viewDetails": "Dettagli"
 	},
 	"map": {
 		"bitcoinMerchantMapTitle": "Mappa dei commercianti Bitcoin"

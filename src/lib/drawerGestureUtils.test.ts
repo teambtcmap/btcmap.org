@@ -33,7 +33,7 @@ describe("determineSnapState", () => {
 	});
 
 	it("snaps to nearest on small movement - above threshold", () => {
-		// threshold = 140 + (667-140)*0.3 = 298.1
+		// threshold = 110 + (667-110)*0.3 = 277.1
 		const result = determineSnapState(0.1, 10, 350, EXPANDED);
 		expect(result).toEqual({ expanded: true, height: EXPANDED });
 	});

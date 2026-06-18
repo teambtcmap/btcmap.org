@@ -311,9 +311,7 @@
 		"collapseDrawer": "Lade inklappen",
 		"merchantDetails": "Ondernemerdetails",
 		"viewBoost": "Boost",
-		"viewDetails": "Details",
-		"swipeUpForDetails": "Veeg omhoog voor details",
-		"swipeDownToClose": "Veeg omlaag om te sluiten"
+		"viewDetails": "Details"
 	},
 	"map": {
 		"bitcoinMerchantMapTitle": "Bitcoin acceptantenkaart"

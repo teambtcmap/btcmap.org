@@ -228,9 +228,7 @@
 		"collapseDrawer": "Drawer einklappen",
 		"merchantDetails": "Händlerdetails",
 		"viewBoost": "Boost",
-		"viewDetails": "Details",
-		"swipeUpForDetails": "Nach oben wischen für Details",
-		"swipeDownToClose": "Nach unten wischen zum Schließen"
+		"viewDetails": "Details"
 	},
 	"map": {
 		"bitcoinMerchantMapTitle": "Bitcoin Händlerkarte"

@@ -311,9 +311,7 @@
 		"collapseDrawer": "Collapse drawer",
 		"merchantDetails": "Merchant details",
 		"viewBoost": "Boost",
-		"viewDetails": "Details",
-		"swipeUpForDetails": "Swipe up for details",
-		"swipeDownToClose": "Swipe down to close"
+		"viewDetails": "Details"
 	},
 	"map": {
 		"bitcoinMerchantMapTitle": "Bitcoin Merchant Map"

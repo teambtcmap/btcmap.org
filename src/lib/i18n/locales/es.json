@@ -228,9 +228,7 @@
 		"collapseDrawer": "Contraer panel",
 		"merchantDetails": "Detalles del comercio",
 		"viewBoost": "Impulsar",
-		"viewDetails": "Detalles",
-		"swipeUpForDetails": "Desliza hacia arriba para ver detalles",
-		"swipeDownToClose": "Desliza hacia abajo para cerrar"
+		"viewDetails": "Detalles"
 	},
 	"map": {
 		"bitcoinMerchantMapTitle": "Mapa de Comercios Bitcoin"

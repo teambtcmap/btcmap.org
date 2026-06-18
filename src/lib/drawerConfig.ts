@@ -2,8 +2,9 @@
 // These values control the behavior of the mobile drawer's swipe gestures
 
 // Peek (collapsed) heights for the two bottom sheets.
-// Merchant drawer: bottom-anchored, full-width; shows name + quick info.
-export const PEEK_HEIGHT = 140;
+// Merchant drawer: bottom-anchored, full-width; shows name + payment/verify row
+// (snug — no trailing swipe hint).
+export const PEEK_HEIGHT = 110;
 // Search sheet: bottom-anchored, full-width (like the merchant drawer and
 // Google Maps); peek shows the grabber + single input. Rounded top corners at
 // peek, square once expanded.

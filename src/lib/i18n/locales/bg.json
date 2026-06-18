@@ -412,10 +412,6 @@
 		"locationsIncludeAtms": "Местата включват банкомати.",
 		"noDataAvailable": "Няма налични данни"
 	},
-	"merchantPeek": {
-		"swipeUpDetails": "Плъзнете нагоре за детайли",
-		"swipeDownClose": "Плъзнете надолу за затваряне"
-	},
 	"merchantDrawer": {
 		"back": "Назад"
 	},
@@ -666,9 +662,7 @@
 		"collapseDrawer": "Свий панела",
 		"merchantDetails": "Детайли за търговеца",
 		"viewBoost": "Подсили",
-		"viewDetails": "Детайли",
-		"swipeUpForDetails": "Плъзнете нагоре за детайли",
-		"swipeDownToClose": "Плъзнете надолу за затваряне"
+		"viewDetails": "Детайли"
 	},
 	"map": {
 		"bitcoinMerchantMapTitle": "Карта на биткойн търговци"

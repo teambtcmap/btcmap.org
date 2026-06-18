@@ -228,9 +228,7 @@
 		"collapseDrawer": "Свернуть панель",
 		"merchantDetails": "Детали места",
 		"viewBoost": "Буст",
-		"viewDetails": "Детали",
-		"swipeUpForDetails": "Смахните вверх для деталей",
-		"swipeDownToClose": "Смахните вниз для закрытия"
+		"viewDetails": "Детали"
 	},
 	"map": {
 		"bitcoinMerchantMapTitle": "Биткоин карта"
