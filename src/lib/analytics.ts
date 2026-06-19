@@ -6,13 +6,14 @@ import { dev } from "$app/environment";
 
 const ANALYTICS_HOSTNAME = "btcmap.org";
 
-type EventName =
+export type EventName =
 	| "search_query"
 	| "search_input_focus"
+	| "search_sheet_swipe_expand"
+	| "search_sheet_swipe_collapse"
+	| "search_sheet_tap_expand"
 	| "category_filter"
 	| "boost_layer_toggle"
-	| "worldwide_mode_click"
-	| "nearby_mode_click"
 	| "home_button_click"
 	| "show_all_on_map_click"
 	| "merchant_list_item_click"

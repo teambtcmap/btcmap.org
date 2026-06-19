@@ -37,8 +37,7 @@
 		"countries": "Pays"
 	},
 	"search": {
-		"placeholderWorldwide": "Rechercher dans le monde entier...",
-		"placeholderNearby": "Rechercher à proximité...",
+		"placeholderPlaces": "Rechercher des lieux...",
 		"searching": "Recherche en cours...",
 		"noResults": "Aucun résultat trouvé",
 		"noResultsFor": "Aucun résultat trouvé pour « {query} »",
@@ -50,10 +49,7 @@
 		"showAll": "Tout afficher",
 		"clear": "Effacer la recherche",
 		"noVisible": "Aucun commerce visible dans la vue actuelle",
-		"worldwide": "Monde entier",
-		"nearby": "À proximité",
-		"switchToWorldwide": "Passer à la recherche mondiale",
-		"filterResults": "Filtrer les résultats à proximité",
+		"nearbyCount": "{count} à proximité",
 		"placeholder": "Rechercher...",
 		"ariaLabel": "Rechercher dans le classement",
 		"enablePreciseDistances": "Activer les distances précises",
@@ -232,9 +228,7 @@
 		"collapseDrawer": "Réduire le panneau",
 		"merchantDetails": "Détails du commerce",
 		"viewBoost": "Boost",
-		"viewDetails": "Détails",
-		"swipeUpForDetails": "Glissez vers le haut pour les détails",
-		"swipeDownToClose": "Glissez vers le bas pour fermer"
+		"viewDetails": "Détails"
 	},
 	"map": {
 		"bitcoinMerchantMapTitle": "Carte des commerces Bitcoin"
@@ -292,7 +286,6 @@
 		"loading": "Chargement",
 		"submitting": "Envoi en cours",
 		"filterByCategory": "Filtrer par catégorie",
-		"switchMode": "Changer le mode de recherche",
 		"togglePanel": "Basculer le panneau de la liste des commerces",
 		"merchantList": "Liste des commerces",
 		"merchantListItem": "Élément de la liste des commerces",

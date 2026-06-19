@@ -2,9 +2,6 @@
 import "maplibre-gl/dist/maplibre-gl.css";
 
 import Spiderfy from "@nazka/map-gl-js-spiderfy";
-import convex from "@turf/convex";
-import { featureCollection, point } from "@turf/helpers";
-import type { Feature, FeatureCollection, Point, Polygon } from "geojson";
 import type {
 	FilterSpecification,
 	GeoJSONSource,
@@ -23,6 +20,7 @@ import MapUnsupportedFallback from "$components/MapUnsupportedFallback.svelte";
 import { trackEvent } from "$lib/analytics";
 import { filterMerchantsByCategory } from "$lib/categoryMapping";
 import {
+	BREAKPOINTS,
 	CLUSTERING_DISABLED_ZOOM,
 	DEFAULT_MAP_LAT,
 	DEFAULT_MAP_LNG,
@@ -33,6 +31,7 @@ import {
 	MERCHANT_LIST_MIN_ZOOM,
 	NEARBY_RADIUS_MULTIPLIER,
 } from "$lib/constants";
+import { SEARCH_SHEET_PEEK_HEIGHT } from "$lib/drawerConfig";
 import { _, getDisplayLang, locale } from "$lib/i18n";
 import {
 	BASEMAPS,
@@ -70,7 +69,6 @@ import {
 	parseMerchantHash,
 } from "$lib/merchantDrawerHash";
 import { merchantDrawer } from "$lib/merchantDrawerStore";
-import type { MerchantListMode } from "$lib/merchantListStore";
 import { merchantList } from "$lib/merchantListStore";
 import { savedPlaceIds } from "$lib/session";
 import {
@@ -95,8 +93,14 @@ import { BasemapsControl } from "./controls/BasemapsControl";
 import { BoostToggleControl } from "./controls/BoostToggleControl";
 import { DataRefreshControl } from "./controls/DataRefreshControl";
 import { NavButtonsControl } from "./controls/NavButtonsControl";
+import { browser } from "$app/environment";
 
 export let data: PageData;
+
+// Layout decision locked at init (same pattern as MerchantDrawerHash): the
+// mobile search sheet and the desktop floating bar derive from one value so
+// a viewport resize can never leave zero or two search surfaces
+const isMobileLayout = browser && window.innerWidth < BREAKPOINTS.md;
 
 type PlaceFeature = {
 	type: "Feature";
@@ -173,11 +177,6 @@ const applyLabelPalette = (m: MapLibreMap, t: "light" | "dark" | undefined) => {
 		m.setPaintProperty("boosted-place-label", "text-halo-color", palette.halo);
 	}
 };
-// Latest-wins guard for the async getClusterLeaves callback. Mouseenter
-// fires per-feature, so a quick sweep across multiple clusters can stack
-// pending leaf fetches; we only commit the hull whose cluster id is still
-// the one currently being hovered.
-let latestHullClusterId: number | null = null;
 // Deep-link pan: if the user lands on a URL with `merchant=…` but no
 // viewport coords, we wait for the place to appear in `$placesById`
 // then pan to it. Track the subscription + safety timer so onDestroy
@@ -510,7 +509,10 @@ const fitSearchResultBounds = () => {
 // SvelteKit endpoint, hand results to the store. Errors surface as toasts.
 const executeSearch = async (query: string) => {
 	searchAbortController?.abort();
-	if (query.length < 3) return;
+	// Trim so the request matches the dispatch decision (handlePanelSearch gates
+	// on the trimmed length) — otherwise "  abc" is sent verbatim as %20%20abc.
+	const trimmed = query.trim();
+	if (trimmed.length < 3) return;
 
 	trackEvent("search_query");
 	searchAbortController = new AbortController();
@@ -521,17 +523,26 @@ const executeSearch = async (query: string) => {
 
 	try {
 		const response = await fetch(
-			`/api/search/places?name=${encodeURIComponent(query)}`,
+			`/api/search/places?name=${encodeURIComponent(trimmed)}`,
 			{ signal: searchAbortController.signal },
 		);
 		if (!response.ok) throw new Error("Search API error");
 		const results: Place[] = await response.json();
+		// The panel/sheet may have been closed while we were awaiting the
+		// response (abort only rejects the fetch, not the json() window). Don't
+		// let a late result reopen it.
+		if (!get(merchantList).isOpen) return;
 		merchantList.openWithSearchResults(query, results);
 	} catch (error) {
 		if (error instanceof Error && error.name === "AbortError") return;
 		console.error("Search error:", error);
 		errToast(get(_)("errors.searchUnavailable"));
-		merchantList.exitSearchMode();
+		// Mirror the success-path guard: if the panel was closed/collapsed while
+		// the request was in flight, a non-abort failure must not pop it back open.
+		if (!get(merchantList).isOpen) return;
+		// Keep the user's typed query (and search mode) — a transient failure
+		// shouldn't wipe the input or silently drop them back to nearby.
+		merchantList.openSearchMode(false);
 	}
 };
 
@@ -540,16 +551,30 @@ const debouncedPanelSearch = debounce(
 	300,
 );
 
+// Single-input model: typing ≥3 chars searches worldwide; anything shorter
+// (incl. empty) falls back to the nearby browse list. No mode toggle.
 const handlePanelSearch = (query: string) => {
-	debouncedPanelSearch(query);
-};
-
-const handleModeChange = (mode: MerchantListMode) => {
-	if (mode === "nearby") {
-		searchAbortController?.abort();
-		updateMerchantList();
+	if (query.trim().length >= 3) {
+		debouncedPanelSearch(query);
+		return;
+	}
+	// Too short / empty → abort any search and return to nearby browse,
+	// keeping whatever the user has typed so far in the input
+	debouncedPanelSearch.cancel();
+	searchAbortController?.abort();
+	if (get(merchantList).mode !== "nearby") {
+		merchantList.setMode("nearby");
+		updateMerchantList({ force: true });
 	}
 };
+
+// Closing/collapsing the list discards any pending or in-flight worldwide
+// search — otherwise a late response calls openSearchMode/openWithSearchResults
+// and pops the panel (or the mobile sheet) back open on its own
+$: if (!$merchantList.isOpen) {
+	debouncedPanelSearch.cancel();
+	searchAbortController?.abort();
+}
 
 // Browser back/forward / external hash mutation → re-sync the drawer.
 // Highlight-state on markers isn't a concept here (MapLibre paints from
@@ -558,11 +583,6 @@ const handleModeChange = (mode: MerchantListMode) => {
 const handleHashChange = () => {
 	if (typeof window === "undefined") return;
 	merchantDrawer.syncFromHash();
-};
-
-const EMPTY_HULL_COLLECTION: FeatureCollection<Polygon> = {
-	type: "FeatureCollection",
-	features: [],
 };
 
 const EMPTY_COLLECTION: PlaceFeatureCollection = {
@@ -801,15 +821,28 @@ $: if (map && styleLoaded) {
 	syncSelectionPulse($merchantDrawer.merchantId);
 }
 
+// Populate the nearby list/count once on first load. The initial camera is
+// set programmatically (no moveend fires), so without this the peek pill and
+// nearby list stay empty until the user pans or opens the panel.
+let didInitialNearbyCount = false;
+$: if (
+	browser &&
+	map &&
+	styleLoaded &&
+	$places.length > 0 &&
+	!didInitialNearbyCount
+) {
+	didInitialNearbyCount = true;
+	updateMerchantList();
+}
+
 // The custom sources + layers we add on top of whatever basemap is
 // active. applyBasemap() carries these across a setStyle() so the pins,
 // clusters, and labels survive a basemap/theme swap untouched (MapLibre's
 // style differ leaves byte-identical layers in place — only the basemap
 // layers below them get swapped).
-const CUSTOM_SOURCE_IDS = ["places", "places-boosted", "cluster-hull"];
+const CUSTOM_SOURCE_IDS = ["places", "places-boosted"];
 const CUSTOM_LAYER_IDS = [
-	"cluster-hull-fill",
-	"cluster-hull-outline",
 	"clusters-outer",
 	"clusters-inner",
 	"cluster-count",
@@ -872,6 +905,14 @@ const applyBasemap = (id: BasemapId) => {
 };
 
 onMount(async () => {
+	// Bridge the JS peek-height const into CSS so the bottom-chrome lift (scale
+	// bar, attribution, tile indicator) stays in sync with the anchored search
+	// sheet's peek without duplicating the literal value.
+	document.documentElement.style.setProperty(
+		"--search-sheet-peek-height",
+		`${SEARCH_SHEET_PEEK_HEIGHT}px`,
+	);
+
 	// WebGL absence (older Android WebViews, hardened browsers, disabled
 	// GPU) would leave the map blank if we tried to instantiate MapLibre.
 	// Surface a static fallback instead.
@@ -956,7 +997,12 @@ onMount(async () => {
 		// Show the "Support BTC Map" supporter link on every basemap (legacy
 		// /map guaranteed it regardless of basemap). Data-source credit
 		// (OSM / OpenFreeMap / Carto) comes from each style's own sources.
-		attributionControl: { customAttribution: SUPPORT_ATTR },
+		// Mobile: compact (i) button so it doesn't cover the bottom edge under
+		// the floating search. Desktop has room — show the full credit.
+		attributionControl: {
+			customAttribution: SUPPORT_ATTR,
+			compact: isMobileLayout,
+		},
 		center: initialCenter,
 		zoom: initialZoom,
 		bearing: hashCoords?.bearing ?? 0,
@@ -997,6 +1043,16 @@ onMount(async () => {
 	// L.control.scale). Metric units only; imperial is added by the
 	// browser locale via MapLibre's bilingual variant if needed later.
 	map.addControl(new maplibre.ScaleControl({ unit: "metric" }), "bottom-left");
+
+	// Mobile only: the compact AttributionControl renders expanded on first
+	// load (maplibregl-compact-show). Collapse it to the (i) button so it
+	// doesn't cover the bottom edge; the user can still tap (i) to expand.
+	// Desktop is not compact, so the full credit stays visible.
+	if (isMobileLayout) {
+		mapContainer
+			.querySelector(".maplibregl-ctrl-attrib")
+			?.classList.remove("maplibregl-compact-show");
+	}
 
 	// Geolocate control: pulse dot, accuracy circle, and heading arrow are
 	// built in. Heading uses the device's compass when available, falling
@@ -1099,33 +1155,6 @@ onMount(async () => {
 		map.addSource("places-boosted", {
 			type: "geojson",
 			data: EMPTY_COLLECTION,
-		});
-
-		// Hover hull: convex polygon enclosing all leaves of the cluster the
-		// cursor is over. Added before the visible cluster discs so the
-		// translucent fill sits under, not on top of, the cluster discs.
-		map.addSource("cluster-hull", {
-			type: "geojson",
-			data: EMPTY_HULL_COLLECTION,
-		});
-
-		map.addLayer({
-			id: "cluster-hull-fill",
-			type: "fill",
-			source: "cluster-hull",
-			paint: {
-				"fill-color": "rgba(110, 204, 57, 0.15)",
-			},
-		});
-
-		map.addLayer({
-			id: "cluster-hull-outline",
-			type: "line",
-			source: "cluster-hull",
-			paint: {
-				"line-color": "rgba(110, 204, 57, 0.6)",
-				"line-width": 1.5,
-			},
 		});
 
 		// Translucent outer ring — green/yellow/orange tiers by point_count
@@ -1540,66 +1569,6 @@ onMount(async () => {
 			merchantDrawer.close();
 		});
 
-		// Cluster hover → draw a convex hull around its leaves. Capped at 500
-		// leaves to keep convex computation cheap on dense clusters.
-		map.on("mouseenter", "clusters-outer", (e: MapLayerMouseEvent) => {
-			if (!map) return;
-			const feature = e.features?.[0] as MapGeoJSONFeature | undefined;
-			if (!feature) return;
-			const clusterId = feature.properties?.cluster_id as number | undefined;
-			const pointCount = feature.properties?.point_count as number | undefined;
-			if (clusterId === undefined) return;
-			latestHullClusterId = clusterId;
-			const source = map.getSource("places") as GeoJSONSource | undefined;
-			const hullSource = map.getSource("cluster-hull") as
-				| GeoJSONSource
-				| undefined;
-			if (!source || !hullSource) return;
-			const limit = Math.min(pointCount ?? 500, 500);
-			source
-				.getClusterLeaves(clusterId, limit, 0)
-				.then((leaves) => {
-					// Stale callback guard — bail if hover has moved to another
-					// cluster (or cleared entirely) by the time leaves resolve.
-					if (latestHullClusterId !== clusterId) return;
-					const points: Feature<Point>[] = [];
-					for (const leaf of leaves) {
-						if (leaf.geometry?.type !== "Point") continue;
-						const coords = leaf.geometry.coordinates as [number, number];
-						points.push(point(coords));
-					}
-					const hull = convex(featureCollection(points));
-					if (!hull) {
-						// Degenerate cluster (≤ 2 unique points / collinear) — clear
-						// any stale hull from a previous hover instead of leaving it on.
-						hullSource.setData(EMPTY_HULL_COLLECTION);
-						return;
-					}
-					hullSource.setData({
-						type: "FeatureCollection",
-						features: [hull],
-					});
-				})
-				.catch((err) => {
-					// Cluster id can become invalid mid-flight when syncPlacesToSource
-					// replaces the source data and the cluster index regenerates.
-					// Swallow that — the hover will redraw on the next mouseenter.
-					if (latestHullClusterId === clusterId) {
-						latestHullClusterId = null;
-					}
-					console.debug("hover-hull getClusterLeaves rejected", err);
-				});
-		});
-
-		map.on("mouseleave", "clusters-outer", () => {
-			if (!map) return;
-			latestHullClusterId = null;
-			const hullSource = map.getSource("cluster-hull") as
-				| GeoJSONSource
-				| undefined;
-			hullSource?.setData(EMPTY_HULL_COLLECTION);
-		});
-
 		// Refresh enriched details (and thus labels) on viewport changes
 		// once we're above LABEL_VISIBLE_ZOOM. Debounced so quick pans don't
 		// spam the API; the store internally aborts any stale request.
@@ -1803,28 +1772,20 @@ onDestroy(() => {
 <MapLoadingMain progress={mapLoading} status={mapLoadingStatus} />
 
 <!--
-	Floating search bar — desktop: top-left, mobile: bottom-center.
-	Hidden on mobile while the merchant drawer is open so the drawer
-	gets the full bottom area. The bar itself hides when the list panel
+	Floating search bar — desktop only, top-left. On mobile the merchant
+	list panel renders as a bottom sheet whose peek state carries the
+	single search input instead. The bar itself hides when the list panel
 	is open (the panel renders its own search input in the same slot).
 -->
-{#if styleLoaded}
-	<div
-		class="pointer-events-none z-[1000] max-md:fixed max-md:right-3 max-md:bottom-[calc(5rem+env(safe-area-inset-bottom))] max-md:left-3 md:absolute md:top-3 md:left-3
-			{$merchantDrawer.isOpen ? 'max-md:hidden' : ''}"
-	>
+{#if styleLoaded && !isMobileLayout}
+	<div class="pointer-events-none absolute top-3 left-3 z-[1000]">
 		<MapSearchBar
 			onSearch={handlePanelSearch}
 			onFocus={() => {
 				merchantList.open();
 				updateMerchantList({ force: true });
 			}}
-			onNearbyClick={() => {
-				merchantList.open();
-				updateMerchantList({ force: true });
-			}}
 			nearbyCount={$merchantList.totalCount}
-			isLoadingCount={$merchantList.isLoadingList}
 		/>
 	</div>
 {/if}
@@ -1842,9 +1803,10 @@ onDestroy(() => {
 		// See onHoverStart above.
 	}}
 	onSearch={handlePanelSearch}
-	onModeChange={handleModeChange}
 	onRefresh={() => updateMerchantList({ force: true })}
 	{currentZoom}
+	mapReady={styleLoaded}
+	isMobile={isMobileLayout}
 />
 
 {#if styleLoaded}
@@ -1870,4 +1832,17 @@ onDestroy(() => {
 	/* IControl-related rules moved to ./controls/controls.css so any page
 	   that mounts these controls (currently /map and /communities/map)
 	   gets the popup positioning + anchor button styles. */
+
+	/* Mobile: the search sheet is anchored to the bottom edge, so lift the
+	   bottom map chrome (scale bar + attribution) above its peek so the credit
+	   stays visible above the sheet. --search-sheet-peek-height is set from the
+	   SEARCH_SHEET_PEEK_HEIGHT const in onMount; the fallback matches it. */
+	@media (max-width: 767px) {
+		.map-container :global(.maplibregl-ctrl-bottom-left),
+		.map-container :global(.maplibregl-ctrl-bottom-right) {
+			bottom: calc(
+				env(safe-area-inset-bottom) + var(--search-sheet-peek-height, 88px)
+			);
+		}
+	}
 </style>
