@@ -790,7 +790,10 @@ onDestroy(() => {
 			<!-- Peek: input facade — opens the sheet without focusing a real input
 			     (keyboard stays down until the user taps the real input and types).
 			     The whole facade is also a swipe surface like the drawer's peek. -->
-			<div id="merchant-sheet-content" class="flex flex-1 items-center px-3 pb-2.5">
+			<div
+				id="merchant-sheet-content"
+				class="flex flex-1 items-center px-3 pb-[max(0.75rem,env(safe-area-inset-bottom))]"
+			>
 				<button
 					bind:this={facadeElement}
 					type="button"

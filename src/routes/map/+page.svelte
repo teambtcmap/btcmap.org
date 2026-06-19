@@ -1819,12 +1819,12 @@ onDestroy(() => {
 	   gets the popup positioning + anchor button styles. */
 
 	/* Mobile: the search sheet is anchored to the bottom edge, so lift the
-	   bottom map chrome (scale bar + attribution) above its 72px peek
+	   bottom map chrome (scale bar + attribution) above its 88px peek
 	   (SEARCH_SHEET_PEEK_HEIGHT) so the credit stays visible above the sheet. */
 	@media (max-width: 767px) {
 		.map-container :global(.maplibregl-ctrl-bottom-left),
 		.map-container :global(.maplibregl-ctrl-bottom-right) {
-			bottom: calc(env(safe-area-inset-bottom) + 72px);
+			bottom: calc(env(safe-area-inset-bottom) + 88px);
 		}
 	}
 </style>

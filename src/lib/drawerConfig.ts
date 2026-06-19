@@ -7,8 +7,9 @@
 export const PEEK_HEIGHT = 110;
 // Search sheet: bottom-anchored, full-width (like the merchant drawer); peek
 // shows the grabber + single input. Rounded top corners at peek, square once
-// expanded.
-export const SEARCH_SHEET_PEEK_HEIGHT = 72;
+// expanded. Tall enough that the input clears the bottom gesture bar / curved
+// corners on bezelled phones (the facade also adds a safe-area bottom inset).
+export const SEARCH_SHEET_PEEK_HEIGHT = 88;
 
 // Gesture thresholds
 export const VELOCITY_THRESHOLD = 0.5; // px/ms - minimum velocity for flick gesture detection
