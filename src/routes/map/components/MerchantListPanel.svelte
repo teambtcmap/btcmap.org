@@ -83,16 +83,14 @@ const sheetGesture = createDrawerGestureController({
 const sheetHeight = sheetGesture.drawerHeight;
 const sheetExpanded = sheetGesture.expanded;
 
-// Anchored bottom sheet (like the merchant drawer): full
-// width, latched to the bottom edge. The top corners are rounded at peek and
-// square off once expanded (handled by a class toggle in the markup).
-$: mobileSheetStyle = isMobile
-	? [
-			`height:${$sheetHeight}px`,
-			"max-height:100dvh",
-			"will-change:height",
-		].join(";")
-	: "";
+// Anchored bottom sheet (like the merchant drawer): full width, latched to
+// the bottom edge. The top corners are rounded at peek and square off once
+// expanded (handled by a class toggle in the markup). The height is bound
+// inline in the markup (style={...}) rather than via a $: variable: while the
+// sheet is unmounted under an open merchant drawer the spring resets to peek,
+// and a derived reactive string could miss that update and remount stale at
+// the old expanded height. Reading $sheetHeight directly in the template
+// stays in sync.
 
 let grabberElement: HTMLElement;
 
@@ -469,7 +467,9 @@ onDestroy(() => {
 			? 'fixed right-0 bottom-0 left-0 shadow-2xl'
 			: 'absolute top-3 bottom-[max(3rem,env(safe-area-inset-bottom))] left-3 w-80 rounded-lg shadow-lg dark:shadow-black/30'}"
 		class:rounded-t-[10px]={isMobile && !$sheetExpanded}
-		style={mobileSheetStyle}
+		style={isMobile
+			? `height:${$sheetHeight}px;max-height:100dvh;will-change:height`
+			: ''}
 		role="complementary"
 		aria-label={$_('aria.merchantList')}
 	>
