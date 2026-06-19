@@ -266,11 +266,13 @@ $: if (isMobile) {
 // merchant drawer (mirrors the old floating bar's max-md:hidden rule)
 $: showPeekSheet = isMobile && mapReady && !$merchantDrawer.isOpen;
 
-// The drawer taking the bottom edge can unmount the sheet mid-drag, which
-// would strand the captured pointer and the spring height. Reset so the
-// sheet remounts cleanly at peek (mirrors MerchantDrawerMobile's
-// resetToPeek-on-merchant-change).
+// The merchant drawer owns the bottom edge: close the list (so an expanded
+// sheet can't linger behind the higher-z drawer, e.g. when a merchant opens
+// via deep link / hash while the list is open) and reset the gesture so the
+// peek sheet remounts cleanly once the drawer closes. Resetting also avoids
+// stranding a captured pointer / spring height when the sheet unmounts mid-drag.
 $: if (isMobile && $merchantDrawer.isOpen) {
+	if (get(merchantList).isOpen) merchantList.close();
 	sheetGesture.resetToPeek();
 }
 $: pillCount = formatNearbyPillCount(totalCount);
