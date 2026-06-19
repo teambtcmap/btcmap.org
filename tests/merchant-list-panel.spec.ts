@@ -30,10 +30,11 @@ test.describe('Merchant List Panel', () => {
 		// Wait for markers to load
 		await waitForMarkersToLoad(page);
 
-		// Floating search bar should be visible with the neutral placeholder
+		// Floating search bar should be visible with the neutral places placeholder
+		// (loose match so copy/i18n tweaks don't break the behavioral test)
 		const searchInput = page.getByRole('searchbox', { name: /search for bitcoin merchants/i });
 		await expect(searchInput).toBeVisible({ timeout: 15000 });
-		await expect(searchInput).toHaveAttribute('placeholder', 'Search places...');
+		await expect(searchInput).toHaveAttribute('placeholder', /search places/i);
 
 		// The Worldwide/Nearby mode toggle has been removed entirely — assert the
 		// scope radios are absent (not merely hidden) via toHaveCount(0).

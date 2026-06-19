@@ -509,7 +509,10 @@ const fitSearchResultBounds = () => {
 // SvelteKit endpoint, hand results to the store. Errors surface as toasts.
 const executeSearch = async (query: string) => {
 	searchAbortController?.abort();
-	if (query.length < 3) return;
+	// Trim so the request matches the dispatch decision (handlePanelSearch gates
+	// on the trimmed length) — otherwise "  abc" is sent verbatim as %20%20abc.
+	const trimmed = query.trim();
+	if (trimmed.length < 3) return;
 
 	trackEvent("search_query");
 	searchAbortController = new AbortController();
@@ -520,7 +523,7 @@ const executeSearch = async (query: string) => {
 
 	try {
 		const response = await fetch(
-			`/api/search/places?name=${encodeURIComponent(query)}`,
+			`/api/search/places?name=${encodeURIComponent(trimmed)}`,
 			{ signal: searchAbortController.signal },
 		);
 		if (!response.ok) throw new Error("Search API error");
@@ -534,6 +537,9 @@ const executeSearch = async (query: string) => {
 		if (error instanceof Error && error.name === "AbortError") return;
 		console.error("Search error:", error);
 		errToast(get(_)("errors.searchUnavailable"));
+		// Mirror the success-path guard: if the panel was closed/collapsed while
+		// the request was in flight, a non-abort failure must not pop it back open.
+		if (!get(merchantList).isOpen) return;
 		// Keep the user's typed query (and search mode) — a transient failure
 		// shouldn't wipe the input or silently drop them back to nearby.
 		merchantList.openSearchMode(false);
