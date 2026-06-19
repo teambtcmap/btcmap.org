@@ -31,6 +31,7 @@ import {
 	MERCHANT_LIST_MIN_ZOOM,
 	NEARBY_RADIUS_MULTIPLIER,
 } from "$lib/constants";
+import { SEARCH_SHEET_PEEK_HEIGHT } from "$lib/drawerConfig";
 import { _, getDisplayLang, locale } from "$lib/i18n";
 import {
 	BASEMAPS,
@@ -898,6 +899,14 @@ const applyBasemap = (id: BasemapId) => {
 };
 
 onMount(async () => {
+	// Bridge the JS peek-height const into CSS so the bottom-chrome lift (scale
+	// bar, attribution, tile indicator) stays in sync with the anchored search
+	// sheet's peek without duplicating the literal value.
+	document.documentElement.style.setProperty(
+		"--search-sheet-peek-height",
+		`${SEARCH_SHEET_PEEK_HEIGHT}px`,
+	);
+
 	// WebGL absence (older Android WebViews, hardened browsers, disabled
 	// GPU) would leave the map blank if we tried to instantiate MapLibre.
 	// Surface a static fallback instead.
@@ -1819,12 +1828,15 @@ onDestroy(() => {
 	   gets the popup positioning + anchor button styles. */
 
 	/* Mobile: the search sheet is anchored to the bottom edge, so lift the
-	   bottom map chrome (scale bar + attribution) above its 88px peek
-	   (SEARCH_SHEET_PEEK_HEIGHT) so the credit stays visible above the sheet. */
+	   bottom map chrome (scale bar + attribution) above its peek so the credit
+	   stays visible above the sheet. --search-sheet-peek-height is set from the
+	   SEARCH_SHEET_PEEK_HEIGHT const in onMount; the fallback matches it. */
 	@media (max-width: 767px) {
 		.map-container :global(.maplibregl-ctrl-bottom-left),
 		.map-container :global(.maplibregl-ctrl-bottom-right) {
-			bottom: calc(env(safe-area-inset-bottom) + 88px);
+			bottom: calc(
+				env(safe-area-inset-bottom) + var(--search-sheet-peek-height, 88px)
+			);
 		}
 	}
 </style>
