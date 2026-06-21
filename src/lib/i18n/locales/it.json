@@ -156,6 +156,7 @@
 		"zoomIn": "Ingrandisci",
 		"zoomOut": "Rimpicciolisci",
 		"basemapTitle": "Basemap",
+		"verifiedFilterTitle": "Mostra solo luoghi verificati",
 		"locate": "Mostrami dove sono",
 		"boostAlt": "Boost",
 		"locateAlt": "Mostrami dove sono",
@@ -219,6 +220,12 @@
 		"outdatedTooltip": "Obsoleto, si prega di ri-verificare",
 		"helpImprove": "Aiuta a migliorare i dati per tutti",
 		"surveyedBy": "Completato dai membri della community di BTC Map"
+	},
+	"verificationFilter": {
+		"any": "Tutti",
+		"within1Year": "Verificato nell'ultimo anno",
+		"within2Years": "Verificato negli ultimi 2 anni",
+		"within3Years": "Verificato negli ultimi 3 anni"
 	},
 	"payment": {
 		"methods": "Metodi di pagamento",
