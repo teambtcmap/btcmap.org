@@ -84,6 +84,41 @@ const getStaticFileDate = async (): Promise<string> => {
 	return getTwoWeeksAgoDate();
 };
 
+// The bulk feed (CDN places.json) and the MAP_SYNC update path carry no
+// verification date, so the map markers have nothing to filter on. Enrich
+// every place with verified_at from one lean call (id + date for all places)
+// and merge by id. Runs in the background after first paint so it never
+// delays initial rendering; warm loads already have the dates from the cached
+// store. Best-effort: on failure the map renders without dates and the
+// recency filter stays inert (see filterPlacesByRecency / the map gate).
+const enrichWithVerifiedDates = async (): Promise<void> => {
+	try {
+		const response = await api.get<{ id: number; verified_at?: string }[]>(
+			`${API_BASE}/v4/places?fields=id,verified_at`,
+		);
+		if (!Array.isArray(response.data)) return;
+		const verifiedById = new Map<number, string>();
+		for (const item of response.data) {
+			if (typeof item?.id === "number" && item.verified_at) {
+				verifiedById.set(item.id, item.verified_at);
+			}
+		}
+		if (verifiedById.size === 0) return;
+		const current = get(places);
+		const enriched = current.map((p) => {
+			const verified_at = verifiedById.get(p.id);
+			return verified_at && verified_at !== p.verified_at
+				? { ...p, verified_at }
+				: p;
+		});
+		await yieldToMain();
+		places.set(enriched);
+		await localforage.setItem("places_v4", enriched);
+	} catch (error) {
+		console.warn("Could not load verification dates:", error);
+	}
+};
+
 export const elementsSync = async () => {
 	// Prevent concurrent syncs - if already running, skip this invocation
 	if (syncInProgress) {
@@ -318,6 +353,10 @@ export const elementsSync = async () => {
 							await yieldToMain();
 							// set response to store
 							places.set(placesData);
+							// Backfill verification dates (absent from the bulk feed)
+							// without blocking first paint; updates the store + cache
+							// when they arrive.
+							void enrichWithVerifiedDates();
 							placesLoadingStatus.set("Complete!");
 							placesLoadingProgress.set(PROGRESS_RANGES.COMPLETE);
 
