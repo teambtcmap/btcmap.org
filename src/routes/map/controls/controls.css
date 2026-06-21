@@ -50,6 +50,30 @@
 	margin: 0;
 }
 
+/* Verified filter: one-time loading state while the on-demand date fetch runs
+   (first activation only). Swap the clock glyph for a spinner. */
+.maplibre-next-verified.loading a.maplibregl-ctrl-link svg {
+	display: none;
+}
+.maplibre-next-verified.loading a.maplibregl-ctrl-link::after {
+	content: "";
+	width: 14px;
+	height: 14px;
+	border-radius: 50%;
+	border: 2px solid rgba(0, 0, 0, 0.25);
+	border-top-color: #111;
+	animation: mlnv-spin 0.7s linear infinite;
+}
+.dark .maplibre-next-verified.loading a.maplibregl-ctrl-link::after {
+	border-color: rgba(255, 255, 255, 0.3);
+	border-top-color: #fff;
+}
+@keyframes mlnv-spin {
+	to {
+		transform: rotate(360deg);
+	}
+}
+
 /* Anchor-based buttons inside the custom IControls (NavButtons / Boost /
    DataRefresh). MapLibre's default `.maplibregl-ctrl-group button` rules
    don't apply to <a> elements, so we replicate the dimensions, hover and

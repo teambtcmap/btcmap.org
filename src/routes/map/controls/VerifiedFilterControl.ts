@@ -19,7 +19,9 @@ type Options = {
 	initial: VerifiedFilterYears;
 	// Apply the chosen filter. The page owns the effect (re-syncing markers +
 	// refreshing the nearby list); this control handles only UI + persistence.
-	onSelect: (years: VerifiedFilterYears) => void;
+	// Returns a promise so the button can show a spinner during the one-time
+	// on-demand date fetch on first activation.
+	onSelect: (years: VerifiedFilterYears) => void | Promise<void>;
 };
 
 // Encode the nullable filter value as a radio value string ("any" | "1"…).
@@ -123,7 +125,7 @@ export class VerifiedFilterControl implements IControl {
 			radio.value = toRadioValue(option.value);
 			radio.checked = option.value === this.#current;
 			radio.addEventListener("change", () => {
-				if (radio.checked) this.#select(option.value);
+				if (radio.checked) void this.#select(option.value);
 			});
 
 			const text = document.createElement("span");
@@ -141,12 +143,24 @@ export class VerifiedFilterControl implements IControl {
 		this.#button?.setAttribute("aria-label", title);
 	}
 
-	#select(years: VerifiedFilterYears): void {
+	async #select(years: VerifiedFilterYears): Promise<void> {
 		this.#current = years;
 		storeVerifiedFilter(years);
-		this.#options.onSelect(years);
 		trackEvent("verified_filter_change", { years: toRadioValue(years) });
 		this.#close();
+		// Spinner covers the one-time on-demand date fetch; instant (invisible)
+		// once the dates are already loaded.
+		this.#setLoading(true);
+		try {
+			await this.#options.onSelect(years);
+		} finally {
+			this.#setLoading(false);
+		}
+	}
+
+	#setLoading(on: boolean): void {
+		this.#container?.classList.toggle("loading", on);
+		this.#button?.setAttribute("aria-busy", on ? "true" : "false");
 	}
 
 	#toggle(): void {
