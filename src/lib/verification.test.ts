@@ -4,8 +4,10 @@ import type { Place } from "$lib/types";
 
 import {
 	calcVerifiedDate,
+	filterPlacesByRecency,
 	isRecentlyVerified,
 	isUpToDate,
+	isVerifiedWithinYears,
 } from "./verification";
 
 const FIXED_NOW = new Date("2026-05-04T12:00:00Z").getTime();
@@ -92,5 +94,60 @@ describe("isUpToDate", () => {
 	it("returns false when merchant or verified_at is missing", () => {
 		expect(isUpToDate(null)).toBe(false);
 		expect(isUpToDate(place(undefined))).toBe(false);
+	});
+});
+
+describe("isVerifiedWithinYears", () => {
+	it("returns true within the N-year window", () => {
+		expect(isVerifiedWithinYears(daysAgo(300), 1)).toBe(true);
+		expect(isVerifiedWithinYears(daysAgo(600), 2)).toBe(true);
+		expect(isVerifiedWithinYears(daysAgo(900), 3)).toBe(true);
+	});
+
+	it("returns false outside the N-year window", () => {
+		expect(isVerifiedWithinYears(daysAgo(400), 1)).toBe(false);
+		expect(isVerifiedWithinYears(daysAgo(800), 2)).toBe(false);
+		expect(isVerifiedWithinYears(daysAgo(1200), 3)).toBe(false);
+	});
+
+	it("respects the exact boundary (2 years + 15 days is outside)", () => {
+		const date = new Date(FIXED_NOW);
+		date.setFullYear(date.getFullYear() - 2);
+		date.setDate(date.getDate() - 15);
+		expect(isVerifiedWithinYears(date.toISOString(), 2)).toBe(false);
+	});
+
+	it("returns false for missing or invalid input", () => {
+		expect(isVerifiedWithinYears(undefined, 3)).toBe(false);
+		expect(isVerifiedWithinYears(null, 3)).toBe(false);
+		expect(isVerifiedWithinYears("", 3)).toBe(false);
+		expect(isVerifiedWithinYears("not-a-date", 3)).toBe(false);
+	});
+});
+
+describe("filterPlacesByRecency", () => {
+	const place = (id: number, verified_at?: string): Place =>
+		({ id, verified_at }) as unknown as Place;
+
+	const list = [
+		place(1, daysAgo(100)), // within 1 year
+		place(2, daysAgo(500)), // within 2 years, outside 1
+		place(3, daysAgo(900)), // within 3 years, outside 2
+		place(4, daysAgo(2000)), // outside 3 years
+		place(5, undefined), // never verified
+	];
+
+	it("returns the list unchanged when years is null", () => {
+		expect(filterPlacesByRecency(list, null)).toBe(list);
+	});
+
+	it("keeps only places verified within the window", () => {
+		expect(filterPlacesByRecency(list, 1).map((p) => p.id)).toEqual([1]);
+		expect(filterPlacesByRecency(list, 2).map((p) => p.id)).toEqual([1, 2]);
+		expect(filterPlacesByRecency(list, 3).map((p) => p.id)).toEqual([1, 2, 3]);
+	});
+
+	it("excludes places without a verified_at when a filter is active", () => {
+		expect(filterPlacesByRecency(list, 3).some((p) => p.id === 5)).toBe(false);
 	});
 });
