@@ -52,7 +52,11 @@ export const PLACE_FIELDS = {
 } as const;
 
 export const PLACE_FIELD_SETS = {
-	MAP_SYNC: [...PLACE_FIELDS.CORE, ...PLACE_FIELDS.SYNC],
+	// verified_at rides along on incremental updates so a changed place keeps
+	// its date through a sync (no flicker) and the recency filter never needs a
+	// full re-fetch to stay fresh — the baseline is loaded once, lazily, by
+	// ensureVerifiedDates() when the filter is first engaged.
+	MAP_SYNC: [...PLACE_FIELDS.CORE, ...PLACE_FIELDS.SYNC, "verified_at"],
 	COMPLETE_PLACE: [
 		...PLACE_FIELDS.CORE,
 		...PLACE_FIELDS.SYNC,
