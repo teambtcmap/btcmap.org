@@ -23,6 +23,7 @@ import { merchantList } from "$lib/merchantListStore";
 import type { Place } from "$lib/types";
 import { userLocation } from "$lib/userLocationStore";
 import { errToast, formatNearbyPillCount } from "$lib/utils";
+import { filterPlacesByRecency } from "$lib/verification";
 
 import MerchantListItem from "./MerchantListItem.svelte";
 import NearbyCountPill from "./NearbyCountPill.svelte";
@@ -292,6 +293,7 @@ $: isSearching = $merchantList.isSearching;
 $: searchQuery = $merchantList.searchQuery;
 $: selectedCategory = $merchantList.selectedCategory;
 $: categoryCounts = $merchantList.categoryCounts;
+$: verifiedWithinYears = $merchantList.verifiedWithinYears;
 
 // Location button state
 let locationRequestDismissed = false;
@@ -330,11 +332,13 @@ function handleDismissLocation() {
 	locationRequestDismissed = true;
 }
 
-// Filter search results by category
-$: filteredSearchResults =
+// Filter search results by category and verification recency
+$: filteredSearchResults = filterPlacesByRecency(
 	selectedCategory === "all"
 		? searchResults
-		: searchResults.filter((p) => placeMatchesCategory(p, selectedCategory));
+		: searchResults.filter((p) => placeMatchesCategory(p, selectedCategory)),
+	verifiedWithinYears,
+);
 
 // Helper function to check if a category has matching merchants
 // Note: counts param required for Svelte reactivity (indirect deps aren't tracked)

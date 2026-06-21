@@ -12,11 +12,17 @@ import {
 } from "$lib/categoryMapping";
 import { MERCHANT_LIST_MAX_ITEMS } from "$lib/constants";
 import { _ } from "$lib/i18n";
+import type { VerifiedFilterYears } from "$lib/map/verifiedFilter";
+import {
+	getStoredVerifiedFilter,
+	storeVerifiedFilter,
+} from "$lib/map/verifiedFilter";
 import { isBoosted } from "$lib/merchantDrawerLogic";
 import type { Place } from "$lib/types";
 import type { UserLocation } from "$lib/userLocationStore";
 import { userLocation } from "$lib/userLocationStore";
 import { calculateDistance, errToast } from "$lib/utils";
+import { filterPlacesByRecency } from "$lib/verification";
 
 export type MerchantListMode = "nearby" | "search";
 
@@ -39,6 +45,8 @@ export interface MerchantListState {
 	// Category filter
 	selectedCategory: CategoryKey;
 	categoryCounts: CategoryCounts;
+	// "Verified within N years" filter (null = Any/off); persisted to localStorage
+	verifiedWithinYears: VerifiedFilterYears;
 }
 
 const initialState: MerchantListState = {
@@ -54,6 +62,7 @@ const initialState: MerchantListState = {
 	isSearching: false,
 	selectedCategory: "all",
 	categoryCounts: createEmptyCategoryCounts(),
+	verifiedWithinYears: getStoredVerifiedFilter(),
 };
 
 // Helper function to reset category state
@@ -182,10 +191,16 @@ function createMerchantListStore() {
 			centerLon?: number,
 			limit: number = MERCHANT_LIST_MAX_ITEMS,
 		) {
-			const categoryCounts = countMerchantsByCategory(merchants);
-			const { selectedCategory } = get(store);
-			const { filtered, effectiveCategory } = applyCategoryFilter(
+			const { selectedCategory, verifiedWithinYears } = get(store);
+			// Apply the recency filter first so the category counts reflect the
+			// verification window the user is actually seeing.
+			const recencyPlaces = filterPlacesByRecency(
 				merchants,
+				verifiedWithinYears,
+			);
+			const categoryCounts = countMerchantsByCategory(recencyPlaces);
+			const { filtered, effectiveCategory } = applyCategoryFilter(
+				recencyPlaces,
 				selectedCategory,
 				categoryCounts,
 			);
@@ -258,11 +273,16 @@ function createMerchantListStore() {
 						categoryCounts,
 					}));
 				} else {
-					const { selectedCategory } = get(store);
-					const { filtered, effectiveCategory } = applyCategoryFilter(
+					const { selectedCategory, verifiedWithinYears } = get(store);
+					const recencyPlaces = filterPlacesByRecency(
 						validPlaces,
+						verifiedWithinYears,
+					);
+					const recencyCounts = countMerchantsByCategory(recencyPlaces);
+					const { filtered, effectiveCategory } = applyCategoryFilter(
+						recencyPlaces,
 						selectedCategory,
-						categoryCounts,
+						recencyCounts,
 					);
 
 					const sorted = sortMerchants(
@@ -278,7 +298,7 @@ function createMerchantListStore() {
 						totalCount: filtered.length,
 						placeDetailsCache,
 						isLoadingList: false,
-						categoryCounts,
+						categoryCounts: recencyCounts,
 						selectedCategory: effectiveCategory,
 					}));
 				}
@@ -377,7 +397,12 @@ function createMerchantListStore() {
 				undefined,
 				get(userLocation).location,
 			);
-			const categoryCounts = countMerchantsByCategory(sortedResults);
+			// Counts reflect the recency window; the panel applies the same
+			// recency + category filter to what it renders (filteredSearchResults).
+			const { verifiedWithinYears } = get(store);
+			const categoryCounts = countMerchantsByCategory(
+				filterPlacesByRecency(sortedResults, verifiedWithinYears),
+			);
 			update((state) => ({
 				...resetCategoryState(state),
 				isOpen: true,
@@ -438,6 +463,14 @@ function createMerchantListStore() {
 		// Set the selected category filter
 		setSelectedCategory(category: CategoryKey) {
 			update((state) => ({ ...state, selectedCategory: category }));
+		},
+
+		// Set the "verified within N years" filter (null = Any/off) and persist
+		// it. Unlike the category filter, this survives close()/reset and across
+		// sessions, matching the Android setting.
+		setVerifiedFilter(years: VerifiedFilterYears) {
+			storeVerifiedFilter(years);
+			update((state) => ({ ...state, verifiedWithinYears: years }));
 		},
 
 		// Reset the selected category to 'all'
