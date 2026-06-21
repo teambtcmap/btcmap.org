@@ -260,33 +260,36 @@ function createMerchantListStore() {
 				const placeDetailsCache = new Map<number, Place>();
 				validPlaces.forEach((place) => placeDetailsCache.set(place.id, place));
 
-				const categoryCounts = countMerchantsByCategory(validPlaces);
+				// Apply the recency filter before the density check (list data is
+				// fetched with verified_at, so no readiness gate is needed): a
+				// narrow window can bring an otherwise-too-dense area under the
+				// ceiling, so the filter stays effective at zoom 10-14.
+				const { selectedCategory, verifiedWithinYears } = get(store);
+				const recencyPlaces = filterPlacesByRecency(
+					validPlaces,
+					verifiedWithinYears,
+				);
+				const categoryCounts = countMerchantsByCategory(recencyPlaces);
 
 				// Check if we should hide results (too many at low zoom)
 				if (
 					options?.hideIfExceeds &&
-					validPlaces.length > options.hideIfExceeds
+					recencyPlaces.length > options.hideIfExceeds
 				) {
 					// Too many results - store count but show empty list
 					// The panel will display "zoom in" message, button shows count
 					update((state) => ({
 						...state,
 						merchants: [],
-						totalCount: validPlaces.length,
+						totalCount: recencyPlaces.length,
 						isLoadingList: false,
 						categoryCounts,
 					}));
 				} else {
-					const { selectedCategory, verifiedWithinYears } = get(store);
-					const recencyPlaces = filterPlacesByRecency(
-						validPlaces,
-						verifiedWithinYears,
-					);
-					const recencyCounts = countMerchantsByCategory(recencyPlaces);
 					const { filtered, effectiveCategory } = applyCategoryFilter(
 						recencyPlaces,
 						selectedCategory,
-						recencyCounts,
+						categoryCounts,
 					);
 
 					const sorted = sortMerchants(
@@ -302,7 +305,7 @@ function createMerchantListStore() {
 						totalCount: filtered.length,
 						placeDetailsCache,
 						isLoadingList: false,
-						categoryCounts: recencyCounts,
+						categoryCounts,
 						selectedCategory: effectiveCategory,
 					}));
 				}
