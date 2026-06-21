@@ -106,7 +106,11 @@ export const ensureVerifiedDates = async (force = false): Promise<void> => {
 				verifiedById.set(item.id, item.verified_at);
 			}
 		}
-		verifiedDatesLoaded.set(true);
+		// Only latch the flag once we actually have dates. An empty/degenerate
+		// response (e.g. an API hiccup returning []) must NOT flip the gate true,
+		// or the filter would hide every pin with no dates to match. Leaving the
+		// flag false keeps the filter inert (shows everything) and lets a later
+		// sync retry.
 		if (verifiedById.size === 0) return;
 		const current = get(places);
 		const enriched = current.map((p) => {
@@ -117,6 +121,7 @@ export const ensureVerifiedDates = async (force = false): Promise<void> => {
 		});
 		await yieldToMain();
 		places.set(enriched);
+		verifiedDatesLoaded.set(true);
 		await localforage.setItem("places_v4", enriched);
 	} catch (error) {
 		console.warn("Could not load verification dates:", error);
