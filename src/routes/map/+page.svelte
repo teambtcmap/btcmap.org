@@ -431,11 +431,14 @@ const debouncedUpdateMerchantList = debounce(
 // $merchantList.verifiedWithinYears; the forced update re-filters the list
 // (mirrors the category filter's onRefresh path).
 const applyVerifiedFilter = async (years: VerifiedFilterYears) => {
-	// Load the dates on demand the first time a real window is picked; instant
-	// thereafter (ensureVerifiedDates no-ops once loaded). The control awaits
-	// this to show its spinner only during the one-time fetch.
-	if (years != null) await ensureVerifiedDates();
+	// Set + persist the choice immediately (setVerifiedFilter owns persistence),
+	// so it survives even if the user navigates away during the fetch. Markers
+	// and the list gate on verifiedDatesLoaded, so they show everything until
+	// the dates land. Then load the dates on demand (no-op once loaded; the
+	// control awaits this to show its spinner only during the one-time fetch)
+	// and refresh the list.
 	merchantList.setVerifiedFilter(years);
+	if (years != null) await ensureVerifiedDates();
 	updateMerchantList({ force: true });
 };
 

@@ -8,10 +8,7 @@ import { get } from "svelte/store";
 import { trackEvent } from "$lib/analytics";
 import { _ } from "$lib/i18n";
 import type { VerifiedFilterYears } from "$lib/map/verifiedFilter";
-import {
-	storeVerifiedFilter,
-	VERIFIED_FILTER_OPTIONS,
-} from "$lib/map/verifiedFilter";
+import { VERIFIED_FILTER_OPTIONS } from "$lib/map/verifiedFilter";
 
 import "./controls.css";
 
@@ -145,7 +142,8 @@ export class VerifiedFilterControl implements IControl {
 
 	async #select(years: VerifiedFilterYears): Promise<void> {
 		this.#current = years;
-		storeVerifiedFilter(years);
+		// Persistence is owned by the merchant store (setVerifiedFilter, invoked
+		// via onSelect) — don't write localStorage here too.
 		trackEvent("verified_filter_change", { years: toRadioValue(years) });
 		this.#close();
 		// Spinner covers the one-time on-demand date fetch; instant (invisible)
