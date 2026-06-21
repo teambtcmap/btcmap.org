@@ -106,6 +106,27 @@
 	height: 16px;
 }
 
+/* Active-window indicator: a small accent dot on the closed button so a
+   returning user can tell a recency filter is hiding places. Placed after the
+   generic anchor rules to keep selector specificity non-descending. */
+.maplibre-next-verified.active a.maplibregl-ctrl-link {
+	position: relative;
+}
+.maplibre-next-verified.active a.maplibregl-ctrl-link::before {
+	content: "";
+	position: absolute;
+	top: 4px;
+	right: 4px;
+	width: 7px;
+	height: 7px;
+	border-radius: 50%;
+	background: #f7931a;
+	border: 1.5px solid #fff;
+}
+.dark .maplibre-next-verified.active a.maplibregl-ctrl-link::before {
+	border-color: #1f2937;
+}
+
 /* Dark-mode treatment for the rounded "pill" that holds zoom / locate /
    nav / boost / data-refresh / basemap controls. MapLibre's stock CSS
    hardcodes a white background, so against a dark basemap the controls

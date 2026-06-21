@@ -81,6 +81,7 @@ export class VerifiedFilterControl implements IControl {
 		this.#popup = popup;
 
 		this.#renderPopup();
+		this.#updateActive();
 
 		// Re-render labels when the locale changes.
 		this.#unsubLocale = _.subscribe(() => this.#renderPopup());
@@ -142,6 +143,7 @@ export class VerifiedFilterControl implements IControl {
 
 	async #select(years: VerifiedFilterYears): Promise<void> {
 		this.#current = years;
+		this.#updateActive();
 		// Persistence is owned by the merchant store (setVerifiedFilter, invoked
 		// via onSelect) — don't write localStorage here too.
 		trackEvent("verified_filter_change", { years: toRadioValue(years) });
@@ -159,6 +161,13 @@ export class VerifiedFilterControl implements IControl {
 	#setLoading(on: boolean): void {
 		this.#container?.classList.toggle("loading", on);
 		this.#button?.setAttribute("aria-busy", on ? "true" : "false");
+	}
+
+	#updateActive(): void {
+		// Visual cue on the closed button that a window is active. The filter
+		// hides places and persists across sessions, so a returning user needs
+		// to see why the map is sparse.
+		this.#container?.classList.toggle("active", this.#current != null);
 	}
 
 	#toggle(): void {
