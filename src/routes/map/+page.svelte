@@ -869,6 +869,22 @@ $: if (
 	updateMerchantList();
 }
 
+// A returning user with a persisted window: load the dates once the bulk
+// places are in (not during map setup, which can win the race and enrich an
+// empty store), so the map + list arrive filtered without a manual toggle.
+let didInitialVerifiedLoad = false;
+$: if (
+	browser &&
+	map &&
+	styleLoaded &&
+	$places.length > 0 &&
+	!didInitialVerifiedLoad &&
+	getStoredVerifiedFilter() != null
+) {
+	didInitialVerifiedLoad = true;
+	void ensureVerifiedDates().then(() => updateMerchantList({ force: true }));
+}
+
 // The custom sources + layers we add on top of whatever basemap is
 // active. applyBasemap() carries these across a setStyle() so the pins,
 // clusters, and labels survive a basemap/theme swap untouched (MapLibre's
@@ -1139,12 +1155,6 @@ onMount(async () => {
 		}),
 		"top-right",
 	);
-
-	// If a window is already persisted, load the dates once now so the
-	// returning user's map + list reflect it without a manual toggle.
-	if (getStoredVerifiedFilter() != null) {
-		void ensureVerifiedDates().then(() => updateMerchantList({ force: true }));
-	}
 
 	// Mirror /map's behavior: sync location into the userLocation store so
 	// the merchant list panel can compute distances without prompting again.

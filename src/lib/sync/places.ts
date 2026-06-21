@@ -114,6 +114,11 @@ export const ensureVerifiedDates = async (): Promise<void> => {
 		// sync retry.
 		if (verifiedById.size === 0) return;
 		const current = get(places);
+		// If the bulk places haven't loaded yet (the dates fetch won the race),
+		// bail without latching or caching — otherwise we'd persist an empty
+		// places_v4 and flip the gate true with no data, hiding everything. The
+		// caller re-runs once $places is populated.
+		if (current.length === 0) return;
 		const enriched = current.map((p) => {
 			const verified_at = verifiedById.get(p.id);
 			return verified_at && verified_at !== p.verified_at
