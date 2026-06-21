@@ -796,11 +796,13 @@ $: if (map && styleLoaded && $places) {
 	} else {
 		effective = $places;
 	}
-	// Verified-recency filter. Gate on dates being present: the bulk feed has
-	// no verified_at until the background enrichment lands, so until then treat
-	// the filter as inert rather than hiding every pin.
+	// Verified-recency filter. Search results carry verified_at natively
+	// (LIST_ITEM), so filter them regardless of the bulk-enrichment flag —
+	// matching the panel's filteredSearchResults. The $places-derived branches
+	// gate on the flag: the bulk feed has no verified_at until enrichment lands,
+	// so until then treat the filter as inert rather than hiding every pin.
 	const verifiedYears = $merchantList.verifiedWithinYears;
-	const datesReady = verifiedYears == null || $verifiedDatesLoaded;
+	const datesReady = verifiedYears == null || inSearch || $verifiedDatesLoaded;
 	if (datesReady) {
 		effective = filterPlacesByRecency(effective, verifiedYears);
 	}
