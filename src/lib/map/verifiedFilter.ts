@@ -1,7 +1,8 @@
-// Persisted "verified within N years" map filter. Mirrors basemaps.ts: the
-// map control owns the UI + localStorage; the page seeds the initial value and
-// the merchant store holds the runtime selection. `null` is the "Any" (off)
-// state — show everything, matching how the category filter defaults to "all".
+// Persisted "verified within N years" map filter. The map control renders the
+// UI, the merchant store owns the runtime selection AND its localStorage
+// persistence (setVerifiedFilter), and the page seeds the initial value via
+// getStoredVerifiedFilter(). `null` is the "Any" (off) state — show everything,
+// matching how the category filter defaults to "all".
 
 export type VerifiedFilterYears = 1 | 2 | 3 | null;
 

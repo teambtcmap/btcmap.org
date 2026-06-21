@@ -15,9 +15,9 @@ import "./controls.css";
 type Options = {
 	initial: VerifiedFilterYears;
 	// Apply the chosen filter. The page owns the effect (re-syncing markers +
-	// refreshing the nearby list); this control handles only UI + persistence.
-	// Returns a promise so the button can show a spinner during the one-time
-	// on-demand date fetch on first activation.
+	// refreshing the nearby list) and persistence (the store's setVerifiedFilter);
+	// this control handles only the UI. Returns a promise so the button can show
+	// a spinner during the one-time on-demand date fetch on first activation.
 	onSelect: (years: VerifiedFilterYears) => void | Promise<void>;
 };
 
@@ -27,7 +27,7 @@ const toRadioValue = (years: VerifiedFilterYears): string =>
 
 // "Verified within N years" filter — a clock-icon button that expands into a
 // radio list (Any / 1 / 2 / 3 years), mirroring BasemapsControl. Selecting an
-// option persists the choice and delegates the effect to the page's onSelect.
+// option delegates persistence + the effect to the page's onSelect.
 export class VerifiedFilterControl implements IControl {
 	#options: Options;
 	#container: HTMLDivElement | undefined;

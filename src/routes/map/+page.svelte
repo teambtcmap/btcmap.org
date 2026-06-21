@@ -1130,8 +1130,8 @@ onMount(async () => {
 	);
 
 	// "Verified within N years" filter — clock-icon button + radio popover.
-	// Owns its own localStorage persistence; the page applies the effect
-	// (marker re-sync + nearby list refresh) via applyVerifiedFilter.
+	// The page applies the effect and persistence (marker re-sync, nearby list
+	// refresh, store setVerifiedFilter) via applyVerifiedFilter.
 	map.addControl(
 		new VerifiedFilterControl({
 			initial: getStoredVerifiedFilter(),

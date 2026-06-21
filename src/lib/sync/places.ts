@@ -88,9 +88,10 @@ const getStaticFileDate = async (): Promise<string> => {
 // The bulk CDN feed (places.json) carries no verification date, so a place's
 // baseline date is unknown until this runs. Fetch verified_at for every place
 // in one lean call and merge it into $places by id. Fetched LAZILY — only when
-// the recency filter is engaged (default users never call this) and only once
-// (no-op when already loaded). Incremental MAP_SYNC updates carry verified_at,
-// so changed places stay fresh afterwards without a full re-fetch. Sets
+// the recency filter is engaged (default users never call this) and once per
+// session (the flag is in-memory, so a new session re-fetches the full set —
+// keeping the baseline fresh). Incremental MAP_SYNC updates carry verified_at,
+// so changed places stay fresh within the session too. Sets
 // verifiedDatesLoaded so the filter flips from inert to active. Best-effort:
 // on failure the flag stays false and the filter keeps showing everything.
 export const ensureVerifiedDates = async (): Promise<void> => {
