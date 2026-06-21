@@ -12,6 +12,7 @@ import {
 	placesLoadingProgress,
 	placesLoadingStatus,
 	placesSyncCount,
+	verifiedDatesLoaded,
 } from "$lib/store";
 import { clearTables } from "$lib/sync/clearTables";
 import type { Place } from "$lib/types";
@@ -85,13 +86,15 @@ const getStaticFileDate = async (): Promise<string> => {
 };
 
 // The bulk feed (CDN places.json) and the MAP_SYNC update path carry no
-// verification date, so the map markers have nothing to filter on. Enrich
-// every place with verified_at from one lean call (id + date for all places)
-// and merge by id. Runs in the background after first paint so it never
-// delays initial rendering; warm loads already have the dates from the cached
-// store. Best-effort: on failure the map renders without dates and the
-// recency filter stays inert (see filterPlacesByRecency / the map gate).
-const enrichWithVerifiedDates = async (): Promise<void> => {
+// verification date, so the map markers have nothing to filter on. Fetch
+// verified_at for every place in one lean call and merge it into $places by
+// id. Fetched LAZILY — only when the recency filter is engaged (default users
+// never call this). Idempotent: a no-op once loaded unless `force` (used by
+// the periodic sync to refresh). Sets verifiedDatesLoaded so the filter can
+// flip from inert to active. Best-effort: on failure the flag stays false and
+// the recency filter keeps showing everything.
+export const ensureVerifiedDates = async (force = false): Promise<void> => {
+	if (!force && get(verifiedDatesLoaded)) return;
 	try {
 		const response = await api.get<{ id: number; verified_at?: string }[]>(
 			`${API_BASE}/v4/places?fields=id,verified_at`,
@@ -103,6 +106,7 @@ const enrichWithVerifiedDates = async (): Promise<void> => {
 				verifiedById.set(item.id, item.verified_at);
 			}
 		}
+		verifiedDatesLoaded.set(true);
 		if (verifiedById.size === 0) return;
 		const current = get(places);
 		const enriched = current.map((p) => {
@@ -353,10 +357,10 @@ export const elementsSync = async () => {
 							await yieldToMain();
 							// set response to store
 							places.set(placesData);
-							// Backfill verification dates (absent from the bulk feed)
-							// without blocking first paint; updates the store + cache
-							// when they arrive.
-							void enrichWithVerifiedDates();
+							// Refresh verification dates ONLY if the recency filter has
+							// been engaged this session — otherwise nothing consumes
+							// them, so we skip the fetch entirely.
+							if (get(verifiedDatesLoaded)) void ensureVerifiedDates(true);
 							placesLoadingStatus.set("Complete!");
 							placesLoadingProgress.set(PROGRESS_RANGES.COMPLETE);
 

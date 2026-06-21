@@ -80,7 +80,9 @@ import {
 	placesError,
 	placesLoadingProgress,
 	placesLoadingStatus,
+	verifiedDatesLoaded,
 } from "$lib/store";
+import { ensureVerifiedDates } from "$lib/sync/places";
 import { theme } from "$lib/theme";
 import type { Place } from "$lib/types";
 import { userLocation } from "$lib/userLocationStore";
@@ -428,7 +430,11 @@ const debouncedUpdateMerchantList = debounce(
 // changes. The marker reactive block re-runs because it reads
 // $merchantList.verifiedWithinYears; the forced update re-filters the list
 // (mirrors the category filter's onRefresh path).
-const applyVerifiedFilter = (years: VerifiedFilterYears) => {
+const applyVerifiedFilter = async (years: VerifiedFilterYears) => {
+	// Load the dates on demand the first time a real window is picked; instant
+	// thereafter (ensureVerifiedDates no-ops once loaded). The control awaits
+	// this to show its spinner only during the one-time fetch.
+	if (years != null) await ensureVerifiedDates();
 	merchantList.setVerifiedFilter(years);
 	updateMerchantList({ force: true });
 };
@@ -794,8 +800,7 @@ $: if (map && styleLoaded && $places) {
 	// no verified_at until the background enrichment lands, so until then treat
 	// the filter as inert rather than hiding every pin.
 	const verifiedYears = $merchantList.verifiedWithinYears;
-	const datesReady =
-		verifiedYears == null || $places.some((p) => p.verified_at);
+	const datesReady = verifiedYears == null || $verifiedDatesLoaded;
 	if (datesReady) {
 		effective = filterPlacesByRecency(effective, verifiedYears);
 	}
@@ -1129,6 +1134,12 @@ onMount(async () => {
 		}),
 		"top-right",
 	);
+
+	// If a window is already persisted, load the dates once now so the
+	// returning user's map + list reflect it without a manual toggle.
+	if (getStoredVerifiedFilter() != null) {
+		void ensureVerifiedDates().then(() => updateMerchantList({ force: true }));
+	}
 
 	// Mirror /map's behavior: sync location into the userLocation store so
 	// the merchant list panel can compute distances without prompting again.

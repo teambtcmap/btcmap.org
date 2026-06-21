@@ -18,6 +18,7 @@ import {
 	storeVerifiedFilter,
 } from "$lib/map/verifiedFilter";
 import { isBoosted } from "$lib/merchantDrawerLogic";
+import { verifiedDatesLoaded } from "$lib/store";
 import type { Place } from "$lib/types";
 import type { UserLocation } from "$lib/userLocationStore";
 import { userLocation } from "$lib/userLocationStore";
@@ -193,11 +194,14 @@ function createMerchantListStore() {
 		) {
 			const { selectedCategory, verifiedWithinYears } = get(store);
 			// Apply the recency filter first so the category counts reflect the
-			// verification window the user is actually seeing.
-			const recencyPlaces = filterPlacesByRecency(
-				merchants,
-				verifiedWithinYears,
-			);
+			// verification window the user is actually seeing. Gate on the dates
+			// being loaded (they're lazy) so we don't blank the list while a
+			// filter is active but enrichment hasn't landed — matches the markers.
+			const recencyReady =
+				verifiedWithinYears == null || get(verifiedDatesLoaded);
+			const recencyPlaces = recencyReady
+				? filterPlacesByRecency(merchants, verifiedWithinYears)
+				: merchants;
 			const categoryCounts = countMerchantsByCategory(recencyPlaces);
 			const { filtered, effectiveCategory } = applyCategoryFilter(
 				recencyPlaces,
