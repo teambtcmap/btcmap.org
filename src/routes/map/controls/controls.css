@@ -13,7 +13,8 @@
 /* Basemap picker — IControl that owns its own container; the popup is
    absolutely positioned relative to it. Hover-or-click the icon to
    expand the radio list. */
-.maplibre-next-basemaps {
+.maplibre-next-basemaps,
+.maplibre-next-verified {
 	position: relative;
 }
 .maplibre-next-basemaps-popup {

@@ -58,6 +58,8 @@ import {
 	PIN_FILL_REGULAR,
 } from "$lib/map/maplibreSprites";
 import { parseLatLongQuery } from "$lib/map/queryViewport";
+import type { VerifiedFilterYears } from "$lib/map/verifiedFilter";
+import { getStoredVerifiedFilter } from "$lib/map/verifiedFilter";
 import {
 	calculateRadiusKmFromLngLatBounds,
 	getZoomBehavior,
@@ -83,6 +85,7 @@ import { theme } from "$lib/theme";
 import type { Place } from "$lib/types";
 import { userLocation } from "$lib/userLocationStore";
 import { debounce, errToast, isBoosted } from "$lib/utils";
+import { filterPlacesByRecency } from "$lib/verification";
 
 import type { PageData } from "./$types";
 import MapSearchBar from "./components/MapSearchBar.svelte";
@@ -93,6 +96,7 @@ import { BasemapsControl } from "./controls/BasemapsControl";
 import { BoostToggleControl } from "./controls/BoostToggleControl";
 import { DataRefreshControl } from "./controls/DataRefreshControl";
 import { NavButtonsControl } from "./controls/NavButtonsControl";
+import { VerifiedFilterControl } from "./controls/VerifiedFilterControl";
 import { browser } from "$app/environment";
 
 export let data: PageData;
@@ -419,6 +423,15 @@ const debouncedUpdateMerchantList = debounce(
 	updateMerchantList,
 	MAP_DEBOUNCE_DELAY,
 );
+
+// Re-sync markers + refresh the nearby list when the verified-recency filter
+// changes. The marker reactive block re-runs because it reads
+// $merchantList.verifiedWithinYears; the forced update re-filters the list
+// (mirrors the category filter's onRefresh path).
+const applyVerifiedFilter = (years: VerifiedFilterYears) => {
+	merchantList.setVerifiedFilter(years);
+	updateMerchantList({ force: true });
+};
 
 // MerchantListPanel callbacks — see /map/+page.svelte for the prod
 // equivalents. Camera moves do NOT account for the panel width yet; for
@@ -777,15 +790,25 @@ $: if (map && styleLoaded && $places) {
 	} else {
 		effective = $places;
 	}
+	// Verified-recency filter. Gate on dates being present: the bulk feed has
+	// no verified_at until the background enrichment lands, so until then treat
+	// the filter as inert rather than hiding every pin.
+	const verifiedYears = $merchantList.verifiedWithinYears;
+	const datesReady =
+		verifiedYears == null || $places.some((p) => p.verified_at);
+	if (datesReady) {
+		effective = filterPlacesByRecency(effective, verifiedYears);
+	}
 	const placesLen = effective.length;
 	const savedSize = $savedPlaceIds.size;
 	const cacheSize = $merchantList.placeDetailsCache.size;
 	const currentLocale = $locale;
-	const searchSig = inSearch
+	const modeSig = inSearch
 		? `s:${$merchantList.searchResults.map((p) => p.id).join(",")}`
 		: category !== "all"
 			? `c:${category}`
 			: "n";
+	const searchSig = `${modeSig}|v:${verifiedYears ?? "any"}`;
 	if (
 		placesLen !== lastPlacesLength ||
 		savedSize !== lastSavedIdsSize ||
@@ -1092,6 +1115,17 @@ onMount(async () => {
 			basemaps: BASEMAPS,
 			initial: initialBasemap,
 			onSelect: applyBasemap,
+		}),
+		"top-right",
+	);
+
+	// "Verified within N years" filter — clock-icon button + radio popover.
+	// Owns its own localStorage persistence; the page applies the effect
+	// (marker re-sync + nearby list refresh) via applyVerifiedFilter.
+	map.addControl(
+		new VerifiedFilterControl({
+			initial: getStoredVerifiedFilter(),
+			onSelect: applyVerifiedFilter,
 		}),
 		"top-right",
 	);
