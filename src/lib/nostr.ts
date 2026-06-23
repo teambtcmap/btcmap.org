@@ -5,9 +5,18 @@ import { finalizeEvent } from "nostr-tools/pure";
 import { API_BASE } from "$lib/api-base";
 
 // URL the API verifies in the NIP-98 event's "u" tag. Must match what the
-// btcmap-api server sees, including scheme and no trailing slash. Driven
-// by API_BASE so local dev (VITE_API_BASE_URL=/btcmap-api-proxy or an
-// absolute http://127.0.0.1:8000) signs for the right origin.
+// btcmap-api server reconstructs (its BTCMAP_API_BASE_URL + request path),
+// including scheme and no trailing slash. Driven by API_BASE so the signed
+// `u` and the server route's upstream fetch (routes/api/session/nostr) always
+// resolve to the same absolute URL — never split these two apart, or the
+// signature binds to a different URL than the request actually hits.
+//
+// API_BASE must be ABSOLUTE for the Nostr flow. In prod it defaults to
+// https://api.btcmap.org; for local API dev set VITE_API_BASE_URL to the
+// absolute http://127.0.0.1:8000. The relative Vite dev-proxy form
+// (VITE_API_BASE_URL=/btcmap-api-proxy) is NOT supported here: it would sign a
+// relative `u` that can't match the server's absolute reconstruction (→ 401),
+// and the server-side proxy fetch needs an absolute URL anyway.
 export const NOSTR_AUTH_URL = `${API_BASE}/v4/auth/nostr`;
 
 // Both signing paths return something the server can verify. The local
