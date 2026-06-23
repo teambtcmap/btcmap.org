@@ -1160,5 +1160,26 @@
 			"netlifyDocsAnalytics": "Netlify Docs - Analytics",
 			"netlifyDocsHowAnalytics": "Netlify Docs - How Analytics Works"
 		}
+	},
+	"login": {
+		"title": "Вход",
+		"username": "Потребителско име",
+		"password": "Парола",
+		"submit": "Вход",
+		"loggingIn": "Влизане...",
+		"failed": "Невалидно потребителско име или парола.",
+		"error": "Нещо се обърка. Моля, опитайте отново.",
+		"noAccount": "Нямате акаунт?",
+		"createAccount": "Създайте тук",
+		"nostrExtension": "Вход с разширение Nostr",
+		"nostrSigning": "Подписване…",
+		"nostrFailed": "Подписът на Nostr беше отхвърлен",
+		"nostrError": "Входът с Nostr не можа да бъде завършен",
+		"nsecToggle": "Или поставете вашия nsec",
+		"nsecLabel": "Таен ключ за Nostr",
+		"nsecWarning": "Вашият nsec се изпраща само към вашия браузър за еднократен вход — той никога не се съхранява или предава.",
+		"nsecSubmit": "Вход с nsec",
+		"nsecInvalid": "Това не прилича на валиден nsec",
+		"or": "или"
 	}
 }

@@ -82,7 +82,17 @@
 		"failed": "Username o password non validi.",
 		"error": "Qualcosa è andato storto. Riprova.",
 		"noAccount": "Non hai un account?",
-		"createAccount": "Crealo qui"
+		"createAccount": "Crealo qui",
+		"nostrExtension": "Accedi con l'estensione Nostr",
+		"nostrSigning": "Firma in corso…",
+		"nostrFailed": "Firma Nostr rifiutata",
+		"nostrError": "Impossibile completare l'accesso con Nostr",
+		"nsecToggle": "Oppure incolla il tuo nsec",
+		"nsecLabel": "Chiave segreta Nostr",
+		"nsecWarning": "Il tuo nsec viene inviato solo al tuo browser per accedere una volta — non viene mai memorizzato né trasmesso.",
+		"nsecSubmit": "Accedi con nsec",
+		"nsecInvalid": "Questo non sembra un nsec valido",
+		"or": "oppure"
 	},
 	"backup": {
 		"title": "Backup dell'account",

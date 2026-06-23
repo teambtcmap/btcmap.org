@@ -1078,5 +1078,26 @@
 			"netlifyDocsAnalytics": "Documentation Netlify - Analytics",
 			"netlifyDocsHowAnalytics": "Documentation Netlify - Fonctionnement de l'analytique"
 		}
+	},
+	"login": {
+		"title": "Se connecter",
+		"username": "Nom d'utilisateur",
+		"password": "Mot de passe",
+		"submit": "Se connecter",
+		"loggingIn": "Connexion en cours...",
+		"failed": "Nom d'utilisateur ou mot de passe invalide.",
+		"error": "Une erreur s'est produite. Veuillez réessayer.",
+		"noAccount": "Vous n'avez pas de compte ?",
+		"createAccount": "Créez-en un ici",
+		"nostrExtension": "Se connecter avec l'extension Nostr",
+		"nostrSigning": "Signature…",
+		"nostrFailed": "La signature Nostr a été rejetée",
+		"nostrError": "Impossible de finaliser la connexion Nostr",
+		"nsecToggle": "Ou collez votre nsec",
+		"nsecLabel": "Clé secrète Nostr",
+		"nsecWarning": "Votre nsec n'est envoyé qu'à votre navigateur pour vous connecter une seule fois — il n'est jamais stocké ni transmis.",
+		"nsecSubmit": "Se connecter avec nsec",
+		"nsecInvalid": "Cela ne ressemble pas à un nsec valide",
+		"or": "ou"
 	}
 }

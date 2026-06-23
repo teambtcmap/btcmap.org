@@ -1078,5 +1078,26 @@
 			"netlifyDocsAnalytics": "Netlify Docs - Analytik",
 			"netlifyDocsHowAnalytics": "Netlify Docs - Wie Analytik funktioniert"
 		}
+	},
+	"login": {
+		"title": "Anmelden",
+		"username": "Benutzername",
+		"password": "Passwort",
+		"submit": "Anmelden",
+		"loggingIn": "Anmeldung läuft...",
+		"failed": "Ungültiger Benutzername oder Passwort.",
+		"error": "Etwas ist schiefgelaufen. Bitte versuche es erneut.",
+		"noAccount": "Noch kein Konto?",
+		"createAccount": "Hier eines erstellen",
+		"nostrExtension": "Mit Nostr-Erweiterung anmelden",
+		"nostrSigning": "Wird signiert…",
+		"nostrFailed": "Nostr-Signatur wurde abgelehnt",
+		"nostrError": "Nostr-Anmeldung konnte nicht abgeschlossen werden",
+		"nsecToggle": "Oder füge deinen nsec ein",
+		"nsecLabel": "Geheimer Nostr-Schlüssel",
+		"nsecWarning": "Dein nsec wird nur an deinen Browser gesendet, um dich einmalig anzumelden — er wird niemals gespeichert oder übertragen.",
+		"nsecSubmit": "Mit nsec anmelden",
+		"nsecInvalid": "Das sieht nicht nach einem gültigen nsec aus",
+		"or": "oder"
 	}
 }

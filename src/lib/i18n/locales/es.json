@@ -1077,5 +1077,26 @@
 			"netlifyDocsAnalytics": "Documentación de Netlify - Analytics",
 			"netlifyDocsHowAnalytics": "Documentación de Netlify - Cómo Funcionan las Analíticas"
 		}
+	},
+	"login": {
+		"title": "Iniciar sesión",
+		"username": "Nombre de usuario",
+		"password": "Contraseña",
+		"submit": "Iniciar sesión",
+		"loggingIn": "Iniciando sesión...",
+		"failed": "Nombre de usuario o contraseña no válidos.",
+		"error": "Algo salió mal. Inténtalo de nuevo.",
+		"noAccount": "¿No tienes una cuenta?",
+		"createAccount": "Crea una aquí",
+		"nostrExtension": "Inicia sesión con la extensión de Nostr",
+		"nostrSigning": "Firmando…",
+		"nostrFailed": "La firma de Nostr fue rechazada",
+		"nostrError": "No se pudo completar el inicio de sesión con Nostr",
+		"nsecToggle": "O pega tu nsec",
+		"nsecLabel": "Clave secreta de Nostr",
+		"nsecWarning": "Tu nsec se envía solo a tu navegador para iniciar sesión una vez — nunca se almacena ni se transmite.",
+		"nsecSubmit": "Inicia sesión con nsec",
+		"nsecInvalid": "Eso no parece un nsec válido",
+		"or": "o"
 	}
 }

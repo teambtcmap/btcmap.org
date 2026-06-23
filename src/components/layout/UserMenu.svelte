@@ -7,7 +7,7 @@ import { hasNewActivity } from "$lib/activityNotifier";
 import { _ } from "$lib/i18n";
 import { session } from "$lib/session";
 
-import { afterNavigate } from "$app/navigation";
+import { afterNavigate, goto } from "$app/navigation";
 
 export let id = "user-menu";
 
@@ -104,6 +104,11 @@ afterNavigate(() => {
 						on:click={() => {
 							session.clear();
 							open = false;
+							// Authenticated pages (e.g. /user/saved, /user/activity)
+							// only check for a session in onMount, so without an
+							// explicit nav they keep showing the post-login UI in
+							// a broken state after the token is wiped.
+							goto("/login");
 						}}
 						class="flex w-full items-center gap-2 px-4 py-2 text-sm text-primary transition-colors hover:bg-gray-100 dark:text-white dark:hover:bg-white/10"
 					>

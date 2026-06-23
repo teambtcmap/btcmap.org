@@ -82,7 +82,17 @@
 		"failed": "Ongeldige gebruikersnaam of wachtwoord.",
 		"error": "Oeps, er ging iets fout. Probeer het nog eens.",
 		"noAccount": "Nog geen account?",
-		"createAccount": "Maak er hier eentje aan"
+		"createAccount": "Maak er hier eentje aan",
+		"nostrExtension": "Aanmelden met Nostr-extensie",
+		"nostrSigning": "Ondertekenen…",
+		"nostrFailed": "Nostr-handtekening is geweigerd",
+		"nostrError": "Kon Nostr-aanmelding niet voltooien",
+		"nsecToggle": "Of plak je nsec",
+		"nsecLabel": "Nostr geheime sleutel",
+		"nsecWarning": "Je nsec wordt alleen naar je browser gestuurd om eenmalig aan te melden &mdash; hij wordt nooit opgeslagen of verzonden.",
+		"nsecSubmit": "Aanmelden met nsec",
+		"nsecInvalid": "Dat lijkt geen geldige nsec",
+		"or": "of"
 	},
 	"backup": {
 		"title": "Back-up account",
