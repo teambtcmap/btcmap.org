@@ -52,7 +52,6 @@ export class HeatmapToggleControl implements IControl {
 		a.tabIndex = 0;
 		a.setAttribute("role", "button");
 		a.setAttribute("aria-disabled", "false");
-		a.setAttribute("aria-pressed", String(this.#enabled));
 		a.innerHTML = HEATMAP_ICON_SVG;
 
 		a.addEventListener("click", (e) => {
@@ -86,12 +85,16 @@ export class HeatmapToggleControl implements IControl {
 		return container;
 	}
 
+	// Reflect #enabled into the DOM: the active-tint class and the
+	// aria-pressed state. Called on initial render and on every toggle so
+	// the accessibility state never goes stale.
 	#renderActive() {
 		if (!this.#button) return;
 		this.#button.classList.toggle(
 			"maplibregl-ctrl-heatmap-enabled",
 			this.#enabled,
 		);
+		this.#button.setAttribute("aria-pressed", String(this.#enabled));
 	}
 
 	onRemove(): void {
