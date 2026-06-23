@@ -918,6 +918,13 @@ const CUSTOM_LAYER_IDS = [
 	"clusters-hit",
 ];
 
+const HEATMAP_HIDDEN_CLUSTER_LAYER_IDS = [
+	"clusters-outer",
+	"clusters-inner",
+	"cluster-count",
+	"clusters-hit",
+];
+
 // Toggle the merchant-density heatmap layer. Off by default unless the
 // user previously enabled it (persisted in localStorage by the control).
 let heatmapEnabled = false;
@@ -930,6 +937,15 @@ const setHeatmapEnabled = (enabled: boolean) => {
 			"visibility",
 			enabled ? "visible" : "none",
 		);
+	}
+	for (const layerId of HEATMAP_HIDDEN_CLUSTER_LAYER_IDS) {
+		if (map.getLayer(layerId)) {
+			map.setLayoutProperty(
+				layerId,
+				"visibility",
+				enabled ? "none" : "visible",
+			);
+		}
 	}
 };
 
@@ -962,15 +978,9 @@ const applyBasemap = (id: BasemapId) => {
 		loadSavedBadgeSprite(map).catch(() => {});
 		ensureSpritesForPlaces(map, get(places));
 		spiderfier?.applyTo("clusters-hit");
-		// Re-apply heatmap visibility in case the style diff fell back to
-		// a full rebuild and reset the carried layer's layout property.
-		if (map.getLayer("place-heatmap")) {
-			map.setLayoutProperty(
-				"place-heatmap",
-				"visibility",
-				heatmapEnabled ? "visible" : "none",
-			);
-		}
+		// Re-apply heatmap/cluster visibility in case the style diff fell
+		// back to a full rebuild and reset carried layout properties.
+		setHeatmapEnabled(heatmapEnabled);
 	});
 	map.setStyle(styleForBasemap(id), {
 		transformStyle: (previous, next) => {
