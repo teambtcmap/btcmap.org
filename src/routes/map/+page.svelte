@@ -1281,8 +1281,8 @@ onMount(async () => {
 		// reflects pure point density. Radius and intensity scale up with
 		// zoom so the halo widens as you zoom out to a city/region view and
 		// tightens as pins take over. Opacity stays at full strength through
-		// zoom 16 and fades to zero only in the final zoom level (16→17) so
-		// the heatmap hands off cleanly to the individual pins at
+		// zoom 14 and fades to zero from zoom 14→17 so the heatmap hands off
+		// cleanly to the individual pins at
 		// CLUSTERING_DISABLED_ZOOM.
 		map.addLayer({
 			id: "place-heatmap",
@@ -1331,7 +1331,7 @@ onMount(async () => {
 					"interpolate",
 					["linear"],
 					["zoom"],
-					16,
+					14,
 					0.9,
 					CLUSTERING_DISABLED_ZOOM,
 					0,
