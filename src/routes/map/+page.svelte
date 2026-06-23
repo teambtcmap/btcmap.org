@@ -756,9 +756,12 @@ const syncPlacesToSource = (list: Place[]) => {
 	);
 	source.setData(buildFeatureCollectionFor(clustered));
 	boostedSource.setData(buildFeatureCollectionFor(standalone));
-	// The heatmap reflects overall place density, so it always gets the
-	// full list regardless of the boosted-clustering routing decision.
-	if (heatmapSource) {
+	// The heatmap reflects overall place density, so it gets the full list
+	// regardless of the boosted-clustering routing decision. Only refresh it
+	// while the layer is actually visible — when off (the default) we skip
+	// the full-list feature-collection build entirely and repopulate from
+	// lastSyncedList on enable (see setHeatmapEnabled).
+	if (heatmapSource && heatmapEnabled) {
 		heatmapSource.setData(buildFeatureCollectionFor(list));
 	}
 	ensureSpritesForPlaces(map, list);
@@ -934,6 +937,15 @@ let heatmapEnabled = getStoredHeatmapEnabled();
 const setHeatmapEnabled = (enabled: boolean) => {
 	if (!map) return;
 	heatmapEnabled = enabled;
+	// syncPlacesToSource skips the heatmap source while it's hidden, so seed
+	// it from the last synced list on enable — otherwise it would stay blank
+	// until the next data sync.
+	if (enabled) {
+		const heatmapSource = map.getSource("places-heatmap") as
+			| GeoJSONSource
+			| undefined;
+		heatmapSource?.setData(buildFeatureCollectionFor(lastSyncedList));
+	}
 	if (map.getLayer("place-heatmap")) {
 		map.setLayoutProperty(
 			"place-heatmap",
