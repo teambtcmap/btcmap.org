@@ -80,6 +80,8 @@
 		"zoomOut": "Dézoomer",
 		"basemapTitle": "Fond de carte",
 		"verifiedFilterTitle": "Afficher seulement les lieux vérifiés",
+		"heatmap": "Activer la carte de chaleur de densité des commerces",
+		"heatmapAlt": "Carte de chaleur",
 		"locate": "Afficher ma position",
 		"boostAlt": "Boost",
 		"locateAlt": "Afficher ma position",

@@ -97,6 +97,7 @@ import TileLoadingIndicator from "./components/TileLoadingIndicator.svelte";
 import { BasemapsControl } from "./controls/BasemapsControl";
 import { BoostToggleControl } from "./controls/BoostToggleControl";
 import { DataRefreshControl } from "./controls/DataRefreshControl";
+import { HeatmapToggleControl } from "./controls/HeatmapToggleControl";
 import { NavButtonsControl } from "./controls/NavButtonsControl";
 import { VerifiedFilterControl } from "./controls/VerifiedFilterControl";
 import { browser } from "$app/environment";
@@ -742,6 +743,9 @@ const syncPlacesToSource = (list: Place[]) => {
 	const boostedSource = map.getSource("places-boosted") as
 		| GeoJSONSource
 		| undefined;
+	const heatmapSource = map.getSource("places-heatmap") as
+		| GeoJSONSource
+		| undefined;
 	if (!source || !boostedSource) return;
 	lastSyncedList = list;
 	boostedAreClustered = shouldClusterBoostedAtZoom(map.getZoom());
@@ -751,6 +755,11 @@ const syncPlacesToSource = (list: Place[]) => {
 	);
 	source.setData(buildFeatureCollectionFor(clustered));
 	boostedSource.setData(buildFeatureCollectionFor(standalone));
+	// The heatmap reflects overall place density, so it always gets the
+	// full list regardless of the boosted-clustering routing decision.
+	if (heatmapSource) {
+		heatmapSource.setData(buildFeatureCollectionFor(list));
+	}
 	ensureSpritesForPlaces(map, list);
 	if (list.length > 0) elementsLoaded = true;
 	// E2E test hook: Playwright can't probe WebGL canvas pins like it
@@ -890,8 +899,9 @@ $: if (
 // clusters, and labels survive a basemap/theme swap untouched (MapLibre's
 // style differ leaves byte-identical layers in place — only the basemap
 // layers below them get swapped).
-const CUSTOM_SOURCE_IDS = ["places", "places-boosted"];
+const CUSTOM_SOURCE_IDS = ["places", "places-boosted", "places-heatmap"];
 const CUSTOM_LAYER_IDS = [
+	"place-heatmap",
 	"clusters-outer",
 	"clusters-inner",
 	"cluster-count",
@@ -907,6 +917,21 @@ const CUSTOM_LAYER_IDS = [
 	"boosted-place-label",
 	"clusters-hit",
 ];
+
+// Toggle the merchant-density heatmap layer. Off by default unless the
+// user previously enabled it (persisted in localStorage by the control).
+let heatmapEnabled = false;
+const setHeatmapEnabled = (enabled: boolean) => {
+	if (!map) return;
+	heatmapEnabled = enabled;
+	if (map.getLayer("place-heatmap")) {
+		map.setLayoutProperty(
+			"place-heatmap",
+			"visibility",
+			enabled ? "visible" : "none",
+		);
+	}
+};
 
 // Switch the basemap without tearing down our pin/cluster/label layers.
 // setStyle's transformStyle hook re-attaches the custom sources + layers
@@ -937,6 +962,15 @@ const applyBasemap = (id: BasemapId) => {
 		loadSavedBadgeSprite(map).catch(() => {});
 		ensureSpritesForPlaces(map, get(places));
 		spiderfier?.applyTo("clusters-hit");
+		// Re-apply heatmap visibility in case the style diff fell back to
+		// a full rebuild and reset the carried layer's layout property.
+		if (map.getLayer("place-heatmap")) {
+			map.setLayoutProperty(
+				"place-heatmap",
+				"visibility",
+				heatmapEnabled ? "visible" : "none",
+			);
+		}
 	});
 	map.setStyle(styleForBasemap(id), {
 		transformStyle: (previous, next) => {
@@ -1156,6 +1190,12 @@ onMount(async () => {
 		"top-right",
 	);
 
+	// Heatmap toggle — layers-icon-style button that shows/hides the
+	// merchant-density heatmap layer. Owns its own localStorage
+	// persistence; the actual visibility swap is delegated to
+	// setHeatmapEnabled.
+	map.addControl(new HeatmapToggleControl(setHeatmapEnabled), "top-right");
+
 	// Mirror /map's behavior: sync location into the userLocation store so
 	// the merchant list panel can compute distances without prompting again.
 	geolocate.on("geolocate", (e: GeolocationPosition) => {
@@ -1215,6 +1255,84 @@ onMount(async () => {
 		map.addSource("places-boosted", {
 			type: "geojson",
 			data: EMPTY_COLLECTION,
+		});
+
+		// Non-clustered source backing the merchant-density heatmap.
+		// Heatmap layers read raw point features, so they can't share the
+		// clustered `places` source — this dedicated source always carries
+		// the full unclustered list (see syncPlacesToSource). Visibility is
+		// toggled by HeatmapToggleControl; off by default.
+		map.addSource("places-heatmap", {
+			type: "geojson",
+			data: EMPTY_COLLECTION,
+		});
+
+		// Merchant-density heatmap. Weight is uniform (1) so the gradient
+		// reflects pure point density; boosted places weigh slightly more
+		// so paid placements read as hotter cores within a cluster. Radius
+		// and intensity scale up with zoom so the halo widens as you zoom
+		// out to a city/region view and tightens as pins take over. Opacity
+		// stays at full strength through zoom 16 and fades to zero only in
+		// the final zoom level (16→17) so the heatmap hands off cleanly to
+		// the individual pins at CLUSTERING_DISABLED_ZOOM.
+		map.addLayer({
+			id: "place-heatmap",
+			type: "heatmap",
+			source: "places-heatmap",
+			maxzoom: CLUSTERING_DISABLED_ZOOM,
+			layout: { visibility: "none" },
+			paint: {
+				"heatmap-weight": [
+					"case",
+					["boolean", ["get", "boosted"], false],
+					1.6,
+					1,
+				],
+				"heatmap-intensity": [
+					"interpolate",
+					["linear"],
+					["zoom"],
+					0,
+					1,
+					CLUSTERING_DISABLED_ZOOM,
+					3,
+				],
+				"heatmap-color": [
+					"interpolate",
+					["linear"],
+					["heatmap-density"],
+					0,
+					"rgba(0, 0, 255, 0)",
+					0.2,
+					"#67e8f9", // cyan-300
+					0.4,
+					"#22d3ee", // cyan-400
+					0.6,
+					"#facc15", // yellow-400
+					0.8,
+					"#f97316", // orange-500
+					1,
+					"#dc2626", // red-600
+				],
+				"heatmap-radius": [
+					"interpolate",
+					["linear"],
+					["zoom"],
+					0,
+					8,
+					CLUSTERING_DISABLED_ZOOM,
+					30,
+				],
+				"heatmap-opacity": [
+					"interpolate",
+					["linear"],
+					["zoom"],
+					16,
+					0.9,
+					CLUSTERING_DISABLED_ZOOM,
+					0,
+				],
+			},
 		});
 
 		// Translucent outer ring — green/yellow/orange tiers by point_count
@@ -1763,6 +1881,11 @@ onMount(async () => {
 		applyLabelPalette(map, get(theme));
 		lastAppliedLabelTheme = get(theme);
 		syncPlacesToSource($places);
+		// Apply the persisted heatmap on/off state now that the layer
+		// exists. The toggle control can't do this itself — it's added
+		// before 'load' fires, so the layer isn't present at addControl
+		// time.
+		setHeatmapEnabled(heatmapEnabled);
 		// Kick once on load — if the user lands above the threshold, labels
 		// should appear without requiring a move.
 		triggerEnrichmentIfNeeded();

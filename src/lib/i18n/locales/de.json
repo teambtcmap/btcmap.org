@@ -80,6 +80,8 @@
 		"zoomOut": "Verkleinern",
 		"basemapTitle": "Hintergrundkarte",
 		"verifiedFilterTitle": "Nur verifizierte Orte anzeigen",
+		"heatmap": "Wärmebild der Händlerteilichte ein-/ausblenden",
+		"heatmapAlt": "Wärmebild",
 		"locate": "Zeige mir meinen Standort",
 		"boostAlt": "Boost",
 		"locateAlt": "Zeige mir meinen Standort",

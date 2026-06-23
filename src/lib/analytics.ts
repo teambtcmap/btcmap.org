@@ -15,6 +15,7 @@ export type EventName =
 	| "category_filter"
 	| "verified_filter_change"
 	| "boost_layer_toggle"
+	| "heatmap_layer_toggle"
 	| "home_button_click"
 	| "show_all_on_map_click"
 	| "merchant_list_item_click"

@@ -80,6 +80,8 @@
 		"zoomOut": "Alejar",
 		"basemapTitle": "Mapa base",
 		"verifiedFilterTitle": "Mostrar solo lugares verificados",
+		"heatmap": "Activar mapa de calor de densidad de comercios",
+		"heatmapAlt": "Mapa de calor",
 		"locate": "Mostrar mi ubicación",
 		"boostAlt": "Impulsar",
 		"locateAlt": "Mostrar mi ubicación",
