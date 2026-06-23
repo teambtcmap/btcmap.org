@@ -164,3 +164,10 @@
 .dark .maplibregl-ctrl-group a.maplibregl-ctrl-link svg {
 	filter: invert(1);
 }
+/* Preserve the heatmap enabled blue in dark mode — the invert above would
+   turn #33b5e5 into an orange-ish tint, losing the active-state cue. */
+.dark .maplibregl-ctrl-group
+	a.maplibregl-ctrl-link.maplibregl-ctrl-heatmap-enabled
+	svg {
+	filter: none;
+}
