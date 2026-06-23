@@ -969,11 +969,11 @@ const applyHeatmapVisibility = () => {
 		);
 	}
 	// Conceal all point/cluster/badge/label layers while the heatmap is
-	// visible.  Pins re-appear slightly before the heatmap fully fades out
-	// (zoom 16.5, ~15 % opacity) so the transition feels smooth — at the
-	// maxzoom boundary (17) the heatmap instantly removes itself, so
-	// waiting until then makes the pop-in feel abrupt.
-	const PIN_REVEAL_ZOOM = CLUSTERING_DISABLED_ZOOM - 0.5;
+	// visible.  Pins re-appear before the heatmap fully fades out
+	// (zoom 15.5, ~45 % opacity) so individual pins show through the
+	// still-fading heatmap — at the maxzoom boundary (17) the heatmap
+	// instantly removes itself, so waiting until then feels abrupt.
+	const PIN_REVEAL_ZOOM = CLUSTERING_DISABLED_ZOOM - 1.5;
 	const hidePins = heatmapEnabled && zoom < PIN_REVEAL_ZOOM;
 	for (const layerId of HEATMAP_HIDDEN_LAYER_IDS) {
 		if (map.getLayer(layerId)) {
