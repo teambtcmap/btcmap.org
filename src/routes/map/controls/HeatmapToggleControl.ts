@@ -36,9 +36,15 @@ export class HeatmapToggleControl implements IControl {
 
 	constructor(onToggle: (enabled: boolean) => void) {
 		this.#onToggle = onToggle;
-		this.#enabled =
-			typeof window !== "undefined" &&
-			localStorage.getItem(HEATMAP_STORAGE_KEY) === "true";
+		let stored = false;
+		if (typeof window !== "undefined") {
+			try {
+				stored = localStorage.getItem(HEATMAP_STORAGE_KEY) === "true";
+			} catch {
+				// localStorage may be unavailable (private mode)
+			}
+		}
+		this.#enabled = stored;
 	}
 
 	getDefaultPosition(): ControlPosition {
