@@ -96,11 +96,10 @@ export class HeatmapToggleControl implements IControl {
 
 	#renderActive() {
 		if (!this.#button) return;
-		this.#button.setAttribute("aria-pressed", String(this.#enabled));
-		this.#button.style.opacity = this.#enabled ? "1" : "0.55";
-		this.#button.style.backgroundColor = this.#enabled
-			? "rgba(0, 0, 0, 0.08)"
-			: "";
+		this.#button.classList.toggle(
+			"maplibregl-ctrl-heatmap-enabled",
+			this.#enabled,
+		);
 	}
 
 	onRemove(): void {
