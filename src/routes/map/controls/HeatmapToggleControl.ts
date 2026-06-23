@@ -100,6 +100,7 @@ export class HeatmapToggleControl implements IControl {
 			"maplibregl-ctrl-heatmap-enabled",
 			this.#enabled,
 		);
+		this.#button.setAttribute("aria-pressed", String(this.#enabled));
 	}
 
 	onRemove(): void {
