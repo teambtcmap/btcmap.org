@@ -1046,6 +1046,15 @@
 		}
 	},
 	"login": {
+		"title": "Entrar",
+		"username": "Nome de usuário",
+		"password": "Senha",
+		"submit": "Entrar",
+		"loggingIn": "Entrando...",
+		"failed": "Nome de usuário ou senha inválidos.",
+		"error": "Algo deu errado. Tente novamente.",
+		"noAccount": "Não tem uma conta?",
+		"createAccount": "Crie uma aqui",
 		"nostrExtension": "Entrar com a extensão Nostr",
 		"nostrSigning": "Assinando…",
 		"nostrFailed": "A assinatura Nostr foi rejeitada",

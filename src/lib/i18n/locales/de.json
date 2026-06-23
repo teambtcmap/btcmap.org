@@ -1073,6 +1073,15 @@
 		}
 	},
 	"login": {
+		"title": "Anmelden",
+		"username": "Benutzername",
+		"password": "Passwort",
+		"submit": "Anmelden",
+		"loggingIn": "Anmeldung läuft...",
+		"failed": "Ungültiger Benutzername oder Passwort.",
+		"error": "Etwas ist schiefgelaufen. Bitte versuche es erneut.",
+		"noAccount": "Noch kein Konto?",
+		"createAccount": "Hier eines erstellen",
 		"nostrExtension": "Mit Nostr-Erweiterung anmelden",
 		"nostrSigning": "Wird signiert…",
 		"nostrFailed": "Nostr-Signatur wurde abgelehnt",

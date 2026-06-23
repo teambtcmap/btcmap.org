@@ -1072,6 +1072,15 @@
 		}
 	},
 	"login": {
+		"title": "Iniciar sesión",
+		"username": "Nombre de usuario",
+		"password": "Contraseña",
+		"submit": "Iniciar sesión",
+		"loggingIn": "Iniciando sesión...",
+		"failed": "Nombre de usuario o contraseña no válidos.",
+		"error": "Algo salió mal. Inténtalo de nuevo.",
+		"noAccount": "¿No tienes una cuenta?",
+		"createAccount": "Crea una aquí",
 		"nostrExtension": "Inicia sesión con la extensión de Nostr",
 		"nostrSigning": "Firmando…",
 		"nostrFailed": "La firma de Nostr fue rechazada",

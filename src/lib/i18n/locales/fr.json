@@ -1073,6 +1073,15 @@
 		}
 	},
 	"login": {
+		"title": "Se connecter",
+		"username": "Nom d'utilisateur",
+		"password": "Mot de passe",
+		"submit": "Se connecter",
+		"loggingIn": "Connexion en cours...",
+		"failed": "Nom d'utilisateur ou mot de passe invalide.",
+		"error": "Une erreur s'est produite. Veuillez réessayer.",
+		"noAccount": "Vous n'avez pas de compte ?",
+		"createAccount": "Créez-en un ici",
 		"nostrExtension": "Se connecter avec l'extension Nostr",
 		"nostrSigning": "Signature…",
 		"nostrFailed": "La signature Nostr a été rejetée",
