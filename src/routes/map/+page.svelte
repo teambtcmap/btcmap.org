@@ -920,12 +920,25 @@ const CUSTOM_LAYER_IDS = [
 	"boosted-place-label",
 	"clusters-hit",
 ];
-
-const HEATMAP_HIDDEN_CLUSTER_LAYER_IDS = [
+// All point/cluster/badge/label layers that the heatmap conceals while
+// active below CLUSTERING_DISABLED_ZOOM (17).  At zoom 17+ the heatmap
+// layer naturally disappears (its maxzoom), so these layers are revealed
+// again without the user having to toggle heatmap off.
+const HEATMAP_HIDDEN_LAYER_IDS = [
 	"clusters-outer",
 	"clusters-inner",
 	"cluster-count",
 	"clusters-hit",
+	"unclustered-point",
+	"boosted-point",
+	"comment-badge",
+	"comment-badge-count",
+	"saved-badge",
+	"place-label",
+	"boosted-comment-badge",
+	"boosted-comment-badge-count",
+	"boosted-saved-badge",
+	"boosted-place-label",
 ];
 
 // Toggle the merchant-density heatmap layer. Off by default unless the
@@ -938,25 +951,39 @@ if (typeof window !== "undefined") {
 		// localStorage may be unavailable (private mode)
 	}
 }
-const setHeatmapEnabled = (enabled: boolean) => {
+
+const applyHeatmapVisibility = () => {
 	if (!map) return;
-	heatmapEnabled = enabled;
+	const zoom = map.getZoom();
+	// Heatmap layer: visible when enabled regardless of zoom (the layer
+	// itself has maxzoom: CLUSTERING_DISABLED_ZOOM, so it won't render
+	// past that).
 	if (map.getLayer("place-heatmap")) {
 		map.setLayoutProperty(
 			"place-heatmap",
 			"visibility",
-			enabled ? "visible" : "none",
+			heatmapEnabled ? "visible" : "none",
 		);
 	}
-	for (const layerId of HEATMAP_HIDDEN_CLUSTER_LAYER_IDS) {
+	// Conceal all point/cluster/badge/label layers while the heatmap is
+	// visible — at zoom >= CLUSTERING_DISABLED_ZOOM the heatmap is gone,
+	// so pins re-appear automatically.
+	const hidePins = heatmapEnabled && zoom < CLUSTERING_DISABLED_ZOOM;
+	for (const layerId of HEATMAP_HIDDEN_LAYER_IDS) {
 		if (map.getLayer(layerId)) {
 			map.setLayoutProperty(
 				layerId,
 				"visibility",
-				enabled ? "none" : "visible",
+				hidePins ? "none" : "visible",
 			);
 		}
 	}
+};
+
+const setHeatmapEnabled = (enabled: boolean) => {
+	if (!map) return;
+	heatmapEnabled = enabled;
+	applyHeatmapVisibility();
 };
 
 // Switch the basemap without tearing down our pin/cluster/label layers.
@@ -1781,6 +1808,10 @@ onMount(async () => {
 			if (shouldClusterBoostedAtZoom(currentZoom) !== boostedAreClustered) {
 				syncPlacesToSource(lastSyncedList);
 			}
+			// When the heatmap is active, zooming past CLUSTERING_DISABLED_ZOOM
+			// naturally removes the heatmap layer (its maxzoom), so re-show
+			// all the point/cluster/badge layers that were concealed.
+			applyHeatmapVisibility();
 			debouncedUpdateMerchantList();
 		});
 
