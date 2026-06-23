@@ -13,7 +13,8 @@
 /* Basemap picker — IControl that owns its own container; the popup is
    absolutely positioned relative to it. Hover-or-click the icon to
    expand the radio list. */
-.maplibre-next-basemaps {
+.maplibre-next-basemaps,
+.maplibre-next-verified {
 	position: relative;
 }
 .maplibre-next-basemaps-popup {
@@ -49,6 +50,30 @@
 	margin: 0;
 }
 
+/* Verified filter: one-time loading state while the on-demand date fetch runs
+   (first activation only). Swap the clock glyph for a spinner. */
+.maplibre-next-verified.loading a.maplibregl-ctrl-link svg {
+	display: none;
+}
+.maplibre-next-verified.loading a.maplibregl-ctrl-link::after {
+	content: "";
+	width: 14px;
+	height: 14px;
+	border-radius: 50%;
+	border: 2px solid rgba(0, 0, 0, 0.25);
+	border-top-color: #111;
+	animation: mlnv-spin 0.7s linear infinite;
+}
+.dark .maplibre-next-verified.loading a.maplibregl-ctrl-link::after {
+	border-color: rgba(255, 255, 255, 0.3);
+	border-top-color: #fff;
+}
+@keyframes mlnv-spin {
+	to {
+		transform: rotate(360deg);
+	}
+}
+
 /* Anchor-based buttons inside the custom IControls (NavButtons / Boost /
    DataRefresh). MapLibre's default `.maplibregl-ctrl-group button` rules
    don't apply to <a> elements, so we replicate the dimensions, hover and
@@ -79,6 +104,27 @@
 	display: block;
 	width: 16px;
 	height: 16px;
+}
+
+/* Active-window indicator: a small accent dot on the closed button so a
+   returning user can tell a recency filter is hiding places. Placed after the
+   generic anchor rules to keep selector specificity non-descending. */
+.maplibre-next-verified.active a.maplibregl-ctrl-link {
+	position: relative;
+}
+.maplibre-next-verified.active a.maplibregl-ctrl-link::before {
+	content: "";
+	position: absolute;
+	top: 4px;
+	right: 4px;
+	width: 7px;
+	height: 7px;
+	border-radius: 50%;
+	background: #f7931a;
+	border: 1.5px solid #fff;
+}
+.dark .maplibre-next-verified.active a.maplibregl-ctrl-link::before {
+	border-color: #1f2937;
 }
 
 /* Dark-mode treatment for the rounded "pill" that holds zoom / locate /

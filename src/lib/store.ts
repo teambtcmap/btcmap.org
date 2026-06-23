@@ -34,6 +34,12 @@ export const placesSyncCount = writable(0);
 export const placesLoadingStatus = writable<string>(""); // e.g. "Downloading places...", "Processing data..."
 export const placesLoadingProgress = writable<number>(0); // 0-100 percentage
 
+// True once the lazy verified_at enrichment has loaded. The dates are only
+// fetched when the recency filter is engaged, so the map markers + nearby list
+// gate on this to stay inert until the dates are present. See
+// src/lib/sync/places.ts (ensureVerifiedDates).
+export const verifiedDatesLoaded = writable(false);
+
 export const users: Writable<User[]> = writable([]);
 export const userError = writable("");
 

@@ -12,6 +12,7 @@ import {
 	placesLoadingProgress,
 	placesLoadingStatus,
 	placesSyncCount,
+	verifiedDatesLoaded,
 } from "$lib/store";
 import { clearTables } from "$lib/sync/clearTables";
 import type { Place } from "$lib/types";
@@ -82,6 +83,55 @@ const getStaticFileDate = async (): Promise<string> => {
 
 	// Fallback to 2 weeks ago
 	return getTwoWeeksAgoDate();
+};
+
+// The bulk CDN feed (places.json) carries no verification date, so a place's
+// baseline date is unknown until this runs. Fetch verified_at for every place
+// in one lean call and merge it into $places by id. Fetched LAZILY — only when
+// the recency filter is engaged (default users never call this) and once per
+// session (the flag is in-memory, so a new session re-fetches the full set —
+// keeping the baseline fresh). Incremental MAP_SYNC updates carry verified_at,
+// so changed places stay fresh within the session too. Sets
+// verifiedDatesLoaded so the filter flips from inert to active. Best-effort:
+// on failure the flag stays false and the filter keeps showing everything.
+export const ensureVerifiedDates = async (): Promise<void> => {
+	if (get(verifiedDatesLoaded)) return;
+	try {
+		const response = await api.get<{ id: number; verified_at?: string }[]>(
+			`${API_BASE}/v4/places?fields=id,verified_at`,
+		);
+		if (!Array.isArray(response.data)) return;
+		const verifiedById = new Map<number, string>();
+		for (const item of response.data) {
+			if (typeof item?.id === "number" && item.verified_at) {
+				verifiedById.set(item.id, item.verified_at);
+			}
+		}
+		// Only latch the flag once we actually have dates. An empty/degenerate
+		// response (e.g. an API hiccup returning []) must NOT flip the gate true,
+		// or the filter would hide every pin with no dates to match. Leaving the
+		// flag false keeps the filter inert (shows everything) and lets a later
+		// sync retry.
+		if (verifiedById.size === 0) return;
+		const current = get(places);
+		// If the bulk places haven't loaded yet (the dates fetch won the race),
+		// bail without latching or caching — otherwise we'd persist an empty
+		// places_v4 and flip the gate true with no data, hiding everything. The
+		// caller re-runs once $places is populated.
+		if (current.length === 0) return;
+		const enriched = current.map((p) => {
+			const verified_at = verifiedById.get(p.id);
+			return verified_at && verified_at !== p.verified_at
+				? { ...p, verified_at }
+				: p;
+		});
+		await yieldToMain();
+		places.set(enriched);
+		verifiedDatesLoaded.set(true);
+		await localforage.setItem("places_v4", enriched);
+	} catch (error) {
+		console.warn("Could not load verification dates:", error);
+	}
 };
 
 export const elementsSync = async () => {

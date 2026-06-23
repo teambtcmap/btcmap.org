@@ -12,11 +12,18 @@ import {
 } from "$lib/categoryMapping";
 import { MERCHANT_LIST_MAX_ITEMS } from "$lib/constants";
 import { _ } from "$lib/i18n";
+import type { VerifiedFilterYears } from "$lib/map/verifiedFilter";
+import {
+	getStoredVerifiedFilter,
+	storeVerifiedFilter,
+} from "$lib/map/verifiedFilter";
 import { isBoosted } from "$lib/merchantDrawerLogic";
+import { verifiedDatesLoaded } from "$lib/store";
 import type { Place } from "$lib/types";
 import type { UserLocation } from "$lib/userLocationStore";
 import { userLocation } from "$lib/userLocationStore";
 import { calculateDistance, errToast } from "$lib/utils";
+import { filterPlacesByRecency } from "$lib/verification";
 
 export type MerchantListMode = "nearby" | "search";
 
@@ -39,6 +46,8 @@ export interface MerchantListState {
 	// Category filter
 	selectedCategory: CategoryKey;
 	categoryCounts: CategoryCounts;
+	// "Verified within N years" filter (null = Any/off); persisted to localStorage
+	verifiedWithinYears: VerifiedFilterYears;
 }
 
 const initialState: MerchantListState = {
@@ -54,6 +63,7 @@ const initialState: MerchantListState = {
 	isSearching: false,
 	selectedCategory: "all",
 	categoryCounts: createEmptyCategoryCounts(),
+	verifiedWithinYears: getStoredVerifiedFilter(),
 };
 
 // Helper function to reset category state
@@ -182,10 +192,19 @@ function createMerchantListStore() {
 			centerLon?: number,
 			limit: number = MERCHANT_LIST_MAX_ITEMS,
 		) {
-			const categoryCounts = countMerchantsByCategory(merchants);
-			const { selectedCategory } = get(store);
+			const { selectedCategory, verifiedWithinYears } = get(store);
+			// Apply the recency filter first so the category counts reflect the
+			// verification window the user is actually seeing. Gate on the dates
+			// being loaded (they're lazy) so we don't blank the list while a
+			// filter is active but enrichment hasn't landed — matches the markers.
+			const recencyReady =
+				verifiedWithinYears == null || get(verifiedDatesLoaded);
+			const recencyPlaces = recencyReady
+				? filterPlacesByRecency(merchants, verifiedWithinYears)
+				: merchants;
+			const categoryCounts = countMerchantsByCategory(recencyPlaces);
 			const { filtered, effectiveCategory } = applyCategoryFilter(
-				merchants,
+				recencyPlaces,
 				selectedCategory,
 				categoryCounts,
 			);
@@ -241,26 +260,34 @@ function createMerchantListStore() {
 				const placeDetailsCache = new Map<number, Place>();
 				validPlaces.forEach((place) => placeDetailsCache.set(place.id, place));
 
-				const categoryCounts = countMerchantsByCategory(validPlaces);
+				// Apply the recency filter before the density check (list data is
+				// fetched with verified_at, so no readiness gate is needed): a
+				// narrow window can bring an otherwise-too-dense area under the
+				// ceiling, so the filter stays effective at zoom 10-14.
+				const { selectedCategory, verifiedWithinYears } = get(store);
+				const recencyPlaces = filterPlacesByRecency(
+					validPlaces,
+					verifiedWithinYears,
+				);
+				const categoryCounts = countMerchantsByCategory(recencyPlaces);
 
 				// Check if we should hide results (too many at low zoom)
 				if (
 					options?.hideIfExceeds &&
-					validPlaces.length > options.hideIfExceeds
+					recencyPlaces.length > options.hideIfExceeds
 				) {
 					// Too many results - store count but show empty list
 					// The panel will display "zoom in" message, button shows count
 					update((state) => ({
 						...state,
 						merchants: [],
-						totalCount: validPlaces.length,
+						totalCount: recencyPlaces.length,
 						isLoadingList: false,
 						categoryCounts,
 					}));
 				} else {
-					const { selectedCategory } = get(store);
 					const { filtered, effectiveCategory } = applyCategoryFilter(
-						validPlaces,
+						recencyPlaces,
 						selectedCategory,
 						categoryCounts,
 					);
@@ -377,7 +404,12 @@ function createMerchantListStore() {
 				undefined,
 				get(userLocation).location,
 			);
-			const categoryCounts = countMerchantsByCategory(sortedResults);
+			// Counts reflect the recency window; the panel applies the same
+			// recency + category filter to what it renders (filteredSearchResults).
+			const { verifiedWithinYears } = get(store);
+			const categoryCounts = countMerchantsByCategory(
+				filterPlacesByRecency(sortedResults, verifiedWithinYears),
+			);
 			update((state) => ({
 				...resetCategoryState(state),
 				isOpen: true,
@@ -438,6 +470,14 @@ function createMerchantListStore() {
 		// Set the selected category filter
 		setSelectedCategory(category: CategoryKey) {
 			update((state) => ({ ...state, selectedCategory: category }));
+		},
+
+		// Set the "verified within N years" filter (null = Any/off) and persist
+		// it. Unlike the category filter, this survives close()/reset and across
+		// sessions, matching the Android setting.
+		setVerifiedFilter(years: VerifiedFilterYears) {
+			storeVerifiedFilter(years);
+			update((state) => ({ ...state, verifiedWithinYears: years }));
 		},
 
 		// Reset the selected category to 'all'

@@ -156,6 +156,7 @@
 		"zoomIn": "Inzoomen",
 		"zoomOut": "Uitzoomen",
 		"basemapTitle": "Achtergrondkaart",
+		"verifiedFilterTitle": "Alleen geverifieerde plaatsen tonen",
 		"locate": "Laat me zien waar ik ben",
 		"boostAlt": "Boost",
 		"locateAlt": "Laat me zien waar ik ben",
@@ -219,6 +220,12 @@
 		"outdatedTooltip": "Verouderd, controleer opnieuw",
 		"helpImprove": "Help de gegevens voor iedereen te verbeteren",
 		"surveyedBy": "Voltooid door BTC Map-communityleden"
+	},
+	"verificationFilter": {
+		"any": "Alle",
+		"within1Year": "Geverifieerd binnen 1 jaar",
+		"within2Years": "Geverifieerd binnen 2 jaar",
+		"within3Years": "Geverifieerd binnen 3 jaar"
 	},
 	"payment": {
 		"methods": "Betaalmethoden",

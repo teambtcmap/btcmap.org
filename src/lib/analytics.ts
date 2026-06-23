@@ -13,6 +13,7 @@ export type EventName =
 	| "search_sheet_swipe_collapse"
 	| "search_sheet_tap_expand"
 	| "category_filter"
+	| "verified_filter_change"
 	| "boost_layer_toggle"
 	| "home_button_click"
 	| "show_all_on_map_click"

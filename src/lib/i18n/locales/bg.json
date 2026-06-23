@@ -60,6 +60,7 @@
 		"zoomIn": "Увеличете",
 		"zoomOut": "Намалете",
 		"basemapTitle": "Базова карта",
+		"verifiedFilterTitle": "Показвай само проверени места",
 		"locate": "Покажи къде съм",
 		"boostAlt": "Подсили",
 		"locateAlt": "Покажи къде съм",
@@ -607,6 +608,12 @@
 		"taggingActivity": "Активност по тагване",
 		"taggingIssues": "Проблеми с тагването",
 		"wiki": "Уики"
+	},
+	"verificationFilter": {
+		"any": "Всички",
+		"within1Year": "Проверено през последната година",
+		"within2Years": "Проверено през последните 2 години",
+		"within3Years": "Проверено през последните 3 години"
 	},
 	"payment": {
 		"accepted": "Приемани плащания",

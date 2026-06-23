@@ -58,6 +58,8 @@ import {
 	PIN_FILL_REGULAR,
 } from "$lib/map/maplibreSprites";
 import { parseLatLongQuery } from "$lib/map/queryViewport";
+import type { VerifiedFilterYears } from "$lib/map/verifiedFilter";
+import { getStoredVerifiedFilter } from "$lib/map/verifiedFilter";
 import {
 	calculateRadiusKmFromLngLatBounds,
 	getZoomBehavior,
@@ -78,11 +80,14 @@ import {
 	placesError,
 	placesLoadingProgress,
 	placesLoadingStatus,
+	verifiedDatesLoaded,
 } from "$lib/store";
+import { ensureVerifiedDates } from "$lib/sync/places";
 import { theme } from "$lib/theme";
 import type { Place } from "$lib/types";
 import { userLocation } from "$lib/userLocationStore";
 import { debounce, errToast, isBoosted } from "$lib/utils";
+import { filterPlacesByRecency } from "$lib/verification";
 
 import type { PageData } from "./$types";
 import MapSearchBar from "./components/MapSearchBar.svelte";
@@ -93,6 +98,7 @@ import { BasemapsControl } from "./controls/BasemapsControl";
 import { BoostToggleControl } from "./controls/BoostToggleControl";
 import { DataRefreshControl } from "./controls/DataRefreshControl";
 import { NavButtonsControl } from "./controls/NavButtonsControl";
+import { VerifiedFilterControl } from "./controls/VerifiedFilterControl";
 import { browser } from "$app/environment";
 
 export let data: PageData;
@@ -419,6 +425,22 @@ const debouncedUpdateMerchantList = debounce(
 	updateMerchantList,
 	MAP_DEBOUNCE_DELAY,
 );
+
+// Re-sync markers + refresh the nearby list when the verified-recency filter
+// changes. The marker reactive block re-runs because it reads
+// $merchantList.verifiedWithinYears; the forced update re-filters the list
+// (mirrors the category filter's onRefresh path).
+const applyVerifiedFilter = async (years: VerifiedFilterYears) => {
+	// Set + persist the choice immediately (setVerifiedFilter owns persistence),
+	// so it survives even if the user navigates away during the fetch. Markers
+	// and the list gate on verifiedDatesLoaded, so they show everything until
+	// the dates land. Then load the dates on demand (no-op once loaded; the
+	// control awaits this to show its spinner only during the one-time fetch)
+	// and refresh the list.
+	merchantList.setVerifiedFilter(years);
+	if (years != null) await ensureVerifiedDates();
+	updateMerchantList({ force: true });
+};
 
 // MerchantListPanel callbacks — see /map/+page.svelte for the prod
 // equivalents. Camera moves do NOT account for the panel width yet; for
@@ -777,15 +799,26 @@ $: if (map && styleLoaded && $places) {
 	} else {
 		effective = $places;
 	}
+	// Verified-recency filter. Search results carry verified_at natively
+	// (LIST_ITEM), so filter them regardless of the bulk-enrichment flag —
+	// matching the panel's filteredSearchResults. The $places-derived branches
+	// gate on the flag: the bulk feed has no verified_at until enrichment lands,
+	// so until then treat the filter as inert rather than hiding every pin.
+	const verifiedYears = $merchantList.verifiedWithinYears;
+	const datesReady = verifiedYears == null || inSearch || $verifiedDatesLoaded;
+	if (datesReady) {
+		effective = filterPlacesByRecency(effective, verifiedYears);
+	}
 	const placesLen = effective.length;
 	const savedSize = $savedPlaceIds.size;
 	const cacheSize = $merchantList.placeDetailsCache.size;
 	const currentLocale = $locale;
-	const searchSig = inSearch
+	const modeSig = inSearch
 		? `s:${$merchantList.searchResults.map((p) => p.id).join(",")}`
 		: category !== "all"
 			? `c:${category}`
 			: "n";
+	const searchSig = `${modeSig}|v:${verifiedYears ?? "any"}`;
 	if (
 		placesLen !== lastPlacesLength ||
 		savedSize !== lastSavedIdsSize ||
@@ -834,6 +867,22 @@ $: if (
 ) {
 	didInitialNearbyCount = true;
 	updateMerchantList();
+}
+
+// A returning user with a persisted window: load the dates once the bulk
+// places are in (not during map setup, which can win the race and enrich an
+// empty store), so the map + list arrive filtered without a manual toggle.
+let didInitialVerifiedLoad = false;
+$: if (
+	browser &&
+	map &&
+	styleLoaded &&
+	$places.length > 0 &&
+	!didInitialVerifiedLoad &&
+	getStoredVerifiedFilter() != null
+) {
+	didInitialVerifiedLoad = true;
+	void ensureVerifiedDates().then(() => updateMerchantList({ force: true }));
 }
 
 // The custom sources + layers we add on top of whatever basemap is
@@ -1092,6 +1141,17 @@ onMount(async () => {
 			basemaps: BASEMAPS,
 			initial: initialBasemap,
 			onSelect: applyBasemap,
+		}),
+		"top-right",
+	);
+
+	// "Verified within N years" filter — clock-icon button + radio popover.
+	// The page applies the effect and persistence (marker re-sync, nearby list
+	// refresh, store setVerifiedFilter) via applyVerifiedFilter.
+	map.addControl(
+		new VerifiedFilterControl({
+			initial: getStoredVerifiedFilter(),
+			onSelect: applyVerifiedFilter,
 		}),
 		"top-right",
 	);

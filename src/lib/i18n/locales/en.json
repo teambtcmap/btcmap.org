@@ -156,6 +156,7 @@
 		"zoomIn": "Zoom in",
 		"zoomOut": "Zoom out",
 		"basemapTitle": "Basemap",
+		"verifiedFilterTitle": "Only show verified places",
 		"locate": "Show me where I am",
 		"boostAlt": "Boost",
 		"locateAlt": "Show me where I am",
@@ -219,6 +220,12 @@
 		"outdatedTooltip": "Outdated please re-verify",
 		"helpImprove": "Help improve the data for everyone",
 		"surveyedBy": "Completed by BTC Map community members"
+	},
+	"verificationFilter": {
+		"any": "Any",
+		"within1Year": "Verified within 1 year",
+		"within2Years": "Verified within 2 years",
+		"within3Years": "Verified within 3 years"
 	},
 	"payment": {
 		"methods": "Payment Methods",
