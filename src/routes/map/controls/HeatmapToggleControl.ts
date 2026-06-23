@@ -7,6 +7,7 @@ import { get } from "svelte/store";
 
 import { trackEvent } from "$lib/analytics";
 import { _, locale } from "$lib/i18n";
+import { getStoredHeatmapEnabled, storeHeatmapEnabled } from "$lib/map/heatmap";
 
 import "./controls.css";
 
@@ -22,8 +23,6 @@ import "./controls.css";
 // dark-mode invert filter as the other anchor-based controls. This
 // reuses the app's Material Icons set rather than introducing a new
 // icon asset.
-const HEATMAP_STORAGE_KEY = "btcmap:heatmap-layer";
-
 const HEATMAP_ICON_SVG =
 	'<svg width="16" height="16" viewBox="0 0 24 24" aria-hidden="true" fill="currentColor"><path d="M11.57 13.16c-1.36.28-2.17 1.16-2.17 2.41c0 1.34 1.11 2.42 2.49 2.42c2.05 0 3.71-1.66 3.71-3.71c0-1.07-.15-2.12-.46-3.12c-.79 1.07-2.2 1.72-3.57 2M13.5.67s.74 2.65.74 4.8c0 2.06-1.35 3.73-3.41 3.73c-2.07 0-3.63-1.67-3.63-3.73l.03-.36C5.21 7.51 4 10.62 4 14c0 4.42 3.58 8 8 8s8-3.58 8-8C20 8.61 17.41 3.8 13.5.67M12 20c-3.31 0-6-2.69-6-6c0-1.53.3-3.04.86-4.43a5.58 5.58 0 0 0 3.97 1.63c2.66 0 4.75-1.83 5.28-4.43A14.77 14.77 0 0 1 18 14c0 3.31-2.69 6-6 6"/></svg>';
 
@@ -36,9 +35,7 @@ export class HeatmapToggleControl implements IControl {
 
 	constructor(onToggle: (enabled: boolean) => void) {
 		this.#onToggle = onToggle;
-		this.#enabled =
-			typeof window !== "undefined" &&
-			localStorage.getItem(HEATMAP_STORAGE_KEY) === "true";
+		this.#enabled = getStoredHeatmapEnabled();
 	}
 
 	getDefaultPosition(): ControlPosition {
@@ -62,12 +59,7 @@ export class HeatmapToggleControl implements IControl {
 			e.preventDefault();
 			this.#enabled = !this.#enabled;
 			this.#renderActive();
-			try {
-				localStorage.setItem(HEATMAP_STORAGE_KEY, String(this.#enabled));
-			} catch {
-				// localStorage may be unavailable (private mode); the
-				// toggle still works for the session, just not persisted.
-			}
+			storeHeatmapEnabled(this.#enabled);
 			trackEvent("heatmap_layer_toggle", { enabled: this.#enabled });
 			this.#onToggle(this.#enabled);
 		});

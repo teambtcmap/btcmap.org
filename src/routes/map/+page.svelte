@@ -45,6 +45,7 @@ import {
 	routePlacesByBoostAndZoom,
 	shouldClusterBoostedAtZoom,
 } from "$lib/map/boostedClustering";
+import { getStoredHeatmapEnabled } from "$lib/map/heatmap";
 import {
 	type HashCoords,
 	parseHashCoords,
@@ -925,9 +926,11 @@ const HEATMAP_HIDDEN_CLUSTER_LAYER_IDS = [
 	"clusters-hit",
 ];
 
-// Toggle the merchant-density heatmap layer. Off by default unless the
-// user previously enabled it (persisted in localStorage by the control).
-let heatmapEnabled = false;
+// Toggle the merchant-density heatmap layer. Seeded from the persisted
+// choice (getStoredHeatmapEnabled) so a returning user who left it on gets
+// the layer restored on load; the control writes the choice on toggle and
+// drives this via setHeatmapEnabled. Off by default.
+let heatmapEnabled = getStoredHeatmapEnabled();
 const setHeatmapEnabled = (enabled: boolean) => {
 	if (!map) return;
 	heatmapEnabled = enabled;
