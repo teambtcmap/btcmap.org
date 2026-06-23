@@ -97,7 +97,10 @@ import TileLoadingIndicator from "./components/TileLoadingIndicator.svelte";
 import { BasemapsControl } from "./controls/BasemapsControl";
 import { BoostToggleControl } from "./controls/BoostToggleControl";
 import { DataRefreshControl } from "./controls/DataRefreshControl";
-import { HeatmapToggleControl } from "./controls/HeatmapToggleControl";
+import {
+	HEATMAP_STORAGE_KEY,
+	HeatmapToggleControl,
+} from "./controls/HeatmapToggleControl";
 import { NavButtonsControl } from "./controls/NavButtonsControl";
 import { VerifiedFilterControl } from "./controls/VerifiedFilterControl";
 import { browser } from "$app/environment";
@@ -928,6 +931,13 @@ const HEATMAP_HIDDEN_CLUSTER_LAYER_IDS = [
 // Toggle the merchant-density heatmap layer. Off by default unless the
 // user previously enabled it (persisted in localStorage by the control).
 let heatmapEnabled = false;
+if (typeof window !== "undefined") {
+	try {
+		heatmapEnabled = localStorage.getItem(HEATMAP_STORAGE_KEY) === "true";
+	} catch {
+		// localStorage may be unavailable (private mode)
+	}
+}
 const setHeatmapEnabled = (enabled: boolean) => {
 	if (!map) return;
 	heatmapEnabled = enabled;
