@@ -1278,13 +1278,12 @@ onMount(async () => {
 		});
 
 		// Merchant-density heatmap. Weight is uniform (1) so the gradient
-		// reflects pure point density; boosted places weigh slightly more
-		// so paid placements read as hotter cores within a cluster. Radius
-		// and intensity scale up with zoom so the halo widens as you zoom
-		// out to a city/region view and tightens as pins take over. Opacity
-		// stays at full strength through zoom 16 and fades to zero only in
-		// the final zoom level (16→17) so the heatmap hands off cleanly to
-		// the individual pins at CLUSTERING_DISABLED_ZOOM.
+		// reflects pure point density. Radius and intensity scale up with
+		// zoom so the halo widens as you zoom out to a city/region view and
+		// tightens as pins take over. Opacity stays at full strength through
+		// zoom 16 and fades to zero only in the final zoom level (16→17) so
+		// the heatmap hands off cleanly to the individual pins at
+		// CLUSTERING_DISABLED_ZOOM.
 		map.addLayer({
 			id: "place-heatmap",
 			type: "heatmap",
@@ -1292,12 +1291,7 @@ onMount(async () => {
 			maxzoom: CLUSTERING_DISABLED_ZOOM,
 			layout: { visibility: "none" },
 			paint: {
-				"heatmap-weight": [
-					"case",
-					["boolean", ["get", "boosted"], false],
-					1.6,
-					1,
-				],
+				"heatmap-weight": 1,
 				"heatmap-intensity": [
 					"interpolate",
 					["linear"],
