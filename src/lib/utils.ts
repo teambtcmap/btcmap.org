@@ -58,11 +58,11 @@ export const humanizeIconName = (icon: string): string => {
 		.replace(/\b\w/g, (c) => c.toUpperCase());
 };
 
-// Formats nearby merchant count for display: '' when 0, '(>99)' when exceeds max, '(N)' otherwise
-export const formatNearbyCount = (count: number): string => {
-	if (count === 0) return "";
-	if (count > MERCHANT_LIST_MAX_ITEMS) return `(>${MERCHANT_LIST_MAX_ITEMS})`;
-	return `(${count})`;
+// Formats the nearby count for the badge pill: '' when 0, '>250' above the list cap, 'N' otherwise
+export const formatNearbyPillCount = (count: number): string => {
+	if (count <= 0) return "";
+	if (count > MERCHANT_LIST_MAX_ITEMS) return `>${MERCHANT_LIST_MAX_ITEMS}`;
+	return String(count);
 };
 
 // Yields to main thread to prevent UI freezes during heavy operations (browser-only)
@@ -303,7 +303,8 @@ export function getCommunitiesAtCoordinates(
 	allAreas: Area[],
 ): Area[] {
 	return allAreas.filter((area) => {
-		if (area.tags.type !== "community") return false;
+		// Some area records can come back without a tags object; guard before access
+		if (area.tags?.type !== "community") return false;
 		if (!area.tags.geo_json) return false;
 		const bbox = getBbox(area.tags.geo_json);
 		if (bbox) {

@@ -2,7 +2,10 @@ import { get } from "svelte/store";
 import type { Mock } from "vitest";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 
-import { MERCHANT_LIST_FETCH_CEILING } from "$lib/constants";
+import {
+	MERCHANT_LIST_FETCH_CEILING,
+	MERCHANT_LIST_MAX_ITEMS,
+} from "$lib/constants";
 import type { Place } from "$lib/types";
 
 // Mock the centralized axios instance
@@ -126,15 +129,15 @@ describe("merchantListStore", () => {
 
 	describe("setMerchants", () => {
 		it("should limit results to default max items", () => {
-			const merchants = Array.from({ length: 100 }, (_, i) =>
+			const merchants = Array.from({ length: 300 }, (_, i) =>
 				createMockPlace({ id: i, name: `Place ${i}` }),
 			);
 
 			merchantList.setMerchants(merchants, 0, 0);
 			const state = get(merchantList);
 
-			expect(state.merchants.length).toBe(99); // MERCHANT_LIST_MAX_ITEMS
-			expect(state.totalCount).toBe(100);
+			expect(state.merchants.length).toBe(MERCHANT_LIST_MAX_ITEMS); // 250
+			expect(state.totalCount).toBe(300);
 		});
 
 		it("should update totalCount with full array length", () => {
@@ -362,7 +365,7 @@ describe("merchantListStore", () => {
 		});
 
 		it("shows nearest items when matches are under the fetch ceiling", async () => {
-			const mockPlaces = Array.from({ length: 150 }, (_, i) =>
+			const mockPlaces = Array.from({ length: 300 }, (_, i) =>
 				createMockPlace({ id: i }),
 			);
 			(api.get as Mock).mockResolvedValueOnce({ data: mockPlaces });
@@ -372,8 +375,8 @@ describe("merchantListStore", () => {
 			});
 			const state = get(merchantList);
 
-			expect(state.merchants.length).toBe(99); // MERCHANT_LIST_MAX_ITEMS
-			expect(state.totalCount).toBe(150);
+			expect(state.merchants.length).toBe(MERCHANT_LIST_MAX_ITEMS); // 250
+			expect(state.totalCount).toBe(300);
 		});
 
 		it("blanks the list when matches exceed the fetch ceiling", async () => {

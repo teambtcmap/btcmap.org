@@ -27,13 +27,14 @@ export function determineSnapState(
 	totalDelta: number,
 	finalHeight: number,
 	expandedHeight: number,
+	peekHeight: number = PEEK_HEIGHT,
 ): SnapState {
 	// Velocity takes priority - flick gestures feel responsive
 	if (Math.abs(velocity) > VELOCITY_THRESHOLD) {
 		if (velocity > 0) {
 			return { expanded: true, height: expandedHeight };
 		} else {
-			return { expanded: false, height: PEEK_HEIGHT };
+			return { expanded: false, height: peekHeight };
 		}
 	}
 
@@ -42,16 +43,16 @@ export function determineSnapState(
 		return { expanded: true, height: expandedHeight };
 	}
 	if (totalDelta < -DISTANCE_THRESHOLD) {
-		return { expanded: false, height: PEEK_HEIGHT };
+		return { expanded: false, height: peekHeight };
 	}
 
 	// Small movement - snap to nearest based on current position
 	const threshold =
-		PEEK_HEIGHT + (expandedHeight - PEEK_HEIGHT) * POSITION_THRESHOLD_PERCENT;
+		peekHeight + (expandedHeight - peekHeight) * POSITION_THRESHOLD_PERCENT;
 	if (finalHeight > threshold) {
 		return { expanded: true, height: expandedHeight };
 	}
-	return { expanded: false, height: PEEK_HEIGHT };
+	return { expanded: false, height: peekHeight };
 }
 
 // Updates velocity tracking state - returns new state without mutation

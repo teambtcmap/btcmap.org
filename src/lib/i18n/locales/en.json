@@ -122,8 +122,7 @@
 		}
 	},
 	"search": {
-		"placeholderWorldwide": "Search worldwide...",
-		"placeholderNearby": "Search nearby...",
+		"placeholderPlaces": "Search places...",
 		"searching": "Searching...",
 		"noResults": "No results found",
 		"noResultsFor": "No results found for \"{query}\"",
@@ -135,10 +134,7 @@
 		"showAll": "Show all",
 		"clear": "Clear search",
 		"noVisible": "No merchants visible in current view",
-		"worldwide": "Worldwide",
-		"nearby": "Nearby",
-		"switchToWorldwide": "Switch to worldwide search",
-		"filterResults": "Filter nearby results",
+		"nearbyCount": "{count} nearby",
 		"placeholder": "Search...",
 		"ariaLabel": "Search leaderboard",
 		"enablePreciseDistances": "Enable precise distances",
@@ -325,9 +321,7 @@
 		"collapseDrawer": "Collapse drawer",
 		"merchantDetails": "Merchant details",
 		"viewBoost": "Boost",
-		"viewDetails": "Details",
-		"swipeUpForDetails": "Swipe up for details",
-		"swipeDownToClose": "Swipe down to close"
+		"viewDetails": "Details"
 	},
 	"map": {
 		"bitcoinMerchantMapTitle": "Bitcoin Merchant Map"
@@ -386,7 +380,6 @@
 		"loading": "Loading",
 		"submitting": "Submitting",
 		"filterByCategory": "Filter by category",
-		"switchMode": "Switch search mode",
 		"togglePanel": "Toggle merchant list panel",
 		"merchantList": "Merchant list",
 		"merchantListItem": "Merchant list item",

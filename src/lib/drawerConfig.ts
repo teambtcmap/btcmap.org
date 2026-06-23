@@ -1,8 +1,15 @@
 // Drawer gesture configuration constants
 // These values control the behavior of the mobile drawer's swipe gestures
 
-// Drawer height states
-export const PEEK_HEIGHT = 140; // Collapsed state height - shows merchant name and quick info
+// Peek (collapsed) heights for the two bottom sheets.
+// Merchant drawer: bottom-anchored, full-width; shows name + payment/verify row
+// (snug — no trailing swipe hint).
+export const PEEK_HEIGHT = 110;
+// Search sheet: bottom-anchored, full-width (like the merchant drawer); peek
+// shows the grabber + single input. Rounded top corners at peek, square once
+// expanded. Tall enough that the input clears the bottom gesture bar / curved
+// corners on bezelled phones (the facade also adds a safe-area bottom inset).
+export const SEARCH_SHEET_PEEK_HEIGHT = 88;
 
 // Gesture thresholds
 export const VELOCITY_THRESHOLD = 0.5; // px/ms - minimum velocity for flick gesture detection

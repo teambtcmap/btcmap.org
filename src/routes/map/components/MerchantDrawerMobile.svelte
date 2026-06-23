@@ -2,6 +2,7 @@
 import { onMount } from "svelte";
 
 import BoostContent from "$components/BoostContent.svelte";
+import CollapseButton from "$components/CollapseButton.svelte";
 import Icon from "$components/Icon.svelte";
 import MerchantDetailsContent from "$components/MerchantDetailsContent.svelte";
 import { trackEvent } from "$lib/analytics";
@@ -259,17 +260,13 @@ export function openDrawer(id: number) {
 				{/if}
 
 				{#if $expanded && drawerView === 'details'}
-					<button
-						on:pointerdown|stopPropagation
-						on:click={() => {
+					<CollapseButton
+						onClick={() => {
 							trackEvent('drawer_collapse_button_click');
 							drawerGesture.collapse();
 						}}
-						class="touch-auto rounded-full p-2 text-primary transition-colors hover:bg-gray-100 dark:text-white dark:hover:bg-white/10"
-						aria-label={$_("mapDrawer.collapseDrawer")}
-					>
-						<Icon w="20" h="20" icon="keyboard_arrow_down" type="material" />
-					</button>
+						ariaLabel={$_('mapDrawer.collapseDrawer')}
+					/>
 				{:else if drawerView === 'details'}
 					<div class="w-9"></div>
 				{/if}

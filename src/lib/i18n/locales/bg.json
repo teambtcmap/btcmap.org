@@ -98,7 +98,6 @@
 		"searchInput": "Търсене на биткойн търговци",
 		"selectCategory": "Избери категория",
 		"submitting": "Изпращане",
-		"switchMode": "Превключи режим на търсене",
 		"togglePanel": "Превключи панела със списъка",
 		"newActivity": "Нова активност в запазените ви места"
 	},
@@ -416,10 +415,6 @@
 		"locationsIncludeAtms": "Местата включват банкомати.",
 		"noDataAvailable": "Няма налични данни"
 	},
-	"merchantPeek": {
-		"swipeUpDetails": "Плъзнете нагоре за детайли",
-		"swipeDownClose": "Плъзнете надолу за затваряне"
-	},
 	"merchantDrawer": {
 		"back": "Назад"
 	},
@@ -633,24 +628,20 @@
 		"clear": "Изчисти търсенето",
 		"dismissLocationPrompt": "Отхвърли подсказката за местоположение",
 		"enablePreciseDistances": "Включи точни разстояния",
-		"filterResults": "Филтрирай резултатите наблизо",
 		"locationEnabled": "Местоположението е включено. Списъкът е подреден по разстояние.",
 		"locationPermissionDenied": "Разрешението за местоположение е отказано. Включете го в настройките на браузъра.",
 		"locationUnavailable": "Не може да се определи местоположението ви. Моля, опитайте отново.",
-		"nearby": "Наблизо",
+		"nearbyCount": "{count} наблизо",
 		"noResults": "Няма намерени резултати",
 		"noResultsFor": "Няма резултати за \"{query}\"",
 		"noVisible": "Няма видими търговци в текущия изглед",
 		"placeholder": "Търсене...",
-		"placeholderNearby": "Търсене наблизо...",
-		"placeholderWorldwide": "Търсене по целия свят...",
+		"placeholderPlaces": "Търсене на места...",
 		"prompt": "Търсете търговци по име",
 		"resultsCount": "{count} резултат(а)",
 		"searching": "Търсене...",
 		"showAll": "Покажи всички",
 		"showingNearest": "Показване на най-близките {count}",
-		"switchToWorldwide": "Премини към търсене по целия свят",
-		"worldwide": "По целия свят",
 		"zoomIn": "Увеличете за да видите списъка",
 		"zoomInDetail": "Списъкът с търговци показва места при приближаване"
 	},
@@ -674,9 +665,7 @@
 		"collapseDrawer": "Свий панела",
 		"merchantDetails": "Детайли за търговеца",
 		"viewBoost": "Подсили",
-		"viewDetails": "Детайли",
-		"swipeUpForDetails": "Плъзнете нагоре за детайли",
-		"swipeDownToClose": "Плъзнете надолу за затваряне"
+		"viewDetails": "Детайли"
 	},
 	"map": {
 		"bitcoinMerchantMapTitle": "Карта на биткойн търговци"

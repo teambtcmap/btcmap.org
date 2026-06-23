@@ -122,8 +122,7 @@
 		}
 	},
 	"search": {
-		"placeholderWorldwide": "Cerca in tutto il mondo...",
-		"placeholderNearby": "Cerca nelle vicinanze...",
+		"placeholderPlaces": "Cerca luoghi...",
 		"searching": "Ricerca in corso...",
 		"noResults": "Nessun risultato trovato",
 		"noResultsFor": "Nessun risultato trovato per \"{query}\"",
@@ -135,10 +134,7 @@
 		"showAll": "Mostra tutto",
 		"clear": "Cancella ricerca",
 		"noVisible": "Nessun commerciante visibile nella vista attuale",
-		"worldwide": "In tutto il mondo",
-		"nearby": "Vicinanze",
-		"switchToWorldwide": "Passa alla ricerca globale",
-		"filterResults": "Filtra i risultati nelle vicinanze",
+		"nearbyCount": "{count} nelle vicinanze",
 		"placeholder": "Cerca...",
 		"ariaLabel": "Cerca nella classifica",
 		"enablePreciseDistances": "Abilita distanze precise",
@@ -325,9 +321,7 @@
 		"collapseDrawer": "Riduci riquadro",
 		"merchantDetails": "Dettagli commerciante",
 		"viewBoost": "Boost",
-		"viewDetails": "Dettagli",
-		"swipeUpForDetails": "Scorri verso l'alto per i dettagli",
-		"swipeDownToClose": "Scorri verso il basso per chiudere"
+		"viewDetails": "Dettagli"
 	},
 	"map": {
 		"bitcoinMerchantMapTitle": "Mappa dei commercianti Bitcoin"
@@ -386,7 +380,6 @@
 		"loading": "Caricamento",
 		"submitting": "Invio in corso",
 		"filterByCategory": "Filtra per categoria",
-		"switchMode": "Cambia modalità di ricerca",
 		"togglePanel": "Attiva/disattiva il pannello della lista dei commercianti",
 		"merchantList": "Lista dei commercianti",
 		"merchantListItem": "Elemento della lista dei commercianti",

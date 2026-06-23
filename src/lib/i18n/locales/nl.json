@@ -122,8 +122,7 @@
 		}
 	},
 	"search": {
-		"placeholderWorldwide": "Zoek wereldwijd...",
-		"placeholderNearby": "Zoek in de buurt...",
+		"placeholderPlaces": "Zoek plaatsen...",
 		"searching": "Aan het zoeken...",
 		"noResults": "Geen resultaten gevonden",
 		"noResultsFor": "Er zijn geen resultaten gevonden voor \"{query}\"",
@@ -135,10 +134,7 @@
 		"showAll": "Toon alles",
 		"clear": "Zoekopdracht wissen",
 		"noVisible": "Er zijn geen ondernemers zichtbaar in deze weergave",
-		"worldwide": "Wereldwijd",
-		"nearby": "Omgeving",
-		"switchToWorldwide": "Schakel over naar wereldwijd zoeken",
-		"filterResults": "Filter nabijgelegen resultaten",
+		"nearbyCount": "{count} in de buurt",
 		"placeholder": "Zoeken...",
 		"ariaLabel": "Zoek in ranglijst",
 		"enablePreciseDistances": "Nauwkeurige afstanden activeren",
@@ -325,9 +321,7 @@
 		"collapseDrawer": "Lade inklappen",
 		"merchantDetails": "Ondernemerdetails",
 		"viewBoost": "Boost",
-		"viewDetails": "Details",
-		"swipeUpForDetails": "Veeg omhoog voor details",
-		"swipeDownToClose": "Veeg omlaag om te sluiten"
+		"viewDetails": "Details"
 	},
 	"map": {
 		"bitcoinMerchantMapTitle": "Bitcoin acceptantenkaart"
@@ -386,7 +380,6 @@
 		"loading": "Laden",
 		"submitting": "Indienen",
 		"filterByCategory": "Filter op categorie",
-		"switchMode": "Wissel van zoekmodus",
 		"togglePanel": "Ondernemerslijst tonen/verbergen",
 		"merchantList": "Ondernemerslijst",
 		"merchantListItem": "Ondernemerslijst item",

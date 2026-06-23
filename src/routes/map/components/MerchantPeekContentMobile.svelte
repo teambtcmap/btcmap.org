@@ -77,15 +77,4 @@ $: hasVerification = merchant.verified_at !== undefined;
 			{/if}
 		</div>
 	</div>
-
-	<!-- Swipe hint -->
-	<div class="flex items-center justify-end border-t border-gray-200 pt-3 dark:border-white/10">
-		<div class="flex items-center gap-1 text-xs text-body dark:text-white/50">
-			<Icon w="14" h="14" icon="arrow_upward" type="material" />
-			<span>{$_('mapDrawer.swipeUpForDetails')}</span>
-			<span class="mx-1">·</span>
-			<Icon w="14" h="14" icon="arrow_downward" type="material" />
-			<span>{$_('mapDrawer.swipeDownToClose')}</span>
-		</div>
-	</div>
 </div>
