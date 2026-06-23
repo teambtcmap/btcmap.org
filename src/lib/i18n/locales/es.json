@@ -1072,15 +1072,15 @@
 		}
 	},
 	"login": {
-		"nostrExtension": "Sign in with Nostr extension",
-		"nostrSigning": "Signing…",
-		"nostrFailed": "Nostr signature was rejected",
-		"nostrError": "Could not complete Nostr login",
-		"nsecToggle": "Or paste your nsec",
-		"nsecLabel": "Nostr secret key",
-		"nsecWarning": "Your nsec is sent only to your browser to sign in once — it is never stored or transmitted.",
-		"nsecSubmit": "Sign in with nsec",
-		"nsecInvalid": "That does not look like a valid nsec",
-		"or": "or"
+		"nostrExtension": "Inicia sesión con la extensión de Nostr",
+		"nostrSigning": "Firmando…",
+		"nostrFailed": "La firma de Nostr fue rechazada",
+		"nostrError": "No se pudo completar el inicio de sesión con Nostr",
+		"nsecToggle": "O pega tu nsec",
+		"nsecLabel": "Clave secreta de Nostr",
+		"nsecWarning": "Tu nsec se envía solo a tu navegador para iniciar sesión una vez — nunca se almacena ni se transmite.",
+		"nsecSubmit": "Inicia sesión con nsec",
+		"nsecInvalid": "Eso no parece un nsec válido",
+		"or": "o"
 	}
 }
