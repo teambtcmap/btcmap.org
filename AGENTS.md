@@ -181,6 +181,63 @@ When adding new API calls, always use `${API_BASE}/...` (imported from `$lib/api
 
 User-facing URLs (Atom feed `href` attributes, OpenGraph image URLs) should remain hardcoded to the production API since they're rendered in HTML and must resolve publicly.
 
+## Nostr
+
+Profile and event data comes from arbitrary public relays — treat all of it as fully untrusted input.
+
+### NIP Reference
+
+Use [https://nostrhub.io/nips](https://nostrhub.io/nips) as the definitive NIP source — it includes core NIPs from the official repo plus community additions.
+
+### Security
+
+**CRITICAL:** Nostr private keys (`nsec`) are stored in plaintext in `localStorage`. Any JavaScript running on the origin can steal them. A single XSS means permanent, unrecoverable key theft across every Nostr client the user uses. **Treat XSS mitigation as the top-priority security concern.**
+
+- **Sanitize event-sourced URLs.** Before binding a relay-provided URL (e.g. a kind:0 `picture`) into `src`/`href`, validate the scheme is `http(s)` — reject `javascript:`, `data:`, and unparseable values (see `safeHttpUrl` in `src/lib/nostrProfile.ts`). Keep `referrerpolicy="no-referrer"` on remote images so the page URL doesn't leak to a hostile host.
+- **Never `{@html}` event content.** Bind event-sourced strings as text so Svelte escapes them, or run them through DOMPurify (`src/lib/utils.ts`) first.
+- **Sanitize event-sourced strings interpolated into CSS.** A malicious `font-family` or `url()` value can break out of the CSS context and inject rules.
+- **CSP is defense-in-depth**, not primary defense. Never relax it with `'unsafe-eval'`, `'unsafe-inline'` on `script-src`, or wildcard sources.
+- **Filter by `authors` when trust is implied.** Nostr is permissionless — signatures prove authorship, not trustworthiness. For admin/moderator queries and addressable events (kinds 30000–39999), always constrain by trusted pubkeys. The `d` tag alone is not a trust boundary.
+  ```ts
+  // ❌ Anyone can publish with any d-tag value
+  nostr.query([{ kinds: [30078], "#d": ["app-organizers"], limit: 1 }]);
+
+  // ✅ Only trust admin authors
+  nostr.query([{ kinds: [30078], authors: ADMIN_PUBKEYS, "#d": ["app-organizers"], limit: 1 }]);
+  ```
+
+### NIP Selection
+
+- **Review existing NIPs first** on [nostrhub.io](https://nostrhub.io/nips). The goal is to find the closest existing solution.
+- **Prefer extending existing NIPs** over creating custom kinds, even if it requires minor schema compromises. Custom kinds fragment the ecosystem.
+- **When existing NIPs are close but not perfect**, use the existing kind as the base and add domain-specific tags. Document extensions in `NIP.md`.
+- **Only generate a new kind** when no existing NIP covers the core functionality, the data structure is fundamentally different, or the use case needs different storage characteristics.
+- **Custom kinds MUST include a NIP-31 `alt` tag** with a human-readable description.
+
+### Kind Ranges
+
+- **Regular** (1000 ≤ kind < 10000): stored permanently by relays. Notes, articles, etc.
+- **Replaceable** (10000 ≤ kind < 20000): only the latest event per `pubkey+kind` is stored. Profile metadata (kind 0), contact lists (kind 3).
+- **Addressable** (30000 ≤ kind < 40000): identified by `pubkey+kind+d-tag`; only the latest per combo is stored. Long-form content, application data.
+- Kinds below 1000 are legacy regular; their storage behavior is per-kind (e.g. kind 1 is regular, kind 3 is replaceable).
+
+### Tag Design
+
+- **Kind = schema, tags = semantics.** Don't create new kinds just to represent a different category of the same data.
+- **Relays only index single-letter tags.** Use `t` for categories so NIP-12-style filters work at the relay level. Multi-letter tags force inefficient client-side filtering.
+- **Filter at the relay.** Pass tag filters in the query rather than fetching everything and filtering in JS. Combine kinds into one filter instead of running parallel queries.
+
+### Content Field
+
+- **Use `content` for** large freeform text or existing industry-standard JSON formats (GeoJSON, etc.). Kind 0 is the exception where structured JSON goes in `content`.
+- **Use tags for** queryable metadata — anything you might filter on. If you need to filter by a field, it **must** be a tag (relays don't index content).
+- **`content: ""` is idiomatic** for tag-only events.
+
+### NIP-19 Identifiers
+
+- **Decode NIP-19 → hex before querying** (see `toHex` in `src/lib/nostrProfile.ts`); treat an undecodable or unexpected-prefix identifier as a miss, never as raw query input. Filters only accept hex.
+- Never treat `nsec1` or unknown prefixes as valid input.
+
 ## Project Structure Notes
 
 - `src/lib/sync/places.ts` always runs first and populates the `$places` store with `Place[]` data
