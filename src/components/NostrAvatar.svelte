@@ -13,23 +13,37 @@ export { cls as class };
 
 let picture: string | null = null;
 let imgFailed = false;
+let imgLoaded = false;
 
 onMount(async () => {
 	const profile = await fetchProfile(npub);
 	picture = profile?.picture ?? null;
 });
 
-// Show the user's Nostr picture once we have a URL that hasn't errored;
-// otherwise fall back to the same account icon UserMenu shows by default
-// (covers loading, no-profile, and broken-image-URL cases).
-$: showImage = picture !== null && !imgFailed;
+// Reveal the picture only once its bytes have actually loaded; until then
+// (and for no-profile / broken-URL accounts) keep the same account icon
+// UserMenu shows by default, so there's no blank/broken flash.
+$: showImage = picture !== null && !imgFailed && imgLoaded;
 </script>
 
-{#if showImage}
+{#if !showImage}
+	<Icon
+		type="material"
+		icon="account_circle_filled"
+		w={String(size)}
+		h={String(size)}
+		class={cls}
+	/>
+{/if}
+
+{#if picture !== null && !imgFailed}
 	<!--
-		The picture URL is user-controlled (it comes from the signer's kind:0
-		profile on public relays), so referrerpolicy="no-referrer" keeps the
-		current page URL from leaking to a hostile image host.
+		Rendered (but kept hidden until on:load) so the browser downloads it
+		while the icon stands in. The picture URL is user-controlled (it comes
+		from the signer's kind:0 profile on public relays), so
+		referrerpolicy="no-referrer" keeps the current page URL from leaking to
+		a hostile image host. No loading="lazy": a display:none lazy image can
+		defer forever and never fire on:load.
 	-->
 	<img
 		src={picture}
@@ -37,17 +51,10 @@ $: showImage = picture !== null && !imgFailed;
 		width={size}
 		height={size}
 		referrerpolicy="no-referrer"
-		loading="lazy"
 		decoding="async"
+		on:load={() => (imgLoaded = true)}
 		on:error={() => (imgFailed = true)}
 		class="rounded-full object-cover {cls}"
-	/>
-{:else}
-	<Icon
-		type="material"
-		icon="account_circle_filled"
-		w={String(size)}
-		h={String(size)}
-		class={cls}
+		class:hidden={!imgLoaded}
 	/>
 {/if}
