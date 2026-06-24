@@ -181,6 +181,16 @@ When adding new API calls, always use `${API_BASE}/...` (imported from `$lib/api
 
 User-facing URLs (Atom feed `href` attributes, OpenGraph image URLs) should remain hardcoded to the production API since they're rendered in HTML and must resolve publicly.
 
+## Nostr
+
+Profile and event data comes from arbitrary public relays — treat all of it as fully untrusted input.
+
+- **Sanitize event-sourced URLs.** Before binding a relay-provided URL (e.g. a kind:0 `picture`) into `src`/`href`, validate the scheme is `http(s)` — reject `javascript:`, `data:`, and unparseable values (see `safeHttpUrl` in `src/lib/nostrProfile.ts`). Keep `referrerpolicy="no-referrer"` on remote images so the page URL doesn't leak to a hostile host.
+- **Never `{@html}` event content.** Bind event-sourced strings as text so Svelte escapes them, or run them through DOMPurify (`src/lib/utils.ts`) first.
+- **Decode NIP-19 → hex before querying** (see `toHex` in `src/lib/nostrProfile.ts`); treat an undecodable or unexpected-prefix identifier as a miss, never as raw query input.
+- **Filter at the relay, not in JS.** Use proper `authors`/`kinds` filters and combine kinds into one filter rather than over-fetching and post-filtering client-side.
+- **Reuse existing NIPs/kinds** rather than inventing custom ones; if a custom kind is unavoidable, include a NIP-31 `alt` tag.
+
 ## Project Structure Notes
 
 - `src/lib/sync/places.ts` always runs first and populates the `$places` store with `Place[]` data
