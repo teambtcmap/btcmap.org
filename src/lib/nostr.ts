@@ -89,3 +89,29 @@ export function decodeNsec(nsec: string): Uint8Array {
 	}
 	return decoded.data;
 }
+
+// Shape returned by the /api/session/nostr proxy on a successful login.
+export type NostrAuthResult = {
+	token: string;
+	username: string;
+	npub: string | null;
+};
+
+// Validate and narrow the proxy's auth response. Throws when token or username
+// is missing (the proxy guarantees both on success, but the client re-checks
+// defensively); npub is narrowed to string | null (absent/non-string → null).
+export function parseNostrAuthResponse(data: unknown): NostrAuthResult {
+	const d = (data ?? {}) as {
+		token?: unknown;
+		username?: unknown;
+		npub?: unknown;
+	};
+	if (typeof d.token !== "string" || typeof d.username !== "string") {
+		throw new Error("Nostr auth did not return a token");
+	}
+	return {
+		token: d.token,
+		username: d.username,
+		npub: typeof d.npub === "string" ? d.npub : null,
+	};
+}
