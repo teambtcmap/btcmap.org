@@ -92,4 +92,21 @@ describe("fetchProfile", () => {
 		await fetchProfile(hex("8"));
 		expect(mockGet).toHaveBeenCalledTimes(1);
 	});
+
+	it("dedups concurrent fetches for the same key into one query", async () => {
+		let resolveGet: (value: unknown) => void = () => {};
+		mockGet.mockReturnValue(
+			new Promise((resolve) => {
+				resolveGet = resolve;
+			}),
+		);
+		// Both calls start before the relay query resolves.
+		const first = fetchProfile(hex("7"));
+		const second = fetchProfile(hex("7"));
+		resolveGet(metadataEvent(JSON.stringify({ name: "grace" })));
+		const [a, b] = await Promise.all([first, second]);
+		expect(a).toEqual({ name: "grace" });
+		expect(b).toEqual(a);
+		expect(mockGet).toHaveBeenCalledTimes(1);
+	});
 });

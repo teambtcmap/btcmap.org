@@ -26,6 +26,13 @@ const MAX_WAIT_MS = 3000;
 // so a profile-less npub isn't refetched on every render.
 const cache = new Map<string, NostrProfile | null>();
 
+// In-flight requests keyed by hex pubkey, so concurrent callers (e.g. UserMenu
+// and the NostrAvatar it renders, both querying on first paint) share a single
+// relay query instead of each opening their own.
+const inflight = new Map<string, Promise<NostrProfile | null>>();
+
+// One pool for the tab's lifetime, deliberately left open so repeat lookups
+// reuse the relay connections (matches the session-long result cache).
 let pool: SimplePool | null = null;
 function getPool(): SimplePool {
 	if (!pool) pool = new SimplePool();
@@ -74,18 +81,29 @@ export async function fetchProfile(
 
 	if (cache.has(hex)) return cache.get(hex) ?? null;
 
-	let profile: NostrProfile | null = null;
+	const existing = inflight.get(hex);
+	if (existing) return existing;
+
+	const request = queryProfile(hex);
+	inflight.set(hex, request);
+	try {
+		const profile = await request;
+		cache.set(hex, profile);
+		return profile;
+	} finally {
+		inflight.delete(hex);
+	}
+}
+
+async function queryProfile(hex: string): Promise<NostrProfile | null> {
 	try {
 		const event = await getPool().get(
 			RELAYS,
 			{ kinds: [0], authors: [hex] },
 			{ maxWait: MAX_WAIT_MS },
 		);
-		profile = event ? parseMetadata(event.content) : null;
+		return event ? parseMetadata(event.content) : null;
 	} catch {
-		profile = null;
+		return null;
 	}
-
-	cache.set(hex, profile);
-	return profile;
 }
