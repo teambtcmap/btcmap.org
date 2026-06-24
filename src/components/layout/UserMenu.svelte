@@ -3,6 +3,7 @@ import OutClick from "svelte-outclick";
 
 import BackupModal from "$components/auth/BackupModal.svelte";
 import Icon from "$components/Icon.svelte";
+import NostrAvatar from "$components/NostrAvatar.svelte";
 import { hasNewActivity } from "$lib/activityNotifier";
 import { _ } from "$lib/i18n";
 import { session } from "$lib/session";
@@ -38,12 +39,16 @@ afterNavigate(() => {
 		aria-haspopup="true"
 		aria-expanded={open}
 	>
-		<Icon
-			type="material"
-			icon={$session ? 'account_circle_filled' : 'account_circle'}
-			w="24"
-			h="24"
-		/>
+		{#if $session?.npub}
+			<NostrAvatar npub={$session.npub} size={24} class="h-6 w-6" />
+		{:else}
+			<Icon
+				type="material"
+				icon={$session ? 'account_circle_filled' : 'account_circle'}
+				w="24"
+				h="24"
+			/>
+		{/if}
 		{#if $session && $hasNewActivity}
 			<span
 				class="absolute right-1 top-1 h-2.5 w-2.5 rounded-full bg-red-500 ring-2 ring-white dark:ring-dark"
