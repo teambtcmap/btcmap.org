@@ -1349,7 +1349,7 @@ onMount(async () => {
 					["linear"],
 					["zoom"],
 					0,
-					1,
+					0.5,
 					CLUSTERING_DISABLED_ZOOM,
 					3,
 				],
@@ -1366,16 +1366,20 @@ onMount(async () => {
 					0.6,
 					"#facc15", // yellow-400
 					0.8,
+					"#facc15", // yellow-400 — yellow holds longer
+					1.0,
 					"#f97316", // orange-500
-					1,
-					"#dc2626", // red-600
+					1.2,
+					"#ea580c", // orange-600
+					1.5,
+					"#dc2626", // red-600 — red only at extreme density
 				],
 				"heatmap-radius": [
 					"interpolate",
 					["linear"],
 					["zoom"],
 					0,
-					8,
+					3,
 					CLUSTERING_DISABLED_ZOOM,
 					30,
 				],
