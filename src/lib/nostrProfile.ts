@@ -15,7 +15,8 @@ export type NostrProfile = {
 const RELAYS = [
 	"wss://relay.damus.io",
 	"wss://nos.lol",
-	"wss://relay.nostr.band",
+	"wss://relay.primal.net",
+	"wss://ditto.pub/relay",
 ];
 
 // The avatar is non-critical chrome, so fail fast and fall back to the icon
