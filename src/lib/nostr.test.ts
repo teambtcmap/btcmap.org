@@ -2,7 +2,11 @@ import { nip19 } from "nostr-tools";
 import { generateSecretKey, getPublicKey } from "nostr-tools/pure";
 import { describe, expect, it, vi } from "vitest";
 
-import { decodeNsec, signAuthWithSecretKey } from "./nostr";
+import {
+	decodeNsec,
+	parseNostrAuthResponse,
+	signAuthWithSecretKey,
+} from "./nostr";
 
 describe("decodeNsec", () => {
 	it("returns 32 bytes for a valid nsec", () => {
@@ -82,5 +86,52 @@ describe("signAuthWithSecretKey", () => {
 		} finally {
 			vi.useRealTimers();
 		}
+	});
+});
+
+describe("parseNostrAuthResponse", () => {
+	it("returns token, username and npub from a full response", () => {
+		expect(
+			parseNostrAuthResponse({
+				token: "tok",
+				username: "alice",
+				npub: "npub1xyz",
+			}),
+		).toEqual({ token: "tok", username: "alice", npub: "npub1xyz" });
+	});
+
+	it("narrows a missing npub to null", () => {
+		expect(parseNostrAuthResponse({ token: "tok", username: "alice" })).toEqual(
+			{
+				token: "tok",
+				username: "alice",
+				npub: null,
+			},
+		);
+	});
+
+	it("narrows a non-string npub to null", () => {
+		expect(
+			parseNostrAuthResponse({ token: "tok", username: "alice", npub: 42 }),
+		).toMatchObject({ npub: null });
+	});
+
+	it("throws when token is missing", () => {
+		expect(() => parseNostrAuthResponse({ username: "alice" })).toThrow();
+	});
+
+	it("throws when username is missing", () => {
+		expect(() => parseNostrAuthResponse({ token: "tok" })).toThrow();
+	});
+
+	it("throws when token is not a string", () => {
+		expect(() =>
+			parseNostrAuthResponse({ token: 1, username: "alice" }),
+		).toThrow();
+	});
+
+	it("throws on null or undefined data", () => {
+		expect(() => parseNostrAuthResponse(null)).toThrow();
+		expect(() => parseNostrAuthResponse(undefined)).toThrow();
 	});
 });
