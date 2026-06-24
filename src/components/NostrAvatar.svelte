@@ -1,6 +1,4 @@
 <script lang="ts">
-import { onMount } from "svelte";
-
 import Icon from "$components/Icon.svelte";
 import { _ } from "$lib/i18n";
 import { fetchProfile } from "$lib/nostrProfile";
@@ -14,11 +12,25 @@ export { cls as class };
 let picture: string | null = null;
 let imgFailed = false;
 let imgLoaded = false;
+let loadedNpub: string | null = null;
 
-onMount(async () => {
-	const profile = await fetchProfile(npub);
-	picture = profile?.picture ?? null;
-});
+// Fetch reactively on npub, not just onMount: this instance is reused across
+// account switches (it lives in the persistent Header), so re-fetch and reset
+// the render state whenever npub changes. fetchProfile dedups + caches, so the
+// repeated calls are cheap.
+$: loadProfile(npub);
+
+function loadProfile(value: string) {
+	if (value === loadedNpub) return;
+	loadedNpub = value;
+	picture = null;
+	imgFailed = false;
+	imgLoaded = false;
+	fetchProfile(value).then((profile) => {
+		// Ignore a stale result if npub changed again mid-fetch.
+		if (loadedNpub === value) picture = profile?.picture ?? null;
+	});
+}
 
 // Reveal the picture only once its bytes have actually loaded; until then
 // (and for no-profile / broken-URL accounts) keep the same account icon
