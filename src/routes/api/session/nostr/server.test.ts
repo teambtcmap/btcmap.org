@@ -1,4 +1,4 @@
-import { beforeEach, describe, expect, it, vi } from "vitest";
+import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 
 import { POST } from "./+server";
 
@@ -43,6 +43,11 @@ function call(request: Request, fetchImpl: unknown) {
 beforeEach(() => {
 	// The error paths log to console.error by design; keep test output clean.
 	vi.spyOn(console, "error").mockImplementation(() => {});
+});
+
+afterEach(() => {
+	// Restore the console.error spy so it can't leak into other test files.
+	vi.restoreAllMocks();
 });
 
 describe("POST /api/session/nostr", () => {
