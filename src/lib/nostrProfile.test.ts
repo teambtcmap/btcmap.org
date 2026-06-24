@@ -1,0 +1,137 @@
+import { afterEach, describe, expect, it, vi } from "vitest";
+
+// Stub SimplePool so no real relay sockets are opened; mockGet stands in for
+// pool.get and is controlled per test.
+const { mockGet } = vi.hoisted(() => ({ mockGet: vi.fn() }));
+vi.mock("nostr-tools/pool", () => ({
+	SimplePool: vi.fn(() => ({ get: mockGet })),
+}));
+
+import { fetchProfile } from "./nostrProfile";
+
+// 64-char hex pubkey — fetchProfile accepts hex directly, so tests skip npub
+// decoding. A distinct fill char per test avoids the module-level cache
+// colliding across cases.
+const hex = (fill: string) => fill.repeat(64);
+
+const metadataEvent = (content: string) => ({
+	kind: 0,
+	content,
+	pubkey: "00",
+	id: "00",
+	sig: "00",
+	created_at: 0,
+	tags: [],
+});
+
+afterEach(() => mockGet.mockReset());
+
+describe("fetchProfile", () => {
+	it("parses a full kind:0 profile", async () => {
+		mockGet.mockResolvedValue(
+			metadataEvent(
+				JSON.stringify({
+					name: "alice",
+					display_name: "Alice",
+					picture: "https://example.test/a.png",
+					nip05: "alice@example.test",
+				}),
+			),
+		);
+		expect(await fetchProfile(hex("a"))).toEqual({
+			name: "alice",
+			displayName: "Alice",
+			picture: "https://example.test/a.png",
+			nip05: "alice@example.test",
+		});
+	});
+
+	it("keeps only the fields that are present", async () => {
+		mockGet.mockResolvedValue(metadataEvent(JSON.stringify({ name: "bob" })));
+		expect(await fetchProfile(hex("b"))).toEqual({ name: "bob" });
+	});
+
+	it("ignores non-string fields", async () => {
+		mockGet.mockResolvedValue(
+			metadataEvent(JSON.stringify({ name: 42, picture: null })),
+		);
+		expect(await fetchProfile(hex("9"))).toEqual({});
+	});
+
+	it("drops a picture URL that is not http(s)", async () => {
+		mockGet.mockResolvedValue(
+			metadataEvent(
+				JSON.stringify({ name: "mallory", picture: "javascript:alert(1)" }),
+			),
+		);
+		expect(await fetchProfile(hex("1"))).toEqual({ name: "mallory" });
+	});
+
+	it("drops a picture value that is not a parseable URL", async () => {
+		mockGet.mockResolvedValue(
+			metadataEvent(JSON.stringify({ picture: "/relative/path.png" })),
+		);
+		expect(await fetchProfile(hex("2"))).toEqual({});
+	});
+
+	it("keeps an http picture URL", async () => {
+		mockGet.mockResolvedValue(
+			metadataEvent(JSON.stringify({ picture: "http://example.test/p.png" })),
+		);
+		expect(await fetchProfile(hex("3"))).toEqual({
+			picture: "http://example.test/p.png",
+		});
+	});
+
+	it("returns null on malformed JSON content", async () => {
+		mockGet.mockResolvedValue(metadataEvent("{ not json"));
+		expect(await fetchProfile(hex("c"))).toBeNull();
+	});
+
+	it("returns null when no event is found (miss/timeout)", async () => {
+		mockGet.mockResolvedValue(null);
+		expect(await fetchProfile(hex("d"))).toBeNull();
+	});
+
+	it("returns null when the relay query throws", async () => {
+		mockGet.mockRejectedValue(new Error("relay down"));
+		expect(await fetchProfile(hex("e"))).toBeNull();
+	});
+
+	it("returns null and does not query for invalid input", async () => {
+		expect(await fetchProfile("not-an-npub")).toBeNull();
+		expect(mockGet).not.toHaveBeenCalled();
+	});
+
+	it("caches a hit — a second call returns the same object without re-querying", async () => {
+		mockGet.mockResolvedValue(metadataEvent(JSON.stringify({ name: "frank" })));
+		const first = await fetchProfile(hex("f"));
+		const second = await fetchProfile(hex("f"));
+		expect(second).toBe(first);
+		expect(mockGet).toHaveBeenCalledTimes(1);
+	});
+
+	it("caches negatives — a null result is not refetched", async () => {
+		mockGet.mockResolvedValue(null);
+		await fetchProfile(hex("8"));
+		await fetchProfile(hex("8"));
+		expect(mockGet).toHaveBeenCalledTimes(1);
+	});
+
+	it("dedups concurrent fetches for the same key into one query", async () => {
+		let resolveGet: (value: unknown) => void = () => {};
+		mockGet.mockReturnValue(
+			new Promise((resolve) => {
+				resolveGet = resolve;
+			}),
+		);
+		// Both calls start before the relay query resolves.
+		const first = fetchProfile(hex("7"));
+		const second = fetchProfile(hex("7"));
+		resolveGet(metadataEvent(JSON.stringify({ name: "grace" })));
+		const [a, b] = await Promise.all([first, second]);
+		expect(a).toEqual({ name: "grace" });
+		expect(b).toEqual(a);
+		expect(mockGet).toHaveBeenCalledTimes(1);
+	});
+});

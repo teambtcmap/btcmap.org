@@ -3,8 +3,10 @@ import OutClick from "svelte-outclick";
 
 import BackupModal from "$components/auth/BackupModal.svelte";
 import Icon from "$components/Icon.svelte";
+import NostrAvatar from "$components/NostrAvatar.svelte";
 import { hasNewActivity } from "$lib/activityNotifier";
 import { _ } from "$lib/i18n";
+import { fetchProfile } from "$lib/nostrProfile";
 import { session } from "$lib/session";
 
 import { afterNavigate, goto } from "$app/navigation";
@@ -13,8 +15,30 @@ export let id = "user-menu";
 
 let open = false;
 let showBackup = false;
+
+// For Nostr accounts, prefer the profile's display name over the
+// auto-generated API username in the menu label/tooltip. fetchProfile caches,
+// and the guard keeps this to a single fetch per npub.
+let nostrName: string | null = null;
+let loadedNpub: string | null = null;
+
+function syncNostrName(npub: string | null) {
+	if (npub === loadedNpub) return;
+	loadedNpub = npub;
+	nostrName = null;
+	if (npub) {
+		fetchProfile(npub).then((profile) => {
+			// Ignore a stale result if npub changed while fetching.
+			if (loadedNpub === npub) {
+				nostrName = profile?.displayName || profile?.name || null;
+			}
+		});
+	}
+}
+
 $: triggerId = `${id}-trigger`;
-$: accountLabel = $session?.username ?? $_("nav.account");
+$: syncNostrName($session?.npub ?? null);
+$: accountLabel = nostrName ?? $session?.username ?? $_("nav.account");
 // Fold the new-activity state into the button's accessible name —
 // otherwise the inner dot's aria-label is shadowed by the button's
 // own aria-label and never reaches assistive tech.
@@ -38,12 +62,16 @@ afterNavigate(() => {
 		aria-haspopup="true"
 		aria-expanded={open}
 	>
-		<Icon
-			type="material"
-			icon={$session ? 'account_circle_filled' : 'account_circle'}
-			w="24"
-			h="24"
-		/>
+		{#if $session?.npub}
+			<NostrAvatar npub={$session.npub} size={24} class="h-6 w-6" />
+		{:else}
+			<Icon
+				type="material"
+				icon={$session ? 'account_circle_filled' : 'account_circle'}
+				w="24"
+				h="24"
+			/>
+		{/if}
 		{#if $session && $hasNewActivity}
 			<span
 				class="absolute right-1 top-1 h-2.5 w-2.5 rounded-full bg-red-500 ring-2 ring-white dark:ring-dark"
