@@ -53,6 +53,19 @@ function toHex(npubOrHex: string): string | null {
 	}
 }
 
+// Relay-provided values are untrusted, so a field destined for a resource URL
+// (the picture goes straight into an <img src>) must be a real http(s) URL.
+// Reject javascript:, data:, and anything unparseable rather than handing it
+// to the DOM.
+function safeHttpUrl(value: string): string | null {
+	try {
+		const { protocol } = new URL(value);
+		return protocol === "http:" || protocol === "https:" ? value : null;
+	} catch {
+		return null;
+	}
+}
+
 function parseMetadata(content: string): NostrProfile | null {
 	try {
 		const meta = JSON.parse(content) as Record<string, unknown>;
@@ -60,7 +73,10 @@ function parseMetadata(content: string): NostrProfile | null {
 		if (typeof meta.name === "string") profile.name = meta.name;
 		if (typeof meta.display_name === "string")
 			profile.displayName = meta.display_name;
-		if (typeof meta.picture === "string") profile.picture = meta.picture;
+		if (typeof meta.picture === "string") {
+			const picture = safeHttpUrl(meta.picture);
+			if (picture) profile.picture = picture;
+		}
 		if (typeof meta.nip05 === "string") profile.nip05 = meta.nip05;
 		return profile;
 	} catch {

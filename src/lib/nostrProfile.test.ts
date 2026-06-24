@@ -58,6 +58,31 @@ describe("fetchProfile", () => {
 		expect(await fetchProfile(hex("9"))).toEqual({});
 	});
 
+	it("drops a picture URL that is not http(s)", async () => {
+		mockGet.mockResolvedValue(
+			metadataEvent(
+				JSON.stringify({ name: "mallory", picture: "javascript:alert(1)" }),
+			),
+		);
+		expect(await fetchProfile(hex("1"))).toEqual({ name: "mallory" });
+	});
+
+	it("drops a picture value that is not a parseable URL", async () => {
+		mockGet.mockResolvedValue(
+			metadataEvent(JSON.stringify({ picture: "/relative/path.png" })),
+		);
+		expect(await fetchProfile(hex("2"))).toEqual({});
+	});
+
+	it("keeps an http picture URL", async () => {
+		mockGet.mockResolvedValue(
+			metadataEvent(JSON.stringify({ picture: "http://example.test/p.png" })),
+		);
+		expect(await fetchProfile(hex("3"))).toEqual({
+			picture: "http://example.test/p.png",
+		});
+	});
+
 	it("returns null on malformed JSON content", async () => {
 		mockGet.mockResolvedValue(metadataEvent("{ not json"));
 		expect(await fetchProfile(hex("c"))).toBeNull();
