@@ -53,6 +53,8 @@
 	},
 	"mapControls": {
 		"goToHome": "Към началната страница",
+		"worldView": "Глобус",
+		"viewTitle": "Изглед",
 		"boostedOnly": "Само подсилени места",
 		"overlaysTitle": "Наслагвания",
 		"layersAndFilters": "Слоеве и филтри",

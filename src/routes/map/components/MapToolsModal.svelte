@@ -22,6 +22,8 @@ export let heatmapOn = false;
 export let onToggleHeatmap: ((enabled: boolean) => void) | null = null;
 export let boostActive = false;
 export let onToggleBoost: (() => void) | null = null;
+export let globeOn = false;
+export let onToggleGlobe: (() => void) | null = null;
 
 let verifiedLoading = false;
 
@@ -147,6 +149,37 @@ $: hasOverlays = !!onToggleHeatmap || !!onToggleBoost;
 						</span>
 					</button>
 				{/if}
+			</section>
+		{/if}
+
+		<!-- View / projection -->
+		{#if onToggleGlobe}
+			<section>
+				<h3
+					class="mb-1 text-xs font-semibold uppercase tracking-wide text-gray-500 dark:text-white/50"
+				>
+					{$_("mapControls.viewTitle")}
+				</h3>
+				<button
+					type="button"
+					role="switch"
+					aria-checked={globeOn}
+					on:click={() => onToggleGlobe?.()}
+					class="flex w-full items-center justify-between gap-3 rounded-lg px-3 py-2 text-left text-body hover:bg-gray-100 dark:text-white dark:hover:bg-white/5"
+				>
+					<span>{$_("mapControls.worldView")}</span>
+					<span
+						class="relative inline-block h-5 w-9 flex-none rounded-full transition-colors {globeOn
+							? 'bg-primary'
+							: 'bg-gray-300 dark:bg-white/20'}"
+					>
+						<span
+							class="absolute top-0.5 left-0.5 h-4 w-4 rounded-full bg-white transition-transform {globeOn
+								? 'translate-x-4'
+								: 'translate-x-0'}"
+						/>
+					</span>
+				</button>
 			</section>
 		{/if}
 	</div>

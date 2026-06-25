@@ -1051,6 +1051,7 @@ const applyBasemap = (id: BasemapId) => {
 let toolsModalOpen = false;
 let selectedBasemap: BasemapId | undefined;
 let selectedVerified: VerifiedFilterYears = null;
+let globeOn = false;
 const boostActive =
 	typeof window !== "undefined" &&
 	new URLSearchParams(window.location.search).has("boosts");
@@ -1091,6 +1092,12 @@ const onToggleBoostOverlay = () => {
 	if (url.searchParams.has("boosts")) url.searchParams.delete("boosts");
 	else url.searchParams.set("boosts", "true");
 	window.location.search = url.search;
+};
+const onToggleGlobe = () => {
+	if (!map) return;
+	globeOn = !globeOn;
+	map.setProjection({ type: globeOn ? "globe" : "mercator" });
+	trackEvent("worldview_toggle", { enabled: globeOn });
 };
 
 onMount(async () => {
@@ -1226,8 +1233,6 @@ onMount(async () => {
 		}),
 		"top-right",
 	);
-	map.addControl(new maplibre.GlobeControl(), "top-right");
-
 	// Bottom-left scale bar — present in legacy /map (Leaflet's
 	// L.control.scale). Metric units only; imperial is added by the
 	// browser locale via MapLibre's bilingual variant if needed later.
@@ -2107,6 +2112,8 @@ onDestroy(() => {
 	onToggleHeatmap={onToggleHeatmapOverlay}
 	{boostActive}
 	onToggleBoost={onToggleBoostOverlay}
+	{globeOn}
+	{onToggleGlobe}
 />
 
 <style>

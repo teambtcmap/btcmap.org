@@ -157,6 +157,8 @@
 	},
 	"mapControls": {
 		"goToHome": "Ga naar de startpagina",
+		"worldView": "Globeweergave",
+		"viewTitle": "Weergave",
 		"boostedOnly": "Alleen geboostte locaties",
 		"overlaysTitle": "Overlays",
 		"layersAndFilters": "Lagen & filters",

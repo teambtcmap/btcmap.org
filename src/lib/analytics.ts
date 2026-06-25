@@ -25,6 +25,7 @@ export type EventName =
 	| "account_button_click"
 	| "nav_menu_open"
 	| "layers_panel_open"
+	| "worldview_toggle"
 	| "layer_change"
 	| "drawer_swipe_expand"
 	| "drawer_swipe_collapse"

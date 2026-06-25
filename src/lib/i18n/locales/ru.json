@@ -72,6 +72,8 @@
 	},
 	"mapControls": {
 		"goToHome": "На главную страницу",
+		"worldView": "Вид глобуса",
+		"viewTitle": "Вид",
 		"boostedOnly": "Только места с активным бустом",
 		"overlaysTitle": "Наложения",
 		"layersAndFilters": "Слои и фильтры",

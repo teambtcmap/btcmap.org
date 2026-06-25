@@ -72,6 +72,8 @@
 	},
 	"mapControls": {
 		"goToHome": "Ir para a página inicial",
+		"worldView": "Visão de globo",
+		"viewTitle": "Visualização",
 		"boostedOnly": "Apenas locais impulsionados",
 		"overlaysTitle": "Sobreposições",
 		"layersAndFilters": "Camadas e filtros",

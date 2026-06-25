@@ -157,6 +157,8 @@
 	},
 	"mapControls": {
 		"goToHome": "Vai alla home page",
+		"worldView": "Vista globo",
+		"viewTitle": "Vista",
 		"boostedOnly": "Solo posizioni boostate",
 		"overlaysTitle": "Sovrapposizioni",
 		"layersAndFilters": "Livelli e filtri",
