@@ -157,6 +157,8 @@
 	},
 	"mapControls": {
 		"goToHome": "Go to home page",
+		"boostedOnly": "Boosted locations only",
+		"overlaysTitle": "Overlays",
 		"layersAndFilters": "Layers & filters",
 		"menu": "Menu",
 		"addLocation": "Add location",

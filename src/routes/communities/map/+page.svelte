@@ -16,8 +16,10 @@ import { get } from "svelte/store";
 import MapLoadingMain from "$components/MapLoadingMain.svelte";
 import MapUnsupportedFallback from "$components/MapUnsupportedFallback.svelte";
 import Socials from "$components/Socials.svelte";
+import { trackEvent } from "$lib/analytics";
 import { _ } from "$lib/i18n";
 import {
+	BASEMAP_STORAGE_KEY,
 	BASEMAPS,
 	type BasemapId,
 	defaultBasemap,
@@ -38,8 +40,12 @@ import { areaIconSrc, errToast } from "$lib/utils";
 import { browser } from "$app/environment";
 import { resolve } from "$app/paths";
 import { page } from "$app/stores";
+import MapToolsModal from "../../map/components/MapToolsModal.svelte";
+import {
+	MapButtonControl,
+	TUNE_ICON_SVG,
+} from "../../map/controls/MapButtonControl";
 import { MapMenuControl } from "../../map/controls/MapMenuControl";
-import { MapToolsControl } from "../../map/controls/MapToolsControl";
 
 let mapLoading = 0;
 
@@ -123,6 +129,25 @@ const applyBasemap = (id: BasemapId) => {
 			return { ...next, sources, layers: [...next.layers, ...carried] };
 		},
 	});
+};
+
+// MapToolsModal (basemap-only) state + handlers for /communities/map.
+let toolsModalOpen = false;
+let selectedBasemap: BasemapId | undefined;
+
+const openToolsModal = () => {
+	toolsModalOpen = true;
+	trackEvent("layers_panel_open");
+};
+const onPickBasemap = (id: BasemapId) => {
+	selectedBasemap = id;
+	try {
+		localStorage.setItem(BASEMAP_STORAGE_KEY, id);
+	} catch {
+		// localStorage unavailable (private mode); skip persistence.
+	}
+	applyBasemap(id);
+	trackEvent("layer_change", { layer: id });
 };
 
 const addCommunitiesLayers = (m: MapLibreMap) => {
@@ -361,13 +386,12 @@ const initializeMap = async () => {
 
 	map.addControl(new MapMenuControl("communities"), "top-right");
 
+	selectedBasemap = initialBasemap;
 	map.addControl(
-		new MapToolsControl({
-			basemap: {
-				basemaps: BASEMAPS,
-				initial: initialBasemap,
-				onSelect: applyBasemap,
-			},
+		new MapButtonControl({
+			iconSvg: TUNE_ICON_SVG,
+			labelKey: "mapControls.layersAndFilters",
+			onClick: openToolsModal,
 		}),
 		"top-right",
 	);
@@ -455,6 +479,13 @@ onDestroy(() => {
 	     the override. Leaflet used to mask this entirely by sizing its
 	     own container; MapLibre respects the DOM box. -->
 	<div bind:this={mapElement} class="!absolute inset-0 !bg-teal dark:!bg-dark" />
+
+	<MapToolsModal
+		bind:open={toolsModalOpen}
+		basemaps={BASEMAPS}
+		currentBasemap={selectedBasemap}
+		onSelectBasemap={onPickBasemap}
+	/>
 
 	{#if webglUnsupported}
 		<MapUnsupportedFallback />

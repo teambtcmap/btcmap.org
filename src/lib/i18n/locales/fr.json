@@ -72,6 +72,8 @@
 	},
 	"mapControls": {
 		"goToHome": "Aller à la page d'accueil",
+		"boostedOnly": "Lieux boostés uniquement",
+		"overlaysTitle": "Superpositions",
 		"layersAndFilters": "Calques et filtres",
 		"menu": "Menu",
 		"addLocation": "Ajouter un lieu",

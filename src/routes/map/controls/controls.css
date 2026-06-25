@@ -210,3 +210,57 @@
 .dark .maplibre-next-tools-header:not(:first-child) {
 	border-top-color: rgba(255, 255, 255, 0.1);
 }
+/* The panel is taller than a single radio list now — clamp + scroll so it
+   never overflows a short mobile viewport. */
+.maplibre-next-tools-popup {
+	max-height: 70vh;
+	overflow-y: auto;
+}
+
+/* Overlay rows: a labelled switch (heatmap, boost). */
+.maplibre-next-tools-toggle {
+	display: flex;
+	align-items: center;
+	justify-content: space-between;
+	gap: 10px;
+	width: 100%;
+	padding: 6px 12px;
+	background: none;
+	border: 0;
+	font: inherit;
+	color: inherit;
+	cursor: pointer;
+}
+.maplibre-next-tools-toggle:hover {
+	background: rgba(0, 0, 0, 0.05);
+}
+.dark .maplibre-next-tools-toggle:hover {
+	background: rgba(255, 255, 255, 0.08);
+}
+.maplibre-next-tools-knob {
+	width: 28px;
+	height: 16px;
+	border-radius: 8px;
+	background: #c4c4c4;
+	position: relative;
+	flex: none;
+	transition: background 0.15s;
+}
+.maplibre-next-tools-knob::after {
+	content: "";
+	position: absolute;
+	top: 2px;
+	left: 2px;
+	width: 12px;
+	height: 12px;
+	border-radius: 50%;
+	background: #fff;
+	transition: left 0.15s;
+}
+.maplibre-next-tools-toggle[aria-checked="true"] .maplibre-next-tools-knob {
+	background: #f7931a;
+}
+.maplibre-next-tools-toggle[aria-checked="true"]
+	.maplibre-next-tools-knob::after {
+	left: 14px;
+}

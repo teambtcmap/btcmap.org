@@ -157,6 +157,8 @@
 	},
 	"mapControls": {
 		"goToHome": "Vai alla home page",
+		"boostedOnly": "Solo posizioni boostate",
+		"overlaysTitle": "Sovrapposizioni",
 		"layersAndFilters": "Livelli e filtri",
 		"menu": "Menu",
 		"addLocation": "Aggiungi posizione",

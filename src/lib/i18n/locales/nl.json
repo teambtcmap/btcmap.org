@@ -157,6 +157,8 @@
 	},
 	"mapControls": {
 		"goToHome": "Ga naar de startpagina",
+		"boostedOnly": "Alleen geboostte locaties",
+		"overlaysTitle": "Overlays",
 		"layersAndFilters": "Lagen & filters",
 		"menu": "Menu",
 		"addLocation": "Locatie toevoegen",

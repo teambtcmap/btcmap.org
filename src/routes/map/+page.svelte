@@ -34,6 +34,7 @@ import {
 import { SEARCH_SHEET_PEEK_HEIGHT } from "$lib/drawerConfig";
 import { _, getDisplayLang, locale } from "$lib/i18n";
 import {
+	BASEMAP_STORAGE_KEY,
 	BASEMAPS,
 	type BasemapId,
 	defaultBasemap,
@@ -45,6 +46,7 @@ import {
 	routePlacesByBoostAndZoom,
 	shouldClusterBoostedAtZoom,
 } from "$lib/map/boostedClustering";
+import { HEATMAP_STORAGE_KEY } from "$lib/map/heatmap";
 import {
 	type HashCoords,
 	parseHashCoords,
@@ -91,16 +93,12 @@ import { filterPlacesByRecency } from "$lib/verification";
 
 import type { PageData } from "./$types";
 import MapSearchBar from "./components/MapSearchBar.svelte";
+import MapToolsModal from "./components/MapToolsModal.svelte";
 import MerchantDrawerHash from "./components/MerchantDrawerHash.svelte";
 import MerchantListPanel from "./components/MerchantListPanel.svelte";
 import TileLoadingIndicator from "./components/TileLoadingIndicator.svelte";
-import { BoostToggleControl } from "./controls/BoostToggleControl";
-import {
-	HEATMAP_STORAGE_KEY,
-	HeatmapToggleControl,
-} from "./controls/HeatmapToggleControl";
+import { MapButtonControl, TUNE_ICON_SVG } from "./controls/MapButtonControl";
 import { MapMenuControl } from "./controls/MapMenuControl";
-import { MapToolsControl } from "./controls/MapToolsControl";
 import { browser } from "$app/environment";
 
 export let data: PageData;
@@ -1047,6 +1045,54 @@ const applyBasemap = (id: BasemapId) => {
 	});
 };
 
+// MapToolsModal state + the page-owned effect/persistence/analytics handlers
+// it calls. selectedBasemap/selectedVerified are seeded in onMount (browser)
+// and updated here on user change; the modal is a controlled component.
+let toolsModalOpen = false;
+let selectedBasemap: BasemapId | undefined;
+let selectedVerified: VerifiedFilterYears = null;
+const boostActive =
+	typeof window !== "undefined" &&
+	new URLSearchParams(window.location.search).has("boosts");
+
+const openToolsModal = () => {
+	toolsModalOpen = true;
+	trackEvent("layers_panel_open");
+};
+const onPickBasemap = (id: BasemapId) => {
+	selectedBasemap = id;
+	try {
+		localStorage.setItem(BASEMAP_STORAGE_KEY, id);
+	} catch {
+		// localStorage unavailable (private mode); skip persistence.
+	}
+	applyBasemap(id);
+	trackEvent("layer_change", { layer: id });
+};
+const onPickVerified = async (years: VerifiedFilterYears) => {
+	selectedVerified = years;
+	trackEvent("verified_filter_change", {
+		years: years == null ? "any" : String(years),
+	});
+	await applyVerifiedFilter(years);
+};
+const onToggleHeatmapOverlay = (enabled: boolean) => {
+	try {
+		localStorage.setItem(HEATMAP_STORAGE_KEY, String(enabled));
+	} catch {
+		// localStorage unavailable (private mode); session-only toggle.
+	}
+	trackEvent("heatmap_layer_toggle", { enabled });
+	setHeatmapEnabled(enabled);
+};
+const onToggleBoostOverlay = () => {
+	trackEvent("boost_layer_toggle");
+	const url = new URL(window.location.href);
+	if (url.searchParams.has("boosts")) url.searchParams.delete("boosts");
+	else url.searchParams.set("boosts", "true");
+	window.location.search = url.search;
+};
+
 onMount(async () => {
 	// Bridge the JS peek-height const into CSS so the bottom-chrome lift (scale
 	// bar, attribution, tile indicator) stays in sync with the anchored search
@@ -1219,36 +1265,25 @@ onMount(async () => {
 		.querySelector(".maplibregl-ctrl-geolocate")
 		?.addEventListener("click", () => trackEvent("locate_click"));
 
-	// Right-side action buttons — mirror /map's stack order:
-	// nav links (home / add / community / account) → boost toggle.
+	// Right-side action button: the page-nav menu. Map/data controls
+	// (basemap, verified filter, boost + heatmap overlays, world-view) live
+	// in the consolidated tools panel below.
 	map.addControl(new MapMenuControl(), "top-right");
-	map.addControl(new BoostToggleControl(), "top-right");
 
-	// Consolidated tools panel — one layers-icon button expanding a sectioned
-	// popup. Starts with the basemap picker (verified filter, overlays and
-	// world-view fold in next). Owns its own localStorage persistence; the
-	// basemap swap is delegated to applyBasemap so the custom pin/cluster/label
-	// layers survive it.
+	// Tools panel trigger — opens MapToolsModal (basemap, verified filter,
+	// boost + heatmap overlays; world-view folds in next). The modal is a
+	// controlled Svelte component rendered in the markup; this is just the
+	// top-right button.
+	selectedBasemap = initialBasemap;
+	selectedVerified = getStoredVerifiedFilter();
 	map.addControl(
-		new MapToolsControl({
-			basemap: {
-				basemaps: BASEMAPS,
-				initial: initialBasemap,
-				onSelect: applyBasemap,
-			},
-			verified: {
-				initial: getStoredVerifiedFilter(),
-				onSelect: applyVerifiedFilter,
-			},
+		new MapButtonControl({
+			iconSvg: TUNE_ICON_SVG,
+			labelKey: "mapControls.layersAndFilters",
+			onClick: openToolsModal,
 		}),
 		"top-right",
 	);
-
-	// Heatmap toggle — layers-icon-style button that shows/hides the
-	// merchant-density heatmap layer. Owns its own localStorage
-	// persistence; the actual visibility swap is delegated to
-	// setHeatmapEnabled.
-	map.addControl(new HeatmapToggleControl(setHeatmapEnabled), "top-right");
 
 	// Mirror /map's behavior: sync location into the userLocation store so
 	// the merchant list panel can compute distances without prompting again.
@@ -1315,7 +1350,7 @@ onMount(async () => {
 		// Heatmap layers read raw point features, so they can't share the
 		// clustered `places` source — this dedicated source always carries
 		// the full unclustered list (see syncPlacesToSource). Visibility is
-		// toggled by HeatmapToggleControl; off by default.
+		// toggled via the tools panel; off by default.
 		map.addSource("places-heatmap", {
 			type: "geojson",
 			data: EMPTY_COLLECTION,
@@ -2060,6 +2095,19 @@ onDestroy(() => {
 <TileLoadingIndicator visible={tilesLoading && !webglUnsupported} />
 
 <MerchantDrawerHash />
+
+<MapToolsModal
+	bind:open={toolsModalOpen}
+	basemaps={BASEMAPS}
+	currentBasemap={selectedBasemap}
+	onSelectBasemap={onPickBasemap}
+	currentVerified={selectedVerified}
+	onSelectVerified={onPickVerified}
+	heatmapOn={heatmapEnabled}
+	onToggleHeatmap={onToggleHeatmapOverlay}
+	{boostActive}
+	onToggleBoost={onToggleBoostOverlay}
+/>
 
 <style>
 	.map-container {

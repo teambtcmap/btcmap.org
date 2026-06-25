@@ -72,6 +72,8 @@
 	},
 	"mapControls": {
 		"goToHome": "Zur Startseite gehen",
+		"boostedOnly": "Nur geboostete Orte",
+		"overlaysTitle": "Overlays",
 		"layersAndFilters": "Ebenen & Filter",
 		"menu": "Menü",
 		"addLocation": "Ort hinzufügen",

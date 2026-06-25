@@ -72,6 +72,8 @@
 	},
 	"mapControls": {
 		"goToHome": "На главную страницу",
+		"boostedOnly": "Только места с активным бустом",
+		"overlaysTitle": "Наложения",
 		"layersAndFilters": "Слои и фильтры",
 		"menu": "Меню",
 		"addLocation": "Добавить место",

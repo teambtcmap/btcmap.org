@@ -72,6 +72,8 @@
 	},
 	"mapControls": {
 		"goToHome": "Ir para a página inicial",
+		"boostedOnly": "Apenas locais impulsionados",
+		"overlaysTitle": "Sobreposições",
 		"layersAndFilters": "Camadas e filtros",
 		"menu": "Menu",
 		"addLocation": "Adicionar local",

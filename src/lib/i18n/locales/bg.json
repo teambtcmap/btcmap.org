@@ -53,6 +53,8 @@
 	},
 	"mapControls": {
 		"goToHome": "Към началната страница",
+		"boostedOnly": "Само подсилени места",
+		"overlaysTitle": "Наслагвания",
 		"layersAndFilters": "Слоеве и филтри",
 		"menu": "Меню",
 		"addLocation": "Добави място",
