@@ -72,6 +72,10 @@
 	},
 	"mapControls": {
 		"goToHome": "Ir para a página inicial",
+		"account": "Conta",
+		"login": "Entrar",
+		"accountAlt": "Conta",
+		"loginAlt": "Entrar",
 		"worldView": "Visão de globo",
 		"viewTitle": "Visualização",
 		"boostedOnly": "Apenas locais impulsionados",

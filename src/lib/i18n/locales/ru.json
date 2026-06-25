@@ -72,6 +72,10 @@
 	},
 	"mapControls": {
 		"goToHome": "На главную страницу",
+		"account": "Аккаунт",
+		"login": "Войти",
+		"accountAlt": "Аккаунт",
+		"loginAlt": "Войти",
 		"worldView": "Вид глобуса",
 		"viewTitle": "Вид",
 		"boostedOnly": "Только места с активным бустом",

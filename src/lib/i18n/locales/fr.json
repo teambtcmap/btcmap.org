@@ -72,6 +72,10 @@
 	},
 	"mapControls": {
 		"goToHome": "Aller à la page d'accueil",
+		"account": "Compte",
+		"login": "Se connecter",
+		"accountAlt": "Compte",
+		"loginAlt": "Se connecter",
 		"worldView": "Vue globe",
 		"viewTitle": "Vue",
 		"boostedOnly": "Lieux boostés uniquement",
