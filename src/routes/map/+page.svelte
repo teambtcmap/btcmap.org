@@ -96,7 +96,6 @@ import MerchantListPanel from "./components/MerchantListPanel.svelte";
 import TileLoadingIndicator from "./components/TileLoadingIndicator.svelte";
 import { BasemapsControl } from "./controls/BasemapsControl";
 import { BoostToggleControl } from "./controls/BoostToggleControl";
-import { DataRefreshControl } from "./controls/DataRefreshControl";
 import {
 	HEATMAP_STORAGE_KEY,
 	HeatmapToggleControl,
@@ -1222,11 +1221,9 @@ onMount(async () => {
 		?.addEventListener("click", () => trackEvent("locate_click"));
 
 	// Right-side action buttons — mirror /map's stack order:
-	// nav links (home / add / community / account) → boost toggle →
-	// data-refresh (hidden until fresh sync arrives).
+	// nav links (home / add / community / account) → boost toggle.
 	map.addControl(new NavButtonsControl(), "top-right");
 	map.addControl(new BoostToggleControl(), "top-right");
-	map.addControl(new DataRefreshControl(), "top-right");
 
 	// Basemap picker — layers-icon button that expands on hover/click,
 	// matching the L.control.layers shape prod uses. Owns its own

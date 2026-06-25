@@ -1,7 +1,7 @@
 /*
  * Shared styles for the custom MapLibre IControls in this directory
- * (BasemapsControl, NavButtonsControl, BoostToggleControl,
- * DataRefreshControl). Imported by each control's TS module so any page
+ * (BasemapsControl, NavButtonsControl, BoostToggleControl). Imported by
+ * each control's TS module so any page
  * that mounts the controls — currently /map and /communities/map — gets
  * the popup positioning, dark-mode treatment, and anchor button styles.
  *
@@ -74,10 +74,10 @@
 	}
 }
 
-/* Anchor-based buttons inside the custom IControls (NavButtons / Boost /
-   DataRefresh). MapLibre's default `.maplibregl-ctrl-group button` rules
-   don't apply to <a> elements, so we replicate the dimensions, hover and
-   focus states here. */
+/* Anchor-based buttons inside the custom IControls (NavButtons / Boost).
+   MapLibre's default `.maplibregl-ctrl-group button` rules don't apply to
+   <a> elements, so we replicate the dimensions, hover and focus states
+   here. */
 /* Matches GlobeControl's blue-active pattern — tint heatmap icon #33b5e5 when enabled */
 .maplibregl-ctrl-group a.maplibregl-ctrl-link.maplibregl-ctrl-heatmap-enabled
 	svg {
@@ -154,7 +154,7 @@
 }
 /* MapLibre's built-in controls embed dark-gray SVG glyphs as
    background-image on a child <span class="maplibregl-ctrl-icon">; our
-   NavButtons / Boost / DataRefresh controls render plain <img> icons;
+   NavButtons / Boost controls render plain <img> icons;
    the BasemapsControl renders an inline <svg stroke="currentColor">.
    Invert all three — the icons are single-color silhouettes, so a
    straight invert(1) reads as a clean light-on-dark version of the

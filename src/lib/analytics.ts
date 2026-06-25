@@ -23,7 +23,6 @@ export type EventName =
 	| "add_location_click"
 	| "community_map_click"
 	| "account_button_click"
-	| "data_refresh_click"
 	| "layer_change"
 	| "drawer_swipe_expand"
 	| "drawer_swipe_collapse"

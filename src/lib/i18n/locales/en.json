@@ -162,7 +162,6 @@
 		"merchantMap": "Merchant map",
 		"account": "Account",
 		"login": "Log in",
-		"dataRefreshAvailable": "Data refresh available",
 		"zoomIn": "Zoom in",
 		"zoomOut": "Zoom out",
 		"basemapTitle": "Basemap",
@@ -176,8 +175,7 @@
 		"communityMapAlt": "Community map",
 		"merchantMapAlt": "Merchant map",
 		"accountAlt": "Account",
-		"loginAlt": "Log in",
-		"dataRefreshAlt": "Data refresh available"
+		"loginAlt": "Log in"
 	},
 	"merchant": {
 		"tagsNote": "More information on bitcoin mapping tags can be found",

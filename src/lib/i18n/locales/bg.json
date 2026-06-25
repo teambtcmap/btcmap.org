@@ -56,7 +56,6 @@
 		"addLocation": "Добави място",
 		"communityMap": "Карта на общностите",
 		"merchantMap": "Карта на търговците",
-		"dataRefreshAvailable": "Налични нови данни",
 		"zoomIn": "Увеличете",
 		"zoomOut": "Намалете",
 		"basemapTitle": "Базова карта",
@@ -68,8 +67,7 @@
 		"goToHomeAlt": "Към началната страница",
 		"addLocationAlt": "Добави място",
 		"communityMapAlt": "Карта на общностите",
-		"merchantMapAlt": "Карта на търговците",
-		"dataRefreshAlt": "Налични нови данни"
+		"merchantMapAlt": "Карта на търговците"
 	},
 	"aria": {
 		"logoAlt": "Лого на BTC Map",

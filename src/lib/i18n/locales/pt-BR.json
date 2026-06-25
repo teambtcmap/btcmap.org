@@ -75,7 +75,6 @@
 		"addLocation": "Adicionar local",
 		"communityMap": "Mapa da comunidade",
 		"merchantMap": "Mapa de comerciantes",
-		"dataRefreshAvailable": "Atualização de dados disponível",
 		"zoomIn": "Aumentar zoom",
 		"zoomOut": "Diminuir zoom",
 		"basemapTitle": "Mapa base",
@@ -87,8 +86,7 @@
 		"goToHomeAlt": "Ir para a página inicial",
 		"addLocationAlt": "Adicionar local",
 		"communityMapAlt": "Mapa da comunidade",
-		"merchantMapAlt": "Mapa de comerciantes",
-		"dataRefreshAlt": "Atualização de dados disponível"
+		"merchantMapAlt": "Mapa de comerciantes"
 	},
 	"merchant": {
 		"tagsNote": "Mais informações sobre tags de mapeamento bitcoin podem ser encontradas",

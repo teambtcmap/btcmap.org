@@ -75,7 +75,6 @@
 		"addLocation": "Добавить место",
 		"communityMap": "Карта сообщества",
 		"merchantMap": "Карта торговцев",
-		"dataRefreshAvailable": "Доступно обновление данных",
 		"zoomIn": "Приблизить",
 		"zoomOut": "Отдалить",
 		"basemapTitle": "Базовая карта",
@@ -87,8 +86,7 @@
 		"goToHomeAlt": "На главную страницу",
 		"addLocationAlt": "Добавить место",
 		"communityMapAlt": "Карта сообщества",
-		"merchantMapAlt": "Карта торговцев",
-		"dataRefreshAlt": "Доступно обновление данных"
+		"merchantMapAlt": "Карта торговцев"
 	},
 	"merchant": {
 		"tagsNote": "Более подробная информация о метках доступна",
