@@ -69,9 +69,9 @@
 		"typeDeleted": "Verwijderd",
 		"typeCommented": "Gereageerd",
 		"typeBoosted": "Geboost",
-		"noTypesSelected": "Kies hierboven ten minste &eacute;&eacute;n type activiteit",
-		"noMatchingTypes": "Geen enkele activiteit past bij je gekozen types.",
-		"newSinceLastVisit": "{count} nieuw sinds je laatste bezoek"
+		"noTypesSelected": "Kies hierboven ten minste één type activiteit",
+		"noMatchingTypes": "Geen enkele activiteit past bij je gekozen types."
+		"newSinceLastVisit": "{count} nieuwe items sinds je vorige bezoek"
 	},
 	"login": {
 		"title": "Aanmelden",
@@ -85,27 +85,27 @@
 		"createAccount": "Maak er hier eentje aan",
 		"nostrExtension": "Aanmelden met Nostr-extensie",
 		"nostrSigning": "Ondertekenen…",
-		"nostrFailed": "Nostr-handtekening is geweigerd",
-		"nostrError": "Kon Nostr-aanmelding niet voltooien",
-		"nsecToggle": "Of plak je nsec",
-		"nsecLabel": "Nostr geheime sleutel",
-		"nsecWarning": "Je nsec wordt alleen naar je browser gestuurd om eenmalig aan te melden &mdash; hij wordt nooit opgeslagen of verzonden.",
+		"nostrFailed": "Nostr-handtekening geweigerd",
+		"nostrError": "Nostr-aanmelding kon niet worden voltooid",
+		"nsecToggle": "Of plak je nsec-sleutel",
+		"nsecLabel": "Nostr privésleutel",
+		"nsecWarning": "Je nsec wordt alleen naar je browser gestuurd om jezelf aan te melden — het wordt nooit opgeslagen of gedeeld.",
 		"nsecSubmit": "Aanmelden met nsec",
-		"nsecInvalid": "Dat lijkt geen geldige nsec",
-		"or": "of"
+		"nsecInvalid": "Dat ziet er niet uit als een geldige nsec",
+		"or": "of"	},
 	},
 	"backup": {
 		"title": "Back-up account",
 		"description": "Bewaar deze gegevens om op een ander apparaat in te loggen.",
 		"username": "Gebruikersnaam",
 		"password": "Wachtwoord",
-		"copy": "Kopi&euml;ren",
+		"copy": "Kopiëren",
 		"show": "Wachtwoord tonen",
 		"hide": "Wachtwoord verbergen",
 		"unavailable": "Niet beschikbaar (verouderd account)",
 		"warning": "Deze inloggegevens zijn de enige manier om je opgeslagen locaties te herstellen.",
 		"copied": "Gekopieerd naar klembord",
-		"copyFailed": "Kopi&euml;ren mislukt, kopieer alsjeblieft handmatig"
+		"copyFailed": "Kopiëren mislukt, kopieer alsjeblieft handmatig"
 	},
 	"save": {
 		"accountCreatedPlace": "Account aangemaakt, je opgeslagen locaties worden op dit apparaat bewaard.",
@@ -122,7 +122,7 @@
 		}
 	},
 	"search": {
-		"placeholderPlaces": "Zoek plaatsen...",
+		"placeholderPlaces": "Locaties zoeken...",
 		"searching": "Aan het zoeken...",
 		"noResults": "Geen resultaten gevonden",
 		"noResultsFor": "Er zijn geen resultaten gevonden voor \"{query}\"",
@@ -165,8 +165,8 @@
 		"dataRefreshAvailable": "Nieuwe gegevens beschikbaar",
 		"zoomIn": "Inzoomen",
 		"zoomOut": "Uitzoomen",
-		"basemapTitle": "Achtergrondkaart",
-		"verifiedFilterTitle": "Alleen geverifieerde plaatsen tonen",
+		"basemapTitle": "Basiskaart",
+		"verifiedFilterTitle": "Alleen geverifieerde locaties weergeven",
 		"locate": "Laat me zien waar ik ben",
 		"boostAlt": "Boost",
 		"locateAlt": "Laat me zien waar ik ben",
@@ -183,7 +183,7 @@
 		"tagsNoteHere": "hier",
 		"details": "Details",
 		"activityShort": "Activiteit",
-		"taggerTools": "Tagger-tools",
+		"taggerTools": "Taggingtools",
 		"links": "Links",
 		"navigate": "Navigeren",
 		"edit": "Bewerken",
@@ -229,13 +229,13 @@
 		"verifiedTooltip": "In het afgelopen jaar geverifieerd",
 		"outdatedTooltip": "Verouderd, controleer opnieuw",
 		"helpImprove": "Help de gegevens voor iedereen te verbeteren",
-		"surveyedBy": "Voltooid door BTC Map-communityleden"
+		"surveyedBy": "Voltooid door leden van de BTC Map community"
 	},
 	"verificationFilter": {
-		"any": "Alle",
-		"within1Year": "Geverifieerd binnen 1 jaar",
-		"within2Years": "Geverifieerd binnen 2 jaar",
-		"within3Years": "Geverifieerd binnen 3 jaar"
+		"any": "Elke",
+		"within1Year": "Afgelopen jaar geverifieerd",
+		"within2Years": "Geverifieerd in de laatste 2 jaar",
+		"within3Years": "Geverifieerd in de laatste 3 jaar"
 	},
 	"payment": {
 		"methods": "Betaalmethoden",
@@ -258,8 +258,8 @@
 		"extend": "Verlengen",
 		"boosting": "Boosten...",
 		"expires": "Boost verloopt",
-		"getVisibility": "Geef deze locatie wat liefde",
-		"boostPromo": "Jouw boost helpt meer mensen om het op de kaart te vinden",
+		"getVisibility": "Vergroot je zichtbaarheid",
+		"boostPromo": "Boost deze vermelding om bovenaan te verschijnen bij lokale zoekopdrachten",
 		"boostThisPlace": "Boost deze locatie",
 		"extendBoost": "Boost verlengen",
 		"improveVisibility": "Geef deze locatie een boost om de zichtbaarheid op de kaart te verbeteren.",
@@ -328,26 +328,26 @@
 		"collapseDrawer": "Lade inklappen",
 		"merchantDetails": "Ondernemerdetails",
 		"viewBoost": "Boost",
-		"viewDetails": "Details"
+		"viewDetails": "Details",
 	},
 	"map": {
-		"bitcoinMerchantMapTitle": "Bitcoin acceptantenkaart"
+		"bitcoinMerchantMapTitle": "Bitcoin acceptatiekaart"
 	},
 	"info": {
 		"contact": "Contact",
-		"hours": "Uur",
+		"hours": "Openingstijden",
 		"noActivity": "Geen activiteit om weer te geven.",
 		"loadMore": "Laad meer",
-		"viewOnMainMap": "Toon op hoofdkaart"
+		"viewOnMainMap": "Bekijk op hoofdkaart",
 	},
 	"comments": {
 		"title": "Reacties",
 		"add": "Reactie toevoegen",
 		"adding": "Bezig...",
-		"none": "Er zijn nog geen reacties."
+		"none": "Er zijn nog geen reacties.",
 	},
 	"errorPage": {
-		"title": "BTC-kaart - Fout",
+		"title": "BTC Map - Fout",
 		"home": "Thuis",
 		"tryAgain": "Probeer het opnieuw of neem contact op met BTC Map.",
 		"logoAlt": "Logo"
@@ -360,12 +360,12 @@
 		"updateError": "Kan locaties niet bijwerken via API, gecachte gegevens worden gebruikt.",
 		"captchaFetch": "Kan captcha niet ophalen, probeer het opnieuw of neem contact op met BTC Map.",
 		"noLocationSelected": "Selecteer een locatie...",
-		"noPaymentMethod": "Selecteer minimaal &eacute;&eacute;n betaalmethode...",
+		"noPaymentMethod": "Selecteer minimaal één betaalmethode...",
 		"formSubmission": "Het verzenden van het formulier is mislukt. Probeer het nog eens of neem contact op met BTC Map.",
 		"locationSearch": "Het zoeken naar locaties is mislukt. Probeer het opnieuw of neem contact op met BTC Map.",
-		"mapView": "Kan de kaartweergave niet instellen op de opgegeven co&ouml;rdinaten, probeer het opnieuw of neem contact op met BTC Map.",
+		"mapView": "Kan de kaartweergave niet instellen op de opgegeven coördinaten, probeer het opnieuw of neem contact op met BTC Map.",
 		"merchantDetailsLoadError": "Fout bij het laden van de ondernemergegevens. Probeer het opnieuw.",
-		"boostLoadError": "Laden van boostinformatie mislukt. Probeer het opnieuw."
+		"boostLoadError": "Laden van boostinformatie mislukt. Probeer het opnieuw.",
 	},
 	"success": {
 		"locationSelected": "Locatie geselecteerd!",
@@ -391,7 +391,7 @@
 		"merchantList": "Ondernemerslijst",
 		"merchantListItem": "Ondernemerslijst item",
 		"selectCategory": "Selecteer categorie",
-		"searchInput": "Zoek naar Bitcoin ondernemers",
+		"searchInput": "Zoek naar Bitcoin ondernemers"
 		"newActivity": "Nieuwe activiteit in je opgeslagen plaatsen"
 	},
 	"theme": {
@@ -492,22 +492,24 @@
 	},
 	"addLocation": {
 		"title": "Locatie toevoegen",
-		"subheading": "Accepteer je Bitcoin? Zorg dat je gevonden wordt",
-		"businessOwner": "Als je ondernemer bent, lees dan onze",
-		"bestPractices": "Best practices voor ondernemers",
+		"subheading": "Accepteer je Bitcoin? Zorg dat je gevonden wordt.",
+		"businessOwner": "Als je een ondernemer bent, lees dan onze",
+		"bestPractices": "handige tips voor ondernemers",
 		"guide": "gids.",
 		"heading": "Volledig ontzorgd",
 		"description": "Vul onderstaand formulier in, dan voegt een van onze vrijwilligers je locatie toe aan de kaart.",
 		"tooltip": "Omdat alle toevoegingen door vrijwilligers worden gedaan, kunnen we niet beloven wanneer jouw locatie wordt toegevoegd.",
-		"merchantNamePlaceholder": "Satoshi & Co (lokaal)",
+		"merchantNamePlaceholder": "Satoshi's Comics (lokaal)",
 		"merchantEnglishNamePlaceholder": "Satoshi's Comics (Engels)",
 		"nameEnLabel": "Engelse naam",
-		"nameEnTooltip": "Als het bedrijf een andere naam in het Engels heeft, voer deze hier in. Het wordt getagd als name:en in OpenStreetMap.",
+		"nameEnTooltip": "Vul hier de Engelse naam van het bedrijf in, indien deze afwijkt. Het wordt getagd als name:en in OpenStreetMap.",
 		"noLocationError": "Selecteer een locatie...",
+		"searchByAddressLabel": "Zoek naar een adres",
+		"orSelectOnMapLabel": "…of klik op de kaart",
 		"latitude": "Breedtegraad",
 		"longitude": "Lengtegraad",
-		"advancedToggle": "Geavanceerd: co&ouml;rdinaten handmatig invoeren",
-		"advancedHint": "Handig als je de exacte co&ouml;rdinaten al weet (bijvoorbeeld via Google Maps). Je kan ook op de kaart klikken om ze aan te passen.",
+		"advancedToggle": "Geavanceerd: coördinaten handmatig invoeren",
+		"advancedHint": "Handig als je de exacte coördinaten al weet (bijvoorbeeld via Google Maps). Je kan ook op de kaart klikken om ze aan te passen.",
 		"latitudeInvalid": "Breedtegraad moet een getal tussen -90 en 90 zijn.",
 		"longitudeInvalid": "Lengtegraad moet een getal tussen -180 en 180 zijn.",
 		"addressLabel": "Adres (optioneel)",
@@ -540,11 +542,17 @@
 		"formSuccessType": "Locatie",
 		"formSuccessText": "We zullen je gegevens beoordelen en deze zo snel mogelijk toevoegen."
 	},
+	"addressSearch": {
+		"placeholder": "Zoek op adres...",
+		"buttonSearch": "Zoek",
+		"noResults": "Geen resultaten gevonden. Probeer een specifieker adres of klik op de kaart om een pin te plaatsen.",
+		"networkError": "Adres opzoeken mislukt. Probeer het opnieuw, of klik op de kaart om een pin te plaatsen."
+	},
 	"formSuccess": {
 		"submittedTitle": "{type} Ingediend!",
 		"monitorProgress": "Je kunt de voortgang van je inzending ook hier volgen:",
 		"issueLink": "Ticket #{issue}",
-		"submitAnother": "Nog &eacute;&eacute;n indienen {type}"
+		"submitAnother": "Nog één indienen {type}"
 	},
 	"verifyLocation": {
 		"subheading": "Help mee om de gegevens voor iedereen beter te maken",
@@ -557,7 +565,7 @@
 		"descriptionPart3": "voor meer uitleg.",
 		"tooltip": "LET OP: Omdat we een achterstand hebben met aanvragen en de updates door vrijwilligers worden gedaan, kan het een paar weken duren voordat deze locatie is bijgewerkt. Als je wilt dat de wijzigingen direct op de kaart te zien zijn, kun je de locatie het beste zelf op OpenStreetMap aanpassen.",
 		"loadingPlaceholder": "Ondernemer laden...",
-		"merchantNamePlaceholder": "Naam ondernemer (lokaal)",
+		"merchantNamePlaceholder": "Naam ondernemer",
 		"merchantEnglishNamePlaceholder": "Satoshi's Comics (Engels)",
 		"currentInfoLabel": "De huidige informatie is juist",
 		"currentInfoDescription": "Vink dit vakje aan als je de gegevens hebt gecontroleerd en ze kloppen.",
@@ -567,7 +575,7 @@
 		"verifyLabel": "Hoe heb je dit gecontroleerd?",
 		"verifyPlaceholder": "Geef hier aanvullende informatie op",
 		"successType": "Rapporteer",
-		"successMessage": "Bedankt voor het invullen van dit rapport! We gaan je gegevens bekijken en zo snel mogelijk bijwerken.",
+		"successMessage": "Bedankt voor het invullen van dit rapport! We gaan je gegevens bekijken en zo snel mogelijk bijwerken."
 		"submitReport": "Rapport indienen"
 	},
 	"dashboard": {
@@ -612,7 +620,7 @@
 		"updated": "Bijgewerkt",
 		"deleted": "Verwijderd",
 		"tip": "Tip",
-		"grade": "Cijfer",
+		"grade": "Score",
 		"verified": "Geverifieerd",
 		"sortPosition": "Sorteer op positie",
 		"sortTotal": "Sorteer op totaal aantal bewerkingen",
@@ -652,7 +660,7 @@
 		"tooltip": "LET OP: BTC Map is een gratis en open source project dat wordt gerund door vrijwilligers. Elke communityaanvraag wordt handmatig beoordeeld om de kwaliteit te waarborgen. Het kan daardoor enkele weken duren voordat je community is toegevoegd.",
 		"criteriaHeading": "Criteria",
 		"criteria1": "Bitcoin only",
-		"criteria2": "moet een geografisch gebied zijn en niet slechts &eacute;&eacute;n punt",
+		"criteria2": "moet een geografisch gebied zijn en niet slechts één punt",
 		"criteria3": "bereid zijn om verantwoordelijkheid te nemen voor je lokale kaartgegevens",
 		"criteria4": "probeer nieuwe ondernemers in jouw regio te werven",
 		"locationLabel": "Locatie selecteren",
@@ -674,7 +682,7 @@
 		"lightningSuffix": "string toe.",
 		"lightningPlaceholder": "btcmap@zbd.gg",
 		"socialsLabel": "Social media links",
-		"socialsHint": "Je moet minstens &eacute;&eacute;n methode aanbieden waarmee mensen zich bij je community kunnen aansluiten.",
+		"socialsHint": "Je moet minstens één methode aanbieden waarmee mensen zich bij je community kunnen aansluiten.",
 		"socialsPlaceholder": "Website, Nostr, Telegram, Meetup, enzovoort",
 		"contactLabel": "Contactpersoon",
 		"contactHint": "Een manier om in contact te komen met de communityleider voor het geval we vragen hebben.",
@@ -705,13 +713,13 @@
 		"noTaggingIssues": "Geen tag-problemen!",
 		"noTaggingIssuesModal": "Geen tag-problemen!",
 		"add": "Toevoegen",
-		"verify": "Verifi&euml;ren",
+		"verify": "Verifiëren",
 		"community": "Community",
 		"noAddTickets": "Geen open tickets voor toevoegingen.",
 		"noVerifyTickets": "Geen open verificatietickets.",
 		"noCommunityTickets": "Geen open communitytickets.",
-		"ticketsTooltip": "Scoor je tickets via onze noob-formulieren! Iedereen kan helpen met het toevoegen of verifi&euml;ren van inzendingen op OpenStreetMap.",
-		"ticketsSubheading": "Scoor je tickets via onze noob-formulieren! Iedereen kan helpen met het toevoegen of verifi&euml;ren van ingediende locaties en helpen bij het beoordelen van community's.",
+		"ticketsTooltip": "Scoor je tickets via onze noob-formulieren! Iedereen kan helpen met het toevoegen of verifiëren van inzendingen op OpenStreetMap.",
+		"ticketsSubheading": "Scoor je tickets via onze noob-formulieren! Iedereen kan helpen met het toevoegen of verifiëren van ingediende locaties en helpen bij het beoordelen van community's.",
 		"taggingInstructionsIntro": "Meer informatie over hoe je mee kunt doen vind je in onze",
 		"taggingInstructionsLink": "Tagging-instructies voor ondernemers",
 		"underMaintenance": "Het onderdeel 'Fouten bij het taggen' is momenteel in onderhoud.",
@@ -746,14 +754,14 @@
 		"chartsTitle": "Grafieken",
 		"defaultAreaName": "BTC Map gebied",
 		"locationsNote": "*Locaties waar je met elke Bitcoin-betaalmethode kunt betalen",
-		"verifiedNote": "*Locaties waarvan de survey:date, check_date of check_date:currency:XBT-tag minder dan &eacute;&eacute;n jaar oud is.",
+		"verifiedNote": "*Locaties waarvan de survey:date, check_date of check_date:currency:XBT-tag minder dan één jaar oud is.",
 		"tagsInfo": "*Meer informatie over Bitcoin mapping tags vindt je",
 		"here": "hier",
-		"chartDataNote": "*Grafiekgegevens worden &eacute;&eacute;n keer per 24 uur bijgewerkt."
+		"chartDataNote": "*Grafiekgegevens worden één keer per 24 uur bijgewerkt."
 	},
 	"activityPage": {
 		"title": "Activiteit",
-		"subheading": "Geheimzinnige Supertaggers slapen niet. Ze zijn de hele nacht in de weer met taggen. De wereld die we willen, is slechts &eacute;&eacute;n tag verwijderd.",
+		"subheading": "Geheimzinnige Supertaggers slapen niet. Ze zijn de hele nacht in de weer met taggen. De wereld die we willen, is slechts één tag verwijderd.",
 		"cta": "Ook jij kunt een geheimzinnige supertagging-legende worden! Waar wacht je nog op?",
 		"getTaggin": "Begin met taggen!",
 		"latestSupertaggers": "Nieuwste Supertaggers"
@@ -795,11 +803,11 @@
 			"maintain": "Onderhoud"
 		},
 		"defaultName": "Gebied op de BTC Map kaart",
-		"viewOnCommunityMap": "Weergeven op de communitykaart",
+		"viewOnCommunityMap": "Bekijk op de communitykaart",
 		"verifiedOverYearAgo": "Langer dan een jaar geleden geverifieerd",
 		"verified": "Geverifieerd",
 		"notRecentlyVerified": "Niet recent geverifieerd",
-		"verifyCommunity": "Community verifi&euml;ren",
+		"verifyCommunity": "Community verifiëren",
 		"errorLoadingData": "Fout bij het laden van de gegevens. Probeer het later nog eens.",
 		"loadingData": "Gegevens laden...",
 		"dataWithin24Hours": "De gegevens verschijnen binnen 24 uur.",
@@ -808,9 +816,9 @@
 	},
 	"areaTickets": {
 		"typeAdd": "Toevoegen",
-		"typeVerify": "Verifi&euml;ren",
+		"typeVerify": "Verifiëren",
 		"typeCommunity": "Community",
-		"tooltip": "Scoor je tickets via onze noob-formulieren! Iedereen kan helpen met het toevoegen of verifi&euml;ren van inzendingen op OpenStreetMap.",
+		"tooltip": "Scoor je tickets via onze noob-formulieren! Iedereen kan helpen met het toevoegen of verifiëren van inzendingen op OpenStreetMap.",
 		"noAddTickets": "Geen open tickets voor toevoegingen.",
 		"noVerifyTickets": "Geen open verificatietickets.",
 		"noCommunityTickets": "Geen open communitytickets.",
@@ -820,7 +828,7 @@
 		"loadError": "Kan openstaande tickets niet laden. Probeer het opnieuw of neem contact op met BTC Map."
 	},
 	"verifyCommunity": {
-		"title": "Gegevens van de community verifi&euml;ren",
+		"title": "Gegevens van de community verifiëren",
 		"description": "Help ons om de communitygegevens up-to-date te houden. Controleer de onderstaande informatie.",
 		"communityName": "Communitynaam",
 		"accurateLabel": "De huidige informatie is juist",
@@ -851,7 +859,7 @@
 		"verified": "Geverifieerd",
 		"verifiedLocations": "Geverifieerde locaties",
 		"sortByVerified": "Sorteer op geverifieerde locaties",
-		"grade": "Cijfer",
+		"grade": "Score",
 		"sortByGrade": "Sorteren op beoordeling",
 		"positionCalc": "Positie wordt als volgt berekend:",
 		"primaryCalc": "Primair: Totaal aantal locaties minus 5x verouderde elementen.",
@@ -867,13 +875,13 @@
 		"loadingAreaInfo": "Gebiedsinformatie laden"
 	},
 	"issuesTable": {
-		"searchPlaceholder": "Zoekopdracht...",
-		"merchantName": "Naam handelaar",
-		"description": "Beschrijving",
-		"view": "Weergave",
-		"edit": "Bewerk",
+		"searchPlaceholder": "Zoeken...",
+		"merchantName": "Naam ondernemer",
+		"description": "Omschrijving",
+		"view": "Weergeven",
+		"edit": "Bewerken",
 		"help": "Hulp",
-		"noTaggingIssues": "Geen tagproblemen!",
+		"noTaggingIssues": "Geen tag-problemen!",
 		"noResults": "Geen resultaten gevonden.",
 		"page": "Pagina",
 		"of": "van",
@@ -882,25 +890,25 @@
 		"issueTypeNotVerified": "Laatste verificatiedatum ontbreekt",
 		"issueTypeOutdated": "Verouderd, moet opnieuw worden geverifieerd",
 		"issueTypeOutdatedSoon": "Binnenkort verouderd, moet opnieuw worden geverifieerd",
-		"issueTypeInvalidTag": "Tagwaarde is niet correct opgemaakt ({code})",
-		"issueTypeMisspelledTag": "Spellingsprobleem in tagnaam ({code})"
+		"issueTypeInvalidTag": "Tagwaarde heeft een ongeldige notatie ({code})",
+		"issueTypeMisspelledTag": "Foutieve spelling in tagnaam ({code})"
 	},
 	"taggingIssues": {
-		"title": "Problemen met taggen",
-		"subheading": "Draag bij aan DE kaart door tagproblemen op te lossen!",
-		"descriptionPart1": "Meer informatie over hoe u mee kunt doen vindt u op onze",
-		"linkText": "Instructies voor het taggen",
-		"descriptionPart2": "Wiki-pagina.",
-		"tableTitle": "Mondiale problemen"
+		"title": "Taggingproblemen",
+		"subheading": "Draag bij aan de kaart door tagfouten op te lossen!",
+		"descriptionPart1": "Meer informatie over hoe je mee kunt doen vind je op onze ",
+		"linkText": "Tagging Instructies",
+		"descriptionPart2": " wiki-pagina.",
+		"tableTitle": "Mondiale fouten"
 	},
 	"countries": {
-		"hero": "Bitcoin-adoptie door landen",
-		"description": "Jouw land? Jouw kaart!",
-		"viewLeaderboard": "Bekijk klassement",
-		"viewDirectory": "Directory bekijken",
+		"hero": "Landen die Bitcoin omarmen",
+		"description": "Jouw land? Jouw eigen kaart!",
+		"viewLeaderboard": "Bekijk ranglijst",
+		"viewDirectory": "Toon overzicht",
 		"leaderboardHero": "Toplanden",
-		"leaderboardDescription": "Inzicht in Bitcoin-adoptie wereldwijd!",
-		"leaderboard": "Leiderbord",
+		"leaderboardDescription": "Inzicht in de wereldwijde adoptie van Bitcoin!",
+		"leaderboard": "Ranglijst",
 		"africa": "Afrika",
 		"asia": "Azië",
 		"europe": "Europa",
@@ -913,30 +921,30 @@
 		"ariaLabelWithPercentage": "{grade} van 5 sterren, {percentage}% up-to-date"
 	},
 	"badges": {
-		"title": "Insignes",
-		"intro": "U kunt badges verdienen voor je BTC Map-bijdragen die op je profiel worden weergegeven. Heeft u een badge-idee? Laat het ons weten!",
+		"title": "Badges",
+		"intro": "Je kunt badges verdienen voor je bijdragen aan BTC Map, die op je profiel worden weergegeven. Heb je een leuk idee voor een badge? Laat het ons weten!",
 		"achievements": "Prestaties",
 		"contributions": "Bijdragen",
 		"achievement": {
 			"geyserTournament": {
-				"title": "Geiser toernooi",
+				"title": "Geyser-toernooi",
 				"desc": "Neem deel aan het Supertagger-evenement 2023"
 			},
 			"topTagger": {
 				"title": "Top Tagger",
-				"desc": "Nummer 1 op het klassement"
+				"desc": "#1 op de ranglijst"
 			},
 			"podium": {
 				"title": "Podium",
-				"desc": "In de top 3 van het klassement"
+				"desc": "In de top 3 op de ranglijst"
 			},
 			"highRank": {
 				"title": "Hoge rang",
-				"desc": "In de top 10 van het klassement"
+				"desc": "In de top 10 op de ranglijst"
 			},
 			"ogSupertagger": {
 				"title": "OG Supertagger",
-				"desc": "Draag binnen de eerste 3 maanden bij aan BTC Map"
+				"desc": "Lever binnen de eerste 3 maanden een bijdrage aan BTC Map"
 			},
 			"lightningJunkie": {
 				"title": "Lightningjunkie",
@@ -951,7 +959,7 @@
 				"desc": "Het merendeel van je bijdragen bestaat uit verwijderingen"
 			},
 			"updateMaxi": {
-				"title": "Maxi-update",
+				"title": "Update Maxi",
 				"desc": "Het merendeel van je bijdragen zijn updates"
 			},
 			"creator": {
@@ -969,7 +977,7 @@
 				"desc": "21M"
 			},
 			"pizzaTime": {
-				"title": "Pizza-tijd",
+				"title": "Pizzatijd",
 				"desc": "10K"
 			},
 			"godly": {
@@ -981,7 +989,7 @@
 				"desc": "5000"
 			},
 			"whitepaper": {
-				"title": "White Paper",
+				"title": "Whitepaper",
 				"desc": "3110"
 			},
 			"winston": {
@@ -1009,7 +1017,7 @@
 				"desc": "256"
 			},
 			"noBailouts": {
-				"title": "Geen reddingsoperaties",
+				"title": "Geen bailouts",
 				"desc": "210"
 			},
 			"supertagger": {
@@ -1037,26 +1045,26 @@
 				"desc": "4"
 			},
 			"wholeTagger": {
-				"title": "Hele Tagger",
+				"title": "Whole Tagger",
 				"desc": "1"
 			}
 		}
 	},
 	"apps": {
 		"hero": "Vind ondernemers op elk platform",
-		"subheading": "Wij staan ​​voor u klaar, op welk apparaat en besturingssysteem u ook kiest.",
+		"subheading": "Welk apparaat of besturingssysteem je ook kiest, wij staan voor je klaar.",
 		"btcmap": "BTC Map Apps",
-		"poweredBy": "Powered by BTC Map",
-		"comingSoon": "Binnenkort",
+		"poweredBy": "Mogelijk gemaakt door BTC Map",
+		"comingSoon": "Binnenkort beschikbaar",
 		"sponsor": "Sponsor",
 		"downloadAria": "{name} downloaden",
 		"openAria": "{name} openen"
 	},
 	"media": {
 		"title": "Media",
-		"intro": "Mediamiddelen zijn gratis beschikbaar voor gebruik voor promotionele doeleinden.",
-		"brandColors": "Merk kleuren",
-		"assets": "Activa",
+		"intro": "Mediabestanden zijn gratis te gebruiken voor promotionele doeleinden.",
+		"brandColors": "Huisstijlkleuren",
+		"assets": "Middelen",
 		"downloadAll": "Alles downloaden",
 		"brand": "Merk",
 		"promotional": "Promotioneel",
@@ -1066,23 +1074,23 @@
 			"btcmapLogo": "BTC Map logo",
 			"shadowySupertagger": "Geheimzinnige Supertagger",
 			"shadowySupertaggerLeader": "Geheimzinnige Supertagger - Leider",
-			"activityFeed": "Activiteitsfeed",
+			"activityFeed": "Activiteitenoverzicht",
 			"addCommunity": "Community toevoegen",
 			"addLocation": "Locatie toevoegen",
 			"communities": "Community's",
 			"countries": "Landen",
 			"downloadApps": "Apps downloaden",
 			"earnBadges": "Verdien badges",
-			"main": "Voornaamst",
+			"main": "Hoofdmenu",
 			"map": "Kaart",
 			"merchant": "Ondernemer",
 			"statsDashboard": "Statistiekdashboard",
-			"supertaggerLeaderboard": "Supertagger-klassement",
+			"supertaggerLeaderboard": "Supertagger-ranglijst",
 			"supertaggerProfile": "Supertagger-profiel",
-			"supporters": "Steun ons",
-			"topCommunities": "Topgemeenschappen",
+			"supporters": "Supporters",
+			"topCommunities": "Top community's",
 			"topCountries": "Toplanden",
-			"verifyLocations": "Locaties verifi&euml;ren",
+			"verifyLocations": "Locaties verifiëren",
 			"igor": "Igor",
 			"karnage": "Karnage",
 			"nathanDay": "Nathan Day",
@@ -1097,7 +1105,7 @@
 				"headline": "Houden van wat we doen"
 			},
 			"wayfinder": {
-				"headline": "Steunt de missie"
+				"headline": "Ondersteunen de missie"
 			},
 			"cartographer": {
 				"headline": "Kernpartner van het ecosysteem"
@@ -1109,16 +1117,16 @@
 				"headline": "Onze meest toegewijde supporters"
 			},
 			"pleb": {
-				"headline": "Elke sat telt &mdash; gerangschikt op cumulatieve bijdragen"
+				"headline": "Elke sat telt — gesorteerd op cumulatieve bijdragen"
 			}
 		},
 		"individual": {
 			"heading": "Individuele supporters",
-			"description": "BTC Map wordt gedragen door de community. Individuele supporters helpen het project onafhankelijk en open te houden, in handen van de mensen die het gebruiken.",
+			"description": "BTC Map wordt gedragen door de community. Individuele supporters helpen het project onafhankelijk en open te houden, en in handen van de mensen die het gebruiken.",
 			"cta": "Word supporter"
 		},
 		"sponsors": {
-			"description": "BTC Map wordt erkend als een belangrijk onderdeel van de bredere Bitcoin-infrastructuur. Elke sponsor hieronder ondersteunt ons in onze missie om bitcoin tot dagelijks geld te maken."
+			"description": "BTC Map wordt erkend als een belangrijk onderdeel van de bredere Bitcoin-infrastructuur. Elke onderstaande sponsor steunt ons in onze missie om van Bitcoin een dagelijks betaalmiddel te maken."
 		},
 		"donate": {
 			"scanOrClick": "Scan of klik om te doneren",
@@ -1128,49 +1136,49 @@
 			"protocolAlt": "protocol"
 		},
 		"supporters": {
-			"heading": "Onze geweldige supporters",
+			"heading": "Sponsors uit de sector",
 			"becomeSponsor": "Word sponsor"
 		},
 		"node": {
 			"heading": "Open een lightning-kanaal naar ons",
-			"scanOrClick": "Scan of klik om verbinding te maken"
+			"scanOrClick": "Scan of klik om een verbinding te maken"
 		},
-		"applyHere": "Solliciteer hier",
-		"qrError": "Kon geen QR genereren. Probeer het opnieuw of neem contact op met BTC Map.",
-		"qrLoadError": "Kan QR-generator niet laden. Probeer het opnieuw."
+		"applyHere": "Meld je aan",
+		"qrError": "De QR-code kon niet worden gegenereerd. Probeer het opnieuw of neem contact op met BTC Map.",
+		"qrLoadError": "De QR-generator kon niet worden geladen. Probeer het opnieuw."
 	},
 	"privacyPolicy": {
 		"title": "Privacybeleid",
-		"intro": "Wij verzamelen je persoonlijke gegevens niet.",
-		"readMore": "Lees verder voor meer details.",
+		"intro": "We verzamelen je persoonlijke gegevens niet.",
+		"readMore": "Wil je meer weten? Lees dan verder.",
 		"forms": {
 			"heading": "Formulieren",
-			"intro": "Wat gebeurt er als u een formulier op onze website indient:",
-			"item1": "Er wordt automatisch een probleem aangemaakt in onze zelfgehoste {btcmapDataLink}-opslagplaats met de formulierinformatie.",
-			"item2": "Er wordt automatisch een bericht verzonden naar onze {matrixLink}.",
-			"item3": "Als de inzending geldig is, wordt deze door een BTC Map-bijdrager aan {osmLink} toegevoegd en in onze apps weergegeven.",
-			"item4": "Sommige informatie, waaronder gemeenschappen, wordt niet opgeslagen op OpenStreetMap, maar in plaats daarvan in de BTC Map-database.",
-			"referPolicies": "Raadpleeg het privacybeleid van elk van deze derde partijen om te begrijpen hoe je informatie daar wordt gebruikt.",
-			"agreePublic": "Door informatie in te dienen via een van onze formulieren, gaat u ermee akkoord dat deze informatie openbaar wordt gebruikt.",
-			"doNotSubmit": "Geef geen persoonlijke of privégegevens op.",
-			"xHandleBefore": "Als u een X-handle opneemt, kunnen we berichten plaatsen over je inzending vanuit de",
+			"intro": "Wat gebeurt er als je een formulier op onze website verstuurt:",
+			"item1": "Er wordt automatisch een ticket aangemaakt in onze zelfgehoste {btcmapDataLink} repo met de formulierinformatie.",
+			"item2": "Er wordt automatisch een bericht naar onze {matrixLink} gestuurd.",
+			"item3": "Als de inzending geldig is, voegt een BTC Map vrijwilliger deze toe aan {osmLink} en verschijnt het in onze apps.",
+			"item4": "Sommige informatie, waaronder community's, staat niet op OpenStreetMap, maar in de BTC Map-database.",
+			"referPolicies": "Lees het privacybeleid van elk van deze derde partijen om te begrijpen hoe jouw gegevens daar worden gebruikt.",
+			"agreePublic": "Door informatie in te sturen via een van onze formulieren, ga je ermee akkoord dat deze informatie openbaar wordt gebruikt.",
+			"doNotSubmit": "Deel geen persoonlijke of privégegevens.",
+			"xHandleBefore": "Als je je X-handle doorgeeft, kunnen we je inzending uitlichten op ons",
 			"xHandleAfter": "X-account."
 		},
 		"analytics": {
-			"heading": "Analyses",
-			"intro": "We gebruiken privacy-respecterende analyses geleverd door {netlifyLink} en een zelfgehost exemplaar van {umamiLink} om gebruiksstatistieken in de loop van de tijd bij te houden en de gebruikerservaring te verbeteren.",
-			"noCookies": "Deze analyses maken geen gebruik van cookies of trackers. Er is geen persoonlijk identificeerbare informatie opgenomen. Alle gegevens zijn anoniem en voldoen aan de {gdprLink}.",
-			"readMore": "Hieronder vindt u enkele links om meer te lezen over Netlify Analytics:"
+			"heading": "Analytics",
+			"intro": "We gebruiken privacy-respecterende analytics geleverd door {netlifyLink} en een zelfgehost exemplaar van {umamiLink} om gebruiksstatistieken bij te houden en de gebruikerservaring te verbeteren.",
+			"noCookies": "Deze analytische gegevens gebruiken geen cookies of trackers. Er wordt geen persoonlijk identificeerbare informatie verzameld. Alle data is geanonimiseerd en voldoet aan de {gdprLink}.",
+			"readMore": "Hieronder vind je een paar links om meer te lezen over Netlify Analytics:"
 		},
 		"cookies": {
-			"heading": "Koekjes",
-			"intro": "Wij gebruiken geen cookies."
+			"heading": "Cookies",
+			"intro": "We maken geen gebruik van cookies."
 		},
 		"ipProtection": {
-			"heading": "Hoe u je IP online kunt beschermen",
-			"intro": "Het is een goede gewoonte om je openbare IP-adres te beschermen wanneer u op internet surft. De twee meest voorkomende methoden om dit te doen zijn:",
-			"item1": "Gebruik een VPN-service zoals {mullvadLink}.",
-			"item2": "Gebruik de {torLink}-browser."
+			"heading": "Hoe je jouw IP-adres online beschermt",
+			"intro": "Het is een goede gewoonte om je openbare IP-adres te beschermen tijdens het surfen op het internet. De twee meest voorkomende methoden om dit te doen zijn:",
+			"item1": "Gebruik een VPN-dienst zoals {mullvadLink}.",
+			"item2": "Gebruik de {torLink} browser."
 		},
 		"changes": {
 			"heading": "Wijzigingen in dit privacybeleid",
@@ -1178,15 +1186,15 @@
 		},
 		"contact": {
 			"heading": "Neem contact met ons op",
-			"intro": "Als u vragen of feedback heeft over ons privacybeleid, neem dan contact met ons op via {contactLink} of op een van onze sociale platforms."
+			"intro": "Als je vragen of feedback hebt over ons privacybeleid, neem dan contact met ons op via {contactLink} of op een van onze socials."
 		},
 		"links": {
-			"githubPrivacy": "GitHub-privacybeleid",
-			"discordPrivacy": "Discord-privacybeleid",
-			"osmPrivacy": "OpenStreetMap-privacybeleid",
+			"githubPrivacy": "Privacybeleid van GitHub",
+			"discordPrivacy": "Privacybeleid van Discord",
+			"osmPrivacy": "Privacybeleid van OpenStreetMap",
 			"netlifyAnalytics": "Netlify Analytics",
-			"netlifyDocsAnalytics": "Netlify Documenten - Analytics",
-			"netlifyDocsHowAnalytics": "Netlify Documenten - Hoe Analytics werkt"
+			"netlifyDocsAnalytics": "Netlify Documentatie - Analytics",
+			"netlifyDocsHowAnalytics": "Netlify Documentatie - Hoe Analytics werkt"
 		}
 	}
 }
