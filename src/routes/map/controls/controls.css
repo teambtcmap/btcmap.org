@@ -78,6 +78,12 @@
    DataRefresh). MapLibre's default `.maplibregl-ctrl-group button` rules
    don't apply to <a> elements, so we replicate the dimensions, hover and
    focus states here. */
+/* Matches GlobeControl's blue-active pattern — tint heatmap icon #33b5e5 when enabled */
+.maplibregl-ctrl-group a.maplibregl-ctrl-link.maplibregl-ctrl-heatmap-enabled
+	svg {
+	color: #33b5e5;
+}
+
 .maplibregl-ctrl-group a.maplibregl-ctrl-link {
 	display: flex;
 	align-items: center;
@@ -157,4 +163,11 @@
 .dark .maplibregl-ctrl-group a.maplibregl-ctrl-link img,
 .dark .maplibregl-ctrl-group a.maplibregl-ctrl-link svg {
 	filter: invert(1);
+}
+/* Preserve the heatmap enabled blue in dark mode — the invert above would
+   turn #33b5e5 into an orange-ish tint, losing the active-state cue. */
+.dark .maplibregl-ctrl-group
+	a.maplibregl-ctrl-link.maplibregl-ctrl-heatmap-enabled
+	svg {
+	filter: none;
 }
