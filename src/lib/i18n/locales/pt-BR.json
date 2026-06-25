@@ -193,7 +193,12 @@
 		"finalizeError": "Não foi possível finalizar o impulso, entre em contato com o BTC Map.",
 		"invalidDuration": "Duração de impulso inválida",
 		"invalidMerchantId": "ID do comerciante inválido",
-		"twitterShareText": "Acabei de impulsionar {name} no @btcmap. Confira!"
+		"twitterShareText": "Acabei de impulsionar {name} no @btcmap. Confira!",
+		"errorTitle": "Não foi possível iniciar seu impulso",
+		"errorNetwork": "Você parece estar offline. Verifique sua conexão e tente novamente.",
+		"errorService": "O serviço de impulso está temporariamente indisponível. Por favor, tente novamente em breve.",
+		"errorRetry": "Tente novamente",
+		"errorContact": "Ainda preso? Entre em contato"
 	},
 	"invoicePayment": {
 		"scanOrClick": "Escaneie ou clique para pagar com lightning",
@@ -267,7 +272,9 @@
 		"formSubmission": "Falha no envio do formulário. Tente novamente ou entre em contato com o BTC Map.",
 		"mapView": "Não foi possível definir a visualização do mapa para as coordenadas fornecidas. Tente novamente ou entre em contato com o BTC Map.",
 		"merchantDetailsLoadError": "Erro ao carregar detalhes do comerciante. Tente novamente.",
-		"boostLoadError": "Falha ao carregar informações de boost. Tente novamente."
+		"boostLoadError": "Falha ao carregar informações de boost. Tente novamente.",
+		"invoiceGenerate": "Não foi possível gerar a fatura, por favor tente novamente ou entre em contato com o BTC Map.",
+		"invoiceStatusCheck": "Não foi possível verificar o status da fatura, por favor tente novamente ou entre em contato com o BTC Map."
 	},
 	"aria": {
 		"logoAlt": "Logo do BTC Map",

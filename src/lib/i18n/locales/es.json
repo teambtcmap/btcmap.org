@@ -193,7 +193,12 @@
 		"finalizeError": "No se pudo finalizar el impulso, por favor contacta a BTC Map.",
 		"invalidDuration": "Duración de impulso inválida",
 		"invalidMerchantId": "ID de comercio inválido",
-		"twitterShareText": "Acabo de impulsar a {name} en @btcmap. ¡Échale un vistazo!"
+		"twitterShareText": "Acabo de impulsar a {name} en @btcmap. ¡Échale un vistazo!",
+		"errorTitle": "No se pudo iniciar tu impulso",
+		"errorNetwork": "Parece que estás sin conexión. Verifica tu conexión e inténtalo de nuevo.",
+		"errorService": "El servicio de impulso no está disponible temporalmente. Por favor, inténtalo de nuevo pronto.",
+		"errorRetry": "Intentar de nuevo",
+		"errorContact": "¿Aún atrapado? Contacta"
 	},
 	"invoicePayment": {
 		"scanOrClick": "Escanea o haz clic para pagar con Lightning",
@@ -272,7 +277,9 @@
 		"locationSearch": "No se pudo buscar ubicaciones, por favor inténtalo de nuevo o contacta a BTC Map.",
 		"mapView": "No se pudo establecer la vista del mapa en las coordenadas proporcionadas, por favor inténtalo de nuevo o contacta a BTC Map.",
 		"merchantDetailsLoadError": "Error al cargar los detalles del comercio. Por favor, inténtalo de nuevo.",
-		"boostLoadError": "Error al cargar la información del impulso. Por favor, inténtalo de nuevo."
+		"boostLoadError": "Error al cargar la información del impulso. Por favor, inténtalo de nuevo.",
+		"invoiceGenerate": "No se pudo generar la factura, por favor inténtalo de nuevo o contacta a BTC Map.",
+		"invoiceStatusCheck": "No se pudo verificar el estado de la factura, por favor inténtalo de nuevo o contacta a BTC Map."
 	},
 	"success": {
 		"locationSelected": "¡Ubicación seleccionada!",

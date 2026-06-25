@@ -286,7 +286,12 @@
 		"finalizeError": "We konden de boost niet afronden. Neem contact op met BTC Map.",
 		"invalidDuration": "Ongeldige boostduur",
 		"invalidMerchantId": "Ongeldige ondernemer-ID",
-		"twitterShareText": "Ik heb net {name} geboost op @btcmap. Neem een kijkje!"
+		"twitterShareText": "Ik heb net {name} geboost op @btcmap. Neem een kijkje!",
+		"errorTitle": "Kon je boost niet starten",
+		"errorNetwork": "Je bent offline. Controleer je verbinding en probeer opnieuw.",
+		"errorService": "De boostservice is tijdelijk niet beschikbaar. Probeer het zo meteen opnieuw.",
+		"errorRetry": "Probeer opnieuw",
+		"errorContact": "Nog steeds problemen? Neem contact op met"
 	},
 	"invoicePayment": {
 		"scanOrClick": "Scan of klik om met Lightning te betalen",
@@ -366,7 +371,9 @@
 		"locationSearch": "Het zoeken naar locaties is mislukt. Probeer het opnieuw of neem contact op met BTC Map.",
 		"mapView": "Kan de kaartweergave niet instellen op de opgegeven coördinaten, probeer het opnieuw of neem contact op met BTC Map.",
 		"merchantDetailsLoadError": "Fout bij het laden van de ondernemergegevens. Probeer het opnieuw.",
-		"boostLoadError": "Laden van boostinformatie mislukt. Probeer het opnieuw."
+		"boostLoadError": "Laden van boostinformatie mislukt. Probeer het opnieuw.",
+		"invoiceGenerate": "Kon factuur niet genereren. Probeer het opnieuw of neem contact op met BTC Map.",
+		"invoiceStatusCheck": "Kon factuurstatus niet controleren. Probeer het opnieuw of neem contact op met BTC Map."
 	},
 	"success": {
 		"locationSelected": "Locatie geselecteerd!",
