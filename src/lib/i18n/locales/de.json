@@ -72,6 +72,7 @@
 	},
 	"mapControls": {
 		"goToHome": "Zur Startseite gehen",
+		"layersAndFilters": "Ebenen & Filter",
 		"menu": "Menü",
 		"addLocation": "Ort hinzufügen",
 		"communityMap": "Communitykarte",

@@ -38,8 +38,8 @@ import { areaIconSrc, errToast } from "$lib/utils";
 import { browser } from "$app/environment";
 import { resolve } from "$app/paths";
 import { page } from "$app/stores";
-import { BasemapsControl } from "../../map/controls/BasemapsControl";
 import { MapMenuControl } from "../../map/controls/MapMenuControl";
+import { MapToolsControl } from "../../map/controls/MapToolsControl";
 
 let mapLoading = 0;
 
@@ -362,10 +362,12 @@ const initializeMap = async () => {
 	map.addControl(new MapMenuControl("communities"), "top-right");
 
 	map.addControl(
-		new BasemapsControl({
-			basemaps: BASEMAPS,
-			initial: initialBasemap,
-			onSelect: applyBasemap,
+		new MapToolsControl({
+			basemap: {
+				basemaps: BASEMAPS,
+				initial: initialBasemap,
+				onSelect: applyBasemap,
+			},
 		}),
 		"top-right",
 	);

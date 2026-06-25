@@ -1,6 +1,6 @@
 /*
  * Shared styles for the custom MapLibre IControls in this directory
- * (BasemapsControl, MapMenuControl, BoostToggleControl). Imported by
+ * (MapToolsControl, MapMenuControl, BoostToggleControl). Imported by
  * each control's TS module so any page
  * that mounts the controls — currently /map and /communities/map — gets
  * the popup positioning, dark-mode treatment, and anchor button styles.
@@ -155,7 +155,7 @@
 /* MapLibre's built-in controls embed dark-gray SVG glyphs as
    background-image on a child <span class="maplibregl-ctrl-icon">; our
    NavButtons / Boost controls render plain <img> icons;
-   the BasemapsControl renders an inline <svg stroke="currentColor">.
+   the MapToolsControl renders an inline <svg stroke="currentColor">.
    Invert all three — the icons are single-color silhouettes, so a
    straight invert(1) reads as a clean light-on-dark version of the
    same glyph. */
@@ -194,4 +194,24 @@
 }
 .dark .maplibre-next-menu-row:hover {
 	background: rgba(255, 255, 255, 0.08);
+}
+
+/* Tools panel: shared popup shell with section headers between groups. */
+.maplibre-next-tools {
+	position: relative;
+}
+.maplibre-next-tools-header {
+	padding: 6px 10px 2px;
+	font-size: 11px;
+	font-weight: 600;
+	text-transform: uppercase;
+	letter-spacing: 0.04em;
+	opacity: 0.6;
+}
+.maplibre-next-tools-header:not(:first-child) {
+	border-top: 1px solid rgba(0, 0, 0, 0.08);
+	margin-top: 4px;
+}
+.dark .maplibre-next-tools-header:not(:first-child) {
+	border-top-color: rgba(255, 255, 255, 0.1);
 }

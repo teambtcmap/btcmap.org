@@ -17,32 +17,33 @@ import "./controls.css";
 
 type BasemapEntry = { id: BasemapId; label: string };
 
-type Options = {
-	basemaps: BasemapEntry[];
-	initial: BasemapId;
-	// Apply the chosen basemap. The page owns the actual swap because it
-	// has to carry the custom pin/cluster/label layers across the
-	// setStyle (vector basemaps aren't a toggle-able layer — they're a
-	// whole style). This control only handles the UI + persistence.
-	onSelect: (id: BasemapId) => void;
+export type MapToolsOptions = {
+	basemap?: {
+		basemaps: BasemapEntry[];
+		initial: BasemapId;
+		onSelect: (id: BasemapId) => void;
+	};
 };
 
-// Layer-picker control with the same shape as Leaflet's L.control.layers
-// that prod /map uses: a single icon button that expands into a radio
-// list of basemap labels. Selecting one delegates to the page's
-// onSelect (which does the setStyle swap) and persists the choice.
-export class BasemapsControl implements IControl {
-	#options: Options;
+// One button that expands a sectioned panel consolidating the map's
+// display controls (basemap; verified filter, overlays and view added in
+// later tasks). Replaces the previously separate BasemapsControl /
+// VerifiedFilterControl / BoostToggleControl / HeatmapToggleControl.
+// Each section is optional so /communities/map can mount basemap-only and
+// get exactly the old BasemapsControl behaviour. The page owns the actual
+// map effects via the per-section callbacks.
+export class MapToolsControl implements IControl {
+	#options: MapToolsOptions;
 	#container: HTMLDivElement | undefined;
 	#button: HTMLAnchorElement | undefined;
 	#popup: HTMLDivElement | undefined;
-	#current: BasemapId;
+	#currentBasemap: BasemapId | undefined;
 	#unsubLocale: (() => void) | null = null;
 	#docClickHandler: ((e: MouseEvent) => void) | null = null;
 
-	constructor(options: Options) {
+	constructor(options: MapToolsOptions) {
 		this.#options = options;
-		this.#current = options.initial;
+		this.#currentBasemap = options.basemap?.initial;
 	}
 
 	getDefaultPosition(): ControlPosition {
@@ -52,9 +53,8 @@ export class BasemapsControl implements IControl {
 	onAdd(_map: MapLibreMap): HTMLElement {
 		const container = document.createElement("div");
 		container.className =
-			"maplibregl-ctrl maplibregl-ctrl-group maplibre-next-basemaps";
+			"maplibregl-ctrl maplibregl-ctrl-group maplibre-next-tools";
 
-		// Toggle button — anchor styled like the other action controls.
 		const button = document.createElement("a");
 		button.className = "maplibregl-ctrl-icon maplibregl-ctrl-link";
 		button.href = "#";
@@ -62,22 +62,16 @@ export class BasemapsControl implements IControl {
 		button.setAttribute("role", "button");
 		button.setAttribute("aria-haspopup", "true");
 		button.setAttribute("aria-expanded", "false");
-
-		// Inline SVG: stack-of-layers icon (Material `layers-outline`).
-		// Inline rather than fetched so the button renders the moment the
-		// control is added — no flash, no extra request.
+		// Layers-stack glyph (same as the old BasemapsControl).
 		button.innerHTML = `<svg width="16" height="16" viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="12 2 2 7 12 12 22 7 12 2"></polygon><polyline points="2 17 12 22 22 17"></polyline><polyline points="2 12 12 17 22 12"></polyline></svg>`;
-
 		button.addEventListener("click", (e) => {
 			e.preventDefault();
 			this.#toggle();
 		});
 		container.appendChild(button);
 
-		// Popup with one labelled radio per basemap. Hidden until toggled.
 		const popup = document.createElement("div");
-		popup.className = "maplibre-next-basemaps-popup";
-		popup.setAttribute("role", "radiogroup");
+		popup.className = "maplibre-next-basemaps-popup maplibre-next-tools-popup";
 		popup.hidden = true;
 		container.appendChild(popup);
 
@@ -85,12 +79,11 @@ export class BasemapsControl implements IControl {
 		this.#button = button;
 		this.#popup = popup;
 
-		this.#renderPopup();
+		this.#renderPanel();
+		this.#updateActiveDot();
 
-		// Re-render labels when the locale changes.
-		this.#unsubLocale = _.subscribe(() => this.#renderPopup());
+		this.#unsubLocale = _.subscribe(() => this.#renderPanel());
 
-		// Click anywhere outside the control closes the popup.
 		this.#docClickHandler = (e) => {
 			if (!this.#container?.contains(e.target as Node)) this.#close();
 		};
@@ -112,52 +105,78 @@ export class BasemapsControl implements IControl {
 		this.#popup = undefined;
 	}
 
-	#renderPopup(): void {
+	#renderPanel(): void {
 		if (!this.#popup) return;
 		this.#popup.innerHTML = "";
-		const groupName = `maplibre-next-basemap-${Math.random().toString(36).slice(2, 8)}`;
-		for (const bm of this.#options.basemaps) {
-			const label = document.createElement("label");
-			label.className = "maplibre-next-basemaps-option";
+		const t = get(_);
 
-			const radio = document.createElement("input");
-			radio.type = "radio";
-			radio.name = groupName;
-			radio.value = bm.id;
-			radio.checked = bm.id === this.#current;
-			radio.addEventListener("change", () => {
-				if (radio.checked) this.#select(bm.id);
-			});
-
-			const text = document.createElement("span");
-			text.textContent = bm.label;
-
-			label.appendChild(radio);
-			label.appendChild(text);
-			this.#popup.appendChild(label);
+		if (this.#options.basemap) {
+			this.#popup.appendChild(
+				this.#renderSectionHeader(t("mapControls.basemapTitle")),
+			);
+			this.#popup.appendChild(this.#renderBasemapSection());
 		}
 
-		const title = get(_)("mapControls.basemapTitle", {
-			default: "Basemap",
-		});
+		const title = t("mapControls.layersAndFilters");
 		this.#button?.setAttribute("title", title);
 		this.#button?.setAttribute("aria-label", title);
 	}
 
-	#select(id: BasemapId): void {
-		if (id === this.#current) {
+	#renderSectionHeader(text: string): HTMLElement {
+		const h = document.createElement("div");
+		h.className = "maplibre-next-tools-header";
+		h.textContent = text;
+		return h;
+	}
+
+	#renderBasemapSection(): HTMLElement {
+		const group = document.createElement("div");
+		group.setAttribute("role", "radiogroup");
+		const cfg = this.#options.basemap;
+		if (!cfg) return group;
+		const groupName = `maplibre-next-basemap-${Math.random().toString(36).slice(2, 8)}`;
+		for (const bm of cfg.basemaps) {
+			const label = document.createElement("label");
+			label.className = "maplibre-next-basemaps-option";
+			const radio = document.createElement("input");
+			radio.type = "radio";
+			radio.name = groupName;
+			radio.value = bm.id;
+			radio.checked = bm.id === this.#currentBasemap;
+			radio.addEventListener("change", () => {
+				if (radio.checked) this.#selectBasemap(bm.id);
+			});
+			const text = document.createElement("span");
+			text.textContent = bm.label;
+			label.appendChild(radio);
+			label.appendChild(text);
+			group.appendChild(label);
+		}
+		return group;
+	}
+
+	#selectBasemap(id: BasemapId): void {
+		const cfg = this.#options.basemap;
+		if (!cfg || id === this.#currentBasemap) {
 			this.#close();
 			return;
 		}
-		this.#current = id;
+		this.#currentBasemap = id;
 		try {
 			if (isBasemapId(id)) localStorage.setItem(BASEMAP_STORAGE_KEY, id);
 		} catch {
 			// localStorage unavailable; skip persistence
 		}
-		this.#options.onSelect(id);
+		cfg.onSelect(id);
 		trackEvent("layer_change", { layer: id });
 		this.#close();
+	}
+
+	// Accent dot on the closed button when any view-altering state is active.
+	// Basemap is the default surface, so it never lights the dot; verified /
+	// overlays (added later) will.
+	#updateActiveDot(): void {
+		this.#container?.classList.toggle("active", false);
 	}
 
 	#toggle(): void {
@@ -170,6 +189,9 @@ export class BasemapsControl implements IControl {
 		if (!this.#popup || !this.#button) return;
 		this.#popup.hidden = false;
 		this.#button.setAttribute("aria-expanded", "true");
+		// New interaction gate — measure whether users open the consolidated
+		// panel at all (the per-section events below tell us what they do once in).
+		trackEvent("layers_panel_open");
 	}
 
 	#close(): void {

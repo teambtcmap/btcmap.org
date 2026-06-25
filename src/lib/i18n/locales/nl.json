@@ -157,6 +157,7 @@
 	},
 	"mapControls": {
 		"goToHome": "Ga naar de startpagina",
+		"layersAndFilters": "Lagen & filters",
 		"menu": "Menu",
 		"addLocation": "Locatie toevoegen",
 		"communityMap": "Communitykaart",

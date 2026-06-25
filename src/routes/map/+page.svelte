@@ -94,13 +94,13 @@ import MapSearchBar from "./components/MapSearchBar.svelte";
 import MerchantDrawerHash from "./components/MerchantDrawerHash.svelte";
 import MerchantListPanel from "./components/MerchantListPanel.svelte";
 import TileLoadingIndicator from "./components/TileLoadingIndicator.svelte";
-import { BasemapsControl } from "./controls/BasemapsControl";
 import { BoostToggleControl } from "./controls/BoostToggleControl";
 import {
 	HEATMAP_STORAGE_KEY,
 	HeatmapToggleControl,
 } from "./controls/HeatmapToggleControl";
 import { MapMenuControl } from "./controls/MapMenuControl";
+import { MapToolsControl } from "./controls/MapToolsControl";
 import { VerifiedFilterControl } from "./controls/VerifiedFilterControl";
 import { browser } from "$app/environment";
 
@@ -1225,15 +1225,18 @@ onMount(async () => {
 	map.addControl(new MapMenuControl(), "top-right");
 	map.addControl(new BoostToggleControl(), "top-right");
 
-	// Basemap picker — layers-icon button that expands on hover/click,
-	// matching the L.control.layers shape prod uses. Owns its own
-	// localStorage persistence; the actual swap is delegated to
-	// applyBasemap so the custom pin/cluster/label layers survive it.
+	// Consolidated tools panel — one layers-icon button expanding a sectioned
+	// popup. Starts with the basemap picker (verified filter, overlays and
+	// world-view fold in next). Owns its own localStorage persistence; the
+	// basemap swap is delegated to applyBasemap so the custom pin/cluster/label
+	// layers survive it.
 	map.addControl(
-		new BasemapsControl({
-			basemaps: BASEMAPS,
-			initial: initialBasemap,
-			onSelect: applyBasemap,
+		new MapToolsControl({
+			basemap: {
+				basemaps: BASEMAPS,
+				initial: initialBasemap,
+				onSelect: applyBasemap,
+			},
 		}),
 		"top-right",
 	);

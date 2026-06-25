@@ -72,6 +72,7 @@
 	},
 	"mapControls": {
 		"goToHome": "Ir a la página de inicio",
+		"layersAndFilters": "Capas y filtros",
 		"menu": "Menú",
 		"addLocation": "Agregar ubicación",
 		"communityMap": "Mapa de comunidades",

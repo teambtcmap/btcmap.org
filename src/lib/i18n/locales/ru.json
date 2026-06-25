@@ -72,6 +72,7 @@
 	},
 	"mapControls": {
 		"goToHome": "На главную страницу",
+		"layersAndFilters": "Слои и фильтры",
 		"menu": "Меню",
 		"addLocation": "Добавить место",
 		"communityMap": "Карта сообщества",

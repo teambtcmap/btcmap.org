@@ -157,6 +157,7 @@
 	},
 	"mapControls": {
 		"goToHome": "Go to home page",
+		"layersAndFilters": "Layers & filters",
 		"menu": "Menu",
 		"addLocation": "Add location",
 		"communityMap": "Community map",

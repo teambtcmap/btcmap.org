@@ -53,6 +53,7 @@
 	},
 	"mapControls": {
 		"goToHome": "Към началната страница",
+		"layersAndFilters": "Слоеве и филтри",
 		"menu": "Меню",
 		"addLocation": "Добави място",
 		"communityMap": "Карта на общностите",
