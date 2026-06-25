@@ -34,7 +34,6 @@ import {
 import { SEARCH_SHEET_PEEK_HEIGHT } from "$lib/drawerConfig";
 import { _, getDisplayLang, locale } from "$lib/i18n";
 import {
-	BASEMAP_STORAGE_KEY,
 	BASEMAPS,
 	type BasemapId,
 	defaultBasemap,
@@ -92,17 +91,11 @@ import { debounce, errToast, isBoosted } from "$lib/utils";
 import { filterPlacesByRecency } from "$lib/verification";
 
 import type { PageData } from "./$types";
-import MapMenuModal from "./components/MapMenuModal.svelte";
+import MapControls from "./components/MapControls.svelte";
 import MapSearchBar from "./components/MapSearchBar.svelte";
-import MapToolsModal from "./components/MapToolsModal.svelte";
 import MerchantDrawerHash from "./components/MerchantDrawerHash.svelte";
 import MerchantListPanel from "./components/MerchantListPanel.svelte";
 import TileLoadingIndicator from "./components/TileLoadingIndicator.svelte";
-import {
-	MapButtonControl,
-	MENU_ICON_SVG,
-	TUNE_ICON_SVG,
-} from "./controls/MapButtonControl";
 import { browser } from "$app/environment";
 
 export let data: PageData;
@@ -1049,66 +1042,6 @@ const applyBasemap = (id: BasemapId) => {
 	});
 };
 
-// MapToolsModal state + the page-owned effect/persistence/analytics handlers
-// it calls. selectedBasemap/selectedVerified are seeded in onMount (browser)
-// and updated here on user change; the modal is a controlled component.
-let toolsModalOpen = false;
-let menuModalOpen = false;
-let selectedBasemap: BasemapId | undefined;
-let selectedVerified: VerifiedFilterYears = null;
-let globeOn = false;
-const boostActive =
-	typeof window !== "undefined" &&
-	new URLSearchParams(window.location.search).has("boosts");
-
-const openToolsModal = () => {
-	toolsModalOpen = true;
-	trackEvent("layers_panel_open");
-};
-const openMenuModal = () => {
-	menuModalOpen = true;
-	trackEvent("nav_menu_open", { variant: "main" });
-};
-const onPickBasemap = (id: BasemapId) => {
-	selectedBasemap = id;
-	try {
-		localStorage.setItem(BASEMAP_STORAGE_KEY, id);
-	} catch {
-		// localStorage unavailable (private mode); skip persistence.
-	}
-	applyBasemap(id);
-	trackEvent("layer_change", { layer: id });
-};
-const onPickVerified = async (years: VerifiedFilterYears) => {
-	selectedVerified = years;
-	trackEvent("verified_filter_change", {
-		years: years == null ? "any" : String(years),
-	});
-	await applyVerifiedFilter(years);
-};
-const onToggleHeatmapOverlay = (enabled: boolean) => {
-	try {
-		localStorage.setItem(HEATMAP_STORAGE_KEY, String(enabled));
-	} catch {
-		// localStorage unavailable (private mode); session-only toggle.
-	}
-	trackEvent("heatmap_layer_toggle", { enabled });
-	setHeatmapEnabled(enabled);
-};
-const onToggleBoostOverlay = () => {
-	trackEvent("boost_layer_toggle");
-	const url = new URL(window.location.href);
-	if (url.searchParams.has("boosts")) url.searchParams.delete("boosts");
-	else url.searchParams.set("boosts", "true");
-	window.location.search = url.search;
-};
-const onToggleGlobe = () => {
-	if (!map) return;
-	globeOn = !globeOn;
-	map.setProjection({ type: globeOn ? "globe" : "mercator" });
-	trackEvent("worldview_toggle", { enabled: globeOn });
-};
-
 onMount(async () => {
 	// Bridge the JS peek-height const into CSS so the bottom-chrome lift (scale
 	// bar, attribution, tile indicator) stays in sync with the anchored search
@@ -1279,32 +1212,9 @@ onMount(async () => {
 		.querySelector(".maplibregl-ctrl-geolocate")
 		?.addEventListener("click", () => trackEvent("locate_click"));
 
-	// Right-side action buttons: the page-nav menu, then the tools panel
-	// (basemap, verified filter, boost + heatmap overlays, world-view). Both
-	// open a Svelte modal; these IControls are just the top-right triggers.
-	map.addControl(
-		new MapButtonControl({
-			iconSvg: MENU_ICON_SVG,
-			labelKey: "mapControls.menu",
-			onClick: openMenuModal,
-		}),
-		"top-right",
-	);
-
-	// Tools panel trigger — opens MapToolsModal (basemap, verified filter,
-	// boost + heatmap overlays; world-view folds in next). The modal is a
-	// controlled Svelte component rendered in the markup; this is just the
-	// top-right button.
-	selectedBasemap = initialBasemap;
-	selectedVerified = getStoredVerifiedFilter();
-	map.addControl(
-		new MapButtonControl({
-			iconSvg: TUNE_ICON_SVG,
-			labelKey: "mapControls.layersAndFilters",
-			onClick: openToolsModal,
-		}),
-		"top-right",
-	);
+	// The page-nav menu + layers/filters trigger buttons and their modals are
+	// owned by <MapControls> (rendered in the markup); it registers the
+	// IControls once `map` is set below.
 
 	// Mirror /map's behavior: sync location into the userLocation store so
 	// the merchant list panel can compute distances without prompting again.
@@ -2117,22 +2027,16 @@ onDestroy(() => {
 
 <MerchantDrawerHash />
 
-<MapToolsModal
-	bind:open={toolsModalOpen}
+<MapControls
+	{map}
+	variant="main"
 	basemaps={BASEMAPS}
-	currentBasemap={selectedBasemap}
-	onSelectBasemap={onPickBasemap}
-	currentVerified={selectedVerified}
-	onSelectVerified={onPickVerified}
-	heatmapOn={heatmapEnabled}
-	onToggleHeatmap={onToggleHeatmapOverlay}
-	{boostActive}
-	onToggleBoost={onToggleBoostOverlay}
-	{globeOn}
-	{onToggleGlobe}
+	{applyBasemap}
+	{applyVerifiedFilter}
+	{setHeatmapEnabled}
+	enableBoost
+	enableGlobe
 />
-
-<MapMenuModal bind:open={menuModalOpen} variant="main" />
 
 <style>
 	.map-container {

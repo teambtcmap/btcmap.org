@@ -16,10 +16,8 @@ import { get } from "svelte/store";
 import MapLoadingMain from "$components/MapLoadingMain.svelte";
 import MapUnsupportedFallback from "$components/MapUnsupportedFallback.svelte";
 import Socials from "$components/Socials.svelte";
-import { trackEvent } from "$lib/analytics";
 import { _ } from "$lib/i18n";
 import {
-	BASEMAP_STORAGE_KEY,
 	BASEMAPS,
 	type BasemapId,
 	defaultBasemap,
@@ -40,13 +38,7 @@ import { areaIconSrc, errToast } from "$lib/utils";
 import { browser } from "$app/environment";
 import { resolve } from "$app/paths";
 import { page } from "$app/stores";
-import MapMenuModal from "../../map/components/MapMenuModal.svelte";
-import MapToolsModal from "../../map/components/MapToolsModal.svelte";
-import {
-	MapButtonControl,
-	MENU_ICON_SVG,
-	TUNE_ICON_SVG,
-} from "../../map/controls/MapButtonControl";
+import MapControls from "../../map/components/MapControls.svelte";
 
 let mapLoading = 0;
 
@@ -130,30 +122,6 @@ const applyBasemap = (id: BasemapId) => {
 			return { ...next, sources, layers: [...next.layers, ...carried] };
 		},
 	});
-};
-
-// MapToolsModal (basemap-only) state + handlers for /communities/map.
-let toolsModalOpen = false;
-let menuModalOpen = false;
-let selectedBasemap: BasemapId | undefined;
-
-const openToolsModal = () => {
-	toolsModalOpen = true;
-	trackEvent("layers_panel_open");
-};
-const openMenuModal = () => {
-	menuModalOpen = true;
-	trackEvent("nav_menu_open", { variant: "communities" });
-};
-const onPickBasemap = (id: BasemapId) => {
-	selectedBasemap = id;
-	try {
-		localStorage.setItem(BASEMAP_STORAGE_KEY, id);
-	} catch {
-		// localStorage unavailable (private mode); skip persistence.
-	}
-	applyBasemap(id);
-	trackEvent("layer_change", { layer: id });
 };
 
 const addCommunitiesLayers = (m: MapLibreMap) => {
@@ -390,25 +358,6 @@ const initializeMap = async () => {
 	});
 	map.addControl(geolocate, "top-right");
 
-	map.addControl(
-		new MapButtonControl({
-			iconSvg: MENU_ICON_SVG,
-			labelKey: "mapControls.menu",
-			onClick: openMenuModal,
-		}),
-		"top-right",
-	);
-
-	selectedBasemap = initialBasemap;
-	map.addControl(
-		new MapButtonControl({
-			iconSvg: TUNE_ICON_SVG,
-			labelKey: "mapControls.layersAndFilters",
-			onClick: openToolsModal,
-		}),
-		"top-right",
-	);
-
 	map.addControl(new maplibre.ScaleControl({ unit: "metric" }), "bottom-left");
 
 	map.on("click", FILL_LAYER_ID, (e: MapLayerMouseEvent) => {
@@ -493,14 +442,12 @@ onDestroy(() => {
 	     own container; MapLibre respects the DOM box. -->
 	<div bind:this={mapElement} class="!absolute inset-0 !bg-teal dark:!bg-dark" />
 
-	<MapToolsModal
-		bind:open={toolsModalOpen}
+	<MapControls
+		{map}
+		variant="communities"
 		basemaps={BASEMAPS}
-		currentBasemap={selectedBasemap}
-		onSelectBasemap={onPickBasemap}
+		{applyBasemap}
 	/>
-
-	<MapMenuModal bind:open={menuModalOpen} variant="communities" />
 
 	{#if webglUnsupported}
 		<MapUnsupportedFallback />
