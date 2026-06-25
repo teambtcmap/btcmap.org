@@ -9,11 +9,15 @@ import { _, locale } from "$lib/i18n";
 
 import "./controls.css";
 
-// Sliders / "tune" glyph — the tools (layers & filters) trigger.
-export const TUNE_ICON_SVG = `<svg width="16" height="16" viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="4" y1="21" x2="4" y2="14"></line><line x1="4" y1="10" x2="4" y2="3"></line><line x1="12" y1="21" x2="12" y2="12"></line><line x1="12" y1="8" x2="12" y2="3"></line><line x1="20" y1="21" x2="20" y2="16"></line><line x1="20" y1="12" x2="20" y2="3"></line><line x1="2" y1="14" x2="6" y2="14"></line><line x1="10" y1="8" x2="14" y2="8"></line><line x1="18" y1="16" x2="22" y2="16"></line></svg>`;
+// Material `tune` (sliders) glyph — the tools (layers & filters) trigger.
+// Material `menu` (hamburger) glyph — the page-navigation menu trigger.
+// Inlined from the app's Iconify set (`ic:outline-tune` / `ic:outline-menu`)
+// rather than rendered via <Icon>: the IControl builds raw DOM, and inlining
+// lets an always-visible map button paint instantly with no Iconify API
+// fetch — same approach as the app's other inlined map-control glyphs.
+export const TUNE_ICON_SVG = `<svg width="16" height="16" viewBox="0 0 24 24" aria-hidden="true" fill="currentColor"><path d="M3 17v2h6v-2zM3 5v2h10V5zm10 16v-2h8v-2h-8v-2h-2v6zM7 9v2H3v2h4v2h2V9zm14 4v-2H11v2zm-6-4h2V7h4V5h-4V3h-2z"/></svg>`;
 
-// Hamburger glyph — the page-navigation menu trigger.
-export const MENU_ICON_SVG = `<svg width="16" height="16" viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><line x1="3" y1="6" x2="21" y2="6"></line><line x1="3" y1="12" x2="21" y2="12"></line><line x1="3" y1="18" x2="21" y2="18"></line></svg>`;
+export const MENU_ICON_SVG = `<svg width="16" height="16" viewBox="0 0 24 24" aria-hidden="true" fill="currentColor"><path d="M3 18h18v-2H3zm0-5h18v-2H3zm0-7v2h18V6z"/></svg>`;
 
 type Options = {
 	iconSvg: string;
