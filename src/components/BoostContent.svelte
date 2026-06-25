@@ -137,22 +137,22 @@ const generateInvoice = () => {
 			/>
 
 			<p class="text-xl font-bold text-primary dark:text-white">
-				{$_('boost.errorTitle')}
+				{$_("boost.errorTitle")}
 			</p>
 
 			<p class="text-body dark:text-white">
-				{boostError === 'network' ? $_('boost.errorNetwork') : $_('boost.errorService')}
+				{boostError === "network" ? $_("boost.errorNetwork") : $_("boost.errorService")}
 			</p>
 
 			<PrimaryButton style="w-full rounded-xl p-3" {loading} on:click={retryBoost}>
-				{$_('boost.errorRetry')}
+				{$_("boost.errorRetry")}
 			</PrimaryButton>
 
 			<p class="text-sm text-body dark:text-white">
-				{$_('boost.errorContact')}
+				{$_("boost.errorContact")}
 				<a
-					href="mailto:support@btcmap.org"
-					class="text-link transition-colors hover:text-hover">support@btcmap.org</a
+					href="mailto:hello@btcmap.org"
+					class="text-link transition-colors hover:text-hover">hello@btcmap.org</a
 				>
 			</p>
 		</div>
