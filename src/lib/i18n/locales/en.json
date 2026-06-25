@@ -167,6 +167,7 @@
 		"zoomOut": "Zoom out",
 		"basemapTitle": "Basemap",
 		"verifiedFilterTitle": "Only show verified places",
+		"heatmap": "Toggle merchant density heatmap",
 		"locate": "Show me where I am",
 		"boostAlt": "Boost",
 		"locateAlt": "Show me where I am",

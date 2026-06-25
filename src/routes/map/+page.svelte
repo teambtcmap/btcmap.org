@@ -97,6 +97,10 @@ import TileLoadingIndicator from "./components/TileLoadingIndicator.svelte";
 import { BasemapsControl } from "./controls/BasemapsControl";
 import { BoostToggleControl } from "./controls/BoostToggleControl";
 import { DataRefreshControl } from "./controls/DataRefreshControl";
+import {
+	HEATMAP_STORAGE_KEY,
+	HeatmapToggleControl,
+} from "./controls/HeatmapToggleControl";
 import { NavButtonsControl } from "./controls/NavButtonsControl";
 import { VerifiedFilterControl } from "./controls/VerifiedFilterControl";
 import { browser } from "$app/environment";
@@ -742,6 +746,9 @@ const syncPlacesToSource = (list: Place[]) => {
 	const boostedSource = map.getSource("places-boosted") as
 		| GeoJSONSource
 		| undefined;
+	const heatmapSource = map.getSource("places-heatmap") as
+		| GeoJSONSource
+		| undefined;
 	if (!source || !boostedSource) return;
 	lastSyncedList = list;
 	boostedAreClustered = shouldClusterBoostedAtZoom(map.getZoom());
@@ -751,6 +758,14 @@ const syncPlacesToSource = (list: Place[]) => {
 	);
 	source.setData(buildFeatureCollectionFor(clustered));
 	boostedSource.setData(buildFeatureCollectionFor(standalone));
+	// The heatmap reflects overall place density, so it gets the full list
+	// regardless of the boosted-clustering routing decision. Only refresh it
+	// while the layer is actually visible — when off (the default) we skip
+	// the full-list feature-collection build entirely and repopulate from
+	// lastSyncedList on enable (see setHeatmapEnabled).
+	if (heatmapSource && heatmapEnabled) {
+		heatmapSource.setData(buildFeatureCollectionFor(list));
+	}
 	ensureSpritesForPlaces(map, list);
 	if (list.length > 0) elementsLoaded = true;
 	// E2E test hook: Playwright can't probe WebGL canvas pins like it
@@ -890,8 +905,9 @@ $: if (
 // clusters, and labels survive a basemap/theme swap untouched (MapLibre's
 // style differ leaves byte-identical layers in place — only the basemap
 // layers below them get swapped).
-const CUSTOM_SOURCE_IDS = ["places", "places-boosted"];
+const CUSTOM_SOURCE_IDS = ["places", "places-boosted", "places-heatmap"];
 const CUSTOM_LAYER_IDS = [
+	"place-heatmap",
 	"clusters-outer",
 	"clusters-inner",
 	"cluster-count",
@@ -907,6 +923,83 @@ const CUSTOM_LAYER_IDS = [
 	"boosted-place-label",
 	"clusters-hit",
 ];
+// All point/cluster/badge/label layers that the heatmap conceals while
+// active below CLUSTERING_DISABLED_ZOOM (17).  At zoom 17+ the heatmap
+// layer naturally disappears (its maxzoom), so these layers are revealed
+// again without the user having to toggle heatmap off.
+const HEATMAP_HIDDEN_LAYER_IDS = [
+	"clusters-outer",
+	"clusters-inner",
+	"cluster-count",
+	"clusters-hit",
+	"unclustered-point",
+	"boosted-point",
+	"comment-badge",
+	"comment-badge-count",
+	"saved-badge",
+	"place-label",
+	"boosted-comment-badge",
+	"boosted-comment-badge-count",
+	"boosted-saved-badge",
+	"boosted-place-label",
+];
+
+// Toggle the merchant-density heatmap layer. Off by default unless the
+// user previously enabled it (persisted in localStorage by the control).
+let heatmapEnabled = false;
+if (typeof window !== "undefined") {
+	try {
+		heatmapEnabled = localStorage.getItem(HEATMAP_STORAGE_KEY) === "true";
+	} catch {
+		// localStorage may be unavailable (private mode)
+	}
+}
+
+const applyHeatmapVisibility = () => {
+	if (!map) return;
+	const zoom = map.getZoom();
+	// Heatmap layer: visible when enabled regardless of zoom (the layer
+	// itself has maxzoom: CLUSTERING_DISABLED_ZOOM, so it won't render
+	// past that).
+	if (map.getLayer("place-heatmap")) {
+		map.setLayoutProperty(
+			"place-heatmap",
+			"visibility",
+			heatmapEnabled ? "visible" : "none",
+		);
+	}
+	// Conceal all point/cluster/badge/label layers while the heatmap is
+	// visible.  Pins re-appear before the heatmap fully fades out
+	// (zoom 15.5, ~45 % opacity) so individual pins show through the
+	// still-fading heatmap — at the maxzoom boundary (17) the heatmap
+	// instantly removes itself, so waiting until then feels abrupt.
+	const PIN_REVEAL_ZOOM = CLUSTERING_DISABLED_ZOOM - 1.5;
+	const hidePins = heatmapEnabled && zoom < PIN_REVEAL_ZOOM;
+	for (const layerId of HEATMAP_HIDDEN_LAYER_IDS) {
+		if (map.getLayer(layerId)) {
+			map.setLayoutProperty(
+				layerId,
+				"visibility",
+				hidePins ? "none" : "visible",
+			);
+		}
+	}
+};
+
+const setHeatmapEnabled = (enabled: boolean) => {
+	if (!map) return;
+	heatmapEnabled = enabled;
+	// syncPlacesToSource skips the heatmap source while it's hidden, so seed
+	// it from the last synced list on enable — otherwise it would stay blank
+	// until the next data sync.
+	if (enabled) {
+		const heatmapSource = map.getSource("places-heatmap") as
+			| GeoJSONSource
+			| undefined;
+		heatmapSource?.setData(buildFeatureCollectionFor(lastSyncedList));
+	}
+	applyHeatmapVisibility();
+};
 
 // Switch the basemap without tearing down our pin/cluster/label layers.
 // setStyle's transformStyle hook re-attaches the custom sources + layers
@@ -937,6 +1030,9 @@ const applyBasemap = (id: BasemapId) => {
 		loadSavedBadgeSprite(map).catch(() => {});
 		ensureSpritesForPlaces(map, get(places));
 		spiderfier?.applyTo("clusters-hit");
+		// Re-apply heatmap/cluster visibility in case the style diff fell
+		// back to a full rebuild and reset carried layout properties.
+		setHeatmapEnabled(heatmapEnabled);
 	});
 	map.setStyle(styleForBasemap(id), {
 		transformStyle: (previous, next) => {
@@ -1156,6 +1252,12 @@ onMount(async () => {
 		"top-right",
 	);
 
+	// Heatmap toggle — layers-icon-style button that shows/hides the
+	// merchant-density heatmap layer. Owns its own localStorage
+	// persistence; the actual visibility swap is delegated to
+	// setHeatmapEnabled.
+	map.addControl(new HeatmapToggleControl(setHeatmapEnabled), "top-right");
+
 	// Mirror /map's behavior: sync location into the userLocation store so
 	// the merchant list panel can compute distances without prompting again.
 	geolocate.on("geolocate", (e: GeolocationPosition) => {
@@ -1215,6 +1317,82 @@ onMount(async () => {
 		map.addSource("places-boosted", {
 			type: "geojson",
 			data: EMPTY_COLLECTION,
+		});
+
+		// Non-clustered source backing the merchant-density heatmap.
+		// Heatmap layers read raw point features, so they can't share the
+		// clustered `places` source — this dedicated source always carries
+		// the full unclustered list (see syncPlacesToSource). Visibility is
+		// toggled by HeatmapToggleControl; off by default.
+		map.addSource("places-heatmap", {
+			type: "geojson",
+			data: EMPTY_COLLECTION,
+		});
+
+		// Merchant-density heatmap. Weight is uniform (1) so the gradient
+		// reflects pure point density. Radius and intensity scale up with
+		// zoom so the halo widens as you zoom out to a city/region view and
+		// tightens as pins take over. Opacity stays at full strength through
+		// zoom 14 and fades to zero from zoom 14→17 so the heatmap hands off
+		// cleanly to the individual pins at
+		// CLUSTERING_DISABLED_ZOOM.
+		map.addLayer({
+			id: "place-heatmap",
+			type: "heatmap",
+			source: "places-heatmap",
+			maxzoom: CLUSTERING_DISABLED_ZOOM,
+			layout: { visibility: "none" },
+			paint: {
+				"heatmap-weight": 1,
+				"heatmap-intensity": [
+					"interpolate",
+					["linear"],
+					["zoom"],
+					0,
+					0.5,
+					CLUSTERING_DISABLED_ZOOM,
+					3,
+				],
+				"heatmap-color": [
+					"interpolate",
+					["linear"],
+					["heatmap-density"],
+					0,
+					"rgba(0, 0, 255, 0)",
+					0.2,
+					"#67e8f9", // cyan-300
+					0.4,
+					"#22d3ee", // cyan-400
+					0.6,
+					"#facc15", // yellow-400
+					0.8,
+					"#facc15", // yellow-400 — yellow holds longer
+					1.0,
+					"#f97316", // orange-500
+					1.2,
+					"#ea580c", // orange-600
+					1.5,
+					"#dc2626", // red-600 — red only at extreme density
+				],
+				"heatmap-radius": [
+					"interpolate",
+					["linear"],
+					["zoom"],
+					0,
+					3,
+					CLUSTERING_DISABLED_ZOOM,
+					30,
+				],
+				"heatmap-opacity": [
+					"interpolate",
+					["linear"],
+					["zoom"],
+					14,
+					0.9,
+					CLUSTERING_DISABLED_ZOOM,
+					0,
+				],
+			},
 		});
 
 		// Translucent outer ring — green/yellow/orange tiers by point_count
@@ -1649,6 +1827,10 @@ onMount(async () => {
 			if (shouldClusterBoostedAtZoom(currentZoom) !== boostedAreClustered) {
 				syncPlacesToSource(lastSyncedList);
 			}
+			// When the heatmap is active, zooming past CLUSTERING_DISABLED_ZOOM
+			// naturally removes the heatmap layer (its maxzoom), so re-show
+			// all the point/cluster/badge layers that were concealed.
+			applyHeatmapVisibility();
 			debouncedUpdateMerchantList();
 		});
 
@@ -1763,6 +1945,11 @@ onMount(async () => {
 		applyLabelPalette(map, get(theme));
 		lastAppliedLabelTheme = get(theme);
 		syncPlacesToSource($places);
+		// Apply the persisted heatmap on/off state now that the layer
+		// exists. The toggle control can't do this itself — it's added
+		// before 'load' fires, so the layer isn't present at addControl
+		// time.
+		setHeatmapEnabled(heatmapEnabled);
 		// Kick once on load — if the user lands above the threshold, labels
 		// should appear without requiring a move.
 		triggerEnrichmentIfNeeded();
