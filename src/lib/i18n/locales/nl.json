@@ -157,6 +157,7 @@
 	},
 	"mapControls": {
 		"goToHome": "Ga naar de startpagina",
+		"menu": "Menu",
 		"addLocation": "Locatie toevoegen",
 		"communityMap": "Communitykaart",
 		"merchantMap": "Ondernemerskaart",

@@ -72,6 +72,7 @@
 	},
 	"mapControls": {
 		"goToHome": "Ir para a página inicial",
+		"menu": "Menu",
 		"addLocation": "Adicionar local",
 		"communityMap": "Mapa da comunidade",
 		"merchantMap": "Mapa de comerciantes",

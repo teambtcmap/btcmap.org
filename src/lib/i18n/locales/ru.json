@@ -72,6 +72,7 @@
 	},
 	"mapControls": {
 		"goToHome": "На главную страницу",
+		"menu": "Меню",
 		"addLocation": "Добавить место",
 		"communityMap": "Карта сообщества",
 		"merchantMap": "Карта торговцев",

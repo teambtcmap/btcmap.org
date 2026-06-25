@@ -39,7 +39,7 @@ import { browser } from "$app/environment";
 import { resolve } from "$app/paths";
 import { page } from "$app/stores";
 import { BasemapsControl } from "../../map/controls/BasemapsControl";
-import { NavButtonsControl } from "../../map/controls/NavButtonsControl";
+import { MapMenuControl } from "../../map/controls/MapMenuControl";
 
 let mapLoading = 0;
 
@@ -359,7 +359,7 @@ const initializeMap = async () => {
 	});
 	map.addControl(geolocate, "top-right");
 
-	map.addControl(new NavButtonsControl("communities"), "top-right");
+	map.addControl(new MapMenuControl("communities"), "top-right");
 
 	map.addControl(
 		new BasemapsControl({

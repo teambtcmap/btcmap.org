@@ -1,6 +1,6 @@
 /*
  * Shared styles for the custom MapLibre IControls in this directory
- * (BasemapsControl, NavButtonsControl, BoostToggleControl). Imported by
+ * (BasemapsControl, MapMenuControl, BoostToggleControl). Imported by
  * each control's TS module so any page
  * that mounts the controls — currently /map and /communities/map — gets
  * the popup positioning, dark-mode treatment, and anchor button styles.
@@ -161,7 +161,8 @@
    same glyph. */
 .dark .maplibregl-ctrl-group button .maplibregl-ctrl-icon,
 .dark .maplibregl-ctrl-group a.maplibregl-ctrl-link img,
-.dark .maplibregl-ctrl-group a.maplibregl-ctrl-link svg {
+.dark .maplibregl-ctrl-group a.maplibregl-ctrl-link svg,
+.dark .maplibregl-ctrl-group .maplibre-next-menu-row img {
 	filter: invert(1);
 }
 /* Preserve the heatmap enabled blue in dark mode — the invert above would
@@ -170,4 +171,27 @@
 	a.maplibregl-ctrl-link.maplibregl-ctrl-heatmap-enabled
 	svg {
 	filter: none;
+}
+
+/* Menu control: reuse the basemap popup shell; rows are full-width links. */
+.maplibre-next-menu {
+	position: relative;
+}
+.maplibre-next-menu-popup {
+	min-width: 180px;
+}
+.maplibre-next-menu-row {
+	display: flex;
+	align-items: center;
+	gap: 8px;
+	padding: 6px 12px;
+	color: inherit;
+	text-decoration: none;
+	cursor: pointer;
+}
+.maplibre-next-menu-row:hover {
+	background: rgba(0, 0, 0, 0.05);
+}
+.dark .maplibre-next-menu-row:hover {
+	background: rgba(255, 255, 255, 0.08);
 }

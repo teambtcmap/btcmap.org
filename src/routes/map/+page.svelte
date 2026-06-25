@@ -100,7 +100,7 @@ import {
 	HEATMAP_STORAGE_KEY,
 	HeatmapToggleControl,
 } from "./controls/HeatmapToggleControl";
-import { NavButtonsControl } from "./controls/NavButtonsControl";
+import { MapMenuControl } from "./controls/MapMenuControl";
 import { VerifiedFilterControl } from "./controls/VerifiedFilterControl";
 import { browser } from "$app/environment";
 
@@ -1222,7 +1222,7 @@ onMount(async () => {
 
 	// Right-side action buttons — mirror /map's stack order:
 	// nav links (home / add / community / account) → boost toggle.
-	map.addControl(new NavButtonsControl(), "top-right");
+	map.addControl(new MapMenuControl(), "top-right");
 	map.addControl(new BoostToggleControl(), "top-right");
 
 	// Basemap picker — layers-icon button that expands on hover/click,
