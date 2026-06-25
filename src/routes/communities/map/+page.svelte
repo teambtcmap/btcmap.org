@@ -40,12 +40,13 @@ import { areaIconSrc, errToast } from "$lib/utils";
 import { browser } from "$app/environment";
 import { resolve } from "$app/paths";
 import { page } from "$app/stores";
+import MapMenuModal from "../../map/components/MapMenuModal.svelte";
 import MapToolsModal from "../../map/components/MapToolsModal.svelte";
 import {
 	MapButtonControl,
+	MENU_ICON_SVG,
 	TUNE_ICON_SVG,
 } from "../../map/controls/MapButtonControl";
-import { MapMenuControl } from "../../map/controls/MapMenuControl";
 
 let mapLoading = 0;
 
@@ -133,11 +134,16 @@ const applyBasemap = (id: BasemapId) => {
 
 // MapToolsModal (basemap-only) state + handlers for /communities/map.
 let toolsModalOpen = false;
+let menuModalOpen = false;
 let selectedBasemap: BasemapId | undefined;
 
 const openToolsModal = () => {
 	toolsModalOpen = true;
 	trackEvent("layers_panel_open");
+};
+const openMenuModal = () => {
+	menuModalOpen = true;
+	trackEvent("nav_menu_open", { variant: "communities" });
 };
 const onPickBasemap = (id: BasemapId) => {
 	selectedBasemap = id;
@@ -384,7 +390,14 @@ const initializeMap = async () => {
 	});
 	map.addControl(geolocate, "top-right");
 
-	map.addControl(new MapMenuControl("communities"), "top-right");
+	map.addControl(
+		new MapButtonControl({
+			iconSvg: MENU_ICON_SVG,
+			labelKey: "mapControls.menu",
+			onClick: openMenuModal,
+		}),
+		"top-right",
+	);
 
 	selectedBasemap = initialBasemap;
 	map.addControl(
@@ -486,6 +499,8 @@ onDestroy(() => {
 		currentBasemap={selectedBasemap}
 		onSelectBasemap={onPickBasemap}
 	/>
+
+	<MapMenuModal bind:open={menuModalOpen} variant="communities" />
 
 	{#if webglUnsupported}
 		<MapUnsupportedFallback />

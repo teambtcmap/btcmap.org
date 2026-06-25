@@ -92,13 +92,17 @@ import { debounce, errToast, isBoosted } from "$lib/utils";
 import { filterPlacesByRecency } from "$lib/verification";
 
 import type { PageData } from "./$types";
+import MapMenuModal from "./components/MapMenuModal.svelte";
 import MapSearchBar from "./components/MapSearchBar.svelte";
 import MapToolsModal from "./components/MapToolsModal.svelte";
 import MerchantDrawerHash from "./components/MerchantDrawerHash.svelte";
 import MerchantListPanel from "./components/MerchantListPanel.svelte";
 import TileLoadingIndicator from "./components/TileLoadingIndicator.svelte";
-import { MapButtonControl, TUNE_ICON_SVG } from "./controls/MapButtonControl";
-import { MapMenuControl } from "./controls/MapMenuControl";
+import {
+	MapButtonControl,
+	MENU_ICON_SVG,
+	TUNE_ICON_SVG,
+} from "./controls/MapButtonControl";
 import { browser } from "$app/environment";
 
 export let data: PageData;
@@ -1049,6 +1053,7 @@ const applyBasemap = (id: BasemapId) => {
 // it calls. selectedBasemap/selectedVerified are seeded in onMount (browser)
 // and updated here on user change; the modal is a controlled component.
 let toolsModalOpen = false;
+let menuModalOpen = false;
 let selectedBasemap: BasemapId | undefined;
 let selectedVerified: VerifiedFilterYears = null;
 let globeOn = false;
@@ -1059,6 +1064,10 @@ const boostActive =
 const openToolsModal = () => {
 	toolsModalOpen = true;
 	trackEvent("layers_panel_open");
+};
+const openMenuModal = () => {
+	menuModalOpen = true;
+	trackEvent("nav_menu_open", { variant: "main" });
 };
 const onPickBasemap = (id: BasemapId) => {
 	selectedBasemap = id;
@@ -1270,10 +1279,17 @@ onMount(async () => {
 		.querySelector(".maplibregl-ctrl-geolocate")
 		?.addEventListener("click", () => trackEvent("locate_click"));
 
-	// Right-side action button: the page-nav menu. Map/data controls
-	// (basemap, verified filter, boost + heatmap overlays, world-view) live
-	// in the consolidated tools panel below.
-	map.addControl(new MapMenuControl(), "top-right");
+	// Right-side action buttons: the page-nav menu, then the tools panel
+	// (basemap, verified filter, boost + heatmap overlays, world-view). Both
+	// open a Svelte modal; these IControls are just the top-right triggers.
+	map.addControl(
+		new MapButtonControl({
+			iconSvg: MENU_ICON_SVG,
+			labelKey: "mapControls.menu",
+			onClick: openMenuModal,
+		}),
+		"top-right",
+	);
 
 	// Tools panel trigger — opens MapToolsModal (basemap, verified filter,
 	// boost + heatmap overlays; world-view folds in next). The modal is a
@@ -2115,6 +2131,8 @@ onDestroy(() => {
 	{globeOn}
 	{onToggleGlobe}
 />
+
+<MapMenuModal bind:open={menuModalOpen} variant="main" />
 
 <style>
 	.map-container {
