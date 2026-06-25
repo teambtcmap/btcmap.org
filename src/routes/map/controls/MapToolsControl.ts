@@ -12,6 +12,8 @@ import {
 	type BasemapId,
 	isBasemapId,
 } from "$lib/map/basemaps";
+import type { VerifiedFilterYears } from "$lib/map/verifiedFilter";
+import { VERIFIED_FILTER_OPTIONS } from "$lib/map/verifiedFilter";
 
 import "./controls.css";
 
@@ -23,7 +25,15 @@ export type MapToolsOptions = {
 		initial: BasemapId;
 		onSelect: (id: BasemapId) => void;
 	};
+	verified?: {
+		initial: VerifiedFilterYears;
+		onSelect: (years: VerifiedFilterYears) => void | Promise<void>;
+	};
 };
+
+// Encode the nullable verified filter as a radio value ("any" | "1" | …).
+const toRadioValue = (years: VerifiedFilterYears): string =>
+	years == null ? "any" : String(years);
 
 // One button that expands a sectioned panel consolidating the map's
 // display controls (basemap; verified filter, overlays and view added in
@@ -38,12 +48,14 @@ export class MapToolsControl implements IControl {
 	#button: HTMLAnchorElement | undefined;
 	#popup: HTMLDivElement | undefined;
 	#currentBasemap: BasemapId | undefined;
+	#currentVerified: VerifiedFilterYears | undefined;
 	#unsubLocale: (() => void) | null = null;
 	#docClickHandler: ((e: MouseEvent) => void) | null = null;
 
 	constructor(options: MapToolsOptions) {
 		this.#options = options;
 		this.#currentBasemap = options.basemap?.initial;
+		this.#currentVerified = options.verified?.initial;
 	}
 
 	getDefaultPosition(): ControlPosition {
@@ -117,6 +129,17 @@ export class MapToolsControl implements IControl {
 			this.#popup.appendChild(this.#renderBasemapSection());
 		}
 
+		if (this.#options.verified) {
+			this.#popup.appendChild(
+				this.#renderSectionHeader(
+					t("mapControls.verifiedFilterTitle", {
+						default: "Only show verified places",
+					}),
+				),
+			);
+			this.#popup.appendChild(this.#renderVerifiedSection());
+		}
+
 		const title = t("mapControls.layersAndFilters");
 		this.#button?.setAttribute("title", title);
 		this.#button?.setAttribute("aria-label", title);
@@ -172,11 +195,60 @@ export class MapToolsControl implements IControl {
 		this.#close();
 	}
 
+	#renderVerifiedSection(): HTMLElement {
+		const group = document.createElement("div");
+		group.setAttribute("role", "radiogroup");
+		const cfg = this.#options.verified;
+		if (!cfg) return group;
+		const t = get(_);
+		const groupName = `maplibre-next-verified-${Math.random().toString(36).slice(2, 8)}`;
+		for (const option of VERIFIED_FILTER_OPTIONS) {
+			const label = document.createElement("label");
+			label.className = "maplibre-next-basemaps-option";
+			const radio = document.createElement("input");
+			radio.type = "radio";
+			radio.name = groupName;
+			radio.value = toRadioValue(option.value);
+			radio.checked = option.value === this.#currentVerified;
+			radio.addEventListener("change", () => {
+				if (radio.checked) void this.#selectVerified(option.value);
+			});
+			const text = document.createElement("span");
+			text.textContent = t(option.labelKey);
+			label.appendChild(radio);
+			label.appendChild(text);
+			group.appendChild(label);
+		}
+		return group;
+	}
+
+	async #selectVerified(years: VerifiedFilterYears): Promise<void> {
+		const cfg = this.#options.verified;
+		if (!cfg) return;
+		this.#currentVerified = years;
+		this.#updateActiveDot();
+		trackEvent("verified_filter_change", { years: toRadioValue(years) });
+		this.#close();
+		// Spinner covers the one-time on-demand date fetch; instant once loaded.
+		this.#setLoading(true);
+		try {
+			await cfg.onSelect(years);
+		} finally {
+			this.#setLoading(false);
+		}
+	}
+
+	#setLoading(on: boolean): void {
+		this.#container?.classList.toggle("loading", on);
+		this.#button?.setAttribute("aria-busy", on ? "true" : "false");
+	}
+
 	// Accent dot on the closed button when any view-altering state is active.
-	// Basemap is the default surface, so it never lights the dot; verified /
-	// overlays (added later) will.
+	// Basemap is the default surface, so it never lights the dot; the verified
+	// filter (and overlays, added later) do.
 	#updateActiveDot(): void {
-		this.#container?.classList.toggle("active", false);
+		const active = this.#currentVerified != null;
+		this.#container?.classList.toggle("active", active);
 	}
 
 	#toggle(): void {

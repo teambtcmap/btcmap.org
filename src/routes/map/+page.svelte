@@ -101,7 +101,6 @@ import {
 } from "./controls/HeatmapToggleControl";
 import { MapMenuControl } from "./controls/MapMenuControl";
 import { MapToolsControl } from "./controls/MapToolsControl";
-import { VerifiedFilterControl } from "./controls/VerifiedFilterControl";
 import { browser } from "$app/environment";
 
 export let data: PageData;
@@ -1237,17 +1236,10 @@ onMount(async () => {
 				initial: initialBasemap,
 				onSelect: applyBasemap,
 			},
-		}),
-		"top-right",
-	);
-
-	// "Verified within N years" filter — clock-icon button + radio popover.
-	// The page applies the effect and persistence (marker re-sync, nearby list
-	// refresh, store setVerifiedFilter) via applyVerifiedFilter.
-	map.addControl(
-		new VerifiedFilterControl({
-			initial: getStoredVerifiedFilter(),
-			onSelect: applyVerifiedFilter,
+			verified: {
+				initial: getStoredVerifiedFilter(),
+				onSelect: applyVerifiedFilter,
+			},
 		}),
 		"top-right",
 	);

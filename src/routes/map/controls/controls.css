@@ -10,13 +10,8 @@
  * classes.
  */
 
-/* Basemap picker — IControl that owns its own container; the popup is
-   absolutely positioned relative to it. Hover-or-click the icon to
-   expand the radio list. */
-.maplibre-next-basemaps,
-.maplibre-next-verified {
-	position: relative;
-}
+/* Shared popup shell for the tools panel — absolutely positioned relative
+   to its control container (which sets position: relative). */
 .maplibre-next-basemaps-popup {
 	position: absolute;
 	top: 0;
@@ -52,10 +47,10 @@
 
 /* Verified filter: one-time loading state while the on-demand date fetch runs
    (first activation only). Swap the clock glyph for a spinner. */
-.maplibre-next-verified.loading a.maplibregl-ctrl-link svg {
+.maplibre-next-tools.loading a.maplibregl-ctrl-link svg {
 	display: none;
 }
-.maplibre-next-verified.loading a.maplibregl-ctrl-link::after {
+.maplibre-next-tools.loading a.maplibregl-ctrl-link::after {
 	content: "";
 	width: 14px;
 	height: 14px;
@@ -64,7 +59,7 @@
 	border-top-color: #111;
 	animation: mlnv-spin 0.7s linear infinite;
 }
-.dark .maplibre-next-verified.loading a.maplibregl-ctrl-link::after {
+.dark .maplibre-next-tools.loading a.maplibregl-ctrl-link::after {
 	border-color: rgba(255, 255, 255, 0.3);
 	border-top-color: #fff;
 }
@@ -115,10 +110,10 @@
 /* Active-window indicator: a small accent dot on the closed button so a
    returning user can tell a recency filter is hiding places. Placed after the
    generic anchor rules to keep selector specificity non-descending. */
-.maplibre-next-verified.active a.maplibregl-ctrl-link {
+.maplibre-next-tools.active a.maplibregl-ctrl-link {
 	position: relative;
 }
-.maplibre-next-verified.active a.maplibregl-ctrl-link::before {
+.maplibre-next-tools.active a.maplibregl-ctrl-link::before {
 	content: "";
 	position: absolute;
 	top: 4px;
@@ -129,7 +124,7 @@
 	background: #f7931a;
 	border: 1.5px solid #fff;
 }
-.dark .maplibre-next-verified.active a.maplibregl-ctrl-link::before {
+.dark .maplibre-next-tools.active a.maplibregl-ctrl-link::before {
 	border-color: #1f2937;
 }
 
