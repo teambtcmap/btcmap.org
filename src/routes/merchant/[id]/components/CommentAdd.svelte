@@ -7,7 +7,6 @@ import CloseButton from "$components/CloseButton.svelte";
 import Icon from "$components/Icon.svelte";
 import InvoicePaymentStage from "$components/InvoicePaymentStage.svelte";
 import PrimaryButton from "$components/PrimaryButton.svelte";
-import { PAYMENT_ERROR_MESSAGE } from "$lib/constants";
 import { _ } from "$lib/i18n";
 import { lastUpdatedPlaceId } from "$lib/store";
 import { updateSinglePlace } from "$lib/sync/places";
@@ -62,7 +61,7 @@ const generateInvoice = (event: SubmitEvent) => {
 			loading = false;
 		})
 		.catch((error) => {
-			errToast(PAYMENT_ERROR_MESSAGE);
+			errToast($_("errors.invoiceGenerate"));
 			console.error(error);
 			loading = false;
 		});

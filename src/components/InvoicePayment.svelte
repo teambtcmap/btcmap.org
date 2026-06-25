@@ -5,7 +5,6 @@ import { onDestroy, tick } from "svelte";
 import {
 	BREAKPOINTS,
 	CONFETTI_CANVAS_Z_INDEX,
-	PAYMENT_ERROR_MESSAGE,
 	POLLING_INTERVAL,
 	QR_CODE_SIZE,
 } from "$lib/constants";
@@ -43,7 +42,7 @@ const generateQR = async () => {
 			},
 			(error: Error | null | undefined) => {
 				if (error) {
-					errToast(PAYMENT_ERROR_MESSAGE);
+					errToast($_("errors.invoiceGenerate"));
 					console.error(error);
 					onError(error);
 				}
