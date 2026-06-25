@@ -3,6 +3,7 @@ import type {
 	IControl,
 	Map as MapLibreMap,
 } from "maplibre-gl";
+import type { Readable } from "svelte/store";
 import { get } from "svelte/store";
 
 import { _, locale } from "$lib/i18n";
@@ -24,6 +25,10 @@ type Options = {
 	// i18n key for the button title / aria-label, re-translated on locale change.
 	labelKey: string;
 	onClick: () => void;
+	// Optional reactive flag — toggles an accent dot on the button (e.g. the
+	// tools trigger when a verified filter / overlay is active, so a returning
+	// user sees the map is filtered without opening the panel).
+	active?: Readable<boolean>;
 };
 
 // A minimal MapLibre IControl: one icon button in the top-right control
@@ -34,6 +39,7 @@ export class MapButtonControl implements IControl {
 	#options: Options;
 	#container: HTMLDivElement | undefined;
 	#unsubLocale: (() => void) | null = null;
+	#unsubActive: (() => void) | null = null;
 
 	constructor(options: Options) {
 		this.#options = options;
@@ -68,12 +74,20 @@ export class MapButtonControl implements IControl {
 			button.setAttribute("aria-label", label);
 		});
 
+		// Optional active-state accent dot (subscribe fires synchronously).
+		this.#unsubActive =
+			this.#options.active?.subscribe((on) => {
+				container.classList.toggle("maplibre-next-active", on);
+			}) ?? null;
+
 		return container;
 	}
 
 	onRemove(): void {
 		this.#unsubLocale?.();
 		this.#unsubLocale = null;
+		this.#unsubActive?.();
+		this.#unsubActive = null;
 		this.#container?.parentNode?.removeChild(this.#container);
 		this.#container = undefined;
 	}

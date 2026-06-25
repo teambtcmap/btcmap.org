@@ -1,7 +1,7 @@
 <script lang="ts">
 import type { Map as MapLibreMap } from "maplibre-gl";
 import { onDestroy, onMount } from "svelte";
-import { get } from "svelte/store";
+import { get, writable } from "svelte/store";
 
 import { trackEvent } from "$lib/analytics";
 import {
@@ -48,6 +48,12 @@ let selectedVerified: VerifiedFilterYears = null;
 let heatmapOn = false;
 let boostActive = false;
 let globeOn = false;
+
+// Lights the tools trigger's accent dot when a data-affecting toggle is on
+// (verified filter / boost / heatmap), so a returning user sees the map is
+// filtered without opening the panel. Globe is cosmetic, so it's excluded.
+const toolsActive = writable(false);
+$: toolsActive.set(selectedVerified != null || heatmapOn || boostActive);
 
 let menuControl: MapButtonControl | undefined;
 let toolsControl: MapButtonControl | undefined;
@@ -132,6 +138,7 @@ $: if (map && !registered) {
 		iconSvg: TUNE_ICON_SVG,
 		labelKey: "mapControls.layersAndFilters",
 		onClick: openToolsModal,
+		active: toolsActive,
 	});
 	map.addControl(menuControl, "top-right");
 	map.addControl(toolsControl, "top-right");

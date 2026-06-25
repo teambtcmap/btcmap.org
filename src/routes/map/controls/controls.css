@@ -63,3 +63,26 @@
 .dark .maplibregl-ctrl-group a.maplibregl-ctrl-link svg {
 	filter: invert(1);
 }
+
+/* Active-state accent dot on a trigger button — the tools button lights up
+   when a verified filter / overlay is active, so a returning user can tell
+   the map is filtered without opening the panel. */
+.maplibregl-ctrl-group.maplibre-next-active a.maplibregl-ctrl-link {
+	position: relative;
+}
+.maplibregl-ctrl-group.maplibre-next-active a.maplibregl-ctrl-link::after {
+	content: "";
+	position: absolute;
+	top: 4px;
+	right: 4px;
+	width: 7px;
+	height: 7px;
+	border-radius: 50%;
+	background: #f7931a;
+	border: 1.5px solid #fff;
+}
+.dark
+	.maplibregl-ctrl-group.maplibre-next-active
+	a.maplibregl-ctrl-link::after {
+	border-color: #1f2937;
+}
