@@ -70,7 +70,7 @@
 		"typeCommented": "Gereageerd",
 		"typeBoosted": "Geboost",
 		"noTypesSelected": "Kies hierboven ten minste één type activiteit",
-		"noMatchingTypes": "Geen enkele activiteit past bij je gekozen types."
+		"noMatchingTypes": "Geen enkele activiteit past bij je gekozen types.",
 		"newSinceLastVisit": "{count} nieuwe items sinds je vorige bezoek"
 	},
 	"login": {
@@ -92,7 +92,7 @@
 		"nsecWarning": "Je nsec wordt alleen naar je browser gestuurd om jezelf aan te melden — het wordt nooit opgeslagen of gedeeld.",
 		"nsecSubmit": "Aanmelden met nsec",
 		"nsecInvalid": "Dat ziet er niet uit als een geldige nsec",
-		"or": "of"	},
+		"or": "of"
 	},
 	"backup": {
 		"title": "Back-up account",
@@ -328,7 +328,7 @@
 		"collapseDrawer": "Lade inklappen",
 		"merchantDetails": "Ondernemerdetails",
 		"viewBoost": "Boost",
-		"viewDetails": "Details",
+		"viewDetails": "Details"
 	},
 	"map": {
 		"bitcoinMerchantMapTitle": "Bitcoin acceptatiekaart"
@@ -338,13 +338,13 @@
 		"hours": "Openingstijden",
 		"noActivity": "Geen activiteit om weer te geven.",
 		"loadMore": "Laad meer",
-		"viewOnMainMap": "Bekijk op hoofdkaart",
+		"viewOnMainMap": "Bekijk op hoofdkaart"
 	},
 	"comments": {
 		"title": "Reacties",
 		"add": "Reactie toevoegen",
 		"adding": "Bezig...",
-		"none": "Er zijn nog geen reacties.",
+		"none": "Er zijn nog geen reacties."
 	},
 	"errorPage": {
 		"title": "BTC Map - Fout",
@@ -365,7 +365,7 @@
 		"locationSearch": "Het zoeken naar locaties is mislukt. Probeer het opnieuw of neem contact op met BTC Map.",
 		"mapView": "Kan de kaartweergave niet instellen op de opgegeven coördinaten, probeer het opnieuw of neem contact op met BTC Map.",
 		"merchantDetailsLoadError": "Fout bij het laden van de ondernemergegevens. Probeer het opnieuw.",
-		"boostLoadError": "Laden van boostinformatie mislukt. Probeer het opnieuw.",
+		"boostLoadError": "Laden van boostinformatie mislukt. Probeer het opnieuw."
 	},
 	"success": {
 		"locationSelected": "Locatie geselecteerd!",
@@ -391,7 +391,7 @@
 		"merchantList": "Ondernemerslijst",
 		"merchantListItem": "Ondernemerslijst item",
 		"selectCategory": "Selecteer categorie",
-		"searchInput": "Zoek naar Bitcoin ondernemers"
+		"searchInput": "Zoek naar Bitcoin ondernemers",
 		"newActivity": "Nieuwe activiteit in je opgeslagen plaatsen"
 	},
 	"theme": {
@@ -575,7 +575,7 @@
 		"verifyLabel": "Hoe heb je dit gecontroleerd?",
 		"verifyPlaceholder": "Geef hier aanvullende informatie op",
 		"successType": "Rapporteer",
-		"successMessage": "Bedankt voor het invullen van dit rapport! We gaan je gegevens bekijken en zo snel mogelijk bijwerken."
+		"successMessage": "Bedankt voor het invullen van dit rapport! We gaan je gegevens bekijken en zo snel mogelijk bijwerken.",
 		"submitReport": "Rapport indienen"
 	},
 	"dashboard": {
