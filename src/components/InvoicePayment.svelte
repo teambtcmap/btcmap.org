@@ -5,7 +5,6 @@ import { onDestroy, tick } from "svelte";
 import {
 	BREAKPOINTS,
 	CONFETTI_CANVAS_Z_INDEX,
-	PAYMENT_ERROR_MESSAGE,
 	POLLING_INTERVAL,
 	QR_CODE_SIZE,
 } from "$lib/constants";
@@ -43,7 +42,7 @@ const generateQR = async () => {
 			},
 			(error: Error | null | undefined) => {
 				if (error) {
-					errToast(PAYMENT_ERROR_MESSAGE);
+					errToast($_("supporters.qrLoadError"));
 					console.error(error);
 					onError(error);
 				}
@@ -66,6 +65,7 @@ const checkInvoiceStatus = async () => {
 			clearInterval(pollInterval);
 			invalidateAll(); // Refresh UI immediately
 			jsConfetti.addConfetti();
+			liftConfettiCanvas();
 			onSuccess();
 		}
 	} catch (error) {
@@ -96,13 +96,13 @@ $: if (invoiceId && !polling) {
 	startPolling();
 }
 
-// Set up confetti canvas z-index when QR canvas is ready
-$: if (qr) {
-	const confettiCanvas = document.querySelector("canvas");
+const liftConfettiCanvas = () => {
+	const confettiCanvas =
+		document.querySelector<HTMLCanvasElement>("body > canvas");
 	if (confettiCanvas) {
 		confettiCanvas.style.zIndex = CONFETTI_CANVAS_Z_INDEX;
 	}
-}
+};
 
 // Cleanup polling on component destroy
 onDestroy(() => {

@@ -6,12 +6,9 @@ import { fade } from "svelte/transition";
 import Icon from "$components/Icon.svelte";
 import InvoicePaymentStage from "$components/InvoicePaymentStage.svelte";
 import PrimaryButton from "$components/PrimaryButton.svelte";
-import {
-	PAYMENT_ERROR_MESSAGE,
-	STATUS_CHECK_ERROR_MESSAGE,
-} from "$lib/constants";
 import { _ } from "$lib/i18n";
 import IconSocials from "$lib/icons/IconSocials.svelte";
+import { classifyBoostError } from "$lib/payment";
 import { boost, boostHash, lastUpdatedPlaceId } from "$lib/store";
 import { updateSinglePlace } from "$lib/sync/places";
 import { errToast, warningToast } from "$lib/utils";
@@ -33,6 +30,7 @@ let selectedBoost: { sats: number; time: number; expires: Date } | undefined;
 let invoice = "";
 let invoiceId = "";
 let loading = false;
+let boostError: "network" | "service" | null = null;
 
 onDestroy(() => {
 	stage = 0;
@@ -41,6 +39,7 @@ onDestroy(() => {
 	loading = false;
 	selectedBoost = undefined;
 	tooltip = false;
+	boostError = null;
 });
 
 const handlePaymentSuccess = async () => {
@@ -76,12 +75,18 @@ const handlePaymentError = (error: unknown) => {
 };
 
 const handleStatusCheckError = (error: unknown) => {
-	errToast(STATUS_CHECK_ERROR_MESSAGE);
+	errToast($_("errors.invoiceStatusCheck"));
 	console.error(error);
+};
+
+const retryBoost = () => {
+	boostError = null;
+	generateInvoice();
 };
 
 const generateInvoice = () => {
 	loading = true;
+	boostError = null;
 
 	const timeToDays: Record<number, number> = { 1: 30, 3: 90, 12: 365 };
 	const days = selectedBoost?.time
@@ -113,7 +118,7 @@ const generateInvoice = () => {
 			loading = false;
 		})
 		.catch((error) => {
-			errToast(PAYMENT_ERROR_MESSAGE);
+			boostError = classifyBoostError(error);
 			console.error(error);
 			loading = false;
 		});
@@ -121,7 +126,38 @@ const generateInvoice = () => {
 </script>
 
 {#if stage === 0}
-	<div class="space-y-4">
+	{#if boostError}
+		<div class="space-y-4 text-center">
+			<Icon
+				w="48"
+				h="48"
+				class="mx-auto text-red-500 dark:text-red-400"
+				icon="error_outline"
+				type="material"
+			/>
+
+			<p class="text-xl font-bold text-primary dark:text-white">
+				{$_("boost.errorTitle")}
+			</p>
+
+			<p class="text-body dark:text-white">
+				{boostError === "network" ? $_("boost.errorNetwork") : $_("boost.errorService")}
+			</p>
+
+			<PrimaryButton style="w-full rounded-xl p-3" {loading} on:click={retryBoost}>
+				{$_("boost.errorRetry")}
+			</PrimaryButton>
+
+			<p class="text-sm text-body dark:text-white">
+				{$_("boost.errorContact")}
+				<a
+					href="mailto:hello@btcmap.org"
+					class="text-link transition-colors hover:text-hover">hello@btcmap.org</a
+				>
+			</p>
+		</div>
+	{:else}
+		<div class="space-y-4">
 		<div>
 			<p class="mb-2 text-xl font-bold text-primary dark:text-white">{$_("boost.boostLocation")}</p>
 
@@ -213,6 +249,7 @@ const generateInvoice = () => {
 				: $_("boost.boostAction")}
 		</PrimaryButton>
 	</div>
+	{/if}
 {:else if stage === 1}
 	<InvoicePaymentStage
 		{invoice}

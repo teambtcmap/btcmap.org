@@ -286,7 +286,12 @@
 		"finalizeError": "Impossibile finalizzare il boost, si prega di contattare BTC Map.",
 		"invalidDuration": "Durata del boost non valida",
 		"invalidMerchantId": "ID commerciante non valido",
-		"twitterShareText": "Ho appena attivato il boost per {name} su @btcmap. Dai un'occhiata!"
+		"twitterShareText": "Ho appena attivato il boost per {name} su @btcmap. Dai un'occhiata!",
+		"errorTitle": "Non è stato possibile avviare il boost",
+		"errorNetwork": "Sembra che tu sia offline. Controlla la tua connessione e riprova.",
+		"errorService": "Il servizio di boost è temporaneamente non disponibile. Riprova tra poco.",
+		"errorRetry": "Riprova",
+		"errorContact": "Ancora bloccato? Contatta"
 	},
 	"invoicePayment": {
 		"scanOrClick": "Scansiona o clicca per pagare con lightning",
@@ -366,7 +371,9 @@
 		"locationSearch": "Impossibile cercare le posizioni, riprova o contatta BTC Map.",
 		"mapView": "Impossibile impostare la vista della mappa sulle coordinate fornite, riprova o contatta BTC Map.",
 		"merchantDetailsLoadError": "Errore durante il caricamento dei dettagli del commerciante. Riprova.",
-		"boostLoadError": "Impossibile caricare le informazioni del boost. Riprova."
+		"boostLoadError": "Impossibile caricare le informazioni del boost. Riprova.",
+		"invoiceGenerate": "Impossibile generare l'invoice, riprova o contatta BTC Map.",
+		"invoiceStatusCheck": "Impossibile verificare lo stato dell'invoice, riprova o contatta BTC Map."
 	},
 	"success": {
 		"locationSelected": "Posizione selezionata!",

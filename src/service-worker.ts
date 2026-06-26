@@ -61,8 +61,24 @@ sw.addEventListener("fetch", (event) => {
 	// ignore requests from chrome-extension etc
 	if (event.request.url.indexOf("http") === -1) return;
 
+	const url = new URL(event.request.url);
+
+	// Never intercept API/data requests — they must reach the network and
+	// return real JSON or a real error. Serving a cached response or the
+	// offline.html fallback hands the app HTML where it expects JSON, which
+	// corrupts parsing (e.g. the boost flow's merchant lookup ends up with an
+	// invalid id and the drawer silently resets), and caching volatile
+	// endpoints like invoice status returns stale results.
+	if (
+		url.hostname === "api.btcmap.org" ||
+		url.pathname.startsWith("/api/") ||
+		url.pathname.startsWith("/btcmap-api-proxy") ||
+		url.pathname.startsWith("/rpc")
+	) {
+		return;
+	}
+
 	async function respond() {
-		const url = new URL(event.request.url);
 		const cache = await caches.open(CACHE);
 
 		// Don't cache external map tile/style/sprite resources to prevent stale map data
