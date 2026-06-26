@@ -42,7 +42,7 @@ const generateQR = async () => {
 			},
 			(error: Error | null | undefined) => {
 				if (error) {
-					errToast($_("errors.invoiceGenerate"));
+					errToast($_("supporters.qrLoadError"));
 					console.error(error);
 					onError(error);
 				}
