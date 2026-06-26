@@ -109,7 +109,8 @@ const isMobileLayout = browser && window.innerWidth < BREAKPOINTS.md;
 // via a full page reload, so it's constant for the session; it narrows both the
 // map markers and the nearby list to currently-boosted places.
 const boostsOnly =
-	browser && new URLSearchParams(window.location.search).has("boosts");
+	browser &&
+	new URLSearchParams(window.location.search).get("boosts") === "true";
 
 type PlaceFeature = {
 	type: "Feature";
@@ -369,7 +370,10 @@ const updateMerchantList = (opts?: { force?: boolean }) => {
 
 	const bounds = map.getBounds();
 	const center = map.getCenter();
-	const behavior = getZoomBehavior(currentZoom);
+	// Boosted-only: the bulk $places feed already holds the tiny boosted set at
+	// every zoom, and the radius API (api-with-limit) has no boost filter, so
+	// force the local path so the list/count stay in sync with the filtered map.
+	const behavior = boostsOnly ? "local-markers" : getZoomBehavior(currentZoom);
 	const listOpen = get(merchantList).isOpen;
 	const allowHeavyFetch = opts?.force || listOpen;
 
@@ -743,8 +747,12 @@ const loadSavedBadgeSprite = async (m: MapLibreMap): Promise<void> => {
 const syncPlacesToSource = (rawList: Place[]) => {
 	if (!map || !styleLoaded) return;
 	// "Boosted locations only" narrows every sync path (markers, the boosted
-	// source and the heatmap) to currently-boosted places.
-	const list = boostsOnly ? rawList.filter(isBoosted) : rawList;
+	// source and the heatmap) to currently-boosted places — except in search
+	// mode, where an explicit query should surface all matches on the map.
+	const list =
+		boostsOnly && get(merchantList).mode !== "search"
+			? rawList.filter(isBoosted)
+			: rawList;
 	const source = map.getSource("places") as GeoJSONSource | undefined;
 	const boostedSource = map.getSource("places-boosted") as
 		| GeoJSONSource
