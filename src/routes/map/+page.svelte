@@ -105,6 +105,12 @@ export let data: PageData;
 // a viewport resize can never leave zero or two search surfaces
 const isMobileLayout = browser && window.innerWidth < BREAKPOINTS.md;
 
+// "Boosted locations only" map filter (?boosts=true). The tools modal sets it
+// via a full page reload, so it's constant for the session; it narrows both the
+// map markers and the nearby list to currently-boosted places.
+const boostsOnly =
+	browser && new URLSearchParams(window.location.search).has("boosts");
+
 type PlaceFeature = {
 	type: "Feature";
 	geometry: { type: "Point"; coordinates: [number, number] };
@@ -381,7 +387,8 @@ const updateMerchantList = (opts?: { force?: boolean }) => {
 					p.lon >= buffered.west &&
 					p.lon <= buffered.east,
 			);
-			merchantList.setMerchants(visible, center.lat, center.lng);
+			const listed = boostsOnly ? visible.filter(isBoosted) : visible;
+			merchantList.setMerchants(listed, center.lat, center.lng);
 			if (listOpen || currentZoom >= LABEL_VISIBLE_ZOOM) {
 				if (allowHeavyFetch || currentZoom >= LABEL_VISIBLE_ZOOM) {
 					const radiusKm =
@@ -733,8 +740,11 @@ const loadSavedBadgeSprite = async (m: MapLibreMap): Promise<void> => {
 	m.triggerRepaint();
 };
 
-const syncPlacesToSource = (list: Place[]) => {
+const syncPlacesToSource = (rawList: Place[]) => {
 	if (!map || !styleLoaded) return;
+	// "Boosted locations only" narrows every sync path (markers, the boosted
+	// source and the heatmap) to currently-boosted places.
+	const list = boostsOnly ? rawList.filter(isBoosted) : rawList;
 	const source = map.getSource("places") as GeoJSONSource | undefined;
 	const boostedSource = map.getSource("places-boosted") as
 		| GeoJSONSource
