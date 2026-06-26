@@ -270,6 +270,7 @@
 		"noLocationSelected": "Por favor, selecione um local...",
 		"noPaymentMethod": "Por favor, selecione pelo menos um método de pagamento...",
 		"formSubmission": "Falha no envio do formulário. Tente novamente ou entre em contato com o BTC Map.",
+		"locationSearch": "Não foi possível pesquisar locais. Tente novamente ou entre em contato com o BTC Map.",
 		"mapView": "Não foi possível definir a visualização do mapa para as coordenadas fornecidas. Tente novamente ou entre em contato com o BTC Map.",
 		"merchantDetailsLoadError": "Erro ao carregar detalhes do comerciante. Tente novamente.",
 		"boostLoadError": "Falha ao carregar informações de boost. Tente novamente.",
