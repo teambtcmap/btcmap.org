@@ -198,7 +198,7 @@
 		"errorNetwork": "Você parece estar offline. Verifique sua conexão e tente novamente.",
 		"errorService": "O serviço de impulso está temporariamente indisponível. Por favor, tente novamente em breve.",
 		"errorRetry": "Tente novamente",
-		"errorContact": "Ainda preso? Entre em contato"
+		"errorContact": "Ainda preso? Entre em contato com"
 	},
 	"invoicePayment": {
 		"scanOrClick": "Escaneie ou clique para pagar com lightning",
