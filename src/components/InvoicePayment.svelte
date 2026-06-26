@@ -65,6 +65,7 @@ const checkInvoiceStatus = async () => {
 			clearInterval(pollInterval);
 			invalidateAll(); // Refresh UI immediately
 			jsConfetti.addConfetti();
+			liftConfettiCanvas();
 			onSuccess();
 		}
 	} catch (error) {
@@ -95,18 +96,13 @@ $: if (invoiceId && !polling) {
 	startPolling();
 }
 
-// Lift the confetti canvas above the drawer so it shows on success.
-// JSConfetti renders into a full-screen canvas appended directly to
-// <body>, so target that — NOT querySelector("canvas"), whose first match
-// on the map is the MapLibre canvas; raising its z-index paints the map
-// over the entire boost drawer and hides the QR.
-$: if (qr) {
+const liftConfettiCanvas = () => {
 	const confettiCanvas =
 		document.querySelector<HTMLCanvasElement>("body > canvas");
 	if (confettiCanvas) {
 		confettiCanvas.style.zIndex = CONFETTI_CANVAS_Z_INDEX;
 	}
-}
+};
 
 // Cleanup polling on component destroy
 onDestroy(() => {
