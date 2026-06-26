@@ -74,6 +74,14 @@ const onPickBasemap = (id: BasemapId) => {
 	} catch {
 		// localStorage unavailable (private mode); skip persistence.
 	}
+	// applyBasemap swaps the style via setStyle, which resets the projection
+	// to the style default (mercator). Re-apply globe after the swap so it
+	// survives a basemap change. Register before applyBasemap — raster styles
+	// can fire style.load synchronously inside setStyle, so a later listener
+	// would miss it.
+	if (globeOn && map) {
+		map.once("style.load", () => map?.setProjection({ type: "globe" }));
+	}
 	applyBasemap(id);
 	trackEvent("layer_change", { layer: id });
 };
