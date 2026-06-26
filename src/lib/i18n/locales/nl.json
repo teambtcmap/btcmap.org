@@ -157,12 +157,17 @@
 	},
 	"mapControls": {
 		"goToHome": "Ga naar de startpagina",
+		"worldView": "Globeweergave",
+		"viewTitle": "Weergave",
+		"boostedOnly": "Alleen geboostte locaties",
+		"overlaysTitle": "Overlays",
+		"layersAndFilters": "Lagen & filters",
+		"menu": "Menu",
 		"addLocation": "Locatie toevoegen",
 		"communityMap": "Communitykaart",
 		"merchantMap": "Ondernemerskaart",
 		"account": "Account",
 		"login": "Aanmelden",
-		"dataRefreshAvailable": "Nieuwe gegevens beschikbaar",
 		"zoomIn": "Inzoomen",
 		"zoomOut": "Uitzoomen",
 		"basemapTitle": "Achtergrondkaart",
@@ -176,8 +181,7 @@
 		"communityMapAlt": "Communitykaart",
 		"merchantMapAlt": "Ondernemerskaart",
 		"accountAlt": "Account",
-		"loginAlt": "Aanmelden",
-		"dataRefreshAlt": "Nieuwe gegevens beschikbaar"
+		"loginAlt": "Aanmelden"
 	},
 	"merchant": {
 		"tagsNote": "Meer informatie over Bitcoin mapping tags vind je",

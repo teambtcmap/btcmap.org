@@ -72,10 +72,19 @@
 	},
 	"mapControls": {
 		"goToHome": "Ir a la página de inicio",
+		"account": "Cuenta",
+		"login": "Iniciar sesión",
+		"accountAlt": "Cuenta",
+		"loginAlt": "Iniciar sesión",
+		"worldView": "Vista de globo",
+		"viewTitle": "Vista",
+		"boostedOnly": "Solo ubicaciones impulsadas",
+		"overlaysTitle": "Superposiciones",
+		"layersAndFilters": "Capas y filtros",
+		"menu": "Menú",
 		"addLocation": "Agregar ubicación",
 		"communityMap": "Mapa de comunidades",
 		"merchantMap": "Mapa de comercios",
-		"dataRefreshAvailable": "Actualización de datos disponible",
 		"zoomIn": "Acercar",
 		"zoomOut": "Alejar",
 		"basemapTitle": "Mapa base",
@@ -87,8 +96,7 @@
 		"goToHomeAlt": "Ir a la página de inicio",
 		"addLocationAlt": "Agregar ubicación",
 		"communityMapAlt": "Mapa de comunidades",
-		"merchantMapAlt": "Mapa de comercios",
-		"dataRefreshAlt": "Actualización de datos disponible"
+		"merchantMapAlt": "Mapa de comercios"
 	},
 	"merchant": {
 		"tagsNote": "Más información sobre etiquetas de mapeo de bitcoin se puede encontrar",

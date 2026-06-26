@@ -1,89 +1,18 @@
 /*
  * Shared styles for the custom MapLibre IControls in this directory
- * (BasemapsControl, NavButtonsControl, BoostToggleControl,
- * DataRefreshControl). Imported by each control's TS module so any page
- * that mounts the controls — currently /map and /communities/map — gets
- * the popup positioning, dark-mode treatment, and anchor button styles.
+ * (MapButtonControl — the tools and menu triggers). Imported by the
+ * control's TS module so any page that mounts it — currently /map and
+ * /communities/map — gets the anchor button + dark-mode treatment.
  *
- * Lives outside any component's <style> block on purpose: Svelte's
- * scoped CSS doesn't reach DOM nodes created at runtime by the IControl
- * classes.
+ * Lives outside any component's <style> block on purpose: Svelte's scoped
+ * CSS doesn't reach DOM nodes created at runtime by the IControl classes.
+ * The panel/menu content itself is a Svelte modal styled with Tailwind —
+ * see MapToolsModal / MapMenuModal.
  */
 
-/* Basemap picker — IControl that owns its own container; the popup is
-   absolutely positioned relative to it. Hover-or-click the icon to
-   expand the radio list. */
-.maplibre-next-basemaps,
-.maplibre-next-verified {
-	position: relative;
-}
-.maplibre-next-basemaps-popup {
-	position: absolute;
-	top: 0;
-	right: calc(100% + 6px);
-	background: white;
-	color: #111827; /* gray-900 */
-	border-radius: 4px;
-	box-shadow: 0 1px 4px rgba(0, 0, 0, 0.3);
-	padding: 4px 0;
-	min-width: 140px;
-	font-size: 13px;
-}
-.dark .maplibre-next-basemaps-popup {
-	background: #1f2937; /* gray-800 */
-	color: #f3f4f6; /* gray-100 */
-}
-.maplibre-next-basemaps-option {
-	display: flex;
-	align-items: center;
-	gap: 6px;
-	padding: 4px 10px;
-	cursor: pointer;
-}
-.maplibre-next-basemaps-option:hover {
-	background: rgba(0, 0, 0, 0.05);
-}
-.dark .maplibre-next-basemaps-option:hover {
-	background: rgba(255, 255, 255, 0.08);
-}
-.maplibre-next-basemaps-option input {
-	margin: 0;
-}
-
-/* Verified filter: one-time loading state while the on-demand date fetch runs
-   (first activation only). Swap the clock glyph for a spinner. */
-.maplibre-next-verified.loading a.maplibregl-ctrl-link svg {
-	display: none;
-}
-.maplibre-next-verified.loading a.maplibregl-ctrl-link::after {
-	content: "";
-	width: 14px;
-	height: 14px;
-	border-radius: 50%;
-	border: 2px solid rgba(0, 0, 0, 0.25);
-	border-top-color: #111;
-	animation: mlnv-spin 0.7s linear infinite;
-}
-.dark .maplibre-next-verified.loading a.maplibregl-ctrl-link::after {
-	border-color: rgba(255, 255, 255, 0.3);
-	border-top-color: #fff;
-}
-@keyframes mlnv-spin {
-	to {
-		transform: rotate(360deg);
-	}
-}
-
-/* Anchor-based buttons inside the custom IControls (NavButtons / Boost /
-   DataRefresh). MapLibre's default `.maplibregl-ctrl-group button` rules
-   don't apply to <a> elements, so we replicate the dimensions, hover and
-   focus states here. */
-/* Matches GlobeControl's blue-active pattern — tint heatmap icon #33b5e5 when enabled */
-.maplibregl-ctrl-group a.maplibregl-ctrl-link.maplibregl-ctrl-heatmap-enabled
-	svg {
-	color: #33b5e5;
-}
-
+/* Anchor-based trigger buttons. MapLibre's default
+   `.maplibregl-ctrl-group button` rules don't apply to <a> elements, so we
+   replicate the dimensions, hover and focus states here. */
 .maplibregl-ctrl-group a.maplibregl-ctrl-link {
 	display: flex;
 	align-items: center;
@@ -106,41 +35,14 @@
 .maplibregl-ctrl-group a.maplibregl-ctrl-link:focus-visible {
 	box-shadow: 0 0 2px 2px #0096ff;
 }
-.maplibregl-ctrl-group a.maplibregl-ctrl-link img {
-	display: block;
-	width: 16px;
-	height: 16px;
-}
-
-/* Active-window indicator: a small accent dot on the closed button so a
-   returning user can tell a recency filter is hiding places. Placed after the
-   generic anchor rules to keep selector specificity non-descending. */
-.maplibre-next-verified.active a.maplibregl-ctrl-link {
-	position: relative;
-}
-.maplibre-next-verified.active a.maplibregl-ctrl-link::before {
-	content: "";
-	position: absolute;
-	top: 4px;
-	right: 4px;
-	width: 7px;
-	height: 7px;
-	border-radius: 50%;
-	background: #f7931a;
-	border: 1.5px solid #fff;
-}
-.dark .maplibre-next-verified.active a.maplibregl-ctrl-link::before {
-	border-color: #1f2937;
-}
 
 /* Dark-mode treatment for the rounded "pill" that holds zoom / locate /
-   nav / boost / data-refresh / basemap controls. MapLibre's stock CSS
-   hardcodes a white background, so against a dark basemap the controls
-   read as glaring white blocks. Invert the pill and its icons so the
-   buttons sit on a dark surface with light icons, matching the rest of
-   the app's dark mode. */
+   menu / tools controls. MapLibre's stock CSS hardcodes a white background,
+   so against a dark basemap the controls read as glaring white blocks.
+   Invert the pill and its icons so the buttons sit on a dark surface with
+   light icons, matching the rest of the app's dark mode. */
 .dark .maplibregl-ctrl-group {
-	background-color: #1f2937; /* gray-800, same as basemap popup */
+	background-color: #1f2937; /* gray-800 */
 }
 .dark .maplibregl-ctrl-group button:not(:disabled):hover,
 .dark .maplibregl-ctrl-group a.maplibregl-ctrl-link:hover {
@@ -154,20 +56,33 @@
 }
 /* MapLibre's built-in controls embed dark-gray SVG glyphs as
    background-image on a child <span class="maplibregl-ctrl-icon">; our
-   NavButtons / Boost / DataRefresh controls render plain <img> icons;
-   the BasemapsControl renders an inline <svg stroke="currentColor">.
-   Invert all three — the icons are single-color silhouettes, so a
-   straight invert(1) reads as a clean light-on-dark version of the
-   same glyph. */
+   MapButtonControl renders an inline <svg stroke="currentColor">. Invert
+   both — single-color silhouettes, so invert(1) reads as a clean
+   light-on-dark version of the same glyph. */
 .dark .maplibregl-ctrl-group button .maplibregl-ctrl-icon,
-.dark .maplibregl-ctrl-group a.maplibregl-ctrl-link img,
 .dark .maplibregl-ctrl-group a.maplibregl-ctrl-link svg {
 	filter: invert(1);
 }
-/* Preserve the heatmap enabled blue in dark mode — the invert above would
-   turn #33b5e5 into an orange-ish tint, losing the active-state cue. */
-.dark .maplibregl-ctrl-group
-	a.maplibregl-ctrl-link.maplibregl-ctrl-heatmap-enabled
-	svg {
-	filter: none;
+
+/* Active-state accent dot on a trigger button — the tools button lights up
+   when a verified filter / overlay is active, so a returning user can tell
+   the map is filtered without opening the panel. */
+.maplibregl-ctrl-group.maplibre-next-active a.maplibregl-ctrl-link {
+	position: relative;
+}
+.maplibregl-ctrl-group.maplibre-next-active a.maplibregl-ctrl-link::after {
+	content: "";
+	position: absolute;
+	top: 4px;
+	right: 4px;
+	width: 7px;
+	height: 7px;
+	border-radius: 50%;
+	background: #f7931a;
+	border: 1.5px solid #fff;
+}
+.dark
+	.maplibregl-ctrl-group.maplibre-next-active
+	a.maplibregl-ctrl-link::after {
+	border-color: #1f2937;
 }

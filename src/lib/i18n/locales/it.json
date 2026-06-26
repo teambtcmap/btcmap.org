@@ -157,12 +157,17 @@
 	},
 	"mapControls": {
 		"goToHome": "Vai alla home page",
+		"worldView": "Vista globo",
+		"viewTitle": "Vista",
+		"boostedOnly": "Solo posizioni boostate",
+		"overlaysTitle": "Sovrapposizioni",
+		"layersAndFilters": "Livelli e filtri",
+		"menu": "Menu",
 		"addLocation": "Aggiungi posizione",
 		"communityMap": "Mappa community",
 		"merchantMap": "Mappa commercianti",
 		"account": "Account",
 		"login": "Accedi",
-		"dataRefreshAvailable": "Aggiornamento dati disponibile",
 		"zoomIn": "Ingrandisci",
 		"zoomOut": "Rimpicciolisci",
 		"basemapTitle": "Basemap",
@@ -176,8 +181,7 @@
 		"communityMapAlt": "Mappa community",
 		"merchantMapAlt": "Mappa commercianti",
 		"accountAlt": "Account",
-		"loginAlt": "Accedi",
-		"dataRefreshAlt": " disponibile"
+		"loginAlt": "Accedi"
 	},
 	"merchant": {
 		"tagsNote": "Ulteriori informazioni sui tag di mappatura bitcoin possono essere trovate",

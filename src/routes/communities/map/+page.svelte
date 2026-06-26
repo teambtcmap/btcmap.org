@@ -38,8 +38,7 @@ import { areaIconSrc, errToast } from "$lib/utils";
 import { browser } from "$app/environment";
 import { resolve } from "$app/paths";
 import { page } from "$app/stores";
-import { BasemapsControl } from "../../map/controls/BasemapsControl";
-import { NavButtonsControl } from "../../map/controls/NavButtonsControl";
+import MapControls from "../../map/components/MapControls.svelte";
 
 let mapLoading = 0;
 
@@ -359,17 +358,6 @@ const initializeMap = async () => {
 	});
 	map.addControl(geolocate, "top-right");
 
-	map.addControl(new NavButtonsControl("communities"), "top-right");
-
-	map.addControl(
-		new BasemapsControl({
-			basemaps: BASEMAPS,
-			initial: initialBasemap,
-			onSelect: applyBasemap,
-		}),
-		"top-right",
-	);
-
 	map.addControl(new maplibre.ScaleControl({ unit: "metric" }), "bottom-left");
 
 	map.on("click", FILL_LAYER_ID, (e: MapLayerMouseEvent) => {
@@ -453,6 +441,13 @@ onDestroy(() => {
 	     the override. Leaflet used to mask this entirely by sizing its
 	     own container; MapLibre respects the DOM box. -->
 	<div bind:this={mapElement} class="!absolute inset-0 !bg-teal dark:!bg-dark" />
+
+	<MapControls
+		{map}
+		variant="communities"
+		basemaps={BASEMAPS}
+		{applyBasemap}
+	/>
 
 	{#if webglUnsupported}
 		<MapUnsupportedFallback />

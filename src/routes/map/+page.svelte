@@ -45,6 +45,7 @@ import {
 	routePlacesByBoostAndZoom,
 	shouldClusterBoostedAtZoom,
 } from "$lib/map/boostedClustering";
+import { HEATMAP_STORAGE_KEY } from "$lib/map/heatmap";
 import {
 	type HashCoords,
 	parseHashCoords,
@@ -90,19 +91,11 @@ import { debounce, errToast, isBoosted } from "$lib/utils";
 import { filterPlacesByRecency } from "$lib/verification";
 
 import type { PageData } from "./$types";
+import MapControls from "./components/MapControls.svelte";
 import MapSearchBar from "./components/MapSearchBar.svelte";
 import MerchantDrawerHash from "./components/MerchantDrawerHash.svelte";
 import MerchantListPanel from "./components/MerchantListPanel.svelte";
 import TileLoadingIndicator from "./components/TileLoadingIndicator.svelte";
-import { BasemapsControl } from "./controls/BasemapsControl";
-import { BoostToggleControl } from "./controls/BoostToggleControl";
-import { DataRefreshControl } from "./controls/DataRefreshControl";
-import {
-	HEATMAP_STORAGE_KEY,
-	HeatmapToggleControl,
-} from "./controls/HeatmapToggleControl";
-import { NavButtonsControl } from "./controls/NavButtonsControl";
-import { VerifiedFilterControl } from "./controls/VerifiedFilterControl";
 import { browser } from "$app/environment";
 
 export let data: PageData;
@@ -1182,8 +1175,6 @@ onMount(async () => {
 		}),
 		"top-right",
 	);
-	map.addControl(new maplibre.GlobeControl(), "top-right");
-
 	// Bottom-left scale bar — present in legacy /map (Leaflet's
 	// L.control.scale). Metric units only; imperial is added by the
 	// browser locale via MapLibre's bilingual variant if needed later.
@@ -1221,42 +1212,9 @@ onMount(async () => {
 		.querySelector(".maplibregl-ctrl-geolocate")
 		?.addEventListener("click", () => trackEvent("locate_click"));
 
-	// Right-side action buttons — mirror /map's stack order:
-	// nav links (home / add / community / account) → boost toggle →
-	// data-refresh (hidden until fresh sync arrives).
-	map.addControl(new NavButtonsControl(), "top-right");
-	map.addControl(new BoostToggleControl(), "top-right");
-	map.addControl(new DataRefreshControl(), "top-right");
-
-	// Basemap picker — layers-icon button that expands on hover/click,
-	// matching the L.control.layers shape prod uses. Owns its own
-	// localStorage persistence; the actual swap is delegated to
-	// applyBasemap so the custom pin/cluster/label layers survive it.
-	map.addControl(
-		new BasemapsControl({
-			basemaps: BASEMAPS,
-			initial: initialBasemap,
-			onSelect: applyBasemap,
-		}),
-		"top-right",
-	);
-
-	// "Verified within N years" filter — clock-icon button + radio popover.
-	// The page applies the effect and persistence (marker re-sync, nearby list
-	// refresh, store setVerifiedFilter) via applyVerifiedFilter.
-	map.addControl(
-		new VerifiedFilterControl({
-			initial: getStoredVerifiedFilter(),
-			onSelect: applyVerifiedFilter,
-		}),
-		"top-right",
-	);
-
-	// Heatmap toggle — layers-icon-style button that shows/hides the
-	// merchant-density heatmap layer. Owns its own localStorage
-	// persistence; the actual visibility swap is delegated to
-	// setHeatmapEnabled.
-	map.addControl(new HeatmapToggleControl(setHeatmapEnabled), "top-right");
+	// The page-nav menu + layers/filters trigger buttons and their modals are
+	// owned by <MapControls> (rendered in the markup); it registers the
+	// IControls once `map` is set below.
 
 	// Mirror /map's behavior: sync location into the userLocation store so
 	// the merchant list panel can compute distances without prompting again.
@@ -1323,7 +1281,7 @@ onMount(async () => {
 		// Heatmap layers read raw point features, so they can't share the
 		// clustered `places` source — this dedicated source always carries
 		// the full unclustered list (see syncPlacesToSource). Visibility is
-		// toggled by HeatmapToggleControl; off by default.
+		// toggled via the tools panel; off by default.
 		map.addSource("places-heatmap", {
 			type: "geojson",
 			data: EMPTY_COLLECTION,
@@ -2068,6 +2026,17 @@ onDestroy(() => {
 <TileLoadingIndicator visible={tilesLoading && !webglUnsupported} />
 
 <MerchantDrawerHash />
+
+<MapControls
+	{map}
+	variant="main"
+	basemaps={BASEMAPS}
+	{applyBasemap}
+	{applyVerifiedFilter}
+	{setHeatmapEnabled}
+	enableBoost
+	enableGlobe
+/>
 
 <style>
 	.map-container {
