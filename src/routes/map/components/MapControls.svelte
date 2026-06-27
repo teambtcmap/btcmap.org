@@ -107,7 +107,8 @@ const onToggleHeatmap = (enabled: boolean) => {
 const onToggleBoost = () => {
 	trackEvent("boost_layer_toggle");
 	const url = new URL(window.location.href);
-	if (url.searchParams.has("boosts")) url.searchParams.delete("boosts");
+	if (url.searchParams.get("boosts") === "true")
+		url.searchParams.delete("boosts");
 	else url.searchParams.set("boosts", "true");
 	window.location.search = url.search;
 };
@@ -130,7 +131,7 @@ onMount(() => {
 	}
 	boostActive =
 		typeof window !== "undefined" &&
-		new URLSearchParams(window.location.search).has("boosts");
+		new URLSearchParams(window.location.search).get("boosts") === "true";
 });
 
 // The triggers are MapLibre IControls, so register them once the map exists
