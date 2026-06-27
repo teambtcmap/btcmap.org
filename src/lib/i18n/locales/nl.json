@@ -1,10 +1,10 @@
 {
 	"home": {
-		"hero": "Vind locaties om sats uit te geven, waar je ook bent",
+		"hero": "Vind locaties om met sats te betalen, waar je ook bent.",
 		"openMap": "Kaart openen",
 		"addLocation": "Locatie toevoegen",
-		"description": "We gebruiken {osmLink} om locaties te markeren die Bitcoin accepteren en tonen deze ondernemers in onze prachtige apps.",
-		"openSource": "Onze apps en de onderliggende data zijn gratis en open-source.",
+		"description": "We maken gebruik van {osmLink} om locaties te markeren waar Bitcoin wordt geaccepteerd, en we laten deze ondernemers zien in onze prachtige apps.",
+		"openSource": "Zowel onze apps als de bijbehorende data zijn gratis en open-source.",
 		"hashtag": "#SPEDN ✊",
 		"roadsAlt": "Wegenkaart",
 		"openWebAppAria": "Web-app openen",
@@ -160,8 +160,8 @@
 		"worldView": "Globeweergave",
 		"viewTitle": "Weergave",
 		"boostedOnly": "Alleen geboostte locaties",
-		"overlaysTitle": "Overlays",
-		"layersAndFilters": "Lagen & filters",
+		"overlaysTitle": "Lagen",
+		"layersAndFilters": "Weergavelagen & filters",
 		"menu": "Menu",
 		"addLocation": "Locatie toevoegen",
 		"communityMap": "Communitykaart",
@@ -171,8 +171,8 @@
 		"zoomIn": "Inzoomen",
 		"zoomOut": "Uitzoomen",
 		"basemapTitle": "Achtergrondkaart",
-		"verifiedFilterTitle": "Alleen geverifieerde plaatsen tonen",
-		"heatmap": "Heatmap met ondernemersdichtheid in-/uitschakelen",
+		"verifiedFilterTitle": "Alleen geverifieerde locaties tonen",
+		"heatmap": "Heatmap ondernemersdichtheid in-/uitschakelen",
 		"locate": "Laat me zien waar ik ben",
 		"boostAlt": "Boost",
 		"locateAlt": "Laat me zien waar ik ben",
@@ -187,7 +187,7 @@
 		"tagsNote": "Meer informatie over Bitcoin mapping tags vind je",
 		"tagsNoteHere": "hier",
 		"details": "Details",
-		"activityShort": "Activiteit",
+		"activityShort": "Activiteiten",
 		"taggerTools": "Taggingtools",
 		"links": "Links",
 		"navigate": "Navigeren",
@@ -203,7 +203,7 @@
 		"pay": "Ondernemer betalen",
 		"showTags": "Toon tags",
 		"tagIssues": "Problemen met tags",
-		"viewOSM": "Bekijk OSM",
+		"viewOSM": "Bekijken op OSM",
 		"socialX": "X",
 		"socialInstagram": "Instagram",
 		"socialFacebook": "Facebook",
@@ -237,7 +237,7 @@
 		"surveyedBy": "Voltooid door leden van de BTC Map community"
 	},
 	"verificationFilter": {
-		"any": "Elke",
+		"any": "Alle",
 		"within1Year": "Afgelopen jaar geverifieerd",
 		"within2Years": "Geverifieerd in de laatste 2 jaar",
 		"within3Years": "Geverifieerd in de laatste 3 jaar"
@@ -275,7 +275,7 @@
 		"starAlt": "Ster",
 		"boostedPinAlt": "Geboostte pin",
 		"boostedMerchant": "Geboostte ondernemer",
-		"feeNote": "De bijdrage wordt gebruikt om het open-sourceproject BTC Map te ondersteunen en de ontwikkeling ervan voort te zetten.",
+		"feeNote": "Jouw bijdrage helpt ons om het open-source BTC Map project te ondersteunen en te blijven ontwikkelen.",
 		"boostFor1Month": "Boost voor 1 maand",
 		"boostForNMonths": "Boost voor {time} maanden",
 		"duration1Month": "1 maand",
@@ -291,14 +291,14 @@
 		"invalidDuration": "Ongeldige boostduur",
 		"invalidMerchantId": "Ongeldige ondernemer-ID",
 		"twitterShareText": "Ik heb net {name} geboost op @btcmap. Neem een kijkje!",
-		"errorTitle": "Kon je boost niet starten",
-		"errorNetwork": "Je bent offline. Controleer je verbinding en probeer opnieuw.",
-		"errorService": "De boostservice is tijdelijk niet beschikbaar. Probeer het zo meteen opnieuw.",
+		"errorTitle": "We konden je boost niet starten",
+		"errorNetwork": "Het lijkt erop dat je offline bent. Controleer je verbinding en probeer het opnieuw.",
+		"errorService": "De boost service is even niet beschikbaar. Probeer het zo nog een keer.",
 		"errorRetry": "Probeer opnieuw",
-		"errorContact": "Nog steeds problemen? Neem contact op met"
+		"errorContact": "Lukt het nog steeds niet? Neem contact met ons op"
 	},
 	"invoicePayment": {
-		"scanOrClick": "Scan of klik om met Lightning te betalen",
+		"scanOrClick": "Scan óf klik om met Lightning te betalen",
 		"invoiceLabel": "Factuur",
 		"protocolAlt": "Lightning protocol"
 	},
@@ -308,11 +308,11 @@
 		"anonymousNote": "Alle reacties zijn momenteel anoniem. We vragen een kleine vergoeding in sats als maatregel tegen spam.",
 		"currentFee": "Huidige vergoeding: 500 sats",
 		"yourComment": "Jouw reactie",
-		"submitButton": "Reactie",
+		"submitButton": "Plaats reactie",
 		"publishNote": "Je reactie wordt zichtbaar nadat de betaling door onze bots is bevestigd.",
 		"close": "Sluiten",
 		"thankYou": "Bedankt voor je reactie!",
-		"published": "Je reactie staat nu online!"
+		"published": "Je reactie staat nu online."
 	},
 	"tip": {
 		"label": "Tip",
@@ -329,7 +329,7 @@
 		"finalizing": "Bezig met afronden...",
 		"merging": "Updates samenvoegen...",
 		"checkingUpdates": "Controleren op updates...",
-		"loadingTiles": "Tegels laden..."
+		"loadingTiles": "Kaartdelen laden..."
 	},
 	"mapDrawer": {
 		"back": "Terug",
@@ -376,8 +376,8 @@
 		"mapView": "Kan de kaartweergave niet instellen op de opgegeven coördinaten, probeer het opnieuw of neem contact op met BTC Map.",
 		"merchantDetailsLoadError": "Fout bij het laden van de ondernemergegevens. Probeer het opnieuw.",
 		"boostLoadError": "Laden van boostinformatie mislukt. Probeer het opnieuw.",
-		"invoiceGenerate": "Kon factuur niet genereren. Probeer het opnieuw of neem contact op met BTC Map.",
-		"invoiceStatusCheck": "Kon factuurstatus niet controleren. Probeer het opnieuw of neem contact op met BTC Map."
+		"invoiceGenerate": "Factuur aanmaken mislukt. Probeer het nog een keer of neem contact op met BTC Map.",
+		"invoiceStatusCheck": "Het lukt even niet om je factuurstatus te controleren. Probeer het later nog een keer of neem contact op met BTC Map."
 	},
 	"success": {
 		"locationSelected": "Locatie geselecteerd!",
@@ -548,7 +548,7 @@
 		"contactPlaceholder": "hallo@btcmap.org",
 		"captchaPlaceholder": "Voer de captcha-tekst in",
 		"supertaggerHeading": "Geheimzinnige Supertagger?",
-		"supertaggerDescription": "Draag direct bij aan OSM - like a 😎 boss. Wie heeft er &uuml;berhaupt formulieren nodig?",
+		"supertaggerDescription": "Draag direct bij aan OSM - like a 😎 boss. Wie heeft er überhaupt formulieren nodig?",
 		"supertaggerImageAlt": "geheimzinnige supertagger?",
 		"supertaggerWikiButton": "Raadpleeg de wiki voor instructies.",
 		"formSuccessType": "Locatie",
@@ -767,7 +767,7 @@
 		"defaultAreaName": "BTC Map gebied",
 		"locationsNote": "*Locaties waar je met elke Bitcoin-betaalmethode kunt betalen",
 		"verifiedNote": "*Locaties waarvan de survey:date, check_date of check_date:currency:XBT-tag minder dan één jaar oud is.",
-		"tagsInfo": "*Meer informatie over Bitcoin mapping tags vindt je",
+		"tagsInfo": "*Meer informatie over Bitcoin mapping tags vind je",
 		"here": "hier",
 		"chartDataNote": "*Grafiekgegevens worden één keer per 24 uur bijgewerkt."
 	},
@@ -909,7 +909,7 @@
 		"title": "Taggingproblemen",
 		"subheading": "Draag bij aan de kaart door tagfouten op te lossen!",
 		"descriptionPart1": "Meer informatie over hoe je mee kunt doen vind je op onze ",
-		"linkText": "Tagging Instructies",
+		"linkText": "tagging instructies",
 		"descriptionPart2": " wiki-pagina.",
 		"tableTitle": "Mondiale fouten"
 	},
