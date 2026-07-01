@@ -1,6 +1,7 @@
 import { error, isHttpError, redirect } from "@sveltejs/kit";
 
 import { API_BASE } from "$lib/api-base";
+import type { AreaPageProps, AreaTags } from "$lib/types";
 
 // Shared loader for the community/[area]/[section] and country/[area]/[section]
 // pages. Both fetch the same v3 area + v4 place-issues data and share the same
@@ -21,15 +22,10 @@ export type AreaSectionConfig = {
 };
 
 export type AreaSectionResult = {
-	data: {
-		id: string;
-		numericId: number;
-		name: string;
-		tickets: string;
-		issues: unknown;
-		description: string;
-	};
-	tags: Record<string, string>;
+	// The shared AreaPage data; the community route additionally derives
+	// verifiedDate/iconSquare from `tags` below (both optional on AreaPageProps).
+	data: Omit<AreaPageProps, "verifiedDate" | "iconSquare">;
+	tags: AreaTags;
 };
 
 const VALID_SECTIONS = ["merchants", "stats", "activity", "maintain"];
