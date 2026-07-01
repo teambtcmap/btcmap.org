@@ -14,7 +14,7 @@ type AreaSectionEvent = {
 	fetch: FetchLike;
 };
 
-type AreaSectionConfig = {
+export type AreaSectionConfig = {
 	notFoundMessage: string;
 	redirectBase: string;
 	isValidArea: (area: string) => boolean;

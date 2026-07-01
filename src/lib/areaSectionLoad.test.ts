@@ -1,6 +1,7 @@
 import { isHttpError, isRedirect } from "@sveltejs/kit";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 
+import type { AreaSectionConfig } from "./areaSectionLoad";
 import { loadAreaSection } from "./areaSectionLoad";
 
 type ResponseOverrides = {
@@ -47,16 +48,16 @@ const makeFetch = (responses: FetchResponses = {}) =>
 		throw new Error(`unexpected fetch URL: ${href}`);
 	});
 
-const communityConfig = {
+const communityConfig: AreaSectionConfig = {
 	notFoundMessage: "Community Not Found",
 	redirectBase: "/community",
-	isValidArea: (area: string) => !area.includes("/"),
+	isValidArea: (area) => !area.includes("/"),
 };
 
-const countryConfig = {
+const countryConfig: AreaSectionConfig = {
 	notFoundMessage: "Country Not Found",
 	redirectBase: "/country",
-	isValidArea: (area: string) => /^[\w-]+$/.test(area),
+	isValidArea: (area) => /^[\w-]+$/.test(area),
 };
 
 const captureThrow = async (fn: () => Promise<unknown>): Promise<unknown> => {
