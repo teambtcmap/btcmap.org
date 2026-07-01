@@ -72,10 +72,19 @@
 	},
 	"mapControls": {
 		"goToHome": "На главную страницу",
+		"account": "Аккаунт",
+		"login": "Войти",
+		"accountAlt": "Аккаунт",
+		"loginAlt": "Войти",
+		"worldView": "Вид глобуса",
+		"viewTitle": "Вид",
+		"boostedOnly": "Только места с активным бустом",
+		"overlaysTitle": "Наложения",
+		"layersAndFilters": "Слои и фильтры",
+		"menu": "Меню",
 		"addLocation": "Добавить место",
 		"communityMap": "Карта сообщества",
 		"merchantMap": "Карта торговцев",
-		"dataRefreshAvailable": "Доступно обновление данных",
 		"zoomIn": "Приблизить",
 		"zoomOut": "Отдалить",
 		"basemapTitle": "Базовая карта",
@@ -87,8 +96,7 @@
 		"goToHomeAlt": "На главную страницу",
 		"addLocationAlt": "Добавить место",
 		"communityMapAlt": "Карта сообщества",
-		"merchantMapAlt": "Карта торговцев",
-		"dataRefreshAlt": "Доступно обновление данных"
+		"merchantMapAlt": "Карта торговцев"
 	},
 	"merchant": {
 		"tagsNote": "Более подробная информация о метках доступна",
@@ -198,7 +206,7 @@
 		"errorNetwork": "Кажется, вы находитесь в режиме офлайн. Проверьте подключение и попробуйте снова.",
 		"errorService": "Служба бустов временно недоступна. Пожалуйста, попробуйте снова позже.",
 		"errorRetry": "Попробовать снова",
-		"errorContact": "Всё ещё застряли? Обратитесь"
+		"errorContact": "Всё ещё застряли? Свяжитесь с"
 	},
 	"invoicePayment": {
 		"scanOrClick": "Сканируйте или нажмите для оплаты через Lightning",

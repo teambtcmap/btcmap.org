@@ -53,10 +53,19 @@
 	},
 	"mapControls": {
 		"goToHome": "Към началната страница",
+		"account": "Профил",
+		"login": "Вход",
+		"accountAlt": "Профил",
+		"loginAlt": "Вход",
+		"worldView": "Глобус",
+		"viewTitle": "Изглед",
+		"boostedOnly": "Само подсилени места",
+		"overlaysTitle": "Наслагвания",
+		"layersAndFilters": "Слоеве и филтри",
+		"menu": "Меню",
 		"addLocation": "Добави място",
 		"communityMap": "Карта на общностите",
 		"merchantMap": "Карта на търговците",
-		"dataRefreshAvailable": "Налични нови данни",
 		"zoomIn": "Увеличете",
 		"zoomOut": "Намалете",
 		"basemapTitle": "Базова карта",
@@ -68,8 +77,7 @@
 		"goToHomeAlt": "Към началната страница",
 		"addLocationAlt": "Добави място",
 		"communityMapAlt": "Карта на общностите",
-		"merchantMapAlt": "Карта на търговците",
-		"dataRefreshAlt": "Налични нови данни"
+		"merchantMapAlt": "Карта на търговците"
 	},
 	"aria": {
 		"logoAlt": "Лого на BTC Map",

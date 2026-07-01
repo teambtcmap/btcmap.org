@@ -144,7 +144,7 @@ const generateInvoice = () => {
 				{boostError === "network" ? $_("boost.errorNetwork") : $_("boost.errorService")}
 			</p>
 
-			<PrimaryButton style="w-full rounded-xl p-3" {loading} on:click={retryBoost}>
+			<PrimaryButton style="w-full rounded-xl p-3" disabled={loading} {loading} on:click={retryBoost}>
 				{$_("boost.errorRetry")}
 			</PrimaryButton>
 

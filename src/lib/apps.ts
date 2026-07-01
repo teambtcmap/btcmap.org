@@ -116,6 +116,11 @@ export const appConfigs: AppConfig[] = [
 				platform: "android",
 				url: "https://play.google.com/store/apps/details?id=to.bitkit",
 			},
+			{
+				store: "zapstore",
+				platform: "android",
+				url: "https://zapstore.dev/apps/to.bitkit",
+			},
 		],
 	},
 	{
@@ -129,6 +134,11 @@ export const appConfigs: AppConfig[] = [
 				store: "google-play",
 				platform: "android",
 				url: "https://play.google.com/store/apps/details?id=com.blitzwallet",
+			},
+			{
+				store: "zapstore",
+				platform: "android",
+				url: "https://zapstore.dev/apps/com.blitzwallet",
 			},
 			{
 				store: "app-store",
@@ -172,7 +182,7 @@ export const appConfigs: AppConfig[] = [
 			{
 				store: "zapstore",
 				platform: "android",
-				url: "https://zapstore.dev/apps/com.getalby.albygo",
+				url: "https://zapstore.dev/apps/com.getalby.mobile",
 			},
 			{
 				store: "apk",
@@ -269,6 +279,11 @@ export const appConfigs: AppConfig[] = [
 				url: "https://play.google.com/store/apps/details?id=com.fedi",
 			},
 			{
+				store: "zapstore",
+				platform: "android",
+				url: "https://zapstore.dev/apps/com.fedi",
+			},
+			{
 				store: "apk",
 				platform: "android",
 				url: "https://apk.fedi.xyz",
@@ -295,7 +310,7 @@ export const appConfigs: AppConfig[] = [
 			{
 				store: "app-store",
 				platform: "ios",
-				url: "https://apps.apple.com/us/app/manna-bitcoin-wallet/id6745337602",
+				url: "https://apps.apple.com/in/app/manna-bitcoin-wallet/id6745337602",
 			},
 		],
 	},
@@ -359,11 +374,6 @@ export const appConfigs: AppConfig[] = [
 				url: "https://play.google.com/store/apps/details?id=io.blink.wallet",
 			},
 			{
-				store: "zapstore",
-				platform: "android",
-				url: "https://zapstore.dev/apps/io.blink.wallet",
-			},
-			{
 				store: "apk",
 				platform: "android",
 				url: "https://github.com/blinkbitcoin/blink-mobile/releases/latest",
@@ -386,6 +396,11 @@ export const appConfigs: AppConfig[] = [
 				store: "google-play",
 				platform: "android",
 				url: "https://play.google.com/store/apps/details?id=com.bullbitcoin.mobile",
+			},
+			{
+				store: "zapstore",
+				platform: "android",
+				url: "https://zapstore.dev/apps/com.bullbitcoin.mobile",
 			},
 			{
 				store: "app-store",
