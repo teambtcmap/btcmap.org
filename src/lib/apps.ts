@@ -394,4 +394,39 @@ export const appConfigs: AppConfig[] = [
 			},
 		],
 	},
+	{
+		id: "club-orange",
+		name: "Club Orange",
+		logo: "/images/apps/club-orange.png",
+		tag: "powered-by-btcmap",
+		sponsor: true,
+		sponsorOrder: 5,
+		stores: [
+			{
+				store: "google-play",
+				platform: "android",
+				url: "https://play.google.com/store/apps/details?id=com.orangepill",
+			},
+			{
+				store: "apk",
+				platform: "android",
+				url: "https://github.com/ClubOrangeBitcoin/ClubOrange-releases/releases/latest/download/ClubOrange.apk",
+			},
+			{
+				store: "zapstore",
+				platform: "android",
+				url: "https://zapstore.dev/apps/com.orangepill",
+			},
+			{
+				store: "app-store",
+				platform: "ios",
+				url: "https://apps.apple.com/us/app/orangepill-app-bitcoin/id1627034193",
+			},
+			{
+				store: "web",
+				platform: "web",
+				url: "https://www.cluborange.org",
+			},
+		],
+	},
 ];
