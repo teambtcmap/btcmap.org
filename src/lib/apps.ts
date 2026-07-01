@@ -413,8 +413,9 @@ export const appConfigs: AppConfig[] = [
 		id: "club-orange",
 		name: "Club Orange",
 		logo: "/images/apps/club-orange.png",
-		tag: "coming-soon",
-		sponsor: false,
+		tag: "powered-by-btcmap",
+		sponsor: true,
+		sponsorOrder: 5,
 		stores: [
 			{
 				store: "google-play",

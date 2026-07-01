@@ -46,6 +46,12 @@ export const sponsorshipTiers: SponsorshipTier[] = [
 
 export const sponsors: Sponsor[] = [
 	{
+		name: "Club Orange",
+		url: "https://www.cluborange.org",
+		icon: "/images/supporters/club-orange.png",
+		level: "Explorer",
+	},
+	{
 		name: "JAN3",
 		url: "https://jan3.com",
 		icon: "/images/supporters/jan3.svg",
