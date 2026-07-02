@@ -3,6 +3,7 @@ export type Platform = "android" | "ios" | "web" | "linux" | "windows" | "mac";
 export type StoreKey =
 	| "app-store"
 	| "apk"
+	| "apk-beta"
 	| "f-droid"
 	| "google-play"
 	| "linux-package"
@@ -47,7 +48,12 @@ export const appConfigs: AppConfig[] = [
 			{
 				store: "apk",
 				platform: "android",
-				url: "https://github.com/teambtcmap/btcmap-android/releases/latest",
+				url: "http://static.btcmap.org/android/apk/latest.apk",
+			},
+			{
+				store: "apk-beta",
+				platform: "android",
+				url: "http://static.btcmap.org/android/apk/beta.apk",
 			},
 			{
 				store: "zapstore",

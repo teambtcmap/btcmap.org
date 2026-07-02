@@ -15,6 +15,7 @@ import type { AppIconName } from "./types";
 const icons: Record<AppIconName, string> = {
 	android,
 	apk,
+	"apk-beta": apk,
 	"app-store": appStore,
 	"f-droid": fdroid,
 	"google-play": googlePlay,
