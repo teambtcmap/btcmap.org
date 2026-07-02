@@ -34,6 +34,7 @@
 	},
 	"dependencies": {
 		"@mapbox/geojson-rewind": "^0.5.2",
+		"@mapbox/mapbox-gl-rtl-text": "^0.3.0",
 		"@nazka/map-gl-js-spiderfy": "^2.0.0",
 		"@tanstack/match-sorter-utils": "^8.19.4",
 		"@tanstack/svelte-table": "^8.21.3",

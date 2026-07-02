@@ -11,6 +11,9 @@ importers:
       '@mapbox/geojson-rewind':
         specifier: ^0.5.2
         version: 0.5.2
+      '@mapbox/mapbox-gl-rtl-text':
+        specifier: ^0.3.0
+        version: 0.3.0
       '@nazka/map-gl-js-spiderfy':
         specifier: ^2.0.0
         version: 2.0.0
@@ -924,6 +927,9 @@ packages:
   '@mapbox/jsonlint-lines-primitives@2.0.2':
     resolution: {integrity: sha512-rY0o9A5ECsTQRVhv7tL/OyDpGAoUB4tTvLiW1DSzQGq4bvTPhNw1VpSNjDJc5GFZ2XuyOtSWSVN05qOtcD71qQ==}
     engines: {node: '>= 0.6'}
+
+  '@mapbox/mapbox-gl-rtl-text@0.3.0':
+    resolution: {integrity: sha512-OwQplFqAAEYRobrTKm2wiVP+wcpUVlgXXiUMNQ8tcm5gPN5SQRXFADmITdQOaec4LhDhuuFchS7TS8ua8dUl4w==}
 
   '@mapbox/point-geometry@1.1.0':
     resolution: {integrity: sha512-YGcBz1cg4ATXDCM/71L9xveh4dynfGmcLDqufR+nQQy3fKwsAZsWd/x4621/6uJaeB9mwOHE6hPeDgXz9uViUQ==}
@@ -2982,6 +2988,8 @@ snapshots:
       minimist: 1.2.8
 
   '@mapbox/jsonlint-lines-primitives@2.0.2': {}
+
+  '@mapbox/mapbox-gl-rtl-text@0.3.0': {}
 
   '@mapbox/point-geometry@1.1.0': {}
 
