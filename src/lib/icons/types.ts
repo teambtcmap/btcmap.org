@@ -19,6 +19,7 @@ export type SocialIconName =
 export type AppIconName =
 	| "android"
 	| "apk"
+	| "apk-beta"
 	| "app-store"
 	| "f-droid"
 	| "google-play"

@@ -24,6 +24,7 @@ $: modalTitle = app
 const storeLabels: Record<StoreKey, string> = {
 	"app-store": "App Store",
 	apk: "APK",
+	"apk-beta": "APK (Beta)",
 	"f-droid": "F-Droid",
 	"google-play": "Google Play",
 	"linux-package": "Linux Package",
