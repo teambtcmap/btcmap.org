@@ -1,6 +1,6 @@
 {
 	"home": {
-		"hero": "Vind locaties om met sats te betalen, waar je ook bent.",
+		"hero": "Vind locaties om met sats te betalen, waar je ook bent",
 		"openMap": "Kaart openen",
 		"addLocation": "Locatie toevoegen",
 		"description": "We maken gebruik van {osmLink} om locaties te markeren waar Bitcoin wordt geaccepteerd, en we laten deze ondernemers zien in onze prachtige apps.",
@@ -161,7 +161,7 @@
 		"viewTitle": "Weergave",
 		"boostedOnly": "Alleen geboostte locaties",
 		"overlaysTitle": "Lagen",
-		"layersAndFilters": "Weergavelagen & filters",
+		"layersAndFilters": "Weergave & filters",
 		"menu": "Menu",
 		"addLocation": "Locatie toevoegen",
 		"communityMap": "Communitykaart",
@@ -214,8 +214,8 @@
 		"unknown": "Onbekend",
 		"distanceAway": "{distance} verderop",
 		"deletedBanner": "Deze ondernemer is verwijderd.",
-		"deletedNotice": "Deze ondernemer is verwijderd van BTC Map en accepteert mogelijk geen Bitcoin meer.",
-		"deletedDetail": "De onderstaande gegevens zijn verouderd en dienen uitsluitend ter referentie.",
+		"deletedNotice": "Deze ondernemer is van BTC Map verwijderd en accepteert mogelijk geen Bitcoin meer.",
+		"deletedDetail": "De onderstaande gegevens zijn niet meer actueel en staan er puur ter informatie.",
 		"merchantName": "Naam ondernemer",
 		"address": "Adres",
 		"openingHours": "Openingstijden",
@@ -466,7 +466,7 @@
 		"action": "Actie",
 		"date": "Datum",
 		"noResults": "Geen resultaten gevonden.",
-		"activityTitle": "Activiteit voor {name}"
+		"activityTitle": "Activiteiten van {name}"
 	},
 	"taggerProfile": {
 		"osmProfile": "OSM-profiel",
@@ -594,8 +594,8 @@
 		"hero": "Dashboard",
 		"totalMerchants": "Totaal aantal ondernemers",
 		"recentlyVerified": "Onlangs geverifieerd (1 jaar)",
-		"totalExchanges": "Totaal aantal uitwisselingen",
-		"totalAreas": "Totaal aantal gebieden",
+		"totalExchanges": "Totaal aantal exchanges",
+		"totalAreas": "Totaal aantal community's",
 		"period7d": "7D",
 		"period1m": "1M",
 		"period3m": "3M",
@@ -605,15 +605,15 @@
 		"periodAll": "ALLE",
 		"verifiedLabel": "Recent geverifieerde ondernemers",
 		"totalLabel": "Totaal aantal ondernemers",
-		"merchantsNote": "*Ondernemers die alle Bitcoin-methodes ondersteunen.",
-		"verifiedNote": "*Ondernemers met een survey:date, check_date of check_date:currency:XBT tag die minder dan een jaar oud is.",
+		"merchantsNote": "*Ondernemers die een van de Bitcoin-betaalmethoden accepteren",
+		"verifiedNote": "*Ondernemers met een survey:date=*, check_date=* of check_date:currency:XBT=* tag dat minder dan een jaar oud is",
 		"tagsNotePart1": "*Meer informatie over Bitcoin mapping tags vind je",
 		"tagsNoteLink": "hier",
 		"tagsNotePart2": "."
 	},
 	"leaderboard": {
 		"taggerHero": "Taggerranglijst",
-		"joinButton": "Sluit je bij ze aan",
+		"joinButton": "Sluit je aan",
 		"loadingData": "Ranglijstgegevens worden geladen",
 		"loadingPeriod": "Bezig met laden van {period} aan gegevens...",
 		"failedToLoad": "Fout bij het laden van de ranglijst:",
@@ -656,10 +656,10 @@
 		"hero": "Sluit je aan bij de Bitcoin map community",
 		"description": "Neem de regie over je lokale Bitcoin kaart en help mee aan de groei van Bitcoin. Lokale community's zetten deze beweging in gang. Doe mee met anderen, verwelkom nieuwe bedrijven en heb er plezier in!",
 		"leaderboardHero": "Top community's",
-		"leaderboardDescription": "Bitcoin mapping community's onderhouden hun lokale datasets en streven naar de meest accurate informatie. Ze helpen ook bij het onboarden van nieuwe ondernemers in hun regio!",
+		"leaderboardDescription": "Bitcoin-mappingcommunity's houden hun lokale data up-to-date en zorgen voor de meest accurate informatie. Daarnaast helpen ze ook bij het onboarden van nieuwe ondernemers in hun regio!",
 		"directory": "Directory",
 		"addCommunity": "Community toevoegen",
-		"viewMap": "Bekijk de communitykaart",
+		"viewMap": "Bekijk communitykaart",
 		"leaderboard": "Ranglijst",
 		"byContinent": "Community's per continent",
 		"totalLocations": "Totaal aantal locaties",
@@ -755,21 +755,21 @@
 		"population": "Inwoneraantal",
 		"asOf": "vanaf",
 		"area": "Gebied",
-		"totalLocations": "Totaal aantal locaties",
+		"totalLocations": "Aantal locaties",
 		"recentlyVerified": "Recent geverifieerde locaties",
 		"recentlyVerifiedTooltip": "Locaties die in het afgelopen jaar zijn geverifieerd.",
-		"recentlyVerifiedLabel": "Onlangs geverifieerd",
+		"recentlyVerifiedLabel": "Recent geverifieerd",
 		"outdated": "Verouderd",
 		"locations": "Locaties",
 		"recentlyVerifiedPercent": "Percentage recent geverifieerd",
 		"totalLocationsLabel": "Totaal aantal locaties",
-		"chartsTitle": "Grafieken",
+		"chartsTitle": "grafieken",
 		"defaultAreaName": "BTC Map gebied",
-		"locationsNote": "*Locaties waar je met elke Bitcoin-betaalmethode kunt betalen",
-		"verifiedNote": "*Locaties waarvan de survey:date, check_date of check_date:currency:XBT-tag minder dan één jaar oud is.",
+		"locationsNote": "*Locaties die een van de Bitcoin-betaalmethoden accepteren",
+		"verifiedNote": "*Locaties met een survey:date=*, check_date=* of check_date:currency:XBT=* tag dat minder dan een jaar oud is",
 		"tagsInfo": "*Meer informatie over Bitcoin mapping tags vind je",
 		"here": "hier",
-		"chartDataNote": "*Grafiekgegevens worden één keer per 24 uur bijgewerkt."
+		"chartDataNote": "*Grafiekgegevens worden dagelijks bijgewerkt"
 	},
 	"activityPage": {
 		"title": "Activiteit",
@@ -787,21 +787,21 @@
 		"now": "nu toevoegen!"
 	},
 	"areaActivity": {
-		"supertaggers": "Supertaggers",
+		"supertaggers": "supertaggers",
 		"loadMore": "Laad meer",
 		"noSupertaggers": "Er zijn geen supertaggers om weer te geven.",
 		"supertaggersError": "De topbewerkers konden niet worden geladen. Probeer het later nog eens.",
-		"activity": "Activiteit",
+		"activity": "activiteiten",
 		"noActivity": "Geen activiteit om weer te geven.",
 		"loadError": "Kan activiteit niet laden.",
 		"retry": "Opnieuw",
-		"was": "was",
+		"was": "is",
 		"created": "aangemaakt",
 		"updated": "bijgewerkt",
 		"deleted": "verwijderd",
 		"by": "door",
 		"boosted": "geboost",
-		"forDays": "voor {days} dagen",
+		"forDays": "{days} dagen geleden",
 		"commented": " ",
 		"atomFeeds": "Atom-feeds",
 		"newPlaces": "Nieuwe locaties",
@@ -811,8 +811,8 @@
 		"sections": {
 			"merchants": "Ondernemers",
 			"stats": "Statistieken",
-			"activity": "Activiteit",
-			"maintain": "Onderhoud"
+			"activity": "Activiteiten",
+			"maintain": "Controleren"
 		},
 		"defaultName": "Gebied op de BTC Map kaart",
 		"viewOnCommunityMap": "Bekijk op de communitykaart",
@@ -823,8 +823,8 @@
 		"errorLoadingData": "Fout bij het laden van de gegevens. Probeer het later nog eens.",
 		"loadingData": "Gegevens laden...",
 		"dataWithin24Hours": "De gegevens verschijnen binnen 24 uur.",
-		"taggingIssues": "{name} Fouten bij het taggen",
-		"openTickets": "{name} Open tickets"
+		"taggingIssues": "{name} taggingproblemen",
+		"openTickets": "{name} open tickets"
 	},
 	"areaTickets": {
 		"typeAdd": "Toevoegen",
@@ -834,28 +834,28 @@
 		"noAddTickets": "Geen open tickets voor toevoegingen.",
 		"noVerifyTickets": "Geen open verificatietickets.",
 		"noCommunityTickets": "Geen open communitytickets.",
-		"maintenanceMessage": "Het onderdeel 'Fouten bij het taggen' is momenteel in onderhoud.",
-		"viewOnGitea": "Bekijk tickets direct op Gitea.",
+		"maintenanceMessage": "Het onderdeel 'Taggingproblemen' is momenteel in onderhoud.",
+		"viewOnGitea": "Bekijk de tickets direct op Gitea.",
 		"errorMessage": "Fout bij het ophalen van tickets. Probeer het opnieuw of neem contact op met BTC Map support.",
 		"loadError": "Kan openstaande tickets niet laden. Probeer het opnieuw of neem contact op met BTC Map."
 	},
 	"verifyCommunity": {
-		"title": "Gegevens van de community verifiëren",
-		"description": "Help ons om de communitygegevens up-to-date te houden. Controleer de onderstaande informatie.",
+		"title": "Verificatie van je communitygegevens",
+		"description": "Help ons de communitygegevens actueel te houden door de onderstaande gegevens te controleren.",
 		"communityName": "Communitynaam",
 		"accurateLabel": "De huidige informatie is juist",
-		"accurateHint": "Vink dit vakje aan als je de gegevens hebt gecontroleerd en ze kloppen.",
+		"accurateHint": "Vink dit vakje aan als je de gegevens hebt gecontroleerd en alles klopt.",
 		"updatesLabel": "Updates nodig",
 		"ifApplicable": "(indien van toepassing)",
 		"updatesPlaceholder": "Geef aan welke informatie moet worden bijgewerkt (contactlinks, omschrijving, enzovoort)",
 		"verifyLabel": "Hoe heb je dit gecontroleerd?",
-		"verifyPlaceholder": "Ik heb hun website bezocht, een meetup bijgewoond, rechtstreeks contact met ze gezocht, enzovoort.",
+		"verifyPlaceholder": "Bijvoorbeeld: hun website bezocht, een meetup bijgewoond of rechtstreeks contact met ze opgenomen",
 		"botProtection": "Botbeveiliging",
 		"caseSensitive": "(hoofdlettergevoelig)",
-		"captchaPlaceholder": "Voer de captcha-tekst in.",
+		"captchaPlaceholder": "Vul de captchatekens in",
 		"submitReport": "Rapport indienen",
-		"successType": "Rapporteer",
-		"successMessage": "Bedankt voor het controleren van de informatie van deze community. We bekijken je melding en passen deze zo snel mogelijk aan."
+		"successType": "Rapporteren",
+		"successMessage": "Bedankt voor het controleren van de gegevens van deze community. We kijken je melding na en werken de informatie zo snel mogelijk bij."
 	},
 	"areaLeaderboard": {
 		"communityLeaderboard": "Communityranglijst",
@@ -878,7 +878,7 @@
 		"secondaryCalc": "Secundair: Totaal aantal locaties.",
 		"locationsNote": "Onder de locaties vallen ook geldautomaten.",
 		"totalTooltip": "Alle locaties inclusief geldautomaten",
-		"verifiedTooltip": "Locaties geverifieerd in het afgelopen jaar",
+		"verifiedTooltip": "Locaties die het afgelopen jaar zijn geverifieerd",
 		"tableAria": "Ranglijsttabel",
 		"totalTooltipInfo": "Informatie over het totaal aantal locaties",
 		"verifiedTooltipInfo": "Informatie over geverifieerde locaties",
@@ -934,13 +934,13 @@
 	},
 	"badges": {
 		"title": "Badges",
-		"intro": "Je kunt badges verdienen voor je bijdragen aan BTC Map, die op je profiel worden weergegeven. Heb je een leuk idee voor een badge? Laat het ons weten!",
+		"intro": "Verdien badges voor je bijdragen aan BTC Map. Je ziet ze terug op je profiel. Heb je een leuk idee voor een badge? Laat het ons weten!",
 		"achievements": "Prestaties",
 		"contributions": "Bijdragen",
 		"achievement": {
 			"geyserTournament": {
 				"title": "Geyser-toernooi",
-				"desc": "Neem deel aan het Supertagger-evenement 2023"
+				"desc": "Deelgenomen aan het Supertagger-evenement 2023"
 			},
 			"topTagger": {
 				"title": "Top Tagger",
@@ -959,7 +959,7 @@
 				"desc": "Lever binnen de eerste 3 maanden een bijdrage aan BTC Map"
 			},
 			"lightningJunkie": {
-				"title": "Lightningjunkie",
+				"title": "Lightning junkie",
 				"desc": "Voeg een tipknop toe aan je profiel"
 			},
 			"helloWorld": {
@@ -972,11 +972,11 @@
 			},
 			"updateMaxi": {
 				"title": "Update Maxi",
-				"desc": "Het merendeel van je bijdragen zijn updates"
+				"desc": "Het merendeel van je bijdragen bestaat uit updates"
 			},
 			"creator": {
 				"title": "Schepper",
-				"desc": "Het merendeel van je bijdragen zijn creaties"
+				"desc": "Het merendeel van je bijdragen bestaat uit creaties"
 			},
 			"supporter": {
 				"title": "Supporter",
@@ -1009,7 +1009,7 @@
 				"desc": "1984"
 			},
 			"whale": {
-				"title": "Walvis",
+				"title": "Whale",
 				"desc": "1000"
 			},
 			"infinity": {
