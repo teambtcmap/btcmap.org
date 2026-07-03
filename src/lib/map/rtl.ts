@@ -4,13 +4,21 @@
 // base-map street/place labels (from the vector styles) and BTC Map's own
 // labels. See issue #1116.
 //
-// The plugin is a standalone worker script MapLibre fetches by URL (not an ES
-// module import), so we hand Vite the bundled asset URL via `?url`. This keeps
-// it same-origin (no third-party CDN) while staying version-managed in
-// package.json. We reach the prebuilt dist file by relative path because the
-// package's `exports` map only exposes its ESM source (./src/index.js) and
-// rejects a bare subpath import of dist/.
-import rtlTextPluginUrl from "../../../node_modules/@mapbox/mapbox-gl-rtl-text/dist/mapbox-gl-rtl-text.js?url";
+// @mapbox/mapbox-gl-rtl-text is a standalone worker script MapLibre fetches by
+// URL (via importScripts) — the recommended usage is to pass a hosted URL to
+// setRTLTextPlugin, NOT to bundle/import it. The package's `exports` field
+// deliberately exposes only its ESM ICU source, not the prebuilt dist worker,
+// so there is no clean bundler import (see upstream mapbox/mapbox-gl-rtl-text#16
+// and #18). A pure-ESM distribution that WOULD allow a clean import is staged in
+// mapbox/mapbox-gl-rtl-text#41, but it's blocked on GL JS work — once it lands,
+// revisit this and drop the vendored copy in favour of a normal import.
+//
+// So we self-host the recommended way: a copy of the plugin's dist file is
+// vendored at static/mapbox-gl-rtl-text.js and served same-origin (no
+// third-party CDN). NOTE: pnpm does NOT keep that copy in sync — the
+// @mapbox/mapbox-gl-rtl-text devDependency only pins the version. After bumping
+// it, re-sync the vendored file manually: `pnpm run sync:rtl-plugin`.
+const rtlTextPluginUrl = "/mapbox-gl-rtl-text.js";
 
 // Idempotent: several components initialise their own map, and client-side
 // navigation can re-run onMount. getRTLTextPluginStatus() is "unavailable" only
