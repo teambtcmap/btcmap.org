@@ -11,10 +11,10 @@
 	},
 	"type": "module",
 	"scripts": {
-		"build": "vite build",
+		"build": "pnpm run sync:rtl-plugin && vite build",
 		"check": "svelte-kit sync && svelte-check --tsconfig ./tsconfig.json",
 		"check:watch": "svelte-kit sync && svelte-check --tsconfig ./tsconfig.json --watch",
-		"dev": "vite dev --host",
+		"dev": "pnpm run sync:rtl-plugin && vite dev --host",
 		"format": "biome check src",
 		"format:fix": "biome format --write src",
 		"lint": "biome check src",

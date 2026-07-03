@@ -13,11 +13,12 @@
 // mapbox/mapbox-gl-rtl-text#41, but it's blocked on GL JS work — once it lands,
 // revisit this and drop the vendored copy in favour of a normal import.
 //
-// So we self-host the recommended way: a copy of the plugin's dist file is
-// vendored at static/mapbox-gl-rtl-text.js and served same-origin (no
-// third-party CDN). NOTE: pnpm does NOT keep that copy in sync — the
-// @mapbox/mapbox-gl-rtl-text devDependency only pins the version. After bumping
-// it, re-sync the vendored file manually: `pnpm run sync:rtl-plugin`.
+// So we self-host the recommended way: the plugin's dist file is served
+// same-origin from static/mapbox-gl-rtl-text.js (no third-party CDN). That file
+// is NOT committed — it's git-ignored and copied from the
+// @mapbox/mapbox-gl-rtl-text devDependency by `pnpm run sync:rtl-plugin`, which
+// `pnpm build` and `pnpm dev` run automatically. Bump the devDependency to
+// update the plugin version.
 const rtlTextPluginUrl = "/mapbox-gl-rtl-text.js";
 
 // Idempotent: several components initialise their own map, and client-side
