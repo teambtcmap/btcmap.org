@@ -8,5 +8,5 @@ export const GET: RequestHandler = ({ fetch }) =>
 	forwardLnurlp({
 		fetch,
 		upstream: UPSTREAM,
-		identifier: "donations@btcmap.org",
+		identifier: "donations@lnbits.btcmap.org",
 	});
