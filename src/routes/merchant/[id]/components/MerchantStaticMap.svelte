@@ -5,6 +5,7 @@ import type { Map as MapLibreMap } from "maplibre-gl";
 import { onDestroy, onMount } from "svelte";
 
 import { previewStyleForTheme } from "$lib/map/basemaps";
+import { ensureRtlTextPlugin } from "$lib/map/rtl";
 import { hasWebGL } from "$lib/map/webgl";
 import { theme } from "$lib/theme";
 
@@ -37,6 +38,7 @@ const init = async () => {
 		return;
 	}
 	const maplibre = await import("maplibre-gl");
+	ensureRtlTextPlugin(maplibre);
 	if (destroyed) return;
 
 	lastTheme = $theme;

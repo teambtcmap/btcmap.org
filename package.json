@@ -11,16 +11,17 @@
 	},
 	"type": "module",
 	"scripts": {
-		"build": "vite build",
+		"build": "pnpm run sync:rtl-plugin && vite build",
 		"check": "svelte-kit sync && svelte-check --tsconfig ./tsconfig.json",
 		"check:watch": "svelte-kit sync && svelte-check --tsconfig ./tsconfig.json --watch",
-		"dev": "vite dev --host",
+		"dev": "pnpm run sync:rtl-plugin && vite dev --host",
 		"format": "biome check src",
 		"format:fix": "biome format --write src",
 		"lint": "biome check src",
 		"lint:fix": "biome check --write src",
 		"prepare": "husky",
 		"preview": "vite preview",
+		"sync:rtl-plugin": "cp node_modules/@mapbox/mapbox-gl-rtl-text/dist/mapbox-gl-rtl-text.js static/mapbox-gl-rtl-text.js",
 		"test": "vitest",
 		"typecheck": "tsc --project ./tsconfig.json --noEmit --pretty"
 	},
@@ -63,6 +64,7 @@
 	"devDependencies": {
 		"@biomejs/biome": "^2.5.0",
 		"@iconify/svelte": "^4.2.0",
+		"@mapbox/mapbox-gl-rtl-text": "^0.3.0",
 		"@playwright/test": "^1.59.1",
 		"@sveltejs/adapter-netlify": "^6.0.4",
 		"@sveltejs/kit": "^2.63.1",

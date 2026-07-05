@@ -17,6 +17,7 @@ import {
 	ensureSprite,
 	installPlaceholderHandler,
 } from "$lib/map/maplibreSprites";
+import { ensureRtlTextPlugin } from "$lib/map/rtl";
 import { hasWebGL } from "$lib/map/webgl";
 import { theme } from "$lib/theme";
 import type { SavedPlace } from "$lib/types";
@@ -278,6 +279,7 @@ const initializeMap = async () => {
 		return;
 	}
 	const maplibre = await import("maplibre-gl");
+	ensureRtlTextPlugin(maplibre);
 	// Component may have been destroyed while the dynamic import was in
 	// flight (fast navigation away). Bail before binding to a stale
 	// container — otherwise we leak a Map instance that onDestroy can't

@@ -59,6 +59,7 @@ import {
 	PIN_FILL_REGULAR,
 } from "$lib/map/maplibreSprites";
 import { parseLatLongQuery } from "$lib/map/queryViewport";
+import { ensureRtlTextPlugin } from "$lib/map/rtl";
 import type { VerifiedFilterYears } from "$lib/map/verifiedFilter";
 import { getStoredVerifiedFilter } from "$lib/map/verifiedFilter";
 import {
@@ -1077,6 +1078,7 @@ onMount(async () => {
 		return;
 	}
 	const maplibre = await import("maplibre-gl");
+	ensureRtlTextPlugin(maplibre);
 	// User may have navigated away while the dynamic import was in
 	// flight; bail before instantiating against an unmounted container.
 	if (destroyed) return;

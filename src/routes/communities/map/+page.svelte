@@ -26,6 +26,7 @@ import {
 } from "$lib/map/basemaps";
 import { computeBbox } from "$lib/map/bbox";
 import { parseHashCoords, writeHashCoords } from "$lib/map/mapHash";
+import { ensureRtlTextPlugin } from "$lib/map/rtl";
 import { hasWebGL } from "$lib/map/webgl";
 import { areaError, areas, reportError, reports } from "$lib/store";
 import { areasSync } from "$lib/sync/areas";
@@ -315,6 +316,7 @@ const initializeMap = async () => {
 		return;
 	}
 	const maplibre = await import("maplibre-gl");
+	ensureRtlTextPlugin(maplibre);
 	if (destroyed) return;
 
 	// Five basemaps (legacy parity). A stored picker choice wins; otherwise
