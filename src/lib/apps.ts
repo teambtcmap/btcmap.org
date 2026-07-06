@@ -450,4 +450,18 @@ export const appConfigs: AppConfig[] = [
 			},
 		],
 	},
+	{
+		id: "trustless",
+		name: "Trustless",
+		logo: "/images/apps/trustless.png",
+		tag: "powered-by-btcmap",
+		sponsor: false,
+		stores: [
+			{
+				store: "app-store",
+				platform: "ios",
+				url: "https://apps.apple.com/it/app/id6756965117",
+			},
+		],
+	},
 ];
