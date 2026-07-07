@@ -52,7 +52,7 @@
 		"localforage": "^1.10.0",
 		"maplibre-gl": "^5.24.0",
 		"marked": "^18.0.5",
-		"nostr-tools": "^2.23.8",
+		"nostr-tools": "^2.23.9",
 		"opening_hours": "^3.13.0",
 		"qrcode": "^1.5.4",
 		"svelte-i18n": "^4.0.1",
@@ -62,12 +62,12 @@
 		"tippy.js": "^6.3.7"
 	},
 	"devDependencies": {
-		"@biomejs/biome": "^2.5.0",
+		"@biomejs/biome": "^2.5.2",
 		"@iconify/svelte": "^4.2.0",
 		"@mapbox/mapbox-gl-rtl-text": "^0.3.0",
 		"@playwright/test": "^1.59.1",
 		"@sveltejs/adapter-netlify": "^6.0.4",
-		"@sveltejs/kit": "^2.63.1",
+		"@sveltejs/kit": "^2.69.1",
 		"@sveltejs/vite-plugin-svelte": "^3.1.2",
 		"@tailwindcss/postcss": "^4.3.0",
 		"@tailwindcss/vite": "^4.3.0",
@@ -80,12 +80,12 @@
 		"lint-staged": "^17.0.4",
 		"postcss": "^8.5.10",
 		"svelte": "^4.2.20",
-		"svelte-check": "^4.6.0",
+		"svelte-check": "^4.7.2",
 		"svelte-preprocess": "^6.0.3",
 		"tailwindcss": "^4.3.0",
 		"typescript": "^6.0.3",
 		"vite": "^5.4.21",
-		"vitest": "^3.2.4"
+		"vitest": "^3.2.7"
 	},
 	"packageManager": "pnpm@10.11.0"
 }
