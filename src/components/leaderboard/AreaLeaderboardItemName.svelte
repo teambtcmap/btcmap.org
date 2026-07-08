@@ -10,7 +10,7 @@ export let name: string;
 export let id: string;
 export let countryCode: string | undefined = undefined;
 
-$: avatarSrc = type === "community" ? areaIconSrc(avatar) : avatar;
+$: avatarSrc = type === "community" ? areaIconSrc(id, avatar) : avatar;
 
 $: displayName = name || "Unknown";
 $: hasLongName = displayName?.match(/[^ ]{21}/);

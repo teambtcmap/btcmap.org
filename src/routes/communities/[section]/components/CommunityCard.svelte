@@ -78,7 +78,7 @@ $: tip =
 		>
 			<img
 				loading="lazy"
-				src={areaIconSrc(image)}
+				src={areaIconSrc(id, image)}
 				alt={tags.name}
 				class="mx-auto h-20 w-20 rounded-full object-cover"
 				on:error={function () {

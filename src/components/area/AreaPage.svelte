@@ -203,7 +203,7 @@ const initializeData = async () => {
 
 	avatar =
 		type === "community"
-			? areaIconSrc(area["icon:square"])
+			? areaIconSrc(areaFound.id, area["icon:square"])
 			: `https://static.btcmap.org/images/countries/${areaFound.id}.svg`;
 	description = area.description;
 

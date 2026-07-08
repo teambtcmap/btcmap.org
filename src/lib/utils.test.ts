@@ -672,37 +672,44 @@ describe("isValidLongitude", () => {
 });
 
 describe("areaIconSrc", () => {
-	it("returns the raw URL for static.btcmap.org/images/areas paths", () => {
-		const url = "https://static.btcmap.org/images/areas/abc.png";
-		expect(areaIconSrc(url)).toBe(url);
-		expect(areaIconSrc(url, 64)).toBe(url);
-	});
+	// A truthy icon value signals the area has an image; the URL itself is no
+	// longer used to build the src — the area id keys the v4 image endpoint.
+	const icon = "https://static.btcmap.org/images/areas/361.png";
 
-	it("wraps non-static.btcmap.org URLs with the Netlify image service", () => {
-		const url = "https://ugc.production.linktr.ee/foo.webp";
-		expect(areaIconSrc(url)).toBe(
-			`https://btcmap.org/.netlify/images?url=${encodeURIComponent(url)}&fit=cover&w=256&h=256`,
+	it("builds the v4 area image endpoint URL from the area id", () => {
+		expect(areaIconSrc("free-madeira", icon)).toBe(
+			"https://api.btcmap.org/v4/areas/free-madeira/image?type=square&w=256&h=256",
 		);
 	});
 
 	it("respects a custom size", () => {
-		const url = "https://example.com/icon.png";
-		expect(areaIconSrc(url, 64)).toBe(
-			`https://btcmap.org/.netlify/images?url=${encodeURIComponent(url)}&fit=cover&w=64&h=64`,
+		expect(areaIconSrc("free-madeira", icon, 64)).toBe(
+			"https://api.btcmap.org/v4/areas/free-madeira/image?type=square&w=64&h=64",
 		);
 	});
 
-	it("does not bypass for paths outside /images/areas/", () => {
-		const url = "https://static.btcmap.org/images/countries/us.svg";
-		expect(areaIconSrc(url)).toBe(
-			`https://btcmap.org/.netlify/images?url=${encodeURIComponent(url)}&fit=cover&w=256&h=256`,
+	it("accepts a numeric id", () => {
+		expect(areaIconSrc(361, icon)).toBe(
+			"https://api.btcmap.org/v4/areas/361/image?type=square&w=256&h=256",
 		);
 	});
 
-	it("returns the bitcoin fallback for null/undefined/empty inputs", () => {
-		expect(areaIconSrc(null)).toBe("/images/bitcoin.svg");
-		expect(areaIconSrc(undefined)).toBe("/images/bitcoin.svg");
-		expect(areaIconSrc("")).toBe("/images/bitcoin.svg");
+	it("url-encodes the id", () => {
+		expect(areaIconSrc("a b/c", icon)).toBe(
+			"https://api.btcmap.org/v4/areas/a%20b%2Fc/image?type=square&w=256&h=256",
+		);
+	});
+
+	it("returns the bitcoin fallback when the area has no icon", () => {
+		expect(areaIconSrc("free-madeira", null)).toBe("/images/bitcoin.svg");
+		expect(areaIconSrc("free-madeira", undefined)).toBe("/images/bitcoin.svg");
+		expect(areaIconSrc("free-madeira", "")).toBe("/images/bitcoin.svg");
+	});
+
+	it("returns the bitcoin fallback when the id is missing", () => {
+		expect(areaIconSrc(null, icon)).toBe("/images/bitcoin.svg");
+		expect(areaIconSrc(undefined, icon)).toBe("/images/bitcoin.svg");
+		expect(areaIconSrc("", icon)).toBe("/images/bitcoin.svg");
 	});
 });
 
