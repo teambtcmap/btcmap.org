@@ -587,6 +587,10 @@ export const areaIconSrc = (
 	icon: string | null | undefined,
 	size = 256,
 ): string => {
-	if (!id || !icon) return "/images/bitcoin.svg";
+	// A numeric id of 0 is valid, so guard on null/undefined/empty string
+	// rather than a plain falsy check (which would drop id 0).
+	if (id === null || id === undefined || id === "" || !icon) {
+		return "/images/bitcoin.svg";
+	}
 	return `${API_BASE}/v4/areas/${encodeURIComponent(String(id))}/image?type=square&w=${size}&h=${size}`;
 };

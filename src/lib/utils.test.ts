@@ -694,6 +694,12 @@ describe("areaIconSrc", () => {
 		);
 	});
 
+	it("treats a numeric id of 0 as valid, not missing", () => {
+		expect(areaIconSrc(0, icon)).toBe(
+			"https://api.btcmap.org/v4/areas/0/image?type=square&w=256&h=256",
+		);
+	});
+
 	it("url-encodes the id", () => {
 		expect(areaIconSrc("a b/c", icon)).toBe(
 			"https://api.btcmap.org/v4/areas/a%20b%2Fc/image?type=square&w=256&h=256",
