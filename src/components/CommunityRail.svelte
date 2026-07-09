@@ -58,7 +58,7 @@ $: if (
 }
 
 const avatarUrl = (community: Area): string =>
-	areaIconSrc(community.tags["icon:square"], 64);
+	areaIconSrc(community.id, community.tags["icon:square"], 64);
 
 const communityHref = (community: Area): string =>
 	resolve(`/community/${encodeURIComponent(community.id)}`);

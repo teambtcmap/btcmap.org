@@ -173,7 +173,7 @@ const buildPopupHtml = (
 
 	const img = document.createElement("img");
 	img.loading = "lazy";
-	img.src = areaIconSrc(community.tags["icon:square"]);
+	img.src = areaIconSrc(community.id, community.tags["icon:square"]);
 	img.alt = t("communityMap.avatarAlt");
 	img.className = "w-24 h-24 rounded-full mx-auto";
 	img.title = t("communityMap.communityIconTitle");

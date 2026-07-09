@@ -578,22 +578,19 @@ export const buildMetaDescription = (
 	return `${truncated}…`;
 };
 
-// Wraps an area icon URL with Netlify's image optimization service. Skips
-// the wrapper for icons under static.btcmap.org/images/areas/ — the new
-// standardized format there is 256×256 PNG. Migration to that format is
-// incremental, so legacy entries under the same path also bypass and are
-// served at their native size; we accept that trade-off to get the win on
-// already-migrated icons today. Falsy input short-circuits to the bitcoin
-// fallback to avoid a wasted 400 from Netlify. `size` is intentionally
-// ignored for the bypass path — callers asking for smaller sizes get the
-// native asset and rely on the browser to downscale. Issue #622.
+// Builds an area icon URL via the v4 image endpoint, which resizes on the fly.
+// `id` is the area id (url_alias or numeric); `icon` is the area's existing
+// icon:square value, used only as a "does this area have an image?" gate so we
+// fall back to the bitcoin logo instead of pointing at a 404.
 export const areaIconSrc = (
+	id: string | number | null | undefined,
 	icon: string | null | undefined,
 	size = 256,
 ): string => {
-	if (!icon) return "/images/bitcoin.svg";
-	if (icon.startsWith("https://static.btcmap.org/images/areas/")) {
-		return icon;
+	// A numeric id of 0 is valid, so guard on null/undefined/empty string
+	// rather than a plain falsy check (which would drop id 0).
+	if (id === null || id === undefined || id === "" || !icon) {
+		return "/images/bitcoin.svg";
 	}
-	return `https://btcmap.org/.netlify/images?url=${encodeURIComponent(icon)}&fit=cover&w=${size}&h=${size}`;
+	return `${API_BASE}/v4/areas/${encodeURIComponent(String(id))}/image?type=square&w=${size}&h=${size}`;
 };

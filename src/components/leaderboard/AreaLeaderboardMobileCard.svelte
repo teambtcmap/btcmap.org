@@ -71,7 +71,7 @@ export let type: AreaType;
 				<!-- Row 1: Larger Avatar -->
 				<div class="flex justify-center">
 					<img
-						src={areaIconSrc(area.icon)}
+						src={areaIconSrc(area.alias, area.icon)}
 						alt="{area.name || 'Unknown'} avatar"
 						class="h-16 w-16 rounded-full object-cover"
 						on:error={(e) => {

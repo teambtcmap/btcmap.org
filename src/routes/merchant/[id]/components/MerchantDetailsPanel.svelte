@@ -146,7 +146,7 @@ const withProtocol = (value: string, base: string): string =>
 						class="flex w-20 flex-col items-center gap-1 transition-transform hover:scale-105"
 					>
 						<img
-							src={areaIconSrc(community.tags['icon:square'])}
+							src={areaIconSrc(community.id, community.tags['icon:square'])}
 							alt={$_('aria.logoAlt')}
 							loading="lazy"
 							class="h-16 w-16 rounded-full object-cover"
