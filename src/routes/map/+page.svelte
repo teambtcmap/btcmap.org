@@ -576,6 +576,12 @@ const executeSearch = async (query: string) => {
 		merchantList.openWithSearchResults(query, results);
 	} catch (error) {
 		if (error instanceof Error && error.name === "AbortError") return;
+		// Same staleness check as the success path. The user has typed past this
+		// query, so a newer request is already scheduled or in flight: toasting
+		// would report a failure for a query that is no longer on screen, and
+		// openSearchMode(false) below would clear the spinner out from under the
+		// newer search. That search reports its own failure if it also fails.
+		if (get(merchantList).searchQuery !== query) return;
 		console.error("Search error:", error);
 		errToast(get(_)("errors.searchUnavailable"));
 		// Mirror the success-path guard: if the panel was closed/collapsed while
