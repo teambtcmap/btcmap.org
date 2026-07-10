@@ -203,12 +203,20 @@ onMount(() => {
 // Reference for search input component
 let searchInputComponent: SearchInput;
 
+// Set only while focus is being moved here programmatically, so the resulting
+// focus event isn't tracked as a user interaction. focus() dispatches the event
+// synchronously, so the flag is always cleared by the time anything else runs.
+let focusingProgrammatically = false;
+
 // Called by the page after the desktop floating bar hands the panel over: that
 // bar unmounts as it opens the panel, so focus would otherwise land on <body>.
 // Deliberately not called on mobile — the sheet opens from a button facade, and
 // focusing the real input there raises the on-screen keyboard over the list.
 export function focusSearchInput() {
-	searchInputComponent?.focus();
+	if (!searchInputComponent) return;
+	focusingProgrammatically = true;
+	searchInputComponent.focus();
+	focusingProgrammatically = false;
 }
 
 // Body scroll lock state for mobile (prevents iOS background scroll)
@@ -218,6 +226,9 @@ let scrollLockActive = false;
 let panelElement: HTMLElement;
 
 function handleSearchFocus() {
+	// The floating bar already tracked this interaction before handing focus
+	// over; counting it again would inflate source:"panel" on every desktop open.
+	if (focusingProgrammatically) return;
 	trackEvent("search_input_focus", { source: "panel" });
 }
 
