@@ -171,6 +171,16 @@ test.describe('Merchant List Panel', () => {
 			timeout: 5000
 		});
 		await expect(listPanel).toContainText(/nearby/);
+
+		// The pill renders inside the button but must stay out of its accessible
+		// name: voice control selects elements by the name it announces, and a name
+		// that shifted with the nearby count would be unusable. Exact match, so a
+		// pill leaking back in ("Search places... 14 nearby") fails here.
+		await expect(
+			listPanel.getByRole('button', { name: 'Search places...', exact: true })
+		).toBeVisible();
+		// The count is still announced, as a description rather than a name.
+		await expect(listPanel.locator('#search-facade-nearby-count')).toHaveText(/nearby/);
 	});
 
 	test('mobile: selecting merchant collapses sheet and opens drawer', async ({ page }) => {
@@ -516,10 +526,14 @@ test.describe('Merchant List Panel', () => {
 		await waitForMarkersToLoad(page);
 
 		// Floating search facade should be visible, and it is the only search
-		// surface — no real input exists while the panel is closed.
+		// surface — no real input exists while the panel is closed. Assert the
+		// invariant with a CSS locator, not getByRole('searchbox'): role locators
+		// skip hidden elements, so they'd pass on an input that is mounted but
+		// hidden — exactly the change someone might make to skip the tick().
+		const realInput = page.locator('input[type="search"]');
 		const searchFacade = page.getByRole('button', { name: /search places/i });
 		await expect(searchFacade).toBeVisible({ timeout: 15000 });
-		await expect(page.getByRole('searchbox')).toHaveCount(0);
+		await expect(realInput).toHaveCount(0);
 
 		// Open the list panel
 		await searchFacade.click();
@@ -530,7 +544,7 @@ test.describe('Merchant List Panel', () => {
 
 		// The facade unmounts when the panel opens and the panel renders the real
 		// input in the same slot: exactly one search box, and it lives in the panel.
-		await expect(page.getByRole('searchbox')).toHaveCount(1);
+		await expect(realInput).toHaveCount(1);
 		await expect(listPanel.locator('input[type="search"]')).toBeVisible();
 		await expect(searchFacade).toHaveCount(0);
 
@@ -543,6 +557,6 @@ test.describe('Merchant List Panel', () => {
 
 		// Floating facade reappears and the real input is gone again
 		await expect(searchFacade).toBeVisible({ timeout: 5000 });
-		await expect(page.getByRole('searchbox')).toHaveCount(0);
+		await expect(realInput).toHaveCount(0);
 	});
 });
