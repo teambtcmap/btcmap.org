@@ -563,6 +563,13 @@ const executeSearch = async (query: string) => {
 		// response (abort only rejects the fetch, not the json() window). Don't
 		// let a late result reopen it.
 		if (!get(merchantList).isOpen) return;
+		// The user kept typing while this request was in flight, so it answers a
+		// query that is no longer on screen. Continuous typing keeps re-arming the
+		// debounce, so no newer request dispatched to abort this one. Dropping it
+		// here matters beyond stale results: openWithSearchResults writes `query`
+		// back into searchQuery, which feeds the search input's `value` prop —
+		// applying it would rewrite the input mid-word and reset the caret.
+		if (get(merchantList).searchQuery !== query) return;
 		merchantList.openWithSearchResults(query, results);
 	} catch (error) {
 		if (error instanceof Error && error.name === "AbortError") return;

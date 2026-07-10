@@ -308,6 +308,52 @@ test.describe('Merchant List Panel', () => {
 		await expect(listPanel.locator('li button').first()).toBeVisible({ timeout: 15000 });
 	});
 
+	// Pausing mid-phrase (e.g. at the space in "kiosk hamburg") dispatches the
+	// debounced search for the first word. Resuming typing before that response
+	// lands used to rewrite the input with the in-flight query and reset the
+	// caret, eating the characters typed in between ("kiosk hamburg" → "kioskrg").
+	test('a slow response for an earlier query does not overwrite what the user typed', async ({
+		page
+	}) => {
+		await page.setViewportSize({ width: 1280, height: 720 });
+
+		// Stub the search endpoint with a latency long enough to still be in
+		// flight while the second word is typed. Keeps the race deterministic
+		// and keeps the real search API out of the test.
+		await page.route('**/api/search/places*', async (route) => {
+			await new Promise((resolve) => setTimeout(resolve, 600));
+			await route.fulfill({ status: 200, contentType: 'application/json', body: '[]' });
+		});
+
+		await page.goto('/map#17/42.2762511/42.7024218', { waitUntil: 'load' });
+		await expect(page.getByRole('button', { name: 'Zoom in' })).toBeVisible();
+		await waitForMarkersToLoad(page);
+
+		const searchInput = page.getByRole('searchbox', { name: /search for bitcoin merchants/i });
+		await expect(searchInput).toBeVisible({ timeout: 15000 });
+		await searchInput.click();
+
+		const listPanel = page.locator('[role="complementary"][aria-label="Merchant list"]');
+		await expect(listPanel).toBeVisible({ timeout: 10000 });
+		const panelInput = listPanel.locator('input[type="search"]');
+
+		// Arm the waiter before typing so the dispatch can't be missed.
+		const firstWordRequest = page.waitForRequest(
+			(r) => r.url().includes('/api/search/places') && r.url().includes('kiosk'),
+			{ timeout: 15000 }
+		);
+
+		await panelInput.pressSequentially('kiosk', { delay: 60 });
+		// The user's pause at the space: long enough for the 300ms debounce to fire.
+		await firstWordRequest;
+
+		// Resume typing while "kiosk" is still in flight. Each keystroke re-arms
+		// the debounce, so no newer request dispatches to abort the stale one.
+		await panelInput.pressSequentially(' hamburg', { delay: 100 });
+
+		await expect(panelInput).toHaveValue('kiosk hamburg');
+	});
+
 	test('panel can be closed and floating search bar reappears', async ({ page }) => {
 		// Desktop viewport
 		await page.setViewportSize({ width: 1280, height: 720 });
