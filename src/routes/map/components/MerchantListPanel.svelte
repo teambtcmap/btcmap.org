@@ -27,6 +27,7 @@ import { filterPlacesByRecency } from "$lib/verification";
 
 import MerchantListItem from "./MerchantListItem.svelte";
 import NearbyCountPill from "./NearbyCountPill.svelte";
+import SearchFacade from "./SearchFacade.svelte";
 import { browser } from "$app/environment";
 
 // Get translated category label
@@ -132,12 +133,12 @@ function onSheetPointerUp(event: PointerEvent) {
 	sheetGesture.handlePointerUp(event, grabberElement);
 }
 // The whole peek facade is a swipe surface, not just the grabber strip
-let facadeElement: HTMLElement;
+let facadeElement: HTMLButtonElement | undefined;
 function onFacadePointerDown(event: PointerEvent) {
-	sheetGesture.handlePointerDown(event, facadeElement);
+	sheetGesture.handlePointerDown(event, facadeElement ?? null);
 }
 function onFacadePointerUp(event: PointerEvent) {
-	sheetGesture.handlePointerUp(event, facadeElement);
+	sheetGesture.handlePointerUp(event, facadeElement ?? null);
 }
 
 // Expanded header (input row + toggle/chips) drags the sheet too. A small
@@ -819,31 +820,16 @@ onDestroy(() => {
 				id="merchant-sheet-content"
 				class="flex flex-1 items-center px-3 pb-[max(0.75rem,env(safe-area-inset-bottom))]"
 			>
-				<button
-					bind:this={facadeElement}
-					type="button"
+				<SearchFacade
+					bind:element={facadeElement}
+					count={pillCount}
+					class="touch-none rounded-xl bg-gray-100 py-2 pr-2.5 dark:bg-white/5"
 					on:click={handlePeekTap}
 					on:pointerdown={onFacadePointerDown}
 					on:pointermove={sheetGesture.handlePointerMove}
 					on:pointerup={onFacadePointerUp}
 					on:pointercancel={sheetGesture.handlePointerCancel}
-					class="relative flex w-full touch-none items-center rounded-xl bg-gray-100 py-2 pr-2.5 pl-10 text-left dark:bg-white/5"
-					aria-expanded="false"
-				>
-					<Icon
-						w="18"
-						h="18"
-						icon="search"
-						type="material"
-						class="pointer-events-none absolute top-1/2 left-3 -translate-y-1/2 text-gray-600 dark:text-white/70"
-					/>
-					<span class="flex-1 truncate text-base text-gray-400 dark:text-white/50">
-						{$_('search.placeholderPlaces')}
-					</span>
-					{#if pillCount}
-						<NearbyCountPill count={pillCount} />
-					{/if}
-				</button>
+				/>
 			</div>
 		{/if}
 	</section>
