@@ -555,11 +555,23 @@ const executeSearch = async (query: string) => {
 	merchantDrawer.close();
 	merchantList.openSearchMode(true);
 
+	// The server breaks relevance ties by proximity to this point, mirroring the
+	// original client-side search, which ranked purely by distance from the map
+	// centre. Without it, a query like "hamburg" — which no place is named —
+	// leaves every match tied at the lowest rank, and the result cap selects
+	// among them by name length. `map` is undefined until the map initialises,
+	// and the search box is reachable before that.
+	const searchParams = new URLSearchParams({ name: trimmed });
+	if (map) {
+		const center = map.getCenter();
+		searchParams.set("lat", String(center.lat));
+		searchParams.set("lon", String(center.lng));
+	}
+
 	try {
-		const response = await fetch(
-			`/api/search/places?name=${encodeURIComponent(trimmed)}`,
-			{ signal: searchAbortController.signal },
-		);
+		const response = await fetch(`/api/search/places?${searchParams}`, {
+			signal: searchAbortController.signal,
+		});
 		if (!response.ok) throw new Error("Search API error");
 		const results: Place[] = await response.json();
 		// The panel/sheet may have been closed while we were awaiting the
