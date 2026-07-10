@@ -11,7 +11,7 @@ import type {
 	Map as MapLibreMap,
 	Marker,
 } from "maplibre-gl";
-import { onDestroy, onMount } from "svelte";
+import { onDestroy, onMount, tick } from "svelte";
 import { get } from "svelte/store";
 
 import CommunityRail from "$components/CommunityRail.svelte";
@@ -105,6 +105,9 @@ export let data: PageData;
 // mobile search sheet and the desktop floating bar derive from one value so
 // a viewport resize can never leave zero or two search surfaces
 const isMobileLayout = browser && window.innerWidth < BREAKPOINTS.md;
+
+// Lets the floating search bar hand focus to the panel's input as it unmounts
+let merchantListPanel: MerchantListPanel;
 
 // "Boosted locations only" map filter (?boosts=true). The tools modal sets it
 // via a full page reload, so it's constant for the session; it narrows both the
@@ -563,9 +566,22 @@ const executeSearch = async (query: string) => {
 		// response (abort only rejects the fetch, not the json() window). Don't
 		// let a late result reopen it.
 		if (!get(merchantList).isOpen) return;
+		// The user kept typing while this request was in flight, so it answers a
+		// query that is no longer on screen. Continuous typing keeps re-arming the
+		// debounce, so no newer request dispatched to abort this one. Dropping it
+		// here matters beyond stale results: openWithSearchResults writes `query`
+		// back into searchQuery, which feeds the search input's `value` prop —
+		// applying it would rewrite the input mid-word and reset the caret.
+		if (get(merchantList).searchQuery !== query) return;
 		merchantList.openWithSearchResults(query, results);
 	} catch (error) {
 		if (error instanceof Error && error.name === "AbortError") return;
+		// Same staleness check as the success path. The user has typed past this
+		// query, so a newer request is already scheduled or in flight: toasting
+		// would report a failure for a query that is no longer on screen, and
+		// openSearchMode(false) below would clear the spinner out from under the
+		// newer search. That search reports its own failure if it also fails.
+		if (get(merchantList).searchQuery !== query) return;
 		console.error("Search error:", error);
 		errToast(get(_)("errors.searchUnavailable"));
 		// Mirror the success-path guard: if the panel was closed/collapsed while
@@ -2006,9 +2022,16 @@ onDestroy(() => {
 	<div class="pointer-events-none absolute top-3 left-3 z-[1000]">
 		<MapSearchBar
 			onSearch={handlePanelSearch}
-			onFocus={() => {
+			onFocus={async () => {
 				merchantList.open();
 				updateMerchantList({ force: true });
+				// Opening the panel unmounts this bar mid-focus, so focus falls to
+				// <body> and the click looks like it did nothing. Wait for the panel's
+				// input to mount, then hand focus over. Desktop only by construction:
+				// MapSearchBar doesn't render on mobile, where the sheet opens from a
+				// button facade so the on-screen keyboard stays down.
+				await tick();
+				merchantListPanel?.focusSearchInput();
 			}}
 			nearbyCount={$merchantList.totalCount}
 		/>
@@ -2016,6 +2039,7 @@ onDestroy(() => {
 {/if}
 
 <MerchantListPanel
+	bind:this={merchantListPanel}
 	onPanToNearbyMerchant={panToNearbyMerchant}
 	onZoomToSearchResult={zoomToSearchResult}
 	onZoomToNearbyLevel={zoomToNearbyLevel}
