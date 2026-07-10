@@ -2013,23 +2013,22 @@ onDestroy(() => {
 <MapLoadingMain progress={mapLoading} status={mapLoadingStatus} />
 
 <!--
-	Floating search bar — desktop only, top-left. On mobile the merchant
+	Floating search facade — desktop only, top-left. On mobile the merchant
 	list panel renders as a bottom sheet whose peek state carries the
-	single search input instead. The bar itself hides when the list panel
-	is open (the panel renders its own search input in the same slot).
+	single search facade instead. The facade hides when the list panel
+	is open (the panel renders the real search input in the same slot).
 -->
 {#if styleLoaded && !isMobileLayout}
 	<div class="pointer-events-none absolute top-3 left-3 z-[1000]">
 		<MapSearchBar
-			onSearch={handlePanelSearch}
-			onFocus={async () => {
+			onActivate={async () => {
 				merchantList.open();
 				updateMerchantList({ force: true });
-				// Opening the panel unmounts this bar mid-focus, so focus falls to
-				// <body> and the click looks like it did nothing. Wait for the panel's
+				// Opening the panel unmounts the facade, so focus would fall to <body>
+				// and the click would look like it did nothing. Wait for the panel's
 				// input to mount, then hand focus over. Desktop only by construction:
-				// MapSearchBar doesn't render on mobile, where the sheet opens from a
-				// button facade so the on-screen keyboard stays down.
+				// MapSearchBar doesn't render on mobile, where activating the sheet's
+				// facade must leave the on-screen keyboard down.
 				await tick();
 				merchantListPanel?.focusSearchInput();
 			}}
