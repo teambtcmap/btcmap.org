@@ -12,6 +12,7 @@ export type EventName =
 	| "search_sheet_swipe_expand"
 	| "search_sheet_swipe_collapse"
 	| "search_sheet_tap_expand"
+	| "search_bar_tap_expand"
 	| "category_filter"
 	| "verified_filter_change"
 	| "boost_layer_toggle"

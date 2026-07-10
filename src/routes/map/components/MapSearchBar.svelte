@@ -17,7 +17,7 @@ $: isOpen = $merchantList.isOpen;
 $: pillCount = formatNearbyPillCount(nearbyCount);
 
 function handleActivate() {
-	trackEvent("search_input_focus", { source: "floating_bar" });
+	trackEvent("search_bar_tap_expand");
 	onActivate?.();
 }
 </script>
