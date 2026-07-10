@@ -15,7 +15,7 @@ test.describe('Merchant List Panel', () => {
 		checkForConsoleErrors(page);
 	});
 
-	test('single search input is visible on map load, no mode toggle anywhere', async ({ page }) => {
+	test('search facade is visible on map load, no mode toggle anywhere', async ({ page }) => {
 		// Desktop viewport
 		await page.setViewportSize({ width: 1280, height: 720 });
 
@@ -30,11 +30,14 @@ test.describe('Merchant List Panel', () => {
 		// Wait for markers to load
 		await waitForMarkersToLoad(page);
 
-		// Floating search bar should be visible with the neutral places placeholder
-		// (loose match so copy/i18n tweaks don't break the behavioral test)
-		const searchInput = page.getByRole('searchbox', { name: /search for bitcoin merchants/i });
-		await expect(searchInput).toBeVisible({ timeout: 15000 });
-		await expect(searchInput).toHaveAttribute('placeholder', /search places/i);
+		// The floating surface is a button facade carrying the neutral places copy,
+		// not a real input (loose match so copy/i18n tweaks don't break the test).
+		const searchFacade = page.getByRole('button', { name: /search places/i });
+		await expect(searchFacade).toBeVisible({ timeout: 15000 });
+		await expect(searchFacade).toContainText(/search places/i);
+		// No real search input exists until the panel opens — that's what keeps the
+		// on-screen keyboard down on mobile and makes the facade honest on desktop.
+		await expect(page.locator('input[type="search"]')).toHaveCount(0);
 
 		// The Worldwide/Nearby mode toggle has been removed entirely — assert the
 		// scope radios are absent (not merely hidden) via toHaveCount(0).
@@ -42,7 +45,7 @@ test.describe('Merchant List Panel', () => {
 		await expect(page.getByRole('radio', { name: /nearby/i })).toHaveCount(0);
 	});
 
-	test('list panel opens via search input focus and shows nearby merchants', async ({ page }) => {
+	test('list panel opens via the search facade and shows nearby merchants', async ({ page }) => {
 		// Desktop viewport
 		await page.setViewportSize({ width: 1280, height: 720 });
 
@@ -62,9 +65,9 @@ test.describe('Merchant List Panel', () => {
 		await expect(listPanel).not.toBeVisible();
 
 		// Click on search input to open panel
-		const searchInput = page.getByRole('searchbox', { name: /search for bitcoin merchants/i });
-		await expect(searchInput).toBeVisible({ timeout: 15000 });
-		await searchInput.click();
+		const searchFacade = page.getByRole('button', { name: /search places/i });
+		await expect(searchFacade).toBeVisible({ timeout: 15000 });
+		await searchFacade.click();
 
 		// List panel should now be visible with the nearby browse list (empty
 		// input → nearby), so merchant rows appear
@@ -93,9 +96,9 @@ test.describe('Merchant List Panel', () => {
 		await waitForMarkersToLoad(page);
 
 		// Click on search input to open list panel
-		const searchInput = page.getByRole('searchbox', { name: /search for bitcoin merchants/i });
-		await expect(searchInput).toBeVisible({ timeout: 15000 });
-		await searchInput.click();
+		const searchFacade = page.getByRole('button', { name: /search places/i });
+		await expect(searchFacade).toBeVisible({ timeout: 15000 });
+		await searchFacade.click();
 
 		// Wait for list panel to appear
 		const listPanel = page.locator('[role="complementary"][aria-label="Merchant list"]');
@@ -168,6 +171,16 @@ test.describe('Merchant List Panel', () => {
 			timeout: 5000
 		});
 		await expect(listPanel).toContainText(/nearby/);
+
+		// The pill renders inside the button but must stay out of its accessible
+		// name: voice control selects elements by the name it announces, and a name
+		// that shifted with the nearby count would be unusable. Exact match, so a
+		// pill leaking back in ("Search places... 14 nearby") fails here.
+		await expect(
+			listPanel.getByRole('button', { name: 'Search places...', exact: true })
+		).toBeVisible();
+		// The count is still announced, as a description rather than a name.
+		await expect(listPanel.locator('#search-facade-nearby-count')).toHaveText(/nearby/);
 	});
 
 	test('mobile: selecting merchant collapses sheet and opens drawer', async ({ page }) => {
@@ -274,10 +287,10 @@ test.describe('Merchant List Panel', () => {
 		// Wait for markers to load
 		await waitForMarkersToLoad(page);
 
-		// Open the panel via the search input
-		const searchInput = page.getByRole('searchbox', { name: /search for bitcoin merchants/i });
-		await expect(searchInput).toBeVisible({ timeout: 15000 });
-		await searchInput.click();
+		// Open the panel via the search facade
+		const searchFacade = page.getByRole('button', { name: /search places/i });
+		await expect(searchFacade).toBeVisible({ timeout: 15000 });
+		await searchFacade.click();
 
 		const listPanel = page.locator('[role="complementary"][aria-label="Merchant list"]');
 		await expect(listPanel).toBeVisible({ timeout: 10000 });
@@ -329,9 +342,9 @@ test.describe('Merchant List Panel', () => {
 		await expect(page.getByRole('button', { name: 'Zoom in' })).toBeVisible();
 		await waitForMarkersToLoad(page);
 
-		const searchInput = page.getByRole('searchbox', { name: /search for bitcoin merchants/i });
-		await expect(searchInput).toBeVisible({ timeout: 15000 });
-		await searchInput.click();
+		const searchFacade = page.getByRole('button', { name: /search places/i });
+		await expect(searchFacade).toBeVisible({ timeout: 15000 });
+		await searchFacade.click();
 
 		const listPanel = page.locator('[role="complementary"][aria-label="Merchant list"]');
 		await expect(listPanel).toBeVisible({ timeout: 10000 });
@@ -389,9 +402,9 @@ test.describe('Merchant List Panel', () => {
 		await expect(page.getByRole('button', { name: 'Zoom in' })).toBeVisible();
 		await waitForMarkersToLoad(page);
 
-		const searchInput = page.getByRole('searchbox', { name: /search for bitcoin merchants/i });
-		await expect(searchInput).toBeVisible({ timeout: 15000 });
-		await searchInput.click();
+		const searchFacade = page.getByRole('button', { name: /search places/i });
+		await expect(searchFacade).toBeVisible({ timeout: 15000 });
+		await searchFacade.click();
 
 		const listPanel = page.locator('[role="complementary"][aria-label="Merchant list"]');
 		await expect(listPanel).toBeVisible({ timeout: 10000 });
@@ -420,9 +433,9 @@ test.describe('Merchant List Panel', () => {
 		expect(await page.getByText(/search temporarily unavailable/i).count()).toBe(0);
 	});
 
-	// Focusing the desktop floating bar opens the panel, which unmounts the bar
-	// mid-focus and drops focus to <body>. The panel's own input has to pick it
-	// up, or the click appears to do nothing and typing goes nowhere.
+	// Activating the desktop facade opens the panel, which unmounts the facade.
+	// The panel's own input has to pick focus up, or the click appears to do
+	// nothing and typing goes nowhere.
 	test('desktop: focus moves to the panel search input when the panel opens', async ({ page }) => {
 		await page.setViewportSize({ width: 1280, height: 720 });
 
@@ -430,9 +443,9 @@ test.describe('Merchant List Panel', () => {
 		await expect(page.getByRole('button', { name: 'Zoom in' })).toBeVisible();
 		await waitForMarkersToLoad(page);
 
-		const searchInput = page.getByRole('searchbox', { name: /search for bitcoin merchants/i });
-		await expect(searchInput).toBeVisible({ timeout: 15000 });
-		await searchInput.click();
+		const searchFacade = page.getByRole('button', { name: /search places/i });
+		await expect(searchFacade).toBeVisible({ timeout: 15000 });
+		await searchFacade.click();
 
 		const listPanel = page.locator('[role="complementary"][aria-label="Merchant list"]');
 		await expect(listPanel).toBeVisible({ timeout: 10000 });
@@ -444,6 +457,37 @@ test.describe('Merchant List Panel', () => {
 		// ...so a single click is enough to start typing. Stay under the 3-char
 		// search threshold: this test stubs no routes, and a dispatched query would
 		// hit the real API and log a console error on failure.
+		await page.keyboard.type('ab');
+		await expect(panelInput).toHaveValue('ab');
+	});
+
+	// The facade is a button, not a searchbox, so keyboard users reach it with Tab
+	// and open it with Enter. Focus must still end up in the panel's real input,
+	// otherwise a keyboard user is stranded on an element that no longer exists.
+	test('desktop: the search facade opens with the keyboard and lands focus in the input', async ({
+		page
+	}) => {
+		await page.setViewportSize({ width: 1280, height: 720 });
+
+		await page.goto('/map#17/42.2762511/42.7024218', { waitUntil: 'load' });
+		await expect(page.getByRole('button', { name: 'Zoom in' })).toBeVisible();
+		await waitForMarkersToLoad(page);
+
+		const searchFacade = page.getByRole('button', { name: /search places/i });
+		await expect(searchFacade).toBeVisible({ timeout: 15000 });
+
+		await searchFacade.focus();
+		await expect(searchFacade).toBeFocused();
+		await page.keyboard.press('Enter');
+
+		const listPanel = page.locator('[role="complementary"][aria-label="Merchant list"]');
+		await expect(listPanel).toBeVisible({ timeout: 10000 });
+
+		const panelInput = listPanel.locator('input[type="search"]');
+		await expect(panelInput).toBeFocused();
+
+		// Stay under the 3-char search threshold: no route stub, so a dispatched
+		// query would hit the real API.
 		await page.keyboard.type('ab');
 		await expect(panelInput).toHaveValue('ab');
 	});
@@ -481,25 +525,28 @@ test.describe('Merchant List Panel', () => {
 		// Wait for markers to load
 		await waitForMarkersToLoad(page);
 
-		// Floating search bar should be visible
-		const floatingSearchInput = page.getByRole('searchbox', {
-			name: /search for bitcoin merchants/i
-		});
-		await expect(floatingSearchInput).toBeVisible({ timeout: 15000 });
+		// Floating search facade should be visible, and it is the only search
+		// surface — no real input exists while the panel is closed. Assert the
+		// invariant with a CSS locator, not getByRole('searchbox'): role locators
+		// skip hidden elements, so they'd pass on an input that is mounted but
+		// hidden — exactly the change someone might make to skip the tick().
+		const realInput = page.locator('input[type="search"]');
+		const searchFacade = page.getByRole('button', { name: /search places/i });
+		await expect(searchFacade).toBeVisible({ timeout: 15000 });
+		await expect(realInput).toHaveCount(0);
 
 		// Open the list panel
-		await floatingSearchInput.click();
+		await searchFacade.click();
 
 		// List panel should be visible
 		const listPanel = page.locator('[role="complementary"][aria-label="Merchant list"]');
 		await expect(listPanel).toBeVisible({ timeout: 10000 });
 
-		// The floating bar unmounts when the panel opens — the panel renders its
-		// own input in the same slot. Both share the accessible name, so assert
-		// there's exactly one search box now and it lives inside the panel.
-		const searchboxes = page.getByRole('searchbox', { name: /search for bitcoin merchants/i });
-		await expect(searchboxes).toHaveCount(1);
+		// The facade unmounts when the panel opens and the panel renders the real
+		// input in the same slot: exactly one search box, and it lives in the panel.
+		await expect(realInput).toHaveCount(1);
 		await expect(listPanel.locator('input[type="search"]')).toBeVisible();
+		await expect(searchFacade).toHaveCount(0);
 
 		// Close the panel using the close button
 		const closeButton = listPanel.getByRole('button', { name: /close merchant list/i });
@@ -508,7 +555,8 @@ test.describe('Merchant List Panel', () => {
 		// Panel should close
 		await expect(listPanel).not.toBeVisible({ timeout: 5000 });
 
-		// Floating search bar reappears (the search box is outside the panel again)
-		await expect(floatingSearchInput).toBeVisible({ timeout: 5000 });
+		// Floating facade reappears and the real input is gone again
+		await expect(searchFacade).toBeVisible({ timeout: 5000 });
+		await expect(realInput).toHaveCount(0);
 	});
 });

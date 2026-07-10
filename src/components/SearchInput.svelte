@@ -4,7 +4,6 @@ import Icon from "$components/Icon.svelte";
 export let value: string = "";
 export let placeholder: string = "";
 export let ariaLabel: string = "Search";
-export let rounded: boolean = false;
 // Filled-field variant: gives the input a grey rounded surface so it reads
 // clearly as a tappable search field (used inside the merchant list panel)
 export let filled: boolean = false;
@@ -34,7 +33,6 @@ export function focus() {
 		{placeholder}
 		aria-label={ariaLabel}
 		class="w-full border-0 py-3 pr-10 pl-10 text-base text-primary outline-none placeholder:text-gray-400 dark:text-white dark:placeholder:text-white/50 [&::-webkit-search-cancel-button]:hidden
-			{rounded ? 'rounded-lg' : ''}
 			{filled ? 'rounded-xl bg-gray-100 dark:bg-white/5' : 'bg-transparent'}"
 	/>
 	<!-- pointer-events-none so passive content (count pill, spinner) doesn't
