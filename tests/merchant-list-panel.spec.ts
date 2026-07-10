@@ -354,6 +354,50 @@ test.describe('Merchant List Panel', () => {
 		await expect(panelInput).toHaveValue('kiosk hamburg');
 	});
 
+	// Focusing the desktop floating bar opens the panel, which unmounts the bar
+	// mid-focus and drops focus to <body>. The panel's own input has to pick it
+	// up, or the click appears to do nothing and typing goes nowhere.
+	test('desktop: focus moves to the panel search input when the panel opens', async ({ page }) => {
+		await page.setViewportSize({ width: 1280, height: 720 });
+
+		await page.goto('/map#17/42.2762511/42.7024218', { waitUntil: 'load' });
+		await expect(page.getByRole('button', { name: 'Zoom in' })).toBeVisible();
+		await waitForMarkersToLoad(page);
+
+		const searchInput = page.getByRole('searchbox', { name: /search for bitcoin merchants/i });
+		await expect(searchInput).toBeVisible({ timeout: 15000 });
+		await searchInput.click();
+
+		const listPanel = page.locator('[role="complementary"][aria-label="Merchant list"]');
+		await expect(listPanel).toBeVisible({ timeout: 10000 });
+
+		// The panel's input, not <body>, holds focus after the swap
+		const panelInput = listPanel.locator('input[type="search"]');
+		await expect(panelInput).toBeFocused();
+
+		// ...so a single click is enough to start typing
+		await page.keyboard.type('abc');
+		await expect(panelInput).toHaveValue('abc');
+	});
+
+	// The mobile peek facade is a button, and tapping it must not focus the real
+	// input — an autofocus there raises the on-screen keyboard over the list.
+	test('mobile: opening the sheet does not focus the search input', async ({ page }) => {
+		await page.setViewportSize({ width: 375, height: 667 });
+
+		await page.goto('/map#17/42.2762511/42.7024218', { waitUntil: 'load' });
+		await expect(page.getByRole('button', { name: 'Zoom in' })).toBeVisible();
+		await waitForMarkersToLoad(page);
+
+		const listPanel = page.locator('[role="complementary"][aria-label="Merchant list"]');
+		await expect(listPanel).toBeVisible({ timeout: 15000 });
+		await listPanel.getByRole('button', { name: /search places/i }).click();
+
+		const panelInput = listPanel.locator('input[type="search"]');
+		await expect(panelInput).toBeVisible({ timeout: 5000 });
+		await expect(panelInput).not.toBeFocused();
+	});
+
 	test('panel can be closed and floating search bar reappears', async ({ page }) => {
 		// Desktop viewport
 		await page.setViewportSize({ width: 1280, height: 720 });

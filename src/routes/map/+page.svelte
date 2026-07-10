@@ -11,7 +11,7 @@ import type {
 	Map as MapLibreMap,
 	Marker,
 } from "maplibre-gl";
-import { onDestroy, onMount } from "svelte";
+import { onDestroy, onMount, tick } from "svelte";
 import { get } from "svelte/store";
 
 import CommunityRail from "$components/CommunityRail.svelte";
@@ -105,6 +105,9 @@ export let data: PageData;
 // mobile search sheet and the desktop floating bar derive from one value so
 // a viewport resize can never leave zero or two search surfaces
 const isMobileLayout = browser && window.innerWidth < BREAKPOINTS.md;
+
+// Lets the floating search bar hand focus to the panel's input as it unmounts
+let merchantListPanel: MerchantListPanel;
 
 // "Boosted locations only" map filter (?boosts=true). The tools modal sets it
 // via a full page reload, so it's constant for the session; it narrows both the
@@ -2013,9 +2016,16 @@ onDestroy(() => {
 	<div class="pointer-events-none absolute top-3 left-3 z-[1000]">
 		<MapSearchBar
 			onSearch={handlePanelSearch}
-			onFocus={() => {
+			onFocus={async () => {
 				merchantList.open();
 				updateMerchantList({ force: true });
+				// Opening the panel unmounts this bar mid-focus, so focus falls to
+				// <body> and the click looks like it did nothing. Wait for the panel's
+				// input to mount, then hand focus over. Desktop only by construction:
+				// MapSearchBar doesn't render on mobile, where the sheet opens from a
+				// button facade so the on-screen keyboard stays down.
+				await tick();
+				merchantListPanel?.focusSearchInput();
 			}}
 			nearbyCount={$merchantList.totalCount}
 		/>
@@ -2023,6 +2033,7 @@ onDestroy(() => {
 {/if}
 
 <MerchantListPanel
+	bind:this={merchantListPanel}
 	onPanToNearbyMerchant={panToNearbyMerchant}
 	onZoomToSearchResult={zoomToSearchResult}
 	onZoomToNearbyLevel={zoomToNearbyLevel}

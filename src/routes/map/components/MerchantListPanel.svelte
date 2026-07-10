@@ -203,6 +203,14 @@ onMount(() => {
 // Reference for search input component
 let searchInputComponent: SearchInput;
 
+// Called by the page after the desktop floating bar hands the panel over: that
+// bar unmounts as it opens the panel, so focus would otherwise land on <body>.
+// Deliberately not called on mobile — the sheet opens from a button facade, and
+// focusing the real input there raises the on-screen keyboard over the list.
+export function focusSearchInput() {
+	searchInputComponent?.focus();
+}
+
 // Body scroll lock state for mobile (prevents iOS background scroll)
 let scrollLockActive = false;
 
