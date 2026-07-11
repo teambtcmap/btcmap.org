@@ -43,6 +43,7 @@
 		"noResultsFor": "Keine Ergebnisse für \"{query}\"",
 		"prompt": "Suche nach Händlern bei Namen",
 		"resultsCount": "{count} Ergebnis(se)",
+		"resultsCountOf": "{shown} von {total} Ergebnis(se)",
 		"showingNearest": "Zeige nächste {count}",
 		"zoomIn": "Vergrößern, um Liste zu sehen",
 		"zoomInDetail": "Die Händlerliste zeigt Orte bei stärkerer Vergrößerung",

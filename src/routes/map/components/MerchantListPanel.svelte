@@ -631,17 +631,24 @@ onDestroy(() => {
 						{:else if searchResults.length === 0}
 							{$_('search.prompt')}
 						{:else if selectedCategory !== 'all' && filteredSearchResults.length !== searchResults.length}
-							{filteredSearchResults.length} of {searchResults.length} result{searchResults.length !==
-							1
-								? 's'
-								: ''}
+							{$_('search.resultsCountOf', {
+								values: {
+									shown: filteredSearchResults.length,
+									total: searchResults.length
+								}
+							})}
 						{:else if searchTotal > searchResults.length}
 							<!-- The API caps how many rows it returns, so a broad query matches
 							     far more than we can show. Report the real total rather than
 							     passing the truncated slice off as the whole result set. -->
-							{searchResults.length} of {searchTotal.toLocaleString()} results
+							{$_('search.resultsCountOf', {
+								values: {
+									shown: searchResults.length,
+									total: searchTotal.toLocaleString()
+								}
+							})}
 						{:else}
-							{searchResults.length} result{searchResults.length !== 1 ? 's' : ''}
+							{$_('search.resultsCount', { values: { count: searchResults.length } })}
 						{/if}
 					{:else if showZoomInMessage && !isLoadingList}
 						<!-- Loading spinner takes precedence so a stale count-only state

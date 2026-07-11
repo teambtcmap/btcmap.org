@@ -43,6 +43,7 @@
 		"noResultsFor": "Aucun résultat trouvé pour « {query} »",
 		"prompt": "Rechercher des commerces par nom",
 		"resultsCount": "{count} résultat(s)",
+		"resultsCountOf": "{shown} sur {total} résultat(s)",
 		"showingNearest": "Affichage des {count} plus proches",
 		"zoomIn": "Zoomez pour voir la liste",
 		"zoomInDetail": "La liste des commerces affiche les lieux lorsque vous zoomez davantage",
