@@ -27,7 +27,7 @@ import { filterPlacesByRecency } from "$lib/verification";
 
 export type MerchantListMode = "nearby" | "search";
 
-export interface MerchantListState {
+export type MerchantListState = {
 	isOpen: boolean;
 	merchants: Place[];
 	totalCount: number;
@@ -52,7 +52,7 @@ export interface MerchantListState {
 	categoryCounts: CategoryCounts;
 	// "Verified within N years" filter (null = Any/off); persisted to localStorage
 	verifiedWithinYears: VerifiedFilterYears;
-}
+};
 
 const initialState: MerchantListState = {
 	isOpen: false,
