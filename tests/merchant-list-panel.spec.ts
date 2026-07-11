@@ -5,6 +5,19 @@ import {
 	checkForConsoleErrors
 } from './helpers';
 
+// Match on the decoded `name` param rather than the raw URL. The search request
+// also carries lat/lon now, so the URL no longer ends at the name, and
+// URLSearchParams encodes the space in "kiosk hamburg" as "+" rather than "%20".
+// Comparing the decoded param is immune to both, and still distinguishes "kiosk"
+// from "kiosk hamburg" exactly.
+const searchNameIs = (url: string, name: string) =>
+	new URL(url).searchParams.get('name') === name;
+
+// The search proxy returns { places, total, hasMore } — `total` is the server's
+// full match count, which can exceed the rows it returned.
+const searchBody = (places: unknown[] = [], total = places.length) =>
+	JSON.stringify({ places, total, hasMore: total > places.length });
+
 test.describe('Merchant List Panel', () => {
 	// Collect console errors during tests
 	test.beforeEach(async ({ page }) => {
@@ -335,7 +348,11 @@ test.describe('Merchant List Panel', () => {
 		// and keeps the real search API out of the test.
 		await page.route('**/api/search/places*', async (route) => {
 			await new Promise((resolve) => setTimeout(resolve, 600));
-			await route.fulfill({ status: 200, contentType: 'application/json', body: '[]' });
+			await route.fulfill({
+				status: 200,
+				contentType: 'application/json',
+				body: searchBody()
+			});
 		});
 
 		await page.goto('/map#17/42.2762511/42.7024218', { waitUntil: 'load' });
@@ -351,8 +368,8 @@ test.describe('Merchant List Panel', () => {
 		const panelInput = listPanel.locator('input[type="search"]');
 
 		// Arm the waiters before typing so the dispatch can't be missed. Match the
-		// first word exactly — "kiosk%20hamburg" also contains "kiosk".
-		const isFirstWord = (url: string) => url.endsWith('/api/search/places?name=kiosk');
+		// first word exactly — a substring test would also match "kiosk hamburg".
+		const isFirstWord = (url: string) => searchNameIs(url, 'kiosk');
 		const firstWordRequest = page.waitForRequest((r) => isFirstWord(r.url()), {
 			timeout: 15000
 		});
@@ -374,7 +391,9 @@ test.describe('Merchant List Panel', () => {
 		// The next search dispatches 300ms after the last keystroke. Awaiting its
 		// response proves the stale one was fully processed, and lets the stubbed
 		// route finish instead of being torn down mid-sleep.
-		await page.waitForResponse((r) => r.url().includes('kiosk%20hamburg'), { timeout: 15000 });
+		await page.waitForResponse((r) => searchNameIs(r.url(), 'kiosk hamburg'), {
+			timeout: 15000
+		});
 
 		await expect(panelInput).toHaveValue('kiosk hamburg');
 	});
@@ -391,11 +410,15 @@ test.describe('Merchant List Panel', () => {
 		await page.route('**/api/search/places*', async (route) => {
 			const url = route.request().url();
 			await new Promise((resolve) => setTimeout(resolve, 600));
-			if (url.endsWith('name=kiosk')) {
+			if (searchNameIs(url, 'kiosk')) {
 				await route.fulfill({ status: 502, contentType: 'text/plain', body: 'upstream down' });
 				return;
 			}
-			await route.fulfill({ status: 200, contentType: 'application/json', body: '[]' });
+			await route.fulfill({
+				status: 200,
+				contentType: 'application/json',
+				body: searchBody()
+			});
 		});
 
 		await page.goto('/map#17/42.2762511/42.7024218', { waitUntil: 'load' });
@@ -410,7 +433,7 @@ test.describe('Merchant List Panel', () => {
 		await expect(listPanel).toBeVisible({ timeout: 10000 });
 		const panelInput = listPanel.locator('input[type="search"]');
 
-		const isFirstWord = (url: string) => url.endsWith('/api/search/places?name=kiosk');
+		const isFirstWord = (url: string) => searchNameIs(url, 'kiosk');
 		const firstWordRequest = page.waitForRequest((r) => isFirstWord(r.url()), {
 			timeout: 15000
 		});
@@ -423,7 +446,9 @@ test.describe('Merchant List Panel', () => {
 		await panelInput.pressSequentially(' hamburg', { delay: 100 });
 
 		await firstWordResponse;
-		await page.waitForResponse((r) => r.url().includes('kiosk%20hamburg'), { timeout: 15000 });
+		await page.waitForResponse((r) => searchNameIs(r.url(), 'kiosk hamburg'), {
+			timeout: 15000
+		});
 
 		// The abandoned 502 is swallowed: input intact, no error toast. (The
 		// afterEach console-error check also catches its console.error.)
