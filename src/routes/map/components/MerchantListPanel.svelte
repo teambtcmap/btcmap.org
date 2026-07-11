@@ -309,6 +309,7 @@ $: nearbyCountLabel =
 		? $_("search.nearbyCount", { values: { count: pillCount } })
 		: "";
 $: searchResults = $merchantList.searchResults;
+$: searchTotal = $merchantList.searchTotal;
 $: isSearching = $merchantList.isSearching;
 $: searchQuery = $merchantList.searchQuery;
 $: selectedCategory = $merchantList.selectedCategory;
@@ -634,6 +635,11 @@ onDestroy(() => {
 							1
 								? 's'
 								: ''}
+						{:else if searchTotal > searchResults.length}
+							<!-- The API caps how many rows it returns, so a broad query matches
+							     far more than we can show. Report the real total rather than
+							     passing the truncated slice off as the whole result set. -->
+							{searchResults.length} of {searchTotal.toLocaleString()} results
 						{:else}
 							{searchResults.length} result{searchResults.length !== 1 ? 's' : ''}
 						{/if}

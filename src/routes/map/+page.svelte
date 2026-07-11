@@ -563,7 +563,11 @@ const executeSearch = async (query: string) => {
 	// and the search box is reachable before that.
 	const searchParams = new URLSearchParams({ name: trimmed });
 	if (map) {
-		const center = map.getCenter();
+		// wrap() normalises longitude into [-180, 180]. Panning across the
+		// antimeridian leaves getCenter().lng unbounded (e.g. 190), and the API
+		// would take that verbatim as the distance origin, ranking by proximity to
+		// a point that doesn't exist.
+		const center = map.getCenter().wrap();
 		searchParams.set("lat", String(center.lat));
 		searchParams.set("lon", String(center.lng));
 	}
@@ -573,7 +577,10 @@ const executeSearch = async (query: string) => {
 			signal: searchAbortController.signal,
 		});
 		if (!response.ok) throw new Error("Search API error");
-		const results: Place[] = await response.json();
+		// `total` is the server's full match count, which can exceed the rows it
+		// returned — the panel reports the gap rather than hiding the truncation.
+		const { places: results, total }: { places: Place[]; total: number } =
+			await response.json();
 		// The panel/sheet may have been closed while we were awaiting the
 		// response (abort only rejects the fetch, not the json() window). Don't
 		// let a late result reopen it.
@@ -585,7 +592,7 @@ const executeSearch = async (query: string) => {
 		// back into searchQuery, which feeds the search input's `value` prop —
 		// applying it would rewrite the input mid-word and reset the caret.
 		if (get(merchantList).searchQuery !== query) return;
-		merchantList.openWithSearchResults(query, results);
+		merchantList.openWithSearchResults(query, results, total);
 	} catch (error) {
 		if (error instanceof Error && error.name === "AbortError") return;
 		// Same staleness check as the success path. The user has typed past this

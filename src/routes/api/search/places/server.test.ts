@@ -29,13 +29,40 @@ describe("GET /api/search/places", () => {
 					icon: "local_cafe",
 				},
 			],
+			total_count: 1,
+			has_more: false,
 		});
 
 		const res = await call("?name=hamburg", fetchImpl);
 
-		expect(await res.json()).toEqual([
-			{ id: 1, name: "Kaffeeklatsch", lat: 53.5, lon: 9.9, icon: "local_cafe" },
-		]);
+		expect(await res.json()).toEqual({
+			places: [
+				{
+					id: 1,
+					name: "Kaffeeklatsch",
+					lat: 53.5,
+					lon: 9.9,
+					icon: "local_cafe",
+				},
+			],
+			total: 1,
+			hasMore: false,
+		});
+	});
+
+	it("passes the server's true total through, not the truncated row count", async () => {
+		// The API caps `limit`, so a broad query returns far fewer rows than it
+		// matched. The panel needs the real total to avoid labelling a truncated
+		// slice as the whole result set.
+		const fetchImpl = apiResponse({
+			results: [{ type: "place", id: 1, name: "A" }],
+			total_count: 6171,
+			has_more: true,
+		});
+
+		const res = await call("?name=str", fetchImpl);
+
+		expect(await res.json()).toMatchObject({ total: 6171, hasMore: true });
 	});
 
 	it("calls the omnisearch endpoint scoped to places", async () => {
@@ -77,6 +104,6 @@ describe("GET /api/search/places", () => {
 
 	it("tolerates a response with no results array", async () => {
 		const res = await call("?name=hamburg", apiResponse({}));
-		expect(await res.json()).toEqual([]);
+		expect(await res.json()).toEqual({ places: [], total: 0, hasMore: false });
 	});
 });

@@ -45,12 +45,21 @@ export const GET: RequestHandler = async ({ url, fetch }) => {
 
 	const body = (await res.json()) as {
 		results?: ({ type: string } & Record<string, unknown>)[];
+		total_count?: number;
+		has_more?: boolean;
 	};
-	// Drop the discriminator so the response stays exactly Place[], the shape the
-	// map route and merchantListStore already consume.
+	// Drop the discriminator so each row is exactly a Place.
 	const places = (body.results ?? []).map(({ type: _type, ...place }) => place);
 
-	return new Response(JSON.stringify(places), {
-		headers: { "Content-Type": "application/json" },
-	});
+	// The API caps `limit`, so a broad query ("str" matches every addr:street)
+	// returns far fewer rows than it matched. Pass the true total through instead
+	// of letting the panel present a truncated slice as the whole result set.
+	return new Response(
+		JSON.stringify({
+			places,
+			total: body.total_count ?? places.length,
+			hasMore: body.has_more ?? false,
+		}),
+		{ headers: { "Content-Type": "application/json" } },
+	);
 };
