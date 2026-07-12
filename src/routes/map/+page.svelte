@@ -629,10 +629,28 @@ const handlePanelSearch = (query: string) => {
 	debouncedPanelSearch.cancel();
 	searchAbortController?.abort();
 	if (get(merchantList).mode !== "nearby") {
+		// The search → nearby watcher below refreshes the list for the current
+		// viewport; no need to also call updateMerchantList here.
 		merchantList.setMode("nearby");
-		updateMerchantList({ force: true });
 	}
 };
+
+// The map moves while search mode is active — clicking a result flies to it. But
+// updateMerchantList deliberately skips refreshing in search mode (setMerchants
+// also rewrites categoryCounts/selectedCategory, which the search panel owns), and
+// close() keeps the old merchant data so the count stays on the collapsed facade.
+// So on returning to nearby, the list and its "N nearby" count still describe
+// wherever the user was *before* searching: search Hamburg from Helsinki, click a
+// result, close the panel, and it still reports Helsinki's count over a Hamburg
+// map until the next pan. Refresh once on that transition. Covers every exit —
+// clearing the input, closing the panel, exitSearchMode.
+let lastListMode = get(merchantList).mode;
+$: {
+	const listMode = $merchantList.mode;
+	const leftSearch = lastListMode === "search" && listMode === "nearby";
+	lastListMode = listMode;
+	if (leftSearch) updateMerchantList({ force: true });
+}
 
 // Closing/collapsing the list discards any pending or in-flight worldwide
 // search — otherwise a late response calls openSearchMode/openWithSearchResults
