@@ -662,6 +662,7 @@
 		"placeholderPlaces": "Търсене на места...",
 		"prompt": "Търсете търговци по име",
 		"resultsCount": "{count} резултат(а)",
+		"resultsCountOf": "{shown} от {total} резултат(а)",
 		"searching": "Търсене...",
 		"showAll": "Покажи всички",
 		"showingNearest": "Показване на най-близките {count}",

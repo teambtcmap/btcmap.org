@@ -128,6 +128,7 @@
 		"noResultsFor": "Er zijn geen resultaten gevonden voor \"{query}\"",
 		"prompt": "Zoek ondernemers op naam",
 		"resultsCount": "{count} resulta(a)t(en)",
+		"resultsCountOf": "{shown} van {total} resulta(a)t(en)",
 		"showingNearest": "Toont dichtstbijzijnde {count}",
 		"zoomIn": "Zoom in om de lijst te zien",
 		"zoomInDetail": "De lijst met ondernemers toont locaties als je verder inzoomt.",

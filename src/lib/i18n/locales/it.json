@@ -128,6 +128,7 @@
 		"noResultsFor": "Nessun risultato trovato per \"{query}\"",
 		"prompt": "Cerca commercianti per nome",
 		"resultsCount": "{count} risultati",
+		"resultsCountOf": "{shown} di {total} risultati",
 		"showingNearest": "Mostrando i {count} più vicini",
 		"zoomIn": "Ingrandisci per vedere la lista",
 		"zoomInDetail": "La lista dei commercianti mostra le posizioni quando si esegue uno zoom più ravvicinato",

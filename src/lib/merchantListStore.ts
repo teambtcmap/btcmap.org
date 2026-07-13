@@ -27,7 +27,7 @@ import { filterPlacesByRecency } from "$lib/verification";
 
 export type MerchantListMode = "nearby" | "search";
 
-export interface MerchantListState {
+export type MerchantListState = {
 	isOpen: boolean;
 	merchants: Place[];
 	totalCount: number;
@@ -42,13 +42,17 @@ export interface MerchantListState {
 	// Search state
 	searchQuery: string;
 	searchResults: Place[];
+	// Total matches on the server. The API caps how many it returns, so this can
+	// exceed searchResults.length; the panel surfaces the gap rather than
+	// presenting a truncated slice as the whole result set.
+	searchTotal: number;
 	isSearching: boolean;
 	// Category filter
 	selectedCategory: CategoryKey;
 	categoryCounts: CategoryCounts;
 	// "Verified within N years" filter (null = Any/off); persisted to localStorage
 	verifiedWithinYears: VerifiedFilterYears;
-}
+};
 
 const initialState: MerchantListState = {
 	isOpen: false,
@@ -60,6 +64,7 @@ const initialState: MerchantListState = {
 	mode: "nearby",
 	searchQuery: "",
 	searchResults: [],
+	searchTotal: 0,
 	isSearching: false,
 	selectedCategory: "all",
 	categoryCounts: createEmptyCategoryCounts(),
@@ -181,6 +186,7 @@ function createMerchantListStore() {
 				mode: "nearby",
 				searchQuery: "",
 				searchResults: [],
+				searchTotal: 0,
 				isSearching: false,
 			}));
 		},
@@ -396,14 +402,23 @@ function createMerchantListStore() {
 			}
 		},
 
-		// Open panel with search results (sorted with boosted first)
-		openWithSearchResults(query: string, results: Place[]) {
-			const sortedResults = sortMerchants(
-				results,
-				undefined,
-				undefined,
-				get(userLocation).location,
-			);
+		// Open panel with search results (boosted first, then the server's order)
+		openWithSearchResults(
+			query: string,
+			results: Place[],
+			total: number = results.length,
+		) {
+			// The server already ordered these by relevance (exact name match, then
+			// prefix, then substring, then a hit on any other tag) with proximity to
+			// the map centre as the tiebreak. Preserve that — re-sorting by distance
+			// or alphabetically, as the nearby list does, would discard it and bury
+			// an exact name match. Only boosted places are promoted above it.
+			// Array.sort is stable, so equal-boost rows keep the server's order.
+			const sortedResults = [...results].sort((a, b) => {
+				if (isBoosted(a) && !isBoosted(b)) return -1;
+				if (!isBoosted(a) && isBoosted(b)) return 1;
+				return 0;
+			});
 			// Counts reflect the recency window; the panel applies the same
 			// recency + category filter to what it renders (filteredSearchResults).
 			const { verifiedWithinYears } = get(store);
@@ -416,6 +431,9 @@ function createMerchantListStore() {
 				mode: "search",
 				searchQuery: query,
 				searchResults: sortedResults,
+				// Total matches on the server, which can exceed what it returned —
+				// the panel shows "N of TOTAL" so truncation isn't silent.
+				searchTotal: total,
 				isSearching: false,
 				categoryCounts,
 			}));
@@ -446,6 +464,7 @@ function createMerchantListStore() {
 				...resetCategoryState(state),
 				searchQuery: "",
 				searchResults: [],
+				searchTotal: 0,
 				isSearching: false,
 			}));
 		},
@@ -458,6 +477,7 @@ function createMerchantListStore() {
 				mode: "nearby",
 				searchQuery: "",
 				searchResults: [],
+				searchTotal: 0,
 				isSearching: false,
 			}));
 		},

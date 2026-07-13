@@ -43,6 +43,7 @@
 		"noResultsFor": "No se encontraron resultados para \"{query}\"",
 		"prompt": "Buscar comercios por nombre",
 		"resultsCount": "{count} resultado(s)",
+		"resultsCountOf": "{shown} de {total} resultado(s)",
 		"showingNearest": "Mostrando los {count} más cercanos",
 		"zoomIn": "Acercar para ver la lista",
 		"zoomInDetail": "La lista de comercios muestra ubicaciones cuando se acerca más",

@@ -128,6 +128,7 @@
 		"noResultsFor": "No results found for \"{query}\"",
 		"prompt": "Search for merchants by name",
 		"resultsCount": "{count} result(s)",
+		"resultsCountOf": "{shown} of {total} result(s)",
 		"showingNearest": "Showing nearest {count}",
 		"zoomIn": "Zoom in to see list",
 		"zoomInDetail": "The merchant list shows locations when zoomed in closer",

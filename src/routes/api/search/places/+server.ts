@@ -1,10 +1,12 @@
 import { error } from "@sveltejs/kit";
 
 import { API_BASE } from "$lib/api-base";
-import { buildFieldsParam, PLACE_FIELD_SETS } from "$lib/api-fields";
 
 import type { RequestHandler } from "./$types";
 
+// Worldwide free-text search. Backed by /v4/search, which matches every OSM tag
+// value, so a city name finds the places addressed in that city. Scoped to
+// places: the results panel renders a Place[] and cannot display areas.
 export const GET: RequestHandler = async ({ url, fetch }) => {
 	const query = url.searchParams.get("name");
 
@@ -12,13 +14,25 @@ export const GET: RequestHandler = async ({ url, fetch }) => {
 		error(400, "Missing required parameter: name");
 	}
 
-	const fields = buildFieldsParam(PLACE_FIELD_SETS.LIST_ITEM);
+	const params = new URLSearchParams({
+		q: query,
+		type_filter: "place",
+		limit: "100",
+	});
+
+	// Both or neither: the API rejects a lone coordinate. Supplying them lets the
+	// server break relevance ties by proximity, which is what makes `limit`
+	// meaningful for a query like "hamburg" that no place is actually named.
+	const lat = url.searchParams.get("lat");
+	const lon = url.searchParams.get("lon");
+	if (lat && lon) {
+		params.set("lat", lat);
+		params.set("lon", lon);
+	}
 
 	let res: Response;
 	try {
-		res = await fetch(
-			`${API_BASE}/v4/places/search/?name=${encodeURIComponent(query)}&fields=${fields}`,
-		);
+		res = await fetch(`${API_BASE}/v4/search/?${params}`);
 	} catch (err) {
 		console.error("Search API error:", err);
 		error(502, "Search temporarily unavailable");
@@ -29,7 +43,23 @@ export const GET: RequestHandler = async ({ url, fetch }) => {
 		error(res.status, "Search temporarily unavailable");
 	}
 
-	return new Response(JSON.stringify(await res.json()), {
-		headers: { "Content-Type": "application/json" },
-	});
+	const body = (await res.json()) as {
+		results?: ({ type: string } & Record<string, unknown>)[];
+		total_count?: number;
+		has_more?: boolean;
+	};
+	// Drop the discriminator so each row is exactly a Place.
+	const places = (body.results ?? []).map(({ type: _type, ...place }) => place);
+
+	// The API caps `limit`, so a broad query ("str" matches every addr:street)
+	// returns far fewer rows than it matched. Pass the true total through instead
+	// of letting the panel present a truncated slice as the whole result set.
+	return new Response(
+		JSON.stringify({
+			places,
+			total: body.total_count ?? places.length,
+			hasMore: body.has_more ?? false,
+		}),
+		{ headers: { "Content-Type": "application/json" } },
+	);
 };

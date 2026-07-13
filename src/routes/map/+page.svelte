@@ -555,13 +555,32 @@ const executeSearch = async (query: string) => {
 	merchantDrawer.close();
 	merchantList.openSearchMode(true);
 
+	// The server breaks relevance ties by proximity to this point, mirroring the
+	// original client-side search, which ranked purely by distance from the map
+	// centre. Without it, a query like "hamburg" — which no place is named —
+	// leaves every match tied at the lowest rank, and the result cap selects
+	// among them by name length. `map` is undefined until the map initialises,
+	// and the search box is reachable before that.
+	const searchParams = new URLSearchParams({ name: trimmed });
+	if (map) {
+		// wrap() normalises longitude into [-180, 180]. Panning across the
+		// antimeridian leaves getCenter().lng unbounded (e.g. 190), and the API
+		// would take that verbatim as the distance origin, ranking by proximity to
+		// a point that doesn't exist.
+		const center = map.getCenter().wrap();
+		searchParams.set("lat", String(center.lat));
+		searchParams.set("lon", String(center.lng));
+	}
+
 	try {
-		const response = await fetch(
-			`/api/search/places?name=${encodeURIComponent(trimmed)}`,
-			{ signal: searchAbortController.signal },
-		);
+		const response = await fetch(`/api/search/places?${searchParams}`, {
+			signal: searchAbortController.signal,
+		});
 		if (!response.ok) throw new Error("Search API error");
-		const results: Place[] = await response.json();
+		// `total` is the server's full match count, which can exceed the rows it
+		// returned — the panel reports the gap rather than hiding the truncation.
+		const { places: results, total }: { places: Place[]; total: number } =
+			await response.json();
 		// The panel/sheet may have been closed while we were awaiting the
 		// response (abort only rejects the fetch, not the json() window). Don't
 		// let a late result reopen it.
@@ -573,7 +592,7 @@ const executeSearch = async (query: string) => {
 		// back into searchQuery, which feeds the search input's `value` prop —
 		// applying it would rewrite the input mid-word and reset the caret.
 		if (get(merchantList).searchQuery !== query) return;
-		merchantList.openWithSearchResults(query, results);
+		merchantList.openWithSearchResults(query, results, total);
 	} catch (error) {
 		if (error instanceof Error && error.name === "AbortError") return;
 		// Same staleness check as the success path. The user has typed past this
@@ -610,10 +629,28 @@ const handlePanelSearch = (query: string) => {
 	debouncedPanelSearch.cancel();
 	searchAbortController?.abort();
 	if (get(merchantList).mode !== "nearby") {
+		// The search → nearby watcher below refreshes the list for the current
+		// viewport; no need to also call updateMerchantList here.
 		merchantList.setMode("nearby");
-		updateMerchantList({ force: true });
 	}
 };
+
+// The map moves while search mode is active — clicking a result flies to it. But
+// updateMerchantList deliberately skips refreshing in search mode (setMerchants
+// also rewrites categoryCounts/selectedCategory, which the search panel owns), and
+// close() keeps the old merchant data so the count stays on the collapsed facade.
+// So on returning to nearby, the list and its "N nearby" count still describe
+// wherever the user was *before* searching: search Hamburg from Helsinki, click a
+// result, close the panel, and it still reports Helsinki's count over a Hamburg
+// map until the next pan. Refresh once on that transition. Covers every exit —
+// clearing the input, closing the panel, exitSearchMode.
+let lastListMode = get(merchantList).mode;
+$: {
+	const listMode = $merchantList.mode;
+	const leftSearch = lastListMode === "search" && listMode === "nearby";
+	lastListMode = listMode;
+	if (leftSearch) updateMerchantList({ force: true });
+}
 
 // Closing/collapsing the list discards any pending or in-flight worldwide
 // search — otherwise a late response calls openSearchMode/openWithSearchResults
