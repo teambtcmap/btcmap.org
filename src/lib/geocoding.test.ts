@@ -24,6 +24,8 @@ describe("searchAddress", () => {
 			format: "jsonv2",
 			limit: 5,
 			addressdetails: 0,
+			extratags: 1,
+			namedetails: 1,
 			"accept-language": "de",
 		});
 	});
@@ -52,6 +54,51 @@ describe("searchAddress", () => {
 			{ lat: 52.52, lon: 13.405, displayName: "Berlin, Germany" },
 			{ lat: 48.1351, lon: 11.582, displayName: "Munich, Germany" },
 		]);
+	});
+
+	it("enriches results with OSM POI metadata when present", async () => {
+		mockedAxios.get.mockResolvedValueOnce({
+			data: [
+				{
+					lat: "53.0318",
+					lon: "5.6580",
+					display_name: "Kreta, Sneek, Netherlands",
+					name: "Kreta",
+					type: "restaurant",
+					osm_type: "node",
+					osm_id: 42,
+					namedetails: { name: "Kreta" },
+					extratags: {
+						website: "https://kreta.example",
+						phone: "+31 515 123456",
+						opening_hours: "Mo-Su 12:00-22:00",
+					},
+				},
+			],
+		});
+
+		const results = await searchAddress("kreta sneek", "en");
+
+		expect(results[0]).toEqual({
+			lat: 53.0318,
+			lon: 5.658,
+			displayName: "Kreta, Sneek, Netherlands",
+			name: "Kreta",
+			category: "restaurant",
+			website: "https://kreta.example",
+			phone: "+31 515 123456",
+			openingHours: "Mo-Su 12:00-22:00",
+			osmType: "node",
+			osmId: "42",
+		});
+	});
+
+	it("ignores an uninformative type ('yes') for category", async () => {
+		mockedAxios.get.mockResolvedValueOnce({
+			data: [{ lat: "1", lon: "2", display_name: "x", type: "yes" }],
+		});
+		const results = await searchAddress("x", "en");
+		expect(results[0].category).toBeUndefined();
 	});
 
 	it("returns an empty array on empty response", async () => {

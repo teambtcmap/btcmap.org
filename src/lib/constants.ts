@@ -12,6 +12,21 @@ export const GITEA_LABELS = {
 	},
 } as const;
 
+// Name-based labels resolved/created at issue-creation time via createLabel().
+// Using names (instead of hardcoded numeric ids) means these labels do not need
+// to be pre-created in Gitea with a known id — the first submission creates them.
+export const GITEA_LABEL_NAMES = {
+	// Wizard: business with no physical location visitors can go to — online
+	// shops/webshops and services delivered at the customer's place (e.g. a mobile
+	// window cleaner). Stored for a future listing, not shown on the map yet.
+	ONLINE_OR_MOBILE: "online-or-mobile",
+	// Wizard: user reports updated data for a merchant already present on OSM.
+	UPDATE_LOCATION: "update-location",
+	// Applied by a maintainer to green-light an automated OSM push (see
+	// src/routes/api/gitea/webhook). The webhook only acts on issues carrying this label.
+	APPROVED: "osm-approved",
+} as const;
+
 export const POLLING_INTERVAL = 2500;
 export const QR_CODE_SIZE = { mobile: 200, desktop: 275 };
 
