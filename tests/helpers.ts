@@ -58,12 +58,14 @@ export function checkForConsoleErrors(page: Page) {
 		if (error.length <= 2) return false;
 		if (error.includes('Failed to load resource')) return false;
 		if (error.includes('net::ERR_')) return false;
-		// Skip WebGL initialization errors (expected in headless browser)
+		// Skip WebGL initialization errors (expected in headless browser).
+		// maplibre-gl v6 fires webglcontextcreationerror plus a
+		// GPUInitializationError whose message starts "WebGL2 is required
+		// to display this map" — the v5-era strings no longer exist.
 		if (error.includes('webglcontextcreationerror')) return false;
-		if (error.includes('Failed to initialize WebGL')) return false;
-		if (error.includes('Could not create a WebGL context')) return false;
+		if (error.includes('WebGL2 is required')) return false;
+		if (error.includes('GPUInitializationError')) return false;
 		// Skip MapLibre/Leaflet errors related to missing WebGL
-		if (error.includes('_getTransformForUpdate')) return false;
 		if (error.includes("Cannot read properties of undefined (reading 'remove')")) return false;
 		return true;
 	});
