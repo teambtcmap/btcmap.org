@@ -68,6 +68,7 @@ import {
 } from "$lib/map/viewport";
 import { loadCachedView, saveCachedView } from "$lib/map/viewportCache";
 import { hasWebGL } from "$lib/map/webgl";
+import { ensureMapLibreWorkerUrl } from "$lib/map/worker";
 import {
 	MERCHANT_URL_CHANGE_EVENT,
 	parseMerchantHash,
@@ -1131,6 +1132,7 @@ onMount(async () => {
 		return;
 	}
 	const maplibre = await import("maplibre-gl");
+	ensureMapLibreWorkerUrl(maplibre);
 	ensureRtlTextPlugin(maplibre);
 	// User may have navigated away while the dynamic import was in
 	// flight; bail before instantiating against an unmounted container.

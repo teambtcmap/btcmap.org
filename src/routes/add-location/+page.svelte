@@ -23,6 +23,7 @@ import TextLink from "$components/TextLink.svelte";
 import { _, locale } from "$lib/i18n";
 import { ensureRtlTextPlugin } from "$lib/map/rtl";
 import { hasWebGL } from "$lib/map/webgl";
+import { ensureMapLibreWorkerUrl } from "$lib/map/worker";
 import { theme } from "$lib/theme";
 import { errToast, isValidLatitude, isValidLongitude } from "$lib/utils";
 
@@ -114,6 +115,7 @@ async function initializeMap() {
 		return;
 	}
 	const maplibre = await import("maplibre-gl");
+	ensureMapLibreWorkerUrl(maplibre);
 	ensureRtlTextPlugin(maplibre);
 	maplibreRef = maplibre;
 	if (destroyed) return;

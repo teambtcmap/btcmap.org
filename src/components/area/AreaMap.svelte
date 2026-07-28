@@ -24,6 +24,7 @@ import {
 } from "$lib/map/maplibreSprites";
 import { ensureRtlTextPlugin } from "$lib/map/rtl";
 import { hasWebGL } from "$lib/map/webgl";
+import { ensureMapLibreWorkerUrl } from "$lib/map/worker";
 import { theme } from "$lib/theme";
 import type { Grade, Place } from "$lib/types";
 import { getGrade, isBoosted } from "$lib/utils";
@@ -417,6 +418,7 @@ const initializeMap = async () => {
 		return;
 	}
 	const maplibre = await import("maplibre-gl");
+	ensureMapLibreWorkerUrl(maplibre);
 	ensureRtlTextPlugin(maplibre);
 	// Component may have been destroyed while the dynamic import was in
 	// flight (fast navigation away). Bail before binding to a stale
