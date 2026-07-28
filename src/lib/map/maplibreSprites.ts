@@ -194,7 +194,7 @@ export const ensureSpritesForPlaces = (m: MapLibreMap, list: Place[]): void => {
 	}
 };
 
-// 1×1 transparent placeholder so styleimagemissing doesn't spam warnings
+// 1×1 transparent placeholder so missing-image lookups don't spam warnings
 // before composite sprites resolve. Each missing icon name registers the
 // same blank bitmap; once the real sprite is added via addImage(), it
 // replaces this stub.
@@ -208,9 +208,15 @@ export const transparentPixel = (): {
 	data: new Uint8Array([0, 0, 0, 0]),
 });
 
+// v6 replaced the styleimagemissing listener pattern with a single
+// resolver slot per map: the old event is notify-only now, so an
+// addImage inside a listener no longer satisfies the pending image
+// request — unported, every pin would stay missing. Repeat calls just
+// overwrite the slot with an identical resolver, so this stays as
+// idempotent as the old duplicate-tolerant m.on registration.
 export const installPlaceholderHandler = (m: MapLibreMap): void => {
-	m.on("styleimagemissing", (e) => {
-		if (m.hasImage(e.id)) return;
-		m.addImage(e.id, transparentPixel());
+	m.setMissingStyleImageResolver((id) => {
+		if (m.hasImage(id)) return;
+		m.addImage(id, transparentPixel());
 	});
 };
