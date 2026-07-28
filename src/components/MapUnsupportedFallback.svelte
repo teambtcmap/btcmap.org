@@ -1,7 +1,7 @@
 <script lang="ts">
 // Rendered in place of a MapLibre map container when the browser cannot
-// supply a WebGL context. Fills its parent so it matches the map's slot
-// in whatever layout hosts it.
+// supply a WebGL2 context (required since maplibre-gl v6). Fills its
+// parent so it matches the map's slot in whatever layout hosts it.
 </script>
 
 <div
@@ -13,7 +13,7 @@
 		Map unavailable
 	</h2>
 	<p class="max-w-md text-sm text-primary dark:text-white">
-		Your browser doesn't support WebGL, which is required to display the
+		Your browser doesn't support WebGL2, which is required to display the
 		interactive map. Try updating your browser, enabling hardware
 		acceleration, or switching to a recent version of Chrome, Firefox, or
 		Safari.
