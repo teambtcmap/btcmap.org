@@ -22,7 +22,7 @@ jobs:
       - uses: ./.github/actions/setup
         with:
           needs-env: 'true'
-          needs-sync: 'false'
+          needs-sync: 'true'
 
       - name: Cache Playwright browsers
         id: playwright-cache
