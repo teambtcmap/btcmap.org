@@ -494,9 +494,14 @@ function createMerchantListStore() {
 
 		// Set the "verified within N years" filter (null = Any/off) and persist
 		// it. Unlike the category filter, this survives close()/reset and across
-		// sessions, matching the Android setting.
-		setVerifiedFilter(years: VerifiedFilterYears) {
-			storeVerifiedFilter(years);
+		// sessions, matching the Android setting. `persist: false` seeds a
+		// session-only selection (the ?outdated URL param) so a shared link
+		// can't overwrite the visitor's stored preference.
+		setVerifiedFilter(
+			years: VerifiedFilterYears,
+			opts: { persist?: boolean } = {},
+		) {
+			if (opts.persist !== false) storeVerifiedFilter(years);
 			update((state) => ({ ...state, verifiedWithinYears: years }));
 		},
 

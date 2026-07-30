@@ -152,7 +152,8 @@
 		"any": "Tous",
 		"within1Year": "Vérifié il y a moins d'un an",
 		"within2Years": "Vérifié il y a moins de 2 ans",
-		"within3Years": "Vérifié il y a moins de 3 ans"
+		"within3Years": "Vérifié il y a moins de 3 ans",
+		"outdatedOnly": "Lieux obsolètes uniquement"
 	},
 	"payment": {
 		"methods": "Méthodes de paiement",

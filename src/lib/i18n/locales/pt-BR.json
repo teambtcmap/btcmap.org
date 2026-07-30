@@ -152,7 +152,8 @@
 		"any": "Todos",
 		"within1Year": "Verificado no último ano",
 		"within2Years": "Verificado nos últimos 2 anos",
-		"within3Years": "Verificado nos últimos 3 anos"
+		"within3Years": "Verificado nos últimos 3 anos",
+		"outdatedOnly": "Apenas locais desatualizados"
 	},
 	"payment": {
 		"methods": "Métodos de Pagamento",

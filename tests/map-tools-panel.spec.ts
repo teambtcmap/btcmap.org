@@ -21,6 +21,7 @@ test.describe('Map tools panel', () => {
 		// One representative control per section.
 		await expect(dialog.getByRole('radio', { name: 'OpenStreetMap' })).toBeVisible();
 		await expect(dialog.getByRole('radio', { name: 'Any' })).toBeVisible();
+		await expect(dialog.getByRole('radio', { name: 'Outdated only' })).toBeVisible();
 		await expect(
 			dialog.getByRole('switch', { name: /toggle merchant density heatmap/i })
 		).toBeVisible();

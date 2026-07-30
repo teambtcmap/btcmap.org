@@ -61,7 +61,6 @@ import {
 import { parseLatLongQuery } from "$lib/map/queryViewport";
 import { ensureRtlTextPlugin } from "$lib/map/rtl";
 import type { VerifiedFilterYears } from "$lib/map/verifiedFilter";
-import { getStoredVerifiedFilter } from "$lib/map/verifiedFilter";
 import {
 	calculateRadiusKmFromLngLatBounds,
 	getZoomBehavior,
@@ -115,6 +114,17 @@ let merchantListPanel: MerchantListPanel;
 const boostsOnly =
 	browser &&
 	new URLSearchParams(window.location.search).get("boosts") === "true";
+
+// "Outdated only" deep link (?outdated, any value — presence alone counts,
+// matching the legacy Leaflet param): seed the verified-recency filter's
+// inverse mode so the map becomes a re-verification worklist. Session-only
+// (no persist): a shared link must not overwrite the visitor's stored
+// preference.
+const outdatedOnly =
+	browser && new URLSearchParams(window.location.search).has("outdated");
+if (outdatedOnly) {
+	merchantList.setVerifiedFilter("outdated", { persist: false });
+}
 
 type PlaceFeature = {
 	type: "Feature";
@@ -450,6 +460,16 @@ const applyVerifiedFilter = async (years: VerifiedFilterYears) => {
 	// control awaits this to show its spinner only during the one-time fetch)
 	// and refresh the list.
 	merchantList.setVerifiedFilter(years);
+	// Leaving outdated mode invalidates an ?outdated deep link — strip the
+	// param (same silent-URL-update idiom as mapHash) so a reload doesn't
+	// resurrect the filter the user just switched away from.
+	if (years !== "outdated") {
+		const url = new URL(window.location.href);
+		if (url.searchParams.has("outdated")) {
+			url.searchParams.delete("outdated");
+			history.replaceState(history.state, "", url);
+		}
+	}
 	if (years != null) await ensureVerifiedDates();
 	updateMerchantList({ force: true });
 };
@@ -949,7 +969,8 @@ $: if (
 	updateMerchantList();
 }
 
-// A returning user with a persisted window: load the dates once the bulk
+// A returning user with a persisted window (or an ?outdated deep link — both
+// land in the store's verifiedWithinYears): load the dates once the bulk
 // places are in (not during map setup, which can win the race and enrich an
 // empty store), so the map + list arrive filtered without a manual toggle.
 let didInitialVerifiedLoad = false;
@@ -959,7 +980,7 @@ $: if (
 	styleLoaded &&
 	$places.length > 0 &&
 	!didInitialVerifiedLoad &&
-	getStoredVerifiedFilter() != null
+	$merchantList.verifiedWithinYears != null
 ) {
 	didInitialVerifiedLoad = true;
 	void ensureVerifiedDates().then(() => updateMerchantList({ force: true }));
@@ -2113,6 +2134,7 @@ onDestroy(() => {
 	basemaps={BASEMAPS}
 	{applyBasemap}
 	{applyVerifiedFilter}
+	currentVerified={$merchantList.verifiedWithinYears}
 	{setHeatmapEnabled}
 	enableBoost
 	enableGlobe
