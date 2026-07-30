@@ -2134,6 +2134,7 @@ onDestroy(() => {
 	basemaps={BASEMAPS}
 	{applyBasemap}
 	{applyVerifiedFilter}
+	currentVerified={$merchantList.verifiedWithinYears}
 	{setHeatmapEnabled}
 	enableBoost
 	enableGlobe
