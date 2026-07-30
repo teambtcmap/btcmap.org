@@ -43,6 +43,11 @@ export function isUpToDate(merchant: Place | null): boolean {
 	return isRecentlyVerified(merchant?.verified_at);
 }
 
+// The recency-filter selection: a "verified within N years" window,
+// "outdated" (the inverse — verification missing or stale), or null (the
+// "Any" / off state). The map filter's VerifiedFilterYears aliases this.
+export type RecencyFilter = 1 | 2 | 3 | "outdated" | null;
+
 // Filters to places verified within `years`; returns the list unchanged when
 // the filter is null (the "Any" / off state). Places without a verified_at are
 // excluded when a year filter is active, matching the Android app. "outdated"
@@ -50,7 +55,7 @@ export function isUpToDate(merchant: Place | null): boolean {
 // stale remain (the re-verification worklist, /map?outdated).
 export function filterPlacesByRecency(
 	places: Place[],
-	filter: number | "outdated" | null,
+	filter: RecencyFilter,
 ): Place[] {
 	if (filter == null) return places;
 	if (filter === "outdated") {

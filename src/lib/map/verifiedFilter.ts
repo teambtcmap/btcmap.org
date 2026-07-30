@@ -1,3 +1,5 @@
+import type { RecencyFilter } from "$lib/verification";
+
 // Persisted "verified within N years" map filter. The map control renders the
 // UI, the merchant store owns the runtime selection AND its localStorage
 // persistence (setVerifiedFilter), and the page seeds the initial value via
@@ -6,7 +8,7 @@
 // inverse mode (only places needing re-verification); the name keeps its
 // historical "Years" even though the union now carries more than year counts.
 
-export type VerifiedFilterYears = 1 | 2 | 3 | "outdated" | null;
+export type VerifiedFilterYears = RecencyFilter;
 
 export const VERIFIED_FILTER_STORAGE_KEY = "btcmap-next-verified-filter";
 
