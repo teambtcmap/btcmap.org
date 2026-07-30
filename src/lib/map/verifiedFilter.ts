@@ -19,6 +19,7 @@ export const VERIFIED_FILTER_OPTIONS: {
 	{ value: 1, labelKey: "verificationFilter.within1Year" },
 	{ value: 2, labelKey: "verificationFilter.within2Years" },
 	{ value: 3, labelKey: "verificationFilter.within3Years" },
+	{ value: "outdated", labelKey: "verificationFilter.outdatedOnly" },
 ];
 
 export const isVerifiedFilterYears = (v: unknown): v is 1 | 2 | 3 =>

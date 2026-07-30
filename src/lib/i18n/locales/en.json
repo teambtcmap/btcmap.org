@@ -241,7 +241,8 @@
 		"any": "Any",
 		"within1Year": "Verified within 1 year",
 		"within2Years": "Verified within 2 years",
-		"within3Years": "Verified within 3 years"
+		"within3Years": "Verified within 3 years",
+		"outdatedOnly": "Outdated only"
 	},
 	"payment": {
 		"methods": "Payment Methods",

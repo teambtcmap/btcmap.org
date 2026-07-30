@@ -241,7 +241,8 @@
 		"any": "Alle",
 		"within1Year": "Afgelopen jaar geverifieerd",
 		"within2Years": "Geverifieerd in de laatste 2 jaar",
-		"within3Years": "Geverifieerd in de laatste 3 jaar"
+		"within3Years": "Geverifieerd in de laatste 3 jaar",
+		"outdatedOnly": "Alleen verouderde locaties"
 	},
 	"payment": {
 		"methods": "Betaalmethoden",

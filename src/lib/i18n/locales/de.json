@@ -152,7 +152,8 @@
 		"any": "Alle",
 		"within1Year": "Innerhalb des letzten Jahres verifiziert",
 		"within2Years": "Innerhalb der letzten 2 Jahre verifiziert",
-		"within3Years": "Innerhalb der letzten 3 Jahre verifiziert"
+		"within3Years": "Innerhalb der letzten 3 Jahre verifiziert",
+		"outdatedOnly": "Nur veraltete Orte"
 	},
 	"payment": {
 		"methods": "Zahlungsmethoden",

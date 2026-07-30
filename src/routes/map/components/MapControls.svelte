@@ -12,7 +12,7 @@ import {
 } from "$lib/map/basemaps";
 import { HEATMAP_STORAGE_KEY } from "$lib/map/heatmap";
 import type { VerifiedFilterYears } from "$lib/map/verifiedFilter";
-import { getStoredVerifiedFilter } from "$lib/map/verifiedFilter";
+import { merchantList } from "$lib/merchantListStore";
 import { theme } from "$lib/theme";
 
 import MapMenuModal from "./MapMenuModal.svelte";
@@ -121,7 +121,10 @@ const onToggleGlobe = () => {
 
 onMount(() => {
 	selectedBasemap = getStoredBasemap() ?? defaultBasemap(get(theme));
-	if (applyVerifiedFilter) selectedVerified = getStoredVerifiedFilter();
+	// Runtime store value, not storage: an ?outdated deep link seeds the
+	// session filter without persisting, and the modal must reflect it.
+	if (applyVerifiedFilter)
+		selectedVerified = get(merchantList).verifiedWithinYears;
 	if (setHeatmapEnabled) {
 		try {
 			heatmapOn = localStorage.getItem(HEATMAP_STORAGE_KEY) === "true";
