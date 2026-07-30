@@ -150,4 +150,16 @@ describe("filterPlacesByRecency", () => {
 	it("excludes places without a verified_at when a filter is active", () => {
 		expect(filterPlacesByRecency(list, 3).some((p) => p.id === 5)).toBe(false);
 	});
+
+	it("keeps only places outside the 12-month window in outdated mode", () => {
+		expect(filterPlacesByRecency(list, "outdated").map((p) => p.id)).toEqual([
+			2, 3, 4, 5,
+		]);
+	});
+
+	it("includes never-verified places in outdated mode", () => {
+		expect(
+			filterPlacesByRecency(list, "outdated").some((p) => p.id === 5),
+		).toBe(true);
+	});
 });

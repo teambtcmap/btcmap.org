@@ -2,9 +2,11 @@
 // UI, the merchant store owns the runtime selection AND its localStorage
 // persistence (setVerifiedFilter), and the page seeds the initial value via
 // getStoredVerifiedFilter(). `null` is the "Any" (off) state — show everything,
-// matching how the category filter defaults to "all".
+// matching how the category filter defaults to "all". "outdated" is the
+// inverse mode (only places needing re-verification); the name keeps its
+// historical "Years" even though the union now carries more than year counts.
 
-export type VerifiedFilterYears = 1 | 2 | 3 | null;
+export type VerifiedFilterYears = 1 | 2 | 3 | "outdated" | null;
 
 export const VERIFIED_FILTER_STORAGE_KEY = "btcmap-next-verified-filter";
 
@@ -26,6 +28,7 @@ export const getStoredVerifiedFilter = (): VerifiedFilterYears => {
 	if (typeof window === "undefined") return null;
 	try {
 		const raw = localStorage.getItem(VERIFIED_FILTER_STORAGE_KEY);
+		if (raw === "outdated") return "outdated";
 		if (raw) {
 			const n = Number(raw);
 			if (isVerifiedFilterYears(n)) return n;

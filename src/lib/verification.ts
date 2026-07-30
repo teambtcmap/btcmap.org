@@ -44,12 +44,17 @@ export function isUpToDate(merchant: Place | null): boolean {
 }
 
 // Filters to places verified within `years`; returns the list unchanged when
-// `years` is null (the "Any" / off state). Places without a verified_at are
-// excluded when a year filter is active, matching the Android app.
+// the filter is null (the "Any" / off state). Places without a verified_at are
+// excluded when a year filter is active, matching the Android app. "outdated"
+// inverts the 12-month window — only places whose verification is missing or
+// stale remain (the re-verification worklist, /map?outdated).
 export function filterPlacesByRecency(
 	places: Place[],
-	years: number | null,
+	filter: number | "outdated" | null,
 ): Place[] {
-	if (years == null) return places;
-	return places.filter((p) => isVerifiedWithinYears(p.verified_at, years));
+	if (filter == null) return places;
+	if (filter === "outdated") {
+		return places.filter((p) => !isRecentlyVerified(p.verified_at));
+	}
+	return places.filter((p) => isVerifiedWithinYears(p.verified_at, filter));
 }
