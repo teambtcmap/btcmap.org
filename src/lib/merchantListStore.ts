@@ -502,7 +502,39 @@ function createMerchantListStore() {
 			opts: { persist?: boolean } = {},
 		) {
 			if (opts.persist !== false) storeVerifiedFilter(years);
-			update((state) => ({ ...state, verifiedWithinYears: years }));
+			update((state) => {
+				// In search mode the page-level refresh (updateMerchantList)
+				// early-returns, so recompute the chip counts here from the same
+				// recency-filtered selection the panel renders — otherwise they
+				// freeze at search time and disagree with the visible list.
+				// Search results carry their own verified_at (from /v4/search),
+				// so no verifiedDatesLoaded gate applies, matching the panel and
+				// the marker block's inSearch bypass. Nearby mode stays untouched:
+				// the forced update re-runs setMerchants/fetchAndReplaceList,
+				// which own that recompute.
+				if (state.mode === "search" && state.searchResults.length > 0) {
+					const recencyResults = filterPlacesByRecency(
+						state.searchResults,
+						years,
+					);
+					const categoryCounts = countMerchantsByCategory(recencyResults);
+					// applyCategoryFilter keeps the auto-reset semantics single-owner:
+					// a window that zeroes the selected chip snaps selection to "all",
+					// exactly as nearby mode does.
+					const { effectiveCategory } = applyCategoryFilter(
+						recencyResults,
+						state.selectedCategory,
+						categoryCounts,
+					);
+					return {
+						...state,
+						verifiedWithinYears: years,
+						categoryCounts,
+						selectedCategory: effectiveCategory,
+					};
+				}
+				return { ...state, verifiedWithinYears: years };
+			});
 		},
 
 		// Reset the selected category to 'all'

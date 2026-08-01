@@ -6,6 +6,7 @@ import {
 	MERCHANT_LIST_FETCH_CEILING,
 	MERCHANT_LIST_MAX_ITEMS,
 } from "$lib/constants";
+import { VERIFIED_FILTER_STORAGE_KEY } from "$lib/map/verifiedFilter";
 import type { Place } from "$lib/types";
 
 // Mock the centralized axios instance
@@ -746,6 +747,115 @@ describe("merchantListStore", () => {
 			expect(state.mode).toBe("nearby");
 			expect(state.searchQuery).toBe("pizza");
 			expect(state.searchResults.length).toBe(1);
+		});
+	});
+
+	describe("setVerifiedFilter", () => {
+		const recent = () => new Date(Date.now() - 30 * 86400000).toISOString();
+		const old = () => new Date(Date.now() - 2 * 365 * 86400000).toISOString();
+
+		it("recomputes search-mode category counts for the new window", () => {
+			merchantList.openWithSearchResults("test query", [
+				createMockPlace({ id: 1, icon: "restaurant", verified_at: recent() }),
+				createMockPlace({ id: 2, icon: "restaurant", verified_at: old() }),
+				createMockPlace({ id: 3, icon: "local_cafe", verified_at: recent() }),
+				createMockPlace({ id: 4, icon: "local_atm", verified_at: old() }),
+			]);
+			expect(get(merchantList).categoryCounts.all).toBe(4);
+
+			merchantList.setVerifiedFilter(1, { persist: false });
+			const counts = get(merchantList).categoryCounts;
+
+			expect(counts.all).toBe(2);
+			expect(counts.restaurants).toBe(1);
+			expect(counts.coffee).toBe(1);
+			expect(counts.atms).toBe(0);
+		});
+
+		it("restores the full counts when the filter clears", () => {
+			merchantList.openWithSearchResults("test query", [
+				createMockPlace({ id: 1, icon: "restaurant", verified_at: recent() }),
+				createMockPlace({ id: 2, icon: "local_cafe", verified_at: old() }),
+			]);
+			merchantList.setVerifiedFilter(1, { persist: false });
+			expect(get(merchantList).categoryCounts.all).toBe(1);
+
+			merchantList.setVerifiedFilter(null, { persist: false });
+			expect(get(merchantList).categoryCounts.all).toBe(2);
+		});
+
+		it("inverts the window in outdated mode", () => {
+			merchantList.openWithSearchResults("test query", [
+				createMockPlace({ id: 1, icon: "restaurant", verified_at: recent() }),
+				createMockPlace({ id: 2, icon: "restaurant", verified_at: old() }),
+				createMockPlace({ id: 3, icon: "local_cafe", verified_at: recent() }),
+				createMockPlace({ id: 4, icon: "local_atm" }),
+			]);
+
+			merchantList.setVerifiedFilter("outdated", { persist: false });
+			const counts = get(merchantList).categoryCounts;
+
+			expect(counts.all).toBe(2);
+			expect(counts.restaurants).toBe(1);
+			expect(counts.atms).toBe(1);
+			expect(counts.coffee).toBe(0);
+		});
+
+		it("auto-resets a selected category the new window zeroes", () => {
+			merchantList.openWithSearchResults("test query", [
+				createMockPlace({ id: 1, icon: "restaurant", verified_at: old() }),
+				createMockPlace({ id: 2, icon: "local_cafe", verified_at: recent() }),
+			]);
+			merchantList.setSelectedCategory("restaurants");
+
+			merchantList.setVerifiedFilter(1, { persist: false });
+
+			expect(get(merchantList).selectedCategory).toBe("all");
+		});
+
+		it("keeps a selected category the new window still populates", () => {
+			merchantList.openWithSearchResults("test query", [
+				createMockPlace({ id: 1, icon: "restaurant", verified_at: recent() }),
+				createMockPlace({ id: 2, icon: "local_cafe", verified_at: old() }),
+			]);
+			merchantList.setSelectedCategory("restaurants");
+
+			merchantList.setVerifiedFilter(1, { persist: false });
+
+			expect(get(merchantList).selectedCategory).toBe("restaurants");
+		});
+
+		it("leaves nearby-mode counts to the page-driven refresh", () => {
+			merchantList.setMerchants([
+				createMockPlace({ id: 1, icon: "restaurant", verified_at: old() }),
+			]);
+
+			merchantList.setVerifiedFilter(1, { persist: false });
+			const state = get(merchantList);
+
+			expect(state.verifiedWithinYears).toBe(1);
+			expect(state.categoryCounts.all).toBe(1);
+		});
+
+		it("does not touch counts when the search has no results", () => {
+			merchantList.openWithSearchResults("test query", [
+				createMockPlace({ id: 1, icon: "restaurant", verified_at: old() }),
+			]);
+			merchantList.clearSearchInput();
+
+			merchantList.setVerifiedFilter(1, { persist: false });
+
+			expect(get(merchantList).categoryCounts.all).toBe(1);
+		});
+
+		it("persist option still controls storage", () => {
+			merchantList.setVerifiedFilter(2);
+			expect(localStorage.getItem(VERIFIED_FILTER_STORAGE_KEY)).toBe("2");
+
+			merchantList.setVerifiedFilter(1, { persist: false });
+			expect(localStorage.getItem(VERIFIED_FILTER_STORAGE_KEY)).toBe("2");
+
+			localStorage.removeItem(VERIFIED_FILTER_STORAGE_KEY);
 		});
 	});
 
