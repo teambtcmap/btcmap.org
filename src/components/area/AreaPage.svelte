@@ -40,9 +40,7 @@ import {
 } from "$lib/store";
 import { areasSync } from "$lib/sync/areas";
 import { batchSync } from "$lib/sync/batchSync";
-import { eventsSync } from "$lib/sync/events";
 import { reportsSync } from "$lib/sync/reports";
-import { usersSync } from "$lib/sync/users";
 import type {
 	AreaPageProps,
 	AreaTags,
@@ -60,7 +58,7 @@ import {
 import { isRecentlyVerified } from "$lib/verification";
 
 onMount(() => {
-	batchSync([areasSync, reportsSync, eventsSync, usersSync]);
+	batchSync([areasSync, reportsSync]);
 });
 
 // alert for user errors
