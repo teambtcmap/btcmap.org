@@ -518,19 +518,20 @@ function createMerchantListStore() {
 						years,
 					);
 					const categoryCounts = countMerchantsByCategory(recencyResults);
-					// applyCategoryFilter keeps the auto-reset semantics single-owner:
-					// a window that zeroes the selected chip snaps selection to "all",
-					// exactly as nearby mode does.
-					const { effectiveCategory } = applyCategoryFilter(
-						recencyResults,
-						state.selectedCategory,
-						categoryCounts,
-					);
+					// Auto-reset from the counts alone (applyCategoryFilter's rule,
+					// minus its filtered list, which nothing here consumes — and
+					// whose predicate differs from the one the panel renders with):
+					// a window that zeroes the selected chip snaps selection to
+					// "all", exactly as nearby mode does.
+					const shouldReset =
+						state.selectedCategory !== "all" &&
+						categoryCounts.all > 0 &&
+						categoryCounts[state.selectedCategory] === 0;
 					return {
 						...state,
 						verifiedWithinYears: years,
 						categoryCounts,
-						selectedCategory: effectiveCategory,
+						selectedCategory: shouldReset ? "all" : state.selectedCategory,
 					};
 				}
 				return { ...state, verifiedWithinYears: years };
