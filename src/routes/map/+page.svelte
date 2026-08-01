@@ -18,7 +18,10 @@ import CommunityRail from "$components/CommunityRail.svelte";
 import MapLoadingMain from "$components/MapLoadingMain.svelte";
 import MapUnsupportedFallback from "$components/MapUnsupportedFallback.svelte";
 import { trackEvent } from "$lib/analytics";
-import { filterMerchantsByCategory } from "$lib/categoryMapping";
+import {
+	filterMerchantsByCategory,
+	placeMatchesCategory,
+} from "$lib/categoryMapping";
 import {
 	BREAKPOINTS,
 	CLUSTERING_DISABLED_ZOOM,
@@ -893,7 +896,15 @@ $: if (map && styleLoaded && $places) {
 	const category = $merchantList.selectedCategory;
 	let effective: Place[];
 	if (inSearch) {
-		effective = $merchantList.searchResults;
+		// Apply the category chips to search pins with the panel's exact
+		// predicate (placeMatchesCategory, see filteredSearchResults) so the
+		// list and the map always show the same set.
+		effective =
+			category === "all"
+				? $merchantList.searchResults
+				: $merchantList.searchResults.filter((p) =>
+						placeMatchesCategory(p, category),
+					);
 	} else if (category !== "all") {
 		effective = filterMerchantsByCategory($places, category);
 	} else {
@@ -914,7 +925,7 @@ $: if (map && styleLoaded && $places) {
 	const cacheSize = $merchantList.placeDetailsCache.size;
 	const currentLocale = $locale;
 	const modeSig = inSearch
-		? `s:${$merchantList.searchResults.map((p) => p.id).join(",")}`
+		? `s:${category}:${$merchantList.searchResults.map((p) => p.id).join(",")}`
 		: category !== "all"
 			? `c:${category}`
 			: "n";
