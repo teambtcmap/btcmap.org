@@ -420,4 +420,65 @@ describe("categoryMapping", () => {
 			expect(getIconColorWithFallback("some_unknown_icon")).not.toBe("");
 		});
 	});
+
+	// The map pins (search branch), the panel's filteredSearchResults, and the
+	// store's applyCategoryFilter split between filterMerchantsByCategory
+	// (group icon-list membership) and placeMatchesCategory (last-write-wins
+	// icon→category lookup). They are only extensionally equal while no icon
+	// appears in two groups — the moment that breaks, pins and list silently
+	// diverge again (the #1159 bug class). These tests make that divergence
+	// loud instead of silent.
+	describe("category predicate equivalence", () => {
+		// Every mapped icon, plus the shapes callers actually see: unknown,
+		// empty, and missing icons.
+		const corpus: Place[] = [
+			...CATEGORY_ENTRIES.flatMap(([, group]) =>
+				group.icons.map((icon) => createMockPlace({ icon })),
+			),
+			createMockPlace({ icon: "some_unknown_icon" }),
+			createMockPlace({ icon: "" }),
+			createMockPlace({}),
+		];
+
+		it("no icon belongs to two category groups", () => {
+			const seen = new Map<string, CategoryKey>();
+			for (const [key, group] of CATEGORY_ENTRIES) {
+				for (const icon of group.icons) {
+					const previous = seen.get(icon);
+					expect(
+						previous,
+						`icon "${icon}" is in both "${previous}" and "${key}" — filterMerchantsByCategory and placeMatchesCategory now disagree; consolidate to one predicate (#1168) before shipping this`,
+					).toBeUndefined();
+					seen.set(icon, key);
+				}
+			}
+		});
+
+		it("filterMerchantsByCategory and placeMatchesCategory select the same set for every category", () => {
+			for (const category of CATEGORIES) {
+				const viaGroupFilter = filterMerchantsByCategory(corpus, category).map(
+					(p) => p.id,
+				);
+				const viaPlacePredicate = corpus
+					.filter((p) => placeMatchesCategory(p, category))
+					.map((p) => p.id);
+				expect(viaGroupFilter, `category "${category}"`).toEqual(
+					viaPlacePredicate,
+				);
+			}
+		});
+
+		it("countMerchantsByCategory agrees with both predicates for every category", () => {
+			const counts = countMerchantsByCategory(corpus);
+			for (const category of CATEGORIES) {
+				if (category === "all") {
+					expect(counts.all).toBe(corpus.length);
+					continue;
+				}
+				expect(counts[category], `category "${category}"`).toBe(
+					filterMerchantsByCategory(corpus, category).length,
+				);
+			}
+		});
+	});
 });
