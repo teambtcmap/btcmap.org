@@ -24,7 +24,10 @@ export const VERIFIED_FILTER_OPTIONS: {
 	{ value: "outdated", labelKey: "verificationFilter.outdatedOnly" },
 ];
 
-export const isVerifiedFilterYears = (v: unknown): v is 1 | 2 | 3 =>
+// Covers only the numeric year windows — NOT the full VerifiedFilterYears
+// union ("outdated" is parsed separately in getStoredVerifiedFilter), which
+// is why this stays module-private.
+const isVerifiedYearsWindow = (v: unknown): v is 1 | 2 | 3 =>
 	v === 1 || v === 2 || v === 3;
 
 export const getStoredVerifiedFilter = (): VerifiedFilterYears => {
@@ -34,7 +37,7 @@ export const getStoredVerifiedFilter = (): VerifiedFilterYears => {
 		if (raw === "outdated") return "outdated";
 		if (raw) {
 			const n = Number(raw);
-			if (isVerifiedFilterYears(n)) return n;
+			if (isVerifiedYearsWindow(n)) return n;
 		}
 	} catch {
 		// localStorage unavailable
