@@ -523,11 +523,11 @@ const isValidCoord = (lat: number, lon: number): boolean =>
 	lon >= -180 &&
 	lon <= 180;
 
-const fitSearchResultBounds = () => {
+// Fits the list the panel passes in (its filteredSearchResults) — never the
+// store's raw searchResults, which may include category/recency-hidden rows.
+const fitSearchResultBounds = (places: Place[]) => {
 	if (!map) return;
-	const results = get(merchantList).searchResults.filter((p) =>
-		isValidCoord(p.lat, p.lon),
-	);
+	const results = places.filter((p) => isValidCoord(p.lat, p.lon));
 	if (results.length === 0) return;
 	if (results.length === 1) {
 		// Match legacy: zoom past CLUSTERING_DISABLED_ZOOM (17) so the

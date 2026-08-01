@@ -62,8 +62,11 @@ export let currentZoom: number = 0;
 export let onSearch: ((query: string) => void) | undefined = undefined;
 // Refresh callback for category filtering
 export let onRefresh: (() => void) | undefined = undefined;
-// Callback to fit map bounds to all search results
-export let onFitSearchResultBounds: (() => void) | undefined = undefined;
+// Callback to fit map bounds to the search results the list actually shows.
+// Receives filteredSearchResults so the camera frames exactly the visible
+// set — deriving it page-side from raw searchResults is how it drifted.
+export let onFitSearchResultBounds: ((places: Place[]) => void) | undefined =
+	undefined;
 // Map style readiness — gates the mobile peek sheet so it doesn't show over the loading screen
 export let mapReady = false;
 // Layout decision locked at page init (same pattern as MerchantDrawerHash);
@@ -667,7 +670,7 @@ onDestroy(() => {
 						type="button"
 						on:click={() => {
 							trackEvent('show_all_on_map_click');
-							onFitSearchResultBounds?.();
+							onFitSearchResultBounds?.(filteredSearchResults);
 						}}
 						disabled={filteredSearchResults.length === 0}
 						class="flex shrink-0 items-center gap-1.5 rounded-lg border px-2.5 py-1 text-xs font-medium transition-colors
