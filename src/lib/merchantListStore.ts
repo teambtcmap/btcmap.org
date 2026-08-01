@@ -365,6 +365,16 @@ function createMerchantListStore() {
 					verifiedWithinYears,
 				);
 
+				// A response that raced a filter change can settle before the
+				// re-invocation aborts it (e.g. during applyVerifiedFilter's
+				// ensureVerifiedDates await) — drop the stale count (the forced
+				// follow-up refetch owns the fresh one) but never strand the
+				// spinner.
+				if (get(store).verifiedWithinYears !== verifiedWithinYears) {
+					update((state) => ({ ...state, isLoadingList: false }));
+					return;
+				}
+
 				update((state) => ({
 					...state,
 					merchants: [],

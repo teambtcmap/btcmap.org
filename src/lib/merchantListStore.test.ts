@@ -502,6 +502,11 @@ describe("merchantListStore", () => {
 				{ id: 3, lat: 0, lon: 0, name: "C" },
 			];
 
+			// Absolute expectations per filter so both paths agreeing on a
+			// wrong value (or a swallowed rejection leaving the previous
+			// count in place) cannot pass vacuously.
+			const expected = { null: 3, 1: 1, outdated: 2 } as const;
+
 			for (const filter of [null, 1, "outdated"] as const) {
 				merchantList.setVerifiedFilter(filter, { persist: false });
 
@@ -516,7 +521,23 @@ describe("merchantListStore", () => {
 				expect(closedPanelCount, `filter ${String(filter)}`).toBe(
 					openPanelCount,
 				);
+				expect(closedPanelCount, `filter ${String(filter)}`).toBe(
+					expected[String(filter) as keyof typeof expected],
+				);
+
+				// The over-ceiling (hideIfExceeds) branch is the state users
+				// actually transition into over dense areas — its recency-only
+				// policy is the one fetchCountOnly mirrors; pin that too.
+				(api.get as Mock).mockResolvedValueOnce({ data: rows });
+				await merchantList.fetchAndReplaceList({ lat: 0, lon: 0 }, 10, {
+					hideIfExceeds: 0,
+				});
+				expect(
+					get(merchantList).totalCount,
+					`over-ceiling, filter ${String(filter)}`,
+				).toBe(closedPanelCount);
 			}
+			expect(errToast).not.toHaveBeenCalled();
 		});
 
 		it("should set totalCount from response length", async () => {
