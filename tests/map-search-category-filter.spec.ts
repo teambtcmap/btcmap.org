@@ -42,10 +42,14 @@ test.describe('Map search category filter', () => {
 				() => (window as unknown as { __mapPlacesCount?: number }).__mapPlacesCount ?? 0
 			);
 
+		// Arm the response waiter BEFORE typing so a fast response can't land
+		// first (repo convention — see merchant-list-panel.spec.ts).
+		const searchResponse = page.waitForResponse(
+			(r) => r.url().includes('/api/search/places'),
+			{ timeout: 15000 }
+		);
 		await listPanel.locator('input[type="search"]').fill('resto');
-		await page.waitForResponse((r) => r.url().includes('/api/search/places'), {
-			timeout: 15000
-		});
+		await searchResponse;
 		// All three stubbed results become pins.
 		await expect
 			.poll(placesCount, { timeout: MARKER_LOAD_TIMEOUT })
