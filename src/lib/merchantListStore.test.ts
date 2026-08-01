@@ -2,12 +2,14 @@ import { get } from "svelte/store";
 import type { Mock } from "vitest";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 
+import { CATEGORIES, placeMatchesCategory } from "$lib/categoryMapping";
 import {
 	MERCHANT_LIST_FETCH_CEILING,
 	MERCHANT_LIST_MAX_ITEMS,
 } from "$lib/constants";
 import { VERIFIED_FILTER_STORAGE_KEY } from "$lib/map/verifiedFilter";
 import type { Place } from "$lib/types";
+import { filterPlacesByRecency } from "$lib/verification";
 
 // Mock the centralized axios instance
 vi.mock("$lib/axios", () => ({
@@ -856,6 +858,45 @@ describe("merchantListStore", () => {
 			expect(localStorage.getItem(VERIFIED_FILTER_STORAGE_KEY)).toBe("2");
 
 			localStorage.removeItem(VERIFIED_FILTER_STORAGE_KEY);
+		});
+
+		// Consistency oracle: whatever the filter mode, the chip counts must
+		// describe exactly the selection the panel renders — its
+		// filteredSearchResults rule (recency window, then per-category via
+		// placeMatchesCategory) replicated here as the reference.
+		it("counts always describe the selection the panel renders", () => {
+			const recent = new Date(Date.now() - 30 * 86400000).toISOString();
+			const old = new Date(Date.now() - 2 * 365 * 86400000).toISOString();
+			merchantList.openWithSearchResults("test query", [
+				createMockPlace({ id: 1, icon: "restaurant", verified_at: recent }),
+				createMockPlace({ id: 2, icon: "restaurant", verified_at: old }),
+				createMockPlace({ id: 3, icon: "local_cafe", verified_at: recent }),
+				createMockPlace({ id: 4, icon: "local_cafe" }),
+				createMockPlace({ id: 5, icon: "local_atm", verified_at: old }),
+				createMockPlace({ id: 6, icon: "storefront", verified_at: recent }),
+				createMockPlace({ id: 7, icon: "hotel", verified_at: old }),
+				createMockPlace({ id: 8, icon: "some_unknown", verified_at: recent }),
+				createMockPlace({ id: 9, verified_at: old }),
+			]);
+
+			for (const filter of [null, 1, 2, 3, "outdated"] as const) {
+				merchantList.setVerifiedFilter(filter, { persist: false });
+				const { categoryCounts, searchResults } = get(merchantList);
+				const rendered = filterPlacesByRecency(searchResults, filter);
+
+				expect(categoryCounts.all, `filter ${String(filter)}`).toBe(
+					rendered.length,
+				);
+				for (const category of CATEGORIES) {
+					if (category === "all") continue;
+					expect(
+						categoryCounts[category],
+						`filter ${String(filter)} / category ${category}`,
+					).toBe(
+						rendered.filter((p) => placeMatchesCategory(p, category)).length,
+					);
+				}
+			}
 		});
 	});
 
