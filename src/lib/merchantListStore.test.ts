@@ -430,7 +430,7 @@ describe("merchantListStore", () => {
 	});
 
 	describe("fetchCountOnly", () => {
-		it("should request only id field", async () => {
+		it("should request only id field while no recency filter is active", async () => {
 			(api.get as Mock).mockResolvedValueOnce({ data: [] });
 
 			await merchantList.fetchCountOnly({ lat: 10, lon: 20 }, 5);
@@ -439,6 +439,55 @@ describe("merchantListStore", () => {
 				expect.stringContaining("fields=id"),
 				expect.any(Object),
 			);
+			expect((api.get as Mock).mock.calls[0][0]).not.toContain("verified_at");
+		});
+
+		it("should widen the fields with verified_at while a recency filter is active", async () => {
+			merchantList.setVerifiedFilter(1, { persist: false });
+			(api.get as Mock).mockResolvedValueOnce({ data: [] });
+
+			await merchantList.fetchCountOnly({ lat: 10, lon: 20 }, 5);
+
+			expect(api.get).toHaveBeenCalledWith(
+				expect.stringContaining("fields=id,verified_at"),
+				expect.any(Object),
+			);
+		});
+
+		it("should count only recently verified places when a year window is active", async () => {
+			merchantList.setVerifiedFilter(1, { persist: false });
+			const recent = new Date(Date.now() - 30 * 86400000).toISOString();
+			const old = new Date(Date.now() - 2 * 365 * 86400000).toISOString();
+			(api.get as Mock).mockResolvedValueOnce({
+				data: [
+					{ id: 1, verified_at: recent },
+					{ id: 2, verified_at: old },
+					{ id: 3 },
+				],
+			});
+
+			await merchantList.fetchCountOnly({ lat: 0, lon: 0 }, 10);
+			const state = get(merchantList);
+
+			expect(state.totalCount).toBe(1);
+			expect(state.merchants).toEqual([]);
+		});
+
+		it("should count stale and never-verified places in outdated mode", async () => {
+			merchantList.setVerifiedFilter("outdated", { persist: false });
+			const recent = new Date(Date.now() - 30 * 86400000).toISOString();
+			const old = new Date(Date.now() - 2 * 365 * 86400000).toISOString();
+			(api.get as Mock).mockResolvedValueOnce({
+				data: [
+					{ id: 1, verified_at: recent },
+					{ id: 2, verified_at: old },
+					{ id: 3 },
+				],
+			});
+
+			await merchantList.fetchCountOnly({ lat: 0, lon: 0 }, 10);
+
+			expect(get(merchantList).totalCount).toBe(2);
 		});
 
 		it("should set totalCount from response length", async () => {
