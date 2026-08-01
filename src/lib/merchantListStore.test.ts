@@ -490,6 +490,35 @@ describe("merchantListStore", () => {
 			expect(get(merchantList).totalCount).toBe(2);
 		});
 
+		// Consistency guard for the open/close boundary: the closed-panel badge
+		// and the open panel's list must report the same total for the same
+		// rows under every filter mode, so the count never jumps on open.
+		it("agrees with fetchAndReplaceList's totalCount for the same rows under every filter", async () => {
+			const recent = new Date(Date.now() - 30 * 86400000).toISOString();
+			const old = new Date(Date.now() - 2 * 365 * 86400000).toISOString();
+			const rows = [
+				{ id: 1, lat: 0, lon: 0, name: "A", verified_at: recent },
+				{ id: 2, lat: 0, lon: 0, name: "B", verified_at: old },
+				{ id: 3, lat: 0, lon: 0, name: "C" },
+			];
+
+			for (const filter of [null, 1, "outdated"] as const) {
+				merchantList.setVerifiedFilter(filter, { persist: false });
+
+				(api.get as Mock).mockResolvedValueOnce({ data: rows });
+				await merchantList.fetchCountOnly({ lat: 0, lon: 0 }, 10);
+				const closedPanelCount = get(merchantList).totalCount;
+
+				(api.get as Mock).mockResolvedValueOnce({ data: rows });
+				await merchantList.fetchAndReplaceList({ lat: 0, lon: 0 }, 10);
+				const openPanelCount = get(merchantList).totalCount;
+
+				expect(closedPanelCount, `filter ${String(filter)}`).toBe(
+					openPanelCount,
+				);
+			}
+		});
+
 		it("should set totalCount from response length", async () => {
 			const mockIds = [{ id: 1 }, { id: 2 }, { id: 3 }];
 			(api.get as Mock).mockResolvedValueOnce({ data: mockIds });
