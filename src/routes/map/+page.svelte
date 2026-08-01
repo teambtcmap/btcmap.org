@@ -938,11 +938,13 @@ $: if (map && styleLoaded && $places) {
 // In-place mutations to a place (boost confirmation, new comment count)
 // don't change array length or any of the size counters above, so the
 // guard wouldn't repaint the pin. lastUpdatedPlaceId is set by
-// updateSinglePlace() in $lib/sync/places.ts — re-sync the source when
-// it fires, then clear so we don't re-sync next time anything else
-// triggers this reactive block.
+// updateSinglePlace() in $lib/sync/places.ts — invalidate the memo so the
+// marker block above re-runs, recomputes `effective` with the current
+// search/category/recency filters applied, and re-syncs (same idiom as the
+// style-load reset). Never sync raw $places here: that bypasses every
+// filter and poisons lastSyncedList for the heatmap/zoom-crossing paths.
 $: if (map && styleLoaded && $lastUpdatedPlaceId) {
-	syncPlacesToSource($places);
+	lastPlacesLength = -1;
 	lastUpdatedPlaceId.set(undefined);
 }
 
