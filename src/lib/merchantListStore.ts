@@ -348,7 +348,9 @@ function createMerchantListStore() {
 			const fields = verifiedWithinYears == null ? "id" : "id,verified_at";
 
 			try {
-				const response = await api.get<Place[]>(
+				// Typed to the payload actually requested — these rows are not
+				// full Places and must not be handed to anything expecting one.
+				const response = await api.get<Pick<Place, "id" | "verified_at">[]>(
 					`${API_BASE}/v4/places/search/?lat=${center.lat}&lon=${center.lon}&radius_km=${radiusKm}&fields=${fields}`,
 					{ timeout: 10000, signal: listAbortController.signal },
 				);

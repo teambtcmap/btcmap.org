@@ -53,10 +53,13 @@ export type RecencyFilter = 1 | 2 | 3 | "outdated" | null;
 // excluded when a year filter is active, matching the Android app. "outdated"
 // inverts the 12-month window — only places whose verification is missing or
 // stale remain (the re-verification worklist, /map?outdated).
-export function filterPlacesByRecency(
-	places: Place[],
+// Generic over anything carrying verified_at so partial-field API rows
+// (e.g. the count-only id,verified_at fetch) filter without pretending to
+// be full Places.
+export function filterPlacesByRecency<T extends Pick<Place, "verified_at">>(
+	places: T[],
 	filter: RecencyFilter,
-): Place[] {
+): T[] {
 	if (filter == null) return places;
 	if (filter === "outdated") {
 		return places.filter((p) => !isRecentlyVerified(p.verified_at));
