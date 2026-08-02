@@ -76,6 +76,19 @@ function resetCategoryState<T extends MerchantListState>(state: T): T {
 	return { ...state, selectedCategory: "all" };
 }
 
+// The auto-reset rule shared by every counts recompute: a selected chip whose
+// count dropped to zero (while other merchants remain) snaps back to "all".
+function shouldResetCategory(
+	selectedCategory: CategoryKey,
+	categoryCounts: CategoryCounts,
+): boolean {
+	return (
+		selectedCategory !== "all" &&
+		categoryCounts.all > 0 &&
+		categoryCounts[selectedCategory] === 0
+	);
+}
+
 // Helper to apply category filtering with auto-reset when selected category has no matches
 // Returns filtered merchants and the effective category (may be reset to 'all')
 function applyCategoryFilter(
@@ -83,13 +96,12 @@ function applyCategoryFilter(
 	selectedCategory: CategoryKey,
 	categoryCounts: CategoryCounts,
 ): { filtered: Place[]; effectiveCategory: CategoryKey } {
-	// Auto-reset if selected category has no matches but other merchants exist
-	const shouldReset =
-		selectedCategory !== "all" &&
-		categoryCounts.all > 0 &&
-		categoryCounts[selectedCategory] === 0;
-
-	const effectiveCategory = shouldReset ? "all" : selectedCategory;
+	const effectiveCategory = shouldResetCategory(
+		selectedCategory,
+		categoryCounts,
+	)
+		? "all"
+		: selectedCategory;
 
 	const filtered =
 		effectiveCategory !== "all"
@@ -518,20 +530,21 @@ function createMerchantListStore() {
 						years,
 					);
 					const categoryCounts = countMerchantsByCategory(recencyResults);
-					// Auto-reset from the counts alone (applyCategoryFilter's rule,
-					// minus its filtered list, which nothing here consumes — and
-					// whose predicate differs from the one the panel renders with):
-					// a window that zeroes the selected chip snaps selection to
-					// "all", exactly as nearby mode does.
-					const shouldReset =
-						state.selectedCategory !== "all" &&
-						categoryCounts.all > 0 &&
-						categoryCounts[state.selectedCategory] === 0;
+					// Shared auto-reset rule, counts-only (deliberately not
+					// applyCategoryFilter: its filtered list is unused here and
+					// built with a different predicate than the panel renders
+					// with): a window that zeroes the selected chip snaps
+					// selection to "all", exactly as nearby mode does.
 					return {
 						...state,
 						verifiedWithinYears: years,
 						categoryCounts,
-						selectedCategory: shouldReset ? "all" : state.selectedCategory,
+						selectedCategory: shouldResetCategory(
+							state.selectedCategory,
+							categoryCounts,
+						)
+							? "all"
+							: state.selectedCategory,
 					};
 				}
 				return { ...state, verifiedWithinYears: years };
