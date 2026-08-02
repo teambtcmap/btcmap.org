@@ -1,4 +1,4 @@
-import { describe, expect, it } from "vitest";
+import { describe, expect, it, vi } from "vitest";
 
 import {
 	isSyncableRow,
@@ -89,10 +89,13 @@ describe("validateSyncPage", () => {
 });
 
 describe("nextCursor", () => {
-	it("advances to the page's last timestamp when it moved", () => {
+	it("advances to the page's last timestamp when it moved, silently", () => {
+		const warn = vi.spyOn(console, "warn").mockImplementation(() => {});
 		expect(
 			nextCursor("2026-01-01T00:00:00.000Z", "2026-01-02T00:00:00.000Z"),
 		).toBe("2026-01-02T00:00:00.000Z");
+		expect(warn).not.toHaveBeenCalled();
+		warn.mockRestore();
 	});
 
 	// The v2 updated_since is inclusive (the crawl dedup exists because each
@@ -101,15 +104,27 @@ describe("nextCursor", () => {
 	// refetch the same page forever. Nudging one millisecond past the stuck
 	// timestamp trades bounded staleness (skipped rows return whenever they
 	// next update) for guaranteed progress.
-	it("nudges one millisecond past a stuck timestamp", () => {
+	it("nudges one millisecond past a stuck timestamp and warns loudly", () => {
+		const warn = vi.spyOn(console, "warn").mockImplementation(() => {});
 		expect(
-			nextCursor("2025-07-07T08:08:14.974Z", "2025-07-07T08:08:14.974Z"),
+			nextCursor(
+				"2025-07-07T08:08:14.974Z",
+				"2025-07-07T08:08:14.974Z",
+				"reports",
+			),
 		).toBe("2025-07-07T08:08:14.975Z");
+		// The deferral of same-timestamp rows must never be silent.
+		expect(warn).toHaveBeenCalledOnce();
+		expect(warn.mock.calls[0][0]).toContain("reports");
+		expect(warn.mock.calls[0][0]).toContain("2025-07-07T08:08:14.974Z");
+		warn.mockRestore();
 	});
 
 	it("rolls the nudge across a second boundary", () => {
+		const warn = vi.spyOn(console, "warn").mockImplementation(() => {});
 		expect(
 			nextCursor("2025-07-07T08:08:14.999Z", "2025-07-07T08:08:14.999Z"),
 		).toBe("2025-07-07T08:08:15.000Z");
+		warn.mockRestore();
 	});
 });

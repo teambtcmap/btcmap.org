@@ -80,11 +80,22 @@ export function validateSyncPage<T extends SyncableEntity>(
 // forever (#1164; real data: a reports backfill wrote 10k rows in under 7s,
 // so a bulk write with identical timestamps is one migration away). When the
 // cursor is stuck, nudge one millisecond past it: rows sharing the timestamp
-// beyond the page boundary are skipped for now and picked up whenever they
-// next update — bounded staleness beats an unbreakable refetch loop.
-// isSyncableRow guarantees pageLast parses.
-export function nextCursor(previous: string, pageLast: string): string {
+// beyond the page boundary are deferred until they next update — bounded
+// staleness beats an unbreakable refetch loop. A within-timestamp
+// continuation is impossible against this API (updated_since + limit is the
+// whole pagination surface — no page token, no id tiebreak; a full re-crawl
+// pages through the same API and hits the same tie), so the nudge is the
+// only progress-guaranteeing option; the warn keeps the deferral from being
+// silent. isSyncableRow guarantees pageLast parses.
+export function nextCursor(
+	previous: string,
+	pageLast: string,
+	label = "sync",
+): string {
 	if (pageLast !== previous) return pageLast;
+	console.warn(
+		`${label}: pagination cursor stuck at ${pageLast} (full page of identical timestamps); nudging +1ms — rows sharing this timestamp beyond the page boundary are deferred until they next update`,
+	);
 	return new Date(Date.parse(pageLast) + 1).toISOString();
 }
 
@@ -242,6 +253,7 @@ async function initialSync<T extends SyncableEntity>(
 			updatedSince = nextCursor(
 				updatedSince,
 				newItems[newItems.length - 1].updated_at,
+				apiEndpoint,
 			);
 
 			for (const item of newItems) {
@@ -293,6 +305,7 @@ async function incrementalSync<T extends SyncableEntity>(
 		updatedSince = nextCursor(
 			updatedSince,
 			newItems[newItems.length - 1].updated_at,
+			apiEndpoint,
 		);
 
 		// Update or add items
