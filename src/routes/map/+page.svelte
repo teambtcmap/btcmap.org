@@ -158,10 +158,12 @@ let lastSavedIdsSize = -1;
 let lastEnrichedCacheSize = -1;
 let lastLocale: string | null | undefined;
 let lastAppliedLabelTheme: "light" | "dark" | undefined;
-// Signature of the search-mode visible set. Empty string forces an
-// initial sync; "n" = nearby (all places); "s:<id>,<id>,…" = a specific
-// search-result list. Distinct from lastPlacesLength because a fresh
-// search may have the same result count as the previous one.
+// Signature of the mode-dependent visible set. Empty string forces an
+// initial sync; "n" = nearby (all places); "c:<category>" = nearby
+// narrowed by a chip; "s:<category>:<id>,<id>,…" = a search-result list
+// (optionally narrowed by a chip); the sync guard appends "|v:<years>"
+// for the verified-recency window. Distinct from lastPlacesLength
+// because a fresh search or chip switch may leave the count unchanged.
 let lastSearchModeSig = "";
 
 // Last place list fed to the sources, kept so the boosted-clustering boundary
