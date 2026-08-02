@@ -31,6 +31,25 @@ export interface SyncConfig<T extends SyncableEntity> {
 	cacheDuration?: number;
 }
 
+// A usable row is an object with an id. Anything else is corruption: a
+// non-JSON API response (maintenance page, proxy error) parsed as a string
+// gets character-iterated by the crawl loops, and the dedup collapse leaves
+// exactly one stray character (typically a trailing "\n") that then survives
+// every incremental merge in the persisted cache forever — crashing every
+// consumer that trusts the row shape. Validate at both trust boundaries:
+// API responses and cache hydration (so already-poisoned caches self-heal).
+export function isSyncableRow<T extends SyncableEntity>(
+	item: unknown,
+): item is T {
+	return (
+		typeof item === "object" &&
+		item !== null &&
+		"id" in item &&
+		(item as { id: unknown }).id != null &&
+		typeof (item as { updated_at?: unknown }).updated_at === "string"
+	);
+}
+
 // Factory function that creates a sync function with its own state
 export function createSyncFunction<T extends SyncableEntity>(
 	config: SyncConfig<T>,
@@ -86,6 +105,12 @@ export function createSyncFunction<T extends SyncableEntity>(
 			if (!isServerSide) {
 				try {
 					cachedData = await localforage.getItem(config.storageKey);
+					// Persisted data is untrusted input: drop corrupt rows (or the
+					// whole value if it isn't an array) so a poisoned cache heals
+					// on the next sync instead of crashing consumers forever.
+					cachedData = Array.isArray(cachedData)
+						? cachedData.filter((item) => isSyncableRow<T>(item))
+						: null;
 				} catch (err) {
 					console.error(`Could not load ${config.name} locally:`, err);
 					config.errorStore.set(
@@ -170,11 +195,19 @@ async function initialSync<T extends SyncableEntity>(
 				`${API_BASE}/v2/${apiEndpoint}?updated_since=${updatedSince}&limit=${limit}`,
 			);
 
-			const newItems = response.data;
+			// A non-JSON response (maintenance page, proxy error) arrives as a
+			// string — iterating it would merge stray characters into the cache.
+			if (!Array.isArray(response.data)) {
+				throw new Error("API returned invalid data format");
+			}
+			// Pagination advances on the RAW count; the cursor and the merge use
+			// only validated rows. Break when nothing usable remains so a
+			// garbage page can't loop forever on a stuck cursor.
+			responseCount = response.data.length;
+			const newItems = response.data.filter((item) => isSyncableRow<T>(item));
 			if (!newItems.length) break;
 
 			updatedSince = newItems[newItems.length - 1].updated_at;
-			responseCount = newItems.length;
 
 			// Add new items, avoiding duplicates
 			for (const item of newItems) {
@@ -226,11 +259,16 @@ async function incrementalSync<T extends SyncableEntity>(
 			`${API_BASE}/v2/${apiEndpoint}?updated_since=${updatedSince}&limit=${limit}`,
 		);
 
-		const newItems = response.data;
+		// Same trust-boundary rules as initialSync; a throw here propagates to
+		// the caller, which falls back to the (already sanitized) cached data.
+		if (!Array.isArray(response.data)) {
+			throw new Error("API returned invalid data format");
+		}
+		responseCount = response.data.length;
+		const newItems = response.data.filter((item) => isSyncableRow<T>(item));
 		if (!newItems.length) break;
 
 		updatedSince = newItems[newItems.length - 1].updated_at;
-		responseCount = newItems.length;
 
 		// Update or add items
 		for (const item of newItems) {
