@@ -324,8 +324,20 @@ function createMerchantListStore() {
 			}
 		},
 
-		// Fetch only IDs to get count (minimal payload for button badge)
-		// Used at zoom 10-14 when panel is closed - avoids fetching full data unnecessarily
+		// Count-only fetch for the closed-panel badge at zoom 10-14. Minimal
+		// payload: ids alone, widened with verified_at only while the recency
+		// filter is active so the badge counts the same set the markers and the
+		// open panel show (matching fetchAndReplaceList's hideIfExceeds policy,
+		// which is the state users transition into on open). Category needs
+		// nothing here: close() resets it to "all" and this path only runs with
+		// the panel closed. Search rows carry verified_at natively, so no
+		// verifiedDatesLoaded gate applies — that gate exists for the bulk
+		// $places feed, which lacks dates until enrichment. Deliberate trade:
+		// during the one-time enrichment fetch the badge (like the open panel
+		// list, which filters ungated for the same reason) is filtered while
+		// the markers briefly are not; gating the badge instead would make it
+		// disagree with the list at the open/close boundary — the exact
+		// mismatch this method exists to prevent.
 		async fetchCountOnly(
 			center: { lat: number; lon: number },
 			radiusKm: number,
@@ -335,9 +347,17 @@ function createMerchantListStore() {
 
 			update((state) => ({ ...state, isLoadingList: true }));
 
+			// One snapshot so the fields param and the post-response filter can
+			// never disagree; a mid-flight filter change re-invokes this method,
+			// which aborts the stale request above.
+			const { verifiedWithinYears } = get(store);
+			const fields = verifiedWithinYears == null ? "id" : "id,verified_at";
+
 			try {
-				const response = await api.get<{ id: number }[]>(
-					`${API_BASE}/v4/places/search/?lat=${center.lat}&lon=${center.lon}&radius_km=${radiusKm}&fields=id`,
+				// Typed to the payload actually requested — these rows are not
+				// full Places and must not be handed to anything expecting one.
+				const response = await api.get<Pick<Place, "id" | "verified_at">[]>(
+					`${API_BASE}/v4/places/search/?lat=${center.lat}&lon=${center.lon}&radius_km=${radiusKm}&fields=${fields}`,
 					{ timeout: 10000, signal: listAbortController.signal },
 				);
 
@@ -348,11 +368,25 @@ function createMerchantListStore() {
 
 				// Filter out invalid items missing required id field
 				const validItems = filterValidPlaces(response.data);
+				const recencyPlaces = filterPlacesByRecency(
+					validItems,
+					verifiedWithinYears,
+				);
+
+				// A response that raced a filter change can settle before the
+				// re-invocation aborts it (e.g. during applyVerifiedFilter's
+				// ensureVerifiedDates await) — drop the stale count (the forced
+				// follow-up refetch owns the fresh one) but never strand the
+				// spinner.
+				if (get(store).verifiedWithinYears !== verifiedWithinYears) {
+					update((state) => ({ ...state, isLoadingList: false }));
+					return;
+				}
 
 				update((state) => ({
 					...state,
 					merchants: [],
-					totalCount: validItems.length,
+					totalCount: recencyPlaces.length,
 					isLoadingList: false,
 					// Preserve existing categoryCounts since we don't have actual merchant data to recalculate them
 				}));
