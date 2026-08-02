@@ -331,7 +331,13 @@ function createMerchantListStore() {
 		// which is the state users transition into on open). Category needs
 		// nothing here: close() resets it to "all" and this path only runs with
 		// the panel closed. Search rows carry verified_at natively, so no
-		// verifiedDatesLoaded gate applies.
+		// verifiedDatesLoaded gate applies — that gate exists for the bulk
+		// $places feed, which lacks dates until enrichment. Deliberate trade:
+		// during the one-time enrichment fetch the badge (like the open panel
+		// list, which filters ungated for the same reason) is filtered while
+		// the markers briefly are not; gating the badge instead would make it
+		// disagree with the list at the open/close boundary — the exact
+		// mismatch this method exists to prevent.
 		async fetchCountOnly(
 			center: { lat: number; lon: number },
 			radiusKm: number,
