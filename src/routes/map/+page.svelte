@@ -18,7 +18,10 @@ import CommunityRail from "$components/CommunityRail.svelte";
 import MapLoadingMain from "$components/MapLoadingMain.svelte";
 import MapUnsupportedFallback from "$components/MapUnsupportedFallback.svelte";
 import { trackEvent } from "$lib/analytics";
-import { filterMerchantsByCategory } from "$lib/categoryMapping";
+import {
+	filterMerchantsByCategory,
+	placeMatchesCategory,
+} from "$lib/categoryMapping";
 import {
 	BREAKPOINTS,
 	CLUSTERING_DISABLED_ZOOM,
@@ -155,10 +158,12 @@ let lastSavedIdsSize = -1;
 let lastEnrichedCacheSize = -1;
 let lastLocale: string | null | undefined;
 let lastAppliedLabelTheme: "light" | "dark" | undefined;
-// Signature of the search-mode visible set. Empty string forces an
-// initial sync; "n" = nearby (all places); "s:<id>,<id>,…" = a specific
-// search-result list. Distinct from lastPlacesLength because a fresh
-// search may have the same result count as the previous one.
+// Signature of the mode-dependent visible set. Empty string forces an
+// initial sync; "n" = nearby (all places); "c:<category>" = nearby
+// narrowed by a chip; "s:<category>:<id>,<id>,…" = a search-result list
+// (optionally narrowed by a chip); the sync guard appends "|v:<years>"
+// for the verified-recency window. Distinct from lastPlacesLength
+// because a fresh search or chip switch may leave the count unchanged.
 let lastSearchModeSig = "";
 
 // Last place list fed to the sources, kept so the boosted-clustering boundary
@@ -914,7 +919,15 @@ $: if (map && styleLoaded && $places) {
 	const category = $merchantList.selectedCategory;
 	let effective: Place[];
 	if (inSearch) {
-		effective = $merchantList.searchResults;
+		// Apply the category chips to search pins with the panel's exact
+		// predicate (placeMatchesCategory, see filteredSearchResults) so the
+		// list and the map always show the same set.
+		effective =
+			category === "all"
+				? $merchantList.searchResults
+				: $merchantList.searchResults.filter((p) =>
+						placeMatchesCategory(p, category),
+					);
 	} else if (category !== "all") {
 		effective = filterMerchantsByCategory($places, category);
 	} else {
@@ -935,7 +948,7 @@ $: if (map && styleLoaded && $places) {
 	const cacheSize = $merchantList.placeDetailsCache.size;
 	const currentLocale = $locale;
 	const modeSig = inSearch
-		? `s:${$merchantList.searchResults.map((p) => p.id).join(",")}`
+		? `s:${category}:${$merchantList.searchResults.map((p) => p.id).join(",")}`
 		: category !== "all"
 			? `c:${category}`
 			: "n";
