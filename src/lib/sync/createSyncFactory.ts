@@ -73,6 +73,21 @@ export function validateSyncPage<T extends SyncableEntity>(
 	return { rows, rawCount: data.length };
 }
 
+// Advances the pagination cursor past a page. The v2 updated_since is
+// inclusive (the crawl dedup exists precisely because each page's last row
+// reappears on the next), so a FULL page whose rows all share one timestamp
+// can never advance the cursor — the crawl would refetch the same page
+// forever (#1164; real data: a reports backfill wrote 10k rows in under 7s,
+// so a bulk write with identical timestamps is one migration away). When the
+// cursor is stuck, nudge one millisecond past it: rows sharing the timestamp
+// beyond the page boundary are skipped for now and picked up whenever they
+// next update — bounded staleness beats an unbreakable refetch loop.
+// isSyncableRow guarantees pageLast parses.
+export function nextCursor(previous: string, pageLast: string): string {
+	if (pageLast !== previous) return pageLast;
+	return new Date(Date.parse(pageLast) + 1).toISOString();
+}
+
 // Factory function that creates a sync function with its own state
 export function createSyncFunction<T extends SyncableEntity>(
 	config: SyncConfig<T>,
@@ -209,8 +224,10 @@ async function initialSync<T extends SyncableEntity>(
 ): Promise<T[]> {
 	let updatedSince = "2022-01-01T00:00:00.000Z";
 	let responseCount: number;
-	const allData: T[] = [];
-	const seenIds = new Set<string | number>();
+	// Map dedup: keys keep insertion order and set() updates in place, so this
+	// matches the previous push-or-replace semantics at O(1) per row instead
+	// of a findIndex scan (quadratic over 100k+ event rows on the dupe path).
+	const dataMap = new Map<string | number, T>();
 
 	do {
 		try {
@@ -222,20 +239,13 @@ async function initialSync<T extends SyncableEntity>(
 			responseCount = rawCount;
 			if (!responseCount) break;
 
-			updatedSince = newItems[newItems.length - 1].updated_at;
+			updatedSince = nextCursor(
+				updatedSince,
+				newItems[newItems.length - 1].updated_at,
+			);
 
-			// Add new items, avoiding duplicates
 			for (const item of newItems) {
-				if (!seenIds.has(item.id)) {
-					seenIds.add(item.id);
-					allData.push(item);
-				} else {
-					// Update existing item
-					const idx = allData.findIndex((d) => d.id === item.id);
-					if (idx !== -1) {
-						allData[idx] = item;
-					}
-				}
+				dataMap.set(item.id, item);
 			}
 		} catch (error) {
 			errorStore.set(
@@ -247,7 +257,7 @@ async function initialSync<T extends SyncableEntity>(
 	} while (responseCount === limit);
 
 	// Filter out deleted items
-	return allData.filter(filterDeleted);
+	return Array.from(dataMap.values()).filter(filterDeleted);
 }
 
 // Incremental sync - update from existing cached data
@@ -280,7 +290,10 @@ async function incrementalSync<T extends SyncableEntity>(
 		responseCount = rawCount;
 		if (!responseCount) break;
 
-		updatedSince = newItems[newItems.length - 1].updated_at;
+		updatedSince = nextCursor(
+			updatedSince,
+			newItems[newItems.length - 1].updated_at,
+		);
 
 		// Update or add items
 		for (const item of newItems) {

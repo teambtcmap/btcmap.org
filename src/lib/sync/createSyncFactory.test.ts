@@ -1,6 +1,10 @@
 import { describe, expect, it } from "vitest";
 
-import { isSyncableRow, validateSyncPage } from "./createSyncFactory";
+import {
+	isSyncableRow,
+	nextCursor,
+	validateSyncPage,
+} from "./createSyncFactory";
 
 describe("isSyncableRow", () => {
 	it("accepts a well-formed entity row", () => {
@@ -81,5 +85,31 @@ describe("validateSyncPage", () => {
 		const result = validateSyncPage(page);
 		expect(result.rows).toEqual([valid(1), valid(2)]);
 		expect(result.rawCount).toBe(3);
+	});
+});
+
+describe("nextCursor", () => {
+	it("advances to the page's last timestamp when it moved", () => {
+		expect(
+			nextCursor("2026-01-01T00:00:00.000Z", "2026-01-02T00:00:00.000Z"),
+		).toBe("2026-01-02T00:00:00.000Z");
+	});
+
+	// The v2 updated_since is inclusive (the crawl dedup exists because each
+	// page's last row reappears on the next). A FULL page sharing one
+	// timestamp can therefore never advance the cursor — the crawl would
+	// refetch the same page forever. Nudging one millisecond past the stuck
+	// timestamp trades bounded staleness (skipped rows return whenever they
+	// next update) for guaranteed progress.
+	it("nudges one millisecond past a stuck timestamp", () => {
+		expect(
+			nextCursor("2025-07-07T08:08:14.974Z", "2025-07-07T08:08:14.974Z"),
+		).toBe("2025-07-07T08:08:14.975Z");
+	});
+
+	it("rolls the nudge across a second boundary", () => {
+		expect(
+			nextCursor("2025-07-07T08:08:14.999Z", "2025-07-07T08:08:14.999Z"),
+		).toBe("2025-07-07T08:08:15.000Z");
 	});
 });
