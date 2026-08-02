@@ -880,6 +880,27 @@ const triggerEnrichmentIfNeeded = debounce(() => {
 	);
 }, ENRICHMENT_DEBOUNCE_DELAY);
 
+// In-place mutations to a place (boost confirmation, new comment count)
+// don't change array length or any of the size counters below, so the marker
+// block's guard wouldn't repaint the pin. lastUpdatedPlaceId is set by the
+// boost/comment flows (BoostContent, CommentAdd) right after they await
+// updateSinglePlace() in $lib/sync/places.ts — invalidate the memo so the
+// marker block re-runs with the current search/category/recency filters and
+// re-syncs (same idiom as the style-load reset). Never sync raw $places here:
+// that bypasses every filter and poisons lastSyncedList for the heatmap and
+// zoom-crossing paths. ORDERING MATTERS: this block must stay ABOVE the
+// marker block. Svelte 4 excludes self-assigned variables when ordering
+// reactive blocks, so the marker block (which also assigns lastPlacesLength)
+// is not sorted after this one — only source order guarantees the marker
+// block's dirty check sees the bit this assignment sets within the same
+// update pass. Note: in search mode pins render from searchResults, which
+// updateSinglePlace doesn't refresh, so the re-sync repaints only data the
+// store already holds.
+$: if (map && styleLoaded && $lastUpdatedPlaceId !== undefined) {
+	lastPlacesLength = -1;
+	lastUpdatedPlaceId.set(undefined);
+}
+
 // Rebuild only when the count changes meaningfully (and always on first load),
 // to avoid jank on incremental store updates with ~50k places worldwide.
 // Also rebuild when $savedPlaceIds size changes so the saved badge appears/
@@ -933,17 +954,6 @@ $: if (map && styleLoaded && $places) {
 		lastSearchModeSig = searchSig;
 		syncPlacesToSource(effective);
 	}
-}
-
-// In-place mutations to a place (boost confirmation, new comment count)
-// don't change array length or any of the size counters above, so the
-// guard wouldn't repaint the pin. lastUpdatedPlaceId is set by
-// updateSinglePlace() in $lib/sync/places.ts — re-sync the source when
-// it fires, then clear so we don't re-sync next time anything else
-// triggers this reactive block.
-$: if (map && styleLoaded && $lastUpdatedPlaceId) {
-	syncPlacesToSource($places);
-	lastUpdatedPlaceId.set(undefined);
 }
 
 // Position the locator pulse. Depends on $places too so a deep-linked merchant
