@@ -451,9 +451,14 @@ describe("categoryMapping", () => {
 						`falsy icon in group "${key}" — placeMatchesCategory early-returns on falsy icons while filterMerchantsByCategory matches them`,
 					).toBeTruthy();
 					const previous = seen.get(icon);
+					// Distinguish the repeat cases: a duplicate WITHIN a group is
+					// harmless to predicate equivalence but still a config mistake;
+					// a repeat ACROSS groups is the divergence hazard itself.
 					expect(
 						previous,
-						`icon "${icon}" is in both "${previous}" and "${key}" — filterMerchantsByCategory and placeMatchesCategory now disagree; consolidate to one predicate (#1168) before shipping this`,
+						previous === key
+							? `icon "${icon}" is listed twice in group "${key}" — remove the duplicate`
+							: `icon "${icon}" is in both "${previous}" and "${key}" — filterMerchantsByCategory and placeMatchesCategory now disagree; consolidate to one predicate (#1168) before shipping this`,
 					).toBeUndefined();
 					seen.set(icon, key);
 				}
