@@ -76,6 +76,19 @@ function resetCategoryState<T extends MerchantListState>(state: T): T {
 	return { ...state, selectedCategory: "all" };
 }
 
+// The auto-reset rule shared by every counts recompute: a selected chip whose
+// count dropped to zero (while other merchants remain) snaps back to "all".
+function shouldResetCategory(
+	selectedCategory: CategoryKey,
+	categoryCounts: CategoryCounts,
+): boolean {
+	return (
+		selectedCategory !== "all" &&
+		categoryCounts.all > 0 &&
+		categoryCounts[selectedCategory] === 0
+	);
+}
+
 // Helper to apply category filtering with auto-reset when selected category has no matches
 // Returns filtered merchants and the effective category (may be reset to 'all')
 function applyCategoryFilter(
@@ -83,13 +96,12 @@ function applyCategoryFilter(
 	selectedCategory: CategoryKey,
 	categoryCounts: CategoryCounts,
 ): { filtered: Place[]; effectiveCategory: CategoryKey } {
-	// Auto-reset if selected category has no matches but other merchants exist
-	const shouldReset =
-		selectedCategory !== "all" &&
-		categoryCounts.all > 0 &&
-		categoryCounts[selectedCategory] === 0;
-
-	const effectiveCategory = shouldReset ? "all" : selectedCategory;
+	const effectiveCategory = shouldResetCategory(
+		selectedCategory,
+		categoryCounts,
+	)
+		? "all"
+		: selectedCategory;
 
 	const filtered =
 		effectiveCategory !== "all"
@@ -536,7 +548,45 @@ function createMerchantListStore() {
 			opts: { persist?: boolean } = {},
 		) {
 			if (opts.persist !== false) storeVerifiedFilter(years);
-			update((state) => ({ ...state, verifiedWithinYears: years }));
+			update((state) => {
+				// In search mode the page-level refresh (updateMerchantList)
+				// early-returns, so recompute the chip counts here from the same
+				// recency-filtered selection the panel renders — otherwise they
+				// freeze at search time and disagree with the visible list.
+				// Search results carry their own verified_at (from /v4/search),
+				// so no verifiedDatesLoaded gate applies, matching the panel and
+				// the marker block's inSearch bypass. Nearby mode stays untouched:
+				// the forced update re-runs setMerchants/fetchAndReplaceList,
+				// which own that recompute.
+				if (state.mode === "search" && state.searchResults.length > 0) {
+					const recencyResults = filterPlacesByRecency(
+						state.searchResults,
+						years,
+					);
+					const categoryCounts = countMerchantsByCategory(recencyResults);
+					// Shared auto-reset rule, counts-only. Deliberately not
+					// applyCategoryFilter: its filtered list is unused here, and
+					// it filters via filterMerchantsByCategory (group icon-list
+					// scan) while the panel renders via placeMatchesCategory
+					// (ICON_TO_CATEGORY lookup) — two implementations that agree
+					// only while the categoryMapping equivalence tests hold, so
+					// this path avoids depending on the one the panel doesn't
+					// use. A window that zeroes the selected chip snaps
+					// selection to "all", exactly as nearby mode does.
+					return {
+						...state,
+						verifiedWithinYears: years,
+						categoryCounts,
+						selectedCategory: shouldResetCategory(
+							state.selectedCategory,
+							categoryCounts,
+						)
+							? "all"
+							: state.selectedCategory,
+					};
+				}
+				return { ...state, verifiedWithinYears: years };
+			});
 		},
 
 		// Reset the selected category to 'all'

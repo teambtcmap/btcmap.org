@@ -633,7 +633,10 @@ onDestroy(() => {
 							{$_('search.noResults')}
 						{:else if searchResults.length === 0}
 							{$_('search.prompt')}
-						{:else if selectedCategory !== 'all' && filteredSearchResults.length !== searchResults.length}
+						{:else if filteredSearchResults.length !== searchResults.length}
+							<!-- Any client-side narrowing (category chip OR verified filter)
+							     shows shown-of-returned, so the line always describes the
+							     rows actually rendered below it -->
 							{$_('search.resultsCountOf', {
 								values: {
 									shown: filteredSearchResults.length,
