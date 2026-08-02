@@ -31,12 +31,10 @@ import api from "$lib/axios";
 import {
 	areaError,
 	areas,
-	eventError,
 	places,
 	placesError,
 	reportError,
 	reports,
-	userError,
 } from "$lib/store";
 import { areasSync } from "$lib/sync/areas";
 import { batchSync } from "$lib/sync/batchSync";
@@ -61,10 +59,6 @@ onMount(() => {
 	batchSync([areasSync, reportsSync]);
 });
 
-// alert for user errors
-$: $userError && errToast($userError);
-// alert for event errors
-$: $eventError && errToast($eventError);
 // alert for element errors
 $: $placesError && errToast($placesError);
 // alert for area errors
