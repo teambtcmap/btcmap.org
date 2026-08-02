@@ -1,6 +1,6 @@
 import { get } from "svelte/store";
 import type { Mock } from "vitest";
-import { beforeEach, describe, expect, it, vi } from "vitest";
+import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 
 import { CATEGORIES, placeMatchesCategory } from "$lib/categoryMapping";
 import {
@@ -92,6 +92,14 @@ describe("merchantListStore", () => {
 			lastUpdated: null,
 			usesMetricSystem: null,
 		});
+	});
+
+	afterEach(() => {
+		// Defensive: tests that persist the verified filter clean up inline,
+		// but a failing assertion would skip that — never leak the key. (Note
+		// reset() restores module-init state and does NOT re-read storage, so
+		// today a leak is inert; this guards the day that changes.)
+		localStorage.removeItem(VERIFIED_FILTER_STORAGE_KEY);
 	});
 
 	describe("state toggles", () => {

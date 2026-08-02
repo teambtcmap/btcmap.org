@@ -530,10 +530,14 @@ function createMerchantListStore() {
 						years,
 					);
 					const categoryCounts = countMerchantsByCategory(recencyResults);
-					// Shared auto-reset rule, counts-only (deliberately not
-					// applyCategoryFilter: its filtered list is unused here and
-					// built with a different predicate than the panel renders
-					// with): a window that zeroes the selected chip snaps
+					// Shared auto-reset rule, counts-only. Deliberately not
+					// applyCategoryFilter: its filtered list is unused here, and
+					// it filters via filterMerchantsByCategory (group icon-list
+					// scan) while the panel renders via placeMatchesCategory
+					// (ICON_TO_CATEGORY lookup) — two implementations that agree
+					// only while the categoryMapping equivalence tests hold, so
+					// this path avoids depending on the one the panel doesn't
+					// use. A window that zeroes the selected chip snaps
 					// selection to "all", exactly as nearby mode does.
 					return {
 						...state,
