@@ -19,6 +19,18 @@ test.describe('Communities Page', () => {
 		).toBeVisible();
 	});
 
+	test('renders community cards once the areas sync lands', async ({ page }) => {
+		// The directory previously passed CI while rendering ZERO cards (a
+		// crashed reactive left the page silently empty — #1187), because no
+		// test asserted the actual content. Pin it: the list must populate.
+		await page.goto('/communities/africa', { waitUntil: 'load' });
+		await expect
+			.poll(() => page.locator('a[href*="/community/"]').count(), {
+				timeout: 60000
+			})
+			.toBeGreaterThan(0);
+	});
+
 	test('displays navigation buttons', async ({ page }) => {
 		await page.goto('/communities');
 

@@ -172,7 +172,7 @@ const initializeData = async () => {
 		if (type === "community") {
 			return (
 				area.id === data.id &&
-				area.tags.type === "community" &&
+				area.tags?.type === "community" &&
 				area.tags.geo_json &&
 				area.tags.name &&
 				area.tags["icon:square"] &&
@@ -181,7 +181,7 @@ const initializeData = async () => {
 		} else {
 			return (
 				area.id === data.id &&
-				area.tags.type === "country" &&
+				area.tags?.type === "country" &&
 				area.id.length === 2 &&
 				area.tags.geo_json &&
 				area.tags.name &&

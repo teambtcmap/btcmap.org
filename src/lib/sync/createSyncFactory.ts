@@ -31,6 +31,48 @@ export interface SyncConfig<T extends SyncableEntity> {
 	cacheDuration?: number;
 }
 
+// A usable row is an object with a string/number id and a parseable
+// updated_at — the two fields the merge maps and the pagination cursor
+// actually rely on. Anything else is corruption: a non-JSON API response
+// (maintenance page, proxy error) parsed as a string gets character-iterated
+// by the crawl loops, and the dedup collapse leaves exactly one stray
+// character (typically a trailing "\n") that then survives every incremental
+// merge in the persisted cache forever — crashing every consumer that trusts
+// the row shape. Validate at both trust boundaries: API responses and cache
+// hydration (so already-poisoned caches self-heal).
+export function isSyncableRow<T extends SyncableEntity>(
+	item: unknown,
+): item is T {
+	if (typeof item !== "object" || item === null) return false;
+	const { id, updated_at } = item as { id?: unknown; updated_at?: unknown };
+	return (
+		(typeof id === "string" || typeof id === "number") &&
+		typeof updated_at === "string" &&
+		!Number.isNaN(Date.parse(updated_at))
+	);
+}
+
+// Validates one crawl page at the API trust boundary — shared by both crawl
+// loops so their anomaly semantics cannot drift. Throws on a non-JSON
+// response (a string would otherwise be character-iterated into the cache)
+// and on a non-empty page with zero valid rows (which must surface as an
+// error, not silently truncate the sync — it also can't advance the cursor,
+// so continuing would spin in place). An empty page is the normal end of
+// data. Pagination advances on the RAW count; the cursor and the merge use
+// only the validated rows.
+export function validateSyncPage<T extends SyncableEntity>(
+	data: unknown,
+): { rows: T[]; rawCount: number } {
+	if (!Array.isArray(data)) {
+		throw new Error("API returned invalid data format");
+	}
+	const rows = data.filter((item) => isSyncableRow<T>(item));
+	if (data.length && !rows.length) {
+		throw new Error("API page contained no valid rows");
+	}
+	return { rows, rawCount: data.length };
+}
+
 // Factory function that creates a sync function with its own state
 export function createSyncFunction<T extends SyncableEntity>(
 	config: SyncConfig<T>,
@@ -86,6 +128,12 @@ export function createSyncFunction<T extends SyncableEntity>(
 			if (!isServerSide) {
 				try {
 					cachedData = await localforage.getItem(config.storageKey);
+					// Persisted data is untrusted input: drop corrupt rows (or the
+					// whole value if it isn't an array) so a poisoned cache heals
+					// on the next sync instead of crashing consumers forever.
+					cachedData = Array.isArray(cachedData)
+						? cachedData.filter((item) => isSyncableRow<T>(item))
+						: null;
 				} catch (err) {
 					console.error(`Could not load ${config.name} locally:`, err);
 					config.errorStore.set(
@@ -170,11 +218,11 @@ async function initialSync<T extends SyncableEntity>(
 				`${API_BASE}/v2/${apiEndpoint}?updated_since=${updatedSince}&limit=${limit}`,
 			);
 
-			const newItems = response.data;
-			if (!newItems.length) break;
+			const { rows: newItems, rawCount } = validateSyncPage<T>(response.data);
+			responseCount = rawCount;
+			if (!responseCount) break;
 
 			updatedSince = newItems[newItems.length - 1].updated_at;
-			responseCount = newItems.length;
 
 			// Add new items, avoiding duplicates
 			for (const item of newItems) {
@@ -226,11 +274,13 @@ async function incrementalSync<T extends SyncableEntity>(
 			`${API_BASE}/v2/${apiEndpoint}?updated_since=${updatedSince}&limit=${limit}`,
 		);
 
-		const newItems = response.data;
-		if (!newItems.length) break;
+		// A throw from validateSyncPage propagates to the caller, which falls
+		// back to the (already sanitized) cached data.
+		const { rows: newItems, rawCount } = validateSyncPage<T>(response.data);
+		responseCount = rawCount;
+		if (!responseCount) break;
 
 		updatedSince = newItems[newItems.length - 1].updated_at;
-		responseCount = newItems.length;
 
 		// Update or add items
 		for (const item of newItems) {

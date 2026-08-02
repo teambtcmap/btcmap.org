@@ -257,7 +257,7 @@ const initializeCommunities = async () => {
 
 	const communitiesFiltered = $areas.filter(
 		(area) =>
-			area.tags.type === "community" &&
+			area.tags?.type === "community" &&
 			area.tags.geo_json &&
 			area.tags.name &&
 			area.tags["icon:square"] &&
