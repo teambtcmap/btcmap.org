@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 
-import { isSyncableRow } from "./createSyncFactory";
+import { isSyncableRow, validateSyncPage } from "./createSyncFactory";
 
 describe("isSyncableRow", () => {
 	it("accepts a well-formed entity row", () => {
@@ -47,5 +47,39 @@ describe("isSyncableRow", () => {
 		// A string that isn't a date would poison the updated_since cursor.
 		expect(isSyncableRow({ id: 1, updated_at: "not-a-date" })).toBe(false);
 		expect(isSyncableRow({ id: 1, updated_at: "" })).toBe(false);
+	});
+});
+
+describe("validateSyncPage", () => {
+	const valid = (id: number) => ({
+		id,
+		updated_at: "2026-01-01T00:00:00Z",
+	});
+
+	it("passes a valid page through with its raw count", () => {
+		const page = [valid(1), valid(2)];
+		expect(validateSyncPage(page)).toEqual({ rows: page, rawCount: 2 });
+	});
+
+	it("treats an empty page as the normal end of data", () => {
+		expect(validateSyncPage([])).toEqual({ rows: [], rawCount: 0 });
+	});
+
+	it("throws on a non-JSON (string) response instead of iterating it", () => {
+		expect(() => validateSyncPage("<html>maintenance</html>\n")).toThrow(
+			"invalid data format",
+		);
+		expect(() => validateSyncPage(undefined)).toThrow("invalid data format");
+	});
+
+	it("throws on a non-empty page with zero valid rows", () => {
+		expect(() => validateSyncPage(["\n", null, {}])).toThrow("no valid rows");
+	});
+
+	it("drops invalid rows but keeps the raw count for pagination", () => {
+		const page = [valid(1), "\n", valid(2)];
+		const result = validateSyncPage(page);
+		expect(result.rows).toEqual([valid(1), valid(2)]);
+		expect(result.rawCount).toBe(3);
 	});
 });

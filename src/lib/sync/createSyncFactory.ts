@@ -52,6 +52,27 @@ export function isSyncableRow<T extends SyncableEntity>(
 	);
 }
 
+// Validates one crawl page at the API trust boundary — shared by both crawl
+// loops so their anomaly semantics cannot drift. Throws on a non-JSON
+// response (a string would otherwise be character-iterated into the cache)
+// and on a non-empty page with zero valid rows (which must surface as an
+// error, not silently truncate the sync — it also can't advance the cursor,
+// so continuing would spin in place). An empty page is the normal end of
+// data. Pagination advances on the RAW count; the cursor and the merge use
+// only the validated rows.
+export function validateSyncPage<T extends SyncableEntity>(
+	data: unknown,
+): { rows: T[]; rawCount: number } {
+	if (!Array.isArray(data)) {
+		throw new Error("API returned invalid data format");
+	}
+	const rows = data.filter((item) => isSyncableRow<T>(item));
+	if (data.length && !rows.length) {
+		throw new Error("API page contained no valid rows");
+	}
+	return { rows, rawCount: data.length };
+}
+
 // Factory function that creates a sync function with its own state
 export function createSyncFunction<T extends SyncableEntity>(
 	config: SyncConfig<T>,
@@ -197,22 +218,9 @@ async function initialSync<T extends SyncableEntity>(
 				`${API_BASE}/v2/${apiEndpoint}?updated_since=${updatedSince}&limit=${limit}`,
 			);
 
-			// A non-JSON response (maintenance page, proxy error) arrives as a
-			// string — iterating it would merge stray characters into the cache.
-			if (!Array.isArray(response.data)) {
-				throw new Error("API returned invalid data format");
-			}
-			// Pagination advances on the RAW count; the cursor and the merge use
-			// only validated rows. An empty page is the normal end of data; a
-			// non-empty page with zero valid rows is an anomaly — surface it as
-			// an error rather than silently truncating the sync (it also can't
-			// advance the cursor, so continuing would spin in place).
-			responseCount = response.data.length;
+			const { rows: newItems, rawCount } = validateSyncPage<T>(response.data);
+			responseCount = rawCount;
 			if (!responseCount) break;
-			const newItems = response.data.filter((item) => isSyncableRow<T>(item));
-			if (!newItems.length) {
-				throw new Error("API page contained no valid rows");
-			}
 
 			updatedSince = newItems[newItems.length - 1].updated_at;
 
@@ -266,17 +274,11 @@ async function incrementalSync<T extends SyncableEntity>(
 			`${API_BASE}/v2/${apiEndpoint}?updated_since=${updatedSince}&limit=${limit}`,
 		);
 
-		// Same trust-boundary rules as initialSync; a throw here propagates to
-		// the caller, which falls back to the (already sanitized) cached data.
-		if (!Array.isArray(response.data)) {
-			throw new Error("API returned invalid data format");
-		}
-		responseCount = response.data.length;
+		// A throw from validateSyncPage propagates to the caller, which falls
+		// back to the (already sanitized) cached data.
+		const { rows: newItems, rawCount } = validateSyncPage<T>(response.data);
+		responseCount = rawCount;
 		if (!responseCount) break;
-		const newItems = response.data.filter((item) => isSyncableRow<T>(item));
-		if (!newItems.length) {
-			throw new Error("API page contained no valid rows");
-		}
 
 		updatedSince = newItems[newItems.length - 1].updated_at;
 
