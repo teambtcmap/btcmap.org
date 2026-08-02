@@ -76,8 +76,13 @@ const closeDrawer = () => {
 };
 
 let grade: Grade | undefined;
+// Round before grading so the stars agree with AreaStats, which displays the
+// same value via toFixed(0) — a fractional 94.6 must not show "95%" in Stats
+// while the header grades it below the 95% five-star boundary.
 $: grade =
-	upToDatePercent === undefined ? undefined : getGrade(upToDatePercent);
+	upToDatePercent === undefined
+		? undefined
+		: getGrade(Math.round(upToDatePercent));
 
 let gradeTooltip: HTMLButtonElement;
 
