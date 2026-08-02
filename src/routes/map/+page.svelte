@@ -882,7 +882,8 @@ const triggerEnrichmentIfNeeded = debounce(() => {
 
 // In-place mutations to a place (boost confirmation, new comment count)
 // don't change array length or any of the size counters below, so the marker
-// block's guard wouldn't repaint the pin. lastUpdatedPlaceId is set by
+// block's guard wouldn't repaint the pin. lastUpdatedPlaceId is set by the
+// boost/comment flows (BoostContent, CommentAdd) right after they await
 // updateSinglePlace() in $lib/sync/places.ts — invalidate the memo so the
 // marker block re-runs with the current search/category/recency filters and
 // re-syncs (same idiom as the style-load reset). Never sync raw $places here:
@@ -895,7 +896,7 @@ const triggerEnrichmentIfNeeded = debounce(() => {
 // update pass. Note: in search mode pins render from searchResults, which
 // updateSinglePlace doesn't refresh, so the re-sync repaints only data the
 // store already holds.
-$: if (map && styleLoaded && $lastUpdatedPlaceId) {
+$: if (map && styleLoaded && $lastUpdatedPlaceId !== undefined) {
 	lastPlacesLength = -1;
 	lastUpdatedPlaceId.set(undefined);
 }
