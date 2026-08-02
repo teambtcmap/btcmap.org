@@ -33,6 +33,10 @@ import { browser } from "$app/environment";
 export let name: string;
 export let geoJSON: GeoJSON;
 export let filteredPlaces: Place[];
+// Latest report's up_to_date_percent for this area (same source AreaStats
+// renders); undefined while reports load or when the area has none — the
+// stars stay in their loading state rather than fabricating a grade.
+export let upToDatePercent: number | undefined = undefined;
 
 type PlaceFeature = {
 	type: "Feature";
@@ -71,11 +75,14 @@ const closeDrawer = () => {
 	selectedMerchantId = null;
 };
 
-let total: number | undefined;
-let upToDate: number | undefined;
-let upToDatePercent: string | undefined;
-
-let grade: Grade;
+let grade: Grade | undefined;
+// Round before grading so the stars agree with AreaStats, which displays the
+// same value via toFixed(0) — a fractional 94.6 must not show "95%" in Stats
+// while the header grades it below the 95% five-star boundary.
+$: grade =
+	upToDatePercent === undefined
+		? undefined
+		: getGrade(Math.round(upToDatePercent));
 
 let gradeTooltip: HTMLButtonElement;
 
@@ -470,19 +477,7 @@ const initializeMap = async () => {
 		mapLoaded = true;
 		lastAppliedGeoJSON = geoJSON;
 		lastAppliedFilteredPlaces = filteredPlaces;
-
-		updateAreaGrade();
 	});
-};
-
-// Compute area grade from the rendered place set. The legacy component
-// treated every place in `filteredPlaces` as up-to-date (the parent
-// AreaPage already filters by verification), so mirror that here.
-const updateAreaGrade = () => {
-	total = filteredPlaces.length;
-	upToDate = filteredPlaces.length;
-	upToDatePercent = upToDate ? (upToDate / (total / 100)).toFixed(0) : "0";
-	grade = getGrade(Number(upToDatePercent));
 };
 
 // Theme reactivity — swap the basemap, then re-register area + places overlays
@@ -540,7 +535,6 @@ $: if (
 		closeDrawer();
 	}
 	fitToArea(map, true);
-	updateAreaGrade();
 }
 
 $: if (map && styleLoaded) {
@@ -555,7 +549,7 @@ $: if (map && styleLoaded) {
 	>
 		{name || 'BTC Map Area'} Map
 		<div class="flex items-center space-x-1 text-link">
-			{#if dataInitialized && mapLoaded}
+			{#if dataInitialized && mapLoaded && grade !== undefined}
 				<div class="flex items-center space-x-1">
 					{#each Array(grade) as _, index (index)}
 						<Icon type="fa" icon="star" w="16" h="16" />

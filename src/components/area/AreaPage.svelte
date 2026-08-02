@@ -533,7 +533,12 @@ let issues: PlaceIssue[] = [];
 	</div>
 
 	{#if activeSection === Sections.merchants}
-		<AreaMap {name} geoJSON={area?.geo_json} {filteredPlaces} />
+		<AreaMap
+			{name}
+			geoJSON={area?.geo_json}
+			{filteredPlaces}
+			upToDatePercent={areaReports?.[0]?.tags.up_to_date_percent}
+		/>
 		<AreaMerchantHighlights {dataInitialized} {filteredPlaces} />
 		{#if browser}
 			<Boost />

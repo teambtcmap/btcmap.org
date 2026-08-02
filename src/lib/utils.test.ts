@@ -10,6 +10,7 @@ import {
 	formatDistance,
 	formatNearbyPillCount,
 	getCommunitiesAtCoordinates,
+	getGrade,
 	isValidLatitude,
 	isValidLightningTip,
 	isValidLongitude,
@@ -782,5 +783,22 @@ describe("isValidLightningTip", () => {
 
 	it("rejects an address containing whitespace", () => {
 		expect(isValidLightningTip("alice @getalby.com")).toBe(false);
+	});
+});
+
+describe("getGrade", () => {
+	// The star rating in the area map header renders directly from these
+	// boundaries (5 stars must mean >=95% up to date) — pin every edge.
+	it("maps the documented percentage boundaries to grades", () => {
+		expect(getGrade(100)).toBe(5);
+		expect(getGrade(95)).toBe(5);
+		expect(getGrade(94)).toBe(4);
+		expect(getGrade(75)).toBe(4);
+		expect(getGrade(74)).toBe(3);
+		expect(getGrade(50)).toBe(3);
+		expect(getGrade(49)).toBe(2);
+		expect(getGrade(25)).toBe(2);
+		expect(getGrade(24)).toBe(1);
+		expect(getGrade(0)).toBe(1);
 	});
 });
