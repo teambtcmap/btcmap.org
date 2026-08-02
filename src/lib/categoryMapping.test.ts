@@ -420,4 +420,81 @@ describe("categoryMapping", () => {
 			expect(getIconColorWithFallback("some_unknown_icon")).not.toBe("");
 		});
 	});
+
+	// The map pins (search branch), the panel's filteredSearchResults, and the
+	// store's applyCategoryFilter split between filterMerchantsByCategory
+	// (group icon-list membership) and placeMatchesCategory (last-write-wins
+	// icon→category lookup). They are extensionally equal only while every
+	// configured icon is truthy AND no icon appears in two groups (a falsy
+	// icon would match `=== ""` in one predicate and early-return in the
+	// other) — the moment either breaks, pins and list silently diverge again
+	// (the #1159 bug class). These tests make that divergence loud instead of
+	// silent.
+	describe("category predicate equivalence", () => {
+		// Every mapped icon, plus the shapes callers actually see: unknown,
+		// empty, and missing icons.
+		const corpus: Place[] = [
+			...CATEGORY_ENTRIES.flatMap(([, group]) =>
+				group.icons.map((icon) => createMockPlace({ icon })),
+			),
+			createMockPlace({ icon: "some_unknown_icon" }),
+			createMockPlace({ icon: "" }),
+			createMockPlace({}),
+		];
+
+		it("every icon is truthy and belongs to exactly one category group", () => {
+			const seen = new Map<string, CategoryKey>();
+			for (const [key, group] of CATEGORY_ENTRIES) {
+				for (const icon of group.icons) {
+					expect(
+						icon,
+						`falsy icon in group "${key}" — placeMatchesCategory early-returns on falsy icons while filterMerchantsByCategory matches them`,
+					).toBeTruthy();
+					const previous = seen.get(icon);
+					// Distinguish the repeat cases: a duplicate WITHIN a group is
+					// harmless to predicate equivalence but still a config mistake;
+					// a repeat ACROSS groups is the divergence hazard itself.
+					expect(
+						previous,
+						previous === key
+							? `icon "${icon}" is listed twice in group "${key}" — remove the duplicate`
+							: `icon "${icon}" is in both "${previous}" and "${key}" — filterMerchantsByCategory and placeMatchesCategory now disagree; consolidate to one predicate (#1168) before shipping this`,
+					).toBeUndefined();
+					seen.set(icon, key);
+				}
+			}
+		});
+
+		it("filterMerchantsByCategory and placeMatchesCategory select the same set for every category", () => {
+			// Compare by icon, not id: a divergence failure then names the
+			// offending icon directly instead of printing random mock ids.
+			// Sorted so the claim is literally about the SET — a reimplementation
+			// that reorders while selecting the same places must not fail this.
+			for (const category of CATEGORIES) {
+				const viaGroupFilter = filterMerchantsByCategory(corpus, category)
+					.map((p) => p.icon ?? "<missing>")
+					.sort();
+				const viaPlacePredicate = corpus
+					.filter((p) => placeMatchesCategory(p, category))
+					.map((p) => p.icon ?? "<missing>")
+					.sort();
+				expect(viaGroupFilter, `category "${category}"`).toEqual(
+					viaPlacePredicate,
+				);
+			}
+		});
+
+		it("countMerchantsByCategory agrees with both predicates for every category", () => {
+			const counts = countMerchantsByCategory(corpus);
+			for (const category of CATEGORIES) {
+				if (category === "all") {
+					expect(counts.all).toBe(corpus.length);
+					continue;
+				}
+				expect(counts[category], `category "${category}"`).toBe(
+					filterMerchantsByCategory(corpus, category).length,
+				);
+			}
+		});
+	});
 });
