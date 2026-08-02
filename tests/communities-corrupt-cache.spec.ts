@@ -58,17 +58,22 @@ test.describe('Communities directory with a corrupted cache', () => {
 					open.onsuccess = () => {
 						const db = open.result;
 						const tx = db.transaction('keyvaluepairs', 'readwrite');
+						// Resolve on the TRANSACTION committing, not the request
+						// succeeding: request success fires before the commit is
+						// durable, and navigating away can abort an uncommitted
+						// transaction — which would make this test flaky.
+						tx.oncomplete = () => {
+							db.close();
+							resolve();
+						};
+						tx.onabort = () => reject(tx.error ?? new Error('tx aborted'));
+						tx.onerror = () => reject(tx.error ?? new Error('tx error'));
 						const store = tx.objectStore('keyvaluepairs');
 						const get = store.get('areas_v4');
 						get.onsuccess = () => {
 							const rows = get.result;
 							rows.splice(Math.min(900, rows.length), 0, '\n');
-							const put = store.put(rows, 'areas_v4');
-							put.onsuccess = () => {
-								db.close();
-								resolve();
-							};
-							put.onerror = () => reject(put.error);
+							store.put(rows, 'areas_v4');
 						};
 						get.onerror = () => reject(get.error);
 					};

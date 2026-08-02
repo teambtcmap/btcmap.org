@@ -35,11 +35,17 @@ describe("isSyncableRow", () => {
 		expect(isSyncableRow({ id: undefined, updated_at: "2026-01-01" })).toBe(
 			false,
 		);
+		// The merge maps key on id — only string/number keys dedupe correctly.
+		expect(isSyncableRow({ id: {}, updated_at: "2026-01-01" })).toBe(false);
+		expect(isSyncableRow({ id: [], updated_at: "2026-01-01" })).toBe(false);
 	});
 
 	it("rejects rows whose updated_at cannot drive the sync cursor", () => {
 		expect(isSyncableRow({ id: 1 })).toBe(false);
 		expect(isSyncableRow({ id: 1, updated_at: null })).toBe(false);
 		expect(isSyncableRow({ id: 1, updated_at: 12345 })).toBe(false);
+		// A string that isn't a date would poison the updated_since cursor.
+		expect(isSyncableRow({ id: 1, updated_at: "not-a-date" })).toBe(false);
+		expect(isSyncableRow({ id: 1, updated_at: "" })).toBe(false);
 	});
 });

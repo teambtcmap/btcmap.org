@@ -31,22 +31,24 @@ export interface SyncConfig<T extends SyncableEntity> {
 	cacheDuration?: number;
 }
 
-// A usable row is an object with an id. Anything else is corruption: a
-// non-JSON API response (maintenance page, proxy error) parsed as a string
-// gets character-iterated by the crawl loops, and the dedup collapse leaves
-// exactly one stray character (typically a trailing "\n") that then survives
-// every incremental merge in the persisted cache forever — crashing every
-// consumer that trusts the row shape. Validate at both trust boundaries:
-// API responses and cache hydration (so already-poisoned caches self-heal).
+// A usable row is an object with a string/number id and a parseable
+// updated_at — the two fields the merge maps and the pagination cursor
+// actually rely on. Anything else is corruption: a non-JSON API response
+// (maintenance page, proxy error) parsed as a string gets character-iterated
+// by the crawl loops, and the dedup collapse leaves exactly one stray
+// character (typically a trailing "\n") that then survives every incremental
+// merge in the persisted cache forever — crashing every consumer that trusts
+// the row shape. Validate at both trust boundaries: API responses and cache
+// hydration (so already-poisoned caches self-heal).
 export function isSyncableRow<T extends SyncableEntity>(
 	item: unknown,
 ): item is T {
+	if (typeof item !== "object" || item === null) return false;
+	const { id, updated_at } = item as { id?: unknown; updated_at?: unknown };
 	return (
-		typeof item === "object" &&
-		item !== null &&
-		"id" in item &&
-		(item as { id: unknown }).id != null &&
-		typeof (item as { updated_at?: unknown }).updated_at === "string"
+		(typeof id === "string" || typeof id === "number") &&
+		typeof updated_at === "string" &&
+		!Number.isNaN(Date.parse(updated_at))
 	);
 }
 
@@ -201,11 +203,16 @@ async function initialSync<T extends SyncableEntity>(
 				throw new Error("API returned invalid data format");
 			}
 			// Pagination advances on the RAW count; the cursor and the merge use
-			// only validated rows. Break when nothing usable remains so a
-			// garbage page can't loop forever on a stuck cursor.
+			// only validated rows. An empty page is the normal end of data; a
+			// non-empty page with zero valid rows is an anomaly — surface it as
+			// an error rather than silently truncating the sync (it also can't
+			// advance the cursor, so continuing would spin in place).
 			responseCount = response.data.length;
+			if (!responseCount) break;
 			const newItems = response.data.filter((item) => isSyncableRow<T>(item));
-			if (!newItems.length) break;
+			if (!newItems.length) {
+				throw new Error("API page contained no valid rows");
+			}
 
 			updatedSince = newItems[newItems.length - 1].updated_at;
 
@@ -265,8 +272,11 @@ async function incrementalSync<T extends SyncableEntity>(
 			throw new Error("API returned invalid data format");
 		}
 		responseCount = response.data.length;
+		if (!responseCount) break;
 		const newItems = response.data.filter((item) => isSyncableRow<T>(item));
-		if (!newItems.length) break;
+		if (!newItems.length) {
+			throw new Error("API page contained no valid rows");
+		}
 
 		updatedSince = newItems[newItems.length - 1].updated_at;
 
