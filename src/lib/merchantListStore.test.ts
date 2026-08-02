@@ -1,3 +1,4 @@
+import { CanceledError } from "axios";
 import { get } from "svelte/store";
 import type { Mock } from "vitest";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
@@ -438,9 +439,33 @@ describe("merchantListStore", () => {
 
 			expect(errToast).not.toHaveBeenCalled();
 		});
+
+		// Deliberate aborts through our AbortControllers reject with axios v1's
+		// CanceledError (name "CanceledError"), NOT "AbortError" — rapid pans
+		// cancel the prior request every time and must never toast.
+		it("should ignore axios CanceledError (no toast, no warn)", async () => {
+			const warnSpy = vi.spyOn(console, "warn").mockImplementation(() => {});
+			(api.get as Mock).mockRejectedValueOnce(new CanceledError("canceled"));
+
+			await merchantList.fetchAndReplaceList({ lat: 0, lon: 0 }, 10);
+
+			expect(errToast).not.toHaveBeenCalled();
+			expect(warnSpy).not.toHaveBeenCalled();
+			warnSpy.mockRestore();
+		});
 	});
 
 	describe("fetchCountOnly", () => {
+		it("should ignore axios CanceledError (no warn)", async () => {
+			const warnSpy = vi.spyOn(console, "warn").mockImplementation(() => {});
+			(api.get as Mock).mockRejectedValueOnce(new CanceledError("canceled"));
+
+			await merchantList.fetchCountOnly({ lat: 0, lon: 0 }, 10);
+
+			expect(warnSpy).not.toHaveBeenCalled();
+			warnSpy.mockRestore();
+		});
+
 		it("should request only id field while no recency filter is active", async () => {
 			(api.get as Mock).mockResolvedValueOnce({ data: [] });
 
@@ -582,6 +607,16 @@ describe("merchantListStore", () => {
 	});
 
 	describe("fetchEnrichedDetails", () => {
+		it("should ignore axios CanceledError (no warn)", async () => {
+			const warnSpy = vi.spyOn(console, "warn").mockImplementation(() => {});
+			(api.get as Mock).mockRejectedValueOnce(new CanceledError("canceled"));
+
+			await merchantList.fetchEnrichedDetails({ lat: 0, lon: 0 }, 5);
+
+			expect(warnSpy).not.toHaveBeenCalled();
+			warnSpy.mockRestore();
+		});
+
 		it("should merge into existing cache (not replace)", async () => {
 			// Set up initial cache
 			const initialPlace = createMockPlace({ id: 1 });
