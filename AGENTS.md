@@ -241,7 +241,7 @@ Use [https://nostrhub.io/nips](https://nostrhub.io/nips) as the definitive NIP s
 ## Project Structure Notes
 
 - `src/lib/sync/places.ts` always runs first and populates the `$places` store with `Place[]` data
-- Use `Place` type for v4 API data, `Element` type for v2 API data
+- Use `Place` type for v4 API data; the remaining v2 surfaces (area/report/event/user crawls via `createSyncFactory`, per-place issues on the merchant page from `/v2/elements`) use their own types (`Area`, `Report`, `Event`, `User`, `Issue`) — there is no `Element` type anymore
 - Prefer editing existing files over creating new ones
 - Only create documentation files when explicitly requested
 - **Svelte v4** — do not use Svelte v5 runes syntax (`$state`, `$derived`, `$effect`, etc.); we intentionally stay on v4
