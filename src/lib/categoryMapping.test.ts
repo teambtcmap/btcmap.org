@@ -468,13 +468,16 @@ describe("categoryMapping", () => {
 		it("filterMerchantsByCategory and placeMatchesCategory select the same set for every category", () => {
 			// Compare by icon, not id: a divergence failure then names the
 			// offending icon directly instead of printing random mock ids.
+			// Sorted so the claim is literally about the SET — a reimplementation
+			// that reorders while selecting the same places must not fail this.
 			for (const category of CATEGORIES) {
-				const viaGroupFilter = filterMerchantsByCategory(corpus, category).map(
-					(p) => p.icon ?? "<missing>",
-				);
+				const viaGroupFilter = filterMerchantsByCategory(corpus, category)
+					.map((p) => p.icon ?? "<missing>")
+					.sort();
 				const viaPlacePredicate = corpus
 					.filter((p) => placeMatchesCategory(p, category))
-					.map((p) => p.icon ?? "<missing>");
+					.map((p) => p.icon ?? "<missing>")
+					.sort();
 				expect(viaGroupFilter, `category "${category}"`).toEqual(
 					viaPlacePredicate,
 				);
