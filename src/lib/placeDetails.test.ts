@@ -216,6 +216,31 @@ describe("getPlaceDetails", () => {
 		expect(await getPlaceDetails(2)).toEqual(updated);
 	});
 
+	it("eviction abandons an in-flight request — the next caller refetches", async () => {
+		// elementsSync evicts when a place changed server-side; a caller
+		// arriving after the eviction must not join (and display) a request
+		// dispatched before it.
+		let resolveStale: (value: { data: Place }) => void = () => {};
+		mockGet.mockReturnValueOnce(
+			new Promise((resolve) => {
+				resolveStale = resolve;
+			}),
+		);
+		const stalePending = getPlaceDetails(3);
+
+		evictPlaceDetails(3);
+
+		const updated = makePlace({ id: 3, name: "Synced" });
+		mockGet.mockResolvedValueOnce({ data: updated });
+		expect(await getPlaceDetails(3)).toEqual(updated);
+		expect(mockGet).toHaveBeenCalledTimes(2);
+
+		// The abandoned request settles late and must not clobber the cache
+		resolveStale({ data: makePlace({ id: 3, name: "Stale" }) });
+		await stalePending;
+		expect(await getPlaceDetails(3)).toEqual(updated);
+	});
+
 	it("serves a primed record and stops after eviction", async () => {
 		const place = makePlace({ id: 8 });
 		primePlaceDetails(place);

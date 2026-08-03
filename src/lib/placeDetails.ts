@@ -143,4 +143,8 @@ export const primePlaceDetails = (place: Place): void => {
 export const evictPlaceDetails = (id: number): void => {
 	bumpGeneration(id);
 	detailsCache.delete(id);
+	// Abandon any pending request too: the generation bump already keeps its
+	// response out of the cache, but a caller arriving after the eviction
+	// must dispatch a refetch rather than join (and display) the stale one.
+	inFlight.delete(id);
 };
