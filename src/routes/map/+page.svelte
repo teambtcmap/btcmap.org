@@ -19,10 +19,6 @@ import MapLoadingMain from "$components/MapLoadingMain.svelte";
 import MapUnsupportedFallback from "$components/MapUnsupportedFallback.svelte";
 import { trackEvent } from "$lib/analytics";
 import {
-	filterMerchantsByCategory,
-	placeMatchesCategory,
-} from "$lib/categoryMapping";
-import {
 	BREAKPOINTS,
 	CLUSTERING_DISABLED_ZOOM,
 	DEFAULT_MAP_LAT,
@@ -69,6 +65,11 @@ import {
 	getZoomBehavior,
 } from "$lib/map/viewport";
 import { loadCachedView, saveCachedView } from "$lib/map/viewportCache";
+import {
+	computeVisibleSignature,
+	placesRevision,
+	selectVisiblePlaces,
+} from "$lib/map/visiblePlaces";
 import { hasWebGL } from "$lib/map/webgl";
 import {
 	MERCHANT_URL_CHANGE_EVENT,
@@ -78,7 +79,6 @@ import { merchantDrawer } from "$lib/merchantDrawerStore";
 import { merchantList } from "$lib/merchantListStore";
 import { savedPlaceIds } from "$lib/session";
 import {
-	lastUpdatedPlaceId,
 	places,
 	placesById,
 	placesError,
@@ -91,7 +91,6 @@ import { theme } from "$lib/theme";
 import type { Place } from "$lib/types";
 import { userLocation } from "$lib/userLocationStore";
 import { debounce, errToast, isBoosted } from "$lib/utils";
-import { filterPlacesByRecency } from "$lib/verification";
 
 import type { PageData } from "./$types";
 import MapControls from "./components/MapControls.svelte";
@@ -153,18 +152,12 @@ let destroyed = false;
 let spiderfier: Spiderfy | undefined;
 let styleLoaded = false;
 let webglUnsupported = false;
-let lastPlacesLength = -1;
-let lastSavedIdsSize = -1;
-let lastEnrichedCacheSize = -1;
-let lastLocale: string | null | undefined;
 let lastAppliedLabelTheme: "light" | "dark" | undefined;
-// Signature of the mode-dependent visible set. Empty string forces an
-// initial sync; "n" = nearby (all places); "c:<category>" = nearby
-// narrowed by a chip; "s:<category>:<id>,<id>,…" = a search-result list
-// (optionally narrowed by a chip); the sync guard appends "|v:<years>"
-// for the verified-recency window. Distinct from lastPlacesLength
-// because a fresh search or chip switch may leave the count unchanged.
-let lastSearchModeSig = "";
+// The one render signature gating syncPlacesToSource: the visibility
+// signature (computeVisibleSignature — mode/category/recency/gate/boosts/
+// $placesRevision/search ids) joined with the render-only inputs (saved-ids
+// size, enriched-cache size, locale). Empty string forces a sync.
+let lastRenderSig = "";
 
 // Last place list fed to the sources, kept so the boosted-clustering boundary
 // re-sync (on zoom crossing BOOSTED_CLUSTERING_MAX_ZOOM) can rebuild without a
@@ -823,15 +816,11 @@ const loadSavedBadgeSprite = async (m: MapLibreMap): Promise<void> => {
 	m.triggerRepaint();
 };
 
-const syncPlacesToSource = (rawList: Place[]) => {
+// Renders exactly the list it is given — all visibility policy (search,
+// category, recency, boosts) lives upstream in selectVisiblePlaces; this
+// function must never re-filter or accept an unfiltered list.
+const syncPlacesToSource = (list: Place[]) => {
 	if (!map || !styleLoaded) return;
-	// "Boosted locations only" narrows every sync path (markers, the boosted
-	// source and the heatmap) to currently-boosted places — except in search
-	// mode, where an explicit query should surface all matches on the map.
-	const list =
-		boostsOnly && get(merchantList).mode !== "search"
-			? rawList.filter(isBoosted)
-			: rawList;
 	const source = map.getSource("places") as GeoJSONSource | undefined;
 	const boostedSource = map.getSource("places-boosted") as
 		| GeoJSONSource
@@ -885,87 +874,48 @@ const triggerEnrichmentIfNeeded = debounce(() => {
 	);
 }, ENRICHMENT_DEBOUNCE_DELAY);
 
-// In-place mutations to a place (boost confirmation, new comment count)
-// don't change array length or any of the size counters below, so the marker
-// block's guard wouldn't repaint the pin. lastUpdatedPlaceId is set by the
-// boost/comment flows (BoostContent, CommentAdd) right after they await
-// updateSinglePlace() in $lib/sync/places.ts — invalidate the memo so the
-// marker block re-runs with the current search/category/recency filters and
-// re-syncs (same idiom as the style-load reset). Never sync raw $places here:
-// that bypasses every filter and poisons lastSyncedList for the heatmap and
-// zoom-crossing paths. ORDERING MATTERS: this block must stay ABOVE the
-// marker block. Svelte 4 excludes self-assigned variables when ordering
-// reactive blocks, so the marker block (which also assigns lastPlacesLength)
-// is not sorted after this one — only source order guarantees the marker
-// block's dirty check sees the bit this assignment sets within the same
-// update pass. Note: in search mode pins render from searchResults, which
-// updateSinglePlace doesn't refresh, so the re-sync repaints only data the
-// store already holds.
-$: if (map && styleLoaded && $lastUpdatedPlaceId !== undefined) {
-	lastPlacesLength = -1;
-	lastUpdatedPlaceId.set(undefined);
-}
-
-// Rebuild only when the count changes meaningfully (and always on first load),
-// to avoid jank on incremental store updates with ~50k places worldwide.
-// Also rebuild when $savedPlaceIds size changes so the saved badge appears/
-// disappears as the user toggles saves, and when the enriched details cache
-// grows so place-name labels appear as their data arrives. Tracking size
-// catches add/remove but misses the swap case (e.g. save A + unsave B with
-// no net size change) — accepted tradeoff for now.
+// The visible set comes from the shared pipeline (selectVisiblePlaces) so the
+// pins can never disagree with the list, counts, or camera again — the
+// #1158-#1162 bug class. The render signature gates the expensive
+// syncPlacesToSource: visibility inputs via computeVisibleSignature (with
+// $placesRevision covering bulk turnover AND in-place mutations from the
+// boost/comment flows — this replaces the old lastUpdatedPlaceId handshake
+// and its source-order contract), plus render-only inputs: $savedPlaceIds
+// size (saved badges), enriched-cache size (name labels), and locale. Size
+// tracking misses the swap case (save A + unsave B, no net change) —
+// accepted tradeoff carried over from the memo it replaces.
 $: if (map && styleLoaded && $places) {
 	const inSearch =
 		$merchantList.mode === "search" && $merchantList.searchResults.length > 0;
-	const category = $merchantList.selectedCategory;
-	let effective: Place[];
-	if (inSearch) {
-		// Apply the category chips to search pins with the panel's exact
-		// predicate (placeMatchesCategory, see filteredSearchResults) so the
-		// list and the map always show the same set.
-		effective =
-			category === "all"
-				? $merchantList.searchResults
-				: $merchantList.searchResults.filter((p) =>
-						placeMatchesCategory(p, category),
-					);
-	} else if (category !== "all") {
-		effective = filterMerchantsByCategory($places, category);
-	} else {
-		effective = $places;
-	}
-	// Verified-recency filter. Search results carry verified_at natively
-	// (LIST_ITEM), so filter them regardless of the bulk-enrichment flag —
-	// matching the panel's filteredSearchResults. The $places-derived branches
-	// gate on the flag: the bulk feed has no verified_at until enrichment lands,
-	// so until then treat the filter as inert rather than hiding every pin.
-	const verifiedYears = $merchantList.verifiedWithinYears;
-	const datesReady = verifiedYears == null || inSearch || $verifiedDatesLoaded;
-	if (datesReady) {
-		effective = filterPlacesByRecency(effective, verifiedYears);
-	}
-	const placesLen = effective.length;
-	const savedSize = $savedPlaceIds.size;
-	const cacheSize = $merchantList.placeDetailsCache.size;
-	const currentLocale = $locale;
-	const modeSig = inSearch
-		? `s:${category}:${$merchantList.searchResults.map((p) => p.id).join(",")}`
-		: category !== "all"
-			? `c:${category}`
-			: "n";
-	const searchSig = `${modeSig}|v:${verifiedYears ?? "any"}`;
-	if (
-		placesLen !== lastPlacesLength ||
-		savedSize !== lastSavedIdsSize ||
-		cacheSize !== lastEnrichedCacheSize ||
-		currentLocale !== lastLocale ||
-		searchSig !== lastSearchModeSig
-	) {
-		lastPlacesLength = placesLen;
-		lastSavedIdsSize = savedSize;
-		lastEnrichedCacheSize = cacheSize;
-		lastLocale = currentLocale;
-		lastSearchModeSig = searchSig;
-		syncPlacesToSource(effective);
+	const inputs = {
+		mode: (inSearch ? "search" : "nearby") as "search" | "nearby",
+		category: $merchantList.selectedCategory,
+		recency: $merchantList.verifiedWithinYears,
+		// Search rows carry verified_at natively (LIST_ITEM); the bulk feed
+		// only after enrichment — the pipeline keeps the filter inert until
+		// the dates land rather than hiding every pin.
+		recencyReady: inSearch || $verifiedDatesLoaded,
+		// Markers exempt search mode from the boosted-only narrowing: an
+		// explicit query should surface all matches on the map.
+		boostsOnly: boostsOnly && !inSearch,
+	};
+	const renderSig = [
+		computeVisibleSignature(
+			inputs,
+			$placesRevision,
+			inSearch ? $merchantList.searchResults.map((p) => p.id).join(",") : "",
+		),
+		$savedPlaceIds.size,
+		$merchantList.placeDetailsCache.size,
+		$locale,
+	].join("~");
+	if (renderSig !== lastRenderSig) {
+		lastRenderSig = renderSig;
+		const { selection } = selectVisiblePlaces({
+			...inputs,
+			places: inSearch ? $merchantList.searchResults : $places,
+		});
+		syncPlacesToSource(selection);
 	}
 }
 
@@ -2012,14 +1962,14 @@ onMount(async () => {
 		}
 
 		styleLoaded = true;
-		lastPlacesLength = -1;
-		lastSavedIdsSize = -1;
-		lastEnrichedCacheSize = -1;
-		lastSearchModeSig = "";
+		// Invalidate the render signature: setting styleLoaded re-runs the
+		// marker block, which recomputes the filtered selection and syncs it.
+		// Never sync raw $places here — syncPlacesToSource renders exactly
+		// what it is given and all filtering lives upstream in the pipeline.
+		lastRenderSig = "";
 		// Apply theme-dependent label palette now that the layer exists.
 		applyLabelPalette(map, get(theme));
 		lastAppliedLabelTheme = get(theme);
-		syncPlacesToSource($places);
 		// Apply the persisted heatmap on/off state now that the layer
 		// exists. The toggle control can't do this itself — it's added
 		// before 'load' fires, so the layer isn't present at addControl
