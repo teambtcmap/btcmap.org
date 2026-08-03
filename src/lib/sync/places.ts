@@ -457,7 +457,9 @@ const applyPlaceUpdate = async (place: Place): Promise<Place | null> => {
 		return null;
 	}
 
-	// Check if place was deleted - remove from cache if present
+	// Check if place was deleted - remove from cache if present. Evicting the
+	// details cache up front (before the fallible persist) is safe: eviction
+	// is conservative — worst case is an extra refetch, never wrong data.
 	if (place.deleted_at) {
 		evictPlaceDetails(place.id);
 		const updatedPlaces = cachedPlaces.filter((p) => p.id !== place.id);
@@ -469,8 +471,6 @@ const applyPlaceUpdate = async (place: Place): Promise<Place | null> => {
 		}
 		return null;
 	}
-
-	primePlaceDetails(place);
 
 	// Find and update the place in the array, or add it if missing
 	const placeIndex = cachedPlaces.findIndex((p) => p.id === place.id);
@@ -487,6 +487,11 @@ const applyPlaceUpdate = async (place: Place): Promise<Place | null> => {
 	await yieldToMain();
 
 	places.set(updatedPlaces);
+
+	// Prime the details cache only after persistence + store publication
+	// succeed — priming first would leave drawers serving "updated" data
+	// while $places/localforage still hold the old record if setItem threw.
+	primePlaceDetails(place);
 	return place;
 };
 
