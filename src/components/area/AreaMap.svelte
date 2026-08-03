@@ -18,12 +18,9 @@ import ShowTags from "$components/ShowTags.svelte";
 import TaggingIssues from "$components/TaggingIssues.svelte";
 import { CLUSTERING_DISABLED_ZOOM, GradeTable } from "$lib/constants";
 import { computeBbox } from "$lib/map/bbox";
-import {
-	ensureSpritesForPlaces,
-	installPlaceholderHandler,
-} from "$lib/map/maplibreSprites";
-import { ensureRtlTextPlugin } from "$lib/map/rtl";
-import { hasWebGL } from "$lib/map/webgl";
+import type { BtcmapMapHandle } from "$lib/map/createMap";
+import { createBtcmapMap } from "$lib/map/createMap";
+import { ensureSpritesForPlaces } from "$lib/map/maplibreSprites";
 import { theme } from "$lib/theme";
 import type { Grade, Place } from "$lib/types";
 import { getGrade, isBoosted } from "$lib/utils";
@@ -59,9 +56,6 @@ const EMPTY_COLLECTION: PlaceFeatureCollection = {
 	features: [],
 };
 
-const STYLE_LIGHT = "https://tiles.openfreemap.org/styles/liberty";
-const STYLE_DARK = "https://static.btcmap.org/map-styles/dark.json";
-
 const AREA_OUTLINE_COLOR = "#0E95AF";
 
 // Local drawer state — mirrors the legacy Leaflet AreaMap component.
@@ -94,9 +88,9 @@ $: gradeTooltip &&
 
 let mapContainer: HTMLDivElement;
 let map: MapLibreMap | undefined;
+let mapHandle: BtcmapMapHandle | undefined;
 let mapLoaded = false;
 let styleLoaded = false;
-let lastAppliedTheme: "light" | "dark" | undefined;
 // Track last-applied props by reference so the area-change reactive only
 // fires on genuine prop turnover, not on theme-swap styleLoaded toggles.
 let lastAppliedGeoJSON: GeoJSON | undefined;
@@ -395,9 +389,6 @@ const attachInteractions = (m: MapLibreMap) => {
 	});
 };
 
-const styleUrlForTheme = (t: "light" | "dark" | undefined): string =>
-	t === "dark" ? STYLE_DARK : STYLE_LIGHT;
-
 let initialRenderComplete = false;
 let dataInitialized = false;
 let destroyed = false;
@@ -411,92 +402,44 @@ onMount(() => {
 
 onDestroy(() => {
 	destroyed = true;
-	map?.remove();
+	mapHandle?.destroy();
+	mapHandle = undefined;
 	map = undefined;
 });
 
+// The bring-up (WebGL check, dynamic import, controls, theme-swap state
+// machine) lives in createBtcmapMap; this component supplies the area
+// overlays and the first-load camera/interaction wiring. The shared sprite
+// cache evicts resolved promises on completion, so any sprites that didn't
+// survive a theme swap regenerate lazily against the new style.
 const initializeMap = async () => {
 	if (dataInitialized) return;
 	dataInitialized = true;
 
-	if (!hasWebGL()) {
+	const outcome = await createBtcmapMap({
+		container: mapContainer,
+		theme: $theme,
+		isCancelled: () => destroyed,
+		registerOverlays: (m) => initializeMapContents(m),
+		onFirstLoad: (m) => {
+			fitToArea(m);
+			attachInteractions(m);
+			mapLoaded = true;
+			lastAppliedGeoJSON = geoJSON;
+			lastAppliedFilteredPlaces = filteredPlaces;
+		},
+		onStyleReadyChange: (ready) => {
+			styleLoaded = ready;
+		},
+	});
+
+	if (outcome.status === "unsupported") {
 		webglUnsupported = true;
 		return;
 	}
-	const maplibre = await import("maplibre-gl");
-	ensureRtlTextPlugin(maplibre);
-	// Component may have been destroyed while the dynamic import was in
-	// flight (fast navigation away). Bail before binding to a stale
-	// container — otherwise we leak a Map instance that onDestroy can't
-	// clean up because it already ran with `map` undefined.
-	if (destroyed) return;
-
-	lastAppliedTheme = $theme;
-
-	map = new maplibre.Map({
-		container: mapContainer,
-		style: styleUrlForTheme($theme),
-		maxZoom: 21,
-		dragRotate: true,
-		touchZoomRotate: true,
-		pitchWithRotate: false,
-		attributionControl: { compact: true },
-	});
-
-	map.addControl(
-		new maplibre.NavigationControl({
-			showCompass: true,
-			showZoom: true,
-			visualizePitch: false,
-		}),
-		"top-right",
-	);
-
-	const geolocate = new maplibre.GeolocateControl({
-		positionOptions: { enableHighAccuracy: true },
-		trackUserLocation: true,
-		showUserLocation: true,
-		showAccuracyCircle: true,
-		fitBoundsOptions: { maxZoom: 15, linear: true },
-	});
-	map.addControl(geolocate, "top-right");
-
-	// MapLibre logs a "image missing" warning whenever a symbol references an
-	// icon id that hasn't been registered yet. Composite pin sprites resolve
-	// async; registering a transparent stub for any missing id keeps the
-	// console quiet and prevents flicker until the real sprite lands.
-	installPlaceholderHandler(map);
-
-	// First load — register everything and mark mapLoaded once stable.
-	map.on("load", () => {
-		if (!map) return;
-		initializeMapContents(map);
-		fitToArea(map);
-		attachInteractions(map);
-		styleLoaded = true;
-		mapLoaded = true;
-		lastAppliedGeoJSON = geoJSON;
-		lastAppliedFilteredPlaces = filteredPlaces;
-	});
-};
-
-// Theme reactivity — swap the basemap, then re-register area + places overlays
-// on the resulting style.load event. The shared sprite cache evicts resolved
-// promises on completion, so any sprites that didn't survive the style swap
-// regenerate lazily on first render against the new style.
-const applyTheme = (next: "light" | "dark" | undefined) => {
-	if (!map) return;
-	if (!styleLoaded) return;
-	if (next === lastAppliedTheme) return;
-	lastAppliedTheme = next;
-	styleLoaded = false;
-	const onStyleLoad = () => {
-		if (!map) return;
-		initializeMapContents(map);
-		styleLoaded = true;
-	};
-	map.once("style.load", onStyleLoad);
-	map.setStyle(styleUrlForTheme(next));
+	if (outcome.status === "cancelled") return;
+	mapHandle = outcome.handle;
+	map = outcome.handle.map;
 };
 
 $: if (initialRenderComplete && geoJSON && filteredPlaces && !dataInitialized) {
@@ -538,7 +481,7 @@ $: if (
 }
 
 $: if (map && styleLoaded) {
-	applyTheme($theme);
+	mapHandle?.setTheme($theme);
 }
 </script>
 
