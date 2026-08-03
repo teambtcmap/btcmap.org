@@ -262,13 +262,18 @@ function createMerchantListStore() {
 					preCategory.length > options.hideIfExceeds
 				) {
 					// Too many results - store count but show empty list
-					// The panel will display "zoom in" message, button shows count
+					// The panel will display "zoom in" message, button shows count.
+					// The auto-reset still persists: a selected chip whose count
+					// dropped to zero must snap back to "all" here too, or the chip
+					// state disagrees with the markers (which render the pipeline's
+					// reset selection independently).
 					update((state) => ({
 						...state,
 						merchants: [],
 						totalCount: preCategory.length,
 						isLoadingList: false,
 						categoryCounts: counts,
+						selectedCategory: effectiveCategory,
 					}));
 				} else {
 					const sorted = sortMerchants(

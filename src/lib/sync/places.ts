@@ -356,12 +356,17 @@ export const elementsSync = async () => {
 				// A periodic re-sync that merged nothing must NOT republish:
 				// places.set notifies every subscriber (and bumps placesRevision)
 				// even when the array is unchanged, sending ~50k rows back through
-				// the map pipeline once per sync interval for no reason. The first
+				// the map pipeline once per sync interval for no reason. Applies
+				// ONLY to cache-based re-syncs: a CDN baseline download (no local
+				// cache — e.g. after a failed persist) always publishes, since the
+				// in-memory data may be older than the fresh baseline. The first
 				// publication of the session (empty store) always goes through —
 				// hydrating from the cache IS a change. The synced_at watermark
 				// still advances so the update window stays minimal.
 				const nothingChanged =
-					mergedUpdateCount === 0 && get(places).length > 0;
+					cachedPlaces != null &&
+					mergedUpdateCount === 0 &&
+					get(places).length > 0;
 				if (nothingChanged) {
 					if (apiSucceeded) {
 						await localforage.setItem(
