@@ -159,6 +159,19 @@ describe("createBtcmapMap", () => {
 		expect(fake.setStyleCalls).toEqual([]);
 	});
 
+	it("treats undefined and light as the same theme — no restyle on resolve", async () => {
+		// Callers may construct before the theme store resolves; undefined and
+		// "light" map to the same style, so resolving must not restyle.
+		const { handle, fake } = await readyOutcome({ theme: undefined });
+		fake.fire("load");
+
+		handle.setTheme("light");
+		expect(fake.setStyleCalls).toEqual([]);
+
+		handle.setTheme("dark");
+		expect(fake.setStyleCalls).toEqual([styleUrlForTheme("dark")]);
+	});
+
 	it("ignores setTheme while a previous swap's style is still loading", async () => {
 		const { handle, fake } = await readyOutcome();
 		fake.fire("load");

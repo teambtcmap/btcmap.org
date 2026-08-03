@@ -55,7 +55,13 @@ export const createBtcmapMap = async (opts: {
 	ensureRtlTextPlugin(maplibre);
 	if (opts.isCancelled?.()) return { status: "cancelled" };
 
-	let appliedTheme = opts.theme;
+	// Normalize so undefined ≡ "light" (they resolve to the same style):
+	// otherwise a caller that initializes with an unresolved theme and later
+	// passes "light" would trigger a full setStyle round-trip for nothing.
+	const normalizeTheme = (t: MapThemeName): "light" | "dark" =>
+		t === "dark" ? "dark" : "light";
+
+	let appliedTheme = normalizeTheme(opts.theme);
 	let ready = false;
 	let disposed = false;
 
@@ -110,15 +116,16 @@ export const createBtcmapMap = async (opts: {
 	const setTheme = (next: MapThemeName) => {
 		if (disposed) return;
 		if (!ready) return;
-		if (next === appliedTheme) return;
-		appliedTheme = next;
+		const normalized = normalizeTheme(next);
+		if (normalized === appliedTheme) return;
+		appliedTheme = normalized;
 		setReady(false);
 		map.once("style.load", () => {
 			if (disposed) return;
 			opts.registerOverlays(map);
 			setReady(true);
 		});
-		map.setStyle(styleUrlForTheme(next));
+		map.setStyle(styleUrlForTheme(normalized));
 	};
 
 	const destroy = () => {
