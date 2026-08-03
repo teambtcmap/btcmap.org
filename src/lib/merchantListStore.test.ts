@@ -676,22 +676,27 @@ describe("merchantListStore", () => {
 		});
 
 		it("should leave the cache untouched on a non-array response", async () => {
+			// try/finally: a failing assertion must not leave console.warn
+			// mocked for later tests (beforeEach clears, but doesn't restore)
 			const warnSpy = vi.spyOn(console, "warn").mockImplementation(() => {});
-			// Seed the cache through the list path
-			const initialPlace = createMockPlace({ id: 1 });
-			(api.get as Mock).mockResolvedValueOnce({ data: [initialPlace] });
-			await merchantList.fetchAndReplaceList({ lat: 0, lon: 0 }, 10);
+			try {
+				// Seed the cache through the list path
+				const initialPlace = createMockPlace({ id: 1 });
+				(api.get as Mock).mockResolvedValueOnce({ data: [initialPlace] });
+				await merchantList.fetchAndReplaceList({ lat: 0, lon: 0 }, 10);
 
-			// An HTML error page served with 200 must not poison the cache
-			(api.get as Mock).mockResolvedValueOnce({ data: "<html>oops</html>" });
-			await merchantList.fetchEnrichedDetails({ lat: 0, lon: 0 }, 10);
+				// An HTML error page served with 200 must not poison the cache
+				(api.get as Mock).mockResolvedValueOnce({ data: "<html>oops</html>" });
+				await merchantList.fetchEnrichedDetails({ lat: 0, lon: 0 }, 10);
 
-			const state = get(merchantList);
-			expect(state.placeDetailsCache.has(1)).toBe(true);
-			expect(state.placeDetailsCache.size).toBe(1);
-			expect(state.isEnrichingDetails).toBe(false);
-			expect(warnSpy).toHaveBeenCalled();
-			warnSpy.mockRestore();
+				const state = get(merchantList);
+				expect(state.placeDetailsCache.has(1)).toBe(true);
+				expect(state.placeDetailsCache.size).toBe(1);
+				expect(state.isEnrichingDetails).toBe(false);
+				expect(warnSpy).toHaveBeenCalled();
+			} finally {
+				warnSpy.mockRestore();
+			}
 		});
 	});
 
