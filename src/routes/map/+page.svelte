@@ -893,8 +893,13 @@ $: if (map && styleLoaded && $places) {
 		recency: $merchantList.verifiedWithinYears,
 		// Search rows carry verified_at natively (LIST_ITEM); the bulk feed
 		// only after enrichment — the pipeline keeps the filter inert until
-		// the dates land rather than hiding every pin.
-		recencyReady: inSearch || $verifiedDatesLoaded,
+		// the dates land rather than hiding every pin. Trivially ready when
+		// no window is selected (matching setMerchants in the list store), so
+		// the dates landing can't change the signature while the filter is off.
+		recencyReady:
+			$merchantList.verifiedWithinYears == null ||
+			inSearch ||
+			$verifiedDatesLoaded,
 		// Markers exempt search mode from the boosted-only narrowing: an
 		// explicit query should surface all matches on the map.
 		boostsOnly: boostsOnly && !inSearch,
