@@ -43,7 +43,7 @@ $: if (merchantId && merchantId !== lastFetchedId) {
 		(m) => (merchant = m),
 		(f) => (isLoading = f),
 		(id) => (lastFetchedId = id),
-		abortController.signal,
+		{ signal: abortController.signal },
 	);
 }
 
@@ -62,7 +62,8 @@ const closeDrawer = () => {
 const handleBoost = () => boostMerchant(merchant, merchantId, setBoostLoading);
 
 $: if ($boost !== undefined && merchant) {
-	// Boost state changed - refresh merchant data
+	// Boost state changed - refresh merchant data. fresh bypasses the details
+	// cache so a just-boosted merchant is never served its pre-boost record.
 	if (merchantId) {
 		fetchMerchantDetails(
 			merchantId,
@@ -70,6 +71,7 @@ $: if ($boost !== undefined && merchant) {
 			(m) => (merchant = m),
 			(f) => (isLoading = f),
 			(id) => (lastFetchedId = id),
+			{ fresh: true },
 		);
 	}
 }

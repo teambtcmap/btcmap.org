@@ -6,6 +6,7 @@ import tippy, { type Instance } from "tippy.js";
 import BoostButton from "$components/BoostButton.svelte";
 import Icon from "$components/Icon.svelte";
 import { _ } from "$lib/i18n";
+import { DETAIL_FIELDS, hasDetailFields } from "$lib/placeDetails";
 import type { Place } from "$lib/types";
 import {
 	fetchEnhancedPlace,
@@ -24,7 +25,7 @@ let enhancedMerchant: Place | null = null;
 let isEnhancing = false;
 
 // Check if we need to fetch enhanced data (only essential fields)
-$: needsEnhancement = !merchant.name || !merchant.address;
+$: needsEnhancement = !hasDetailFields(merchant, DETAIL_FIELDS.card);
 
 // Fetch enhanced data when needed
 async function enhanceMerchantData() {

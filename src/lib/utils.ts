@@ -12,8 +12,8 @@ import { subDays } from "date-fns/subDays";
 import { get } from "svelte/store";
 
 import { API_BASE } from "$lib/api-base";
-import { PLACE_FIELD_SETS } from "$lib/api-fields";
 import { MERCHANT_LIST_MAX_ITEMS } from "$lib/constants";
+import { getPlaceDetails } from "$lib/placeDetails";
 import { areas } from "$lib/store";
 import { areasSync } from "$lib/sync/areas";
 import { theme } from "$lib/theme";
@@ -437,13 +437,13 @@ export const formatVerifiedHuman = (isoDateString?: string): string => {
 	return format(parsedDate, "d MMMM yyyy");
 };
 
-// Cache for enhanced place data to avoid repeated API calls
+// Cache for enhanced place data — keyed separately from the raw details
+// cache in $lib/placeDetails because the entries here carry the normalized
+// osm:contact:* social fallbacks
 const enhancedPlacesCache = new Map<string, Place>();
 
-/**
- * Fetches enhanced place data (name, address, etc.) for a specific place ID
- * Uses caching to avoid repeated API calls for the same place
- */
+// Fetches enhanced place data (name, address, etc.) for a specific place ID,
+// with the osm:contact:* fields mapped onto the official social fields
 export async function fetchEnhancedPlace(
 	placeId: string,
 ): Promise<Place | null> {
@@ -453,19 +453,7 @@ export async function fetchEnhancedPlace(
 	}
 
 	try {
-		const response = await fetch(
-			`${API_BASE}/v4/places/${placeId}?fields=${PLACE_FIELD_SETS.COMPLETE_PLACE.join(",")}`,
-		);
-
-		if (!response.ok) {
-			console.warn(
-				`Failed to fetch enhanced data for place ${placeId}:`,
-				response.status,
-			);
-			return null;
-		}
-
-		const basePlace: Place = await response.json();
+		const basePlace = await getPlaceDetails(Number(placeId));
 		const enhancedPlace: Place = { ...basePlace };
 
 		// Map osm:contact fields to official fields as fallback
