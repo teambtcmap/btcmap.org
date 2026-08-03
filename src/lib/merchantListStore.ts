@@ -128,6 +128,28 @@ function filterValidPlaces<T extends { id?: unknown }>(items: T[]): T[] {
 	return items.filter((item): item is T => typeof item?.id === "number");
 }
 
+// The one radius-search fetcher behind the three list reducers
+// (fetchAndReplaceList, fetchCountOnly, fetchEnrichedDetails). Owns the URL
+// shape, the 10s transport policy, the array-shape validation (the API can
+// return an HTML error page), and the dropping of rows without a numeric id.
+// What each reducer does with the rows — and how loudly it fails — stays
+// that reducer's own policy.
+async function searchPlacesInRadius<T extends { id?: unknown }>(
+	center: { lat: number; lon: number },
+	radiusKm: number,
+	fields: string,
+	signal: AbortSignal,
+): Promise<T[]> {
+	const response = await api.get<T[]>(
+		`${API_BASE}/v4/places/search/?lat=${center.lat}&lon=${center.lon}&radius_km=${radiusKm}&fields=${fields}`,
+		{ timeout: 10000, signal },
+	);
+	if (!Array.isArray(response.data)) {
+		throw new Error("API returned invalid data format");
+	}
+	return filterValidPlaces(response.data);
+}
+
 function createMerchantListStore() {
 	const store = writable<MerchantListState>(initialState);
 	const { subscribe, set, update } = store;
@@ -229,19 +251,12 @@ function createMerchantListStore() {
 			update((state) => ({ ...state, isLoadingList: true }));
 
 			try {
-				const fields = buildFieldsParam(PLACE_FIELD_SETS.LIST_ITEM);
-				const response = await api.get<Place[]>(
-					`${API_BASE}/v4/places/search/?lat=${center.lat}&lon=${center.lon}&radius_km=${radiusKm}&fields=${fields}`,
-					{ timeout: 10000, signal: listAbortController.signal },
+				const validPlaces = await searchPlacesInRadius<Place>(
+					center,
+					radiusKm,
+					buildFieldsParam(PLACE_FIELD_SETS.LIST_ITEM),
+					listAbortController.signal,
 				);
-
-				// Validate response is an array (API may return HTML error page)
-				if (!Array.isArray(response.data)) {
-					throw new Error("API returned invalid data format");
-				}
-
-				// Filter out invalid items missing required id field
-				const validPlaces = filterValidPlaces(response.data);
 
 				// Build cache for enriched display (icons, addresses, etc.)
 				const placeDetailsCache = new Map<number, Place>();
@@ -342,18 +357,9 @@ function createMerchantListStore() {
 			try {
 				// Typed to the payload actually requested — these rows are not
 				// full Places and must not be handed to anything expecting one.
-				const response = await api.get<Pick<Place, "id" | "verified_at">[]>(
-					`${API_BASE}/v4/places/search/?lat=${center.lat}&lon=${center.lon}&radius_km=${radiusKm}&fields=${fields}`,
-					{ timeout: 10000, signal: listAbortController.signal },
-				);
-
-				// Validate response is an array (API may return HTML error page)
-				if (!Array.isArray(response.data)) {
-					throw new Error("API returned invalid data format");
-				}
-
-				// Filter out invalid items missing required id field
-				const validItems = filterValidPlaces(response.data);
+				const validItems = await searchPlacesInRadius<
+					Pick<Place, "id" | "verified_at">
+				>(center, radiusKm, fields, listAbortController.signal);
 				const recencyPlaces = filterPlacesByRecency(
 					validItems,
 					verifiedWithinYears,
@@ -397,14 +403,14 @@ function createMerchantListStore() {
 			update((state) => ({ ...state, isEnrichingDetails: true }));
 
 			try {
-				const fields = buildFieldsParam(PLACE_FIELD_SETS.LIST_ITEM);
-				const response = await api.get<Place[]>(
-					`${API_BASE}/v4/places/search/?lat=${center.lat}&lon=${center.lon}&radius_km=${radiusKm}&fields=${fields}`,
-					{ timeout: 10000, signal: detailsAbortController.signal },
+				const validPlaces = await searchPlacesInRadius<Place>(
+					center,
+					radiusKm,
+					buildFieldsParam(PLACE_FIELD_SETS.LIST_ITEM),
+					detailsAbortController.signal,
 				);
 
-				// Filter out invalid items and merge into existing cache
-				const validPlaces = filterValidPlaces(response.data);
+				// Merge into existing cache
 				update((state) => {
 					const mergedCache = new Map(state.placeDetailsCache);
 					validPlaces.forEach((place) => mergedCache.set(place.id, place));
