@@ -6,7 +6,12 @@ import {
 	shouldClusterBoostedAtZoom,
 } from "$lib/map/boostedClustering";
 import { HEATMAP_STORAGE_KEY } from "$lib/map/heatmap";
-import { ensureSpritesForPlaces, loadSvgImage } from "$lib/map/maplibreSprites";
+import {
+	addRealImage,
+	ensureSpritesForPlaces,
+	hasRealImage,
+	loadSvgImage,
+} from "$lib/map/maplibreSprites";
 import type { Place } from "$lib/types";
 import { isBoosted } from "$lib/utils";
 
@@ -102,11 +107,14 @@ const buildSavedBadgeSvg = (bookmarkSvg: string): string => {
 // alpha keeps pixels effectively invisible while ensuring
 // queryRenderedFeatures registers hits on the icon footprint.
 const loadClusterHitSprite = async (m: MapLibreMap): Promise<void> => {
-	if (m.hasImage("cluster-hit")) return;
+	// Gate on the REAL registration, not hasImage(): the styleimagemissing
+	// placeholder can stub this id if a layer renders before/without the real
+	// sprite, and a hasImage() gate would then block every retry.
+	if (hasRealImage(m, "cluster-hit")) return;
 	const svg = `<svg xmlns="http://www.w3.org/2000/svg" width="40" height="40" viewBox="0 0 40 40"><circle cx="20" cy="20" r="20" fill="rgba(0,0,0,0.004)"/></svg>`;
 	const img = await loadSvgImage(svg);
-	if (!m.hasImage("cluster-hit"))
-		m.addImage("cluster-hit", img, { pixelRatio: 1 });
+	if (!hasRealImage(m, "cluster-hit"))
+		addRealImage(m, "cluster-hit", img, { pixelRatio: 1 });
 };
 
 // 16×16 green disc to back the comment count text. Matches /map's
@@ -114,7 +122,7 @@ const loadClusterHitSprite = async (m: MapLibreMap): Promise<void> => {
 // on a canvas — simpler than the SVG → data-URL → <img> roundtrip for
 // a flat shape.
 const loadCommentBadgeSprite = (m: MapLibreMap): void => {
-	if (m.hasImage("comment-badge-bg")) return;
+	if (hasRealImage(m, "comment-badge-bg")) return;
 	// Draw at 2× the logical 16×16 (= 32×32 backing canvas) and register
 	// with pixelRatio: 2 so MapLibre displays at the same logical size
 	// but reads from a higher-density bitmap — keeps the green disc
@@ -136,7 +144,8 @@ const loadCommentBadgeSprite = (m: MapLibreMap): void => {
 		Math.PI * 2,
 	);
 	ctx.fill();
-	m.addImage(
+	addRealImage(
+		m,
 		"comment-badge-bg",
 		ctx.getImageData(0, 0, SIZE * SCALE, SIZE * SCALE),
 		{ pixelRatio: SCALE },
@@ -144,7 +153,7 @@ const loadCommentBadgeSprite = (m: MapLibreMap): void => {
 };
 
 const loadSavedBadgeSprite = async (m: MapLibreMap): Promise<void> => {
-	if (m.hasImage("saved-badge")) return;
+	if (hasRealImage(m, "saved-badge")) return;
 	const encodedColor = encodeURIComponent(LINK_COLOR);
 	const url = `https://api.iconify.design/ic/baseline-bookmark-added.svg?color=${encodedColor}&width=10&height=10`;
 	const res = await fetch(url);
@@ -154,8 +163,8 @@ const loadSavedBadgeSprite = async (m: MapLibreMap): Promise<void> => {
 	const bookmarkSvg = await res.text();
 	const composite = buildSavedBadgeSvg(bookmarkSvg);
 	const img = await loadSvgImage(composite);
-	if (!m.hasImage("saved-badge"))
-		m.addImage("saved-badge", img, { pixelRatio: SAVED_BADGE_SCALE });
+	if (!hasRealImage(m, "saved-badge"))
+		addRealImage(m, "saved-badge", img, { pixelRatio: SAVED_BADGE_SCALE });
 	m.triggerRepaint();
 };
 
