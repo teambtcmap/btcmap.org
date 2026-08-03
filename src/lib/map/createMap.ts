@@ -1,16 +1,16 @@
 import type { Map as MapLibreMap } from "maplibre-gl";
 
+import { styleForBasemap } from "$lib/map/basemaps";
 import { installPlaceholderHandler } from "$lib/map/maplibreSprites";
 import { ensureRtlTextPlugin } from "$lib/map/rtl";
 import { hasWebGL } from "$lib/map/webgl";
 
 export type MapThemeName = "light" | "dark" | undefined;
 
-const STYLE_LIGHT = "https://tiles.openfreemap.org/styles/liberty";
-const STYLE_DARK = "https://static.btcmap.org/map-styles/dark.json";
-
-export const styleUrlForTheme = (t: MapThemeName): string =>
-	t === "dark" ? STYLE_DARK : STYLE_LIGHT;
+// The embedded maps pin their two basemaps to the same styles the /map
+// picker exposes — basemaps.ts stays the single source of truth for the URLs.
+export const styleUrlForTheme = (t: MapThemeName) =>
+	styleForBasemap(t === "dark" ? "ofm-dark" : "liberty");
 
 export type BtcmapMapHandle = {
 	map: MapLibreMap;

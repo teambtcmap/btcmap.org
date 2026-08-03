@@ -291,6 +291,13 @@ const initializeMap = async () => {
 		return;
 	}
 	if (outcome.status === "cancelled") return;
+	// Teardown can interleave with the await above (SvelteKit navigation runs
+	// in microtask continuations) — destroy the just-created map instead of
+	// leaking a WebGL context onDestroy already missed.
+	if (destroyed) {
+		outcome.handle.destroy();
+		return;
+	}
 	mapHandle = outcome.handle;
 	map = outcome.handle.map;
 };
