@@ -1,10 +1,16 @@
+import { get } from "svelte/store";
 import { describe, expect, it } from "vitest";
 
 import { CATEGORIES, placeMatchesCategory } from "$lib/categoryMapping";
+import { places } from "$lib/store";
 import type { Place } from "$lib/types";
 import { filterPlacesByRecency } from "$lib/verification";
 
-import { computeVisibleSignature, selectVisiblePlaces } from "./visiblePlaces";
+import {
+	computeVisibleSignature,
+	placesRevision,
+	selectVisiblePlaces,
+} from "./visiblePlaces";
 
 const recent = () => new Date(Date.now() - 30 * 86400000).toISOString();
 const old = () => new Date(Date.now() - 2 * 365 * 86400000).toISOString();
@@ -169,5 +175,27 @@ describe("computeVisibleSignature", () => {
 		).not.toBe(sig);
 		// the revision covers content changes a shape signature can't see
 		expect(computeVisibleSignature(inputs, 8, "")).not.toBe(sig);
+	});
+});
+
+describe("placesRevision", () => {
+	it("bumps once per $places publication, including identical re-sets", () => {
+		// This is the load-bearing replacement for the lastUpdatedPlaceId
+		// handshake: ANY publication — boost/comment write-through, enrichment
+		// merge, sync — must change the render signature. Subscribe for the
+		// duration (like the page's $placesRevision) because derived stores
+		// are lazy and only track while subscribed.
+		const seen: number[] = [];
+		const unsubscribe = placesRevision.subscribe((n) => seen.push(n));
+		const before = seen.length;
+
+		places.set([]);
+		// An identical reference still counts as a publication — the sync
+		// layer is responsible for not republishing unchanged data, not us
+		places.set(get(places));
+
+		unsubscribe();
+		expect(seen.length).toBe(before + 2);
+		expect(seen[seen.length - 1]).toBe(seen[before - 1] + 2);
 	});
 });

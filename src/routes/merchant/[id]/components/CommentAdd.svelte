@@ -8,7 +8,6 @@ import Icon from "$components/Icon.svelte";
 import InvoicePaymentStage from "$components/InvoicePaymentStage.svelte";
 import PrimaryButton from "$components/PrimaryButton.svelte";
 import { _ } from "$lib/i18n";
-import { lastUpdatedPlaceId } from "$lib/store";
 import { updateSinglePlace } from "$lib/sync/places";
 import type { MerchantPageData } from "$lib/types.js";
 import { errToast } from "$lib/utils";
@@ -35,7 +34,6 @@ const closeModal = () => {
 	invoiceId = "";
 	loading = false;
 	commentComplete = false;
-	$lastUpdatedPlaceId = undefined;
 };
 
 const handleOutClick = () => {
@@ -75,8 +73,6 @@ const handlePaymentSuccess = async () => {
 	// Update the place in localforage and store immediately
 	if (elementId) {
 		await updateSinglePlace(elementId);
-		// Signal map to update marker icon
-		lastUpdatedPlaceId.set(Number(elementId));
 	}
 };
 

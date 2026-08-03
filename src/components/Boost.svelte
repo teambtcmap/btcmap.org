@@ -4,7 +4,7 @@ import OutClick from "svelte-outclick";
 
 import BoostContent from "$components/BoostContent.svelte";
 import CloseButton from "$components/CloseButton.svelte";
-import { boost, lastUpdatedPlaceId, resetBoost } from "$lib/store";
+import { boost, resetBoost } from "$lib/store";
 
 import { invalidateAll } from "$app/navigation";
 
@@ -16,7 +16,6 @@ const closeModal = () => {
 	}
 	$boost = undefined;
 	$resetBoost = $resetBoost + 1;
-	$lastUpdatedPlaceId = undefined;
 	boostComplete = false;
 };
 
