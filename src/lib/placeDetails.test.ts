@@ -172,6 +172,50 @@ describe("getPlaceDetails", () => {
 		expect(await getPlaceDetails(7)).toEqual(place);
 	});
 
+	it("never lets a late in-flight response overwrite a fresher primed record", async () => {
+		// The boost race: a GET the server answered pre-commit settles AFTER
+		// the payment write-through primed the boosted record. The stale
+		// response must not revert the cache.
+		let resolveFetch: (value: { data: Place }) => void = () => {};
+		mockGet.mockReturnValue(
+			new Promise((resolve) => {
+				resolveFetch = resolve;
+			}),
+		);
+		const inFlightPromise = getPlaceDetails(9);
+
+		const boosted = makePlace({ id: 9, name: "Boosted" });
+		primePlaceDetails(boosted);
+
+		resolveFetch({ data: makePlace({ id: 9, name: "Pre-boost" }) });
+		// The caller still receives what the network returned…
+		expect((await inFlightPromise).name).toBe("Pre-boost");
+		// …but the cache keeps the fresher primed record
+		expect(await getPlaceDetails(9)).toEqual(boosted);
+		expect(mockGet).toHaveBeenCalledTimes(1);
+	});
+
+	it("fresh: true dispatches a new request instead of joining a pending one", async () => {
+		let resolveStale: (value: { data: Place }) => void = () => {};
+		mockGet.mockReturnValueOnce(
+			new Promise((resolve) => {
+				resolveStale = resolve;
+			}),
+		);
+		const stalePending = getPlaceDetails(2);
+
+		const updated = makePlace({ id: 2, name: "Updated" });
+		mockGet.mockResolvedValueOnce({ data: updated });
+		const freshResult = await getPlaceDetails(2, { fresh: true });
+		expect(freshResult).toEqual(updated);
+		expect(mockGet).toHaveBeenCalledTimes(2);
+
+		// The abandoned request settles late and must not clobber the cache
+		resolveStale({ data: makePlace({ id: 2, name: "Stale" }) });
+		await stalePending;
+		expect(await getPlaceDetails(2)).toEqual(updated);
+	});
+
 	it("serves a primed record and stops after eviction", async () => {
 		const place = makePlace({ id: 8 });
 		primePlaceDetails(place);

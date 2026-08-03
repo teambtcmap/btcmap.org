@@ -12,8 +12,9 @@ import { subDays } from "date-fns/subDays";
 import { get } from "svelte/store";
 
 import { API_BASE } from "$lib/api-base";
+import api from "$lib/axios";
 import { MERCHANT_LIST_MAX_ITEMS } from "$lib/constants";
-import { getPlaceDetails } from "$lib/placeDetails";
+import { completePlaceUrl, getPlaceDetails } from "$lib/placeDetails";
 import { areas } from "$lib/store";
 import { areasSync } from "$lib/sync/areas";
 import { theme } from "$lib/theme";
@@ -453,7 +454,17 @@ export async function fetchEnhancedPlace(
 	}
 
 	try {
-		const basePlace = await getPlaceDetails(Number(placeId));
+		// Numeric ids go through the shared cached fetcher; OSM-style
+		// "type:id" strings (which completePlaceUrl supports, and this
+		// function accepted historically) fetch directly — the details
+		// cache is keyed by numeric Place id.
+		const basePlace = /^\d+$/.test(placeId)
+			? await getPlaceDetails(Number(placeId))
+			: (
+					await api.get<Place>(completePlaceUrl(placeId), {
+						timeout: 10000,
+					})
+				).data;
 		const enhancedPlace: Place = { ...basePlace };
 
 		// Map osm:contact fields to official fields as fallback

@@ -13,14 +13,14 @@ import type { Place } from "$lib/types";
 
 import { browser } from "$app/environment";
 
-export interface MerchantDrawerState {
+export type MerchantDrawerState = {
 	isOpen: boolean;
 	merchantId: number | null;
 	drawerView: DrawerView;
 	merchant: Place | null;
 	isLoading: boolean;
 	error: string | null;
-}
+};
 
 const initialState: MerchantDrawerState = {
 	isOpen: false,

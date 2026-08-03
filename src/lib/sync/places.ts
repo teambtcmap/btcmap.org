@@ -329,6 +329,12 @@ export const elementsSync = async () => {
 
 						// Use worker to filter and merge updates to avoid blocking main thread
 						const updatedPlaceIds = recentUpdates.map((place) => place.id);
+						// The details cache may still hold pre-update records for these
+						// ids — evict them so the next drawer open refetches instead of
+						// showing data the freshly-synced pins already contradict.
+						for (const updatedId of updatedPlaceIds) {
+							evictPlaceDetails(updatedId);
+						}
 						placesData = await filterPlaces(
 							placesData,
 							updatedPlaceIds,

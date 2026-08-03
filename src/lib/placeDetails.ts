@@ -65,6 +65,20 @@ const withAbort = <T>(
 	});
 };
 
+// Per-id monotonic generation. Bumped whenever something invalidates what is
+// currently cached or in flight: a fresh-record prime, an eviction, or a
+// caller demanding fresh data. A response only writes the cache if the
+// generation it was dispatched under is still current — so a late-arriving
+// response the server answered before a boost committed can never overwrite
+// the fresher record the write-through primed.
+const generations = new Map<number, number>();
+
+const bumpGeneration = (id: number): number => {
+	const next = (generations.get(id) ?? 0) + 1;
+	generations.set(id, next);
+	return next;
+};
+
 export const getPlaceDetails = (
 	id: number,
 	opts: { signal?: AbortSignal; fresh?: boolean } = {},
@@ -77,11 +91,18 @@ export const getPlaceDetails = (
 	if (!opts.fresh) {
 		const cached = detailsCache.get(id);
 		if (cached) return Promise.resolve(cached);
+	} else {
+		// fresh means "hit the network NOW": invalidate the cached record's
+		// generation and abandon any pending request — joining one dispatched
+		// earlier could hand back exactly the staleness the caller opted out of
+		bumpGeneration(id);
+		inFlight.delete(id);
 	}
 
 	let pending = inFlight.get(id);
 	if (!pending) {
-		pending = api
+		const dispatchedGeneration = generations.get(id) ?? 0;
+		const request = api
 			.get<Place>(completePlaceUrl(id), { timeout: DETAILS_TIMEOUT_MS })
 			.then((response) => {
 				const place = response.data;
@@ -91,12 +112,19 @@ export const getPlaceDetails = (
 				if (typeof place?.id !== "number") {
 					throw new Error(`Invalid place details response for ${id}`);
 				}
-				detailsCache.set(id, place);
+				if ((generations.get(id) ?? 0) === dispatchedGeneration) {
+					detailsCache.set(id, place);
+				}
 				return place;
 			})
 			.finally(() => {
-				inFlight.delete(id);
+				// A fresh dispatch may have replaced this entry already —
+				// only clear the slot if it is still ours
+				if (inFlight.get(id) === request) {
+					inFlight.delete(id);
+				}
 			});
+		pending = request;
 		inFlight.set(id, pending);
 	}
 
@@ -104,11 +132,15 @@ export const getPlaceDetails = (
 };
 
 // Write-through hooks for sync/places.ts: after a boost/comment refresh lands
-// the fresh complete record in $places, keep this cache coherent too.
+// the fresh complete record in $places, keep this cache coherent too. The
+// generation bump makes the prime authoritative over any response still in
+// flight.
 export const primePlaceDetails = (place: Place): void => {
+	bumpGeneration(place.id);
 	detailsCache.set(place.id, place);
 };
 
 export const evictPlaceDetails = (id: number): void => {
+	bumpGeneration(id);
 	detailsCache.delete(id);
 };
