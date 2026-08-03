@@ -145,7 +145,9 @@ async function searchPlacesInRadius<T extends { id?: unknown }>(
 		{ timeout: 10000, signal },
 	);
 	if (!Array.isArray(response.data)) {
-		throw new Error("API returned invalid data format");
+		throw new Error(
+			`Radius search returned invalid data: expected an array, got ${typeof response.data}`,
+		);
 	}
 	return filterValidPlaces(response.data);
 }
