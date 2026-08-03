@@ -4,7 +4,6 @@ import "maplibre-gl/dist/maplibre-gl.css";
 import Spiderfy from "@nazka/map-gl-js-spiderfy";
 import type {
 	FilterSpecification,
-	GeoJSONSource,
 	LngLatBounds,
 	MapGeoJSONFeature,
 	MapLayerMouseEvent,

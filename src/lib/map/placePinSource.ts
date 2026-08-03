@@ -38,8 +38,12 @@ const EMPTY_COLLECTION: PlaceFeatureCollection = {
 // the pins, clusters, and labels survive a basemap/theme swap untouched
 // (MapLibre's style differ leaves byte-identical layers in place — only the
 // basemap layers below them get swapped).
-export const CUSTOM_SOURCE_IDS = ["places", "places-boosted", "places-heatmap"];
-export const CUSTOM_LAYER_IDS = [
+export const CUSTOM_SOURCE_IDS: readonly string[] = [
+	"places",
+	"places-boosted",
+	"places-heatmap",
+];
+export const CUSTOM_LAYER_IDS: readonly string[] = [
 	"place-heatmap",
 	"clusters-outer",
 	"clusters-inner",

@@ -1,6 +1,7 @@
 import type { Map as MapLibreMap } from "maplibre-gl";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 
+import { HEATMAP_STORAGE_KEY } from "$lib/map/heatmap";
 import type { Place } from "$lib/types";
 
 const { ensureSpritesMock } = vi.hoisted(() => ({
@@ -190,7 +191,7 @@ describe("heatmap", () => {
 	});
 
 	it("reads the persisted on state and re-applies it after a style load", () => {
-		localStorage.setItem("btcmap:heatmap-layer", "true");
+		localStorage.setItem(HEATMAP_STORAGE_KEY, "true");
 		const fake = makeFakeMap(10);
 		const pin = makeSource();
 		pin.refreshHeatmapAfterStyle(fake.map);
