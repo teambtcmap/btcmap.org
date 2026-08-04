@@ -209,6 +209,16 @@ const renderTable = () => {
 	tableRendered = true;
 };
 
+// Rebuild when the issues prop itself changes: client-side area navigation
+// reuses this component instance, and the TanStack table snapshots `issues`
+// at render time — without this the previous area's rows would linger under
+// the new area's count. Same mechanism as the locale rebuild below.
+let lastIssues = issues;
+$: if (issues !== lastIssues) {
+	lastIssues = issues;
+	tableRendered = false;
+}
+
 $: !loading && !tableRendered && renderTable();
 
 // Re-render the table when locale changes so column headers and

@@ -12,6 +12,7 @@ import type { GeoJSON } from "geojson";
 import { onDestroy, onMount } from "svelte";
 
 import AreaActivity from "$components/area/AreaActivity.svelte";
+import AreaHeader from "$components/area/AreaHeader.svelte";
 import AreaMap from "$components/area/AreaMap.svelte";
 import AreaMerchantHighlights from "$components/area/AreaMerchantHighlights.svelte";
 import AreaStats from "$components/area/AreaStats.svelte";
@@ -20,27 +21,14 @@ import VerifyCommunityForm from "$components/area/VerifyCommunityForm.svelte";
 import Boost from "$components/Boost.svelte";
 import Icon from "$components/Icon.svelte";
 import IssuesTable from "$components/IssuesTable.svelte";
-import OrgBadge from "$components/OrgBadge.svelte";
-import SaveButton from "$components/SaveButton.svelte";
-import Socials from "$components/Socials.svelte";
-import SponsorBadge from "$components/SponsorBadge.svelte";
-import Tip from "$components/Tip.svelte";
 import { API_BASE } from "$lib/api-base";
 import { placesInAreaChunked } from "$lib/area/placesInArea";
 import api from "$lib/axios";
 import { places, placesError, reportError, reports } from "$lib/store";
 import { batchSync } from "$lib/sync/batchSync";
 import { reportsSync } from "$lib/sync/reports";
-import type {
-	AreaPageProps,
-	AreaTags,
-	Place,
-	PlaceIssue,
-	Tagger,
-} from "$lib/types.js";
-import { TipType } from "$lib/types.js";
-import { areaIconSrc, errToast, formatVerifiedHuman } from "$lib/utils";
-import { isRecentlyVerified } from "$lib/verification";
+import type { AreaPageProps, Place, PlaceIssue, Tagger } from "$lib/types.js";
+import { errToast } from "$lib/utils";
 
 onMount(() => {
 	// reportsSync feeds the stats section and the AreaMap grade stars. The
@@ -54,53 +42,22 @@ $: $placesError && errToast($placesError);
 // alert for report errors
 $: $reportError && errToast($reportError);
 
-enum Sections {
-	merchants = "merchants",
-	stats = "stats",
-	activity = "activity",
-	maintain = "maintain",
-}
+// One source of truth: the section id IS the route slug IS the i18n key
+// suffix — the previous enum + three parallel Records carried no information.
+const SECTIONS = ["merchants", "stats", "activity", "maintain"] as const;
+type Section = (typeof SECTIONS)[number];
 
-const sectionKeys: Record<Sections, string> = {
-	[Sections.merchants]: "area.sections.merchants",
-	[Sections.stats]: "area.sections.stats",
-	[Sections.activity]: "area.sections.activity",
-	[Sections.maintain]: "area.sections.maintain",
-};
-
-const sections = Object.values(Sections);
 let scrolled = false;
 
-// Map section names to URL-friendly slugs
-const sectionSlugs: Record<Sections, string> = {
-	[Sections.merchants]: "merchants",
-	[Sections.stats]: "stats",
-	[Sections.activity]: "activity",
-	[Sections.maintain]: "maintain",
+$: activeSection = (SECTIONS as readonly string[]).includes(
+	$page.params.section ?? "",
+)
+	? ($page.params.section as Section)
+	: ("merchants" as Section);
+
+const handleSectionChange = (section: Section) => {
+	goto(`/${type}/${encodeURIComponent(data.id)}/${section}`);
 };
-
-// Reverse mapping from slugs to sections
-const slugToSection: Record<string, Sections> = {
-	merchants: Sections.merchants,
-	stats: Sections.stats,
-	activity: Sections.activity,
-	maintain: Sections.maintain,
-};
-
-// Get the current section from the route parameter
-$: currentSection = $page.params.section || "merchants";
-$: activeSection = slugToSection[currentSection] || Sections.merchants;
-
-// Handle section change
-const handleSectionChange = (section: Sections) => {
-	const slug = sectionSlugs[section];
-	const areaId = encodeURIComponent(data.id);
-	goto(`/${type}/${areaId}/${slug}`);
-};
-
-// No need for hash handling anymore - sections are handled by route parameters
-
-let dataInitialized = false;
 // taggersInFlight prevents re-fire during the async fetch; taggersLoaded
 // gates the UI so the skeleton stays up until the fetch completes. Per-
 // request transient failures are handled by axiosRetry on the shared
@@ -145,65 +102,6 @@ const fetchAreaTopEditors = async () => {
 	}
 };
 
-const initializeData = async () => {
-	if (dataInitialized) return;
-
-	// The SSR bundle carries the full v3 tags (polygon included) and 404s
-	// server-side when required tags are missing — no $areas lookup, no
-	// world-areas crawl, no client goto("/404") (#1174).
-	area = data.tags;
-
-	avatar =
-		type === "community"
-			? areaIconSrc(data.id, area["icon:square"])
-			: `https://static.btcmap.org/images/countries/${data.id}.svg`;
-	description = area.description;
-
-	if (type === "community") {
-		org = area.organization;
-		sponsor = area.sponsor;
-		// The bundle lifts the contact:* tags into one typed object
-		({
-			website,
-			email,
-			phone,
-			nostr,
-			twitter,
-			meetup,
-			telegram,
-			discord,
-			youtube,
-			github,
-			matrix,
-			geyser,
-			satlantis,
-			eventbrite,
-			reddit,
-			simplex,
-			instagram,
-			whatsapp,
-			facebook,
-			linkedin,
-			rss,
-			signal,
-		} = data.contacts);
-		hasContact = Object.keys(data.contacts).length > 0;
-		verifiedDate = data.verifiedDate || area["verified:date"];
-		isVerifiedDateStale = !isRecentlyVerified(verifiedDate);
-
-		if (area["tips:lightning_address"]) {
-			lightning = {
-				destination: area["tips:lightning_address"],
-				type: TipType.Address,
-			};
-		} else if (area["tips:url"]) {
-			lightning = { destination: area["tips:url"], type: TipType.Url };
-		}
-	}
-
-	dataInitialized = true;
-};
-
 // The containment sweep is decoupled from init: the header and AreaMap
 // mount immediately off the SSR bundle, and the pins land when $places and
 // the chunked sweep are done. Once per area (matching the old semantics —
@@ -235,16 +133,14 @@ const runContainmentSweep = async (areaPlaces: Place[], geoJson: GeoJSON) => {
 	}
 };
 
-// Reset area-scoped state when the user navigates client-side to a different area.
-// SvelteKit reuses the +page.svelte instance (and this AreaPage) across
-// /country/X/* → /country/Y/* transitions, and initializeData has an early
-// `if (dataInitialized) return` guard — so without this reset the previous area's
-// state would leak into the next one. Must run before the initializeData reactive
-// below so dataInitialized=false is observed on the same tick.
+// Header state is fully derived (inside AreaHeader) and `area` below derives
+// too — the only state needing an explicit reset on client-side area
+// navigation is the async machinery: the taggers fetch and the containment
+// sweep. SvelteKit reuses this component instance across
+// /country/X/* → /country/Y/* transitions.
 let lastAreaId: string | undefined;
 $: if (data?.id !== lastAreaId) {
 	lastAreaId = data.id;
-	dataInitialized = false;
 	taggersInFlight = false;
 	taggersLoaded = false;
 	taggersLoadError = false;
@@ -260,15 +156,11 @@ $: if (data?.id !== lastAreaId) {
 	sweepDone = false;
 }
 
-// Header + map mount straight off the SSR bundle — no store wait. The
-// containment sweep (which does need $places) runs separately below.
-$: data?.id && !dataInitialized && initializeData();
-
 // Source order matters (the #1177 lesson): this must sit BELOW the reset
-// and init reactives so an area navigation resets state and re-inits
-// before the sweep guard is evaluated — otherwise it would fire once
-// against the outgoing area's polygon.
-$: if (dataInitialized && $places.length && sweptAreaId !== data.id) {
+// reactive so an area navigation resets sweep state before the guard is
+// evaluated — otherwise it would fire once against the outgoing area's
+// polygon.
+$: if (area?.geo_json && $places.length && sweptAreaId !== data.id) {
 	sweptAreaId = data.id;
 	runContainmentSweep($places, area.geo_json);
 }
@@ -277,58 +169,29 @@ $: if (dataInitialized && $places.length && sweptAreaId !== data.id) {
 // One REST call replaces the previous per-place enrichment shim.
 $: if (
 	browser &&
-	activeSection === Sections.activity &&
+	activeSection === "activity" &&
 	!taggersInFlight &&
 	!taggersLoaded
 ) {
 	fetchAreaTopEditors();
 }
 
-// Calculate areaReports reactively based on data initialization and reports store
 // Returns undefined while loading, empty array if no reports for this area, or filtered reports
 $: areaReports =
-	dataInitialized && data?.id && $reports.length > 0
+	data?.id && $reports.length > 0
 		? $reports
 				.filter((report) => report.area_id === data.id)
 				.sort((a, b) => Date.parse(b.created_at) - Date.parse(a.created_at))
 		: undefined;
 
-let area: AreaTags;
+// Derived, not initialized: the previous `const alias/name` froze the
+// first area's values for the lifetime of the reused component instance —
+// stale after any client-side area navigation.
+$: area = data.tags;
+$: alias = data.id;
+let name: string;
+$: name = data.name;
 let filteredPlaces: Place[] = [];
-
-let avatar: string;
-const alias = data.id;
-const name = data.name;
-let description: string | undefined;
-let org: string | undefined;
-let sponsor: boolean | undefined;
-let website: string | undefined;
-let email: string | undefined;
-let phone: string | undefined;
-let nostr: string | undefined;
-let twitter: string | undefined;
-let meetup: string | undefined;
-let telegram: string | undefined;
-let discord: string | undefined;
-let youtube: string | undefined;
-let github: string | undefined;
-let matrix: string | undefined;
-let geyser: string | undefined;
-let satlantis: string | undefined;
-let eventbrite: string | undefined;
-let reddit: string | undefined;
-let simplex: string | undefined;
-let instagram: string | undefined;
-let whatsapp: string | undefined;
-let facebook: string | undefined;
-let linkedin: string | undefined;
-let rss: string | undefined;
-let signal: string | undefined;
-let verifiedDate: string | undefined = data.verifiedDate;
-let hasContact = false;
-
-let isVerifiedDateStale: boolean = !isRecentlyVerified(data.verifiedDate);
-let lightning: { destination: string; type: TipType } | undefined;
 
 let taggers: Tagger[] = [];
 
@@ -340,147 +203,13 @@ $: issues = data?.issues ?? [];
 </script>
 
 <main class="my-10 space-y-16 text-center md:my-20">
-	<section id="profile" class="space-y-8">
-		<div class="space-y-2">
-			{#if avatar}
-				<img
-					src={avatar}
-					alt={$_('aria.avatarAlt')}
-					class="mx-auto h-32 w-32 rounded-full object-cover"
-					on:error={function () {
-						this.src = '/images/bitcoin.svg';
-					}}
-				/>
-			{:else}
-				<div class="mx-auto h-32 w-32 animate-pulse rounded-full bg-link/50" />
-			{/if}
-			<h1 class="text-4xl !leading-tight font-semibold text-primary dark:text-white">
-				{name || $_('area.defaultName')}
-			</h1>
-			<SaveButton id={data.numericId} type="area" />
-			{#if org}
-				<OrgBadge {org} />
-			{/if}
-			{#if sponsor}
-				<SponsorBadge />
-			{/if}
-			{#if description}
-				<p class="text-xl text-primary dark:text-white">{description}</p>
-			{/if}
-			{#if alias && type === 'community'}
-				<a
-					href={`/communities/map?community=${encodeURIComponent(alias)}`}
-					class="inline-flex items-center justify-center text-xs text-link transition-colors hover:text-hover"
-					>{$_('area.viewOnCommunityMap')} <svg
-						class="ml-1 w-3"
-						width="16"
-						height="16"
-						viewBox="0 0 16 16"
-						fill="none"
-						xmlns="http://www.w3.org/2000/svg"
-					>
-						<path
-							d="M3 13L13 3M13 3H5.5M13 3V10.5"
-							stroke="currentColor"
-							stroke-width="1.5"
-							stroke-linecap="round"
-							stroke-linejoin="round"
-						/>
-					</svg></a
-				>
-			{/if}
-			{#if type === 'community'}
-				{#if verifiedDate}
-					<div class="flex items-center justify-center gap-2 text-sm font-semibold">
-						{#if isVerifiedDateStale}
-							<div
-								class="flex items-center gap-1 rounded-full bg-orange-100 px-3 py-1 text-orange-700 dark:bg-orange-900/30 dark:text-orange-300"
-							>
-								<Icon type="fa" icon="circle-exclamation" w="14" h="14" />
-								<span>{$_('area.verifiedOverYearAgo')}</span>
-							</div>
-						{:else}
-							<div
-								class="flex items-center gap-1 rounded-full bg-green-100 px-3 py-1 text-green-700 dark:bg-green-900/30 dark:text-green-300"
-							>
-								<Icon type="material" icon="verified" w="14" h="14" />
-								<span>{$_('area.verified')}: {formatVerifiedHuman(verifiedDate)}</span>
-							</div>
-						{/if}
-					</div>
-				{:else}
-					<div class="flex items-center justify-center gap-2 text-sm font-semibold">
-						<div
-							class="flex items-center gap-1 rounded-full bg-red-100 px-3 py-1 text-red-700 dark:bg-red-900/30 dark:text-red-300"
-						>
-							<Icon type="fa" icon="circle-xmark" w="14" h="14" />
-							<span>{$_('area.notRecentlyVerified')}</span>
-						</div>
-					</div>
-				{/if}
-				{#if type === 'community'}
-					<a
-						href={`/community/${encodeURIComponent(alias)}/maintain#verify-form`}
-						class="inline-flex items-center justify-center text-xs text-link transition-colors hover:text-hover"
-						on:click|preventDefault={() => {
-							activeSection = Sections.maintain;
-							setTimeout(() => {
-								const form = document.getElementById('verify-form');
-								if (form) {
-									form.scrollIntoView({ behavior: 'smooth', block: 'center' });
-								}
-							}, 100);
-						}}>{$_('area.verifyCommunity')}</a
-					>
-				{/if}
-			{/if}
-		</div>
-
-		{#if type === 'community'}
-			{#if dataInitialized && hasContact}
-				<Socials
-					{website}
-					{email}
-					{phone}
-					{nostr}
-					{twitter}
-					{meetup}
-					{telegram}
-					{discord}
-					{youtube}
-					{github}
-					{matrix}
-					{geyser}
-					{satlantis}
-					{eventbrite}
-					{reddit}
-					{simplex}
-					{instagram}
-					{whatsapp}
-					{facebook}
-					{linkedin}
-					{rss}
-					{signal}
-				/>
-			{:else if !dataInitialized}
-				<div class="flex flex-wrap items-center justify-center">
-					{#each Array(3) as _, index (index)}
-						<div class="m-1 h-10 w-10 animate-pulse rounded-full bg-link/50" />
-					{/each}
-				</div>
-			{/if}
-
-			{#if lightning}
-				<Tip destination={lightning.destination} type={lightning.type} user={name} />
-			{/if}
-		{/if}
-	</section>
+<AreaHeader {type} {data} />
 
 	<div
 		on:scroll={() => (scrolled = true)}
 		class="hide-scroll relative grid w-full auto-cols-[minmax(150px,_1fr)] grid-flow-col overflow-x-auto"
 	>
-		{#each sections as section, index (index)}
+		{#each SECTIONS as section (section)}
 			<button
 				on:click={() => handleSectionChange(section)}
 				class="border-b-4 pb-3 text-center text-lg text-link transition-colors hover:border-link {activeSection ===
@@ -488,7 +217,7 @@ $: issues = data?.issues ?? [];
 					? 'border-link font-bold'
 					: 'border-link/25'}"
 			>
-				{$_(sectionKeys[section])}
+				{$_(`area.sections.${section}`)}
 			</button>
 		{/each}
 
@@ -501,7 +230,7 @@ $: issues = data?.issues ?? [];
 		{/if}
 	</div>
 
-	{#if activeSection === Sections.merchants}
+	{#if activeSection === 'merchants'}
 		<AreaMap
 			{name}
 			geoJSON={area?.geo_json}
@@ -516,7 +245,7 @@ $: issues = data?.issues ?? [];
 		{#if browser}
 			<Boost />
 		{/if}
-	{:else if activeSection === Sections.stats}
+	{:else if activeSection === 'stats'}
 		{#if $reportError}
 			<div class="text-center text-primary dark:text-white">
 				<p>{$_('area.errorLoadingData')}</p>
@@ -532,20 +261,22 @@ $: issues = data?.issues ?? [];
 				<p class="text-xl">{$_('area.dataWithin24Hours')}</p>
 			</div>
 		{/if}
-	{:else if activeSection === Sections.activity}
+	{:else if activeSection === 'activity'}
+		<!-- Area data is SSR-delivered now, so it is initialized by definition;
+		     the prop survives until AreaFeed drops its gate. -->
 		<AreaActivity
 			{alias}
 			{name}
-			{dataInitialized}
+			dataInitialized={true}
 			{taggersLoaded}
 			{taggers}
 			{taggersLoadError}
 		/>
-	{:else if activeSection === Sections.maintain}
+	{:else if activeSection === 'maintain'}
 		<IssuesTable
 			title={$_('area.taggingIssues', { values: { name: name || $_('area.defaultName') } })}
 			{issues}
-			loading={!dataInitialized}
+			loading={false}
 		/>
 		<AreaTickets tickets={data.tickets} title={$_('area.openTickets', { values: { name: name || $_('area.defaultName') } })} />
 		{#if type === 'community'}

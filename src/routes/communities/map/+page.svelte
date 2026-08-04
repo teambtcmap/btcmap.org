@@ -16,6 +16,7 @@ import { get } from "svelte/store";
 import MapLoadingMain from "$components/MapLoadingMain.svelte";
 import MapUnsupportedFallback from "$components/MapUnsupportedFallback.svelte";
 import Socials from "$components/Socials.svelte";
+import { extractContacts } from "$lib/area/contacts";
 import { _ } from "$lib/i18n";
 import {
 	BASEMAPS,
@@ -219,30 +220,7 @@ const buildPopupHtml = (
 
 	const socials = new Socials({
 		target: socialsMount,
-		props: {
-			website: community.tags["contact:website"],
-			email: community.tags["contact:email"],
-			phone: community.tags["contact:phone"],
-			nostr: community.tags["contact:nostr"],
-			twitter: community.tags["contact:twitter"],
-			meetup: community.tags["contact:meetup"],
-			telegram: community.tags["contact:telegram"],
-			discord: community.tags["contact:discord"],
-			youtube: community.tags["contact:youtube"],
-			github: community.tags["contact:github"],
-			matrix: community.tags["contact:matrix"],
-			geyser: community.tags["contact:geyser"],
-			satlantis: community.tags["contact:satlantis"],
-			eventbrite: community.tags["contact:eventbrite"],
-			reddit: community.tags["contact:reddit"],
-			simplex: community.tags["contact:simplex"],
-			instagram: community.tags["contact:instagram"],
-			whatsapp: community.tags["contact:whatsapp"],
-			facebook: community.tags["contact:facebook"],
-			linkedin: community.tags["contact:linkedin"],
-			rss: community.tags["contact:rss"],
-			signal: community.tags["contact:signal"],
-		},
+		props: { contacts: extractContacts(community.tags) },
 	});
 
 	return { container, socials };
