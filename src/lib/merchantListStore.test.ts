@@ -444,26 +444,34 @@ describe("merchantListStore", () => {
 		// CanceledError (name "CanceledError"), NOT "AbortError" — rapid pans
 		// cancel the prior request every time and must never toast.
 		it("should ignore axios CanceledError (no toast, no warn)", async () => {
+			// try/finally: a failing assertion must not leave console.warn
+			// mocked for later tests (beforeEach clears, but doesn't restore)
 			const warnSpy = vi.spyOn(console, "warn").mockImplementation(() => {});
-			(api.get as Mock).mockRejectedValueOnce(new CanceledError("canceled"));
+			try {
+				(api.get as Mock).mockRejectedValueOnce(new CanceledError("canceled"));
 
-			await merchantList.fetchAndReplaceList({ lat: 0, lon: 0 }, 10);
+				await merchantList.fetchAndReplaceList({ lat: 0, lon: 0 }, 10);
 
-			expect(errToast).not.toHaveBeenCalled();
-			expect(warnSpy).not.toHaveBeenCalled();
-			warnSpy.mockRestore();
+				expect(errToast).not.toHaveBeenCalled();
+				expect(warnSpy).not.toHaveBeenCalled();
+			} finally {
+				warnSpy.mockRestore();
+			}
 		});
 	});
 
 	describe("fetchCountOnly", () => {
 		it("should ignore axios CanceledError (no warn)", async () => {
 			const warnSpy = vi.spyOn(console, "warn").mockImplementation(() => {});
-			(api.get as Mock).mockRejectedValueOnce(new CanceledError("canceled"));
+			try {
+				(api.get as Mock).mockRejectedValueOnce(new CanceledError("canceled"));
 
-			await merchantList.fetchCountOnly({ lat: 0, lon: 0 }, 10);
+				await merchantList.fetchCountOnly({ lat: 0, lon: 0 }, 10);
 
-			expect(warnSpy).not.toHaveBeenCalled();
-			warnSpy.mockRestore();
+				expect(warnSpy).not.toHaveBeenCalled();
+			} finally {
+				warnSpy.mockRestore();
+			}
 		});
 
 		it("should request only id field while no recency filter is active", async () => {
@@ -609,12 +617,15 @@ describe("merchantListStore", () => {
 	describe("fetchEnrichedDetails", () => {
 		it("should ignore axios CanceledError (no warn)", async () => {
 			const warnSpy = vi.spyOn(console, "warn").mockImplementation(() => {});
-			(api.get as Mock).mockRejectedValueOnce(new CanceledError("canceled"));
+			try {
+				(api.get as Mock).mockRejectedValueOnce(new CanceledError("canceled"));
 
-			await merchantList.fetchEnrichedDetails({ lat: 0, lon: 0 }, 5);
+				await merchantList.fetchEnrichedDetails({ lat: 0, lon: 0 }, 5);
 
-			expect(warnSpy).not.toHaveBeenCalled();
-			warnSpy.mockRestore();
+				expect(warnSpy).not.toHaveBeenCalled();
+			} finally {
+				warnSpy.mockRestore();
+			}
 		});
 
 		it("should merge into existing cache (not replace)", async () => {
