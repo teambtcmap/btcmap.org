@@ -9,7 +9,7 @@ export let type: "country" | "community";
 export let data: AreaPageProps;
 
 import type { GeoJSON } from "geojson";
-import { onMount } from "svelte";
+import { onDestroy, onMount } from "svelte";
 
 import AreaActivity from "$components/area/AreaActivity.svelte";
 import AreaMap from "$components/area/AreaMap.svelte";
@@ -212,6 +212,17 @@ const initializeData = async () => {
 // per completed sweep — never a partial one.
 let sweepGeneration = 0;
 let sweptAreaId: string | undefined;
+// True once the current area's sweep has published — the merchant
+// highlights' skeleton gate (an empty filteredPlaces before this is
+// "still sweeping", after it is a genuine empty area).
+let sweepDone = false;
+
+// Leaving the page entirely must abandon an in-flight sweep at its next
+// chunk boundary — without this it would burn through the remaining ~29k
+// geoContains tests for a component that no longer exists.
+onDestroy(() => {
+	sweepGeneration++;
+});
 
 const runContainmentSweep = async (areaPlaces: Place[], geoJson: GeoJSON) => {
 	const generation = ++sweepGeneration;
@@ -220,6 +231,7 @@ const runContainmentSweep = async (areaPlaces: Place[], geoJson: GeoJSON) => {
 	});
 	if (result && generation === sweepGeneration) {
 		filteredPlaces = result;
+		sweepDone = true;
 	}
 };
 
@@ -245,6 +257,7 @@ $: if (data?.id !== lastAreaId) {
 	// Abandon any in-flight containment sweep and let the new area resweep.
 	sweepGeneration++;
 	sweptAreaId = undefined;
+	sweepDone = false;
 }
 
 // Header + map mount straight off the SSR bundle — no store wait. The
@@ -496,7 +509,10 @@ $: issues = data?.issues ?? [];
 			cameraBbox={data.cameraBbox}
 			upToDatePercent={areaReports?.[0]?.tags.up_to_date_percent}
 		/>
-		<AreaMerchantHighlights {dataInitialized} {filteredPlaces} />
+		<!-- Gate on sweep completion, not dataInitialized: init now finishes
+		     before the sweep, and an empty filteredPlaces mid-sweep is "still
+		     loading", not "no merchants here". -->
+		<AreaMerchantHighlights dataInitialized={sweepDone} {filteredPlaces} />
 		{#if browser}
 			<Boost />
 		{/if}
