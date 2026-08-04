@@ -73,10 +73,12 @@ export type AreaTags = {
 	"tips:lightning_address"?: string;
 	"tips:url"?: string;
 	sponsor?: boolean;
-	"box:north"?: string;
-	"box:east"?: string;
-	"box:south"?: string;
-	"box:west"?: string;
+	// Human-authored camera hints; the API serves numbers despite the
+	// historical string typing. Coerced + validated in areaSectionLoad.
+	"box:north"?: string | number;
+	"box:east"?: string | number;
+	"box:south"?: string | number;
+	"box:west"?: string | number;
 };
 
 export type AreaType = "community" | "country" | "trash";
@@ -386,12 +388,48 @@ export type DropdownLink = {
 
 export type ChartHistory = "7D" | "1M" | "3M" | "6M" | "YTD" | "1Y" | "ALL";
 
+// The `contact:*` tags lifted into one typed object (see areaSectionLoad's
+// extractContacts) so consumers stop indexing `area["contact:x"]` per key.
+export const AREA_CONTACT_KEYS = [
+	"website",
+	"email",
+	"phone",
+	"nostr",
+	"twitter",
+	"meetup",
+	"telegram",
+	"discord",
+	"youtube",
+	"github",
+	"matrix",
+	"geyser",
+	"satlantis",
+	"eventbrite",
+	"reddit",
+	"simplex",
+	"instagram",
+	"whatsapp",
+	"facebook",
+	"linkedin",
+	"rss",
+	"signal",
+] as const;
+export type AreaContactKey = (typeof AREA_CONTACT_KEYS)[number];
+export type AreaContacts = Partial<Record<AreaContactKey, string>>;
+
 export type AreaPageProps = {
 	id: string;
 	numericId: number;
 	name: string;
 	tickets: Tickets;
 	issues: PlaceIssue[];
+	// Full v3 tags, polygon included — the client renders from these instead
+	// of re-crawling the world areas feed to recover them (#1174)
+	tags: AreaTags;
+	contacts: AreaContacts;
+	// Validated box:* camera hint; null when absent/invalid (client falls
+	// back to fitting the polygon). Camera-only, never containment.
+	cameraBbox: [number, number, number, number] | null;
 	verifiedDate?: string;
 	description?: string;
 	iconSquare?: string;

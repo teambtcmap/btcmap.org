@@ -28,15 +28,7 @@ import SponsorBadge from "$components/SponsorBadge.svelte";
 import Tip from "$components/Tip.svelte";
 import { API_BASE } from "$lib/api-base";
 import api from "$lib/axios";
-import {
-	areaError,
-	areas,
-	places,
-	placesError,
-	reportError,
-	reports,
-} from "$lib/store";
-import { areasSync } from "$lib/sync/areas";
+import { places, placesError, reportError, reports } from "$lib/store";
 import { batchSync } from "$lib/sync/batchSync";
 import { reportsSync } from "$lib/sync/reports";
 import type {
@@ -47,22 +39,18 @@ import type {
 	Tagger,
 } from "$lib/types.js";
 import { TipType } from "$lib/types.js";
-import {
-	areaIconSrc,
-	errToast,
-	formatVerifiedHuman,
-	validateContinents,
-} from "$lib/utils";
+import { areaIconSrc, errToast, formatVerifiedHuman } from "$lib/utils";
 import { isRecentlyVerified } from "$lib/verification";
 
 onMount(() => {
-	batchSync([areasSync, reportsSync]);
+	// reportsSync feeds the stats section and the AreaMap grade stars. The
+	// world areas crawl (areasSync) is gone: the SSR bundle now carries this
+	// area's full tags, polygon included (#1174).
+	batchSync([reportsSync]);
 });
 
 // alert for element errors
 $: $placesError && errToast($placesError);
-// alert for area errors
-$: $areaError && errToast($areaError);
 // alert for report errors
 $: $reportError && errToast($reportError);
 
@@ -160,94 +148,46 @@ const fetchAreaTopEditors = async () => {
 const initializeData = async () => {
 	if (dataInitialized) return;
 
-	const areaFound = $areas.find((area) => {
-		if (type === "community") {
-			return (
-				area.id === data.id &&
-				area.tags?.type === "community" &&
-				area.tags.geo_json &&
-				area.tags.name &&
-				area.tags["icon:square"] &&
-				area.tags.continent
-			);
-		} else {
-			return (
-				area.id === data.id &&
-				area.tags?.type === "country" &&
-				area.id.length === 2 &&
-				area.tags.geo_json &&
-				area.tags.name &&
-				area.tags.continent &&
-				validateContinents(area.tags.continent)
-			);
-		}
-	});
-
-	if (!areaFound) {
-		console.error(
-			`Could not find ${type}, please try again or contact BTC Map.`,
-		);
-		goto("/404");
-		return;
-	}
-
-	area = areaFound.tags;
+	// The SSR bundle carries the full v3 tags (polygon included) and 404s
+	// server-side when required tags are missing — no $areas lookup, no
+	// world-areas crawl, no client goto("/404") (#1174).
+	area = data.tags;
 
 	avatar =
 		type === "community"
-			? areaIconSrc(areaFound.id, area["icon:square"])
-			: `https://static.btcmap.org/images/countries/${areaFound.id}.svg`;
+			? areaIconSrc(data.id, area["icon:square"])
+			: `https://static.btcmap.org/images/countries/${data.id}.svg`;
 	description = area.description;
 
 	if (type === "community") {
 		org = area.organization;
 		sponsor = area.sponsor;
-		website = area["contact:website"];
-		email = area["contact:email"];
-		phone = area["contact:phone"];
-		nostr = area["contact:nostr"];
-		twitter = area["contact:twitter"];
-		meetup = area["contact:meetup"];
-		telegram = area["contact:telegram"];
-		discord = area["contact:discord"];
-		youtube = area["contact:youtube"];
-		github = area["contact:github"];
-		matrix = area["contact:matrix"];
-		geyser = area["contact:geyser"];
-		satlantis = area["contact:satlantis"];
-		eventbrite = area["contact:eventbrite"];
-		reddit = area["contact:reddit"];
-		simplex = area["contact:simplex"];
-		instagram = area["contact:instagram"];
-		whatsapp = area["contact:whatsapp"];
-		facebook = area["contact:facebook"];
-		linkedin = area["contact:linkedin"];
-		rss = area["contact:rss"];
-		signal = area["contact:signal"];
-		hasContact = !!(
-			website ||
-			email ||
-			phone ||
-			nostr ||
-			twitter ||
-			meetup ||
-			telegram ||
-			discord ||
-			youtube ||
-			github ||
-			matrix ||
-			geyser ||
-			satlantis ||
-			eventbrite ||
-			reddit ||
-			simplex ||
-			instagram ||
-			whatsapp ||
-			facebook ||
-			linkedin ||
-			rss ||
-			signal
-		);
+		// The bundle lifts the contact:* tags into one typed object
+		({
+			website,
+			email,
+			phone,
+			nostr,
+			twitter,
+			meetup,
+			telegram,
+			discord,
+			youtube,
+			github,
+			matrix,
+			geyser,
+			satlantis,
+			eventbrite,
+			reddit,
+			simplex,
+			instagram,
+			whatsapp,
+			facebook,
+			linkedin,
+			rss,
+			signal,
+		} = data.contacts);
+		hasContact = Object.keys(data.contacts).length > 0;
 		verifiedDate = data.verifiedDate || area["verified:date"];
 		isVerifiedDateStale = !isRecentlyVerified(verifiedDate);
 
@@ -271,8 +211,6 @@ const initializeData = async () => {
 			return false;
 		}
 	});
-
-	issues = data.issues;
 
 	dataInitialized = true;
 };
@@ -298,7 +236,7 @@ $: if (data?.id !== lastAreaId) {
 	filteredPlaces = [];
 }
 
-$: $areas?.length && $places?.length && !dataInitialized && initializeData();
+$: data?.id && $places?.length && !dataInitialized && initializeData();
 
 // Fire the area top-editors fetch only when the user actually lands on /activity.
 // One REST call replaces the previous per-place enrichment shim.
@@ -360,6 +298,10 @@ let lightning: { destination: string; type: TipType } | undefined;
 let taggers: Tagger[] = [];
 
 let issues: PlaceIssue[] = [];
+// Reactive, not latched at init: issues arrive only with the maintain
+// section's load (per-section pruning in areaSectionLoad), so a
+// merchants -> maintain navigation must pick them up.
+$: issues = data?.issues ?? [];
 </script>
 
 <main class="my-10 space-y-16 text-center md:my-20">
@@ -529,6 +471,7 @@ let issues: PlaceIssue[] = [];
 			{name}
 			geoJSON={area?.geo_json}
 			{filteredPlaces}
+			cameraBbox={data.cameraBbox}
 			upToDatePercent={areaReports?.[0]?.tags.up_to_date_percent}
 		/>
 		<AreaMerchantHighlights {dataInitialized} {filteredPlaces} />

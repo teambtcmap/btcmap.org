@@ -34,6 +34,9 @@ export let filteredPlaces: Place[];
 // renders); undefined while reports load or when the area has none — the
 // stars stay in their loading state rather than fabricating a grade.
 export let upToDatePercent: number | undefined = undefined;
+// Validated box:* camera hint from the SSR bundle (see areaSectionLoad).
+// Camera-only, never containment; null falls back to fitting the polygon.
+export let cameraBbox: [number, number, number, number] | null = null;
 
 type PlaceFeature = {
 	type: "Feature";
@@ -323,7 +326,9 @@ const initializeMapContents = (m: MapLibreMap) => {
 };
 
 const fitToArea = (m: MapLibreMap, animate = false) => {
-	const bbox = computeBbox(geoJSON);
+	// The curated box:* hint wins over deriving a box from the polygon —
+	// communities author it to frame their area better than a raw bbox.
+	const bbox = cameraBbox ?? computeBbox(geoJSON);
 	if (!bbox) return;
 	m.fitBounds(
 		[
