@@ -1,6 +1,8 @@
 import { isHttpError, isRedirect } from "@sveltejs/kit";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 
+import type { AreaTags } from "$lib/types";
+
 import type { AreaSectionConfig } from "./areaSectionLoad";
 import { loadAreaSection } from "./areaSectionLoad";
 
@@ -15,6 +17,10 @@ type FetchResponses = {
 	issues?: ResponseOverrides;
 };
 
+// satisfies (not a plain annotation) keeps literal inference, so the tests
+// that deliberately build broken variants by spreading/omitting keys still
+// typecheck — while the happy-path fixture is pinned to the contract the
+// loader assumes and fails to compile if AreaTags gains a required field.
 const AREA_OK = {
 	id: 42,
 	deleted_at: null,
@@ -28,7 +34,7 @@ const AREA_OK = {
 		"verified:date": "2024-01-01",
 		"icon:square": "https://example.com/icon.png",
 	},
-};
+} satisfies { id: number; deleted_at: string | null; tags: AreaTags };
 
 const ISSUES_OK = { requested_issues: [{ id: 1 }, { id: 2 }] };
 
