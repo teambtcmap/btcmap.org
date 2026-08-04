@@ -1,12 +1,16 @@
+import { CanceledError } from "axios";
 import { get } from "svelte/store";
 import type { Mock } from "vitest";
-import { beforeEach, describe, expect, it, vi } from "vitest";
+import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 
+import { CATEGORIES, placeMatchesCategory } from "$lib/categoryMapping";
 import {
 	MERCHANT_LIST_FETCH_CEILING,
 	MERCHANT_LIST_MAX_ITEMS,
 } from "$lib/constants";
+import { VERIFIED_FILTER_STORAGE_KEY } from "$lib/map/verifiedFilter";
 import type { Place } from "$lib/types";
+import { filterPlacesByRecency } from "$lib/verification";
 
 // Mock the centralized axios instance
 vi.mock("$lib/axios", () => ({
@@ -89,6 +93,14 @@ describe("merchantListStore", () => {
 			lastUpdated: null,
 			usesMetricSystem: null,
 		});
+	});
+
+	afterEach(() => {
+		// Defensive: tests that persist the verified filter clean up inline,
+		// but a failing assertion would skip that — never leak the key. (Note
+		// reset() restores module-init state and does NOT re-read storage, so
+		// today a leak is inert; this guards the day that changes.)
+		localStorage.removeItem(VERIFIED_FILTER_STORAGE_KEY);
 	});
 
 	describe("state toggles", () => {
@@ -427,10 +439,42 @@ describe("merchantListStore", () => {
 
 			expect(errToast).not.toHaveBeenCalled();
 		});
+
+		// Deliberate aborts through our AbortControllers reject with axios v1's
+		// CanceledError (name "CanceledError"), NOT "AbortError" — rapid pans
+		// cancel the prior request every time and must never toast.
+		it("should ignore axios CanceledError (no toast, no warn)", async () => {
+			// try/finally: a failing assertion must not leave console.warn
+			// mocked for later tests (beforeEach clears, but doesn't restore)
+			const warnSpy = vi.spyOn(console, "warn").mockImplementation(() => {});
+			try {
+				(api.get as Mock).mockRejectedValueOnce(new CanceledError("canceled"));
+
+				await merchantList.fetchAndReplaceList({ lat: 0, lon: 0 }, 10);
+
+				expect(errToast).not.toHaveBeenCalled();
+				expect(warnSpy).not.toHaveBeenCalled();
+			} finally {
+				warnSpy.mockRestore();
+			}
+		});
 	});
 
 	describe("fetchCountOnly", () => {
-		it("should request only id field", async () => {
+		it("should ignore axios CanceledError (no warn)", async () => {
+			const warnSpy = vi.spyOn(console, "warn").mockImplementation(() => {});
+			try {
+				(api.get as Mock).mockRejectedValueOnce(new CanceledError("canceled"));
+
+				await merchantList.fetchCountOnly({ lat: 0, lon: 0 }, 10);
+
+				expect(warnSpy).not.toHaveBeenCalled();
+			} finally {
+				warnSpy.mockRestore();
+			}
+		});
+
+		it("should request only id field while no recency filter is active", async () => {
 			(api.get as Mock).mockResolvedValueOnce({ data: [] });
 
 			await merchantList.fetchCountOnly({ lat: 10, lon: 20 }, 5);
@@ -439,6 +483,105 @@ describe("merchantListStore", () => {
 				expect.stringContaining("fields=id"),
 				expect.any(Object),
 			);
+			expect((api.get as Mock).mock.calls[0][0]).not.toContain("verified_at");
+		});
+
+		it("should widen the fields with verified_at while a recency filter is active", async () => {
+			merchantList.setVerifiedFilter(1, { persist: false });
+			(api.get as Mock).mockResolvedValueOnce({ data: [] });
+
+			await merchantList.fetchCountOnly({ lat: 10, lon: 20 }, 5);
+
+			expect(api.get).toHaveBeenCalledWith(
+				expect.stringContaining("fields=id,verified_at"),
+				expect.any(Object),
+			);
+		});
+
+		it("should count only recently verified places when a year window is active", async () => {
+			merchantList.setVerifiedFilter(1, { persist: false });
+			const recent = new Date(Date.now() - 30 * 86400000).toISOString();
+			const old = new Date(Date.now() - 2 * 365 * 86400000).toISOString();
+			(api.get as Mock).mockResolvedValueOnce({
+				data: [
+					{ id: 1, verified_at: recent },
+					{ id: 2, verified_at: old },
+					{ id: 3 },
+				],
+			});
+
+			await merchantList.fetchCountOnly({ lat: 0, lon: 0 }, 10);
+			const state = get(merchantList);
+
+			expect(state.totalCount).toBe(1);
+			expect(state.merchants).toEqual([]);
+		});
+
+		it("should count stale and never-verified places in outdated mode", async () => {
+			merchantList.setVerifiedFilter("outdated", { persist: false });
+			const recent = new Date(Date.now() - 30 * 86400000).toISOString();
+			const old = new Date(Date.now() - 2 * 365 * 86400000).toISOString();
+			(api.get as Mock).mockResolvedValueOnce({
+				data: [
+					{ id: 1, verified_at: recent },
+					{ id: 2, verified_at: old },
+					{ id: 3 },
+				],
+			});
+
+			await merchantList.fetchCountOnly({ lat: 0, lon: 0 }, 10);
+
+			expect(get(merchantList).totalCount).toBe(2);
+		});
+
+		// Consistency guard for the open/close boundary: the closed-panel badge
+		// and the open panel's list must report the same total for the same
+		// rows under every filter mode, so the count never jumps on open.
+		it("agrees with fetchAndReplaceList's totalCount for the same rows under every filter", async () => {
+			const recent = new Date(Date.now() - 30 * 86400000).toISOString();
+			const old = new Date(Date.now() - 2 * 365 * 86400000).toISOString();
+			const rows = [
+				{ id: 1, lat: 0, lon: 0, name: "A", verified_at: recent },
+				{ id: 2, lat: 0, lon: 0, name: "B", verified_at: old },
+				{ id: 3, lat: 0, lon: 0, name: "C" },
+			];
+
+			// Absolute expectations per filter so both paths agreeing on a
+			// wrong value (or a swallowed rejection leaving the previous
+			// count in place) cannot pass vacuously.
+			const expected = { null: 3, 1: 1, outdated: 2 } as const;
+
+			for (const filter of [null, 1, "outdated"] as const) {
+				merchantList.setVerifiedFilter(filter, { persist: false });
+
+				(api.get as Mock).mockResolvedValueOnce({ data: rows });
+				await merchantList.fetchCountOnly({ lat: 0, lon: 0 }, 10);
+				const closedPanelCount = get(merchantList).totalCount;
+
+				(api.get as Mock).mockResolvedValueOnce({ data: rows });
+				await merchantList.fetchAndReplaceList({ lat: 0, lon: 0 }, 10);
+				const openPanelCount = get(merchantList).totalCount;
+
+				expect(closedPanelCount, `filter ${String(filter)}`).toBe(
+					openPanelCount,
+				);
+				expect(closedPanelCount, `filter ${String(filter)}`).toBe(
+					expected[String(filter) as keyof typeof expected],
+				);
+
+				// The over-ceiling (hideIfExceeds) branch is the state users
+				// actually transition into over dense areas — its recency-only
+				// policy is the one fetchCountOnly mirrors; pin that too.
+				(api.get as Mock).mockResolvedValueOnce({ data: rows });
+				await merchantList.fetchAndReplaceList({ lat: 0, lon: 0 }, 10, {
+					hideIfExceeds: 0,
+				});
+				expect(
+					get(merchantList).totalCount,
+					`over-ceiling, filter ${String(filter)}`,
+				).toBe(closedPanelCount);
+			}
+			expect(errToast).not.toHaveBeenCalled();
 		});
 
 		it("should set totalCount from response length", async () => {
@@ -472,6 +615,19 @@ describe("merchantListStore", () => {
 	});
 
 	describe("fetchEnrichedDetails", () => {
+		it("should ignore axios CanceledError (no warn)", async () => {
+			const warnSpy = vi.spyOn(console, "warn").mockImplementation(() => {});
+			try {
+				(api.get as Mock).mockRejectedValueOnce(new CanceledError("canceled"));
+
+				await merchantList.fetchEnrichedDetails({ lat: 0, lon: 0 }, 5);
+
+				expect(warnSpy).not.toHaveBeenCalled();
+			} finally {
+				warnSpy.mockRestore();
+			}
+		});
+
 		it("should merge into existing cache (not replace)", async () => {
 			// Set up initial cache
 			const initialPlace = createMockPlace({ id: 1 });
@@ -517,6 +673,30 @@ describe("merchantListStore", () => {
 			expect(state.isLoadingList).toBe(false);
 
 			await fetchPromise;
+		});
+
+		it("should leave the cache untouched on a non-array response", async () => {
+			// try/finally: a failing assertion must not leave console.warn
+			// mocked for later tests (beforeEach clears, but doesn't restore)
+			const warnSpy = vi.spyOn(console, "warn").mockImplementation(() => {});
+			try {
+				// Seed the cache through the list path
+				const initialPlace = createMockPlace({ id: 1 });
+				(api.get as Mock).mockResolvedValueOnce({ data: [initialPlace] });
+				await merchantList.fetchAndReplaceList({ lat: 0, lon: 0 }, 10);
+
+				// An HTML error page served with 200 must not poison the cache
+				(api.get as Mock).mockResolvedValueOnce({ data: "<html>oops</html>" });
+				await merchantList.fetchEnrichedDetails({ lat: 0, lon: 0 }, 10);
+
+				const state = get(merchantList);
+				expect(state.placeDetailsCache.has(1)).toBe(true);
+				expect(state.placeDetailsCache.size).toBe(1);
+				expect(state.isEnrichingDetails).toBe(false);
+				expect(warnSpy).toHaveBeenCalled();
+			} finally {
+				warnSpy.mockRestore();
+			}
 		});
 	});
 
@@ -746,6 +926,154 @@ describe("merchantListStore", () => {
 			expect(state.mode).toBe("nearby");
 			expect(state.searchQuery).toBe("pizza");
 			expect(state.searchResults.length).toBe(1);
+		});
+	});
+
+	describe("setVerifiedFilter", () => {
+		const recent = () => new Date(Date.now() - 30 * 86400000).toISOString();
+		const old = () => new Date(Date.now() - 2 * 365 * 86400000).toISOString();
+
+		it("recomputes search-mode category counts for the new window", () => {
+			merchantList.openWithSearchResults("test query", [
+				createMockPlace({ id: 1, icon: "restaurant", verified_at: recent() }),
+				createMockPlace({ id: 2, icon: "restaurant", verified_at: old() }),
+				createMockPlace({ id: 3, icon: "local_cafe", verified_at: recent() }),
+				createMockPlace({ id: 4, icon: "local_atm", verified_at: old() }),
+			]);
+			expect(get(merchantList).categoryCounts.all).toBe(4);
+
+			merchantList.setVerifiedFilter(1, { persist: false });
+			const counts = get(merchantList).categoryCounts;
+
+			expect(counts.all).toBe(2);
+			expect(counts.restaurants).toBe(1);
+			expect(counts.coffee).toBe(1);
+			expect(counts.atms).toBe(0);
+		});
+
+		it("restores the full counts when the filter clears", () => {
+			merchantList.openWithSearchResults("test query", [
+				createMockPlace({ id: 1, icon: "restaurant", verified_at: recent() }),
+				createMockPlace({ id: 2, icon: "local_cafe", verified_at: old() }),
+			]);
+			merchantList.setVerifiedFilter(1, { persist: false });
+			expect(get(merchantList).categoryCounts.all).toBe(1);
+
+			merchantList.setVerifiedFilter(null, { persist: false });
+			expect(get(merchantList).categoryCounts.all).toBe(2);
+		});
+
+		it("inverts the window in outdated mode", () => {
+			merchantList.openWithSearchResults("test query", [
+				createMockPlace({ id: 1, icon: "restaurant", verified_at: recent() }),
+				createMockPlace({ id: 2, icon: "restaurant", verified_at: old() }),
+				createMockPlace({ id: 3, icon: "local_cafe", verified_at: recent() }),
+				createMockPlace({ id: 4, icon: "local_atm" }),
+			]);
+
+			merchantList.setVerifiedFilter("outdated", { persist: false });
+			const counts = get(merchantList).categoryCounts;
+
+			expect(counts.all).toBe(2);
+			expect(counts.restaurants).toBe(1);
+			expect(counts.atms).toBe(1);
+			expect(counts.coffee).toBe(0);
+		});
+
+		it("auto-resets a selected category the new window zeroes", () => {
+			merchantList.openWithSearchResults("test query", [
+				createMockPlace({ id: 1, icon: "restaurant", verified_at: old() }),
+				createMockPlace({ id: 2, icon: "local_cafe", verified_at: recent() }),
+			]);
+			merchantList.setSelectedCategory("restaurants");
+
+			merchantList.setVerifiedFilter(1, { persist: false });
+
+			expect(get(merchantList).selectedCategory).toBe("all");
+		});
+
+		it("keeps a selected category the new window still populates", () => {
+			merchantList.openWithSearchResults("test query", [
+				createMockPlace({ id: 1, icon: "restaurant", verified_at: recent() }),
+				createMockPlace({ id: 2, icon: "local_cafe", verified_at: old() }),
+			]);
+			merchantList.setSelectedCategory("restaurants");
+
+			merchantList.setVerifiedFilter(1, { persist: false });
+
+			expect(get(merchantList).selectedCategory).toBe("restaurants");
+		});
+
+		it("leaves nearby-mode counts to the page-driven refresh", () => {
+			merchantList.setMerchants([
+				createMockPlace({ id: 1, icon: "restaurant", verified_at: old() }),
+			]);
+
+			merchantList.setVerifiedFilter(1, { persist: false });
+			const state = get(merchantList);
+
+			expect(state.verifiedWithinYears).toBe(1);
+			expect(state.categoryCounts.all).toBe(1);
+		});
+
+		it("does not touch counts when the search has no results", () => {
+			merchantList.openWithSearchResults("test query", [
+				createMockPlace({ id: 1, icon: "restaurant", verified_at: old() }),
+			]);
+			merchantList.clearSearchInput();
+
+			merchantList.setVerifiedFilter(1, { persist: false });
+
+			expect(get(merchantList).categoryCounts.all).toBe(1);
+		});
+
+		it("persist option still controls storage", () => {
+			merchantList.setVerifiedFilter(2);
+			expect(localStorage.getItem(VERIFIED_FILTER_STORAGE_KEY)).toBe("2");
+
+			merchantList.setVerifiedFilter(1, { persist: false });
+			expect(localStorage.getItem(VERIFIED_FILTER_STORAGE_KEY)).toBe("2");
+
+			localStorage.removeItem(VERIFIED_FILTER_STORAGE_KEY);
+		});
+
+		// Consistency oracle: whatever the filter mode, the chip counts must
+		// describe exactly the selection the panel renders — its
+		// filteredSearchResults rule (recency window, then per-category via
+		// placeMatchesCategory) replicated here as the reference.
+		it("counts always describe the selection the panel renders", () => {
+			const recent = new Date(Date.now() - 30 * 86400000).toISOString();
+			const old = new Date(Date.now() - 2 * 365 * 86400000).toISOString();
+			merchantList.openWithSearchResults("test query", [
+				createMockPlace({ id: 1, icon: "restaurant", verified_at: recent }),
+				createMockPlace({ id: 2, icon: "restaurant", verified_at: old }),
+				createMockPlace({ id: 3, icon: "local_cafe", verified_at: recent }),
+				createMockPlace({ id: 4, icon: "local_cafe" }),
+				createMockPlace({ id: 5, icon: "local_atm", verified_at: old }),
+				createMockPlace({ id: 6, icon: "storefront", verified_at: recent }),
+				createMockPlace({ id: 7, icon: "hotel", verified_at: old }),
+				createMockPlace({ id: 8, icon: "some_unknown", verified_at: recent }),
+				createMockPlace({ id: 9, verified_at: old }),
+			]);
+
+			for (const filter of [null, 1, 2, 3, "outdated"] as const) {
+				merchantList.setVerifiedFilter(filter, { persist: false });
+				const { categoryCounts, searchResults } = get(merchantList);
+				const rendered = filterPlacesByRecency(searchResults, filter);
+
+				expect(categoryCounts.all, `filter ${String(filter)}`).toBe(
+					rendered.length,
+				);
+				for (const category of CATEGORIES) {
+					if (category === "all") continue;
+					expect(
+						categoryCounts[category],
+						`filter ${String(filter)} / category ${category}`,
+					).toBe(
+						rendered.filter((p) => placeMatchesCategory(p, category)).length,
+					);
+				}
+			}
 		});
 	});
 

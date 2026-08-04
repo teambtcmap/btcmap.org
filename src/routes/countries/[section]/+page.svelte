@@ -28,7 +28,7 @@ $: countries = $areas?.length
 	? $areas
 			.filter(
 				(area) =>
-					area.tags.type === "country" &&
+					area.tags?.type === "country" &&
 					area.id.length === 2 &&
 					area.tags.geo_json &&
 					area.tags.name &&

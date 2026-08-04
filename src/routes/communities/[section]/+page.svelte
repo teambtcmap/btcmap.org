@@ -34,7 +34,7 @@ $: communities = $areas?.length
 	? ($areas
 			.filter(
 				(area): area is Community =>
-					area.tags.type === "community" &&
+					area.tags?.type === "community" &&
 					!!area.tags.geo_json &&
 					!!area.tags.name &&
 					!!area.tags["icon:square"] &&

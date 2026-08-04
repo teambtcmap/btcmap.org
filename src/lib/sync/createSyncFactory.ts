@@ -31,6 +31,74 @@ export interface SyncConfig<T extends SyncableEntity> {
 	cacheDuration?: number;
 }
 
+// A usable row is an object with a string/number id and a parseable
+// updated_at — the two fields the merge maps and the pagination cursor
+// actually rely on. Anything else is corruption: a non-JSON API response
+// (maintenance page, proxy error) parsed as a string gets character-iterated
+// by the crawl loops, and the dedup collapse leaves exactly one stray
+// character (typically a trailing "\n") that then survives every incremental
+// merge in the persisted cache forever — crashing every consumer that trusts
+// the row shape. Validate at both trust boundaries: API responses and cache
+// hydration (so already-poisoned caches self-heal).
+export function isSyncableRow<T extends SyncableEntity>(
+	item: unknown,
+): item is T {
+	if (typeof item !== "object" || item === null) return false;
+	const { id, updated_at } = item as { id?: unknown; updated_at?: unknown };
+	return (
+		(typeof id === "string" || typeof id === "number") &&
+		typeof updated_at === "string" &&
+		!Number.isNaN(Date.parse(updated_at))
+	);
+}
+
+// Validates one crawl page at the API trust boundary — shared by both crawl
+// loops so their anomaly semantics cannot drift. Throws on a non-JSON
+// response (a string would otherwise be character-iterated into the cache)
+// and on a non-empty page with zero valid rows (which must surface as an
+// error, not silently truncate the sync — it also can't advance the cursor,
+// so continuing would spin in place). An empty page is the normal end of
+// data. Pagination advances on the RAW count; the cursor and the merge use
+// only the validated rows.
+export function validateSyncPage<T extends SyncableEntity>(
+	data: unknown,
+): { rows: T[]; rawCount: number } {
+	if (!Array.isArray(data)) {
+		throw new Error("API returned invalid data format");
+	}
+	const rows = data.filter((item) => isSyncableRow<T>(item));
+	if (data.length && !rows.length) {
+		throw new Error("API page contained no valid rows");
+	}
+	return { rows, rawCount: data.length };
+}
+
+// Advances the pagination cursor past a page. The v2 updated_since is
+// inclusive (the crawl dedup exists precisely because each page's last row
+// reappears on the next), so a FULL page whose rows all share one timestamp
+// can never advance the cursor — the crawl would refetch the same page
+// forever (#1164; real data: a reports backfill wrote 10k rows in under 7s,
+// so a bulk write with identical timestamps is one migration away). When the
+// cursor is stuck, nudge one millisecond past it: rows sharing the timestamp
+// beyond the page boundary are deferred until they next update — bounded
+// staleness beats an unbreakable refetch loop. A within-timestamp
+// continuation is impossible against this API (updated_since + limit is the
+// whole pagination surface — no page token, no id tiebreak; a full re-crawl
+// pages through the same API and hits the same tie), so the nudge is the
+// only progress-guaranteeing option; the warn keeps the deferral from being
+// silent. isSyncableRow guarantees pageLast parses.
+export function nextCursor(
+	previous: string,
+	pageLast: string,
+	label = "sync",
+): string {
+	if (pageLast !== previous) return pageLast;
+	console.warn(
+		`${label}: pagination cursor stuck at ${pageLast} (full page of identical timestamps); nudging +1ms — rows sharing this timestamp beyond the page boundary are deferred until they next update`,
+	);
+	return new Date(Date.parse(pageLast) + 1).toISOString();
+}
+
 // Factory function that creates a sync function with its own state
 export function createSyncFunction<T extends SyncableEntity>(
 	config: SyncConfig<T>,
@@ -86,6 +154,12 @@ export function createSyncFunction<T extends SyncableEntity>(
 			if (!isServerSide) {
 				try {
 					cachedData = await localforage.getItem(config.storageKey);
+					// Persisted data is untrusted input: drop corrupt rows (or the
+					// whole value if it isn't an array) so a poisoned cache heals
+					// on the next sync instead of crashing consumers forever.
+					cachedData = Array.isArray(cachedData)
+						? cachedData.filter((item) => isSyncableRow<T>(item))
+						: null;
 				} catch (err) {
 					console.error(`Could not load ${config.name} locally:`, err);
 					config.errorStore.set(
@@ -161,8 +235,10 @@ async function initialSync<T extends SyncableEntity>(
 ): Promise<T[]> {
 	let updatedSince = "2022-01-01T00:00:00.000Z";
 	let responseCount: number;
-	const allData: T[] = [];
-	const seenIds = new Set<string | number>();
+	// Map dedup: keys keep insertion order and set() updates in place, so this
+	// matches the previous push-or-replace semantics at O(1) per row instead
+	// of a findIndex scan (quadratic over 100k+ event rows on the dupe path).
+	const dataMap = new Map<string | number, T>();
 
 	do {
 		try {
@@ -170,24 +246,18 @@ async function initialSync<T extends SyncableEntity>(
 				`${API_BASE}/v2/${apiEndpoint}?updated_since=${updatedSince}&limit=${limit}`,
 			);
 
-			const newItems = response.data;
-			if (!newItems.length) break;
+			const { rows: newItems, rawCount } = validateSyncPage<T>(response.data);
+			responseCount = rawCount;
+			if (!responseCount) break;
 
-			updatedSince = newItems[newItems.length - 1].updated_at;
-			responseCount = newItems.length;
+			updatedSince = nextCursor(
+				updatedSince,
+				newItems[newItems.length - 1].updated_at,
+				apiEndpoint,
+			);
 
-			// Add new items, avoiding duplicates
 			for (const item of newItems) {
-				if (!seenIds.has(item.id)) {
-					seenIds.add(item.id);
-					allData.push(item);
-				} else {
-					// Update existing item
-					const idx = allData.findIndex((d) => d.id === item.id);
-					if (idx !== -1) {
-						allData[idx] = item;
-					}
-				}
+				dataMap.set(item.id, item);
 			}
 		} catch (error) {
 			errorStore.set(
@@ -199,7 +269,7 @@ async function initialSync<T extends SyncableEntity>(
 	} while (responseCount === limit);
 
 	// Filter out deleted items
-	return allData.filter(filterDeleted);
+	return Array.from(dataMap.values()).filter(filterDeleted);
 }
 
 // Incremental sync - update from existing cached data
@@ -226,11 +296,17 @@ async function incrementalSync<T extends SyncableEntity>(
 			`${API_BASE}/v2/${apiEndpoint}?updated_since=${updatedSince}&limit=${limit}`,
 		);
 
-		const newItems = response.data;
-		if (!newItems.length) break;
+		// A throw from validateSyncPage propagates to the caller, which falls
+		// back to the (already sanitized) cached data.
+		const { rows: newItems, rawCount } = validateSyncPage<T>(response.data);
+		responseCount = rawCount;
+		if (!responseCount) break;
 
-		updatedSince = newItems[newItems.length - 1].updated_at;
-		responseCount = newItems.length;
+		updatedSince = nextCursor(
+			updatedSince,
+			newItems[newItems.length - 1].updated_at,
+			apiEndpoint,
+		);
 
 		// Update or add items
 		for (const item of newItems) {

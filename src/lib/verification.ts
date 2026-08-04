@@ -43,13 +43,26 @@ export function isUpToDate(merchant: Place | null): boolean {
 	return isRecentlyVerified(merchant?.verified_at);
 }
 
+// The recency-filter selection: a "verified within N years" window,
+// "outdated" (the inverse — verification missing or stale), or null (the
+// "Any" / off state). The map filter's VerifiedFilterYears aliases this.
+export type RecencyFilter = 1 | 2 | 3 | "outdated" | null;
+
 // Filters to places verified within `years`; returns the list unchanged when
-// `years` is null (the "Any" / off state). Places without a verified_at are
-// excluded when a year filter is active, matching the Android app.
-export function filterPlacesByRecency(
-	places: Place[],
-	years: number | null,
-): Place[] {
-	if (years == null) return places;
-	return places.filter((p) => isVerifiedWithinYears(p.verified_at, years));
+// the filter is null (the "Any" / off state). Places without a verified_at are
+// excluded when a year filter is active, matching the Android app. "outdated"
+// inverts the 12-month window — only places whose verification is missing or
+// stale remain (the re-verification worklist, /map?outdated).
+// Generic over anything carrying verified_at so partial-field API rows
+// (e.g. the count-only id,verified_at fetch) filter without pretending to
+// be full Places.
+export function filterPlacesByRecency<T extends Pick<Place, "verified_at">>(
+	places: T[],
+	filter: RecencyFilter,
+): T[] {
+	if (filter == null) return places;
+	if (filter === "outdated") {
+		return places.filter((p) => !isRecentlyVerified(p.verified_at));
+	}
+	return places.filter((p) => isVerifiedWithinYears(p.verified_at, filter));
 }

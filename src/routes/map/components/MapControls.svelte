@@ -12,7 +12,6 @@ import {
 } from "$lib/map/basemaps";
 import { HEATMAP_STORAGE_KEY } from "$lib/map/heatmap";
 import type { VerifiedFilterYears } from "$lib/map/verifiedFilter";
-import { getStoredVerifiedFilter } from "$lib/map/verifiedFilter";
 import { theme } from "$lib/theme";
 
 import MapMenuModal from "./MapMenuModal.svelte";
@@ -37,6 +36,10 @@ export let applyBasemap: (id: BasemapId) => void;
 export let applyVerifiedFilter:
 	| ((years: VerifiedFilterYears) => void | Promise<void>)
 	| null = null;
+// The current verified-filter selection, passed down from the page's store
+// (an ?outdated deep link seeds it without persisting, so storage can't be
+// the source of truth here). Routes without the filter leave the default.
+export let currentVerified: VerifiedFilterYears = null;
 export let setHeatmapEnabled: ((enabled: boolean) => void) | null = null;
 export let enableBoost = false;
 export let enableGlobe = false;
@@ -44,7 +47,6 @@ export let enableGlobe = false;
 let toolsModalOpen = false;
 let menuModalOpen = false;
 let selectedBasemap: BasemapId | undefined;
-let selectedVerified: VerifiedFilterYears = null;
 let heatmapOn = false;
 let boostActive = false;
 let globeOn = false;
@@ -53,7 +55,7 @@ let globeOn = false;
 // (verified filter / boost / heatmap), so a returning user sees the map is
 // filtered without opening the panel. Globe is cosmetic, so it's excluded.
 const toolsActive = writable(false);
-$: toolsActive.set(selectedVerified != null || heatmapOn || boostActive);
+$: toolsActive.set(currentVerified != null || heatmapOn || boostActive);
 
 let menuControl: MapButtonControl | undefined;
 let toolsControl: MapButtonControl | undefined;
@@ -85,9 +87,10 @@ const onPickBasemap = (id: BasemapId) => {
 	applyBasemap(id);
 	trackEvent("layer_change", { layer: id });
 };
+// No local selection state: applyVerifiedFilter updates the store
+// synchronously, which flows back through the currentVerified prop.
 const onPickVerified = async (years: VerifiedFilterYears) => {
 	if (!applyVerifiedFilter) return;
-	selectedVerified = years;
 	trackEvent("verified_filter_change", {
 		years: years == null ? "any" : String(years),
 	});
@@ -121,7 +124,6 @@ const onToggleGlobe = () => {
 
 onMount(() => {
 	selectedBasemap = getStoredBasemap() ?? defaultBasemap(get(theme));
-	if (applyVerifiedFilter) selectedVerified = getStoredVerifiedFilter();
 	if (setHeatmapEnabled) {
 		try {
 			heatmapOn = localStorage.getItem(HEATMAP_STORAGE_KEY) === "true";
@@ -168,7 +170,7 @@ onDestroy(() => {
 	{basemaps}
 	currentBasemap={selectedBasemap}
 	onSelectBasemap={onPickBasemap}
-	currentVerified={selectedVerified}
+	{currentVerified}
 	onSelectVerified={applyVerifiedFilter ? onPickVerified : null}
 	{heatmapOn}
 	onToggleHeatmap={setHeatmapEnabled ? onToggleHeatmap : null}

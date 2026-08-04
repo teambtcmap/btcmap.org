@@ -31,18 +31,14 @@ import api from "$lib/axios";
 import {
 	areaError,
 	areas,
-	eventError,
 	places,
 	placesError,
 	reportError,
 	reports,
-	userError,
 } from "$lib/store";
 import { areasSync } from "$lib/sync/areas";
 import { batchSync } from "$lib/sync/batchSync";
-import { eventsSync } from "$lib/sync/events";
 import { reportsSync } from "$lib/sync/reports";
-import { usersSync } from "$lib/sync/users";
 import type {
 	AreaPageProps,
 	AreaTags,
@@ -60,13 +56,9 @@ import {
 import { isRecentlyVerified } from "$lib/verification";
 
 onMount(() => {
-	batchSync([areasSync, reportsSync, eventsSync, usersSync]);
+	batchSync([areasSync, reportsSync]);
 });
 
-// alert for user errors
-$: $userError && errToast($userError);
-// alert for event errors
-$: $eventError && errToast($eventError);
 // alert for element errors
 $: $placesError && errToast($placesError);
 // alert for area errors
@@ -172,7 +164,7 @@ const initializeData = async () => {
 		if (type === "community") {
 			return (
 				area.id === data.id &&
-				area.tags.type === "community" &&
+				area.tags?.type === "community" &&
 				area.tags.geo_json &&
 				area.tags.name &&
 				area.tags["icon:square"] &&
@@ -181,7 +173,7 @@ const initializeData = async () => {
 		} else {
 			return (
 				area.id === data.id &&
-				area.tags.type === "country" &&
+				area.tags?.type === "country" &&
 				area.id.length === 2 &&
 				area.tags.geo_json &&
 				area.tags.name &&
@@ -533,7 +525,12 @@ let issues: PlaceIssue[] = [];
 	</div>
 
 	{#if activeSection === Sections.merchants}
-		<AreaMap {name} geoJSON={area?.geo_json} {filteredPlaces} />
+		<AreaMap
+			{name}
+			geoJSON={area?.geo_json}
+			{filteredPlaces}
+			upToDatePercent={areaReports?.[0]?.tags.up_to_date_percent}
+		/>
 		<AreaMerchantHighlights {dataInitialized} {filteredPlaces} />
 		{#if browser}
 			<Boost />

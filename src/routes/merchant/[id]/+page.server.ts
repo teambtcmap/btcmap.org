@@ -1,7 +1,7 @@
 import { error, isHttpError } from "@sveltejs/kit";
 
 import { API_BASE } from "$lib/api-base";
-import { buildFieldsParam, PLACE_FIELD_SETS } from "$lib/api-fields";
+import { completePlaceUrl } from "$lib/placeDetails";
 import {
 	buildOsmTags,
 	getBoosted,
@@ -49,7 +49,7 @@ export const load: PageServerLoad<MerchantPageData> = async ({
 		// Fetch complete data from v4 Places API (supports both numeric Place IDs and OSM-style IDs)
 		// include_deleted=true is required so deleted places return full field data instead of id-only
 		const placeResponse = await fetch(
-			`${API_BASE}/v4/places/${encodeURIComponent(id)}?fields=${buildFieldsParam(PLACE_FIELD_SETS.COMPLETE_PLACE)}&include_deleted=true`,
+			completePlaceUrl(id, { includeDeleted: true }),
 		);
 
 		if (!placeResponse.ok) {

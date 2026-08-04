@@ -1,3 +1,4 @@
+import axios from "axios";
 import { get, writable } from "svelte/store";
 
 import { API_BASE } from "$lib/api-base";
@@ -6,9 +7,7 @@ import api from "$lib/axios";
 import {
 	type CategoryCounts,
 	type CategoryKey,
-	countMerchantsByCategory,
 	createEmptyCategoryCounts,
-	filterMerchantsByCategory,
 } from "$lib/categoryMapping";
 import { MERCHANT_LIST_MAX_ITEMS } from "$lib/constants";
 import { _ } from "$lib/i18n";
@@ -17,6 +16,7 @@ import {
 	getStoredVerifiedFilter,
 	storeVerifiedFilter,
 } from "$lib/map/verifiedFilter";
+import { selectVisiblePlaces } from "$lib/map/visiblePlaces";
 import { isBoosted } from "$lib/merchantDrawerLogic";
 import { verifiedDatesLoaded } from "$lib/store";
 import type { Place } from "$lib/types";
@@ -76,29 +76,6 @@ function resetCategoryState<T extends MerchantListState>(state: T): T {
 	return { ...state, selectedCategory: "all" };
 }
 
-// Helper to apply category filtering with auto-reset when selected category has no matches
-// Returns filtered merchants and the effective category (may be reset to 'all')
-function applyCategoryFilter(
-	merchants: Place[],
-	selectedCategory: CategoryKey,
-	categoryCounts: CategoryCounts,
-): { filtered: Place[]; effectiveCategory: CategoryKey } {
-	// Auto-reset if selected category has no matches but other merchants exist
-	const shouldReset =
-		selectedCategory !== "all" &&
-		categoryCounts.all > 0 &&
-		categoryCounts[selectedCategory] === 0;
-
-	const effectiveCategory = shouldReset ? "all" : selectedCategory;
-
-	const filtered =
-		effectiveCategory !== "all"
-			? filterMerchantsByCategory(merchants, effectiveCategory)
-			: merchants;
-
-	return { filtered, effectiveCategory };
-}
-
 // Sort order: boosted merchants first (premium placement), then by distance, then alphabetically
 function sortMerchants(
 	merchants: Place[],
@@ -139,9 +116,40 @@ function sortMerchants(
 	});
 }
 
+// Deliberate aborts from our AbortControllers surface as axios CanceledError
+// (axios.isCancel) — or a native AbortError — and are not failures: rapid
+// pans and zoom-boundary crossings cancel the prior request every time.
+function isCancellation(error: Error): boolean {
+	return axios.isCancel(error) || error.name === "AbortError";
+}
+
 // Filter out invalid API response items missing required id field
 function filterValidPlaces<T extends { id?: unknown }>(items: T[]): T[] {
 	return items.filter((item): item is T => typeof item?.id === "number");
+}
+
+// The one radius-search fetcher behind the three list reducers
+// (fetchAndReplaceList, fetchCountOnly, fetchEnrichedDetails). Owns the URL
+// shape, the 10s transport policy, the array-shape validation (the API can
+// return an HTML error page), and the dropping of rows without a numeric id.
+// What each reducer does with the rows — and how loudly it fails — stays
+// that reducer's own policy.
+async function searchPlacesInRadius<T extends { id?: unknown }>(
+	center: { lat: number; lon: number },
+	radiusKm: number,
+	fields: string,
+	signal: AbortSignal,
+): Promise<T[]> {
+	const response = await api.get<T[]>(
+		`${API_BASE}/v4/places/search/?lat=${center.lat}&lon=${center.lon}&radius_km=${radiusKm}&fields=${fields}`,
+		{ timeout: 10000, signal },
+	);
+	if (!Array.isArray(response.data)) {
+		throw new Error(
+			`Radius search returned invalid data: expected an array, got ${typeof response.data}`,
+		);
+	}
+	return filterValidPlaces(response.data);
 }
 
 function createMerchantListStore() {
@@ -199,24 +207,21 @@ function createMerchantListStore() {
 			limit: number = MERCHANT_LIST_MAX_ITEMS,
 		) {
 			const { selectedCategory, verifiedWithinYears } = get(store);
-			// Apply the recency filter first so the category counts reflect the
-			// verification window the user is actually seeing. Gate on the dates
-			// being loaded (they're lazy) so we don't blank the list while a
-			// filter is active but enrichment hasn't landed — matches the markers.
-			const recencyReady =
-				verifiedWithinYears == null || get(verifiedDatesLoaded);
-			const recencyPlaces = recencyReady
-				? filterPlacesByRecency(merchants, verifiedWithinYears)
-				: merchants;
-			const categoryCounts = countMerchantsByCategory(recencyPlaces);
-			const { filtered, effectiveCategory } = applyCategoryFilter(
-				recencyPlaces,
-				selectedCategory,
-				categoryCounts,
-			);
+			// The shared pipeline applies the recency window (gated on the lazy
+			// dates being loaded, matching the markers), computes chip counts on
+			// the pre-category set, and applies the auto-reset rule — one
+			// decision path for list, pins, and counts.
+			const { selection, counts, effectiveCategory } = selectVisiblePlaces({
+				places: merchants,
+				mode: "nearby",
+				category: selectedCategory,
+				recency: verifiedWithinYears,
+				recencyReady: verifiedWithinYears == null || get(verifiedDatesLoaded),
+				boostsOnly: false,
+			});
 
 			const sorted = sortMerchants(
-				filtered,
+				selection,
 				centerLat,
 				centerLon,
 				get(userLocation).location,
@@ -226,9 +231,9 @@ function createMerchantListStore() {
 			update((state) => ({
 				...state,
 				merchants: limited,
-				totalCount: filtered.length,
+				totalCount: selection.length,
 				isLoadingList: false,
-				categoryCounts,
+				categoryCounts: counts,
 				selectedCategory: effectiveCategory,
 			}));
 		},
@@ -248,58 +253,56 @@ function createMerchantListStore() {
 			update((state) => ({ ...state, isLoadingList: true }));
 
 			try {
-				const fields = buildFieldsParam(PLACE_FIELD_SETS.LIST_ITEM);
-				const response = await api.get<Place[]>(
-					`${API_BASE}/v4/places/search/?lat=${center.lat}&lon=${center.lon}&radius_km=${radiusKm}&fields=${fields}`,
-					{ timeout: 10000, signal: listAbortController.signal },
+				const validPlaces = await searchPlacesInRadius<Place>(
+					center,
+					radiusKm,
+					buildFieldsParam(PLACE_FIELD_SETS.LIST_ITEM),
+					listAbortController.signal,
 				);
-
-				// Validate response is an array (API may return HTML error page)
-				if (!Array.isArray(response.data)) {
-					throw new Error("API returned invalid data format");
-				}
-
-				// Filter out invalid items missing required id field
-				const validPlaces = filterValidPlaces(response.data);
 
 				// Build cache for enriched display (icons, addresses, etc.)
 				const placeDetailsCache = new Map<number, Place>();
 				validPlaces.forEach((place) => placeDetailsCache.set(place.id, place));
 
-				// Apply the recency filter before the density check (list data is
-				// fetched with verified_at, so no readiness gate is needed): a
-				// narrow window can bring an otherwise-too-dense area under the
-				// ceiling, so the filter stays effective at zoom 10-14.
+				// The shared pipeline applies the recency window before the density
+				// check (API rows carry verified_at, so recencyReady is
+				// unconditionally true here): a narrow window can bring an
+				// otherwise-too-dense area under the ceiling, so the filter stays
+				// effective at zoom 10-14. The density ceiling compares the
+				// PRE-category set — a selected chip must not defeat it.
 				const { selectedCategory, verifiedWithinYears } = get(store);
-				const recencyPlaces = filterPlacesByRecency(
-					validPlaces,
-					verifiedWithinYears,
-				);
-				const categoryCounts = countMerchantsByCategory(recencyPlaces);
+				const { selection, preCategory, counts, effectiveCategory } =
+					selectVisiblePlaces({
+						places: validPlaces,
+						mode: "nearby",
+						category: selectedCategory,
+						recency: verifiedWithinYears,
+						recencyReady: true,
+						boostsOnly: false,
+					});
 
 				// Check if we should hide results (too many at low zoom)
 				if (
 					options?.hideIfExceeds &&
-					recencyPlaces.length > options.hideIfExceeds
+					preCategory.length > options.hideIfExceeds
 				) {
 					// Too many results - store count but show empty list
-					// The panel will display "zoom in" message, button shows count
+					// The panel will display "zoom in" message, button shows count.
+					// The auto-reset still persists: a selected chip whose count
+					// dropped to zero must snap back to "all" here too, or the chip
+					// state disagrees with the markers (which render the pipeline's
+					// reset selection independently).
 					update((state) => ({
 						...state,
 						merchants: [],
-						totalCount: recencyPlaces.length,
+						totalCount: preCategory.length,
 						isLoadingList: false,
-						categoryCounts,
+						categoryCounts: counts,
+						selectedCategory: effectiveCategory,
 					}));
 				} else {
-					const { filtered, effectiveCategory } = applyCategoryFilter(
-						recencyPlaces,
-						selectedCategory,
-						categoryCounts,
-					);
-
 					const sorted = sortMerchants(
-						filtered,
+						selection,
 						center.lat,
 						center.lon,
 						get(userLocation).location,
@@ -308,15 +311,15 @@ function createMerchantListStore() {
 					update((state) => ({
 						...state,
 						merchants: limited,
-						totalCount: filtered.length,
+						totalCount: selection.length,
 						placeDetailsCache,
 						isLoadingList: false,
-						categoryCounts,
+						categoryCounts: counts,
 						selectedCategory: effectiveCategory,
 					}));
 				}
 			} catch (error) {
-				if (error instanceof Error && error.name !== "AbortError") {
+				if (error instanceof Error && !isCancellation(error)) {
 					console.warn("Failed to fetch merchant list:", error.message);
 					errToast(get(_)("errors.loadFailed"));
 				}
@@ -324,8 +327,20 @@ function createMerchantListStore() {
 			}
 		},
 
-		// Fetch only IDs to get count (minimal payload for button badge)
-		// Used at zoom 10-14 when panel is closed - avoids fetching full data unnecessarily
+		// Count-only fetch for the closed-panel badge at zoom 10-14. Minimal
+		// payload: ids alone, widened with verified_at only while the recency
+		// filter is active so the badge counts the same set the markers and the
+		// open panel show (matching fetchAndReplaceList's hideIfExceeds policy,
+		// which is the state users transition into on open). Category needs
+		// nothing here: close() resets it to "all" and this path only runs with
+		// the panel closed. Search rows carry verified_at natively, so no
+		// verifiedDatesLoaded gate applies — that gate exists for the bulk
+		// $places feed, which lacks dates until enrichment. Deliberate trade:
+		// during the one-time enrichment fetch the badge (like the open panel
+		// list, which filters ungated for the same reason) is filtered while
+		// the markers briefly are not; gating the badge instead would make it
+		// disagree with the list at the open/close boundary — the exact
+		// mismatch this method exists to prevent.
 		async fetchCountOnly(
 			center: { lat: number; lon: number },
 			radiusKm: number,
@@ -335,29 +350,42 @@ function createMerchantListStore() {
 
 			update((state) => ({ ...state, isLoadingList: true }));
 
+			// One snapshot so the fields param and the post-response filter can
+			// never disagree; a mid-flight filter change re-invokes this method,
+			// which aborts the stale request above.
+			const { verifiedWithinYears } = get(store);
+			const fields = verifiedWithinYears == null ? "id" : "id,verified_at";
+
 			try {
-				const response = await api.get<{ id: number }[]>(
-					`${API_BASE}/v4/places/search/?lat=${center.lat}&lon=${center.lon}&radius_km=${radiusKm}&fields=id`,
-					{ timeout: 10000, signal: listAbortController.signal },
+				// Typed to the payload actually requested — these rows are not
+				// full Places and must not be handed to anything expecting one.
+				const validItems = await searchPlacesInRadius<
+					Pick<Place, "id" | "verified_at">
+				>(center, radiusKm, fields, listAbortController.signal);
+				const recencyPlaces = filterPlacesByRecency(
+					validItems,
+					verifiedWithinYears,
 				);
 
-				// Validate response is an array (API may return HTML error page)
-				if (!Array.isArray(response.data)) {
-					throw new Error("API returned invalid data format");
+				// A response that raced a filter change can settle before the
+				// re-invocation aborts it (e.g. during applyVerifiedFilter's
+				// ensureVerifiedDates await) — drop the stale count (the forced
+				// follow-up refetch owns the fresh one) but never strand the
+				// spinner.
+				if (get(store).verifiedWithinYears !== verifiedWithinYears) {
+					update((state) => ({ ...state, isLoadingList: false }));
+					return;
 				}
-
-				// Filter out invalid items missing required id field
-				const validItems = filterValidPlaces(response.data);
 
 				update((state) => ({
 					...state,
 					merchants: [],
-					totalCount: validItems.length,
+					totalCount: recencyPlaces.length,
 					isLoadingList: false,
 					// Preserve existing categoryCounts since we don't have actual merchant data to recalculate them
 				}));
 			} catch (error) {
-				if (error instanceof Error && error.name !== "AbortError") {
+				if (error instanceof Error && !isCancellation(error)) {
 					console.warn("Failed to fetch merchant count:", error.message);
 				}
 				update((state) => ({ ...state, isLoadingList: false }));
@@ -377,14 +405,14 @@ function createMerchantListStore() {
 			update((state) => ({ ...state, isEnrichingDetails: true }));
 
 			try {
-				const fields = buildFieldsParam(PLACE_FIELD_SETS.LIST_ITEM);
-				const response = await api.get<Place[]>(
-					`${API_BASE}/v4/places/search/?lat=${center.lat}&lon=${center.lon}&radius_km=${radiusKm}&fields=${fields}`,
-					{ timeout: 10000, signal: detailsAbortController.signal },
+				const validPlaces = await searchPlacesInRadius<Place>(
+					center,
+					radiusKm,
+					buildFieldsParam(PLACE_FIELD_SETS.LIST_ITEM),
+					detailsAbortController.signal,
 				);
 
-				// Filter out invalid items and merge into existing cache
-				const validPlaces = filterValidPlaces(response.data);
+				// Merge into existing cache
 				update((state) => {
 					const mergedCache = new Map(state.placeDetailsCache);
 					validPlaces.forEach((place) => mergedCache.set(place.id, place));
@@ -395,7 +423,7 @@ function createMerchantListStore() {
 					};
 				});
 			} catch (error) {
-				if (error instanceof Error && error.name !== "AbortError") {
+				if (error instanceof Error && !isCancellation(error)) {
 					console.warn("Failed to fetch enriched details:", error.message);
 				}
 				update((state) => ({ ...state, isEnrichingDetails: false }));
@@ -419,12 +447,18 @@ function createMerchantListStore() {
 				if (!isBoosted(a) && isBoosted(b)) return 1;
 				return 0;
 			});
-			// Counts reflect the recency window; the panel applies the same
-			// recency + category filter to what it renders (filteredSearchResults).
+			// Counts come from the shared pipeline on the recency-filtered set;
+			// the panel renders the same pipeline's selection
+			// (filteredSearchResults), so chips and rows can never disagree.
 			const { verifiedWithinYears } = get(store);
-			const categoryCounts = countMerchantsByCategory(
-				filterPlacesByRecency(sortedResults, verifiedWithinYears),
-			);
+			const { counts: categoryCounts } = selectVisiblePlaces({
+				places: sortedResults,
+				mode: "search",
+				category: "all",
+				recency: verifiedWithinYears,
+				recencyReady: true,
+				boostsOnly: false,
+			});
 			update((state) => ({
 				...resetCategoryState(state),
 				isOpen: true,
@@ -494,10 +528,45 @@ function createMerchantListStore() {
 
 		// Set the "verified within N years" filter (null = Any/off) and persist
 		// it. Unlike the category filter, this survives close()/reset and across
-		// sessions, matching the Android setting.
-		setVerifiedFilter(years: VerifiedFilterYears) {
-			storeVerifiedFilter(years);
-			update((state) => ({ ...state, verifiedWithinYears: years }));
+		// sessions, matching the Android setting. `persist: false` seeds a
+		// session-only selection (the ?outdated URL param) so a shared link
+		// can't overwrite the visitor's stored preference.
+		setVerifiedFilter(
+			years: VerifiedFilterYears,
+			opts: { persist?: boolean } = {},
+		) {
+			if (opts.persist !== false) storeVerifiedFilter(years);
+			update((state) => {
+				// In search mode the page-level refresh (updateMerchantList)
+				// early-returns, so recompute the chip counts here from the same
+				// recency-filtered selection the panel renders — otherwise they
+				// freeze at search time and disagree with the visible list.
+				// Search results carry their own verified_at (from /v4/search),
+				// so no verifiedDatesLoaded gate applies, matching the panel and
+				// the marker block's inSearch bypass. Nearby mode stays untouched:
+				// the forced update re-runs setMerchants/fetchAndReplaceList,
+				// which own that recompute.
+				if (state.mode === "search" && state.searchResults.length > 0) {
+					// The pipeline recomputes counts on the new window and applies
+					// the auto-reset rule — a window that zeroes the selected chip
+					// snaps selection to "all", exactly as nearby mode does.
+					const { counts, effectiveCategory } = selectVisiblePlaces({
+						places: state.searchResults,
+						mode: "search",
+						category: state.selectedCategory,
+						recency: years,
+						recencyReady: true,
+						boostsOnly: false,
+					});
+					return {
+						...state,
+						verifiedWithinYears: years,
+						categoryCounts: counts,
+						selectedCategory: effectiveCategory,
+					};
+				}
+				return { ...state, verifiedWithinYears: years };
+			});
 		},
 
 		// Reset the selected category to 'all'

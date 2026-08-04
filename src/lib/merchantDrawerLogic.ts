@@ -2,11 +2,13 @@ import axios from "axios";
 import type { Writable } from "svelte/store";
 import { get } from "svelte/store";
 
-import { API_BASE } from "$lib/api-base";
-import { buildFieldsParam, PLACE_FIELD_SETS } from "$lib/api-fields";
-import api from "$lib/axios";
 import { _ } from "$lib/i18n";
 import { updateMerchantHash } from "$lib/merchantDrawerHash";
+import {
+	DETAIL_FIELDS,
+	getPlaceDetails,
+	hasDetailFields,
+} from "$lib/placeDetails";
 import { boost } from "$lib/store";
 import type { Boost, Place } from "$lib/types";
 import { errToast } from "$lib/utils";
@@ -36,22 +38,16 @@ export async function fetchMerchantDetails(
 	setMerchant: (merchant: Place | null) => void,
 	setFetching: (fetching: boolean) => void,
 	setLastFetched: (id: number) => void,
-	abortSignal?: AbortSignal,
+	opts?: { signal?: AbortSignal; fresh?: boolean },
 ): Promise<void> {
 	setLastFetched(id);
 	setFetching(true);
 	setMerchant(null);
 
 	try {
-		const response = await api.get(
-			`${API_BASE}/v4/places/${id}?fields=${buildFieldsParam(PLACE_FIELD_SETS.COMPLETE_PLACE)}`,
-			{
-				timeout: 10000, // 10 second timeout
-				signal: abortSignal, // Support request cancellation
-			},
-		);
+		const merchant = await getPlaceDetails(id, opts);
 		if (currentMerchantId === id) {
-			setMerchant(response.data);
+			setMerchant(merchant);
 		}
 	} catch (error) {
 		// Don't show error if request was cancelled (expected behavior)
@@ -66,12 +62,7 @@ export async function fetchMerchantDetails(
 }
 
 export function hasCompleteData(place: Place | undefined): place is Place {
-	if (!place) return false;
-	return (
-		place.name !== undefined &&
-		place.address !== undefined &&
-		place.verified_at !== undefined
-	);
+	return hasDetailFields(place, DETAIL_FIELDS.drawer);
 }
 
 export async function handleBoost(

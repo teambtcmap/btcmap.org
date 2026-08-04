@@ -12,18 +12,17 @@ import {
 	CATEGORY_ENTRIES,
 	type CategoryCounts,
 	type CategoryKey,
-	placeMatchesCategory,
 } from "$lib/categoryMapping";
 import { MERCHANT_LIST_LOW_ZOOM } from "$lib/constants";
 import { SEARCH_SHEET_PEEK_HEIGHT } from "$lib/drawerConfig";
 import { createDrawerGestureController } from "$lib/drawerGestureController";
 import { _ } from "$lib/i18n";
+import { selectVisiblePlaces } from "$lib/map/visiblePlaces";
 import { merchantDrawer } from "$lib/merchantDrawerStore";
 import { merchantList } from "$lib/merchantListStore";
 import type { Place } from "$lib/types";
 import { userLocation } from "$lib/userLocationStore";
 import { errToast, formatNearbyPillCount } from "$lib/utils";
-import { filterPlacesByRecency } from "$lib/verification";
 
 import MerchantListItem from "./MerchantListItem.svelte";
 import NearbyCountPill from "./NearbyCountPill.svelte";
@@ -62,8 +61,11 @@ export let currentZoom: number = 0;
 export let onSearch: ((query: string) => void) | undefined = undefined;
 // Refresh callback for category filtering
 export let onRefresh: (() => void) | undefined = undefined;
-// Callback to fit map bounds to all search results
-export let onFitSearchResultBounds: (() => void) | undefined = undefined;
+// Callback to fit map bounds to the search results the list actually shows.
+// Receives filteredSearchResults so the camera frames exactly the visible
+// set — deriving it page-side from raw searchResults is how it drifted.
+export let onFitSearchResultBounds: ((places: Place[]) => void) | undefined =
+	undefined;
 // Map style readiness — gates the mobile peek sheet so it doesn't show over the loading screen
 export let mapReady = false;
 // Layout decision locked at page init (same pattern as MerchantDrawerHash);
@@ -353,13 +355,17 @@ function handleDismissLocation() {
 	locationRequestDismissed = true;
 }
 
-// Filter search results by category and verification recency
-$: filteredSearchResults = filterPlacesByRecency(
-	selectedCategory === "all"
-		? searchResults
-		: searchResults.filter((p) => placeMatchesCategory(p, selectedCategory)),
-	verifiedWithinYears,
-);
+// The rendered search rows come from the same pipeline as the pins and the
+// chip counts (selectVisiblePlaces), so the list can never disagree with
+// either again.
+$: filteredSearchResults = selectVisiblePlaces({
+	places: searchResults,
+	mode: "search",
+	category: selectedCategory,
+	recency: verifiedWithinYears,
+	recencyReady: true,
+	boostsOnly: false,
+}).selection;
 
 // Helper function to check if a category has matching merchants
 // Note: counts param required for Svelte reactivity (indirect deps aren't tracked)
@@ -630,7 +636,10 @@ onDestroy(() => {
 							{$_('search.noResults')}
 						{:else if searchResults.length === 0}
 							{$_('search.prompt')}
-						{:else if selectedCategory !== 'all' && filteredSearchResults.length !== searchResults.length}
+						{:else if filteredSearchResults.length !== searchResults.length}
+							<!-- Any client-side narrowing (category chip OR verified filter)
+							     shows shown-of-returned, so the line always describes the
+							     rows actually rendered below it -->
 							{$_('search.resultsCountOf', {
 								values: {
 									shown: filteredSearchResults.length,
@@ -667,7 +676,7 @@ onDestroy(() => {
 						type="button"
 						on:click={() => {
 							trackEvent('show_all_on_map_click');
-							onFitSearchResultBounds?.();
+							onFitSearchResultBounds?.(filteredSearchResults);
 						}}
 						disabled={filteredSearchResults.length === 0}
 						class="flex shrink-0 items-center gap-1.5 rounded-lg border px-2.5 py-1 text-xs font-medium transition-colors
