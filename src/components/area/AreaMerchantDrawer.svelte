@@ -74,13 +74,23 @@ $: if ($boost !== lastSeenBoost) {
 	const opening = $boost !== undefined;
 	lastSeenBoost = $boost;
 	if (merchantId && merchant) {
+		// Same abort discipline as the merchantId-driven fetch above: a
+		// drawer close or merchant switch must cancel this too, so a late
+		// response can't stomp the state the drawer has since moved to.
+		if (abortController) {
+			abortController.abort();
+		}
+		abortController = new AbortController();
+
 		fetchMerchantDetails(
 			merchantId,
 			merchantId,
 			(m) => (merchant = m),
 			(f) => (isLoading = f),
 			(id) => (lastFetchedId = id),
-			opening ? { fresh: true } : undefined,
+			opening
+				? { signal: abortController.signal, fresh: true }
+				: { signal: abortController.signal },
 		);
 	}
 }
