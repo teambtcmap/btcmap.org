@@ -1,24 +1,26 @@
 import axios from "axios";
 import { get, writable } from "svelte/store";
 
-import { API_BASE } from "$lib/api-base";
-import { buildFieldsParam, PLACE_FIELD_SETS } from "$lib/api-fields";
-import api from "$lib/axios";
 import type { DrawerView } from "$lib/merchantDrawerHash";
 import { parseMerchantHash, updateMerchantHash } from "$lib/merchantDrawerHash";
+import {
+	DETAIL_FIELDS,
+	getPlaceDetails,
+	hasDetailFields,
+} from "$lib/placeDetails";
 import { placesById } from "$lib/store";
 import type { Place } from "$lib/types";
 
 import { browser } from "$app/environment";
 
-export interface MerchantDrawerState {
+export type MerchantDrawerState = {
 	isOpen: boolean;
 	merchantId: number | null;
 	drawerView: DrawerView;
 	merchant: Place | null;
 	isLoading: boolean;
 	error: string | null;
-}
+};
 
 const initialState: MerchantDrawerState = {
 	isOpen: false,
@@ -36,12 +38,7 @@ function createMerchantDrawerStore() {
 	let abortController: AbortController | null = null;
 
 	function hasCompleteData(place: Place | undefined): place is Place {
-		if (!place) return false;
-		return (
-			place.name !== undefined &&
-			place.address !== undefined &&
-			place.verified_at !== undefined
-		);
+		return hasDetailFields(place, DETAIL_FIELDS.drawer);
 	}
 
 	async function fetchMerchantData(id: number): Promise<void> {
@@ -52,20 +49,16 @@ function createMerchantDrawerStore() {
 		abortController = new AbortController();
 
 		try {
-			const response = await api.get(
-				`${API_BASE}/v4/places/${id}?fields=${buildFieldsParam(PLACE_FIELD_SETS.COMPLETE_PLACE)}`,
-				{
-					timeout: 10000,
-					signal: abortController.signal,
-				},
-			);
+			const merchant = await getPlaceDetails(id, {
+				signal: abortController.signal,
+			});
 
 			// Only update if this merchant is still selected
 			update((state) => {
 				if (state.merchantId === id) {
 					return {
 						...state,
-						merchant: response.data,
+						merchant,
 						isLoading: false,
 						error: null,
 					};

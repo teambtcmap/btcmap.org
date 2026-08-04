@@ -6,6 +6,11 @@ import { API_BASE } from "$lib/api-base";
 import { buildFieldsParam, PLACE_FIELD_SETS } from "$lib/api-fields";
 import api from "$lib/axios";
 import {
+	completePlaceUrl,
+	evictPlaceDetails,
+	primePlaceDetails,
+} from "$lib/placeDetails";
+import {
 	mapUpdates,
 	places,
 	placesError,
@@ -326,6 +331,12 @@ export const elementsSync = async () => {
 
 						// Use worker to filter and merge updates to avoid blocking main thread
 						const updatedPlaceIds = recentUpdates.map((place) => place.id);
+						// The details cache may still hold pre-update records for these
+						// ids — evict them so the next drawer open refetches instead of
+						// showing data the freshly-synced pins already contradict.
+						for (const updatedId of updatedPlaceIds) {
+							evictPlaceDetails(updatedId);
+						}
 						placesData = await filterPlaces(
 							placesData,
 							updatedPlaceIds,
@@ -459,63 +470,68 @@ export const elementsSync = async () => {
 	}
 };
 
+// Shared write-through for a single fresh place record: update localforage +
+// $places, drop the record everywhere if it's deleted, and keep the details
+// cache in $lib/placeDetails coherent. Returns the place, or null when it was
+// deleted or no cache exists yet.
+const applyPlaceUpdate = async (place: Place): Promise<Place | null> => {
+	const cachedPlaces = await localforage.getItem<Place[]>("places_v4");
+
+	if (!cachedPlaces) {
+		console.warn("No cached places found, cannot update place");
+		return null;
+	}
+
+	// Check if place was deleted - remove from cache if present. Evicting the
+	// details cache up front (before the fallible persist) is safe: eviction
+	// is conservative — worst case is an extra refetch, never wrong data.
+	if (place.deleted_at) {
+		evictPlaceDetails(place.id);
+		const updatedPlaces = cachedPlaces.filter((p) => p.id !== place.id);
+		if (updatedPlaces.length !== cachedPlaces.length) {
+			await localforage.setItem("places_v4", updatedPlaces);
+			await yieldToMain();
+			places.set(updatedPlaces);
+			console.info(`Removed deleted place ${place.id} from cache`);
+		}
+		return null;
+	}
+
+	// Find and update the place in the array, or add it if missing
+	const placeIndex = cachedPlaces.findIndex((p) => p.id === place.id);
+	const updatedPlaces = [...cachedPlaces];
+	if (placeIndex !== -1) {
+		updatedPlaces[placeIndex] = place;
+	} else {
+		updatedPlaces.push(place);
+	}
+
+	await localforage.setItem("places_v4", updatedPlaces);
+
+	// Yield to main thread before updating store to prevent UI freeze
+	await yieldToMain();
+
+	places.set(updatedPlaces);
+
+	// Prime the details cache only after persistence + store publication
+	// succeed — priming first would leave drawers serving "updated" data
+	// while $places/localforage still hold the old record if setItem threw.
+	primePlaceDetails(place);
+	return place;
+};
+
 export const updateSinglePlace = async (
 	placeId: string | number,
 ): Promise<Place | null> => {
 	try {
 		// Fetch the updated place from the API
-		const response = await api.get<Place>(
-			`${API_BASE}/v4/places/${placeId}?fields=${buildFieldsParam(PLACE_FIELD_SETS.COMPLETE_PLACE)}`,
-		);
-		const updatedPlace = response.data;
-
-		// Get current places from localforage
-		const cachedPlaces = await localforage.getItem<Place[]>("places_v4");
-
-		if (!cachedPlaces) {
-			console.warn("No cached places found, cannot update single place");
-			return null;
-		}
-
-		// Check if place was deleted - remove from cache if present
-		if (updatedPlace.deleted_at) {
-			const updatedPlaces = cachedPlaces.filter(
-				(p) => p.id !== Number(placeId),
+		const response = await api.get<Place>(completePlaceUrl(placeId));
+		const updatedPlace = await applyPlaceUpdate(response.data);
+		if (updatedPlace) {
+			console.info(
+				`Successfully updated place ${placeId} in localforage and store`,
 			);
-			if (updatedPlaces.length !== cachedPlaces.length) {
-				await localforage.setItem("places_v4", updatedPlaces);
-				await yieldToMain();
-				places.set(updatedPlaces);
-				console.info(`Removed deleted place ${placeId} from cache`);
-			}
-			return null;
 		}
-
-		// Find and update the place in the array
-		const placeIndex = cachedPlaces.findIndex((p) => p.id === updatedPlace.id);
-
-		let updatedPlaces: Place[];
-		if (placeIndex !== -1) {
-			// Update existing place
-			updatedPlaces = [...cachedPlaces];
-			updatedPlaces[placeIndex] = updatedPlace;
-		} else {
-			// Place not found in cache, add it
-			updatedPlaces = [...cachedPlaces, updatedPlace];
-		}
-
-		// Save to localforage
-		await localforage.setItem("places_v4", updatedPlaces);
-
-		// Yield to main thread before updating store to prevent UI freeze
-		await yieldToMain();
-
-		// Update the store
-		places.set(updatedPlaces);
-
-		console.info(
-			`Successfully updated place ${placeId} in localforage and store`,
-		);
 		return updatedPlace;
 	} catch (error) {
 		console.error(`Failed to update single place ${placeId}:`, error);
@@ -533,39 +549,7 @@ export const updatePlaceInCache = async (
 	}
 
 	try {
-		const cachedPlaces = await localforage.getItem<Place[]>("places_v4");
-
-		if (!cachedPlaces) {
-			console.warn("No cached places found, cannot update place");
-			return null;
-		}
-
-		if (place.deleted_at) {
-			const updatedPlaces = cachedPlaces.filter((p) => p.id !== place.id);
-			if (updatedPlaces.length !== cachedPlaces.length) {
-				await localforage.setItem("places_v4", updatedPlaces);
-				await yieldToMain();
-				places.set(updatedPlaces);
-				console.info(`Removed deleted place ${place.id} from cache`);
-			}
-			return null;
-		}
-
-		const placeIndex = cachedPlaces.findIndex((p) => p.id === place.id);
-
-		let updatedPlaces: Place[];
-		if (placeIndex !== -1) {
-			updatedPlaces = [...cachedPlaces];
-			updatedPlaces[placeIndex] = place;
-		} else {
-			updatedPlaces = [...cachedPlaces, place];
-		}
-
-		await localforage.setItem("places_v4", updatedPlaces);
-		await yieldToMain();
-		places.set(updatedPlaces);
-
-		return place;
+		return await applyPlaceUpdate(place);
 	} catch (error) {
 		console.error(`Failed to update place ${place.id} in cache:`, error);
 		return null;
