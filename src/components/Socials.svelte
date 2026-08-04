@@ -4,58 +4,31 @@ export let contacts: AreaContacts = {};
 
 export let style: undefined | string = undefined;
 
-// The template and the sanitized derivations below keep their historical
-// per-key names — only the interface collapsed
-$: ({
-	website,
-	email,
-	phone,
-	nostr,
-	twitter,
-	meetup,
-	telegram,
-	discord,
-	youtube,
-	github,
-	matrix,
-	geyser,
-	satlantis,
-	eventbrite,
-	reddit,
-	simplex,
-	instagram,
-	whatsapp,
-	facebook,
-	linkedin,
-	rss,
-	signal,
-} = contacts);
-
 import Icon from "$components/Icon.svelte";
 import IconSocials from "$lib/icons/IconSocials.svelte";
 import type { AreaContacts } from "$lib/types";
 import { sanitizeUrl } from "$lib/utils";
 
 // Sanitize URLs to prevent XSS from malicious protocols like javascript:
-$: safeWebsite = sanitizeUrl(website);
-$: safeTwitter = sanitizeUrl(twitter);
-$: safeMeetup = sanitizeUrl(meetup);
-$: safeTelegram = sanitizeUrl(telegram);
-$: safeDiscord = sanitizeUrl(discord);
-$: safeYoutube = sanitizeUrl(youtube);
-$: safeGithub = sanitizeUrl(github);
-$: safeMatrix = sanitizeUrl(matrix);
-$: safeGeyser = sanitizeUrl(geyser);
-$: safeSatlantis = sanitizeUrl(satlantis);
-$: safeEventbrite = sanitizeUrl(eventbrite);
-$: safeReddit = sanitizeUrl(reddit);
-$: safeSimplex = sanitizeUrl(simplex);
-$: safeInstagram = sanitizeUrl(instagram);
-$: safeWhatsapp = sanitizeUrl(whatsapp);
-$: safeFacebook = sanitizeUrl(facebook);
-$: safeLinkedin = sanitizeUrl(linkedin);
-$: safeRss = sanitizeUrl(rss);
-$: safeSignal = sanitizeUrl(signal);
+$: safeWebsite = sanitizeUrl(contacts.website);
+$: safeTwitter = sanitizeUrl(contacts.twitter);
+$: safeMeetup = sanitizeUrl(contacts.meetup);
+$: safeTelegram = sanitizeUrl(contacts.telegram);
+$: safeDiscord = sanitizeUrl(contacts.discord);
+$: safeYoutube = sanitizeUrl(contacts.youtube);
+$: safeGithub = sanitizeUrl(contacts.github);
+$: safeMatrix = sanitizeUrl(contacts.matrix);
+$: safeGeyser = sanitizeUrl(contacts.geyser);
+$: safeSatlantis = sanitizeUrl(contacts.satlantis);
+$: safeEventbrite = sanitizeUrl(contacts.eventbrite);
+$: safeReddit = sanitizeUrl(contacts.reddit);
+$: safeSimplex = sanitizeUrl(contacts.simplex);
+$: safeInstagram = sanitizeUrl(contacts.instagram);
+$: safeWhatsapp = sanitizeUrl(contacts.whatsapp);
+$: safeFacebook = sanitizeUrl(contacts.facebook);
+$: safeLinkedin = sanitizeUrl(contacts.linkedin);
+$: safeRss = sanitizeUrl(contacts.rss);
+$: safeSignal = sanitizeUrl(contacts.signal);
 </script>
 
 <div class="flex flex-wrap items-center justify-center {style || ''}">
@@ -66,22 +39,22 @@ $: safeSignal = sanitizeUrl(signal);
 			</span>
 		</a>
 	{/if}
-	{#if email}
-		<a href="mailto:{email}" target="_blank" rel="noreferrer" class="m-1">
+	{#if contacts.email}
+		<a href="mailto:{contacts.email}" target="_blank" rel="noreferrer" class="m-1">
 			<span class="flex h-[40px] w-[40px] items-center justify-center rounded-full bg-[#53C5D5]">
 				<Icon type="fa" icon="envelope" w="28" h="28" class="text-white" />
 			</span>
 		</a>
 	{/if}
-	{#if phone}
-		<a href="tel:{phone}" target="_blank" rel="noreferrer" class="m-1">
+	{#if contacts.phone}
+		<a href="tel:{contacts.phone}" target="_blank" rel="noreferrer" class="m-1">
 			<span class="flex h-[40px] w-[40px] items-center justify-center rounded-full bg-green-600">
 				<Icon type="fa" icon="phone" w="28" h="28" class="text-white" />
 			</span>
 		</a>
 	{/if}
-	{#if nostr}
-		<a href="https://nostr.com/{nostr}" target="_blank" rel="noreferrer" class="m-1">
+	{#if contacts.nostr}
+		<a href="https://nostr.com/{contacts.nostr}" target="_blank" rel="noreferrer" class="m-1">
 			<span class="flex h-[40px] w-[40px] items-center justify-center rounded-full bg-nostr">
 				<IconSocials w="28" h="28" icon="nostr" class="text-white" />
 			</span>
