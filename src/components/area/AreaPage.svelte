@@ -8,8 +8,7 @@ import { page } from "$app/stores";
 export let type: "country" | "community";
 export let data: AreaPageProps;
 
-import rewind from "@mapbox/geojson-rewind";
-import { geoContains } from "d3-geo";
+import type { GeoJSON } from "geojson";
 import { onMount } from "svelte";
 
 import AreaActivity from "$components/area/AreaActivity.svelte";
@@ -27,6 +26,7 @@ import Socials from "$components/Socials.svelte";
 import SponsorBadge from "$components/SponsorBadge.svelte";
 import Tip from "$components/Tip.svelte";
 import { API_BASE } from "$lib/api-base";
+import { placesInAreaChunked } from "$lib/area/placesInArea";
 import api from "$lib/axios";
 import { places, placesError, reportError, reports } from "$lib/store";
 import { batchSync } from "$lib/sync/batchSync";
@@ -201,18 +201,26 @@ const initializeData = async () => {
 		}
 	}
 
-	const rewoundPoly = rewind(area.geo_json, true);
-
-	// For AreaMap, filter places from client store
-	filteredPlaces = $places.filter((place: Place) => {
-		if (geoContains(rewoundPoly, [place.lon, place.lat])) {
-			return true;
-		} else {
-			return false;
-		}
-	});
-
 	dataInitialized = true;
+};
+
+// The containment sweep is decoupled from init: the header and AreaMap
+// mount immediately off the SSR bundle, and the pins land when $places and
+// the chunked sweep are done. Once per area (matching the old semantics —
+// later $places republications don't resweep), generation-guarded so an
+// area navigation abandons an in-flight sweep, publishing one fresh array
+// per completed sweep — never a partial one.
+let sweepGeneration = 0;
+let sweptAreaId: string | undefined;
+
+const runContainmentSweep = async (areaPlaces: Place[], geoJson: GeoJSON) => {
+	const generation = ++sweepGeneration;
+	const result = await placesInAreaChunked(areaPlaces, geoJson, {
+		isStale: () => generation !== sweepGeneration,
+	});
+	if (result && generation === sweepGeneration) {
+		filteredPlaces = result;
+	}
 };
 
 // Reset area-scoped state when the user navigates client-side to a different area.
@@ -234,9 +242,23 @@ $: if (data?.id !== lastAreaId) {
 	taggersFetchGeneration++;
 	taggers = [];
 	filteredPlaces = [];
+	// Abandon any in-flight containment sweep and let the new area resweep.
+	sweepGeneration++;
+	sweptAreaId = undefined;
 }
 
-$: data?.id && $places?.length && !dataInitialized && initializeData();
+// Header + map mount straight off the SSR bundle — no store wait. The
+// containment sweep (which does need $places) runs separately below.
+$: data?.id && !dataInitialized && initializeData();
+
+// Source order matters (the #1177 lesson): this must sit BELOW the reset
+// and init reactives so an area navigation resets state and re-inits
+// before the sweep guard is evaluated — otherwise it would fire once
+// against the outgoing area's polygon.
+$: if (dataInitialized && $places.length && sweptAreaId !== data.id) {
+	sweptAreaId = data.id;
+	runContainmentSweep($places, area.geo_json);
+}
 
 // Fire the area top-editors fetch only when the user actually lands on /activity.
 // One REST call replaces the previous per-place enrichment shim.
