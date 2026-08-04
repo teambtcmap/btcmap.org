@@ -8,9 +8,8 @@ import { page } from "$app/stores";
 export let type: "country" | "community";
 export let data: AreaPageProps;
 
-import rewind from "@mapbox/geojson-rewind";
-import { geoContains } from "d3-geo";
-import { onMount } from "svelte";
+import type { GeoJSON } from "geojson";
+import { onDestroy, onMount } from "svelte";
 
 import AreaActivity from "$components/area/AreaActivity.svelte";
 import AreaMap from "$components/area/AreaMap.svelte";
@@ -27,6 +26,7 @@ import Socials from "$components/Socials.svelte";
 import SponsorBadge from "$components/SponsorBadge.svelte";
 import Tip from "$components/Tip.svelte";
 import { API_BASE } from "$lib/api-base";
+import { placesInAreaChunked } from "$lib/area/placesInArea";
 import api from "$lib/axios";
 import { places, placesError, reportError, reports } from "$lib/store";
 import { batchSync } from "$lib/sync/batchSync";
@@ -201,18 +201,38 @@ const initializeData = async () => {
 		}
 	}
 
-	const rewoundPoly = rewind(area.geo_json, true);
-
-	// For AreaMap, filter places from client store
-	filteredPlaces = $places.filter((place: Place) => {
-		if (geoContains(rewoundPoly, [place.lon, place.lat])) {
-			return true;
-		} else {
-			return false;
-		}
-	});
-
 	dataInitialized = true;
+};
+
+// The containment sweep is decoupled from init: the header and AreaMap
+// mount immediately off the SSR bundle, and the pins land when $places and
+// the chunked sweep are done. Once per area (matching the old semantics —
+// later $places republications don't resweep), generation-guarded so an
+// area navigation abandons an in-flight sweep, publishing one fresh array
+// per completed sweep — never a partial one.
+let sweepGeneration = 0;
+let sweptAreaId: string | undefined;
+// True once the current area's sweep has published — the merchant
+// highlights' skeleton gate (an empty filteredPlaces before this is
+// "still sweeping", after it is a genuine empty area).
+let sweepDone = false;
+
+// Leaving the page entirely must abandon an in-flight sweep at its next
+// chunk boundary — without this it would burn through the remaining ~29k
+// geoContains tests for a component that no longer exists.
+onDestroy(() => {
+	sweepGeneration++;
+});
+
+const runContainmentSweep = async (areaPlaces: Place[], geoJson: GeoJSON) => {
+	const generation = ++sweepGeneration;
+	const result = await placesInAreaChunked(areaPlaces, geoJson, {
+		isStale: () => generation !== sweepGeneration,
+	});
+	if (result && generation === sweepGeneration) {
+		filteredPlaces = result;
+		sweepDone = true;
+	}
 };
 
 // Reset area-scoped state when the user navigates client-side to a different area.
@@ -234,9 +254,24 @@ $: if (data?.id !== lastAreaId) {
 	taggersFetchGeneration++;
 	taggers = [];
 	filteredPlaces = [];
+	// Abandon any in-flight containment sweep and let the new area resweep.
+	sweepGeneration++;
+	sweptAreaId = undefined;
+	sweepDone = false;
 }
 
-$: data?.id && $places?.length && !dataInitialized && initializeData();
+// Header + map mount straight off the SSR bundle — no store wait. The
+// containment sweep (which does need $places) runs separately below.
+$: data?.id && !dataInitialized && initializeData();
+
+// Source order matters (the #1177 lesson): this must sit BELOW the reset
+// and init reactives so an area navigation resets state and re-inits
+// before the sweep guard is evaluated — otherwise it would fire once
+// against the outgoing area's polygon.
+$: if (dataInitialized && $places.length && sweptAreaId !== data.id) {
+	sweptAreaId = data.id;
+	runContainmentSweep($places, area.geo_json);
+}
 
 // Fire the area top-editors fetch only when the user actually lands on /activity.
 // One REST call replaces the previous per-place enrichment shim.
@@ -474,7 +509,10 @@ $: issues = data?.issues ?? [];
 			cameraBbox={data.cameraBbox}
 			upToDatePercent={areaReports?.[0]?.tags.up_to_date_percent}
 		/>
-		<AreaMerchantHighlights {dataInitialized} {filteredPlaces} />
+		<!-- Gate on sweep completion, not dataInitialized: init now finishes
+		     before the sweep, and an empty filteredPlaces mid-sweep is "still
+		     loading", not "no merchants here". -->
+		<AreaMerchantHighlights dataInitialized={sweepDone} {filteredPlaces} />
 		{#if browser}
 			<Boost />
 		{/if}
