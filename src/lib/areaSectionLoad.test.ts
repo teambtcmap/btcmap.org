@@ -19,9 +19,12 @@ const AREA_OK = {
 	id: 42,
 	deleted_at: null,
 	tags: {
+		type: "community",
 		url_alias: "some-area",
 		name: "Some Area",
 		description: "An area description",
+		continent: "europe",
+		geo_json: { type: "Polygon", coordinates: [] },
 		"verified:date": "2024-01-01",
 		"icon:square": "https://example.com/icon.png",
 	},
@@ -52,12 +55,14 @@ const communityConfig: AreaSectionConfig = {
 	notFoundMessage: "Community Not Found",
 	redirectBase: "/community",
 	isValidArea: (area) => !area.includes("/"),
+	hasRequiredTags: () => true,
 };
 
 const countryConfig: AreaSectionConfig = {
 	notFoundMessage: "Country Not Found",
 	redirectBase: "/country",
 	isValidArea: (area) => /^[\w-]+$/.test(area),
+	hasRequiredTags: () => true,
 };
 
 const captureThrow = async (fn: () => Promise<unknown>): Promise<unknown> => {
@@ -223,7 +228,7 @@ describe("loadAreaSection", () => {
 
 		const err = await captureThrow(() =>
 			loadAreaSection(
-				{ params: { area: "some-area", section: "merchants" }, fetch },
+				{ params: { area: "some-area", section: "maintain" }, fetch },
 				communityConfig,
 			),
 		);
@@ -234,7 +239,7 @@ describe("loadAreaSection", () => {
 		}
 	});
 
-	it("returns mapped area + issues data and requests the expected endpoints", async () => {
+	it("returns the bundle without an issues request for non-maintain sections", async () => {
 		const fetch = makeFetch();
 
 		const result = await loadAreaSection(
@@ -247,16 +252,139 @@ describe("loadAreaSection", () => {
 			numericId: 42,
 			name: "Some Area",
 			tickets: "maintenance",
-			issues: ISSUES_OK.requested_issues,
+			// Issues feed only the maintain section's table — the other
+			// sections' SSR payloads must not carry them
+			issues: [],
 			description: "An area description",
+			tags: AREA_OK.tags,
+			contacts: {},
+			cameraBbox: null,
 		});
 		expect(result.tags).toEqual(AREA_OK.tags);
 
-		const areaUrl = fetch.mock.calls[0][0].toString();
-		const issuesUrl = fetch.mock.calls[1][0].toString();
-		expect(areaUrl).toContain("/v3/areas/some-area");
-		expect(issuesUrl).toContain(
-			"/v4/place-issues?area_id=42&limit=10000&offset=0",
+		expect(fetch).toHaveBeenCalledTimes(1);
+		expect(fetch.mock.calls[0][0].toString()).toContain("/v3/areas/some-area");
+	});
+
+	it("fetches issues for the maintain section, paginating past the limit", async () => {
+		const page1 = Array.from({ length: 10000 }, (_, i) => ({ id: i }));
+		const page2 = [{ id: 10000 }, { id: 10001 }];
+		let issuesCall = 0;
+		const fetch = makeFetch({
+			issues: {
+				json: () => ({
+					requested_issues: issuesCall++ === 0 ? page1 : page2,
+				}),
+			},
+		});
+
+		const result = await loadAreaSection(
+			{ params: { area: "some-area", section: "maintain" }, fetch },
+			communityConfig,
 		);
+
+		expect(result.data.issues).toHaveLength(10002);
+		const issuesUrls = fetch.mock.calls
+			.map((call) => call[0].toString())
+			.filter((url) => url.includes("/v4/place-issues"));
+		expect(issuesUrls).toHaveLength(2);
+		expect(issuesUrls[0]).toContain("limit=10000&offset=0");
+		expect(issuesUrls[1]).toContain("limit=10000&offset=10000");
+	});
+
+	it("returns a 404 when required tags are missing", async () => {
+		const fetch = makeFetch();
+
+		const err = await captureThrow(() =>
+			loadAreaSection(
+				{ params: { area: "some-area", section: "merchants" }, fetch },
+				{
+					...communityConfig,
+					hasRequiredTags: (tags) => !!tags["icon:square"] && false,
+				},
+			),
+		);
+
+		expect(isHttpError(err)).toBe(true);
+		if (isHttpError(err)) {
+			expect(err.status).toBe(404);
+			expect(err.body.message).toBe("Community Not Found");
+		}
+	});
+
+	it("lifts contact tags into the typed contacts object", async () => {
+		const fetch = makeFetch({
+			areas: {
+				json: () => ({
+					...AREA_OK,
+					tags: {
+						...AREA_OK.tags,
+						"contact:website": "https://example.org",
+						"contact:telegram": "https://t.me/example",
+						"contact:email": "",
+					},
+				}),
+			},
+		});
+
+		const result = await loadAreaSection(
+			{ params: { area: "some-area", section: "merchants" }, fetch },
+			communityConfig,
+		);
+
+		// Empty strings are dropped; only authored contacts survive
+		expect(result.data.contacts).toEqual({
+			website: "https://example.org",
+			telegram: "https://t.me/example",
+		});
+	});
+
+	it("coerces numeric box:* tags into a camera bbox and rejects junk", async () => {
+		const withBox = (box: Record<string, unknown>) =>
+			makeFetch({
+				areas: {
+					json: () => ({ ...AREA_OK, tags: { ...AREA_OK.tags, ...box } }),
+				},
+			});
+		const load = (fetch: ReturnType<typeof makeFetch>) =>
+			loadAreaSection(
+				{ params: { area: "some-area", section: "merchants" }, fetch },
+				communityConfig,
+			);
+
+		// The API serves numbers despite the historical string typing
+		const numeric = await load(
+			withBox({
+				"box:west": -17.3,
+				"box:south": 32.5,
+				"box:east": -16.2,
+				"box:north": 33.2,
+			}),
+		);
+		expect(numeric.data.cameraBbox).toEqual([-17.3, 32.5, -16.2, 33.2]);
+
+		// String-typed values coerce
+		const strings = await load(
+			withBox({
+				"box:west": "-17.3",
+				"box:south": "32.5",
+				"box:east": "-16.2",
+				"box:north": "33.2",
+			}),
+		);
+		expect(strings.data.cameraBbox).toEqual([-17.3, 32.5, -16.2, 33.2]);
+
+		// Junk, inverted, or wrap boxes fall back to the polygon fit
+		const junk = await load(withBox({ "box:west": "not-a-number" }));
+		expect(junk.data.cameraBbox).toBeNull();
+		const inverted = await load(
+			withBox({
+				"box:west": 10,
+				"box:south": 40,
+				"box:east": 5,
+				"box:north": 45,
+			}),
+		);
+		expect(inverted.data.cameraBbox).toBeNull();
 	});
 });

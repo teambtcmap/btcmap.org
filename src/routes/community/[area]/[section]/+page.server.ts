@@ -10,6 +10,14 @@ export const load: PageServerLoad = async ({ params, fetch }) => {
 			redirectBase: "/community",
 			// Allow non-Latin aliases while still rejecting malformed path-like values.
 			isValidArea: (area) => !area.includes("/"),
+			// The tags AreaPage renders from — previously enforced client-side
+			// via the $areas-lookup filter.
+			hasRequiredTags: (tags) =>
+				tags.type === "community" &&
+				!!tags.geo_json &&
+				!!tags.name &&
+				!!tags["icon:square"] &&
+				!!tags.continent,
 		},
 	);
 
