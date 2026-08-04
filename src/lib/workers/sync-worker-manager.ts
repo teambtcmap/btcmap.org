@@ -1,12 +1,5 @@
 import type { WorkerMessage, WorkerResponse } from "./sync-worker";
-import type {
-	Area,
-	Event,
-	Place,
-	ProgressUpdate,
-	Report,
-	User,
-} from "../types";
+import type { Place, ProgressUpdate } from "../types";
 
 let worker: Worker | null = null;
 let workerInitialized = false;
@@ -49,7 +42,6 @@ function handleWorkerMessage(response: WorkerResponse) {
 
 		case "PARSED":
 		case "FILTERED":
-		case "MERGED":
 			request.resolve(response.payload);
 			pendingRequests.delete(response.id);
 			break;
@@ -177,48 +169,6 @@ export async function filterPlaces(
 		recentUpdates.forEach((place) => {
 			if (!place.deleted_at) {
 				merged.push(place);
-			}
-		});
-		return merged;
-	}
-}
-
-export async function filterDeleted<
-	T extends Place | Area | User | Event | Report,
->(
-	items: T[],
-	type: "places" | "areas" | "users" | "events" | "reports",
-): Promise<T[]> {
-	try {
-		return await sendWorkerMessage<T[]>("FILTER_DELETED", { items, type });
-	} catch (error) {
-		// Fallback to synchronous filtering
-		console.warn("Worker filtering failed, using synchronous fallback:", error);
-		return items.filter((item) => !item.deleted_at);
-	}
-}
-
-export async function mergeUpdates<T extends Area | User | Event | Report>(
-	cached: T[],
-	updates: T[],
-	type: "areas" | "users" | "events" | "reports",
-): Promise<T[]> {
-	try {
-		return await sendWorkerMessage<T[]>("MERGE_UPDATES", {
-			cached,
-			updates,
-			type,
-		});
-	} catch (error) {
-		// Fallback to synchronous merging
-		// Type-safe: T is constrained to Area | User | Event | Report, all have id and deleted_at
-		console.warn("Worker merging failed, using synchronous fallback:", error);
-		const updatesMap = new Map(updates.map((item) => [item.id, item]));
-		const filtered = cached.filter((item) => !updatesMap.has(item.id));
-		const merged = [...filtered];
-		updates.forEach((item) => {
-			if (!item.deleted_at) {
-				merged.push(item);
 			}
 		});
 		return merged;
