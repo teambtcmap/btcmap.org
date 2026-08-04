@@ -6,9 +6,7 @@ import api from "$lib/axios";
 import {
 	type CategoryCounts,
 	type CategoryKey,
-	countMerchantsByCategory,
 	createEmptyCategoryCounts,
-	filterMerchantsByCategory,
 } from "$lib/categoryMapping";
 import { MERCHANT_LIST_MAX_ITEMS } from "$lib/constants";
 import { _ } from "$lib/i18n";
@@ -17,6 +15,7 @@ import {
 	getStoredVerifiedFilter,
 	storeVerifiedFilter,
 } from "$lib/map/verifiedFilter";
+import { selectVisiblePlaces } from "$lib/map/visiblePlaces";
 import { isBoosted } from "$lib/merchantDrawerLogic";
 import { verifiedDatesLoaded } from "$lib/store";
 import type { Place } from "$lib/types";
@@ -74,41 +73,6 @@ const initialState: MerchantListState = {
 // Helper function to reset category state
 function resetCategoryState<T extends MerchantListState>(state: T): T {
 	return { ...state, selectedCategory: "all" };
-}
-
-// The auto-reset rule shared by every counts recompute: a selected chip whose
-// count dropped to zero (while other merchants remain) snaps back to "all".
-function shouldResetCategory(
-	selectedCategory: CategoryKey,
-	categoryCounts: CategoryCounts,
-): boolean {
-	return (
-		selectedCategory !== "all" &&
-		categoryCounts.all > 0 &&
-		categoryCounts[selectedCategory] === 0
-	);
-}
-
-// Helper to apply category filtering with auto-reset when selected category has no matches
-// Returns filtered merchants and the effective category (may be reset to 'all')
-function applyCategoryFilter(
-	merchants: Place[],
-	selectedCategory: CategoryKey,
-	categoryCounts: CategoryCounts,
-): { filtered: Place[]; effectiveCategory: CategoryKey } {
-	const effectiveCategory = shouldResetCategory(
-		selectedCategory,
-		categoryCounts,
-	)
-		? "all"
-		: selectedCategory;
-
-	const filtered =
-		effectiveCategory !== "all"
-			? filterMerchantsByCategory(merchants, effectiveCategory)
-			: merchants;
-
-	return { filtered, effectiveCategory };
 }
 
 // Sort order: boosted merchants first (premium placement), then by distance, then alphabetically
@@ -211,24 +175,21 @@ function createMerchantListStore() {
 			limit: number = MERCHANT_LIST_MAX_ITEMS,
 		) {
 			const { selectedCategory, verifiedWithinYears } = get(store);
-			// Apply the recency filter first so the category counts reflect the
-			// verification window the user is actually seeing. Gate on the dates
-			// being loaded (they're lazy) so we don't blank the list while a
-			// filter is active but enrichment hasn't landed — matches the markers.
-			const recencyReady =
-				verifiedWithinYears == null || get(verifiedDatesLoaded);
-			const recencyPlaces = recencyReady
-				? filterPlacesByRecency(merchants, verifiedWithinYears)
-				: merchants;
-			const categoryCounts = countMerchantsByCategory(recencyPlaces);
-			const { filtered, effectiveCategory } = applyCategoryFilter(
-				recencyPlaces,
-				selectedCategory,
-				categoryCounts,
-			);
+			// The shared pipeline applies the recency window (gated on the lazy
+			// dates being loaded, matching the markers), computes chip counts on
+			// the pre-category set, and applies the auto-reset rule — one
+			// decision path for list, pins, and counts.
+			const { selection, counts, effectiveCategory } = selectVisiblePlaces({
+				places: merchants,
+				mode: "nearby",
+				category: selectedCategory,
+				recency: verifiedWithinYears,
+				recencyReady: verifiedWithinYears == null || get(verifiedDatesLoaded),
+				boostsOnly: false,
+			});
 
 			const sorted = sortMerchants(
-				filtered,
+				selection,
 				centerLat,
 				centerLon,
 				get(userLocation).location,
@@ -238,9 +199,9 @@ function createMerchantListStore() {
 			update((state) => ({
 				...state,
 				merchants: limited,
-				totalCount: filtered.length,
+				totalCount: selection.length,
 				isLoadingList: false,
-				categoryCounts,
+				categoryCounts: counts,
 				selectedCategory: effectiveCategory,
 			}));
 		},
@@ -278,40 +239,45 @@ function createMerchantListStore() {
 				const placeDetailsCache = new Map<number, Place>();
 				validPlaces.forEach((place) => placeDetailsCache.set(place.id, place));
 
-				// Apply the recency filter before the density check (list data is
-				// fetched with verified_at, so no readiness gate is needed): a
-				// narrow window can bring an otherwise-too-dense area under the
-				// ceiling, so the filter stays effective at zoom 10-14.
+				// The shared pipeline applies the recency window before the density
+				// check (API rows carry verified_at, so recencyReady is
+				// unconditionally true here): a narrow window can bring an
+				// otherwise-too-dense area under the ceiling, so the filter stays
+				// effective at zoom 10-14. The density ceiling compares the
+				// PRE-category set — a selected chip must not defeat it.
 				const { selectedCategory, verifiedWithinYears } = get(store);
-				const recencyPlaces = filterPlacesByRecency(
-					validPlaces,
-					verifiedWithinYears,
-				);
-				const categoryCounts = countMerchantsByCategory(recencyPlaces);
+				const { selection, preCategory, counts, effectiveCategory } =
+					selectVisiblePlaces({
+						places: validPlaces,
+						mode: "nearby",
+						category: selectedCategory,
+						recency: verifiedWithinYears,
+						recencyReady: true,
+						boostsOnly: false,
+					});
 
 				// Check if we should hide results (too many at low zoom)
 				if (
 					options?.hideIfExceeds &&
-					recencyPlaces.length > options.hideIfExceeds
+					preCategory.length > options.hideIfExceeds
 				) {
 					// Too many results - store count but show empty list
-					// The panel will display "zoom in" message, button shows count
+					// The panel will display "zoom in" message, button shows count.
+					// The auto-reset still persists: a selected chip whose count
+					// dropped to zero must snap back to "all" here too, or the chip
+					// state disagrees with the markers (which render the pipeline's
+					// reset selection independently).
 					update((state) => ({
 						...state,
 						merchants: [],
-						totalCount: recencyPlaces.length,
+						totalCount: preCategory.length,
 						isLoadingList: false,
-						categoryCounts,
+						categoryCounts: counts,
+						selectedCategory: effectiveCategory,
 					}));
 				} else {
-					const { filtered, effectiveCategory } = applyCategoryFilter(
-						recencyPlaces,
-						selectedCategory,
-						categoryCounts,
-					);
-
 					const sorted = sortMerchants(
-						filtered,
+						selection,
 						center.lat,
 						center.lon,
 						get(userLocation).location,
@@ -320,10 +286,10 @@ function createMerchantListStore() {
 					update((state) => ({
 						...state,
 						merchants: limited,
-						totalCount: filtered.length,
+						totalCount: selection.length,
 						placeDetailsCache,
 						isLoadingList: false,
-						categoryCounts,
+						categoryCounts: counts,
 						selectedCategory: effectiveCategory,
 					}));
 				}
@@ -465,12 +431,18 @@ function createMerchantListStore() {
 				if (!isBoosted(a) && isBoosted(b)) return 1;
 				return 0;
 			});
-			// Counts reflect the recency window; the panel applies the same
-			// recency + category filter to what it renders (filteredSearchResults).
+			// Counts come from the shared pipeline on the recency-filtered set;
+			// the panel renders the same pipeline's selection
+			// (filteredSearchResults), so chips and rows can never disagree.
 			const { verifiedWithinYears } = get(store);
-			const categoryCounts = countMerchantsByCategory(
-				filterPlacesByRecency(sortedResults, verifiedWithinYears),
-			);
+			const { counts: categoryCounts } = selectVisiblePlaces({
+				places: sortedResults,
+				mode: "search",
+				category: "all",
+				recency: verifiedWithinYears,
+				recencyReady: true,
+				boostsOnly: false,
+			});
 			update((state) => ({
 				...resetCategoryState(state),
 				isOpen: true,
@@ -559,30 +531,22 @@ function createMerchantListStore() {
 				// the forced update re-runs setMerchants/fetchAndReplaceList,
 				// which own that recompute.
 				if (state.mode === "search" && state.searchResults.length > 0) {
-					const recencyResults = filterPlacesByRecency(
-						state.searchResults,
-						years,
-					);
-					const categoryCounts = countMerchantsByCategory(recencyResults);
-					// Shared auto-reset rule, counts-only. Deliberately not
-					// applyCategoryFilter: its filtered list is unused here, and
-					// it filters via filterMerchantsByCategory (group icon-list
-					// scan) while the panel renders via placeMatchesCategory
-					// (ICON_TO_CATEGORY lookup) — two implementations that agree
-					// only while the categoryMapping equivalence tests hold, so
-					// this path avoids depending on the one the panel doesn't
-					// use. A window that zeroes the selected chip snaps
-					// selection to "all", exactly as nearby mode does.
+					// The pipeline recomputes counts on the new window and applies
+					// the auto-reset rule — a window that zeroes the selected chip
+					// snaps selection to "all", exactly as nearby mode does.
+					const { counts, effectiveCategory } = selectVisiblePlaces({
+						places: state.searchResults,
+						mode: "search",
+						category: state.selectedCategory,
+						recency: years,
+						recencyReady: true,
+						boostsOnly: false,
+					});
 					return {
 						...state,
 						verifiedWithinYears: years,
-						categoryCounts,
-						selectedCategory: shouldResetCategory(
-							state.selectedCategory,
-							categoryCounts,
-						)
-							? "all"
-							: state.selectedCategory,
+						categoryCounts: counts,
+						selectedCategory: effectiveCategory,
 					};
 				}
 				return { ...state, verifiedWithinYears: years };

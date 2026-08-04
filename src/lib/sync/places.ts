@@ -292,6 +292,7 @@ export const elementsSync = async () => {
 					: await getStaticFileDate();
 
 				let apiSucceeded = false;
+				let mergedUpdateCount = 0;
 
 				try {
 					const apiResponse = await api.get<Place[]>(
@@ -315,6 +316,7 @@ export const elementsSync = async () => {
 					);
 
 					if (recentUpdates.length > 0) {
+						mergedUpdateCount = recentUpdates.length;
 						placesLoadingStatus.set("Merging updates...");
 						placesLoadingProgress.set(
 							cachedPlaces
@@ -351,7 +353,30 @@ export const elementsSync = async () => {
 				placesLoadingStatus.set("Finalizing...");
 				placesLoadingProgress.set(PROGRESS_RANGES.FINALIZE);
 
-				if (placesData.length > 0) {
+				// A periodic re-sync that merged nothing must NOT republish:
+				// places.set notifies every subscriber (and bumps placesRevision)
+				// even when the array is unchanged, sending ~50k rows back through
+				// the map pipeline once per sync interval for no reason. Applies
+				// ONLY to cache-based re-syncs: a CDN baseline download (no local
+				// cache — e.g. after a failed persist) always publishes, since the
+				// in-memory data may be older than the fresh baseline. The first
+				// publication of the session (empty store) always goes through —
+				// hydrating from the cache IS a change. The synced_at watermark
+				// still advances so the update window stays minimal.
+				const nothingChanged =
+					cachedPlaces != null &&
+					mergedUpdateCount === 0 &&
+					get(places).length > 0;
+				if (nothingChanged) {
+					if (apiSucceeded) {
+						await localforage.setItem(
+							"places_v4_synced_at",
+							new Date().toISOString(),
+						);
+					}
+					placesLoadingStatus.set("Complete!");
+					placesLoadingProgress.set(PROGRESS_RANGES.COMPLETE);
+				} else if (placesData.length > 0) {
 					localforage
 						.setItem("places_v4", placesData)
 						.then(async () => {

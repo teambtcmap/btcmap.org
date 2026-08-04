@@ -12,18 +12,17 @@ import {
 	CATEGORY_ENTRIES,
 	type CategoryCounts,
 	type CategoryKey,
-	placeMatchesCategory,
 } from "$lib/categoryMapping";
 import { MERCHANT_LIST_LOW_ZOOM } from "$lib/constants";
 import { SEARCH_SHEET_PEEK_HEIGHT } from "$lib/drawerConfig";
 import { createDrawerGestureController } from "$lib/drawerGestureController";
 import { _ } from "$lib/i18n";
+import { selectVisiblePlaces } from "$lib/map/visiblePlaces";
 import { merchantDrawer } from "$lib/merchantDrawerStore";
 import { merchantList } from "$lib/merchantListStore";
 import type { Place } from "$lib/types";
 import { userLocation } from "$lib/userLocationStore";
 import { errToast, formatNearbyPillCount } from "$lib/utils";
-import { filterPlacesByRecency } from "$lib/verification";
 
 import MerchantListItem from "./MerchantListItem.svelte";
 import NearbyCountPill from "./NearbyCountPill.svelte";
@@ -356,13 +355,17 @@ function handleDismissLocation() {
 	locationRequestDismissed = true;
 }
 
-// Filter search results by category and verification recency
-$: filteredSearchResults = filterPlacesByRecency(
-	selectedCategory === "all"
-		? searchResults
-		: searchResults.filter((p) => placeMatchesCategory(p, selectedCategory)),
-	verifiedWithinYears,
-);
+// The rendered search rows come from the same pipeline as the pins and the
+// chip counts (selectVisiblePlaces), so the list can never disagree with
+// either again.
+$: filteredSearchResults = selectVisiblePlaces({
+	places: searchResults,
+	mode: "search",
+	category: selectedCategory,
+	recency: verifiedWithinYears,
+	recencyReady: true,
+	boostsOnly: false,
+}).selection;
 
 // Helper function to check if a category has matching merchants
 // Note: counts param required for Svelte reactivity (indirect deps aren't tracked)

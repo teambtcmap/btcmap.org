@@ -137,6 +137,31 @@ const markRealSprite = (m: MapLibreMap, name: string): void => {
 	set.add(name);
 };
 
+// For fixed sprites owned by other modules (badges, hit-targets): hasImage()
+// alone can't distinguish a real sprite from the 1×1 stub the
+// styleimagemissing handler inserts while a load is failing or pending — a
+// loader gating on it would treat the stub as done and never retry. These
+// share the real-registration tracking (cleared on style.load) so retries
+// after a transient failure or a style rebuild replace the stub.
+export const hasRealImage = (m: MapLibreMap, name: string): boolean => {
+	ensureStyleResetListener(m);
+	return hasRealSprite(m, name);
+};
+
+export const addRealImage = (
+	m: MapLibreMap,
+	name: string,
+	img: Parameters<MapLibreMap["addImage"]>[1],
+	opts: { pixelRatio: number },
+): void => {
+	ensureStyleResetListener(m);
+	// Remove any stub the placeholder handler installed before we got here —
+	// addImage throws on a duplicate name, and updateImage drops pixelRatio.
+	if (m.hasImage(name)) m.removeImage(name);
+	m.addImage(name, img, opts);
+	markRealSprite(m, name);
+};
+
 export const ensureSprite = (
 	m: MapLibreMap,
 	icon: string,

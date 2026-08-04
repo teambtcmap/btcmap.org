@@ -9,7 +9,7 @@ import PrimaryButton from "$components/PrimaryButton.svelte";
 import { _ } from "$lib/i18n";
 import IconSocials from "$lib/icons/IconSocials.svelte";
 import { classifyBoostError } from "$lib/payment";
-import { boost, boostHash, lastUpdatedPlaceId } from "$lib/store";
+import { boost, boostHash } from "$lib/store";
 import { updateSinglePlace } from "$lib/sync/places";
 import { errToast, warningToast } from "$lib/utils";
 
@@ -58,7 +58,6 @@ const handlePaymentSuccess = async () => {
 
 		if (merchantId) {
 			await updateSinglePlace(merchantId);
-			lastUpdatedPlaceId.set(Number(merchantId));
 		}
 
 		if (onComplete) {
