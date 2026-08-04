@@ -1,31 +1,39 @@
 <script lang="ts">
-export let website: undefined | string = undefined;
-export let email: undefined | string = undefined;
-export let phone: undefined | string = undefined;
-export let nostr: undefined | string = undefined;
-export let twitter: undefined | string = undefined;
-export let meetup: undefined | string = undefined;
-export let telegram: undefined | string = undefined;
-export let discord: undefined | string = undefined;
-export let youtube: undefined | string = undefined;
-export let github: undefined | string = undefined;
-export let matrix: undefined | string = undefined;
-export let geyser: undefined | string = undefined;
-export let satlantis: undefined | string = undefined;
-export let eventbrite: undefined | string = undefined;
-export let reddit: undefined | string = undefined;
-export let simplex: undefined | string = undefined;
-export let instagram: undefined | string = undefined;
-export let whatsapp: undefined | string = undefined;
-export let facebook: undefined | string = undefined;
-export let linkedin: undefined | string = undefined;
-export let rss: undefined | string = undefined;
-export let signal: undefined | string = undefined;
+// One typed object (see $lib/area/contacts) instead of 22 named props
+export let contacts: AreaContacts = {};
 
 export let style: undefined | string = undefined;
 
+// The template and the sanitized derivations below keep their historical
+// per-key names — only the interface collapsed
+$: ({
+	website,
+	email,
+	phone,
+	nostr,
+	twitter,
+	meetup,
+	telegram,
+	discord,
+	youtube,
+	github,
+	matrix,
+	geyser,
+	satlantis,
+	eventbrite,
+	reddit,
+	simplex,
+	instagram,
+	whatsapp,
+	facebook,
+	linkedin,
+	rss,
+	signal,
+} = contacts);
+
 import Icon from "$components/Icon.svelte";
 import IconSocials from "$lib/icons/IconSocials.svelte";
+import type { AreaContacts } from "$lib/types";
 import { sanitizeUrl } from "$lib/utils";
 
 // Sanitize URLs to prevent XSS from malicious protocols like javascript:

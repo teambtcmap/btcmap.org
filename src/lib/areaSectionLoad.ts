@@ -1,13 +1,8 @@
 import { error, isHttpError, redirect } from "@sveltejs/kit";
 
 import { API_BASE } from "$lib/api-base";
-import type {
-	AreaContacts,
-	AreaPageProps,
-	AreaTags,
-	PlaceIssue,
-} from "$lib/types";
-import { AREA_CONTACT_KEYS } from "$lib/types";
+import { extractContacts } from "$lib/area/contacts";
+import type { AreaPageProps, AreaTags, PlaceIssue } from "$lib/types";
 
 // Shared loader for the community/[area]/[section] and country/[area]/[section]
 // pages. Both fetch the same v3 area data and share the same error handling;
@@ -84,19 +79,6 @@ const fetchAllPlaceIssues = async (
 		`place-issues for area ${areaId} truncated at ${all.length} rows`,
 	);
 	return all;
-};
-
-// Lift the 22 `contact:*` string tags into one typed object so consumers
-// stop spelling `area["contact:satlantis"]` at every read site.
-const extractContacts = (tags: AreaTags): AreaContacts => {
-	const contacts: AreaContacts = {};
-	for (const key of AREA_CONTACT_KEYS) {
-		const value = tags[`contact:${key}`];
-		if (typeof value === "string" && value) {
-			contacts[key] = value;
-		}
-	}
-	return contacts;
 };
 
 // box:* tags are human-authored camera hints, served as numbers despite
