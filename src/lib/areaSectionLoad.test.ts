@@ -421,6 +421,26 @@ describe("loadAreaSection", () => {
 		// Junk, inverted, or wrap boxes fall back to the polygon fit
 		const junk = await load(withBox({ "box:west": "not-a-number" }));
 		expect(junk.data.cameraBbox).toBeNull();
+
+		// Out-of-range coordinates fail closed — MapLibre throws on |lat| > 90
+		const badLat = await load(
+			withBox({
+				"box:west": -17.3,
+				"box:south": 32.5,
+				"box:east": -16.2,
+				"box:north": 95,
+			}),
+		);
+		expect(badLat.data.cameraBbox).toBeNull();
+		const badLon = await load(
+			withBox({
+				"box:west": -17.3,
+				"box:south": 32.5,
+				"box:east": 200,
+				"box:north": 33.2,
+			}),
+		);
+		expect(badLon.data.cameraBbox).toBeNull();
 		const inverted = await load(
 			withBox({
 				"box:west": 10,

@@ -113,6 +113,11 @@ const cameraBboxFromTags = (
 	const east = Number(tags["box:east"]);
 	const north = Number(tags["box:north"]);
 	if (![west, south, east, north].every(Number.isFinite)) return null;
+	// Out-of-range coordinates must fail closed too: MapLibre's LngLat
+	// throws on latitudes beyond ±90 (crashing fitBounds mid-init), and
+	// longitudes beyond ±180 silently misplace the camera.
+	if (Math.abs(south) > 90 || Math.abs(north) > 90) return null;
+	if (Math.abs(west) > 180 || Math.abs(east) > 180) return null;
 	if (south >= north || west >= east) return null;
 	return [west, south, east, north];
 };
