@@ -10,7 +10,7 @@ import {
 	fetchMerchantDetails,
 } from "$lib/merchantDrawerLogic";
 import { boost } from "$lib/store";
-import type { Place } from "$lib/types";
+import type { Boost, Place } from "$lib/types";
 import { isUpToDate as checkUpToDate } from "$lib/verification";
 
 export let merchantId: number | null = null;
@@ -61,17 +61,36 @@ const closeDrawer = () => {
 
 const handleBoost = () => boostMerchant(merchant, merchantId, setBoostLoading);
 
-$: if ($boost !== undefined && merchant) {
-	// Boost state changed - refresh merchant data. fresh bypasses the details
-	// cache so a just-boosted merchant is never served its pre-boost record.
-	if (merchantId) {
+// Refresh once per boost-state TRANSITION, tracked via lastSeenBoost. The
+// old shape re-fired whenever `merchant` was reassigned while $boost stayed
+// defined — and since the fetch itself reassigns `merchant`, that spun a
+// network loop for as long as the boost modal stayed open (#1199).
+// Modal open → fresh: true so the boost flow starts from current data (never
+// a pre-boost cached record). Modal close → plain fetch: after a completed
+// payment the write-through has primed the details cache, so this serves the
+// boosted record instantly; after a cancel it's an equally cheap cache hit.
+let lastSeenBoost: Boost;
+$: if ($boost !== lastSeenBoost) {
+	const opening = $boost !== undefined;
+	lastSeenBoost = $boost;
+	if (merchantId && merchant) {
+		// Same abort discipline as the merchantId-driven fetch above: a
+		// drawer close or merchant switch must cancel this too, so a late
+		// response can't stomp the state the drawer has since moved to.
+		if (abortController) {
+			abortController.abort();
+		}
+		abortController = new AbortController();
+
 		fetchMerchantDetails(
 			merchantId,
 			merchantId,
 			(m) => (merchant = m),
 			(f) => (isLoading = f),
 			(id) => (lastFetchedId = id),
-			{ fresh: true },
+			opening
+				? { signal: abortController.signal, fresh: true }
+				: { signal: abortController.signal },
 		);
 	}
 }
