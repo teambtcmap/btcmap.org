@@ -1,3 +1,4 @@
+import axios from "axios";
 import { get, writable } from "svelte/store";
 
 import { API_BASE } from "$lib/api-base";
@@ -113,6 +114,13 @@ function sortMerchants(
 		// Fallback to alphabetical
 		return (a.name || "").localeCompare(b.name || "");
 	});
+}
+
+// Deliberate aborts from our AbortControllers surface as axios CanceledError
+// (axios.isCancel) — or a native AbortError — and are not failures: rapid
+// pans and zoom-boundary crossings cancel the prior request every time.
+function isCancellation(error: Error): boolean {
+	return axios.isCancel(error) || error.name === "AbortError";
 }
 
 // Filter out invalid API response items missing required id field
@@ -294,7 +302,7 @@ function createMerchantListStore() {
 					}));
 				}
 			} catch (error) {
-				if (error instanceof Error && error.name !== "AbortError") {
+				if (error instanceof Error && !isCancellation(error)) {
 					console.warn("Failed to fetch merchant list:", error.message);
 					errToast(get(_)("errors.loadFailed"));
 				}
@@ -369,7 +377,7 @@ function createMerchantListStore() {
 					// Preserve existing categoryCounts since we don't have actual merchant data to recalculate them
 				}));
 			} catch (error) {
-				if (error instanceof Error && error.name !== "AbortError") {
+				if (error instanceof Error && !isCancellation(error)) {
 					console.warn("Failed to fetch merchant count:", error.message);
 				}
 				update((state) => ({ ...state, isLoadingList: false }));
@@ -407,7 +415,7 @@ function createMerchantListStore() {
 					};
 				});
 			} catch (error) {
-				if (error instanceof Error && error.name !== "AbortError") {
+				if (error instanceof Error && !isCancellation(error)) {
 					console.warn("Failed to fetch enriched details:", error.message);
 				}
 				update((state) => ({ ...state, isEnrichingDetails: false }));
