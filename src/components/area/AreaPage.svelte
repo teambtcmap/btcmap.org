@@ -26,6 +26,7 @@ import { placesInAreaChunked } from "$lib/area/placesInArea";
 import api from "$lib/axios";
 import { places, placesError, reportError, reports } from "$lib/store";
 import { batchSync } from "$lib/sync/batchSync";
+import { placesPublished } from "$lib/sync/placeCache";
 import { reportsSync } from "$lib/sync/reports";
 import type { AreaPageProps, Place, PlaceIssue, Tagger } from "$lib/types.js";
 import { errToast } from "$lib/utils";
@@ -160,7 +161,11 @@ $: if (data?.id !== lastAreaId) {
 // reactive so an area navigation resets sweep state before the guard is
 // evaluated — otherwise it would fire once against the outgoing area's
 // polygon.
-$: if (area?.geo_json && $places.length && sweptAreaId !== data.id) {
+// Gate on publication, not $places.length: length can't distinguish "still
+// hydrating" from "legitimately empty", so an empty-but-complete dataset
+// would strand the highlights skeleton. A published empty store sweeps to
+// [] and completes like any other result.
+$: if (area?.geo_json && $placesPublished && sweptAreaId !== data.id) {
 	sweptAreaId = data.id;
 	runContainmentSweep($places, area.geo_json);
 }
