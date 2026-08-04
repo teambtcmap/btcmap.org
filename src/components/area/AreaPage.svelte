@@ -58,18 +58,6 @@ $: activeSection = (SECTIONS as readonly string[]).includes(
 const handleSectionChange = (section: Section) => {
 	goto(`/${type}/${encodeURIComponent(data.id)}/${section}`);
 };
-
-// The header's verify link jumps straight to the maintain form without a
-// route change (matching the legacy behavior the link always had).
-const handleVerifyClick = () => {
-	activeSection = "maintain";
-	setTimeout(() => {
-		const form = document.getElementById("verify-form");
-		if (form) {
-			form.scrollIntoView({ behavior: "smooth", block: "center" });
-		}
-	}, 100);
-};
 // taggersInFlight prevents re-fire during the async fetch; taggersLoaded
 // gates the UI so the skeleton stays up until the fetch completes. Per-
 // request transient failures are handled by axiosRetry on the shared
@@ -215,7 +203,7 @@ $: issues = data?.issues ?? [];
 </script>
 
 <main class="my-10 space-y-16 text-center md:my-20">
-<AreaHeader {type} {data} onVerifyClick={handleVerifyClick} />
+<AreaHeader {type} {data} />
 
 	<div
 		on:scroll={() => (scrolled = true)}

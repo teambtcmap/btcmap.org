@@ -14,9 +14,6 @@ import { isRecentlyVerified } from "$lib/verification";
 
 export let type: "country" | "community";
 export let data: AreaPageProps;
-// The verify link jumps to the maintain section's form — section state is
-// the page's concern, so the behavior stays there.
-export let onVerifyClick: () => void;
 
 // Everything below DERIVES from the SSR bundle — no imperative init, no
 // reset lifecycle: an area navigation swaps `data` and every value follows.
@@ -115,10 +112,14 @@ $: lightning = area["tips:lightning_address"]
 					</div>
 				</div>
 			{/if}
+			<!-- Plain navigation on purpose: the maintain route's own load fetches
+			     the per-section-pruned issues, and the hash scrolls to the form. An
+			     in-place section switch would render maintain with an empty issues
+			     table (#1210's pruning). -->
 			<a
 				href={`/community/${encodeURIComponent(alias)}/maintain#verify-form`}
 				class="inline-flex items-center justify-center text-xs text-link transition-colors hover:text-hover"
-				on:click|preventDefault={onVerifyClick}>{$_('area.verifyCommunity')}</a
+				>{$_('area.verifyCommunity')}</a
 			>
 		{/if}
 	</div>
