@@ -1,27 +1,27 @@
 import type { Place, ProgressUpdate } from "../types";
 
-export interface ParseJSONPayload {
+export type ParseJSONPayload = {
 	json: string;
 	type: "places" | "areas" | "users" | "events" | "reports";
-}
+};
 
-export interface FilterPlacesPayload {
+export type FilterPlacesPayload = {
 	places: Place[];
 	updatedPlaceIds: number[];
 	recentUpdates: Place[];
-}
+};
 
-export interface WorkerMessage {
+export type WorkerMessage = {
 	type: "PARSE_JSON" | "FILTER_PLACES";
 	payload: ParseJSONPayload | FilterPlacesPayload;
 	id: string;
-}
+};
 
-export interface WorkerResponse {
+export type WorkerResponse = {
 	type: "PARSED" | "FILTERED" | "ERROR" | "PROGRESS";
 	payload: unknown;
 	id: string;
-}
+};
 
 function serializeError(error: unknown): string {
 	if (error instanceof Error) {
