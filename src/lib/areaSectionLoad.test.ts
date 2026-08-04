@@ -292,6 +292,44 @@ describe("loadAreaSection", () => {
 		expect(issuesUrls[1]).toContain("limit=10000&offset=10000");
 	});
 
+	it("maps a malformed issues payload to a 502 instead of an empty table", async () => {
+		const fetch = makeFetch({
+			issues: { json: () => ({ totally: "unexpected" }) },
+		});
+
+		const err = await captureThrow(() =>
+			loadAreaSection(
+				{ params: { area: "some-area", section: "maintain" }, fetch },
+				communityConfig,
+			),
+		);
+
+		expect(isHttpError(err)).toBe(true);
+		if (isHttpError(err)) {
+			expect(err.status).toBe(502);
+		}
+	});
+
+	it("returns a 404 when url_alias is missing, regardless of config", async () => {
+		const { url_alias, ...tagsWithoutAlias } = AREA_OK.tags;
+		const fetch = makeFetch({
+			areas: { json: () => ({ ...AREA_OK, tags: tagsWithoutAlias }) },
+		});
+
+		const err = await captureThrow(() =>
+			loadAreaSection(
+				{ params: { area: "some-area", section: "merchants" }, fetch },
+				communityConfig,
+			),
+		);
+
+		expect(isHttpError(err)).toBe(true);
+		if (isHttpError(err)) {
+			expect(err.status).toBe(404);
+			expect(err.body.message).toBe("Community Not Found");
+		}
+	});
+
 	it("returns a 404 when required tags are missing", async () => {
 		const fetch = makeFetch();
 

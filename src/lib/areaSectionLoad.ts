@@ -68,9 +68,13 @@ const fetchAllPlaceIssues = async (
 			throw error(502, "Upstream API error");
 		}
 		const body = await response.json();
-		const rows: PlaceIssue[] = Array.isArray(body?.requested_issues)
-			? body.requested_issues
-			: [];
+		// A malformed payload (missing/non-array requested_issues) is an
+		// upstream schema break, not an empty page — surfacing it beats
+		// silently rendering an empty maintain table.
+		if (!Array.isArray(body?.requested_issues)) {
+			throw error(502, "Upstream API error");
+		}
+		const rows: PlaceIssue[] = body.requested_issues;
 		all.push(...rows);
 		// A short page means we've seen the tail; the old single-shot
 		// `offset=0` silently truncated anything past the first 10k.
@@ -152,7 +156,10 @@ export const loadAreaSection = async (
 
 		const tags: AreaTags = fetchedArea.tags;
 
-		if (!config.hasRequiredTags(tags)) {
+		// url_alias is a loader invariant, not a per-type config concern:
+		// data.id derives from it and feeds avatars, section links, and the
+		// top-editors fetch — an area without one is unrenderable.
+		if (!tags.url_alias || !config.hasRequiredTags(tags)) {
 			throw error(404, config.notFoundMessage);
 		}
 
