@@ -58,12 +58,15 @@ export const readPlaceCache = async (): Promise<Place[] | null> => {
 		console.warn("placeCache: blob is not an array — ignoring corrupt cache");
 		return null;
 	}
-	// A non-empty blob whose rows ALL fail validation is corruption in array
-	// clothing (the literal #1187 shape: a string char-iterated into an
-	// array) — reading it as a warm-but-empty cache would skip the baseline
-	// download and strand the session empty. Cold cache; re-download heals.
-	if (rows.length === 0 && (raw as unknown[]).length > 0) {
-		console.warn("placeCache: no valid rows in blob — ignoring corrupt cache");
+	// ANY dropped row means the blob is corrupt — and unlike the publish
+	// boundary (where the source data still exists upstream and dropping
+	// junk is safe), the blob is the only copy at hydrate time: a partial
+	// snapshot would delta-sync forever without ever restoring the lost
+	// rows, then persist the loss. This also covers the literal #1187 shape
+	// (a string char-iterated into an array, zero valid rows). Cold cache;
+	// the baseline re-download heals it.
+	if (rows.length !== (raw as unknown[]).length) {
+		console.warn("placeCache: invalid rows in blob — ignoring corrupt cache");
 		return null;
 	}
 	return rows;

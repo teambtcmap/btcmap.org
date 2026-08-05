@@ -69,9 +69,12 @@ describe("readPlaceCache", () => {
 		expect(await readPlaceCache()).toEqual([]);
 	});
 
-	it("drops rows that don't look like places and keeps the rest", async () => {
+	it("treats ANY dropped row as corruption — partial snapshots never hydrate", async () => {
 		const warnSpy = vi.spyOn(console, "warn").mockImplementation(() => {});
 		try {
+			// A partial snapshot would delta-sync forever without restoring the
+			// lost rows; at hydrate time the blob is the only copy, so any loss
+			// means cold cache + baseline re-download.
 			mockGetItem.mockResolvedValueOnce([
 				place(1),
 				"\n",
@@ -80,8 +83,7 @@ describe("readPlaceCache", () => {
 				{ id: Number.NaN, lat: 1, lon: 2 },
 				place(3),
 			]);
-			const rows = await readPlaceCache();
-			expect(rows?.map((r) => r.id)).toEqual([1, 3]);
+			expect(await readPlaceCache()).toBeNull();
 			expect(warnSpy).toHaveBeenCalled();
 		} finally {
 			warnSpy.mockRestore();
