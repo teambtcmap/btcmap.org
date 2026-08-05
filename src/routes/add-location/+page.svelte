@@ -21,19 +21,12 @@ import MapUnsupportedFallback from "$components/MapUnsupportedFallback.svelte";
 import PrimaryButton from "$components/PrimaryButton.svelte";
 import TextLink from "$components/TextLink.svelte";
 import { _, locale } from "$lib/i18n";
-import { ensureRtlTextPlugin } from "$lib/map/rtl";
-import { hasWebGL } from "$lib/map/webgl";
-import { ensureMapLibreWorkerUrl } from "$lib/map/worker";
+import type { BtcmapMapHandle } from "$lib/map/createMap";
+import { createBtcmapMap } from "$lib/map/createMap";
 import { theme } from "$lib/theme";
 import { errToast, isValidLatitude, isValidLongitude } from "$lib/utils";
 
 import { browser } from "$app/environment";
-
-const STYLE_LIGHT = "https://tiles.openfreemap.org/styles/liberty";
-const STYLE_DARK = "https://static.btcmap.org/map-styles/dark.json";
-
-const styleUrlForTheme = (t: "light" | "dark" | undefined): string =>
-	t === "dark" ? STYLE_DARK : STYLE_LIGHT;
 
 let captchaContent = "";
 let isCaptchaLoading = true;
@@ -102,55 +95,39 @@ function resetForm() {
 
 async function initializeMap() {
 	// Clean up any existing map (e.g. resetForm re-init).
-	if (map) {
-		map.remove();
-		map = undefined;
-	}
+	mapHandle?.destroy();
+	mapHandle = undefined;
+	map = undefined;
 	marker?.remove();
 	marker = undefined;
 	mapLoaded = false;
 
-	if (!hasWebGL()) {
+	// The bring-up (WebGL check, import, worker/RTL, controls, theme-swap
+	// state machine) lives in createBtcmapMap. No overlays: the picked-
+	// location marker is DOM-level and survives style swaps on its own.
+	const outcome = await createBtcmapMap({
+		container: mapElement,
+		theme: $theme,
+		mapOptions: { center: [0, 0], zoom: 2 },
+		isCancelled: () => destroyed,
+		registerOverlays: () => {},
+		onFirstLoad: () => {
+			mapLoaded = true;
+		},
+	});
+
+	if (outcome.status === "unsupported") {
 		webglUnsupported = true;
 		return;
 	}
-	const maplibre = await import("maplibre-gl");
-	ensureMapLibreWorkerUrl(maplibre);
-	ensureRtlTextPlugin(maplibre);
-	maplibreRef = maplibre;
-	if (destroyed) return;
-
-	lastAppliedTheme = $theme;
-
-	map = new maplibre.Map({
-		container: mapElement,
-		style: styleUrlForTheme($theme),
-		center: [0, 0],
-		zoom: 2,
-		maxZoom: 21,
-		dragRotate: true,
-		touchZoomRotate: true,
-		pitchWithRotate: false,
-		attributionControl: { compact: true },
-	});
-
-	map.addControl(
-		new maplibre.NavigationControl({
-			showCompass: true,
-			showZoom: true,
-			visualizePitch: false,
-		}),
-		"top-right",
-	);
-
-	const geolocateControl = new maplibre.GeolocateControl({
-		positionOptions: { enableHighAccuracy: true },
-		trackUserLocation: true,
-		showUserLocation: true,
-		showAccuracyCircle: true,
-		fitBoundsOptions: { maxZoom: 15, linear: true },
-	});
-	map.addControl(geolocateControl, "top-right");
+	if (outcome.status === "cancelled") return;
+	if (destroyed) {
+		outcome.handle.destroy();
+		return;
+	}
+	mapHandle = outcome.handle;
+	map = outcome.handle.map;
+	maplibreRef = outcome.handle.maplibre;
 
 	map.on("click", (e: MapMouseEvent) => {
 		if (!captchaSecret) return;
@@ -158,10 +135,6 @@ async function initializeMap() {
 			fly: false,
 			syncInputs: true,
 		});
-	});
-
-	map.on("load", () => {
-		mapLoaded = true;
 	});
 }
 
@@ -179,6 +152,7 @@ let latError = "";
 let longError = "";
 let marker: MapLibreMarker | undefined;
 let maplibreRef: typeof import("maplibre-gl") | undefined;
+let mapHandle: BtcmapMapHandle | undefined;
 
 function placeMarker(
 	newLat: number,
@@ -351,7 +325,6 @@ let map: MapLibreMap | undefined;
 let mapLoaded = false;
 let webglUnsupported = false;
 let destroyed = false;
-let lastAppliedTheme: "light" | "dark" | undefined;
 
 onMount(async () => {
 	if (browser) {
@@ -365,24 +338,15 @@ onMount(async () => {
 
 onDestroy(() => {
 	destroyed = true;
-	if (map) {
-		map.remove();
-		map = undefined;
-	}
+	mapHandle?.destroy();
+	mapHandle = undefined;
+	map = undefined;
 });
 
-const applyTheme = (next: "light" | "dark" | undefined) => {
-	if (!map || !mapLoaded) return;
-	if (next === lastAppliedTheme) return;
-	lastAppliedTheme = next;
-	// setStyle preserves added markers (managed outside the style) but drops
-	// any source/layer overrides. We don't add custom layers here, so a plain
-	// setStyle() is sufficient.
-	map.setStyle(styleUrlForTheme(next));
-};
-
+// The facade's setTheme handles change detection; the picked-location
+// marker is DOM-level and survives style swaps on its own.
 $: if (map && mapLoaded) {
-	applyTheme($theme);
+	mapHandle?.setTheme($theme);
 }
 </script>
 

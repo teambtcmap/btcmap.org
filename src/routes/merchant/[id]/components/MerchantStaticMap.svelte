@@ -5,9 +5,8 @@ import type { Map as MapLibreMap } from "maplibre-gl";
 import { onDestroy, onMount } from "svelte";
 
 import { previewStyleForTheme } from "$lib/map/basemaps";
-import { ensureRtlTextPlugin } from "$lib/map/rtl";
-import { hasWebGL } from "$lib/map/webgl";
-import { ensureMapLibreWorkerUrl } from "$lib/map/worker";
+import type { BtcmapMapHandle } from "$lib/map/createMap";
+import { createBtcmapMap } from "$lib/map/createMap";
 import { theme } from "$lib/theme";
 
 import { browser } from "$app/environment";
@@ -22,50 +21,60 @@ let className = "";
 
 export { className as class };
 
-// Carto Positron / Dark Matter, from the shared basemap catalog — clean,
-// low-contrast backdrops that keep the merchant identity overlay legible.
-const styleUrlForTheme = previewStyleForTheme;
-
 let mapElement: HTMLDivElement;
 let map: MapLibreMap | undefined;
+let mapHandle: BtcmapMapHandle | undefined;
 let destroyed = false;
 let unsupported = false;
 let styleLoaded = false;
-let lastTheme: "light" | "dark" | undefined;
 
 const init = async () => {
-	if (!hasWebGL()) {
+	// Bring-up via the shared facade: Carto Positron / Dark Matter preview
+	// pair as the theme styles, no controls, non-interactive — this map is
+	// purely a hero backdrop.
+	const outcome = await createBtcmapMap({
+		container: mapElement,
+		theme: $theme,
+		styles: (t) => previewStyleForTheme(t === "dark" ? "dark" : "light"),
+		controls: false,
+		mapOptions: {
+			center: [long, lat],
+			zoom: 15,
+			interactive: false,
+		},
+		isCancelled: () => destroyed,
+		// Runs on every style (re)load — the swap machine re-collapses the
+		// attribution the incoming style re-opens.
+		registerOverlays: () => collapseAttribution(),
+		onStyleReadyChange: (ready) => {
+			styleLoaded = ready;
+		},
+		onFirstLoad: (m) => {
+			// MapLibre re-opens the attribution <details> whenever it rebuilds
+			// the credit text: _updateAttributions() (fired on every
+			// sourcedata/styledata as tiles stream in) and resize both call
+			// _updateCompact(), which sets the `open` attr again. Re-collapse
+			// after each — our handlers are registered after MapLibre's
+			// internal ones, so they win — with `idle` as a final guarantee
+			// once loading settles.
+			m.on("sourcedata", collapseAttribution);
+			m.on("styledata", collapseAttribution);
+			m.on("resize", collapseAttribution);
+			m.on("idle", collapseAttribution);
+		},
+	});
+
+	if (outcome.status === "unsupported") {
 		unsupported = true;
 		return;
 	}
-	const maplibre = await import("maplibre-gl");
-	ensureMapLibreWorkerUrl(maplibre);
-	ensureRtlTextPlugin(maplibre);
-	if (destroyed) return;
-
-	lastTheme = $theme;
-	map = new maplibre.Map({
-		container: mapElement,
-		style: styleUrlForTheme($theme),
-		center: [long, lat],
-		zoom: 15,
-		interactive: false,
-		attributionControl: { compact: true },
-	});
-	map.on("style.load", () => {
-		styleLoaded = true;
-		collapseAttribution();
-	});
-	// MapLibre re-opens the attribution <details> whenever it rebuilds the
-	// credit text: _updateAttributions() (fired on every sourcedata/styledata
-	// as tiles stream in) and resize both call _updateCompact(), which sets
-	// the `open` attr again. Re-collapse after each — our handlers are
-	// registered after MapLibre's internal ones, so they win — with `idle`
-	// as a final guarantee once loading settles.
-	map.on("sourcedata", collapseAttribution);
-	map.on("styledata", collapseAttribution);
-	map.on("resize", collapseAttribution);
-	map.on("idle", collapseAttribution);
+	if (outcome.status === "cancelled") return;
+	if (destroyed) {
+		outcome.handle.destroy();
+		return;
+	}
+	mapHandle = outcome.handle;
+	map = outcome.handle.map;
 };
 
 // MapLibre 5 renders attribution as a <details> and opens it by default
@@ -85,15 +94,10 @@ onMount(() => {
 	}
 });
 
-// Swap the basemap when the site theme changes, mirroring the full map.
-$: if (map && styleLoaded && $theme !== lastTheme) {
-	lastTheme = $theme;
-	styleLoaded = false;
-	map.once("style.load", () => {
-		styleLoaded = true;
-		collapseAttribution();
-	});
-	map.setStyle(styleUrlForTheme($theme));
+// Swap the basemap when the site theme changes — the facade handles
+// change detection and re-runs the attribution collapse on style.load.
+$: if (map && styleLoaded) {
+	mapHandle?.setTheme($theme);
 }
 
 // Follow the merchant when the coords change (e.g. param-only navigation),
@@ -104,7 +108,8 @@ $: if (map && typeof lat === "number" && typeof long === "number") {
 
 onDestroy(() => {
 	destroyed = true;
-	map?.remove();
+	mapHandle?.destroy();
+	mapHandle = undefined;
 	map = undefined;
 });
 </script>
