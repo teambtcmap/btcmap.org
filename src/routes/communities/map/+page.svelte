@@ -29,6 +29,7 @@ import { computeBbox } from "$lib/map/bbox";
 import { parseHashCoords, writeHashCoords } from "$lib/map/mapHash";
 import { ensureRtlTextPlugin } from "$lib/map/rtl";
 import { hasWebGL } from "$lib/map/webgl";
+import { ensureMapLibreWorkerUrl } from "$lib/map/worker";
 import { areaError, areas, reportError, reports } from "$lib/store";
 import { areasSync } from "$lib/sync/areas";
 import { batchSync } from "$lib/sync/batchSync";
@@ -294,6 +295,7 @@ const initializeMap = async () => {
 		return;
 	}
 	const maplibre = await import("maplibre-gl");
+	ensureMapLibreWorkerUrl(maplibre);
 	ensureRtlTextPlugin(maplibre);
 	if (destroyed) return;
 

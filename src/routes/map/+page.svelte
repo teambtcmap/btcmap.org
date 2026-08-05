@@ -70,6 +70,7 @@ import {
 	selectVisiblePlaces,
 } from "$lib/map/visiblePlaces";
 import { hasWebGL } from "$lib/map/webgl";
+import { ensureMapLibreWorkerUrl } from "$lib/map/worker";
 import {
 	MERCHANT_URL_CHANGE_EVENT,
 	parseMerchantHash,
@@ -868,6 +869,7 @@ onMount(async () => {
 		return;
 	}
 	const maplibre = await import("maplibre-gl");
+	ensureMapLibreWorkerUrl(maplibre);
 	ensureRtlTextPlugin(maplibre);
 	// User may have navigated away while the dynamic import was in
 	// flight; bail before instantiating against an unmounted container.
@@ -1028,7 +1030,9 @@ onMount(async () => {
 
 	// Mirror /map's behavior: sync location into the userLocation store so
 	// the merchant list panel can compute distances without prompting again.
-	geolocate.on("geolocate", (e: GeolocationPosition) => {
+	// v6's GeolocatePositionEvent exposes coords/timestamp directly but is
+	// not assignable to GeolocationPosition (no toJSON) — let TS infer it.
+	geolocate.on("geolocate", (e) => {
 		userLocation.setLocation(e.coords.latitude, e.coords.longitude);
 	});
 

@@ -4,6 +4,7 @@ import { styleForBasemap } from "$lib/map/basemaps";
 import { installPlaceholderHandler } from "$lib/map/maplibreSprites";
 import { ensureRtlTextPlugin } from "$lib/map/rtl";
 import { hasWebGL } from "$lib/map/webgl";
+import { ensureMapLibreWorkerUrl } from "$lib/map/worker";
 
 export type MapThemeName = "light" | "dark" | undefined;
 
@@ -27,7 +28,7 @@ export type CreateBtcmapMapOutcome =
 	| { status: "cancelled" };
 
 // The shared bring-up for embedded maps (AreaMap, MultiPlaceMap): WebGL
-// support check, dynamic maplibre import, RTL plugin, Map construction,
+// support check, dynamic maplibre import, worker URL + RTL plugin, Map construction,
 // navigation + geolocate controls, sprite placeholder handler, and the
 // theme-swap state machine. Overlay content stays with the caller:
 // registerOverlays re-runs after every style (re)load because setStyle()
@@ -52,6 +53,7 @@ export const createBtcmapMap = async (opts: {
 	if (!hasWebGL()) return { status: "unsupported" };
 
 	const maplibre = await import("maplibre-gl");
+	ensureMapLibreWorkerUrl(maplibre);
 	ensureRtlTextPlugin(maplibre);
 	if (opts.isCancelled?.()) return { status: "cancelled" };
 

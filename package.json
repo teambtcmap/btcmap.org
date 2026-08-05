@@ -50,7 +50,7 @@
 		"i18n-iso-countries": "^7.14.0",
 		"js-confetti": "^0.13.1",
 		"localforage": "^1.10.0",
-		"maplibre-gl": "^5.24.0",
+		"maplibre-gl": "^6.1.0",
 		"marked": "^18.0.7",
 		"nostr-tools": "^2.23.12",
 		"opening_hours": "^3.13.0",

@@ -4,6 +4,7 @@ const { hasWebGLMock } = vi.hoisted(() => ({ hasWebGLMock: vi.fn() }));
 
 vi.mock("$lib/map/webgl", () => ({ hasWebGL: hasWebGLMock }));
 vi.mock("$lib/map/rtl", () => ({ ensureRtlTextPlugin: vi.fn() }));
+vi.mock("$lib/map/worker", () => ({ ensureMapLibreWorkerUrl: vi.fn() }));
 vi.mock("$lib/map/maplibreSprites", () => ({
 	installPlaceholderHandler: vi.fn(),
 }));
