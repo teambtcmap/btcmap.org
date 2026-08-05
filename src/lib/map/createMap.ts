@@ -160,9 +160,20 @@ export const createBtcmapMap = async (opts: {
 	// the console quiet and prevents flicker until the real sprite lands.
 	installPlaceholderHandler(map);
 
+	// One shared registration path: a rejecting registerOverlays must not
+	// wedge the handle — ready still flips so the page keeps working and
+	// future swaps re-run registration, which is the natural retry.
+	const runRegisterOverlays = async (): Promise<void> => {
+		try {
+			await opts.registerOverlays(map);
+		} catch (error) {
+			console.error("createBtcmapMap: registerOverlays failed:", error);
+		}
+	};
+
 	map.on("load", async () => {
 		if (disposed) return;
-		await opts.registerOverlays(map);
+		await runRegisterOverlays();
 		if (disposed) return;
 		opts.onFirstLoad?.(map);
 		setReady(true);
@@ -191,7 +202,7 @@ export const createBtcmapMap = async (opts: {
 		// during the call, so a handler added afterwards would miss it.
 		map.once("style.load", async () => {
 			if (disposed) return;
-			await opts.registerOverlays(map);
+			await runRegisterOverlays();
 			if (disposed) return;
 			setReady(true);
 			if (pendingStyle !== null) {

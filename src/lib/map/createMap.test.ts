@@ -284,6 +284,33 @@ describe("createBtcmapMap", () => {
 		expect(fake.ctorOptions.maxZoom).toBe(21);
 	});
 
+	it("a rejecting registerOverlays does not wedge the handle", async () => {
+		const errorSpy = vi.spyOn(console, "error").mockImplementation(() => {});
+		try {
+			const registerOverlays = vi
+				.fn()
+				.mockRejectedValueOnce(new Error("sprite CDN down"))
+				.mockResolvedValue(undefined);
+			const { handle, fake, onFirstLoad, onStyleReadyChange } =
+				await readyOutcome({ registerOverlays });
+
+			await fake.fire("load");
+			// Failure is reported, but the state machine completes: first-load
+			// wiring runs and the handle becomes ready
+			expect(errorSpy).toHaveBeenCalled();
+			expect(onFirstLoad).toHaveBeenCalledTimes(1);
+			expect(onStyleReadyChange).toHaveBeenLastCalledWith(true);
+
+			// And the next swap re-runs registration — the natural retry
+			handle.setTheme("dark");
+			await fake.fire("style.load");
+			expect(registerOverlays).toHaveBeenCalledTimes(2);
+			expect(onStyleReadyChange).toHaveBeenLastCalledWith(true);
+		} finally {
+			errorSpy.mockRestore();
+		}
+	});
+
 	it("destroy removes the map and inert-s the handle", async () => {
 		const { handle, fake, registerOverlays } = await readyOutcome();
 		await fake.fire("load");
