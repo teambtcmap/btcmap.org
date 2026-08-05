@@ -384,8 +384,14 @@ export const elementsSync = async () => {
 					mergedUpdateCount === 0 &&
 					get(places).length > 0;
 				if (nothingChanged) {
+					// Best-effort, matching the changed-data branch: a failed
+					// watermark write must not trip the cache-load catch (and its
+					// misleading toast + CDN fallback) — it just widens the next
+					// update window.
 					if (apiSucceeded) {
-						await writePlacesSyncedAt(new Date().toISOString());
+						await writePlacesSyncedAt(new Date().toISOString()).catch((err) =>
+							console.warn("Could not save sync timestamp:", err),
+						);
 					}
 					placesLoadingStatus.set("Complete!");
 					placesLoadingProgress.set(PROGRESS_RANGES.COMPLETE);
@@ -416,6 +422,15 @@ export const elementsSync = async () => {
 						placesLoadingStatus.set("");
 						placesLoadingProgress.set(0);
 					}
+				} else {
+					// placesData ended up empty (failed baseline download, or a
+					// corrupt cache that sanitized away). Finalize instead of
+					// stranding the status at "Finalizing..." with placesPublished
+					// unlatched — but never persist an empty blob over whatever is
+					// on disk; a healthy next sync re-downloads the baseline.
+					await publishPlaces(placesData, { persist: false });
+					placesLoadingStatus.set("Complete!");
+					placesLoadingProgress.set(PROGRESS_RANGES.COMPLETE);
 				}
 			})
 			.catch(async (err) => {

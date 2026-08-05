@@ -51,6 +51,24 @@ describe("readPlaceCache", () => {
 		}
 	});
 
+	it("treats a non-empty all-invalid array as corruption, not a warm empty cache", async () => {
+		const warnSpy = vi.spyOn(console, "warn").mockImplementation(() => {});
+		try {
+			// The literal #1187 shape: a string char-iterated into an array.
+			// Reading this as warm-but-empty would skip the baseline download.
+			mockGetItem.mockResolvedValueOnce(["\n", "\n", "\n"]);
+			expect(await readPlaceCache()).toBeNull();
+			expect(warnSpy).toHaveBeenCalled();
+		} finally {
+			warnSpy.mockRestore();
+		}
+	});
+
+	it("preserves a legitimately empty array blob", async () => {
+		mockGetItem.mockResolvedValueOnce([]);
+		expect(await readPlaceCache()).toEqual([]);
+	});
+
 	it("drops rows that don't look like places and keeps the rest", async () => {
 		const warnSpy = vi.spyOn(console, "warn").mockImplementation(() => {});
 		try {
@@ -59,6 +77,7 @@ describe("readPlaceCache", () => {
 				"\n",
 				{ id: "nope" },
 				{ id: 2, lat: Number.NaN, lon: 0 },
+				{ id: Number.NaN, lat: 1, lon: 2 },
 				place(3),
 			]);
 			const rows = await readPlaceCache();

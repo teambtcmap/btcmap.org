@@ -22,6 +22,7 @@ const isPlaceRow = (row: unknown): row is Place => {
 	const p = row as { id?: unknown; lat?: unknown; lon?: unknown };
 	return (
 		typeof p.id === "number" &&
+		Number.isFinite(p.id) &&
 		typeof p.lat === "number" &&
 		Number.isFinite(p.lat) &&
 		typeof p.lon === "number" &&
@@ -57,6 +58,14 @@ export const readPlaceCache = async (): Promise<Place[] | null> => {
 		console.warn("placeCache: blob is not an array — ignoring corrupt cache");
 		return null;
 	}
+	// A non-empty blob whose rows ALL fail validation is corruption in array
+	// clothing (the literal #1187 shape: a string char-iterated into an
+	// array) — reading it as a warm-but-empty cache would skip the baseline
+	// download and strand the session empty. Cold cache; re-download heals.
+	if (rows.length === 0 && (raw as unknown[]).length > 0) {
+		console.warn("placeCache: no valid rows in blob — ignoring corrupt cache");
+		return null;
+	}
 	return rows;
 };
 
@@ -78,6 +87,13 @@ export const publishPlaces = async (
 	opts: { persist?: boolean } = {},
 ): Promise<PublishResult> => {
 	const valid = sanitizePlaceRows(rows, "publish") ?? [];
+	// Publish BEFORE persisting: the store must never wait on IndexedDB (a
+	// 29k-row blob write can take hundreds of ms, or hang entirely on a
+	// broken backend). Yield first so the store update doesn't extend the
+	// caller's current long task.
+	await yieldToMain();
+	places.set(valid);
+	published.set(true);
 	let persisted = false;
 	if (opts.persist !== false) {
 		try {
@@ -87,9 +103,5 @@ export const publishPlaces = async (
 			console.error("placeCache: could not persist places blob:", error);
 		}
 	}
-	// Yield to main thread before updating the store to prevent UI freeze
-	await yieldToMain();
-	places.set(valid);
-	published.set(true);
 	return { persisted };
 };
