@@ -1,4 +1,8 @@
-import type { Map as MapLibreMap } from "maplibre-gl";
+import type {
+	Map as MapLibreMap,
+	MapOptions,
+	StyleSpecification,
+} from "maplibre-gl";
 
 import { styleForBasemap } from "$lib/map/basemaps";
 import { installPlaceholderHandler } from "$lib/map/maplibreSprites";
@@ -8,6 +12,8 @@ import { ensureMapLibreWorkerUrl } from "$lib/map/worker";
 
 export type MapThemeName = "light" | "dark" | undefined;
 
+export type MapStyleInput = string | StyleSpecification;
+
 // The embedded maps pin their two basemaps to the same styles the /map
 // picker exposes — basemaps.ts stays the single source of truth for the URLs.
 export const styleUrlForTheme = (t: MapThemeName) =>
@@ -15,9 +21,19 @@ export const styleUrlForTheme = (t: MapThemeName) =>
 
 export type BtcmapMapHandle = {
 	map: MapLibreMap;
-	// Swap the basemap for a theme change. No-ops while a previous swap's
-	// style is still loading — the component's readiness reactive re-invokes
-	// once it settles — and when the theme didn't actually change.
+	// The imported maplibre namespace, for callers that construct Markers,
+	// Popups, or controls of their own.
+	maplibre: typeof import("maplibre-gl");
+	// Swap to an arbitrary style: sets the style, waits for style.load, and
+	// re-runs registerOverlays — one machine for theme swaps AND basemap
+	// picks. The custom layers blink for the moment the swap takes (a
+	// deliberate trade: the old transformStyle carryover kept them alive but
+	// coupled every page to hand-maintained carry-lists). No-ops while a
+	// previous swap's style is still loading.
+	setStyle: (style: MapStyleInput) => void;
+	// Theme sugar over setStyle: resolves the theme through the configured
+	// style pair and no-ops when the theme didn't actually change. Inert in
+	// explicit-style mode (the caller owns style selection there).
 	setTheme: (next: MapThemeName) => void;
 	destroy: () => void;
 };
@@ -27,18 +43,35 @@ export type CreateBtcmapMapOutcome =
 	| { status: "unsupported" }
 	| { status: "cancelled" };
 
-// The shared bring-up for embedded maps (AreaMap, MultiPlaceMap): WebGL
-// support check, dynamic maplibre import, worker URL + RTL plugin, Map construction,
-// navigation + geolocate controls, sprite placeholder handler, and the
-// theme-swap state machine. Overlay content stays with the caller:
-// registerOverlays re-runs after every style (re)load because setStyle()
-// strips custom sprites, sources, and layers.
+// The shared bring-up for every map in the app: WebGL support check, dynamic
+// maplibre import, worker URL + RTL plugin, Map construction, controls,
+// sprite placeholder handler, and the style-swap state machine. Overlay
+// content stays with the caller: registerOverlays re-runs after every style
+// (re)load because setStyle strips custom sprites, sources, and layers.
+//
+// Style selection is one of two modes:
+//   theme mode (default) — the facade picks the style from the theme (via
+//     `styles`, defaulting to the liberty/ofm-dark pair) and setTheme swaps;
+//   explicit-style mode (`style` passed) — the caller owns style selection
+//     (the /map and /communities/map basemap pickers) and swaps via
+//     handle.setStyle; setTheme is inert.
 export const createBtcmapMap = async (opts: {
 	container: HTMLElement;
 	theme: MapThemeName;
+	// Explicit initial style — enables explicit-style mode.
+	style?: MapStyleInput;
+	// Theme-mode style pair override (e.g. the merchant hero's preview
+	// styles). Ignored in explicit-style mode.
+	styles?: (theme: MapThemeName) => MapStyleInput;
+	// Extra Map constructor options merged OVER the shared defaults
+	// (center/zoom/bearing/pitch, interactive, attribution, …).
+	mapOptions?: Partial<MapOptions>;
+	// false skips the navigation + geolocate controls (static previews).
+	controls?: boolean;
 	// Sprites + sources + layers + data. Runs on the initial load and again
-	// after every theme swap's style.load.
-	registerOverlays: (map: MapLibreMap) => void;
+	// after every style swap's style.load. May be async — first-load wiring
+	// and the ready signal wait for it (sprite-before-layer ordering).
+	registerOverlays: (map: MapLibreMap) => void | Promise<void>;
 	// Runs once, after the first registerOverlays: camera + interactions.
 	onFirstLoad?: (map: MapLibreMap) => void;
 	// Style readiness — false while a swap's style is loading. Components
@@ -63,6 +96,10 @@ export const createBtcmapMap = async (opts: {
 	const normalizeTheme = (t: MapThemeName): "light" | "dark" =>
 		t === "dark" ? "dark" : "light";
 
+	const explicitStyle = opts.style !== undefined;
+	const themedStyle = (t: MapThemeName): MapStyleInput =>
+		opts.styles ? opts.styles(normalizeTheme(t)) : styleUrlForTheme(t);
+
 	let appliedTheme = normalizeTheme(opts.theme);
 	let ready = false;
 	let disposed = false;
@@ -73,34 +110,39 @@ export const createBtcmapMap = async (opts: {
 	};
 
 	const map = new maplibre.Map({
-		container: opts.container,
-		style: styleUrlForTheme(opts.theme),
+		style: explicitStyle
+			? (opts.style as MapStyleInput)
+			: themedStyle(opts.theme),
 		maxZoom: 21,
 		dragRotate: true,
 		touchZoomRotate: true,
 		pitchWithRotate: false,
 		attributionControl: { compact: true },
+		...opts.mapOptions,
+		container: opts.container,
 	});
 
-	map.addControl(
-		new maplibre.NavigationControl({
-			showCompass: true,
-			showZoom: true,
-			visualizePitch: false,
-		}),
-		"top-right",
-	);
+	if (opts.controls !== false) {
+		map.addControl(
+			new maplibre.NavigationControl({
+				showCompass: true,
+				showZoom: true,
+				visualizePitch: false,
+			}),
+			"top-right",
+		);
 
-	map.addControl(
-		new maplibre.GeolocateControl({
-			positionOptions: { enableHighAccuracy: true },
-			trackUserLocation: true,
-			showUserLocation: true,
-			showAccuracyCircle: true,
-			fitBoundsOptions: { maxZoom: 15, linear: true },
-		}),
-		"top-right",
-	);
+		map.addControl(
+			new maplibre.GeolocateControl({
+				positionOptions: { enableHighAccuracy: true },
+				trackUserLocation: true,
+				showUserLocation: true,
+				showAccuracyCircle: true,
+				fitBoundsOptions: { maxZoom: 15, linear: true },
+			}),
+			"top-right",
+		);
+	}
 
 	// MapLibre logs an "image missing" warning whenever a symbol references
 	// an icon id that hasn't been registered yet. Composite pin sprites
@@ -108,26 +150,37 @@ export const createBtcmapMap = async (opts: {
 	// the console quiet and prevents flicker until the real sprite lands.
 	installPlaceholderHandler(map);
 
-	map.on("load", () => {
+	map.on("load", async () => {
 		if (disposed) return;
-		opts.registerOverlays(map);
+		await opts.registerOverlays(map);
+		if (disposed) return;
 		opts.onFirstLoad?.(map);
 		setReady(true);
 	});
 
-	const setTheme = (next: MapThemeName) => {
+	const setStyle = (style: MapStyleInput) => {
 		if (disposed) return;
+		if (!ready) return;
+		setReady(false);
+		// Registered BEFORE setStyle on purpose: for inline (object) styles
+		// like the OSM raster basemap, setStyle fires style.load SYNCHRONOUSLY
+		// during the call, so a handler added afterwards would miss it.
+		map.once("style.load", async () => {
+			if (disposed) return;
+			await opts.registerOverlays(map);
+			if (disposed) return;
+			setReady(true);
+		});
+		map.setStyle(style);
+	};
+
+	const setTheme = (next: MapThemeName) => {
+		if (disposed || explicitStyle) return;
 		if (!ready) return;
 		const normalized = normalizeTheme(next);
 		if (normalized === appliedTheme) return;
 		appliedTheme = normalized;
-		setReady(false);
-		map.once("style.load", () => {
-			if (disposed) return;
-			opts.registerOverlays(map);
-			setReady(true);
-		});
-		map.setStyle(styleUrlForTheme(normalized));
+		setStyle(themedStyle(normalized));
 	};
 
 	const destroy = () => {
@@ -136,5 +189,8 @@ export const createBtcmapMap = async (opts: {
 		map.remove();
 	};
 
-	return { status: "ready", handle: { map, setTheme, destroy } };
+	return {
+		status: "ready",
+		handle: { map, maplibre, setStyle, setTheme, destroy },
+	};
 };
