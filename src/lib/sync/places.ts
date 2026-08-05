@@ -1,5 +1,4 @@
 import type { AxiosProgressEvent } from "axios";
-import localforage from "localforage";
 import { get } from "svelte/store";
 
 import { API_BASE } from "$lib/api-base";
@@ -20,8 +19,13 @@ import {
 	verifiedDatesLoaded,
 } from "$lib/store";
 import { clearTables } from "$lib/sync/clearTables";
+import {
+	publishPlaces,
+	readPlaceCache,
+	readPlacesSyncedAt,
+	writePlacesSyncedAt,
+} from "$lib/sync/placeCache";
 import type { Place } from "$lib/types";
-import { yieldToMain } from "$lib/utils";
 import { filterPlaces, parseJSON } from "$lib/workers/sync-worker-manager";
 
 // Concurrency protection to prevent multiple simultaneous syncs
@@ -130,10 +134,11 @@ export const ensureVerifiedDates = async (): Promise<void> => {
 				? { ...p, verified_at }
 				: p;
 		});
-		await yieldToMain();
-		places.set(enriched);
+		// Always publishes (persistence is best-effort inside placeCache), so
+		// the enrichment survives a failed blob write — matching the old
+		// publish-first ordering this replaced.
+		await publishPlaces(enriched);
 		verifiedDatesLoaded.set(true);
-		await localforage.setItem("places_v4", enriched);
 	} catch (error) {
 		console.warn("Could not load verification dates:", error);
 	}
@@ -157,10 +162,10 @@ export const elementsSync = async () => {
 		placesLoadingStatus.set("Initializing...");
 
 		// get places and sync timestamp from local storage
-		const cachedPlaces = await localforage.getItem<Place[]>("places_v4");
-		const cachedSyncedAt = await localforage.getItem<string>(
-			"places_v4_synced_at",
-		);
+		// readPlaceCache sanitizes at the trust boundary: a corrupt blob (the
+		// #1187 class) reads as a cold cache and self-heals via re-download.
+		const cachedPlaces = await readPlaceCache();
+		const cachedSyncedAt = await readPlacesSyncedAt();
 
 		await Promise.resolve(cachedPlaces)
 			.then(async (cachedPlaces) => {
@@ -379,48 +384,53 @@ export const elementsSync = async () => {
 					mergedUpdateCount === 0 &&
 					get(places).length > 0;
 				if (nothingChanged) {
+					// Best-effort, matching the changed-data branch: a failed
+					// watermark write must not trip the cache-load catch (and its
+					// misleading toast + CDN fallback) — it just widens the next
+					// update window.
 					if (apiSucceeded) {
-						await localforage.setItem(
-							"places_v4_synced_at",
-							new Date().toISOString(),
+						await writePlacesSyncedAt(new Date().toISOString()).catch((err) =>
+							console.warn("Could not save sync timestamp:", err),
 						);
 					}
 					placesLoadingStatus.set("Complete!");
 					placesLoadingProgress.set(PROGRESS_RANGES.COMPLETE);
 				} else if (placesData.length > 0) {
-					localforage
-						.setItem("places_v4", placesData)
-						.then(async () => {
-							// Only save sync timestamp if API succeeded, to avoid creating gaps
-							// where updates between old and new timestamp are permanently missed
-							if (apiSucceeded) {
-								await localforage.setItem(
-									"places_v4_synced_at",
-									new Date().toISOString(),
-								);
-							}
-
-							// Yield to main thread before updating store to prevent UI freeze
-							await yieldToMain();
-							// set response to store
-							places.set(placesData);
-							placesLoadingStatus.set("Complete!");
-							placesLoadingProgress.set(PROGRESS_RANGES.COMPLETE);
-
-							// Keep progress at 100% - don't reset to avoid confusing loading states
-							// The map component will handle hiding the indicator when elementsLoaded = true
-						})
-						.catch(async (err) => {
-							// Yield to main thread before updating store to prevent UI freeze
-							await yieldToMain();
-							places.set(placesData);
-							placesError.set(
-								"Could not store places locally, please try again or contact BTC Map.",
+					// publishPlaces always updates the store (the session keeps
+					// working on broken storage); persistence failure surfaces via
+					// the sync path's own error toast.
+					const { persisted } = await publishPlaces(placesData);
+					if (persisted) {
+						// Only save sync timestamp if API succeeded, to avoid creating
+						// gaps where updates between old and new timestamp are
+						// permanently missed. Best-effort: a failed watermark write
+						// just re-fetches a wider update window next sync.
+						if (apiSucceeded) {
+							await writePlacesSyncedAt(new Date().toISOString()).catch((err) =>
+								console.warn("Could not save sync timestamp:", err),
 							);
-							placesLoadingStatus.set("");
-							placesLoadingProgress.set(0);
-							console.error(err);
-						});
+						}
+						placesLoadingStatus.set("Complete!");
+						placesLoadingProgress.set(PROGRESS_RANGES.COMPLETE);
+						// Keep progress at 100% - don't reset to avoid confusing
+						// loading states. The map component handles hiding the
+						// indicator when elementsLoaded = true.
+					} else {
+						placesError.set(
+							"Could not store places locally, please try again or contact BTC Map.",
+						);
+						placesLoadingStatus.set("");
+						placesLoadingProgress.set(0);
+					}
+				} else {
+					// placesData ended up empty (failed baseline download, or a
+					// corrupt cache that sanitized away). Finalize instead of
+					// stranding the status at "Finalizing..." with placesPublished
+					// unlatched — but never persist an empty blob over whatever is
+					// on disk; a healthy next sync re-downloads the baseline.
+					await publishPlaces(placesData, { persist: false });
+					placesLoadingStatus.set("Complete!");
+					placesLoadingProgress.set(PROGRESS_RANGES.COMPLETE);
 				}
 			})
 			.catch(async (err) => {
@@ -454,9 +464,9 @@ export const elementsSync = async () => {
 					}
 
 					if (parsedPlaces.length > 0) {
-						// Yield to main thread before updating store to prevent UI freeze
-						await yieldToMain();
-						places.set(parsedPlaces);
+						// Publish-only: localforage already failed reading, so don't
+						// bank on writing — matching the pre-existing behavior.
+						await publishPlaces(parsedPlaces, { persist: false });
 					}
 				} catch (error) {
 					placesError.set(
@@ -475,7 +485,7 @@ export const elementsSync = async () => {
 // cache in $lib/placeDetails coherent. Returns the place, or null when it was
 // deleted or no cache exists yet.
 const applyPlaceUpdate = async (place: Place): Promise<Place | null> => {
-	const cachedPlaces = await localforage.getItem<Place[]>("places_v4");
+	const cachedPlaces = await readPlaceCache();
 
 	if (!cachedPlaces) {
 		console.warn("No cached places found, cannot update place");
@@ -489,9 +499,7 @@ const applyPlaceUpdate = async (place: Place): Promise<Place | null> => {
 		evictPlaceDetails(place.id);
 		const updatedPlaces = cachedPlaces.filter((p) => p.id !== place.id);
 		if (updatedPlaces.length !== cachedPlaces.length) {
-			await localforage.setItem("places_v4", updatedPlaces);
-			await yieldToMain();
-			places.set(updatedPlaces);
+			await publishPlaces(updatedPlaces);
 			console.info(`Removed deleted place ${place.id} from cache`);
 		}
 		return null;
@@ -506,16 +514,10 @@ const applyPlaceUpdate = async (place: Place): Promise<Place | null> => {
 		updatedPlaces.push(place);
 	}
 
-	await localforage.setItem("places_v4", updatedPlaces);
-
-	// Yield to main thread before updating store to prevent UI freeze
-	await yieldToMain();
-
-	places.set(updatedPlaces);
-
-	// Prime the details cache only after persistence + store publication
-	// succeed — priming first would leave drawers serving "updated" data
-	// while $places/localforage still hold the old record if setItem threw.
+	// publishPlaces always updates the store, so the session shows the fresh
+	// record even when the blob write fails (it just won't survive a reload)
+	// — and the details cache can safely prime to match what $places shows.
+	await publishPlaces(updatedPlaces);
 	primePlaceDetails(place);
 	return place;
 };
