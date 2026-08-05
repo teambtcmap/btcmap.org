@@ -188,16 +188,20 @@ describe("createBtcmapMap", () => {
 		expect(onStyleReadyChange).toHaveBeenLastCalledWith(true);
 	});
 
-	it("ignores setTheme before the first load and for an unchanged theme", async () => {
+	it("queues a pre-load theme change and ignores an unchanged theme", async () => {
 		const { handle, fake } = await readyOutcome();
 
-		// Not ready yet — a swap now would race the initial style load
+		// Not ready yet — the swap must not race the initial style load, but
+		// it must not be dropped either
 		handle.setTheme("dark");
 		expect(fake.setStyleCalls).toEqual([]);
 
 		await fake.fire("load");
-		handle.setTheme("light");
-		expect(fake.setStyleCalls).toEqual([]);
+		expect(fake.setStyleCalls).toEqual([styleUrlForTheme("dark")]);
+
+		await fake.fire("style.load");
+		handle.setTheme("dark");
+		expect(fake.setStyleCalls).toHaveLength(1);
 	});
 
 	it("treats undefined and light as the same theme — no restyle on resolve", async () => {
@@ -213,25 +217,34 @@ describe("createBtcmapMap", () => {
 		expect(fake.setStyleCalls).toEqual([styleUrlForTheme("dark")]);
 	});
 
-	it("ignores swaps while a previous swap's style is still loading", async () => {
-		const { handle, fake } = await readyOutcome();
+	it("queues a pick made mid-swap and applies it when the swap settles", async () => {
+		const { handle, fake, registerOverlays } = await readyOutcome();
 		await fake.fire("load");
 
 		handle.setTheme("dark");
+		// Second pick while dark's style is still loading: not applied yet —
+		// but not dropped either (the picker UI already shows it selected)
 		handle.setTheme("light");
 		expect(fake.setStyleCalls).toEqual([styleUrlForTheme("dark")]);
 
-		// Once the swap settles, the component's readiness reactive re-invokes
+		// The in-flight swap settles → the queued pick applies automatically
 		await fake.fire("style.load");
-		handle.setTheme("light");
 		expect(fake.setStyleCalls).toEqual([
 			styleUrlForTheme("dark"),
 			styleUrlForTheme("light"),
 		]);
+		await fake.fire("style.load");
+		// load + dark swap + queued light swap
+		expect(registerOverlays).toHaveBeenCalledTimes(3);
+
+		// And the queue drains fully: nothing further pending
+		await fake.fire("style.load");
+		expect(fake.setStyleCalls).toHaveLength(2);
 	});
 
 	it("uses the styles override pair in theme mode", async () => {
-		const styles = (t: "light" | "dark" | undefined) =>
+		// Narrowed param: the facade always normalizes before calling
+		const styles = (t: "light" | "dark") =>
 			t === "dark" ? "preview-dark" : "preview-light";
 		const { handle, fake } = await readyOutcome({ styles, theme: "light" });
 		expect(fake.ctorOptions.style).toBe("preview-light");

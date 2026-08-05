@@ -8,6 +8,7 @@ import {
 import { HEATMAP_STORAGE_KEY } from "$lib/map/heatmap";
 import {
 	addRealImage,
+	ensureCommentBadgeSprite,
 	ensureSpritesForPlaces,
 	hasRealImage,
 	loadSvgImage,
@@ -88,41 +89,6 @@ const loadClusterHitSprite = async (m: MapLibreMap): Promise<void> => {
 	const img = await loadSvgImage(svg);
 	if (!hasRealImage(m, "cluster-hit"))
 		addRealImage(m, "cluster-hit", img, { pixelRatio: 1 });
-};
-
-// 16×16 green disc to back the comment count text. Matches /map's
-// Tailwind `bg-green-600 w-4 h-4 rounded-full` exactly. Drawn directly
-// on a canvas — simpler than the SVG → data-URL → <img> roundtrip for
-// a flat shape.
-const loadCommentBadgeSprite = (m: MapLibreMap): void => {
-	if (hasRealImage(m, "comment-badge-bg")) return;
-	// Draw at 2× the logical 16×16 (= 32×32 backing canvas) and register
-	// with pixelRatio: 2 so MapLibre displays at the same logical size
-	// but reads from a higher-density bitmap — keeps the green disc
-	// crisp on retina/phone DPRs instead of upscaling 16×16 bitmap pixels.
-	const SIZE = 16;
-	const SCALE = 2;
-	const canvas = document.createElement("canvas");
-	canvas.width = SIZE * SCALE;
-	canvas.height = SIZE * SCALE;
-	const ctx = canvas.getContext("2d");
-	if (!ctx) return;
-	ctx.fillStyle = "#16A34A";
-	ctx.beginPath();
-	ctx.arc(
-		(SIZE * SCALE) / 2,
-		(SIZE * SCALE) / 2,
-		(SIZE * SCALE) / 2,
-		0,
-		Math.PI * 2,
-	);
-	ctx.fill();
-	addRealImage(
-		m,
-		"comment-badge-bg",
-		ctx.getImageData(0, 0, SIZE * SCALE, SIZE * SCALE),
-		{ pixelRatio: SCALE },
-	);
 };
 
 const loadSavedBadgeSprite = async (m: MapLibreMap): Promise<void> => {
@@ -230,7 +196,7 @@ export const createPlacePinSource = (deps: PlacePinSourceDeps) => {
 			loadSavedBadgeSprite(map).catch((err) => {
 				console.warn("Saved-badge sprite failed to load:", err);
 			}),
-			loadCommentBadgeSprite(map),
+			ensureCommentBadgeSprite(map),
 			loadClusterHitSprite(map).catch((err) => {
 				console.warn("Cluster-hit sprite failed to load:", err);
 			}),

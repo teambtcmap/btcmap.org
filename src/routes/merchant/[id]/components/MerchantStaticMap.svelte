@@ -35,7 +35,7 @@ const init = async () => {
 	const outcome = await createBtcmapMap({
 		container: mapElement,
 		theme: $theme,
-		styles: (t) => previewStyleForTheme(t === "dark" ? "dark" : "light"),
+		styles: previewStyleForTheme,
 		controls: false,
 		mapOptions: {
 			center: [long, lat],

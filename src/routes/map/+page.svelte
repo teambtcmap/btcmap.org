@@ -794,6 +794,17 @@ $: if (
 	void ensureVerifiedDates().then(() => updateMerchantList({ force: true }));
 }
 
+// Globe projection is page state: a basemap swap resets the projection to
+// the incoming style's default, and registerOverlays (re-run on every
+// style.load, queued swaps included) is the one reliable re-apply point.
+let globeOn = false;
+const toggleGlobe = () => {
+	if (!map) return;
+	globeOn = !globeOn;
+	map.setProjection({ type: globeOn ? "globe" : "mercator" });
+	trackEvent("worldview_toggle", { enabled: globeOn });
+};
+
 // Heatmap on/off state and layer-visibility juggling live in the facade;
 // this wrapper is the shape <MapControls> expects.
 const setHeatmapEnabled = (enabled: boolean) => {
@@ -943,6 +954,8 @@ onMount(async () => {
 			ensureSpritesForPlaces(m, get(places));
 			spiderfier?.applyTo("clusters-hit");
 			pinSource.refreshHeatmapAfterStyle(m);
+			// The incoming style resets the projection to its default.
+			if (globeOn) m.setProjection({ type: "globe" });
 		},
 		onFirstLoad: (m) => {
 			// Adopt the instance immediately: the post-outcome assignment below
@@ -1185,9 +1198,10 @@ onMount(async () => {
 	}
 	mapHandle = outcome.handle;
 	map = outcome.handle.map;
-	// Stash the namespace so the selection-pulse helpers can build a Marker.
-	maplibreNs = outcome.handle.maplibre;
+	// Stash the namespace so the selection-pulse helpers can build a Marker;
+	// the local alias below is the same binding, for the wiring code's use.
 	const maplibre = outcome.handle.maplibre;
+	maplibreNs = maplibre;
 
 	if (queryView?.kind === "bounds") {
 		map.fitBounds([queryView.sw, queryView.ne], { animate: false });
@@ -1353,6 +1367,8 @@ onDestroy(() => {
 	{setHeatmapEnabled}
 	enableBoost
 	enableGlobe
+	{globeOn}
+	onToggleGlobe={toggleGlobe}
 />
 
 <style>

@@ -340,7 +340,6 @@ const attachInteractions = (m: MapLibreMap) => {
 	m.addControl(new maplibre.ScaleControl({ unit: "metric" }), "bottom-left");
 
 	m.on("click", FILL_LAYER_ID, (e: MapLayerMouseEvent) => {
-		if (!map) return;
 		const feature = e.features?.[0];
 		if (!feature) return;
 		const id = feature.properties?.id as string | undefined;
@@ -360,10 +359,10 @@ const attachInteractions = (m: MapLibreMap) => {
 	});
 
 	const setPointer = () => {
-		if (map) map.getCanvas().style.cursor = "pointer";
+		m.getCanvas().style.cursor = "pointer";
 	};
 	const resetPointer = () => {
-		if (map) map.getCanvas().style.cursor = "";
+		m.getCanvas().style.cursor = "";
 	};
 	m.on("mouseenter", FILL_LAYER_ID, setPointer);
 	m.on("mouseleave", FILL_LAYER_ID, resetPointer);

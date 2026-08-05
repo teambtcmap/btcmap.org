@@ -61,8 +61,9 @@ export const createBtcmapMap = async (opts: {
 	// Explicit initial style — enables explicit-style mode.
 	style?: MapStyleInput;
 	// Theme-mode style pair override (e.g. the merchant hero's preview
-	// styles). Ignored in explicit-style mode.
-	styles?: (theme: MapThemeName) => MapStyleInput;
+	// styles). Always invoked with a NORMALIZED theme — callers never need
+	// to handle undefined. Ignored in explicit-style mode.
+	styles?: (theme: "light" | "dark") => MapStyleInput;
 	// Extra Map constructor options merged OVER the shared defaults
 	// (center/zoom/bearing/pitch, interactive, attribution, …). style and
 	// container are excluded by type: style selection goes ONLY through
@@ -104,6 +105,7 @@ export const createBtcmapMap = async (opts: {
 	const explicitStyle = opts.style !== undefined;
 	const themedStyle = (t: MapThemeName): MapStyleInput =>
 		opts.styles ? opts.styles(normalizeTheme(t)) : styleUrlForTheme(t);
+	const initialStyle = opts.style ?? themedStyle(opts.theme);
 
 	let appliedTheme = normalizeTheme(opts.theme);
 	let ready = false;
@@ -115,9 +117,7 @@ export const createBtcmapMap = async (opts: {
 	};
 
 	const map = new maplibre.Map({
-		style: explicitStyle
-			? (opts.style as MapStyleInput)
-			: themedStyle(opts.theme),
+		style: initialStyle,
 		maxZoom: 21,
 		dragRotate: true,
 		touchZoomRotate: true,
@@ -166,11 +166,25 @@ export const createBtcmapMap = async (opts: {
 		if (disposed) return;
 		opts.onFirstLoad?.(map);
 		setReady(true);
+		if (pendingStyle !== null) {
+			const next = pendingStyle;
+			pendingStyle = null;
+			setStyle(next);
+		}
 	});
+
+	// A pick that lands while a previous swap's style is still loading is
+	// QUEUED and applied when the swap settles — dropping it would desync
+	// the picker UI (which persists and highlights the choice immediately)
+	// from the map.
+	let pendingStyle: MapStyleInput | null = null;
 
 	const setStyle = (style: MapStyleInput) => {
 		if (disposed) return;
-		if (!ready) return;
+		if (!ready) {
+			pendingStyle = style;
+			return;
+		}
 		setReady(false);
 		// Registered BEFORE setStyle on purpose: for inline (object) styles
 		// like the OSM raster basemap, setStyle fires style.load SYNCHRONOUSLY
@@ -180,16 +194,23 @@ export const createBtcmapMap = async (opts: {
 			await opts.registerOverlays(map);
 			if (disposed) return;
 			setReady(true);
+			if (pendingStyle !== null) {
+				const next = pendingStyle;
+				pendingStyle = null;
+				setStyle(next);
+			}
 		});
 		map.setStyle(style);
 	};
 
 	const setTheme = (next: MapThemeName) => {
 		if (disposed || explicitStyle) return;
-		if (!ready) return;
 		const normalized = normalizeTheme(next);
 		if (normalized === appliedTheme) return;
 		appliedTheme = normalized;
+		// setStyle queues while not ready (initial load or an in-flight
+		// swap), so a theme change is never dropped — it lands as soon as
+		// the map can take it.
 		setStyle(themedStyle(normalized));
 	};
 

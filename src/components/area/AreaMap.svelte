@@ -20,7 +20,10 @@ import { CLUSTERING_DISABLED_ZOOM, GradeTable } from "$lib/constants";
 import { computeBbox } from "$lib/map/bbox";
 import type { BtcmapMapHandle } from "$lib/map/createMap";
 import { createBtcmapMap } from "$lib/map/createMap";
-import { ensureSpritesForPlaces } from "$lib/map/maplibreSprites";
+import {
+	ensureCommentBadgeSprite,
+	ensureSpritesForPlaces,
+} from "$lib/map/maplibreSprites";
 import { theme } from "$lib/theme";
 import type { Grade, Place } from "$lib/types";
 import { getGrade, isBoosted } from "$lib/utils";
@@ -98,34 +101,6 @@ let styleLoaded = false;
 // fires on genuine prop turnover, not on theme-swap styleLoaded toggles.
 let lastAppliedGeoJSON: GeoJSON | undefined;
 let lastAppliedFilteredPlaces: Place[] | undefined;
-
-const loadCommentBadgeSprite = (m: MapLibreMap): void => {
-	if (m.hasImage("comment-badge-bg")) return;
-	// 2× rasterization for crispness on retina/phone DPRs — see /map's
-	// equivalent for rationale.
-	const SIZE = 16;
-	const SCALE = 2;
-	const canvas = document.createElement("canvas");
-	canvas.width = SIZE * SCALE;
-	canvas.height = SIZE * SCALE;
-	const ctx = canvas.getContext("2d");
-	if (!ctx) return;
-	ctx.fillStyle = "#16A34A";
-	ctx.beginPath();
-	ctx.arc(
-		(SIZE * SCALE) / 2,
-		(SIZE * SCALE) / 2,
-		(SIZE * SCALE) / 2,
-		0,
-		Math.PI * 2,
-	);
-	ctx.fill();
-	m.addImage(
-		"comment-badge-bg",
-		ctx.getImageData(0, 0, SIZE * SCALE, SIZE * SCALE),
-		{ pixelRatio: SCALE },
-	);
-};
 
 const buildFeatureCollection = (list: Place[]): PlaceFeatureCollection => ({
 	type: "FeatureCollection",
@@ -319,7 +294,7 @@ const syncPlacesSource = (m: MapLibreMap, list: Place[]) => {
 // intentionally NOT done here — see fitToArea below; theme swaps must
 // preserve the user's pan/zoom.
 const initializeMapContents = (m: MapLibreMap) => {
-	loadCommentBadgeSprite(m);
+	ensureCommentBadgeSprite(m);
 	addAreaLayer(m);
 	addPlacesLayers(m);
 	syncPlacesSource(m, filteredPlaces);
