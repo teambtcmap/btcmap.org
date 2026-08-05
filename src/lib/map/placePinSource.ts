@@ -38,33 +38,6 @@ const EMPTY_COLLECTION: PlaceFeatureCollection = {
 	features: [],
 };
 
-// The custom sources + layers this module adds on top of whatever basemap is
-// active. The /map page's applyBasemap() carries these across a setStyle() so
-// the pins, clusters, and labels survive a basemap/theme swap untouched
-// (MapLibre's style differ leaves byte-identical layers in place — only the
-// basemap layers below them get swapped).
-export const CUSTOM_SOURCE_IDS: readonly string[] = [
-	"places",
-	"places-boosted",
-	"places-heatmap",
-];
-export const CUSTOM_LAYER_IDS: readonly string[] = [
-	"place-heatmap",
-	"clusters-outer",
-	"clusters-inner",
-	"cluster-count",
-	"unclustered-point",
-	"boosted-point",
-	"comment-badge",
-	"comment-badge-count",
-	"saved-badge",
-	"place-label",
-	"boosted-comment-badge",
-	"boosted-comment-badge-count",
-	"boosted-saved-badge",
-	"boosted-place-label",
-	"clusters-hit",
-];
 // All point/cluster/badge/label layers that the heatmap conceals while
 // active below CLUSTERING_DISABLED_ZOOM (17).  At zoom 17+ the heatmap
 // layer naturally disappears (its maxzoom), so these layers are revealed

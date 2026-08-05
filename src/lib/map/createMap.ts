@@ -68,6 +68,9 @@ export const createBtcmapMap = async (opts: {
 	mapOptions?: Partial<MapOptions>;
 	// false skips the navigation + geolocate controls (static previews).
 	controls?: boolean;
+	// Fired when the built-in geolocate control resolves a position — the
+	// control instance itself stays internal to the facade.
+	onGeolocate?: (coords: { latitude: number; longitude: number }) => void;
 	// Sprites + sources + layers + data. Runs on the initial load and again
 	// after every style swap's style.load. May be async — first-load wiring
 	// and the ready signal wait for it (sprite-before-layer ordering).
@@ -132,16 +135,21 @@ export const createBtcmapMap = async (opts: {
 			"top-right",
 		);
 
-		map.addControl(
-			new maplibre.GeolocateControl({
-				positionOptions: { enableHighAccuracy: true },
-				trackUserLocation: true,
-				showUserLocation: true,
-				showAccuracyCircle: true,
-				fitBoundsOptions: { maxZoom: 15, linear: true },
-			}),
-			"top-right",
-		);
+		const geolocate = new maplibre.GeolocateControl({
+			positionOptions: { enableHighAccuracy: true },
+			trackUserLocation: true,
+			showUserLocation: true,
+			showAccuracyCircle: true,
+			fitBoundsOptions: { maxZoom: 15, linear: true },
+		});
+		map.addControl(geolocate, "top-right");
+		if (opts.onGeolocate) {
+			// v6's GeolocatePositionEvent exposes coords directly but is not
+			// assignable to GeolocationPosition (no toJSON) — pass coords only.
+			geolocate.on("geolocate", (e) => {
+				opts.onGeolocate?.(e.coords);
+			});
+		}
 	}
 
 	// MapLibre logs an "image missing" warning whenever a symbol references
