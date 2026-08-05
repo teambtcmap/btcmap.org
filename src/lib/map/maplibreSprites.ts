@@ -148,6 +148,39 @@ export const hasRealImage = (m: MapLibreMap, name: string): boolean => {
 	return hasRealSprite(m, name);
 };
 
+// 16×16 green disc backing the comment-count text — one copy for every map
+// that renders comment badges (/map's pin facade, AreaMap). Matches the
+// legacy Tailwind `bg-green-600 w-4 h-4 rounded-full`. Drawn at 2× and
+// registered with pixelRatio: 2 so it stays crisp on retina/phone DPRs.
+// Gates on the REAL registration (not hasImage) so a styleimagemissing stub
+// can never block the actual sprite.
+export const ensureCommentBadgeSprite = (m: MapLibreMap): void => {
+	if (hasRealImage(m, "comment-badge-bg")) return;
+	const SIZE = 16;
+	const SCALE = 2;
+	const canvas = document.createElement("canvas");
+	canvas.width = SIZE * SCALE;
+	canvas.height = SIZE * SCALE;
+	const ctx = canvas.getContext("2d");
+	if (!ctx) return;
+	ctx.fillStyle = "#16A34A";
+	ctx.beginPath();
+	ctx.arc(
+		(SIZE * SCALE) / 2,
+		(SIZE * SCALE) / 2,
+		(SIZE * SCALE) / 2,
+		0,
+		Math.PI * 2,
+	);
+	ctx.fill();
+	addRealImage(
+		m,
+		"comment-badge-bg",
+		ctx.getImageData(0, 0, SIZE * SCALE, SIZE * SCALE),
+		{ pixelRatio: SCALE },
+	);
+};
+
 export const addRealImage = (
 	m: MapLibreMap,
 	name: string,

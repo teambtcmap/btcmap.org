@@ -26,10 +26,9 @@ import {
 	styleForBasemap,
 } from "$lib/map/basemaps";
 import { computeBbox } from "$lib/map/bbox";
+import type { BtcmapMapHandle } from "$lib/map/createMap";
+import { createBtcmapMap } from "$lib/map/createMap";
 import { parseHashCoords, writeHashCoords } from "$lib/map/mapHash";
-import { ensureRtlTextPlugin } from "$lib/map/rtl";
-import { hasWebGL } from "$lib/map/webgl";
-import { ensureMapLibreWorkerUrl } from "$lib/map/worker";
 import { areaError, areas, reportError, reports } from "$lib/store";
 import { areasSync } from "$lib/sync/areas";
 import { batchSync } from "$lib/sync/batchSync";
@@ -47,7 +46,12 @@ let mapLoading = 0;
 
 let mapElement: HTMLDivElement;
 let map: MapLibreMap | undefined;
+let mapHandle: BtcmapMapHandle | undefined;
 let mapLoaded = false;
+// Last published polygon set, kept so a basemap swap can re-seed the fresh
+// style's source (the swap machine re-installs layers instead of carrying
+// them — see createBtcmapMap.setStyle).
+let lastCommunitiesFC: FeatureCollection | null = null;
 let webglUnsupported = false;
 let communitiesLoaded = false;
 let destroyed = false;
@@ -106,25 +110,12 @@ const buildFeatureCollection = (
 	return { type: "FeatureCollection", features };
 };
 
-// Swap the basemap while keeping the community polygon source + layers live.
-// transformStyle re-attaches them onto the incoming base style; the differ
-// leaves the identical custom layers in place and only swaps the basemap
-// layers below them.
+// Swap the basemap. The facade's swap machine re-installs the polygon
+// source + layers on the incoming style's style.load (registerOverlays) —
+// a momentary polygon blink replaces the old transformStyle carryover and
+// its hand-maintained layer list.
 const applyBasemap = (id: BasemapId) => {
-	if (!map) return;
-	map.setStyle(styleForBasemap(id), {
-		transformStyle: (previous, next) => {
-			if (!previous) return next;
-			const sources = { ...next.sources };
-			if (previous.sources[SOURCE_ID]) {
-				sources[SOURCE_ID] = previous.sources[SOURCE_ID];
-			}
-			const carried = previous.layers.filter(
-				(l) => l.id === FILL_LAYER_ID || l.id === OUTLINE_LAYER_ID,
-			);
-			return { ...next, sources, layers: [...next.layers, ...carried] };
-		},
-	});
+	mapHandle?.setStyle(styleForBasemap(id));
 };
 
 const addCommunitiesLayers = (m: MapLibreMap) => {
@@ -259,8 +250,11 @@ const initializeCommunities = async () => {
 	popupsByCommunity = new Map(communities.map((c) => [c.id, c]));
 
 	addCommunitiesLayers(map);
+	const fc = buildFeatureCollection(communities);
+	// Retained so a basemap swap can re-seed the fresh style's source
+	lastCommunitiesFC = fc;
 	const source = map.getSource(SOURCE_ID) as GeoJSONSource | undefined;
-	source?.setData(buildFeatureCollection(communities));
+	source?.setData(fc);
 
 	if (communityQuery && communitySelected?.tags.geo_json) {
 		try {
@@ -290,60 +284,62 @@ $: if ($areas?.length && $reports?.length && mapLoaded && !communitiesLoaded) {
 }
 
 const initializeMap = async () => {
-	if (!hasWebGL()) {
+	// Five basemaps (legacy parity). A stored picker choice wins; otherwise
+	// the first-visit default is theme-aware (Liberty light, Carto Dark
+	// Matter dark). Explicit-style mode: this page owns style selection, so
+	// the facade's setTheme is inert and swaps go through applyBasemap →
+	// handle.setStyle.
+	const initialBasemap: BasemapId =
+		getStoredBasemap() ?? defaultBasemap(get(theme));
+	const hashCoords = parseHashCoords();
+
+	const outcome = await createBtcmapMap({
+		container: mapElement,
+		theme: get(theme),
+		style: styleForBasemap(initialBasemap),
+		mapOptions: {
+			center: hashCoords ? [hashCoords.lng, hashCoords.lat] : [0, 0],
+			zoom: hashCoords?.zoom ?? 3,
+			bearing: hashCoords?.bearing ?? 0,
+			pitch: hashCoords?.pitch ?? 0,
+		},
+		isCancelled: () => destroyed,
+		// Re-runs after every basemap swap: re-install the polygon layers and
+		// re-seed the fresh style's source from the last published set.
+		registerOverlays: (m) => {
+			addCommunitiesLayers(m);
+			if (lastCommunitiesFC) {
+				const source = m.getSource(SOURCE_ID) as GeoJSONSource | undefined;
+				source?.setData(lastCommunitiesFC);
+			}
+		},
+		onFirstLoad: (m) => {
+			mapLoading = 40;
+			mapLoaded = true;
+			attachInteractions(m);
+		},
+	});
+
+	if (outcome.status === "unsupported") {
 		webglUnsupported = true;
 		return;
 	}
-	const maplibre = await import("maplibre-gl");
-	ensureMapLibreWorkerUrl(maplibre);
-	ensureRtlTextPlugin(maplibre);
-	if (destroyed) return;
+	if (outcome.status === "cancelled") return;
+	if (destroyed) {
+		outcome.handle.destroy();
+		return;
+	}
+	mapHandle = outcome.handle;
+	map = outcome.handle.map;
+};
 
-	// Five basemaps (legacy parity). A stored picker choice wins; otherwise
-	// the first-visit default is theme-aware (Liberty light, Carto Dark
-	// Matter dark). Each basemap is a fixed, sticky style; switches go through
-	// applyBasemap → setStyle({ transformStyle }) so the polygons ride along.
-	const initialBasemap: BasemapId =
-		getStoredBasemap() ?? defaultBasemap(get(theme));
-	const style = styleForBasemap(initialBasemap);
+const attachInteractions = (m: MapLibreMap) => {
+	const maplibre = mapHandle?.maplibre;
+	if (!maplibre) return;
 
-	const hashCoords = parseHashCoords();
+	m.addControl(new maplibre.ScaleControl({ unit: "metric" }), "bottom-left");
 
-	map = new maplibre.Map({
-		container: mapElement,
-		style,
-		center: hashCoords ? [hashCoords.lng, hashCoords.lat] : [0, 0],
-		zoom: hashCoords?.zoom ?? 3,
-		bearing: hashCoords?.bearing ?? 0,
-		pitch: hashCoords?.pitch ?? 0,
-		maxZoom: 21,
-		dragRotate: true,
-		touchZoomRotate: true,
-		pitchWithRotate: false,
-	});
-
-	map.addControl(
-		new maplibre.NavigationControl({
-			showCompass: true,
-			showZoom: true,
-			visualizePitch: false,
-		}),
-		"top-right",
-	);
-
-	const geolocate = new maplibre.GeolocateControl({
-		positionOptions: { enableHighAccuracy: true },
-		trackUserLocation: true,
-		showUserLocation: true,
-		showAccuracyCircle: true,
-		fitBoundsOptions: { maxZoom: 15, linear: true },
-	});
-	map.addControl(geolocate, "top-right");
-
-	map.addControl(new maplibre.ScaleControl({ unit: "metric" }), "bottom-left");
-
-	map.on("click", FILL_LAYER_ID, (e: MapLayerMouseEvent) => {
-		if (!map) return;
+	m.on("click", FILL_LAYER_ID, (e: MapLayerMouseEvent) => {
 		const feature = e.features?.[0];
 		if (!feature) return;
 		const id = feature.properties?.id as string | undefined;
@@ -354,7 +350,7 @@ const initializeMap = async () => {
 		const popup = new maplibre.Popup({ maxWidth: "320px", closeOnClick: true })
 			.setLngLat(e.lngLat)
 			.setDOMContent(container)
-			.addTo(map);
+			.addTo(m);
 		// Destroy the Socials Svelte instance when the popup goes away —
 		// MapLibre removes the DOM but the component's reactive
 		// subscriptions (theme, locale, etc.) would otherwise leak per
@@ -363,28 +359,23 @@ const initializeMap = async () => {
 	});
 
 	const setPointer = () => {
-		if (map) map.getCanvas().style.cursor = "pointer";
+		m.getCanvas().style.cursor = "pointer";
 	};
 	const resetPointer = () => {
-		if (map) map.getCanvas().style.cursor = "";
+		m.getCanvas().style.cursor = "";
 	};
-	map.on("mouseenter", FILL_LAYER_ID, setPointer);
-	map.on("mouseleave", FILL_LAYER_ID, resetPointer);
+	m.on("mouseenter", FILL_LAYER_ID, setPointer);
+	m.on("mouseleave", FILL_LAYER_ID, resetPointer);
 
-	map.on("moveend", () => {
-		if (!map || communityQuery) return;
+	m.on("moveend", () => {
+		if (communityQuery) return;
 		writeHashCoords({
-			zoom: map.getZoom(),
-			lat: map.getCenter().lat,
-			lng: map.getCenter().lng,
-			bearing: map.getBearing(),
-			pitch: map.getPitch(),
+			zoom: m.getZoom(),
+			lat: m.getCenter().lat,
+			lng: m.getCenter().lng,
+			bearing: m.getBearing(),
+			pitch: m.getPitch(),
 		});
-	});
-
-	map.on("load", () => {
-		mapLoading = 40;
-		mapLoaded = true;
 	});
 };
 
@@ -397,10 +388,9 @@ onMount(() => {
 
 onDestroy(() => {
 	destroyed = true;
-	if (map) {
-		map.remove();
-		map = undefined;
-	}
+	mapHandle?.destroy();
+	mapHandle = undefined;
+	map = undefined;
 });
 </script>
 

@@ -8,6 +8,7 @@ import {
 import { HEATMAP_STORAGE_KEY } from "$lib/map/heatmap";
 import {
 	addRealImage,
+	ensureCommentBadgeSprite,
 	ensureSpritesForPlaces,
 	hasRealImage,
 	loadSvgImage,
@@ -38,33 +39,6 @@ const EMPTY_COLLECTION: PlaceFeatureCollection = {
 	features: [],
 };
 
-// The custom sources + layers this module adds on top of whatever basemap is
-// active. The /map page's applyBasemap() carries these across a setStyle() so
-// the pins, clusters, and labels survive a basemap/theme swap untouched
-// (MapLibre's style differ leaves byte-identical layers in place — only the
-// basemap layers below them get swapped).
-export const CUSTOM_SOURCE_IDS: readonly string[] = [
-	"places",
-	"places-boosted",
-	"places-heatmap",
-];
-export const CUSTOM_LAYER_IDS: readonly string[] = [
-	"place-heatmap",
-	"clusters-outer",
-	"clusters-inner",
-	"cluster-count",
-	"unclustered-point",
-	"boosted-point",
-	"comment-badge",
-	"comment-badge-count",
-	"saved-badge",
-	"place-label",
-	"boosted-comment-badge",
-	"boosted-comment-badge-count",
-	"boosted-saved-badge",
-	"boosted-place-label",
-	"clusters-hit",
-];
 // All point/cluster/badge/label layers that the heatmap conceals while
 // active below CLUSTERING_DISABLED_ZOOM (17).  At zoom 17+ the heatmap
 // layer naturally disappears (its maxzoom), so these layers are revealed
@@ -115,41 +89,6 @@ const loadClusterHitSprite = async (m: MapLibreMap): Promise<void> => {
 	const img = await loadSvgImage(svg);
 	if (!hasRealImage(m, "cluster-hit"))
 		addRealImage(m, "cluster-hit", img, { pixelRatio: 1 });
-};
-
-// 16×16 green disc to back the comment count text. Matches /map's
-// Tailwind `bg-green-600 w-4 h-4 rounded-full` exactly. Drawn directly
-// on a canvas — simpler than the SVG → data-URL → <img> roundtrip for
-// a flat shape.
-const loadCommentBadgeSprite = (m: MapLibreMap): void => {
-	if (hasRealImage(m, "comment-badge-bg")) return;
-	// Draw at 2× the logical 16×16 (= 32×32 backing canvas) and register
-	// with pixelRatio: 2 so MapLibre displays at the same logical size
-	// but reads from a higher-density bitmap — keeps the green disc
-	// crisp on retina/phone DPRs instead of upscaling 16×16 bitmap pixels.
-	const SIZE = 16;
-	const SCALE = 2;
-	const canvas = document.createElement("canvas");
-	canvas.width = SIZE * SCALE;
-	canvas.height = SIZE * SCALE;
-	const ctx = canvas.getContext("2d");
-	if (!ctx) return;
-	ctx.fillStyle = "#16A34A";
-	ctx.beginPath();
-	ctx.arc(
-		(SIZE * SCALE) / 2,
-		(SIZE * SCALE) / 2,
-		(SIZE * SCALE) / 2,
-		0,
-		Math.PI * 2,
-	);
-	ctx.fill();
-	addRealImage(
-		m,
-		"comment-badge-bg",
-		ctx.getImageData(0, 0, SIZE * SCALE, SIZE * SCALE),
-		{ pixelRatio: SCALE },
-	);
 };
 
 const loadSavedBadgeSprite = async (m: MapLibreMap): Promise<void> => {
@@ -257,7 +196,7 @@ export const createPlacePinSource = (deps: PlacePinSourceDeps) => {
 			loadSavedBadgeSprite(map).catch((err) => {
 				console.warn("Saved-badge sprite failed to load:", err);
 			}),
-			loadCommentBadgeSprite(map),
+			ensureCommentBadgeSprite(map),
 			loadClusterHitSprite(map).catch((err) => {
 				console.warn("Cluster-hit sprite failed to load:", err);
 			}),

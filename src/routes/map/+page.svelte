@@ -40,6 +40,8 @@ import {
 	styleForBasemap,
 } from "$lib/map/basemaps";
 import { shouldClusterBoostedAtZoom } from "$lib/map/boostedClustering";
+import type { BtcmapMapHandle } from "$lib/map/createMap";
+import { createBtcmapMap } from "$lib/map/createMap";
 import {
 	type HashCoords,
 	parseHashCoords,
@@ -47,17 +49,11 @@ import {
 } from "$lib/map/mapHash";
 import {
 	ensureSpritesForPlaces,
-	installPlaceholderHandler,
 	PIN_FILL_BOOSTED,
 	PIN_FILL_REGULAR,
 } from "$lib/map/maplibreSprites";
-import {
-	CUSTOM_LAYER_IDS,
-	CUSTOM_SOURCE_IDS,
-	createPlacePinSource,
-} from "$lib/map/placePinSource";
+import { createPlacePinSource } from "$lib/map/placePinSource";
 import { parseLatLongQuery } from "$lib/map/queryViewport";
-import { ensureRtlTextPlugin } from "$lib/map/rtl";
 import type { VerifiedFilterYears } from "$lib/map/verifiedFilter";
 import {
 	calculateRadiusKmFromLngLatBounds,
@@ -69,8 +65,6 @@ import {
 	placesRevision,
 	selectVisiblePlaces,
 } from "$lib/map/visiblePlaces";
-import { hasWebGL } from "$lib/map/webgl";
-import { ensureMapLibreWorkerUrl } from "$lib/map/worker";
 import {
 	MERCHANT_URL_CHANGE_EVENT,
 	parseMerchantHash,
@@ -130,6 +124,7 @@ if (outdatedOnly) {
 
 let mapContainer: HTMLDivElement;
 let map: MapLibreMap | undefined;
+let mapHandle: BtcmapMapHandle | undefined;
 let destroyed = false;
 let spiderfier: Spiderfy | undefined;
 let styleLoaded = false;
@@ -799,6 +794,17 @@ $: if (
 	void ensureVerifiedDates().then(() => updateMerchantList({ force: true }));
 }
 
+// Globe projection is page state: a basemap swap resets the projection to
+// the incoming style's default, and registerOverlays (re-run on every
+// style.load, queued swaps included) is the one reliable re-apply point.
+let globeOn = false;
+const toggleGlobe = () => {
+	if (!map) return;
+	globeOn = !globeOn;
+	map.setProjection({ type: globeOn ? "globe" : "mercator" });
+	trackEvent("worldview_toggle", { enabled: globeOn });
+};
+
 // Heatmap on/off state and layer-visibility juggling live in the facade;
 // this wrapper is the shape <MapControls> expects.
 const setHeatmapEnabled = (enabled: boolean) => {
@@ -807,49 +813,17 @@ const setHeatmapEnabled = (enabled: boolean) => {
 };
 
 // Switch the basemap without tearing down our pin/cluster/label layers.
-// setStyle's transformStyle hook re-attaches the custom sources + layers
-// onto the incoming base style; because they're identical to what's already
-// mounted, the differ keeps the layers (and the carried GeoJSON data) live —
-// only the basemap layers below them swap.
-//
-// Two things do NOT survive setStyle on their own and are re-established in
-// the style.load handler below:
-//   • the spiderfier's click/zoom handlers — unspiderfyAll() detaches them
-//     (map.off) and only applyTo() re-binds them, so we must applyTo again;
-//   • the addImage sprites (cluster-hit, badges) IF MapLibre ever falls back
-//     from the diff to a full rebuild (fresh imageManager). The loaders are
-//     hasImage-guarded, so re-running them is a cheap no-op on the normal path.
-// The handler is registered BEFORE setStyle on purpose: for the inline raster
-// (object) style, setStyle fires style.load SYNCHRONOUSLY during the call, so
-// a handler added afterwards would miss it.
+// Swap the basemap. The facade's swap machine re-runs registerOverlays on
+// the incoming style's style.load — sprites, the fifteen layers, label
+// palette, spiderfy re-hook, heatmap state — and the ready toggle clears
+// the render signature so the fresh sources repopulate. A momentary pin
+// blink replaces the old transformStyle carryover and its hand-maintained
+// CUSTOM_*_IDS lists.
 const applyBasemap = (id: BasemapId) => {
-	if (!map) return;
 	// Collapse any open spider before the restyle. This also detaches the
-	// spiderfy library's map handlers (which is why we re-applyTo below).
+	// spiderfy library's map handlers; registerOverlays re-applies them.
 	spiderfier?.unspiderfyAll();
-	map.once("style.load", () => {
-		if (!map) return;
-		applyLabelPalette(map, get(theme));
-		pinSource.loadSprites(map);
-		ensureSpritesForPlaces(map, get(places));
-		spiderfier?.applyTo("clusters-hit");
-		// Re-apply heatmap/cluster visibility in case the style diff fell
-		// back to a full rebuild and reset carried layout properties.
-		pinSource.refreshHeatmapAfterStyle(map);
-	});
-	map.setStyle(styleForBasemap(id), {
-		transformStyle: (previous, next) => {
-			if (!previous) return next;
-			const sources = { ...next.sources };
-			for (const sid of CUSTOM_SOURCE_IDS) {
-				if (previous.sources[sid]) sources[sid] = previous.sources[sid];
-			}
-			const carried = previous.layers.filter((l) =>
-				CUSTOM_LAYER_IDS.includes(l.id),
-			);
-			return { ...next, sources, layers: [...next.layers, ...carried] };
-		},
-	});
+	mapHandle?.setStyle(styleForBasemap(id));
 };
 
 onMount(async () => {
@@ -861,28 +835,12 @@ onMount(async () => {
 		`${SEARCH_SHEET_PEEK_HEIGHT}px`,
 	);
 
-	// WebGL absence (older Android WebViews, hardened browsers, disabled
-	// GPU) would leave the map blank if we tried to instantiate MapLibre.
-	// Surface a static fallback instead.
-	if (!hasWebGL()) {
-		webglUnsupported = true;
-		return;
-	}
-	const maplibre = await import("maplibre-gl");
-	ensureMapLibreWorkerUrl(maplibre);
-	ensureRtlTextPlugin(maplibre);
-	// User may have navigated away while the dynamic import was in
-	// flight; bail before instantiating against an unmounted container.
-	if (destroyed) return;
-	// Stash the namespace so the selection-pulse helpers can build a Marker.
-	maplibreNs = maplibre;
-
 	// Five basemaps (legacy parity): four vector styles + the OSM raster
 	// style. A stored picker choice wins; otherwise the first-visit default
 	// is theme-aware (Liberty in light, Carto Dark Matter in dark). Each
 	// basemap is a FIXED style — the choice is sticky and a theme toggle does
-	// not swap it. Switching goes through applyBasemap() → setStyle({
-	// transformStyle }) so the custom pin/cluster/label layers ride along.
+	// not swap it. Explicit-style mode: this page owns style selection, so
+	// swaps go through applyBasemap → handle.setStyle.
 	const initialBasemap: BasemapId =
 		getStoredBasemap() ?? defaultBasemap(get(theme));
 	const style = styleForBasemap(initialBasemap);
@@ -939,34 +897,311 @@ onMount(async () => {
 		initialCenter = [ipGeo.lng, ipGeo.lat];
 	}
 
-	map = new maplibre.Map({
+	const outcome = await createBtcmapMap({
 		container: mapContainer,
-		// Resolved basemap style — a vector style URL, or the inline OSM raster
-		// style. Defaults to the theme-aware basemap unless the user picked one.
+		theme: get(theme),
 		style,
-		// Show the "Support BTC Map" supporter link on every basemap (legacy
-		// /map guaranteed it regardless of basemap). Data-source credit
-		// (OSM / OpenFreeMap / Carto) comes from each style's own sources.
-		// Mobile: compact (i) button so it doesn't cover the bottom edge under
-		// the floating search. Desktop has room — show the full credit.
-		attributionControl: {
-			customAttribution: SUPPORT_ATTR,
-			compact: isMobileLayout,
+		mapOptions: {
+			// Show the "Support BTC Map" supporter link on every basemap (legacy
+			// /map guaranteed it regardless of basemap). Data-source credit
+			// (OSM / OpenFreeMap / Carto) comes from each style's own sources.
+			// Mobile: compact (i) button so it doesn't cover the bottom edge
+			// under the floating search. Desktop has room — show the full credit.
+			attributionControl: {
+				customAttribution: SUPPORT_ATTR,
+				compact: isMobileLayout,
+			},
+			center: initialCenter,
+			zoom: initialZoom,
+			bearing: hashCoords?.bearing ?? 0,
+			pitch: hashCoords?.pitch ?? 0,
+			// Match legacy Leaflet `noWrap: true` — stop the map from
+			// repeating horizontally when zoomed out, so the user can't pan
+			// past the antimeridian into a duplicate copy of the world.
+			renderWorldCopies: false,
 		},
-		center: initialCenter,
-		zoom: initialZoom,
-		bearing: hashCoords?.bearing ?? 0,
-		pitch: hashCoords?.pitch ?? 0,
-		maxZoom: 21,
-		// Match legacy Leaflet `noWrap: true` — stop the map from
-		// repeating horizontally when zoomed out, so the user can't pan
-		// past the antimeridian into a duplicate copy of the world.
-		renderWorldCopies: false,
-		// Rotation + pitch enabled — the whole point of the migration
-		dragRotate: true,
-		touchZoomRotate: true,
-		pitchWithRotate: false,
+		isCancelled: () => destroyed,
+		// Mirror legacy /map: sync location into the userLocation store so
+		// the merchant list panel can compute distances without prompting.
+		onGeolocate: (coords) => {
+			userLocation.setLocation(coords.latitude, coords.longitude);
+		},
+		onStyleReadyChange: (ready) => {
+			styleLoaded = ready;
+			// Every style becoming ready (first load AND basemap swaps, whose
+			// fresh styles arrive without our sources) invalidates the render
+			// signature: the marker block recomputes the filtered selection
+			// and syncs it into the just-installed sources. Never sync raw
+			// $places — all filtering lives upstream in the pipeline.
+			if (ready) lastRenderSig = "";
+		},
+		// Runs on the initial load and again after every basemap swap's
+		// style.load — a swap's incoming style has none of our sprites,
+		// sources, or layers. The saved-badge fetch goes to a third-party CDN
+		// and must NOT block init; the facade-side loaders catch and degrade.
+		registerOverlays: async (m) => {
+			await pinSource.loadSprites(m);
+			// Component may have been destroyed while sprites were loading
+			// (user navigated away within ~1s of mount).
+			if (destroyed) return;
+			// Sources + fifteen layers (pins, clusters, badges, labels, heatmap).
+			pinSource.install(m);
+			// Style-dependent state the incoming style resets: label palette,
+			// composite pin sprites, spiderfy's layer hook (no-op before the
+			// spiderfier exists on first load), heatmap visibility.
+			applyLabelPalette(m, get(theme));
+			lastAppliedLabelTheme = get(theme);
+			ensureSpritesForPlaces(m, get(places));
+			spiderfier?.applyTo("clusters-hit");
+			pinSource.refreshHeatmapAfterStyle(m);
+			// The incoming style resets the projection to its default.
+			if (globeOn) m.setProjection({ type: "globe" });
+		},
+		onFirstLoad: (m) => {
+			// Adopt the instance immediately: the post-outcome assignment below
+			// also sets it, but nothing should depend on winning that race.
+			map = m;
+			if (destroyed) return;
+
+			// Spiderfy hooks the clusters-hit symbol layer. The library's
+			// internal decision is: if expansionZoom > forceSpiderifyMinZoom OR
+			// expansionZoom > map.maxZoom → spiderfy; else easeTo to expansionZoom.
+			// The default forceSpiderifyMinZoom is null, which coerces to 0 and
+			// causes EVERY click to spiderfy. Set it to our clustering threshold
+			// so only genuinely un-zoomable clusters (coincident points whose
+			// expansionZoom exceeds the threshold) spider out.
+			spiderfier = new Spiderfy(map, {
+				forceSpiderifyMinZoom: CLUSTERING_DISABLED_ZOOM,
+				onLeafClick: (feature) => {
+					const placeId = feature.properties?.id;
+					if (typeof placeId === "number") {
+						merchantDrawer.open(placeId, "details");
+					}
+				},
+				closeOnLeafClick: true,
+				spiderLeavesLayout: {
+					"icon-image": [
+						"concat",
+						"pin-",
+						["case", ["coalesce", ["get", "boosted"], false], "b", "r"],
+						"-",
+						["coalesce", ["get", "icon"], "question_mark"],
+					],
+					"icon-size": 1,
+					"icon-anchor": "bottom",
+					"icon-allow-overlap": true,
+					"icon-ignore-placement": true,
+					"icon-rotation-alignment": "viewport",
+					"icon-pitch-alignment": "viewport",
+				},
+				spiderLegsColor: "rgba(100, 100, 100, 0.6)",
+			});
+			spiderfier.applyTo("clusters-hit");
+
+			const setPointerCursor = () => {
+				if (map) map.getCanvas().style.cursor = "pointer";
+			};
+			const resetCursor = () => {
+				if (map) map.getCanvas().style.cursor = "";
+			};
+			map.on("mouseenter", "clusters-outer", setPointerCursor);
+			map.on("mouseleave", "clusters-outer", resetCursor);
+			map.on("mouseenter", "unclustered-point", setPointerCursor);
+			map.on("mouseleave", "unclustered-point", resetCursor);
+			map.on("mouseenter", "boosted-point", setPointerCursor);
+			map.on("mouseleave", "boosted-point", resetCursor);
+
+			// Unclustered marker click → open the global merchant drawer. The
+			// drawer component lives in the layout, so we only need to push state
+			// into the store. Both layers share the same handler since boosted
+			// pins live in their own source above the clustered one.
+			const onPinClick = (e: MapLayerMouseEvent) => {
+				const feature = e.features?.[0] as MapGeoJSONFeature | undefined;
+				const placeId = feature?.properties?.id;
+				if (typeof placeId !== "number") return;
+				merchantDrawer.open(placeId, "details");
+			};
+			map.on("click", "unclustered-point", onPinClick);
+			map.on("click", "boosted-point", onPinClick);
+
+			// Click on empty map (no marker or cluster hit) closes any open
+			// drawer — matches /map's behavior. Layer-scoped click handlers
+			// fire alongside this generic one, so clicking a marker still
+			// reopens the drawer for the new feature net-net.
+			// The spiderfy lib adds its own symbol layers at applyTo() time
+			// with ids prefixed `spiderfy-leaf-…`. Without including them
+			// here, tapping a spidered leaf would open the drawer (via
+			// onLeafClick) and then immediately close it again because the
+			// generic handler sees no hit on the allowlisted layers.
+			map.on("click", (e: MapLayerMouseEvent) => {
+				if (!map) return;
+				if (!get(merchantDrawer).isOpen) return;
+				const spiderLeafLayerIds = map
+					.getStyle()
+					.layers.filter((l) => l.id.startsWith("spiderfy-leaf"))
+					.map((l) => l.id);
+				const hit = map.queryRenderedFeatures(e.point, {
+					layers: [
+						"unclustered-point",
+						"boosted-point",
+						"clusters-hit",
+						...spiderLeafLayerIds,
+					],
+				});
+				if (hit.length > 0) return;
+				merchantDrawer.close();
+			});
+
+			// Refresh enriched details (and thus labels) on viewport changes
+			// once we're above LABEL_VISIBLE_ZOOM. Debounced so quick pans don't
+			// spam the API; the store internally aborts any stale request.
+			map.on("moveend", triggerEnrichmentIfNeeded);
+
+			// Track current zoom + center + refresh the merchant list panel's
+			// nearby items based on the new viewport. Debounced to keep cost
+			// off the move path. Center drives the CommunityRail.
+			map.on("moveend", () => {
+				if (!map) return;
+				currentZoom = map.getZoom();
+				const c = map.getCenter();
+				currentLat = c.lat;
+				currentLon = c.lng;
+				// Re-route boosted places when zoom crosses BOOSTED_CLUSTERING_MAX_ZOOM
+				// — the MapLibre analogue of the legacy boostedLayer swap. The facade
+				// only re-renders on an actual flip, so steady-state pans stay cheap.
+				if (styleLoaded) {
+					pinSource.resyncForZoom(map);
+				}
+				// When the heatmap is active, zooming past CLUSTERING_DISABLED_ZOOM
+				// naturally removes the heatmap layer (its maxzoom), so re-show
+				// all the point/cluster/badge layers that were concealed.
+				pinSource.applyHeatmapVisibility(map);
+				debouncedUpdateMerchantList();
+			});
+
+			// Tile-loading indicator — debounced to avoid flicker on quick pans.
+			map.on("movestart", () => {
+				if (tilesLoadingTimer) clearTimeout(tilesLoadingTimer);
+				if (tilesLoadingFallback) clearTimeout(tilesLoadingFallback);
+				tilesLoadingTimer = setTimeout(() => {
+					tilesLoading = true;
+				}, 150);
+				tilesLoadingFallback = setTimeout(() => {
+					tilesLoading = false;
+				}, 5000);
+			});
+			map.on("idle", () => {
+				if (tilesLoadingTimer) {
+					clearTimeout(tilesLoadingTimer);
+					tilesLoadingTimer = null;
+				}
+				if (tilesLoadingFallback) {
+					clearTimeout(tilesLoadingFallback);
+					tilesLoadingFallback = null;
+				}
+				tilesLoading = false;
+				mapTilesLoaded = true;
+				// Clustering is settled on idle — reconcile the pulse with whether the
+				// selected pin is currently rendered individually or inside a cluster.
+				updatePulseVisibility();
+			});
+
+			// Persist viewport in the URL hash. Preserves any merchant=… params
+			// added by the drawer so shareable URLs round-trip.
+			const persistViewportToHash = () => {
+				if (!map) return;
+				const center = map.getCenter();
+				writeHashCoords({
+					zoom: map.getZoom(),
+					lat: center.lat,
+					lng: center.lng,
+					bearing: map.getBearing(),
+					pitch: map.getPitch(),
+				});
+			};
+			map.on("moveend", persistViewportToHash);
+
+			// Persist viewport to localforage too, debounced so continuous
+			// pan/zoom doesn't hammer IndexedDB. Returning users land back
+			// where they left off when they revisit /map with no hash/query.
+			const persistViewportToCache = debounce(() => {
+				if (!map) return;
+				const center = map.getCenter();
+				saveCachedView({
+					lat: center.lat,
+					lng: center.lng,
+					zoom: map.getZoom(),
+				});
+			}, 1000);
+			map.on("moveend", persistViewportToCache);
+
+			// If the URL also encoded a merchant=… param, open the drawer to it.
+			merchantDrawer.syncFromHash();
+
+			// Keep the drawer in sync with every channel the merchant URL state
+			// can mutate through:
+			//   • hashchange — direct hash edits or `location.hash = ...`
+			//   • MERCHANT_URL_CHANGE_EVENT — updateMerchantHash() fires this
+			//     because the SvelteKit pushState/replaceState path doesn't
+			//     trigger native popstate/hashchange events.
+			//   • popstate — browser back/forward across history entries that
+			//     differ only in the ?merchant= query param.
+			window.addEventListener("hashchange", handleHashChange);
+			window.addEventListener(MERCHANT_URL_CHANGE_EVENT, handleHashChange);
+			window.addEventListener("popstate", handleHashChange);
+
+			// Deep link: the URL selected a merchant. Reveal it as an individual
+			// pin — pan/zoom to it once it's in the places store — when the URL
+			// carried no viewport, OR carried one whose zoom is below the clustering
+			// threshold (where the pin would be absorbed into a cluster, leaving the
+			// selection pulse floating with nothing under it). A hash zoom at/above
+			// the threshold is honoured as-is. If places are still loading,
+			// subscribe and wait — 10s safety unsubscribe so we never leak.
+			if (!hashCoords || hashCoords.zoom < CLUSTERING_DISABLED_ZOOM) {
+				const { merchantId, isOpen } = parseMerchantHash();
+				if (isOpen && merchantId) {
+					const place = get(placesById).get(merchantId);
+					if (place) {
+						panToPlace(place.lat, place.lon);
+					} else {
+						deepLinkPanUnsub = placesById.subscribe(($byId) => {
+							const p = $byId.get(merchantId);
+							if (!p) return;
+							panToPlace(p.lat, p.lon);
+							if (deepLinkPanTimer) clearTimeout(deepLinkPanTimer);
+							deepLinkPanUnsub?.();
+							deepLinkPanUnsub = null;
+						});
+						deepLinkPanTimer = setTimeout(() => {
+							deepLinkPanUnsub?.();
+							deepLinkPanUnsub = null;
+							deepLinkPanTimer = null;
+						}, 10_000);
+					}
+				}
+			}
+
+			// Kick once on load — if the user lands above the threshold, labels
+			// should appear without requiring a move.
+			triggerEnrichmentIfNeeded();
+		},
 	});
+
+	if (outcome.status === "unsupported") {
+		webglUnsupported = true;
+		return;
+	}
+	if (outcome.status === "cancelled") return;
+	if (destroyed) {
+		outcome.handle.destroy();
+		return;
+	}
+	mapHandle = outcome.handle;
+	map = outcome.handle.map;
+	// Stash the namespace so the selection-pulse helpers can build a Marker;
+	// the local alias below is the same binding, for the wiring code's use.
+	const maplibre = outcome.handle.maplibre;
+	maplibreNs = maplibre;
 
 	if (queryView?.kind === "bounds") {
 		map.fitBounds([queryView.sw, queryView.ne], { animate: false });
@@ -979,42 +1214,18 @@ onMount(async () => {
 	currentLat = initialCenter[1];
 	currentLon = initialCenter[0];
 
-	map.addControl(
-		new maplibre.NavigationControl({
-			showCompass: true,
-			showZoom: true,
-			visualizePitch: false,
-		}),
-		"top-right",
-	);
 	// Bottom-left scale bar — present in legacy /map (Leaflet's
-	// L.control.scale). Metric units only; imperial is added by the
-	// browser locale via MapLibre's bilingual variant if needed later.
+	// L.control.scale). Metric units only.
 	map.addControl(new maplibre.ScaleControl({ unit: "metric" }), "bottom-left");
 
 	// Mobile only: the compact AttributionControl renders expanded on first
 	// load (maplibregl-compact-show). Collapse it to the (i) button so it
 	// doesn't cover the bottom edge; the user can still tap (i) to expand.
-	// Desktop is not compact, so the full credit stays visible.
 	if (isMobileLayout) {
 		mapContainer
 			.querySelector(".maplibregl-ctrl-attrib")
 			?.classList.remove("maplibregl-compact-show");
 	}
-
-	// Geolocate control: pulse dot, accuracy circle, and heading arrow are
-	// built in. Heading uses the device's compass when available, falling
-	// back to GPS movement. fitBoundsOptions.linear routes the camera move
-	// through easeTo instead of flyTo — skips the parabolic zoom-out/zoom-in
-	// arc that read as a long detour for short hops.
-	const geolocate = new maplibre.GeolocateControl({
-		positionOptions: { enableHighAccuracy: true },
-		trackUserLocation: true,
-		showUserLocation: true,
-		showAccuracyCircle: true,
-		fitBoundsOptions: { maxZoom: 15, linear: true },
-	});
-	map.addControl(geolocate, "top-right");
 
 	// Built-in MapLibre controls (geolocate) expose their actions through
 	// native button clicks, not through event APIs we can subscribe to
@@ -1023,284 +1234,6 @@ onMount(async () => {
 	mapContainer
 		.querySelector(".maplibregl-ctrl-geolocate")
 		?.addEventListener("click", () => trackEvent("locate_click"));
-
-	// The page-nav menu + layers/filters trigger buttons and their modals are
-	// owned by <MapControls> (rendered in the markup); it registers the
-	// IControls once `map` is set below.
-
-	// Mirror /map's behavior: sync location into the userLocation store so
-	// the merchant list panel can compute distances without prompting again.
-	// v6's GeolocatePositionEvent exposes coords/timestamp directly but is
-	// not assignable to GeolocationPosition (no toJSON) — let TS infer it.
-	geolocate.on("geolocate", (e) => {
-		userLocation.setLocation(e.coords.latitude, e.coords.longitude);
-	});
-
-	// Composite pin sprites resolve async. Until each `pin-r-{icon}` /
-	// `pin-b-{icon}` lands, MapLibre logs `Image "…" could not be loaded`
-	// for every tile that wants to draw it — on a fresh load with dozens
-	// of unique icon names that's a flood of warnings. The placeholder
-	// handler registers a 1×1 transparent stub for any missing id; the
-	// real sprite replaces it on resolution (see maplibreSprites.ts).
-	installPlaceholderHandler(map);
-
-	map.on("load", async () => {
-		if (!map || destroyed) return;
-
-		// The saved-badge fetch goes to a third-party CDN and must NOT block
-		// map init — the facade catches sprite failures and degrades. The pin
-		// and pin-boosted plain sprites are NOT loaded here — every pin layer
-		// references the composite `pin-r-{icon}` / `pin-b-{icon}` names
-		// produced lazily by ensureSpritesForPlaces.
-		await pinSource.loadSprites(map);
-
-		// Component may have been destroyed while sprites were loading
-		// (user navigated away within ~1s of mount). Without this check
-		// every subsequent addSource/addLayer/new Spiderfy/addEventListener
-		// would run against a removed map and leak handlers. onDestroy's
-		// `map?.remove()` runs but leaves the variable bound to the
-		// destroyed instance, so a plain `!map` check doesn't catch this.
-		if (destroyed) return;
-
-		// Sources + fifteen layers (pins, clusters, badges, labels, heatmap).
-		pinSource.install(map);
-
-		// Spiderfy hooks the clusters-hit symbol layer. The library's
-		// internal decision is: if expansionZoom > forceSpiderifyMinZoom OR
-		// expansionZoom > map.maxZoom → spiderfy; else easeTo to expansionZoom.
-		// The default forceSpiderifyMinZoom is null, which coerces to 0 and
-		// causes EVERY click to spiderfy. Set it to our clustering threshold
-		// so only genuinely un-zoomable clusters (coincident points whose
-		// expansionZoom exceeds the threshold) spider out.
-		spiderfier = new Spiderfy(map, {
-			forceSpiderifyMinZoom: CLUSTERING_DISABLED_ZOOM,
-			onLeafClick: (feature) => {
-				const placeId = feature.properties?.id;
-				if (typeof placeId === "number") {
-					merchantDrawer.open(placeId, "details");
-				}
-			},
-			closeOnLeafClick: true,
-			spiderLeavesLayout: {
-				"icon-image": [
-					"concat",
-					"pin-",
-					["case", ["coalesce", ["get", "boosted"], false], "b", "r"],
-					"-",
-					["coalesce", ["get", "icon"], "question_mark"],
-				],
-				"icon-size": 1,
-				"icon-anchor": "bottom",
-				"icon-allow-overlap": true,
-				"icon-ignore-placement": true,
-				"icon-rotation-alignment": "viewport",
-				"icon-pitch-alignment": "viewport",
-			},
-			spiderLegsColor: "rgba(100, 100, 100, 0.6)",
-		});
-		spiderfier.applyTo("clusters-hit");
-
-		const setPointerCursor = () => {
-			if (map) map.getCanvas().style.cursor = "pointer";
-		};
-		const resetCursor = () => {
-			if (map) map.getCanvas().style.cursor = "";
-		};
-		map.on("mouseenter", "clusters-outer", setPointerCursor);
-		map.on("mouseleave", "clusters-outer", resetCursor);
-		map.on("mouseenter", "unclustered-point", setPointerCursor);
-		map.on("mouseleave", "unclustered-point", resetCursor);
-		map.on("mouseenter", "boosted-point", setPointerCursor);
-		map.on("mouseleave", "boosted-point", resetCursor);
-
-		// Unclustered marker click → open the global merchant drawer. The
-		// drawer component lives in the layout, so we only need to push state
-		// into the store. Both layers share the same handler since boosted
-		// pins live in their own source above the clustered one.
-		const onPinClick = (e: MapLayerMouseEvent) => {
-			const feature = e.features?.[0] as MapGeoJSONFeature | undefined;
-			const placeId = feature?.properties?.id;
-			if (typeof placeId !== "number") return;
-			merchantDrawer.open(placeId, "details");
-		};
-		map.on("click", "unclustered-point", onPinClick);
-		map.on("click", "boosted-point", onPinClick);
-
-		// Click on empty map (no marker or cluster hit) closes any open
-		// drawer — matches /map's behavior. Layer-scoped click handlers
-		// fire alongside this generic one, so clicking a marker still
-		// reopens the drawer for the new feature net-net.
-		// The spiderfy lib adds its own symbol layers at applyTo() time
-		// with ids prefixed `spiderfy-leaf-…`. Without including them
-		// here, tapping a spidered leaf would open the drawer (via
-		// onLeafClick) and then immediately close it again because the
-		// generic handler sees no hit on the allowlisted layers.
-		map.on("click", (e: MapLayerMouseEvent) => {
-			if (!map) return;
-			if (!get(merchantDrawer).isOpen) return;
-			const spiderLeafLayerIds = map
-				.getStyle()
-				.layers.filter((l) => l.id.startsWith("spiderfy-leaf"))
-				.map((l) => l.id);
-			const hit = map.queryRenderedFeatures(e.point, {
-				layers: [
-					"unclustered-point",
-					"boosted-point",
-					"clusters-hit",
-					...spiderLeafLayerIds,
-				],
-			});
-			if (hit.length > 0) return;
-			merchantDrawer.close();
-		});
-
-		// Refresh enriched details (and thus labels) on viewport changes
-		// once we're above LABEL_VISIBLE_ZOOM. Debounced so quick pans don't
-		// spam the API; the store internally aborts any stale request.
-		map.on("moveend", triggerEnrichmentIfNeeded);
-
-		// Track current zoom + center + refresh the merchant list panel's
-		// nearby items based on the new viewport. Debounced to keep cost
-		// off the move path. Center drives the CommunityRail.
-		map.on("moveend", () => {
-			if (!map) return;
-			currentZoom = map.getZoom();
-			const c = map.getCenter();
-			currentLat = c.lat;
-			currentLon = c.lng;
-			// Re-route boosted places when zoom crosses BOOSTED_CLUSTERING_MAX_ZOOM
-			// — the MapLibre analogue of the legacy boostedLayer swap. The facade
-			// only re-renders on an actual flip, so steady-state pans stay cheap.
-			if (styleLoaded) {
-				pinSource.resyncForZoom(map);
-			}
-			// When the heatmap is active, zooming past CLUSTERING_DISABLED_ZOOM
-			// naturally removes the heatmap layer (its maxzoom), so re-show
-			// all the point/cluster/badge layers that were concealed.
-			pinSource.applyHeatmapVisibility(map);
-			debouncedUpdateMerchantList();
-		});
-
-		// Tile-loading indicator — debounced to avoid flicker on quick pans.
-		map.on("movestart", () => {
-			if (tilesLoadingTimer) clearTimeout(tilesLoadingTimer);
-			if (tilesLoadingFallback) clearTimeout(tilesLoadingFallback);
-			tilesLoadingTimer = setTimeout(() => {
-				tilesLoading = true;
-			}, 150);
-			tilesLoadingFallback = setTimeout(() => {
-				tilesLoading = false;
-			}, 5000);
-		});
-		map.on("idle", () => {
-			if (tilesLoadingTimer) {
-				clearTimeout(tilesLoadingTimer);
-				tilesLoadingTimer = null;
-			}
-			if (tilesLoadingFallback) {
-				clearTimeout(tilesLoadingFallback);
-				tilesLoadingFallback = null;
-			}
-			tilesLoading = false;
-			mapTilesLoaded = true;
-			// Clustering is settled on idle — reconcile the pulse with whether the
-			// selected pin is currently rendered individually or inside a cluster.
-			updatePulseVisibility();
-		});
-
-		// Persist viewport in the URL hash. Preserves any merchant=… params
-		// added by the drawer so shareable URLs round-trip.
-		const persistViewportToHash = () => {
-			if (!map) return;
-			const center = map.getCenter();
-			writeHashCoords({
-				zoom: map.getZoom(),
-				lat: center.lat,
-				lng: center.lng,
-				bearing: map.getBearing(),
-				pitch: map.getPitch(),
-			});
-		};
-		map.on("moveend", persistViewportToHash);
-
-		// Persist viewport to localforage too, debounced so continuous
-		// pan/zoom doesn't hammer IndexedDB. Returning users land back
-		// where they left off when they revisit /map with no hash/query.
-		const persistViewportToCache = debounce(() => {
-			if (!map) return;
-			const center = map.getCenter();
-			saveCachedView({
-				lat: center.lat,
-				lng: center.lng,
-				zoom: map.getZoom(),
-			});
-		}, 1000);
-		map.on("moveend", persistViewportToCache);
-
-		// If the URL also encoded a merchant=… param, open the drawer to it.
-		merchantDrawer.syncFromHash();
-
-		// Keep the drawer in sync with every channel the merchant URL state
-		// can mutate through:
-		//   • hashchange — direct hash edits or `location.hash = ...`
-		//   • MERCHANT_URL_CHANGE_EVENT — updateMerchantHash() fires this
-		//     because the SvelteKit pushState/replaceState path doesn't
-		//     trigger native popstate/hashchange events.
-		//   • popstate — browser back/forward across history entries that
-		//     differ only in the ?merchant= query param.
-		window.addEventListener("hashchange", handleHashChange);
-		window.addEventListener(MERCHANT_URL_CHANGE_EVENT, handleHashChange);
-		window.addEventListener("popstate", handleHashChange);
-
-		// Deep link: the URL selected a merchant. Reveal it as an individual
-		// pin — pan/zoom to it once it's in the places store — when the URL
-		// carried no viewport, OR carried one whose zoom is below the clustering
-		// threshold (where the pin would be absorbed into a cluster, leaving the
-		// selection pulse floating with nothing under it). A hash zoom at/above
-		// the threshold is honoured as-is. If places are still loading,
-		// subscribe and wait — 10s safety unsubscribe so we never leak.
-		if (!hashCoords || hashCoords.zoom < CLUSTERING_DISABLED_ZOOM) {
-			const { merchantId, isOpen } = parseMerchantHash();
-			if (isOpen && merchantId) {
-				const place = get(placesById).get(merchantId);
-				if (place) {
-					panToPlace(place.lat, place.lon);
-				} else {
-					deepLinkPanUnsub = placesById.subscribe(($byId) => {
-						const p = $byId.get(merchantId);
-						if (!p) return;
-						panToPlace(p.lat, p.lon);
-						if (deepLinkPanTimer) clearTimeout(deepLinkPanTimer);
-						deepLinkPanUnsub?.();
-						deepLinkPanUnsub = null;
-					});
-					deepLinkPanTimer = setTimeout(() => {
-						deepLinkPanUnsub?.();
-						deepLinkPanUnsub = null;
-						deepLinkPanTimer = null;
-					}, 10_000);
-				}
-			}
-		}
-
-		styleLoaded = true;
-		// Invalidate the render signature: setting styleLoaded re-runs the
-		// marker block, which recomputes the filtered selection and syncs it.
-		// Never sync raw $places here — syncPlacesToSource renders exactly
-		// what it is given and all filtering lives upstream in the pipeline.
-		lastRenderSig = "";
-		// Apply theme-dependent label palette now that the layer exists.
-		applyLabelPalette(map, get(theme));
-		lastAppliedLabelTheme = get(theme);
-		// Apply the persisted heatmap on/off state now that the layer
-		// exists. The toggle control can't do this itself — it's added
-		// before 'load' fires, so the layer isn't present at addControl
-		// time.
-		pinSource.refreshHeatmapAfterStyle(map);
-		// Kick once on load — if the user lands above the threshold, labels
-		// should appear without requiring a move.
-		triggerEnrichmentIfNeeded();
-	});
 });
 
 // Theme toggle → re-color the place-label layer in place. setPaintProperty
@@ -1334,7 +1267,8 @@ onDestroy(() => {
 	if (tilesLoadingFallback) clearTimeout(tilesLoadingFallback);
 	spiderfier?.unspiderfyAll();
 	spiderfier = undefined;
-	map?.remove();
+	mapHandle?.destroy();
+	mapHandle = undefined;
 	map = undefined;
 	// merchantList is a module-level singleton. Without this reset the
 	// next visit to /map flashes the previous session's category filter /
@@ -1433,6 +1367,8 @@ onDestroy(() => {
 	{setHeatmapEnabled}
 	enableBoost
 	enableGlobe
+	{globeOn}
+	onToggleGlobe={toggleGlobe}
 />
 
 <style>

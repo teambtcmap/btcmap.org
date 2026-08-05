@@ -43,13 +43,17 @@ export let currentVerified: VerifiedFilterYears = null;
 export let setHeatmapEnabled: ((enabled: boolean) => void) | null = null;
 export let enableBoost = false;
 export let enableGlobe = false;
+// Globe state lives on the page: a basemap swap resets the projection to
+// the style default, and only the page's registerOverlays (which re-runs on
+// every style.load, queued swaps included) can reliably re-apply it.
+export let globeOn = false;
+export let onToggleGlobe: (() => void) | null = null;
 
 let toolsModalOpen = false;
 let menuModalOpen = false;
 let selectedBasemap: BasemapId | undefined;
 let heatmapOn = false;
 let boostActive = false;
-let globeOn = false;
 
 // Lights the tools trigger's accent dot when a data-affecting toggle is on
 // (verified filter / boost / heatmap), so a returning user sees the map is
@@ -75,14 +79,6 @@ const onPickBasemap = (id: BasemapId) => {
 		localStorage.setItem(BASEMAP_STORAGE_KEY, id);
 	} catch {
 		// localStorage unavailable (private mode); skip persistence.
-	}
-	// applyBasemap swaps the style via setStyle, which resets the projection
-	// to the style default (mercator). Re-apply globe after the swap so it
-	// survives a basemap change. Register before applyBasemap — raster styles
-	// can fire style.load synchronously inside setStyle, so a later listener
-	// would miss it.
-	if (globeOn && map) {
-		map.once("style.load", () => map?.setProjection({ type: "globe" }));
 	}
 	applyBasemap(id);
 	trackEvent("layer_change", { layer: id });
@@ -114,12 +110,6 @@ const onToggleBoost = () => {
 		url.searchParams.delete("boosts");
 	else url.searchParams.set("boosts", "true");
 	window.location.search = url.search;
-};
-const onToggleGlobe = () => {
-	if (!map) return;
-	globeOn = !globeOn;
-	map.setProjection({ type: globeOn ? "globe" : "mercator" });
-	trackEvent("worldview_toggle", { enabled: globeOn });
 };
 
 onMount(() => {
