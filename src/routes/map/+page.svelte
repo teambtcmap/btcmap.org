@@ -944,8 +944,11 @@ onMount(async () => {
 			spiderfier?.applyTo("clusters-hit");
 			pinSource.refreshHeatmapAfterStyle(m);
 		},
-		onFirstLoad: () => {
-			if (!map || destroyed) return;
+		onFirstLoad: (m) => {
+			// Adopt the instance immediately: the post-outcome assignment below
+			// also sets it, but nothing should depend on winning that race.
+			map = m;
+			if (destroyed) return;
 
 			// Spiderfy hooks the clusters-hit symbol layer. The library's
 			// internal decision is: if expansionZoom > forceSpiderifyMinZoom OR

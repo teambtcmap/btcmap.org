@@ -64,8 +64,10 @@ export const createBtcmapMap = async (opts: {
 	// styles). Ignored in explicit-style mode.
 	styles?: (theme: MapThemeName) => MapStyleInput;
 	// Extra Map constructor options merged OVER the shared defaults
-	// (center/zoom/bearing/pitch, interactive, attribution, …).
-	mapOptions?: Partial<MapOptions>;
+	// (center/zoom/bearing/pitch, interactive, attribution, …). style and
+	// container are excluded by type: style selection goes ONLY through
+	// theme/styles/style/setStyle, and the container is its own option.
+	mapOptions?: Partial<Omit<MapOptions, "style" | "container">>;
 	// false skips the navigation + geolocate controls (static previews).
 	controls?: boolean;
 	// Fired when the built-in geolocate control resolves a position — the
