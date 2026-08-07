@@ -72,6 +72,11 @@ $: mapsDropdownLinks = [
 		url: "/communities/map",
 		icon: "communities" as MobileNavIconName,
 	},
+	{
+		title: $_("nav.eventMap"),
+		url: "/events/map",
+		icon: "map" as MobileNavIconName,
+	},
 ] satisfies DropdownLink[];
 
 $: statsDropdownLinks = [
