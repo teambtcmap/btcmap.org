@@ -5,13 +5,11 @@ import GradeDisplay from "$components/leaderboard/GradeDisplay.svelte";
 import LeaderboardCountryName from "$components/leaderboard/LeaderboardCountryName.svelte";
 import { _ } from "$lib/i18n";
 import type { BtcmapTableFeatures } from "$lib/tableFeatures";
-import type { ApiLeaderboardArea, AreaType } from "$lib/types";
+import type { AreaLeaderboardRow, AreaType } from "$lib/types";
 import { areaIconSrc, isEven } from "$lib/utils";
 
-type AreaRow = ApiLeaderboardArea & { position: number };
-
 type Props = {
-	table: Table<BtcmapTableFeatures, AreaRow>;
+	table: Table<BtcmapTableFeatures, AreaLeaderboardRow>;
 	type: AreaType;
 };
 

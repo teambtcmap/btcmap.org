@@ -7,17 +7,15 @@ import AreaLeaderboardItemName from "$components/leaderboard/AreaLeaderboardItem
 import GradeDisplay from "$components/leaderboard/GradeDisplay.svelte";
 import { _ } from "$lib/i18n";
 import type { BtcmapTableFeatures } from "$lib/tableFeatures";
-import type { ApiLeaderboardArea, AreaType } from "$lib/types";
+import type { AreaLeaderboardRow, AreaType } from "$lib/types";
 import { isEven } from "$lib/utils";
 
-type AreaRow = ApiLeaderboardArea & { position: number };
-
 type Props = {
-	table: Table<BtcmapTableFeatures, AreaRow>;
+	table: Table<BtcmapTableFeatures, AreaLeaderboardRow>;
 	type: AreaType;
-	totalTooltip?: HTMLElement;
-	upToDateTooltip?: HTMLElement;
-	gradeTooltip?: HTMLElement;
+	totalTooltip?: HTMLButtonElement;
+	upToDateTooltip?: HTMLButtonElement;
+	gradeTooltip?: HTMLButtonElement;
 };
 
 let {
@@ -52,73 +50,76 @@ let {
 									: typeof headerDef === 'string'
 										? headerDef
 										: header.column.id}
-								<button
-									type="button"
-									class="flex items-center gap-x-1 leading-tight select-none md:gap-x-2"
+								<!-- Tooltip triggers live OUTSIDE the sort button as siblings:
+								     as descendants their clicks and Enter/Space would bubble
+								     into the sort handler (and interactive content inside a
+								     button is invalid HTML — the parser splits nested buttons,
+								     breaking SSR hydration) -->
+								<div
+									class="flex items-center gap-x-1 md:gap-x-2"
 									class:mx-auto={header.column.id !== 'name'}
-									class:cursor-pointer={header.column.getCanSort()}
-									class:justify-center={header.column.id !== 'name'}
-									onclick={header.column.getToggleSortingHandler()}
-									onkeydown={(e) => {
-										if (e.key === 'Enter' || e.key === ' ') {
-											e.preventDefault();
-											header.column.getToggleSortingHandler()?.(e);
-										}
-									}}
-									tabindex={header.column.getCanSort() ? 0 : -1}
-									aria-label={header.column.getCanSort()
-										? `Sort by ${headerLabel}, currently ${
-												header.column.getIsSorted() === 'asc'
-													? 'ascending'
-													: header.column.getIsSorted() === 'desc'
-														? 'descending'
-														: 'unsorted'
-											}`
-										: headerLabel}
+									class:w-fit={header.column.id !== 'name'}
 								>
-									<span class="break-words">
-										<FlexRender {header} />
-									</span>
-									<!-- Tooltip triggers are spans, not buttons: the HTML parser
-									     auto-closes a <button> opened inside a <button>, so nested
-									     buttons break SSR hydration -->
+									<button
+										type="button"
+										class="flex items-center gap-x-1 leading-tight select-none md:gap-x-2"
+										class:cursor-pointer={header.column.getCanSort()}
+										onclick={header.column.getToggleSortingHandler()}
+										onkeydown={(e) => {
+											if (e.key === 'Enter' || e.key === ' ') {
+												e.preventDefault();
+												header.column.getToggleSortingHandler()?.(e);
+											}
+										}}
+										tabindex={header.column.getCanSort() ? 0 : -1}
+										aria-label={header.column.getCanSort()
+											? `Sort by ${headerLabel}, currently ${
+													header.column.getIsSorted() === 'asc'
+														? 'ascending'
+														: header.column.getIsSorted() === 'desc'
+															? 'descending'
+															: 'unsorted'
+												}`
+											: headerLabel}
+									>
+										<span class="break-words">
+											<FlexRender {header} />
+										</span>
+										{#if header.column.getIsSorted().toString() === 'asc'}
+											<span aria-hidden="true">▲</span>
+										{:else if header.column.getIsSorted().toString() === 'desc'}
+											<span aria-hidden="true">▼</span>
+										{/if}
+									</button>
 									{#if header.column.id === 'total'}
-										<span
+										<button
+											type="button"
 											bind:this={totalTooltip}
-											role="button"
-											tabindex="0"
-											class="ml-1 cursor-default"
+											class="cursor-default"
 											aria-label={$_('areaLeaderboard.totalTooltipInfo')}
 										>
 											<Icon type="fa" icon="circle-info" w="14" h="14" class="text-sm" />
-										</span>
+										</button>
 									{:else if header.column.id === 'upToDateElements'}
-										<span
+										<button
+											type="button"
 											bind:this={upToDateTooltip}
-											role="button"
-											tabindex="0"
-											class="ml-1 cursor-default"
+											class="cursor-default"
 											aria-label={$_('areaLeaderboard.verifiedTooltipInfo')}
 										>
 											<Icon type="fa" icon="circle-info" w="14" h="14" class="text-sm" />
-										</span>
+										</button>
 									{:else if header.column.id === 'grade'}
-										<span
+										<button
+											type="button"
 											bind:this={gradeTooltip}
-											role="button"
-											tabindex="0"
-											class="ml-1 cursor-default"
+											class="cursor-default"
 											aria-label={$_('areaLeaderboard.gradeTooltipInfo')}
 										>
 											<Icon type="fa" icon="circle-info" w="14" h="14" class="text-sm" />
-										</span>
+										</button>
 									{/if}
-									{#if header.column.getIsSorted().toString() === 'asc'}
-										<span aria-hidden="true">▲</span>
-									{:else if header.column.getIsSorted().toString() === 'desc'}
-										<span aria-hidden="true">▼</span>
-									{/if}
-								</button>
+								</div>
 							{/if}
 						</th>
 					{/each}

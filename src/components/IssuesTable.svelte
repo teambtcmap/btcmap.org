@@ -46,8 +46,8 @@ const pageSizes = [10, 20, 30, 40, 50];
 let globalFilter = $state("");
 let searchInput: HTMLInputElement | undefined = $state();
 
-// Rows and columns re-derive when the issues prop or the locale changes —
-// the table picks both up through its getter options. This replaces the old
+// Rows re-derive when the issues prop or the locale changes — the table
+// picks them up through its getter option. This replaces the old
 // rebuild-the-entire-table hacks for area navigation and locale switches.
 const rows: IssueFormatted[] = $derived(
 	issues.map((issue) => {
@@ -83,7 +83,9 @@ const rows: IssueFormatted[] = $derived(
 const issueCell = (id: IssueCellId, value: unknown) =>
 	renderComponent(IssueCell, { id, value: String(value ?? "") });
 
-const columns: ColumnDef<BtcmapTableFeatures, IssueFormatted>[] = $derived([
+// Static columns with function headers (same pattern as AreaLeaderboard):
+// locale changes re-render the header text without changing column identity
+const columns: ColumnDef<BtcmapTableFeatures, IssueFormatted>[] = [
 	{
 		accessorKey: "icon",
 		header: "",
@@ -93,14 +95,14 @@ const columns: ColumnDef<BtcmapTableFeatures, IssueFormatted>[] = $derived([
 	},
 	{
 		accessorKey: "name",
-		header: $_(`maintain.merchantName`),
+		header: () => $_(`maintain.merchantName`),
 		cell: (info) => issueCell("name", info.getValue()),
 		filterFn: "fuzzy",
 		enableGlobalFilter: true,
 	},
 	{
 		accessorKey: "type",
-		header: $_(`maintain.description`),
+		header: () => $_(`maintain.description`),
 		cell: (info) => issueCell("type", info.getValue()),
 		enableGlobalFilter: false,
 	},
@@ -125,13 +127,11 @@ const columns: ColumnDef<BtcmapTableFeatures, IssueFormatted>[] = $derived([
 		enableSorting: false,
 		enableGlobalFilter: false,
 	},
-]);
+];
 
 const table = createTable({
 	features: btcmapTableFeatures,
-	get columns() {
-		return columns;
-	},
+	columns,
 	get data() {
 		return rows;
 	},
@@ -210,9 +210,9 @@ const searchDebounce = debounce((e) => handleKeyUp(e));
 				<div class="overflow-x-auto">
 					<table class="w-full text-left whitespace-nowrap text-primary dark:text-white">
 						<thead>
-							{#each table.getHeaderGroups() as headerGroup, index (index)}
+							{#each table.getHeaderGroups() as headerGroup (headerGroup.id)}
 								<tr>
-									{#each headerGroup.headers as header, index (index)}
+									{#each headerGroup.headers as header (header.id)}
 										<th colSpan={header.colSpan} class="px-5 pt-5 pb-2.5">
 											{#if !header.isPlaceholder}
 												<button
@@ -233,9 +233,9 @@ const searchDebounce = debounce((e) => handleKeyUp(e));
 							{/each}
 						</thead>
 						<tbody>
-							{#each table.getRowModel().rows as row, index (index)}
+							{#each table.getRowModel().rows as row, index (row.id)}
 								<tr class={isEven(index) ? 'bg-primary/5 dark:bg-white/5' : ''}>
-									{#each row.getAllCells() as cell, index (index)}
+									{#each row.getAllCells() as cell (cell.id)}
 										<td class="px-5 py-2.5">
 											<FlexRender {cell} />
 										</td>

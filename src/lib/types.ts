@@ -307,6 +307,9 @@ export type ApiLeaderboardArea = {
 	grade: number;
 };
 
+// Leaderboard row: API area enriched with its computed rank
+export type AreaLeaderboardRow = ApiLeaderboardArea & { position: number };
+
 export interface LeaderboardArea extends Area {
 	report: Report;
 	grade: Grade;

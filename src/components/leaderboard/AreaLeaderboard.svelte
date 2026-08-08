@@ -16,10 +16,12 @@ import { GradeTable } from "$lib/constants";
 import type { BtcmapTableFeatures } from "$lib/tableFeatures";
 import { btcmapTableFeatures } from "$lib/tableFeatures";
 import { theme } from "$lib/theme";
-import type { ApiLeaderboardArea, AreaType } from "$lib/types";
+import type {
+	ApiLeaderboardArea,
+	AreaLeaderboardRow,
+	AreaType,
+} from "$lib/types";
 import { debounce, errToast } from "$lib/utils";
-
-type AreaRow = ApiLeaderboardArea & { position: number };
 
 let {
 	type,
@@ -30,9 +32,9 @@ const pageSizes = [10, 20, 30, 40, 50];
 let globalFilter = $state("");
 
 // Tooltip trigger elements, bound upward from the desktop table's headers
-let totalTooltip = $state<HTMLElement>();
-let upToDateTooltip = $state<HTMLElement>();
-let gradeTooltip = $state<HTMLElement>();
+let totalTooltip = $state<HTMLButtonElement>();
+let upToDateTooltip = $state<HTMLButtonElement>();
+let gradeTooltip = $state<HTMLButtonElement>();
 
 // Track instances so they can be destroyed on component teardown
 let tippyInstances: { destroy(): void }[] = [];
@@ -72,7 +74,7 @@ onMount(() => {
 
 // Column definitions - headers are functions so they re-translate on locale
 // change without rebuilding the table
-const columns: ColumnDef<BtcmapTableFeatures, AreaRow>[] = [
+const columns: ColumnDef<BtcmapTableFeatures, AreaLeaderboardRow>[] = [
 	{
 		id: "position",
 		header: () => $_(`areaLeaderboard.position`),
