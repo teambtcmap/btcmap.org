@@ -141,9 +141,6 @@ importers:
       svelte-check:
         specifier: ^4.7.2
         version: 4.7.4(picomatch@4.0.5)(svelte@4.2.20)(typescript@6.0.3)
-      svelte-preprocess:
-        specifier: ^6.0.3
-        version: 6.0.5(postcss@8.5.25)(svelte@4.2.20)(typescript@6.0.3)
       tailwindcss:
         specifier: ^4.3.0
         version: 4.3.3
@@ -2120,43 +2117,6 @@ packages:
     peerDependencies:
       svelte: '>= 4.2.12'
 
-  svelte-preprocess@6.0.5:
-    resolution: {integrity: sha512-sgwew5yV/2eMeQobIWgAxCNarKwiTUDIc3siAUbq3sp0G6ONtzk0W+wJihMdqjbYb3iGU3ubpGv0usnnuXT3qg==}
-    engines: {node: '>= 18.0.0'}
-    peerDependencies:
-      '@babel/core': ^7.10.2
-      coffeescript: ^2.5.1
-      less: ^3.11.3 || ^4.0.0
-      postcss: ^7 || ^8
-      postcss-load-config: '>=3'
-      pug: ^3.0.0
-      sass: ^1.26.8
-      stylus: '>=0.55'
-      sugarss: ^2.0.0 || ^3.0.0 || ^4.0.0
-      svelte: ^4.0.0 || ^5.0.0-next.100 || ^5.0.0
-      typescript: ^5.0.0 || ^6.0.0
-    peerDependenciesMeta:
-      '@babel/core':
-        optional: true
-      coffeescript:
-        optional: true
-      less:
-        optional: true
-      postcss:
-        optional: true
-      postcss-load-config:
-        optional: true
-      pug:
-        optional: true
-      sass:
-        optional: true
-      stylus:
-        optional: true
-      sugarss:
-        optional: true
-      typescript:
-        optional: true
-
   svelte-time@1.1.0:
     resolution: {integrity: sha512-QmjmlS62+9t+no/xHOEYz1Oics+VUu1lk3RZbnnOGmqK2rCRUedktLhIoB0/3GSGg98+UJb4Pe4h7El+OHquYg==}
 
@@ -4102,13 +4062,6 @@ snapshots:
   svelte-outclick@3.7.1(svelte@4.2.20):
     dependencies:
       svelte: 4.2.20
-
-  svelte-preprocess@6.0.5(postcss@8.5.25)(svelte@4.2.20)(typescript@6.0.3):
-    dependencies:
-      svelte: 4.2.20
-    optionalDependencies:
-      postcss: 8.5.25
-      typescript: 6.0.3
 
   svelte-time@1.1.0:
     dependencies:
