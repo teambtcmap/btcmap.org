@@ -507,7 +507,7 @@ onDestroy(() => {
 				}}
 			/>
 		{:else}
-			<div class="mx-auto h-32 w-32 animate-pulse rounded-full bg-link/50" />
+			<div class="mx-auto h-32 w-32 animate-pulse rounded-full bg-link/50"></div>
 		{/if}
 
 		<div class="space-y-1">
@@ -573,8 +573,8 @@ onDestroy(() => {
 			{:else}
 				{#each Array(3) as _, i (i)}
 					<div class="mx-3 mb-6">
-						<div class="mx-auto mb-1 h-24 w-24 animate-pulse rounded-full bg-link/50" />
-						<div class="mx-auto h-5 w-20 animate-pulse rounded bg-link/50" />
+						<div class="mx-auto mb-1 h-24 w-24 animate-pulse rounded-full bg-link/50"></div>
+						<div class="mx-auto h-5 w-20 animate-pulse rounded bg-link/50"></div>
 					</div>
 				{/each}
 			{/if}
@@ -620,7 +620,7 @@ onDestroy(() => {
 				</div>
 			{/if}
 
-			<canvas bind:this={tagTypeChartCanvas} width="100%" height="250" />
+			<canvas bind:this={tagTypeChartCanvas} width="100%" height="250"></canvas>
 		</div>
 	</section>
 

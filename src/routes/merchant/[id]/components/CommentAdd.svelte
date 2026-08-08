@@ -117,7 +117,7 @@ const handleStatusCheckError = (error: unknown) => {
 							rows="3"
 							class="w-full rounded-2xl border-2 border-input p-3 transition-all focus:outline-link dark:bg-white/[0.15]"
 							bind:value={commentValue}
-						/>
+						></textarea>
 					</div>
 
 					<PrimaryButton style="w-full rounded-xl p-3" disabled={loading} type="submit" {loading}>

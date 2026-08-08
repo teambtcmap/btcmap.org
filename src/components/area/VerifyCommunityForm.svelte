@@ -154,7 +154,7 @@ onMount(async () => {
 					rows="3"
 					class="w-full rounded-2xl border-2 border-input bg-white p-3 placeholder-gray-500 transition-all focus:outline-link disabled:cursor-not-allowed disabled:bg-gray-100 disabled:text-gray-500 dark:bg-white/[0.15] dark:text-white dark:placeholder-gray-400 dark:disabled:bg-gray-700 dark:disabled:text-gray-400"
 					bind:value={updates}
-				/>
+				></textarea>
 			</div>
 
 			<div>
@@ -166,7 +166,7 @@ onMount(async () => {
 					rows="3"
 					class="w-full rounded-2xl border-2 border-input bg-white p-3 placeholder-gray-500 transition-all focus:outline-link disabled:cursor-not-allowed disabled:bg-gray-100 disabled:text-gray-500 dark:bg-white/[0.15] dark:text-white dark:placeholder-gray-400 dark:disabled:bg-gray-700 dark:disabled:text-gray-400"
 					bind:this={verify}
-				/>
+				></textarea>
 			</div>
 
 			<div>
@@ -186,7 +186,7 @@ onMount(async () => {
 						class="flex items-center justify-center rounded-2xl border-2 border-input py-1"
 					>
 						{#if isCaptchaLoading}
-							<div class="h-[100px] w-[275px] animate-pulse bg-link/50" />
+							<div class="h-[100px] w-[275px] animate-pulse bg-link/50"></div>
 						{:else}
 							{@html captchaContent}
 						{/if}

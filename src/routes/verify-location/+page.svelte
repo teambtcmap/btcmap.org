@@ -203,7 +203,7 @@ onMount(async () => {
 					rows="3"
 					class="w-full rounded-2xl border-2 border-input p-3 transition-all focus:outline-link dark:bg-white/[0.15]"
 					bind:value={outdated}
-				/>
+				></textarea>
 			</div>
 
 			<div>
@@ -216,7 +216,7 @@ onMount(async () => {
 					rows="3"
 					class="w-full rounded-2xl border-2 border-input p-3 transition-all focus:outline-link dark:bg-white/[0.15]"
 					bind:this={verify}
-				/>
+				></textarea>
 			</div>
 
 			<div>
@@ -236,7 +236,7 @@ onMount(async () => {
 						class="flex items-center justify-center rounded-2xl border-2 border-input py-1"
 					>
 						{#if isCaptchaLoading}
-							<div class="h-[100px] w-[275px] animate-pulse bg-link/50" />
+							<div class="h-[100px] w-[275px] animate-pulse bg-link/50"></div>
 						{:else}
 							{@html captchaContent}
 						{/if}

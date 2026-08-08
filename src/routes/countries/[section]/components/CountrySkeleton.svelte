@@ -3,9 +3,9 @@
 >
 	<div class="my-4 space-y-2 p-4">
 		<!-- avatar placeholder -->
-		<div class="mx-auto h-20 w-20 animate-pulse rounded-full bg-link/50" />
+		<div class="mx-auto h-20 w-20 animate-pulse rounded-full bg-link/50"></div>
 
 		<!-- name placeholder -->
-		<div class="mx-auto h-[28px] w-[200px] animate-pulse rounded-xl bg-link/50" />
+		<div class="mx-auto h-[28px] w-[200px] animate-pulse rounded-xl bg-link/50"></div>
 	</div>
 </div>

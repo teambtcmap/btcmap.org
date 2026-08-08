@@ -58,7 +58,7 @@ export function setTrigger(el: HTMLElement) {
 		class="fixed inset-0 z-[1000] bg-black/40 dark:bg-black/60"
 		on:click={() => (open = false)}
 		aria-hidden="true"
-	/>
+	></div>
 
 	<div
 		bind:this={modalEl}

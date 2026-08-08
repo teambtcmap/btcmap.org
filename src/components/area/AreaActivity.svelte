@@ -61,8 +61,8 @@ let taggerDiv: HTMLDivElement;
 				<div class="flex flex-wrap items-center justify-center">
 					{#each Array(5) as _, index (index)}
 						<div class="m-4 space-y-1 transition-transform hover:scale-110">
-							<p class="mx-auto h-20 w-20 animate-pulse rounded-full bg-link/50" />
-							<p class="mx-auto h-5 w-28 animate-pulse rounded bg-link/50" />
+							<p class="mx-auto h-20 w-20 animate-pulse rounded-full bg-link/50"></p>
+							<p class="mx-auto h-5 w-28 animate-pulse rounded bg-link/50"></p>
 						</div>
 					{/each}
 				</div>

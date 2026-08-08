@@ -48,7 +48,7 @@ function toggle(type: ActivityType) {
 				? 'border-link bg-link/10 text-primary dark:border-link dark:text-white'
 				: 'border-gray-300 text-body/60 hover:border-link hover:text-body dark:border-white/20 dark:text-white/50 dark:hover:text-white'}"
 		>
-			<span class="h-2 w-2 rounded-full {dotColor(type)}" />
+			<span class="h-2 w-2 rounded-full {dotColor(type)}"></span>
 			<span>{$_(TYPE_LABEL_KEYS[type])}</span>
 			{#if showCounts}
 				<span class="text-xs opacity-70">({counts[type]})</span>

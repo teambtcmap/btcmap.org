@@ -353,7 +353,7 @@ onMount(async () => {
 			</div>
 		{/if}
 
-		<canvas bind:this={updatedChartCanvas} width="100%" height="250" />
+		<canvas bind:this={updatedChartCanvas} width="100%" height="250"></canvas>
 	</div>
 </section>
 
@@ -374,7 +374,7 @@ onMount(async () => {
 						<Icon type="fa" icon="chart-area" w="96" h="96" class="animate-pulse text-link/50" />
 					</div>
 				{/if}
-				<canvas bind:this={totalChartCanvas} width="100%" height="400" />
+				<canvas bind:this={totalChartCanvas} width="100%" height="400"></canvas>
 			</div>
 			<p class="mt-1 text-center text-sm text-body dark:text-white">
 				{$_(`areaStats.locationsNote`)}
@@ -390,7 +390,7 @@ onMount(async () => {
 						<Icon type="fa" icon="chart-area" w="96" h="96" class="animate-pulse text-link/50" />
 					</div>
 				{/if}
-				<canvas bind:this={upToDateChartCanvas} width="100%" height="400" />
+				<canvas bind:this={upToDateChartCanvas} width="100%" height="400"></canvas>
 			</div>
 			<p class="mt-1 text-center text-sm text-body dark:text-white">
 				{$_(`areaStats.verifiedNote`)}

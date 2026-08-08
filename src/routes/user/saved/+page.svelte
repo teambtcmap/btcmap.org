@@ -149,7 +149,7 @@ onDestroy(() => {
 
 	{#if loading}
 		<div class="flex justify-center">
-			<div class="h-8 w-8 animate-spin rounded-full border-4 border-link border-t-transparent" />
+			<div class="h-8 w-8 animate-spin rounded-full border-4 border-link border-t-transparent"></div>
 		</div>
 	{:else if !places.length && !areas.length && !placesError && !areasError}
 		<p class="text-center text-lg text-body dark:text-white/70">
