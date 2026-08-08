@@ -218,6 +218,8 @@ function createMerchantListStore() {
 				recency: verifiedWithinYears,
 				recencyReady: verifiedWithinYears == null || get(verifiedDatesLoaded),
 				boostsOnly: false,
+				issuesOnly: false,
+				issuesReady: true,
 			});
 
 			const sorted = sortMerchants(
@@ -279,6 +281,8 @@ function createMerchantListStore() {
 						recency: verifiedWithinYears,
 						recencyReady: true,
 						boostsOnly: false,
+						issuesOnly: false,
+						issuesReady: true,
 					});
 
 				// Check if we should hide results (too many at low zoom)
@@ -458,6 +462,8 @@ function createMerchantListStore() {
 				recency: verifiedWithinYears,
 				recencyReady: true,
 				boostsOnly: false,
+				issuesOnly: false,
+				issuesReady: true,
 			});
 			update((state) => ({
 				...resetCategoryState(state),
@@ -557,6 +563,8 @@ function createMerchantListStore() {
 						recency: years,
 						recencyReady: true,
 						boostsOnly: false,
+						issuesOnly: false,
+						issuesReady: true,
 					});
 					return {
 						...state,

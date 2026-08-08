@@ -6,6 +6,7 @@ import {
 	placeMatchesCategory,
 } from "$lib/categoryMapping";
 import type { VerifiedFilterYears } from "$lib/map/verifiedFilter";
+import { placeHasIssues } from "$lib/placeIssues";
 import { places } from "$lib/store";
 import type { Place } from "$lib/types";
 import { isBoosted } from "$lib/utils";
@@ -33,6 +34,15 @@ export type VisibleSelectionInputs = {
 	// Callers resolve their own boost policy before calling (markers exempt
 	// search mode; the nearby list always filters).
 	boostsOnly: boolean;
+	// The ?issues worklist mode: narrow to places with at least one derived
+	// issue (see $lib/placeIssues). Applied pre-category so chip counts
+	// describe the issue set. Callers resolve search exemption like boosts.
+	issuesOnly: boolean;
+	// Same readiness contract as recencyReady: issue derivation needs
+	// verified_at, so bulk-feed consumers gate on $verifiedDatesLoaded and
+	// the filter stays inert (rather than flagging every row as
+	// not_verified) until enrichment lands.
+	issuesReady: boolean;
 };
 
 export type VisibleSelection = {
@@ -54,9 +64,12 @@ export function selectVisiblePlaces(
 	inputs: VisibleSelectionInputs,
 ): VisibleSelection {
 	const live = inputs.places.filter((p) => !p.deleted_at);
-	const preCategory = inputs.recencyReady
+	let preCategory = inputs.recencyReady
 		? filterPlacesByRecency(live, inputs.recency)
 		: live;
+	if (inputs.issuesOnly && inputs.issuesReady) {
+		preCategory = preCategory.filter((p) => placeHasIssues(p));
+	}
 	const counts = countMerchantsByCategory(preCategory);
 
 	const shouldReset =
@@ -92,6 +105,8 @@ export function computeVisibleSignature(
 		inputs.recency ?? "any",
 		inputs.recencyReady,
 		inputs.boostsOnly,
+		inputs.issuesOnly,
+		inputs.issuesReady,
 		revision,
 		searchResultIds,
 	].join("|");
