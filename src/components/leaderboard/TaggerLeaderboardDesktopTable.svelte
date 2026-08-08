@@ -1,9 +1,10 @@
 <script lang="ts">
 import type { Table } from "@tanstack/svelte-table";
-import { flexRender } from "@tanstack/svelte-table";
+import { FlexRender } from "@tanstack/svelte-table";
 
 import Tip from "$components/Tip.svelte";
 import { _ } from "$lib/i18n";
+import type { BtcmapTableFeatures } from "$lib/tableFeatures";
 import type { TaggerLeaderboard } from "$lib/types";
 import { isEven } from "$lib/utils";
 
@@ -14,7 +15,7 @@ type TaggerRow = TaggerLeaderboard & {
 	tipDestination?: string;
 };
 
-export let table: Table<TaggerRow>;
+let { table }: { table: Table<BtcmapTableFeatures, TaggerRow> } = $props();
 </script>
 
 <div class="hidden lg:block" role="region" aria-label={$_('leaderboard.tableAria')}>
@@ -41,8 +42,8 @@ export let table: Table<TaggerRow>;
 									class:mx-auto={header.column.id !== 'name'}
 									class:cursor-pointer={header.column.getCanSort()}
 									class:justify-center={header.column.id !== 'name'}
-									on:click={header.column.getToggleSortingHandler()}
-									on:keydown={(e) => {
+									onclick={header.column.getToggleSortingHandler()}
+									onkeydown={(e) => {
 										if (e.key === 'Enter' || e.key === ' ') {
 											e.preventDefault();
 											header.column.getToggleSortingHandler()?.(e);
@@ -64,9 +65,7 @@ export let table: Table<TaggerRow>;
 										: headerLabel}
 								>
 									<span class="break-words">
-										<svelte:component
-											this={flexRender(header.column.columnDef.header, header.getContext())}
-										/>
+										<FlexRender {header} />
 									</span>
 									{#if header.column.getIsSorted().toString() === 'asc'}
 										<span aria-hidden="true">▲</span>
@@ -83,7 +82,7 @@ export let table: Table<TaggerRow>;
 		<tbody>
 			{#each table.getRowModel().rows as row (row.id)}
 				<tr class={isEven(row.original.position - 1) ? 'bg-primary/5 dark:bg-white/5' : ''}>
-					{#each row.getVisibleCells() as cell (cell.id)}
+					{#each row.getAllCells() as cell (cell.id)}
 						<td class="px-2 py-3 md:px-5" class:text-center={cell.column.id !== 'name'}>
 							{#if cell.column.id === 'position'}
 								{#if row.original.position === 1}🥇
@@ -98,7 +97,7 @@ export let table: Table<TaggerRow>;
 										src={row.original.avatar}
 										alt={row.original.tagger}
 										class="h-12 w-12 rounded-full object-cover"
-										on:error={(event) => {
+										onerror={(event) => {
 											const target = event.target;
 											if (target instanceof HTMLImageElement) {
 												target.src = '/images/satoshi-nakamoto.png';
@@ -118,9 +117,7 @@ export let table: Table<TaggerRow>;
 									<Tip destination={row.original.tipDestination} class="mx-auto block" />
 								{/if}
 							{:else}
-								<svelte:component
-									this={flexRender(cell.column.columnDef.cell, cell.getContext())}
-								/>
+								<FlexRender {cell} />
 							{/if}
 						</td>
 					{/each}

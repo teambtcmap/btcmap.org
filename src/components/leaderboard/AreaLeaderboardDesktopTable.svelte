@@ -1,19 +1,32 @@
 <script lang="ts">
 import type { Table } from "@tanstack/svelte-table";
-import { flexRender } from "@tanstack/svelte-table";
+import { FlexRender } from "@tanstack/svelte-table";
 
 import Icon from "$components/Icon.svelte";
 import AreaLeaderboardItemName from "$components/leaderboard/AreaLeaderboardItemName.svelte";
 import GradeDisplay from "$components/leaderboard/GradeDisplay.svelte";
 import { _ } from "$lib/i18n";
-import type { AreaType } from "$lib/types";
+import type { BtcmapTableFeatures } from "$lib/tableFeatures";
+import type { ApiLeaderboardArea, AreaType } from "$lib/types";
 import { isEven } from "$lib/utils";
 
-export let table: Table<any>;
-export let type: AreaType;
-export let totalTooltip: HTMLButtonElement;
-export let upToDateTooltip: HTMLButtonElement;
-export let gradeTooltip: HTMLButtonElement;
+type AreaRow = ApiLeaderboardArea & { position: number };
+
+type Props = {
+	table: Table<BtcmapTableFeatures, AreaRow>;
+	type: AreaType;
+	totalTooltip?: HTMLElement;
+	upToDateTooltip?: HTMLElement;
+	gradeTooltip?: HTMLElement;
+};
+
+let {
+	table,
+	type,
+	totalTooltip = $bindable(),
+	upToDateTooltip = $bindable(),
+	gradeTooltip = $bindable(),
+}: Props = $props();
 </script>
 
 <div class="hidden lg:block" role="region" aria-label={$_('areaLeaderboard.tableAria')}>
@@ -33,14 +46,20 @@ export let gradeTooltip: HTMLButtonElement;
 									: 'none'}
 						>
 							{#if !header.isPlaceholder}
+								{@const headerDef = header.column.columnDef.header}
+								{@const headerLabel = typeof headerDef === 'function'
+									? String(headerDef(header.getContext()))
+									: typeof headerDef === 'string'
+										? headerDef
+										: header.column.id}
 								<button
 									type="button"
 									class="flex items-center gap-x-1 leading-tight select-none md:gap-x-2"
 									class:mx-auto={header.column.id !== 'name'}
 									class:cursor-pointer={header.column.getCanSort()}
 									class:justify-center={header.column.id !== 'name'}
-									on:click={header.column.getToggleSortingHandler()}
-									on:keydown={(e) => {
+									onclick={header.column.getToggleSortingHandler()}
+									onkeydown={(e) => {
 										if (e.key === 'Enter' || e.key === ' ') {
 											e.preventDefault();
 											header.column.getToggleSortingHandler()?.(e);
@@ -48,47 +67,51 @@ export let gradeTooltip: HTMLButtonElement;
 									}}
 									tabindex={header.column.getCanSort() ? 0 : -1}
 									aria-label={header.column.getCanSort()
-										? `Sort by ${header.column.columnDef.header}, currently ${
+										? `Sort by ${headerLabel}, currently ${
 												header.column.getIsSorted() === 'asc'
 													? 'ascending'
 													: header.column.getIsSorted() === 'desc'
 														? 'descending'
 														: 'unsorted'
 											}`
-										: String(header.column.columnDef.header)}
+										: headerLabel}
 								>
 									<span class="break-words">
-										<svelte:component
-											this={flexRender(header.column.columnDef.header, header.getContext())}
-										/>
+										<FlexRender {header} />
 									</span>
+									<!-- Tooltip triggers are spans, not buttons: the HTML parser
+									     auto-closes a <button> opened inside a <button>, so nested
+									     buttons break SSR hydration -->
 									{#if header.column.id === 'total'}
-										<button
+										<span
 											bind:this={totalTooltip}
-											type="button"
+											role="button"
+											tabindex="0"
 											class="ml-1 cursor-default"
 											aria-label={$_('areaLeaderboard.totalTooltipInfo')}
 										>
 											<Icon type="fa" icon="circle-info" w="14" h="14" class="text-sm" />
-										</button>
+										</span>
 									{:else if header.column.id === 'upToDateElements'}
-										<button
+										<span
 											bind:this={upToDateTooltip}
-											type="button"
+											role="button"
+											tabindex="0"
 											class="ml-1 cursor-default"
 											aria-label={$_('areaLeaderboard.verifiedTooltipInfo')}
 										>
 											<Icon type="fa" icon="circle-info" w="14" h="14" class="text-sm" />
-										</button>
+										</span>
 									{:else if header.column.id === 'grade'}
-										<button
+										<span
 											bind:this={gradeTooltip}
-											type="button"
+											role="button"
+											tabindex="0"
 											class="ml-1 cursor-default"
 											aria-label={$_('areaLeaderboard.gradeTooltipInfo')}
 										>
 											<Icon type="fa" icon="circle-info" w="14" h="14" class="text-sm" />
-										</button>
+										</span>
 									{/if}
 									{#if header.column.getIsSorted().toString() === 'asc'}
 										<span aria-hidden="true">▲</span>
@@ -105,7 +128,7 @@ export let gradeTooltip: HTMLButtonElement;
 		<tbody>
 			{#each table.getRowModel().rows as row, index (row.id)}
 				<tr class={isEven(index) ? 'bg-primary/5 dark:bg-white/5' : ''}>
-					{#each row.getVisibleCells() as cell (cell.id)}
+					{#each row.getAllCells() as cell (cell.id)}
 						<td
 							class="px-2 py-2.5 md:px-5"
 							class:text-center={cell.column.id === 'position' ||
@@ -129,9 +152,7 @@ export let gradeTooltip: HTMLButtonElement;
 									: 0}
 								<GradeDisplay {grade} {percentage} size="large" />
 							{:else}
-								<svelte:component
-									this={flexRender(cell.column.columnDef.cell, cell.getContext())}
-								/>
+								<FlexRender {cell} />
 							{/if}
 						</td>
 					{/each}

@@ -4,11 +4,18 @@ import type { Table } from "@tanstack/svelte-table";
 import GradeDisplay from "$components/leaderboard/GradeDisplay.svelte";
 import LeaderboardCountryName from "$components/leaderboard/LeaderboardCountryName.svelte";
 import { _ } from "$lib/i18n";
-import type { AreaType } from "$lib/types";
+import type { BtcmapTableFeatures } from "$lib/tableFeatures";
+import type { ApiLeaderboardArea, AreaType } from "$lib/types";
 import { areaIconSrc, isEven } from "$lib/utils";
 
-export let table: Table<any>;
-export let type: AreaType;
+type AreaRow = ApiLeaderboardArea & { position: number };
+
+type Props = {
+	table: Table<BtcmapTableFeatures, AreaRow>;
+	type: AreaType;
+};
+
+let { table, type }: Props = $props();
 </script>
 
 <!-- Mobile cards -->
@@ -42,7 +49,7 @@ export let type: AreaType;
 							src={area.icon || `https://static.btcmap.org/images/countries/${area.alias}.svg`}
 							alt="{localizedName} avatar"
 							class="h-16 w-16 rounded-full object-cover"
-							on:error={(e) => {
+							onerror={(e) => {
 								const target = e.target;
 								if (target instanceof HTMLImageElement) {
 									target.src = '/images/bitcoin.svg';
@@ -74,7 +81,7 @@ export let type: AreaType;
 						src={areaIconSrc(area.alias, area.icon)}
 						alt="{area.name || 'Unknown'} avatar"
 						class="h-16 w-16 rounded-full object-cover"
-						on:error={(e) => {
+						onerror={(e) => {
 							const target = e.target;
 							if (target instanceof HTMLImageElement) {
 								target.src = '/images/bitcoin.svg';

@@ -10,7 +10,7 @@ import type {
 	MapLayerMouseEvent,
 	Map as MapLibreMap,
 } from "maplibre-gl";
-import { onDestroy, onMount } from "svelte";
+import { mount, onDestroy, onMount, unmount } from "svelte";
 import { get } from "svelte/store";
 
 import MapLoadingMain from "$components/MapLoadingMain.svelte";
@@ -146,10 +146,10 @@ const addCommunitiesLayers = (m: MapLibreMap) => {
 	}
 };
 
-// Build popup HTML for a community. Returns the container AND the Socials
-// instance (if any). Caller is responsible for $destroy()'ing the Svelte
-// instance on popup close — otherwise each polygon click leaks an extra
-// Socials with its theme/locale subscriptions still live.
+// Build popup HTML for a community. Returns the container AND the mounted
+// Socials instance (if any). Caller is responsible for unmount()ing it on
+// popup close — otherwise each polygon click leaks an extra Socials with
+// its theme/locale subscriptions still live.
 //
 // Built via DOM APIs instead of innerHTML interpolation: community.tags.*
 // (name, organization, …) come from the curated areas API but are still
@@ -157,7 +157,7 @@ const addCommunitiesLayers = (m: MapLibreMap) => {
 // HTML in a tag from executing.
 const buildPopupHtml = (
 	community: Area,
-): { container: HTMLDivElement; socials: Socials } => {
+): { container: HTMLDivElement; socials: ReturnType<typeof mount> } => {
 	const t = get(_);
 	const container = document.createElement("div");
 	const wrapper = document.createElement("div");
@@ -210,7 +210,7 @@ const buildPopupHtml = (
 	link.textContent = t("communityMap.viewCommunity");
 	wrapper.appendChild(link);
 
-	const socials = new Socials({
+	const socials = mount(Socials, {
 		target: socialsMount,
 		props: { contacts: extractContacts(community.tags) },
 	});
@@ -351,11 +351,11 @@ const attachInteractions = (m: MapLibreMap) => {
 			.setLngLat(e.lngLat)
 			.setDOMContent(container)
 			.addTo(m);
-		// Destroy the Socials Svelte instance when the popup goes away —
+		// Unmount the Socials Svelte instance when the popup goes away —
 		// MapLibre removes the DOM but the component's reactive
 		// subscriptions (theme, locale, etc.) would otherwise leak per
 		// click, accumulating with every polygon the user hovers.
-		popup.on("close", () => socials.$destroy());
+		popup.on("close", () => unmount(socials));
 	});
 
 	const setPointer = () => {
@@ -412,7 +412,7 @@ onDestroy(() => {
 	     Tailwind's `absolute` class by source order; `!absolute` forces
 	     the override. Leaflet used to mask this entirely by sizing its
 	     own container; MapLibre respects the DOM box. -->
-	<div bind:this={mapElement} class="!absolute inset-0 !bg-teal dark:!bg-dark" />
+	<div bind:this={mapElement} class="!absolute inset-0 !bg-teal dark:!bg-dark"></div>
 
 	<MapControls
 		{map}
