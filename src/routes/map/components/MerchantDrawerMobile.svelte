@@ -211,6 +211,7 @@ export function openDrawer(id: number) {
 	<!-- Bottom sheet drawer -->
 	<!-- svelte-ignore a11y-no-noninteractive-element-interactions - Click handler only prevents event bubbling, not for interaction -->
 	<!-- svelte-ignore a11y-click-events-have-key-events - Dialog interaction handled by focusable handle element below -->
+	<!-- svelte-ignore a11y_interactive_supports_focus - Keyboard focus lives on the drag handle below; a tabindex here would make the dialog itself a focusout target and change handleFocusOut behavior -->
 	<div
 		bind:this={drawerElement}
 		class="fixed right-0 bottom-0 left-0 z-[1002] flex flex-col bg-white shadow-2xl transition-shadow dark:bg-dark"
@@ -274,6 +275,7 @@ export function openDrawer(id: number) {
 		</div>
 
 		<!-- Scrollable content area -->
+		<!-- svelte-ignore a11y_no_static_element_interactions - Touch handlers implement the collapse-from-scroll-top gesture on a scroll container, not an interactive control -->
 		<div
 			id="drawer-content"
 			bind:this={contentScrollElement}
@@ -296,6 +298,7 @@ export function openDrawer(id: number) {
 			{:else if merchant}
 				{#if !$expanded}
 					<!-- Peek content wrapper with swipe handlers - allows swiping from anywhere when collapsed -->
+					<!-- svelte-ignore a11y_no_static_element_interactions - Pointer handlers make the peek area a drag surface; the drag handle above is the accessible control -->
 					<div
 						class="touch-none px-4 pt-2 pb-4"
 						on:pointerdown={onPointerDown}
