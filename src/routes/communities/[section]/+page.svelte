@@ -332,15 +332,15 @@ onDestroy(() => {
 			<div class="absolute top-0 left-0 flex h-full w-full flex-col justify-between">
 				<div class="flex flex-wrap justify-center">
 					{#each Array(6) as _, i (i)}
-						<div class="m-2 w-[94px] animate-pulse rounded-sm bg-link/50 py-2" />
+						<div class="m-2 w-[94px] animate-pulse rounded-sm bg-link/50 py-2"></div>
 					{/each}
 				</div>
 				<div
 					class="mx-auto h-[225px] w-[225px] animate-pulse rounded-full bg-link/50 md:h-[300px] md:w-[300px]"
-				/>
+				></div>
 			</div>
 		{/if}
-		<canvas bind:this={continentChartCanvas} width="100%" height="350" />
+		<canvas bind:this={continentChartCanvas} width="100%" height="350"></canvas>
 	</div>
 
 	<div>

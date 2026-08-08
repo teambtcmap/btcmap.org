@@ -27,8 +27,8 @@ $: showSaveButton = item.type !== "place_deleted";
 			class="{highlight
 				? 'animate-ping'
 				: ''} absolute inline-flex h-full w-full rounded-full {dotColor(item.type)} opacity-75"
-		/>
-		<span class="relative inline-flex h-3 w-3 rounded-full {dotColor(item.type)}" />
+		></span>
+		<span class="relative inline-flex h-3 w-3 rounded-full {dotColor(item.type)}"></span>
 	</span>
 
 	<div class="w-full flex-wrap items-center justify-between space-y-2 lg:flex lg:space-y-0">

@@ -123,7 +123,7 @@ $: hasOverlays = !!onToggleHeatmap || !!onToggleBoost;
 								class="absolute top-0.5 left-0.5 h-4 w-4 rounded-full bg-white transition-transform {heatmapOn
 									? 'translate-x-4'
 									: 'translate-x-0'}"
-							/>
+							></span>
 						</span>
 					</button>
 				{/if}
@@ -145,7 +145,7 @@ $: hasOverlays = !!onToggleHeatmap || !!onToggleBoost;
 								class="absolute top-0.5 left-0.5 h-4 w-4 rounded-full bg-white transition-transform {boostActive
 									? 'translate-x-4'
 									: 'translate-x-0'}"
-							/>
+							></span>
 						</span>
 					</button>
 				{/if}
@@ -177,7 +177,7 @@ $: hasOverlays = !!onToggleHeatmap || !!onToggleBoost;
 							class="absolute top-0.5 left-0.5 h-4 w-4 rounded-full bg-white transition-transform {globeOn
 								? 'translate-x-4'
 								: 'translate-x-0'}"
-						/>
+						></span>
 					</span>
 				</button>
 			</section>

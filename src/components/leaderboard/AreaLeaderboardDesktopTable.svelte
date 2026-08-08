@@ -1,19 +1,31 @@
 <script lang="ts">
 import type { Table } from "@tanstack/svelte-table";
-import { flexRender } from "@tanstack/svelte-table";
+import { FlexRender } from "@tanstack/svelte-table";
 
 import Icon from "$components/Icon.svelte";
 import AreaLeaderboardItemName from "$components/leaderboard/AreaLeaderboardItemName.svelte";
 import GradeDisplay from "$components/leaderboard/GradeDisplay.svelte";
 import { _ } from "$lib/i18n";
-import type { AreaType } from "$lib/types";
+import type { BtcmapTableFeatures } from "$lib/tableFeatures";
+import { resolveHeaderLabel } from "$lib/tableFeatures";
+import type { AreaLeaderboardRow, AreaType } from "$lib/types";
 import { isEven } from "$lib/utils";
 
-export let table: Table<any>;
-export let type: AreaType;
-export let totalTooltip: HTMLButtonElement;
-export let upToDateTooltip: HTMLButtonElement;
-export let gradeTooltip: HTMLButtonElement;
+type Props = {
+	table: Table<BtcmapTableFeatures, AreaLeaderboardRow>;
+	type: AreaType;
+	totalTooltip?: HTMLButtonElement;
+	upToDateTooltip?: HTMLButtonElement;
+	gradeTooltip?: HTMLButtonElement;
+};
+
+let {
+	table,
+	type,
+	totalTooltip = $bindable(),
+	upToDateTooltip = $bindable(),
+	gradeTooltip = $bindable(),
+}: Props = $props();
 </script>
 
 <div class="hidden lg:block" role="region" aria-label={$_('areaLeaderboard.tableAria')}>
@@ -33,69 +45,77 @@ export let gradeTooltip: HTMLButtonElement;
 									: 'none'}
 						>
 							{#if !header.isPlaceholder}
-								<button
-									type="button"
-									class="flex items-center gap-x-1 leading-tight select-none md:gap-x-2"
+								{@const headerLabel = resolveHeaderLabel(header)}
+								<!-- Tooltip triggers live OUTSIDE the sort button as siblings:
+								     as descendants their clicks and Enter/Space would bubble
+								     into the sort handler (and interactive content inside a
+								     button is invalid HTML — the parser splits nested buttons,
+								     breaking SSR hydration) -->
+								<div
+									class="flex items-center gap-x-1 md:gap-x-2"
 									class:mx-auto={header.column.id !== 'name'}
-									class:cursor-pointer={header.column.getCanSort()}
-									class:justify-center={header.column.id !== 'name'}
-									on:click={header.column.getToggleSortingHandler()}
-									on:keydown={(e) => {
-										if (e.key === 'Enter' || e.key === ' ') {
-											e.preventDefault();
-											header.column.getToggleSortingHandler()?.(e);
-										}
-									}}
-									tabindex={header.column.getCanSort() ? 0 : -1}
-									aria-label={header.column.getCanSort()
-										? `Sort by ${header.column.columnDef.header}, currently ${
-												header.column.getIsSorted() === 'asc'
-													? 'ascending'
-													: header.column.getIsSorted() === 'desc'
-														? 'descending'
-														: 'unsorted'
-											}`
-										: String(header.column.columnDef.header)}
+									class:w-fit={header.column.id !== 'name'}
 								>
-									<span class="break-words">
-										<svelte:component
-											this={flexRender(header.column.columnDef.header, header.getContext())}
-										/>
-									</span>
+									<button
+										type="button"
+										class="flex items-center gap-x-1 leading-tight select-none md:gap-x-2"
+										class:cursor-pointer={header.column.getCanSort()}
+										onclick={header.column.getToggleSortingHandler()}
+										onkeydown={(e) => {
+											if (e.key === 'Enter' || e.key === ' ') {
+												e.preventDefault();
+												header.column.getToggleSortingHandler()?.(e);
+											}
+										}}
+										tabindex={header.column.getCanSort() ? 0 : -1}
+										aria-label={header.column.getCanSort()
+											? `Sort by ${headerLabel}, currently ${
+													header.column.getIsSorted() === 'asc'
+														? 'ascending'
+														: header.column.getIsSorted() === 'desc'
+															? 'descending'
+															: 'unsorted'
+												}`
+											: headerLabel}
+									>
+										<span class="break-words">
+											<FlexRender {header} />
+										</span>
+										{#if header.column.getIsSorted().toString() === 'asc'}
+											<span aria-hidden="true">▲</span>
+										{:else if header.column.getIsSorted().toString() === 'desc'}
+											<span aria-hidden="true">▼</span>
+										{/if}
+									</button>
 									{#if header.column.id === 'total'}
 										<button
-											bind:this={totalTooltip}
 											type="button"
-											class="ml-1 cursor-default"
+											bind:this={totalTooltip}
+											class="cursor-default"
 											aria-label={$_('areaLeaderboard.totalTooltipInfo')}
 										>
 											<Icon type="fa" icon="circle-info" w="14" h="14" class="text-sm" />
 										</button>
 									{:else if header.column.id === 'upToDateElements'}
 										<button
-											bind:this={upToDateTooltip}
 											type="button"
-											class="ml-1 cursor-default"
+											bind:this={upToDateTooltip}
+											class="cursor-default"
 											aria-label={$_('areaLeaderboard.verifiedTooltipInfo')}
 										>
 											<Icon type="fa" icon="circle-info" w="14" h="14" class="text-sm" />
 										</button>
 									{:else if header.column.id === 'grade'}
 										<button
-											bind:this={gradeTooltip}
 											type="button"
-											class="ml-1 cursor-default"
+											bind:this={gradeTooltip}
+											class="cursor-default"
 											aria-label={$_('areaLeaderboard.gradeTooltipInfo')}
 										>
 											<Icon type="fa" icon="circle-info" w="14" h="14" class="text-sm" />
 										</button>
 									{/if}
-									{#if header.column.getIsSorted().toString() === 'asc'}
-										<span aria-hidden="true">▲</span>
-									{:else if header.column.getIsSorted().toString() === 'desc'}
-										<span aria-hidden="true">▼</span>
-									{/if}
-								</button>
+								</div>
 							{/if}
 						</th>
 					{/each}
@@ -105,7 +125,7 @@ export let gradeTooltip: HTMLButtonElement;
 		<tbody>
 			{#each table.getRowModel().rows as row, index (row.id)}
 				<tr class={isEven(index) ? 'bg-primary/5 dark:bg-white/5' : ''}>
-					{#each row.getVisibleCells() as cell (cell.id)}
+					{#each row.getAllCells() as cell (cell.id)}
 						<td
 							class="px-2 py-2.5 md:px-5"
 							class:text-center={cell.column.id === 'position' ||
@@ -129,9 +149,7 @@ export let gradeTooltip: HTMLButtonElement;
 									: 0}
 								<GradeDisplay {grade} {percentage} size="large" />
 							{:else}
-								<svelte:component
-									this={flexRender(cell.column.columnDef.cell, cell.getContext())}
-								/>
+								<FlexRender {cell} />
 							{/if}
 						</td>
 					{/each}

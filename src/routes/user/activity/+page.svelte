@@ -222,7 +222,7 @@ onMount(async () => {
 
 	{#if initialLoading}
 		<div class="flex justify-center">
-			<div class="h-8 w-8 animate-spin rounded-full border-4 border-link border-t-transparent" />
+			<div class="h-8 w-8 animate-spin rounded-full border-4 border-link border-t-transparent"></div>
 		</div>
 	{:else if !hasSavedItems}
 		<p class="text-center text-lg text-body dark:text-white/70">
@@ -254,7 +254,7 @@ onMount(async () => {
 
 		{#if feedLoading && !feedItems.length}
 			<div class="flex justify-center">
-				<div class="h-8 w-8 animate-spin rounded-full border-4 border-link border-t-transparent" />
+				<div class="h-8 w-8 animate-spin rounded-full border-4 border-link border-t-transparent"></div>
 			</div>
 		{:else if feedError && !feedItems.length}
 			<p class="text-center text-body dark:text-white/70">

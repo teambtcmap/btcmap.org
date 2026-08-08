@@ -1,15 +1,21 @@
-<script lang="ts">
-import type { Column } from "@tanstack/svelte-table";
+<script lang="ts" generics="TData extends RowData">
+import type { Column, RowData } from "@tanstack/svelte-table";
 
-export let column: Column<any> | undefined;
-export let label: string;
-export let ariaLabel: string;
+import type { BtcmapTableFeatures } from "$lib/tableFeatures";
+
+type Props = {
+	column: Column<BtcmapTableFeatures, TData> | undefined;
+	label: string;
+	ariaLabel: string;
+};
+
+let { column, label, ariaLabel }: Props = $props();
 </script>
 
 <button
 	type="button"
 	class="flex cursor-pointer items-center justify-center gap-1 text-body transition-colors select-none hover:text-primary dark:text-white/70 dark:hover:text-white"
-	on:click={(e) => column?.getToggleSortingHandler()?.(e)}
+	onclick={(e) => column?.getToggleSortingHandler()?.(e)}
 	aria-label={ariaLabel}
 	disabled={!column}
 >

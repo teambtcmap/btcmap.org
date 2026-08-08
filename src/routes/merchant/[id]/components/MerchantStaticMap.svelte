@@ -115,7 +115,7 @@ onDestroy(() => {
 </script>
 
 {#if unsupported}
-	<div class="h-full w-full bg-teal dark:bg-[#202f33] {className}" />
+	<div class="h-full w-full bg-teal dark:bg-[#202f33] {className}"></div>
 {:else}
-	<div bind:this={mapElement} class="h-full w-full {className}" aria-hidden="true" />
+	<div bind:this={mapElement} class="h-full w-full {className}" aria-hidden="true"></div>
 {/if}

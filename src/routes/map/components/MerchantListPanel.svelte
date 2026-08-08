@@ -541,6 +541,7 @@ onDestroy(() => {
 		{/if}
 		<!-- Search input - uses shared SearchInput component.
 		     On mobile the row doubles as a sheet drag surface (tap-vs-drag slop). -->
+		<!-- svelte-ignore a11y_no_static_element_interactions - Pointer handlers make the row a sheet drag surface on mobile, not an interactive control -->
 		<div
 			class="shrink-0 px-3 pt-2 pb-1"
 			class:touch-none={isMobile}
@@ -594,6 +595,7 @@ onDestroy(() => {
 		</div>
 
 		<!-- Filters and controls — also a sheet drag surface on mobile -->
+		<!-- svelte-ignore a11y_no_static_element_interactions - Pointer handlers make the row a sheet drag surface on mobile, not an interactive control -->
 		<div
 			class="shrink-0 border-b border-gray-100 px-3 pt-1 pb-3 dark:border-white/10"
 			class:touch-none={isMobile}
@@ -724,6 +726,7 @@ onDestroy(() => {
 		</div>
 
 		<!-- List content (touch handlers: collapse drag from scroll top on mobile) -->
+		<!-- svelte-ignore a11y_no_static_element_interactions - Touch handlers implement the collapse-from-scroll-top gesture on a scroll container, not an interactive control -->
 		<div
 			bind:this={merchantListContainer}
 			id="merchant-sheet-content"

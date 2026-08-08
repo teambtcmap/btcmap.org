@@ -113,4 +113,4 @@ onDestroy(() => {
 <canvas
 	class="mx-auto h-[200px] w-[200px] rounded-2xl border-2 border-gray-300 transition-colors hover:border-link md:h-[275px] md:w-[275px] dark:border-white/95"
 	bind:this={qr}
-/>
+></canvas>

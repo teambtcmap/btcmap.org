@@ -36,7 +36,7 @@ $: tooltipElement &&
 			{/if}
 		{:else}
 			<!-- loading skeleton -->
-			<span class="h-[48px] w-[150px] animate-pulse rounded-xl bg-link/50" />
+			<span class="h-[48px] w-[150px] animate-pulse rounded-xl bg-link/50"></span>
 		{/if}
 	</div>
 </div>

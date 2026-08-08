@@ -1,20 +1,7 @@
 <script lang="ts">
-import { rankItem } from "@tanstack/match-sorter-utils";
-import {
-	type ColumnDef,
-	createSvelteTable,
-	type FilterFn,
-	getCoreRowModel,
-	getFilteredRowModel,
-	getPaginationRowModel,
-	getSortedRowModel,
-	type OnChangeFn,
-	type PaginationState,
-	type SortingState,
-	type TableOptions,
-} from "@tanstack/svelte-table";
+import type { ColumnDef } from "@tanstack/svelte-table";
+import { createTable } from "@tanstack/svelte-table";
 import { onDestroy, onMount } from "svelte";
-import { writable } from "svelte/store";
 import { _, locale } from "svelte-i18n";
 import tippy from "tippy.js";
 
@@ -26,32 +13,37 @@ import LeaderboardSearch from "$components/leaderboard/LeaderboardSearch.svelte"
 import SortHeaderButton from "$components/leaderboard/SortHeaderButton.svelte";
 import { API_BASE } from "$lib/api-base";
 import { GradeTable } from "$lib/constants";
+import type { BtcmapTableFeatures } from "$lib/tableFeatures";
+import { btcmapTableFeatures } from "$lib/tableFeatures";
 import { theme } from "$lib/theme";
-import type { ApiLeaderboardArea, AreaType } from "$lib/types";
+import type {
+	ApiLeaderboardArea,
+	AreaLeaderboardRow,
+	AreaType,
+} from "$lib/types";
 import { debounce, errToast } from "$lib/utils";
 
-export let type: AreaType;
-export let initialPageSize = 10;
+let {
+	type,
+	initialPageSize = 10,
+}: { type: AreaType; initialPageSize?: number } = $props();
 
 const pageSizes = [10, 20, 30, 40, 50];
-let globalFilter = "";
+let globalFilter = $state("");
 
-// Tooltip references for header tooltips only
-let totalTooltip: HTMLButtonElement;
-let upToDateTooltip: HTMLButtonElement;
-let gradeTooltip: HTMLButtonElement;
+// Tooltip trigger elements, bound upward from the desktop table's headers
+let totalTooltip = $state<HTMLButtonElement>();
+let upToDateTooltip = $state<HTMLButtonElement>();
+let gradeTooltip = $state<HTMLButtonElement>();
 
 // Track instances so they can be destroyed on component teardown
 let tippyInstances: { destroy(): void }[] = [];
 
-// API data store
-const leaderboardData = writable<ApiLeaderboardArea[]>([]);
-const loading = writable(true);
-const error = writable<string | null>(null);
+let leaderboardData = $state<ApiLeaderboardArea[]>([]);
+let loading = $state(true);
 
 const fetchLeaderboardData = async () => {
-	loading.set(true);
-	error.set(null);
+	loading = true;
 
 	try {
 		const endpoint =
@@ -66,14 +58,13 @@ const fetchLeaderboardData = async () => {
 		}
 
 		const data: ApiLeaderboardArea[] = await response.json();
-		leaderboardData.set(data);
+		leaderboardData = data;
 	} catch (e) {
 		const message =
 			e instanceof Error ? e.message : "Failed to fetch leaderboard data";
-		error.set(message);
 		errToast(message);
 	} finally {
-		loading.set(false);
+		loading = false;
 	}
 };
 
@@ -81,15 +72,9 @@ onMount(() => {
 	fetchLeaderboardData();
 });
 
-// Fuzzy filter for global search
-const fuzzyFilter: FilterFn<any> = (row, columnId, value, addMeta) => {
-	const itemRank = rankItem(row.getValue(columnId), value);
-	addMeta({ itemRank });
-	return itemRank.passed;
-};
-
-// Column definitions - headers use i18n for locale reactivity
-const columns: ColumnDef<ApiLeaderboardArea & { position: number }>[] = [
+// Column definitions - headers are functions so they re-translate on locale
+// change without rebuilding the table
+const columns: ColumnDef<BtcmapTableFeatures, AreaLeaderboardRow>[] = [
 	{
 		id: "position",
 		header: () => $_(`areaLeaderboard.position`),
@@ -103,7 +88,7 @@ const columns: ColumnDef<ApiLeaderboardArea & { position: number }>[] = [
 		},
 		enableSorting: true,
 		enableGlobalFilter: false,
-		sortingFn: (a, b) => {
+		sortFn: (a, b) => {
 			return a.original.position - b.original.position;
 		},
 	},
@@ -113,7 +98,6 @@ const columns: ColumnDef<ApiLeaderboardArea & { position: number }>[] = [
 		accessorFn: (row) => row.name || "Unknown",
 		cell: (info) => info.row.original,
 		enableSorting: true,
-		// @ts-expect-error TanStack table expects string literal for filterFn but we're using custom fuzzy filter
 		filterFn: "fuzzy",
 		enableGlobalFilter: true,
 	},
@@ -136,7 +120,7 @@ const columns: ColumnDef<ApiLeaderboardArea & { position: number }>[] = [
 		header: () => $_(`areaLeaderboard.grade`),
 		accessorFn: (row) => row.grade || 0,
 		cell: (info) => info.getValue(),
-		sortingFn: (a, b) => {
+		sortFn: (a, b) => {
 			const aGrade = a.original.grade || 0;
 			const bGrade = b.original.grade || 0;
 
@@ -159,83 +143,32 @@ const columns: ColumnDef<ApiLeaderboardArea & { position: number }>[] = [
 	},
 ];
 
-// Table state - initialized once
-let sorting: SortingState = [{ id: "position", desc: false }];
-let pagination: PaginationState = {
-	pageIndex: 0,
-	pageSize: initialPageSize,
-};
-
-const setSorting: OnChangeFn<SortingState> = (updater) => {
-	if (updater instanceof Function) {
-		sorting = updater(sorting);
-	} else {
-		sorting = updater;
-	}
-	options.update((old) => ({
-		...old,
-		state: {
-			...old.state,
-			sorting,
-		},
-	}));
-};
-
-const setPagination: OnChangeFn<PaginationState> = (updater) => {
-	if (updater instanceof Function) {
-		pagination = updater(pagination);
-	} else {
-		pagination = updater;
-	}
-	options.update((old) => ({
-		...old,
-		state: {
-			...old.state,
-			pagination,
-		},
-	}));
-};
-
-// Table options store - created once
-const options = writable<
-	TableOptions<ApiLeaderboardArea & { position: number }>
->({
-	data: [], // Start with empty data
-	columns,
-	state: {
-		sorting,
-		pagination,
-	},
-	filterFns: {
-		fuzzy: fuzzyFilter,
-	},
-	onSortingChange: setSorting,
-	onPaginationChange: setPagination,
-	globalFilterFn: fuzzyFilter,
-	getCoreRowModel: getCoreRowModel(),
-	getSortedRowModel: getSortedRowModel(),
-	getPaginationRowModel: getPaginationRowModel(),
-	getFilteredRowModel: getFilteredRowModel(),
-});
-
-// Create table instance once
-const table = createSvelteTable(options);
-
-// Update only data reactively with positions, not entire table
-$: if ($leaderboardData) {
-	const dataWithPosition = $leaderboardData.map((item, index) => ({
+// Rows re-derive (with positions) whenever the fetched data lands; the
+// table sees them through the getter option below
+const rows = $derived(
+	leaderboardData.map((item, index) => ({
 		...item,
 		position: index + 1,
-	}));
-	options.update((current) => ({
-		...current,
-		data: dataWithPosition,
-	}));
-}
+	})),
+);
+
+const table = createTable({
+	features: btcmapTableFeatures,
+	columns,
+	get data() {
+		return rows;
+	},
+	initialState: {
+		// svelte-ignore state_referenced_locally -- initialState is initial by design
+		pagination: { pageIndex: 0, pageSize: initialPageSize },
+		sorting: [{ id: "position", desc: false }],
+	},
+	globalFilterFn: "fuzzy",
+});
 
 // Search handlers
 const handleKeyUp = (e: KeyboardEvent) => {
-	$table?.setGlobalFilter(String((e.target as HTMLInputElement)?.value));
+	table.setGlobalFilter(String((e.target as HTMLInputElement)?.value));
 };
 
 const searchDebounce = debounce((e) => handleKeyUp(e));
@@ -280,11 +213,11 @@ onDestroy(() => {
 });
 
 // Set header tooltips when elements are available or locale changes
-$: upToDateTooltip &&
-	totalTooltip &&
-	gradeTooltip &&
-	$locale &&
-	setHeaderTooltips();
+$effect(() => {
+	if (upToDateTooltip && totalTooltip && gradeTooltip && $locale) {
+		setHeaderTooltips();
+	}
+});
 </script>
 
 <section id="leaderboard" aria-labelledby="leaderboard-title">
@@ -297,13 +230,13 @@ $: upToDateTooltip &&
 				class="border-b border-gray-300 p-5 text-center text-lg font-semibold text-primary md:text-left dark:border-white/95 dark:text-white"
 			>
 				{type === 'community' ? $_(`areaLeaderboard.communityLeaderboard`) : $_(`areaLeaderboard.countryLeaderboard`)}
-				{#if !$loading && $leaderboardData.length > 0}
-					({$leaderboardData.length})
+				{#if !loading && leaderboardData.length > 0}
+					({leaderboardData.length})
 				{/if}
 			</h2>
 		</header>
 
-		{#if $loading}
+		{#if loading}
 			<div class="p-5">
 				<div
 					class="flex h-[572px] w-full animate-pulse items-center justify-center rounded-3xl border border-link/50"
@@ -313,12 +246,12 @@ $: upToDateTooltip &&
 					<Icon type="fa" icon="table" w="96" h="96" class="animate-pulse text-link/50" />
 				</div>
 			</div>
-		{:else if $leaderboardData.length === 0}
+		{:else if leaderboardData.length === 0}
 			<p class="w-full p-5 text-center text-primary dark:text-white">{$_(`areaLeaderboard.noData`)}</p>
 		{:else}
-			<LeaderboardSearch table={$table} bind:globalFilter {searchDebounce} />
+			<LeaderboardSearch {table} bind:globalFilter {searchDebounce} />
 
-			{#if $table.getFilteredRowModel().rows.length === 0}
+			{#if table.getFilteredRowModel().rows.length === 0}
 				<p class="w-full p-5 text-center text-primary dark:text-white">{$_(`areaLeaderboard.noResults`)}</p>
 			{:else}
 				<!-- Mobile: Three-row card layout with sorting headers -->
@@ -327,43 +260,43 @@ $: upToDateTooltip &&
 					<div class="border-b border-gray-300 bg-primary/5 dark:border-white/95 dark:bg-white/5">
 						<div class="grid grid-cols-4 gap-3 px-4 py-3 text-center text-xs">
 							<SortHeaderButton
-								column={$table?.getColumn('position')}
+								column={table.getColumn('position')}
 								label={$_(`areaLeaderboard.position`)}
 								ariaLabel={$_(`areaLeaderboard.sortByPosition`)}
 							/>
 
 							<SortHeaderButton
-								column={$table?.getColumn('total')}
+								column={table.getColumn('total')}
 								label={$_(`areaLeaderboard.totalLocations`)}
 								ariaLabel={$_(`areaLeaderboard.sortByTotal`)}
 							/>
 
 							<SortHeaderButton
-								column={$table?.getColumn('upToDateElements')}
+								column={table.getColumn('upToDateElements')}
 								label={$_(`areaLeaderboard.verifiedLocations`)}
 								ariaLabel={$_(`areaLeaderboard.sortByVerified`)}
 							/>
 
 							<SortHeaderButton
-								column={$table?.getColumn('grade')}
+								column={table.getColumn('grade')}
 								label={$_(`areaLeaderboard.grade`)}
 								ariaLabel={$_(`areaLeaderboard.sortByGrade`)}
 							/>
 						</div>
 					</div>
 
-					<AreaLeaderboardMobileCard table={$table} {type} />
+					<AreaLeaderboardMobileCard {table} {type} />
 				</div>
 
 				<AreaLeaderboardDesktopTable
-					table={$table}
+					{table}
 					{type}
 					bind:totalTooltip
 					bind:upToDateTooltip
 					bind:gradeTooltip
 				/>
 
-				<LeaderboardPagination table={$table} {pageSizes} />
+				<LeaderboardPagination {table} {pageSizes} />
 			{/if}
 
 			<footer
