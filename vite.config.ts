@@ -4,6 +4,17 @@ import tailwindcss from '@tailwindcss/vite';
 
 export default defineConfig({
 	plugins: [tailwindcss(), sveltekit()],
+	ssr: {
+		// Force the TanStack packages (and match-sorter's transitive
+		// remove-accents) INTO the server bundle. Most are transitive deps,
+		// so with pnpm's strict layout they have no top-level node_modules
+		// entry — if Vite externalizes them (which happens when the build
+		// environment hoists, e.g. Netlify), the serverless function tries
+		// to resolve them at runtime and crashes with missing-export /
+		// module-not-found errors. v9 is also ESM-only, so the external
+		// path is unproven on the lambda runtime — inline all of it.
+		noExternal: [/^@tanstack\//, 'remove-accents']
+	},
 	worker: {
 		format: 'es'
 	},
