@@ -23,7 +23,8 @@ const DAY_MS = 86_400_000;
 // Strictly more than a year since verification. Day-floored: a place at
 // exactly 365 days is not yet outdated, matching the server boundary.
 const OUTDATED_AFTER_DAYS = 365;
-// Within 90 days of crossing the outdated boundary.
+// Strictly more than 275 days — day-floored ages 276..365, the last 90
+// days before crossing the outdated boundary.
 const OUTDATED_SOON_AFTER_DAYS = 275;
 
 export function derivePlaceIssues(
