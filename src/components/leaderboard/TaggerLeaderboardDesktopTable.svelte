@@ -5,6 +5,7 @@ import { FlexRender } from "@tanstack/svelte-table";
 import Tip from "$components/Tip.svelte";
 import { _ } from "$lib/i18n";
 import type { BtcmapTableFeatures } from "$lib/tableFeatures";
+import { resolveHeaderLabel } from "$lib/tableFeatures";
 import type { TaggerLeaderboard } from "$lib/types";
 import { isEven } from "$lib/utils";
 
@@ -35,7 +36,7 @@ let { table }: { table: Table<BtcmapTableFeatures, TaggerRow> } = $props();
 									: 'none'}
 						>
 							{#if !header.isPlaceholder}
-								{@const headerLabel = typeof header.column.columnDef.header === 'string' ? header.column.columnDef.header : header.column.id}
+								{@const headerLabel = resolveHeaderLabel(header)}
 								<button
 									type="button"
 									class="flex items-center gap-x-1 leading-tight select-none md:gap-x-2"

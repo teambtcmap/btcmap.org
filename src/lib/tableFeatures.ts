@@ -1,6 +1,11 @@
 import type { RankingInfo } from "@tanstack/match-sorter-utils";
 import { rankItem } from "@tanstack/match-sorter-utils";
-import type { FilterFn, TableFeatures } from "@tanstack/svelte-table";
+import type {
+	FilterFn,
+	Header,
+	RowData,
+	TableFeatures,
+} from "@tanstack/svelte-table";
 import {
 	columnFilteringFeature,
 	createFilteredRowModel,
@@ -61,3 +66,14 @@ export const btcmapTableFeatures = tableFeatures({
 });
 
 export type BtcmapTableFeatures = typeof btcmapTableFeatures;
+
+// Resolves a column's header definition to a plain-text label (for
+// aria-labels): function headers are invoked with the header context,
+// string headers pass through, anything else falls back to the column id.
+export const resolveHeaderLabel = <TData extends RowData>(
+	header: Header<BtcmapTableFeatures, TData, any>,
+): string => {
+	const def = header.column.columnDef.header;
+	if (typeof def === "function") return String(def(header.getContext()));
+	return typeof def === "string" ? def : header.column.id;
+};

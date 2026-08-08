@@ -8,7 +8,7 @@ import LeaderboardPagination from "$components/leaderboard/LeaderboardPagination
 import LeaderboardSearch from "$components/leaderboard/LeaderboardSearch.svelte";
 import { _ } from "$lib/i18n";
 import type { BtcmapTableFeatures } from "$lib/tableFeatures";
-import { btcmapTableFeatures } from "$lib/tableFeatures";
+import { btcmapTableFeatures, resolveHeaderLabel } from "$lib/tableFeatures";
 import type { ActivityEvent } from "$lib/types";
 import { debounce } from "$lib/utils";
 
@@ -135,10 +135,7 @@ const searchDebounce = debounce((e) => handleKeyUp(e));
 												: 'none'}
 									>
 										{#if !header.isPlaceholder}
-											{@const headerLabel =
-												typeof header.column.columnDef.header === 'function'
-													? String(header.column.columnDef.header(header.getContext()))
-													: String(header.column.columnDef.header)}
+											{@const headerLabel = resolveHeaderLabel(header)}
 											<button
 												type="button"
 												class="flex items-center gap-x-1 leading-tight select-none"

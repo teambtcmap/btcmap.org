@@ -7,6 +7,7 @@ import AreaLeaderboardItemName from "$components/leaderboard/AreaLeaderboardItem
 import GradeDisplay from "$components/leaderboard/GradeDisplay.svelte";
 import { _ } from "$lib/i18n";
 import type { BtcmapTableFeatures } from "$lib/tableFeatures";
+import { resolveHeaderLabel } from "$lib/tableFeatures";
 import type { AreaLeaderboardRow, AreaType } from "$lib/types";
 import { isEven } from "$lib/utils";
 
@@ -44,12 +45,7 @@ let {
 									: 'none'}
 						>
 							{#if !header.isPlaceholder}
-								{@const headerDef = header.column.columnDef.header}
-								{@const headerLabel = typeof headerDef === 'function'
-									? String(headerDef(header.getContext()))
-									: typeof headerDef === 'string'
-										? headerDef
-										: header.column.id}
+								{@const headerLabel = resolveHeaderLabel(header)}
 								<!-- Tooltip triggers live OUTSIDE the sort button as siblings:
 								     as descendants their clicks and Enter/Space would bubble
 								     into the sort handler (and interactive content inside a
