@@ -71,6 +71,7 @@ import {
 } from "$lib/merchantDrawerHash";
 import { merchantDrawer } from "$lib/merchantDrawerStore";
 import { merchantList } from "$lib/merchantListStore";
+import { placeHasIssues } from "$lib/placeIssues";
 import { savedPlaceIds } from "$lib/session";
 import {
 	places,
@@ -121,6 +122,14 @@ const outdatedOnly =
 if (outdatedOnly) {
 	merchantList.setVerifiedFilter("outdated", { persist: false });
 }
+
+// "Issues only" deep link (?issues, presence alone counts, like ?outdated):
+// narrow the map to places with at least one derived issue — the
+// contributor worklist view (#921). Session-only and page-scoped like
+// ?boosts: no persisted state, no store mode; the filter engages once the
+// verified_at enrichment lands.
+const issuesOnly =
+	browser && new URLSearchParams(window.location.search).has("issues");
 
 let mapContainer: HTMLDivElement;
 let map: MapLibreMap | undefined;
@@ -373,10 +382,12 @@ const updateMerchantList = (opts?: { force?: boolean }) => {
 
 	const bounds = map.getBounds();
 	const center = map.getCenter();
-	// Boosted-only: the bulk $places feed already holds the tiny boosted set at
-	// every zoom, and the radius API (api-with-limit) has no boost filter, so
-	// force the local path so the list/count stay in sync with the filtered map.
-	const behavior = boostsOnly ? "local-markers" : getZoomBehavior(currentZoom);
+	// Boosted-only / issues-only: the bulk $places feed already holds the
+	// full filtered set at every zoom, and the radius API (api-with-limit)
+	// can filter by neither boost nor issue state, so force the local path
+	// so the list/count stay in sync with the filtered map.
+	const behavior =
+		boostsOnly || issuesOnly ? "local-markers" : getZoomBehavior(currentZoom);
 	const listOpen = get(merchantList).isOpen;
 	const allowHeavyFetch = opts?.force || listOpen;
 
@@ -394,7 +405,13 @@ const updateMerchantList = (opts?: { force?: boolean }) => {
 					p.lon >= buffered.west &&
 					p.lon <= buffered.east,
 			);
-			const listed = boostsOnly ? visible.filter(isBoosted) : visible;
+			let listed = boostsOnly ? visible.filter(isBoosted) : visible;
+			// Same readiness gate as the marker pipeline: before the
+			// verified_at enrichment lands, the list stays unfiltered
+			// rather than flagging every bulk row as not_verified.
+			if (issuesOnly && get(verifiedDatesLoaded)) {
+				listed = listed.filter((p) => placeHasIssues(p));
+			}
 			merchantList.setMerchants(listed, center.lat, center.lng);
 			if (listOpen || currentZoom >= LABEL_VISIBLE_ZOOM) {
 				if (allowHeavyFetch || currentZoom >= LABEL_VISIBLE_ZOOM) {
@@ -733,6 +750,12 @@ $: if (map && styleLoaded && $places) {
 		// Markers exempt search mode from the boosted-only narrowing: an
 		// explicit query should surface all matches on the map.
 		boostsOnly: boostsOnly && !inSearch,
+		// Same search exemption for the issues worklist: a searched-for
+		// place must appear even when it has no issues.
+		issuesOnly: issuesOnly && !inSearch,
+		// Trivially ready when the mode is off or exempted, so the dates
+		// landing can't change the signature outside issues mode.
+		issuesReady: !issuesOnly || inSearch || $verifiedDatesLoaded,
 	};
 	const renderSig = [
 		computeVisibleSignature(
@@ -778,9 +801,10 @@ $: if (
 }
 
 // A returning user with a persisted window (or an ?outdated deep link — both
-// land in the store's verifiedWithinYears): load the dates once the bulk
-// places are in (not during map setup, which can win the race and enrich an
-// empty store), so the map + list arrive filtered without a manual toggle.
+// land in the store's verifiedWithinYears — or an ?issues deep link): load
+// the dates once the bulk places are in (not during map setup, which can win
+// the race and enrich an empty store), so the map + list arrive filtered
+// without a manual toggle.
 let didInitialVerifiedLoad = false;
 $: if (
 	browser &&
@@ -788,7 +812,7 @@ $: if (
 	styleLoaded &&
 	$places.length > 0 &&
 	!didInitialVerifiedLoad &&
-	$merchantList.verifiedWithinYears != null
+	($merchantList.verifiedWithinYears != null || issuesOnly)
 ) {
 	didInitialVerifiedLoad = true;
 	void ensureVerifiedDates().then(() => updateMerchantList({ force: true }));

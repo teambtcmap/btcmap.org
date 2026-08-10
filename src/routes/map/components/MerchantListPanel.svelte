@@ -365,6 +365,8 @@ $: filteredSearchResults = selectVisiblePlaces({
 	recency: verifiedWithinYears,
 	recencyReady: true,
 	boostsOnly: false,
+	issuesOnly: false,
+	issuesReady: true,
 }).selection;
 
 // Helper function to check if a category has matching merchants

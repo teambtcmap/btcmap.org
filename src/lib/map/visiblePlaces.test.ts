@@ -38,6 +38,8 @@ const base = {
 	recency: null,
 	recencyReady: true,
 	boostsOnly: false,
+	issuesOnly: false,
+	issuesReady: true,
 };
 
 describe("selectVisiblePlaces", () => {
@@ -134,6 +136,33 @@ describe("selectVisiblePlaces", () => {
 		expect(r.selection[0].boosted_until).toBeTruthy();
 	});
 
+	it("narrows to places with derived issues when asked and ready", () => {
+		// Corpus issue rows: two outdated, one never verified, one missing
+		// its icon (also outdated) — the deleted row never counts.
+		const r = selectVisiblePlaces({
+			...base,
+			places: corpus(),
+			issuesOnly: true,
+		});
+		expect(r.selection.length).toBe(4);
+		expect(r.selection.some((p) => p.verified_at === undefined)).toBe(true);
+		// Chip counts describe the issue set, not the full corpus — selecting
+		// a chip inside the worklist must show exactly its count.
+		expect(r.counts.all).toBe(4);
+	});
+
+	it("keeps the issues filter inert until the dates are ready", () => {
+		// Bulk rows before enrichment would ALL classify as not_verified;
+		// the gate keeps the world visible instead.
+		const r = selectVisiblePlaces({
+			...base,
+			places: corpus(),
+			issuesOnly: true,
+			issuesReady: false,
+		});
+		expect(r.selection.length).toBe(7);
+	});
+
 	it("composes boosts after category (empty intersections are honest)", () => {
 		const r = selectVisiblePlaces({
 			...base,
@@ -169,6 +198,12 @@ describe("computeVisibleSignature", () => {
 		).not.toBe(sig);
 		expect(
 			computeVisibleSignature({ ...inputs, boostsOnly: true }, 7, ""),
+		).not.toBe(sig);
+		expect(
+			computeVisibleSignature({ ...inputs, issuesOnly: true }, 7, ""),
+		).not.toBe(sig);
+		expect(
+			computeVisibleSignature({ ...inputs, issuesReady: false }, 7, ""),
 		).not.toBe(sig);
 		expect(
 			computeVisibleSignature({ ...inputs, mode: "search" }, 7, "1,2"),
