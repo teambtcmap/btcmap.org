@@ -20,7 +20,7 @@ import { debounce } from "$lib/utils";
 
 import type { PageData } from "./$types";
 import { goto } from "$app/navigation";
-import { page } from "$app/stores";
+import { page } from "$app/state";
 
 type TopEditorItem = {
 	id: number;
@@ -214,7 +214,7 @@ const searchDebounce = debounce((e) => handleKeyUp(e));
 
 const handlePeriodChange = async (event: Event) => {
 	const nextValue = (event.target as HTMLSelectElement).value as PeriodOption;
-	const search = new URLSearchParams($page.url.searchParams);
+	const search = new URLSearchParams(page.url.searchParams);
 	if (nextValue === DEFAULT_PERIOD) {
 		search.delete("period");
 	} else {
