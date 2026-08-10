@@ -37,7 +37,7 @@ $: displayProgress = progress ?? 0; // Provide fallback for template usage
 			<div
 				class="h-2 min-w-2 rounded-full bg-link transition-all duration-500"
 				style:width={displayProgress.toString() + "%"}
-			/>
+			></div>
 		</div>
 
 		{#if displayProgress > 0 && displayProgress < 100}

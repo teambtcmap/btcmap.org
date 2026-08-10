@@ -188,11 +188,16 @@ const plebTier = sponsorshipTiers.find((t) => t.level === "Pleb")!;
 >
 	<div class="flex flex-col items-center gap-5 py-4">
 		<!-- qr -->
-		<a href={network === 'Lightning' ? `lightning:${lnurlp}` : `bitcoin:${onchain}`}>
+		<a
+			href={network === 'Lightning' ? `lightning:${lnurlp}` : `bitcoin:${onchain}`}
+			aria-label={network === 'Lightning'
+				? t("supporters.donate.lightning")
+				: t("supporters.donate.onchain")}
+		>
 			<canvas
 				use:renderQr
 				class="mx-auto h-[200px] w-[200px] rounded-xl border-4 border-link transition-colors hover:border-hover sm:h-[256px] sm:w-[256px]"
-			/>
+			></canvas>
 		</a>
 
 		<!-- cta -->

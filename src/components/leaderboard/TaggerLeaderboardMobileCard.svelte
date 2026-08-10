@@ -3,6 +3,7 @@ import type { Table } from "@tanstack/svelte-table";
 
 import Icon from "$components/Icon.svelte";
 import { _ } from "$lib/i18n";
+import type { BtcmapTableFeatures } from "$lib/tableFeatures";
 import type { TaggerLeaderboard } from "$lib/types";
 import { isEven } from "$lib/utils";
 
@@ -13,7 +14,7 @@ type TaggerRow = TaggerLeaderboard & {
 	tipDestination?: string;
 };
 
-export let table: Table<TaggerRow>;
+let { table }: { table: Table<BtcmapTableFeatures, TaggerRow> } = $props();
 </script>
 
 <!-- Mobile cards -->
@@ -45,7 +46,7 @@ export let table: Table<TaggerRow>;
 					src={tagger.avatar}
 					alt={tagger.tagger}
 					class="h-16 w-16 rounded-full object-cover"
-					on:error={(event) => {
+					onerror={(event) => {
 						const target = event.target;
 						if (target instanceof HTMLImageElement) {
 							target.src = '/images/satoshi-nakamoto.png';

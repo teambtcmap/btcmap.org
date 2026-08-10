@@ -456,7 +456,7 @@ $: if (map && mapLoaded) {
 							<div
 								bind:this={mapElement}
 								class="z-10 h-[300px] !cursor-crosshair rounded-2xl border-2 border-input !bg-teal md:h-[400px] dark:!bg-dark"
-							/>
+							></div>
 							{#if webglUnsupported}
 								<MapUnsupportedFallback />
 							{:else if !mapLoaded}
@@ -688,7 +688,7 @@ $: if (map && mapLoaded) {
 							rows="3"
 							class="w-full rounded-2xl border-2 border-input p-3 transition-all focus:outline-link disabled:cursor-not-allowed disabled:bg-gray-100 disabled:text-gray-500 dark:bg-white/[0.15] dark:disabled:bg-gray-700 dark:disabled:text-gray-400"
 							bind:this={notes}
-						/>
+						></textarea>
 					</div>
 
 					<div>
@@ -725,7 +725,7 @@ $: if (map && mapLoaded) {
 								class="w-full rounded-2xl border-2 border-input p-3 transition-all focus:outline-link disabled:cursor-not-allowed disabled:bg-gray-100 disabled:text-gray-500 dark:bg-white/[0.15] dark:disabled:bg-gray-700 dark:disabled:text-gray-400"
 								bind:value={sourceOther}
 								bind:this={sourceOtherElement}
-							/>
+							></textarea>
 						{/if}
 					</div>
 
@@ -760,7 +760,7 @@ $: if (map && mapLoaded) {
 						<div class="space-y-2">
 							<div class="flex items-center justify-center rounded-2xl border-2 border-input py-1">
 								{#if isCaptchaLoading}
-									<div class="h-[100px] w-[275px] animate-pulse bg-link/50" />
+									<div class="h-[100px] w-[275px] animate-pulse bg-link/50"></div>
 								{:else}
 									{@html captchaContent}
 								{/if}

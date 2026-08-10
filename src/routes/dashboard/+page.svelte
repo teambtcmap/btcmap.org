@@ -394,7 +394,7 @@ $: {
 
 		<div>
 			<div class="relative">
-				<canvas bind:this={totalChartCanvas} width="100%" height="400" />
+				<canvas bind:this={totalChartCanvas} width="100%" height="400"></canvas>
 			</div>
 			<p class="mt-1 text-center text-sm text-body dark:text-white">
 				{$_('dashboard.merchantsNote')}
@@ -403,7 +403,7 @@ $: {
 
 		<div>
 			<div class="relative">
-				<canvas bind:this={upToDateChartCanvas} width="100%" height="400" />
+				<canvas bind:this={upToDateChartCanvas} width="100%" height="400"></canvas>
 			</div>
 			<p class="mt-1 text-center text-sm text-body dark:text-white">
 				{$_('dashboard.verifiedNote')}

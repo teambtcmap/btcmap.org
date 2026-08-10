@@ -68,7 +68,7 @@ $: lightning = regexMatch?.[0].slice(10);
 					: stat.title === 'U'
 						? 'bg-link'
 						: 'bg-deleted'} lg:hidden"
-			/>{stat.stat}
+			></span>{stat.stat}
 		</span>
 	{/each}
 

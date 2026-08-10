@@ -327,7 +327,7 @@ $: if (map && styleLoaded) {
 			<div
 				bind:this={mapContainer}
 				class="z-10 h-[300px] rounded-3xl border border-gray-300 !bg-teal text-left md:h-[500px] dark:border-white/95 dark:!bg-[#202f33]"
-			/>
+			></div>
 			{#if webglUnsupported}
 				<MapUnsupportedFallback />
 			{:else if !mapLoaded}

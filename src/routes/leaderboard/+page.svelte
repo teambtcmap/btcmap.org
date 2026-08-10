@@ -1,19 +1,6 @@
 <script lang="ts">
-import { rankItem } from "@tanstack/match-sorter-utils";
-import {
-	type ColumnDef,
-	createSvelteTable,
-	type FilterFn,
-	getCoreRowModel,
-	getFilteredRowModel,
-	getPaginationRowModel,
-	getSortedRowModel,
-	type OnChangeFn,
-	type PaginationState,
-	type SortingState,
-	type TableOptions,
-} from "@tanstack/svelte-table";
-import { writable } from "svelte/store";
+import type { ColumnDef } from "@tanstack/svelte-table";
+import { createTable } from "@tanstack/svelte-table";
 
 import FormSelect from "$components/form/FormSelect.svelte";
 import Icon from "$components/Icon.svelte";
@@ -25,10 +12,13 @@ import TaggerLeaderboardDesktopTable from "$components/leaderboard/TaggerLeaderb
 import TaggerLeaderboardMobileCard from "$components/leaderboard/TaggerLeaderboardMobileCard.svelte";
 import PrimaryButton from "$components/PrimaryButton.svelte";
 import { _ } from "$lib/i18n";
+import type { BtcmapTableFeatures } from "$lib/tableFeatures";
+import { btcmapTableFeatures } from "$lib/tableFeatures";
 import { theme } from "$lib/theme";
 import type { TaggerLeaderboard } from "$lib/types";
 import { debounce } from "$lib/utils";
 
+import type { PageData } from "./$types";
 import { goto } from "$app/navigation";
 import { page } from "$app/stores";
 
@@ -57,14 +47,10 @@ const DEFAULT_PERIOD_OPTIONS: PeriodOption[] = [
 	"all-time",
 ];
 
-export let data;
+let { data }: { data: PageData } = $props();
 
 const pageSizes = [10, 20, 30, 40, 50];
-let loading = true;
-let periodLoading = false;
-let errorMessage: string | null = data?.error ?? null;
-let leaderboardRows: TaggerRow[] = [];
-let totalTaggers: number;
+let periodLoading = $state(false);
 
 const validatePeriodOption = (value: unknown): value is PeriodOption => {
 	return (
@@ -73,35 +59,27 @@ const validatePeriodOption = (value: unknown): value is PeriodOption => {
 	);
 };
 
-let periodOptions: PeriodOption[];
-let selectedPeriod: PeriodOption;
-let lastResolvedPeriod: PeriodOption = DEFAULT_PERIOD;
-
-$: {
+const periodOptions = $derived.by((): PeriodOption[] => {
 	const incoming = Array.isArray(data?.periodOptions)
 		? data?.periodOptions
 		: DEFAULT_PERIOD_OPTIONS;
 	const validOptions = Array.from(
 		new Set(incoming.filter((option) => validatePeriodOption(option))),
 	) as PeriodOption[];
-	periodOptions =
-		validOptions.length > 0 ? validOptions : [...DEFAULT_PERIOD_OPTIONS];
-}
+	return validOptions.length > 0 ? validOptions : [...DEFAULT_PERIOD_OPTIONS];
+});
 
-$: {
+const resolvedPeriod = $derived.by((): PeriodOption => {
 	const periodFromData = validatePeriodOption(data?.period)
 		? (data.period as PeriodOption)
 		: DEFAULT_PERIOD;
-	const validPeriod = periodOptions.includes(periodFromData)
+	return periodOptions.includes(periodFromData)
 		? periodFromData
 		: DEFAULT_PERIOD;
-	if (validPeriod !== lastResolvedPeriod) {
-		// Track resolved period to prevent loops
-
-		lastResolvedPeriod = validPeriod;
-		selectedPeriod = validPeriod;
-	}
-}
+});
+// Writable derived: shows the pick optimistically while goto() reloads the
+// data, then re-derives from the loader's answer.
+let selectedPeriod = $derived(resolvedPeriod);
 
 const extractLightningDestination = (tip?: string): string | undefined => {
 	if (!tip) return undefined;
@@ -140,148 +118,96 @@ const normalizeUsers = (users: TopEditorItem[]): TaggerRow[] => {
 		.map((item, index) => ({ ...item, position: index + 1 }));
 };
 
-$: {
-	if (Array.isArray(data?.result?.users)) {
-		const normalizedUsers = normalizeUsers(data.result.users);
-		leaderboardRows = normalizedUsers;
-		totalTaggers = normalizedUsers.length;
-		loading = false;
-		periodLoading = false;
-		errorMessage = null;
-	} else if (data?.error) {
-		loading = false;
-		periodLoading = false;
-		errorMessage = data.error;
-		leaderboardRows = [];
-		totalTaggers = 0;
-	} else {
-		leaderboardRows = [];
-		totalTaggers = 0;
-	}
-}
+const normalizedRows = $derived(
+	Array.isArray(data?.result?.users) ? normalizeUsers(data.result.users) : null,
+);
+const leaderboardRows = $derived(normalizedRows ?? []);
+const totalTaggers = $derived(leaderboardRows.length);
+const errorMessage = $derived(normalizedRows ? null : (data?.error ?? null));
+const loading = $derived(!normalizedRows && !data?.error);
 
-const fuzzyFilter: FilterFn<TaggerRow> = (row, columnId, value, addMeta) => {
-	const itemRank = rankItem(row.getValue(columnId), value);
-	addMeta?.({ itemRank });
-	return itemRank.passed;
-};
+const periodLabels = $derived({
+	"3-months": $_("leaderboard.period3Months"),
+	"6-months": $_("leaderboard.period6Months"),
+	"12-months": $_("leaderboard.period12Months"),
+	"all-time": $_("leaderboard.periodAllTime"),
+});
 
-$: translate = $_;
-$: periodLabels = {
-	"3-months": translate("leaderboard.period3Months"),
-	"6-months": translate("leaderboard.period6Months"),
-	"12-months": translate("leaderboard.period12Months"),
-	"all-time": translate("leaderboard.periodAllTime"),
-};
-let columns: ColumnDef<TaggerRow>[] = [];
-$: columns = [
+// Columns re-derive on locale change; the table picks them up through the
+// getter option below — no manual rebuild plumbing needed.
+const columns: ColumnDef<BtcmapTableFeatures, TaggerRow>[] = $derived([
 	{
 		id: "position",
-		header: translate("leaderboard.position"),
+		header: $_("leaderboard.position"),
 		accessorFn: (row) => row.position,
 		enableSorting: true,
 		enableGlobalFilter: false,
-		sortingFn: (a, b) => a.original.position - b.original.position,
+		sortFn: (a, b) => a.original.position - b.original.position,
 	},
 	{
 		id: "name",
-		header: translate("leaderboard.name"),
+		header: $_("leaderboard.name"),
 		accessorFn: (row) => row.tagger,
 		enableSorting: true,
-		filterFn: fuzzyFilter,
+		filterFn: "fuzzy",
 		enableGlobalFilter: true,
 	},
 	{
 		id: "total",
-		header: translate("leaderboard.total"),
+		header: $_("leaderboard.total"),
 		accessorFn: (row) => row.total,
 		enableSorting: true,
 		enableGlobalFilter: false,
 	},
 	{
 		id: "created",
-		header: translate("leaderboard.created"),
+		header: $_("leaderboard.created"),
 		accessorFn: (row) => row.created,
 		enableSorting: true,
 		enableGlobalFilter: false,
 	},
 	{
 		id: "updated",
-		header: translate("leaderboard.updated"),
+		header: $_("leaderboard.updated"),
 		accessorFn: (row) => row.updated,
 		enableSorting: true,
 		enableGlobalFilter: false,
 	},
 	{
 		id: "deleted",
-		header: translate("leaderboard.deleted"),
+		header: $_("leaderboard.deleted"),
 		accessorFn: (row) => row.deleted,
 		enableSorting: true,
 		enableGlobalFilter: false,
 	},
 	{
 		id: "tip",
-		header: translate("leaderboard.tip"),
+		header: $_("leaderboard.tip"),
 		accessorFn: (row) => row.tipDestination ?? "",
 		enableSorting: false,
 		enableGlobalFilter: false,
 	},
-];
+]);
 
-let sorting: SortingState = [{ id: "total", desc: true }];
-let pagination: PaginationState = {
-	pageIndex: 0,
-	pageSize: pageSizes[0],
-};
-
-const setSorting: OnChangeFn<SortingState> = (updater) => {
-	sorting = updater instanceof Function ? updater(sorting) : updater;
-	options.update((old) => ({
-		...old,
-		state: {
-			...old.state,
-			sorting,
-		},
-	}));
-};
-
-const setPagination: OnChangeFn<PaginationState> = (updater) => {
-	pagination = updater instanceof Function ? updater(pagination) : updater;
-	options.update((old) => ({
-		...old,
-		state: {
-			...old.state,
-			pagination,
-		},
-	}));
-};
-
-const options = writable<TableOptions<TaggerRow>>({
-	data: leaderboardRows,
-	columns: [],
-	state: {
-		sorting,
-		pagination,
+const table = createTable({
+	features: btcmapTableFeatures,
+	get columns() {
+		return columns;
 	},
-	onSortingChange: setSorting,
-	onPaginationChange: setPagination,
-	globalFilterFn: fuzzyFilter,
-	getCoreRowModel: getCoreRowModel(),
-	getSortedRowModel: getSortedRowModel(),
-	getPaginationRowModel: getPaginationRowModel(),
-	getFilteredRowModel: getFilteredRowModel(),
+	get data() {
+		return leaderboardRows;
+	},
+	initialState: {
+		pagination: { pageIndex: 0, pageSize: pageSizes[0] },
+		sorting: [{ id: "total", desc: true }],
+	},
+	globalFilterFn: "fuzzy",
 });
 
-const table = createSvelteTable(options);
-
-$: options.update((current) => ({
-	...current,
-	columns,
-	data: leaderboardRows,
-}));
+const globalFilter = $derived(String(table.atoms.globalFilter.get() ?? ""));
 
 const handleKeyUp = (e: KeyboardEvent) => {
-	$table?.setGlobalFilter(String((e.target as HTMLInputElement)?.value));
+	table.setGlobalFilter(String((e.target as HTMLInputElement)?.value));
 };
 
 const searchDebounce = debounce((e) => handleKeyUp(e));
@@ -299,10 +225,14 @@ const handlePeriodChange = async (event: Event) => {
 	periodLoading = true;
 	selectedPeriod = nextValue;
 
-	await goto(nextUrl, {
-		replaceState: true,
-		noScroll: true,
-	});
+	try {
+		await goto(nextUrl, {
+			replaceState: true,
+			noScroll: true,
+		});
+	} finally {
+		periodLoading = false;
+	}
 };
 </script>
 
@@ -393,12 +323,7 @@ const handlePeriodChange = async (event: Event) => {
 							class="mb-6 flex flex-col gap-4 px-4 py-3 md:flex-row md:items-center md:justify-between"
 						>
 							<div class="flex-1">
-								<LeaderboardSearch
-									table={$table}
-									globalFilter={$table.getState().globalFilter}
-									on:globalFilterChange={(e) => $table?.setGlobalFilter(e.detail)}
-									{searchDebounce}
-								/>
+								<LeaderboardSearch {table} {globalFilter} {searchDebounce} />
 							</div>
 							<label
 								class="flex flex-col gap-2 text-sm font-medium text-primary md:flex-row md:items-center md:gap-3 dark:text-white"
@@ -419,7 +344,7 @@ const handlePeriodChange = async (event: Event) => {
 							</label>
 						</div>
 
-						{#if $table.getFilteredRowModel().rows.length === 0}
+						{#if table.getFilteredRowModel().rows.length === 0}
 							<p class="w-full p-5 text-center text-primary dark:text-white">{$_('leaderboard.noResults')}</p>
 						{:else}
 							<div class="block lg:hidden">
@@ -428,33 +353,33 @@ const handlePeriodChange = async (event: Event) => {
 								>
 									<div class="grid grid-cols-4 gap-3 px-4 py-3 text-center text-xs">
 										<SortHeaderButton
-											column={$table?.getColumn('position')}
+											column={table.getColumn('position')}
 											label={$_('leaderboard.position')}
 											ariaLabel={$_('leaderboard.sortPosition')}
 										/>
 										<SortHeaderButton
-											column={$table?.getColumn('total')}
+											column={table.getColumn('total')}
 											label={$_('leaderboard.total')}
 											ariaLabel={$_('leaderboard.sortTotal')}
 										/>
 										<SortHeaderButton
-											column={$table?.getColumn('created')}
+											column={table.getColumn('created')}
 											label={$_('leaderboard.created')}
 											ariaLabel={$_('leaderboard.sortCreated')}
 										/>
 										<SortHeaderButton
-											column={$table?.getColumn('updated')}
+											column={table.getColumn('updated')}
 											label={$_('leaderboard.updated')}
 											ariaLabel={$_('leaderboard.sortUpdated')}
 										/>
 									</div>
 								</div>
 
-								<TaggerLeaderboardMobileCard table={$table} />
+								<TaggerLeaderboardMobileCard {table} />
 							</div>
 
-							<TaggerLeaderboardDesktopTable table={$table} />
-							<LeaderboardPagination table={$table} {pageSizes} />
+							<TaggerLeaderboardDesktopTable {table} />
+							<LeaderboardPagination {table} {pageSizes} />
 						{/if}
 					</div>
 				{/if}

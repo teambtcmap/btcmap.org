@@ -1,10 +1,17 @@
-<script lang="ts">
-import type { Table } from "@tanstack/svelte-table";
+<script lang="ts" generics="TData extends RowData">
+import type { RowData, Table } from "@tanstack/svelte-table";
 
 import { _ } from "$lib/i18n";
+import type { BtcmapTableFeatures } from "$lib/tableFeatures";
 
-export let table: Table<any>;
-export let pageSizes: number[] = [10, 20, 30, 40, 50];
+type Props = {
+	table: Table<BtcmapTableFeatures, TData>;
+	pageSizes?: number[];
+};
+
+let { table, pageSizes = [10, 20, 30, 40, 50] }: Props = $props();
+
+const pagination = $derived(table.atoms.pagination.get());
 </script>
 
 <!-- Pagination -->
@@ -12,10 +19,9 @@ export let pageSizes: number[] = [10, 20, 30, 40, 50];
 	class="flex w-full flex-col gap-5 px-5 pt-2.5 pb-5 text-primary md:flex-row md:items-center md:justify-between dark:text-white"
 >
 	<select
-		value={table?.getState().pagination.pageSize}
-		on:change={(e) => {
-			// @ts-expect-error Select onChange event target type assertion for page size change
-			table?.setPageSize(Number(e.target?.value));
+		value={pagination.pageSize}
+		onchange={(e) => {
+			table.setPageSize(Number(e.currentTarget.value));
 		}}
 		class="cursor-pointer bg-transparent focus:outline-primary dark:focus:outline-white"
 		aria-label={$_('leaderboard.itemsPerPage')}
@@ -32,22 +38,22 @@ export let pageSizes: number[] = [10, 20, 30, 40, 50];
 			<div class="flex items-center gap-5">
 				<button
 					type="button"
-					class="text-xl font-bold {!table?.getCanPreviousPage()
+					class="text-xl font-bold {!table.getCanPreviousPage()
 						? 'cursor-not-allowed opacity-50'
 						: ''}"
-					on:click={() => table?.firstPage()}
-					disabled={!table?.getCanPreviousPage()}
+					onclick={() => table.firstPage()}
+					disabled={!table.getCanPreviousPage()}
 					aria-label={$_('leaderboard.firstPage')}
 				>
 					&lt;&lt;
 				</button>
 				<button
 					type="button"
-					class="text-xl font-bold {!table?.getCanPreviousPage()
+					class="text-xl font-bold {!table.getCanPreviousPage()
 						? 'cursor-not-allowed opacity-50'
 						: ''}"
-					on:click={() => table?.previousPage()}
-					disabled={!table?.getCanPreviousPage()}
+					onclick={() => table.previousPage()}
+					disabled={!table.getCanPreviousPage()}
 					aria-label={$_('leaderboard.previousPage')}
 				>
 					&lt;
@@ -56,22 +62,22 @@ export let pageSizes: number[] = [10, 20, 30, 40, 50];
 			<div class="flex items-center gap-5">
 				<button
 					type="button"
-					class="text-xl font-bold {!table?.getCanNextPage()
+					class="text-xl font-bold {!table.getCanNextPage()
 						? 'cursor-not-allowed opacity-50'
 						: ''}"
-					on:click={() => table?.nextPage()}
-					disabled={!table?.getCanNextPage()}
+					onclick={() => table.nextPage()}
+					disabled={!table.getCanNextPage()}
 					aria-label={$_('leaderboard.nextPage')}
 				>
 					&gt;
 				</button>
 				<button
 					type="button"
-					class="text-xl font-bold {!table?.getCanNextPage()
+					class="text-xl font-bold {!table.getCanNextPage()
 						? 'cursor-not-allowed opacity-50'
 						: ''}"
-					on:click={() => table?.lastPage()}
-					disabled={!table?.getCanNextPage()}
+					onclick={() => table.lastPage()}
+					disabled={!table.getCanNextPage()}
 					aria-label={$_('leaderboard.lastPage')}
 				>
 					&gt;&gt;
@@ -82,8 +88,8 @@ export let pageSizes: number[] = [10, 20, 30, 40, 50];
 		<span class="flex items-center justify-center gap-1 md:justify-start" aria-live="polite">
 			<div>{$_('leaderboard.page')}</div>
 			<strong>
-				{table?.getState().pagination.pageIndex + 1} {$_('leaderboard.of')}
-				{table?.getPageCount().toLocaleString()}
+				{pagination.pageIndex + 1} {$_('leaderboard.of')}
+				{table.getPageCount().toLocaleString()}
 			</strong>
 		</span>
 	</div>
