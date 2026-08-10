@@ -1,5 +1,5 @@
 <script lang="ts">
-import OutClick from "svelte-outclick";
+import { OutClick } from "svelte-outclick";
 
 import Icon from "$components/Icon.svelte";
 import type { DropdownLink } from "$lib/types";
@@ -35,7 +35,7 @@ afterNavigate(() => {
 	{#if show}
 		<OutClick
 			excludeQuerySelectorAll={`#dropdown-${title.toLowerCase()}`}
-			on:outclick={() => (show = false)}
+			onOutClick={() => (show = false)}
 		>
 			<div class="absolute top-8 right-0 z-50 w-[185px] rounded-2xl shadow-lg">
 				{#each links as link, i (link.url)}

@@ -75,8 +75,8 @@ importers:
         specifier: ^4.0.1
         version: 4.0.1(svelte@5.56.8)
       svelte-outclick:
-        specifier: ^3.7.1
-        version: 3.7.1(svelte@5.56.8)
+        specifier: ^4.2.0
+        version: 4.2.0(svelte@5.56.8)
       svelte-time:
         specifier: ^1.1.0
         version: 1.1.0
@@ -1939,10 +1939,10 @@ packages:
     peerDependencies:
       svelte: ^3 || ^4 || ^5
 
-  svelte-outclick@3.7.1:
-    resolution: {integrity: sha512-+TmDaG8yX4cIhmvflujvgV+NbFHxkUdYfeSczp67UJvkkMO9m6x1ugBQSDnjHD6J1z4tE5alkp5pC5LpoNqOKg==}
+  svelte-outclick@4.2.0:
+    resolution: {integrity: sha512-rQ5u8mSdAAQVfDuxLKMAfoRfwpji1HJksGqiyx8vsjn0z41/GB0Qdqn75sII9WefdwhtjuC6wr7qjFYEqQ/UQw==}
     peerDependencies:
-      svelte: '>= 4.2.12'
+      svelte: '>= 5'
 
   svelte-time@1.1.0:
     resolution: {integrity: sha512-QmjmlS62+9t+no/xHOEYz1Oics+VUu1lk3RZbnnOGmqK2rCRUedktLhIoB0/3GSGg98+UJb4Pe4h7El+OHquYg==}
@@ -3716,7 +3716,7 @@ snapshots:
       svelte: 5.56.8
       tiny-glob: 0.2.9
 
-  svelte-outclick@3.7.1(svelte@5.56.8):
+  svelte-outclick@4.2.0(svelte@5.56.8):
     dependencies:
       svelte: 5.56.8
 
