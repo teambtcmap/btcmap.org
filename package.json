@@ -57,13 +57,13 @@
 		"qrcode": "^1.5.4",
 		"svelte-i18n": "^4.0.1",
 		"svelte-outclick": "^4.2.0",
-		"svelte-time": "^1.1.0",
+		"svelte-time": "^2.3.0",
 		"svg-captcha": "^1.4.0",
 		"tippy.js": "^6.3.7"
 	},
 	"devDependencies": {
 		"@biomejs/biome": "^2.5.3",
-		"@iconify/svelte": "^4.2.0",
+		"@iconify/svelte": "^5.2.2",
 		"@mapbox/mapbox-gl-rtl-text": "^0.4.0",
 		"@playwright/test": "^1.62.0",
 		"@sveltejs/adapter-netlify": "^6.0.4",
