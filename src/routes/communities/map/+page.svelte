@@ -39,7 +39,7 @@ import { areaIconSrc, errToast } from "$lib/utils";
 
 import { browser } from "$app/environment";
 import { resolve } from "$app/paths";
-import { page } from "$app/stores";
+import { page } from "$app/state";
 import MapControls from "../../map/components/MapControls.svelte";
 
 let mapLoading = 0;
@@ -56,9 +56,9 @@ let webglUnsupported = false;
 let communitiesLoaded = false;
 let destroyed = false;
 
-const communityQuery = $page.url.searchParams.get("community");
-const communityLang = $page.url.searchParams.get("communityLang");
-const organization = $page.url.searchParams.get("organization");
+const communityQuery = page.url.searchParams.get("community");
+const communityLang = page.url.searchParams.get("communityLang");
+const organization = page.url.searchParams.get("organization");
 
 $: $areaError && errToast($areaError);
 $: $reportError && errToast($reportError);

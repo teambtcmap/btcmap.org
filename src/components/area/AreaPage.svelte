@@ -3,13 +3,14 @@ import { _ } from "svelte-i18n";
 
 import { browser } from "$app/environment";
 import { goto } from "$app/navigation";
-import { page } from "$app/stores";
+import { page } from "$app/state";
 
 export let type: "country" | "community";
 export let data: AreaPageProps;
 
 import type { GeoJSON } from "geojson";
 import { onDestroy, onMount } from "svelte";
+import { toStore } from "svelte/store";
 
 import AreaActivity from "$components/area/AreaActivity.svelte";
 import AreaHeader from "$components/area/AreaHeader.svelte";
@@ -50,10 +51,14 @@ type Section = (typeof SECTIONS)[number];
 
 let scrolled = false;
 
-$: activeSection = (SECTIONS as readonly string[]).includes(
-	$page.params.section ?? "",
-)
-	? ($page.params.section as Section)
+// toStore bridges $app/state's rune-backed page into a store this
+// legacy-mode component's $: statement can actually track — a bare
+// page.params read inside $: would run once and tab switching (goto to a
+// sibling section) would stop updating activeSection.
+const pageSection = toStore(() => page.params.section);
+
+$: activeSection = (SECTIONS as readonly string[]).includes($pageSection ?? "")
+	? ($pageSection as Section)
 	: ("merchants" as Section);
 
 const handleSectionChange = (section: Section) => {

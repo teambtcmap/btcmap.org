@@ -25,17 +25,21 @@ import { isLoading, locale } from "svelte-i18n";
 import Footer from "$components/layout/Footer.svelte";
 import { isSupportedLocale } from "$lib/i18n";
 
-import { page } from "$app/stores";
+import { afterNavigate } from "$app/navigation";
+import { page } from "$app/state";
 
 // Apply language from URL param site-wide (e.g. /map?language=bg for embedded maps).
 // On /communities/map, ?communityLang= filters communities; ?language= sets UI locale.
-$: if (browser) {
-	const langParam = $page.url.searchParams.get("language");
+// afterNavigate fires on mount and after every client-side navigation — the
+// same cadence the old `$: if (browser)` block with its $page store dep had
+// (a bare page.url read in a legacy $: would only ever run once).
+afterNavigate(() => {
+	const langParam = page.url.searchParams.get("language");
 	if (langParam && isSupportedLocale(langParam)) {
 		locale.set(langParam);
 		localStorage.setItem("language", langParam);
 	}
-}
+});
 
 // Update HTML lang attribute dynamically when locale changes
 $: if (browser && $locale) {

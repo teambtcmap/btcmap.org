@@ -5,10 +5,10 @@ import Icon from "$components/Icon.svelte";
 import { _ } from "$lib/i18n";
 
 import { resolve } from "$app/paths";
-import { page } from "$app/stores";
+import { page } from "$app/state";
 
 onMount(() => {
-	if ($page.status === 500 && !navigator.onLine) {
+	if (page.status === 500 && !navigator.onLine) {
 		location.reload();
 	}
 });
@@ -35,7 +35,7 @@ onMount(() => {
 				class="text-xl font-semibold text-link transition-colors hover:text-hover"
 				><Icon type="fa" icon="house" w="16" h="16" class="mr-2 inline" /> {$_('errorPage.home')}</a
 			>
-			<h1 class="text-4xl md:text-5xl dark:text-white">{$page.status}: {$page.error?.message}</h1>
+			<h1 class="text-4xl md:text-5xl dark:text-white">{page.status}: {page.error?.message}</h1>
 			<h2 class="text-xl font-semibold text-primary dark:text-white">
 				{$_('errorPage.tryAgain')}
 			</h2>
