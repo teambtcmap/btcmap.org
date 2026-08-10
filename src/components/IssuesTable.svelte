@@ -9,6 +9,8 @@ import { _ } from "svelte-i18n";
 
 import Icon from "$components/Icon.svelte";
 import IssueCell from "$components/IssueCell.svelte";
+import LeaderboardPagination from "$components/leaderboard/LeaderboardPagination.svelte";
+import LeaderboardSearch from "$components/leaderboard/LeaderboardSearch.svelte";
 import type { BtcmapTableFeatures } from "$lib/tableFeatures";
 import { btcmapTableFeatures } from "$lib/tableFeatures";
 import { theme } from "$lib/theme";
@@ -44,7 +46,6 @@ type IssueCellId =
 const pageSizes = [10, 20, 30, 40, 50];
 
 let globalFilter = $state("");
-let searchInput: HTMLInputElement | undefined = $state();
 
 // Rows re-derive when the issues prop or the locale changes — the table
 // picks them up through its getter option. This replaces the old
@@ -142,8 +143,6 @@ const table = createTable({
 	globalFilterFn: "fuzzy",
 });
 
-const pagination = $derived(table.atoms.pagination.get());
-
 const handleKeyUp = (e: KeyboardEvent) => {
 	table.setGlobalFilter(String((e.target as HTMLInputElement)?.value));
 };
@@ -174,36 +173,7 @@ const searchDebounce = debounce((e) => handleKeyUp(e));
 		{:else if !issues.length}
 			<p class="w-full p-5 text-center text-primary dark:text-white">{$_(`maintain.noTaggingIssues`)}</p>
 		{:else}
-			<div class="relative text-primary dark:text-white">
-				<input
-					type="text"
-					placeholder={$_(`search.placeholder`)}
-					class="w-full bg-primary/5 px-5 py-2.5 text-sm focus:outline-primary dark:bg-white/5 dark:focus:outline-white"
-					bind:value={globalFilter}
-					onkeyup={searchDebounce}
-					bind:this={searchInput}
-				/>
-				{#if globalFilter}
-					<button
-						class="absolute top-1/2 right-3 -translate-y-1/2"
-						onclick={() => {
-							globalFilter = '';
-							table.setGlobalFilter('');
-						}}
-					>
-						<Icon type="fa" icon="circle-xmark" w="16" h="16" />
-					</button>
-				{:else}
-					<button
-						class="absolute top-1/2 right-3 -translate-y-1/2"
-						onclick={() => {
-							searchInput?.focus();
-						}}
-					>
-						<Icon type="fa" icon="magnifying-glass" w="16" h="16" />
-					</button>
-				{/if}
-			</div>
+			<LeaderboardSearch {table} bind:globalFilter {searchDebounce} />
 			{#if table.getFilteredRowModel().rows.length === 0}
 				<p class="w-full p-5 text-center text-primary dark:text-white">{$_(`leaderboard.noResults`)}</p>
 			{:else}
@@ -246,75 +216,7 @@ const searchDebounce = debounce((e) => handleKeyUp(e));
 					</table>
 				</div>
 
-				<div
-					class="flex w-full flex-col gap-5 px-5 pt-2.5 pb-5 text-primary md:flex-row md:items-center md:justify-between dark:text-white"
-				>
-					<select
-						value={pagination.pageSize}
-						onchange={(e) => {
-							table.setPageSize(Number(e.currentTarget.value));
-						}}
-						class="cursor-pointer bg-transparent focus:outline-primary dark:focus:outline-white"
-					>
-						{#each pageSizes as pageSize (pageSize)}
-							<option value={pageSize}>
-								{$_(`leaderboard.show`, { values: { pageSize } })}
-							</option>
-						{/each}
-					</select>
-
-					<div class="flex flex-col gap-5 md:flex-row md:items-center">
-						<div class="flex items-center justify-between gap-5 md:justify-start">
-							<div class="flex items-center gap-5">
-								<button
-									class="text-xl font-bold {!table.getCanPreviousPage()
-										? 'cursor-not-allowed opacity-50'
-										: ''}"
-									onclick={() => table.firstPage()}
-									disabled={!table.getCanPreviousPage()}
-								>
-									&lt;&lt;
-								</button>
-								<button
-									class="text-xl font-bold {!table.getCanPreviousPage()
-										? 'cursor-not-allowed opacity-50'
-										: ''}"
-									onclick={() => table.previousPage()}
-									disabled={!table.getCanPreviousPage()}
-								>
-									&lt;
-								</button>
-							</div>
-							<div class="flex items-center gap-5">
-								<button
-									class="text-xl font-bold {!table.getCanNextPage()
-										? 'cursor-not-allowed opacity-50'
-										: ''}"
-									onclick={() => table.nextPage()}
-									disabled={!table.getCanNextPage()}
-								>
-									&gt;
-								</button>
-								<button
-									class="text-xl font-bold {!table.getCanNextPage()
-										? 'cursor-not-allowed opacity-50'
-										: ''}"
-									onclick={() => table.lastPage()}
-									disabled={!table.getCanNextPage()}
-								>
-									&gt;&gt;
-								</button>
-							</div>
-						</div>
-
-						<span class="flex items-center justify-center gap-1 md:justify-start">
-							<div>{$_(`leaderboard.page`)}</div>
-							<strong>
-								{pagination.pageIndex + 1} {$_(`leaderboard.of`)} {table.getPageCount().toLocaleString()}
-							</strong>
-						</span>
-					</div>
-				</div>
+				<LeaderboardPagination {table} {pageSizes} />
 			{/if}
 		{/if}
 	</div>
