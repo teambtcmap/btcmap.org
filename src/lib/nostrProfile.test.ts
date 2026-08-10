@@ -4,7 +4,12 @@ import { afterEach, describe, expect, it, vi } from "vitest";
 // pool.get and is controlled per test.
 const { mockGet } = vi.hoisted(() => ({ mockGet: vi.fn() }));
 vi.mock("nostr-tools/pool", () => ({
-	SimplePool: vi.fn(() => ({ get: mockGet })),
+	// A function expression, not an arrow: the module calls `new SimplePool()`
+	// and vitest 4 propagates real construct semantics (arrows throw under
+	// `new`; vitest 3's spy shimmed this away)
+	SimplePool: vi.fn(function SimplePool() {
+		return { get: mockGet };
+	}),
 }));
 
 import { fetchProfile } from "./nostrProfile";
