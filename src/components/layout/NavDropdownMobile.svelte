@@ -1,5 +1,5 @@
 <script lang="ts">
-import OutClick from "svelte-outclick";
+import { OutClick } from "svelte-outclick";
 
 import Icon from "$components/Icon.svelte";
 import IconMobileNav from "$lib/icons/IconMobileNav.svelte";
@@ -36,7 +36,7 @@ $: displayIcon = (show ? `${icon}-highlight` : icon) as MobileNavIconName;
 {#if show}
 	<OutClick
 		excludeQuerySelectorAll={`#dropdown-${title.toLowerCase()}-mobile`}
-		on:outclick={() => (show = false)}
+		onOutClick={() => (show = false)}
 	>
 		<div class="ml-7 space-y-2">
 			{#each links as link (link.url)}

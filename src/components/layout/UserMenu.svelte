@@ -1,5 +1,5 @@
 <script lang="ts">
-import OutClick from "svelte-outclick";
+import { OutClick } from "svelte-outclick";
 
 import BackupModal from "$components/auth/BackupModal.svelte";
 import Icon from "$components/Icon.svelte";
@@ -83,7 +83,7 @@ afterNavigate(() => {
 	{#if open}
 		<OutClick
 			excludeQuerySelectorAll={`#${triggerId}`}
-			on:outclick={() => (open = false)}
+			onOutClick={() => (open = false)}
 		>
 			<div
 				class="absolute right-0 top-full z-50 mt-2 w-48 rounded-lg border border-gray-300 bg-white py-1 shadow-lg dark:border-white/20 dark:bg-dark"

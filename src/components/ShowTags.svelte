@@ -1,6 +1,6 @@
 <script lang="ts">
 import { fly } from "svelte/transition";
-import OutClick from "svelte-outclick";
+import { OutClick } from "svelte-outclick";
 
 import CloseButton from "$components/CloseButton.svelte";
 import { showTags } from "$lib/store";
@@ -9,7 +9,7 @@ const closeModal = () => ($showTags = undefined);
 </script>
 
 {#if $showTags}
-	<OutClick excludeQuerySelectorAll="#show-tags" on:outclick={closeModal}>
+	<OutClick excludeQuerySelectorAll="#show-tags" onOutClick={closeModal}>
 		<div
 			transition:fly={{ y: 200, duration: 300 }}
 			class="center-fixed z-[2000] max-h-[90dvh] w-[90vw] overflow-auto rounded-xl border border-gray-300 bg-white p-6 text-left shadow-2xl md:h-[400px] md:w-[430px] dark:border-white/95 dark:bg-dark"

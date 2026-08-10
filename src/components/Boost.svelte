@@ -1,6 +1,6 @@
 <script lang="ts">
 import { fly } from "svelte/transition";
-import OutClick from "svelte-outclick";
+import { OutClick } from "svelte-outclick";
 
 import BoostContent from "$components/BoostContent.svelte";
 import CloseButton from "$components/CloseButton.svelte";
@@ -29,7 +29,7 @@ const handleBoostComplete = () => {
 </script>
 
 {#if $boost}
-	<OutClick on:outclick={handleOutClick}>
+	<OutClick onOutClick={handleOutClick}>
 		<div
 			transition:fly={{ y: 200, duration: 300 }}
 			class="center-fixed z-[2000] max-h-[90dvh] w-[90vw] overflow-auto rounded-xl border border-gray-300 bg-white p-6 text-left shadow-2xl md:w-[430px] dark:border-white/95 dark:bg-dark"
