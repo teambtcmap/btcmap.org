@@ -78,8 +78,8 @@ importers:
         specifier: ^4.2.0
         version: 4.2.0(svelte@5.56.8)
       svelte-time:
-        specifier: ^1.1.0
-        version: 1.1.0
+        specifier: ^2.3.0
+        version: 2.3.0
       svg-captcha:
         specifier: ^1.4.0
         version: 1.4.0
@@ -91,8 +91,8 @@ importers:
         specifier: ^2.5.3
         version: 2.5.7
       '@iconify/svelte':
-        specifier: ^4.2.0
-        version: 4.2.0(svelte@5.56.8)
+        specifier: ^5.2.2
+        version: 5.2.2(svelte@5.56.8)
       '@mapbox/mapbox-gl-rtl-text':
         specifier: ^0.4.0
         version: 0.4.0
@@ -738,10 +738,10 @@ packages:
   '@iarna/toml@2.2.5':
     resolution: {integrity: sha512-trnsAYxU3xnS1gPHPyU961coFyLkh4gAD/0zQ5mymY4yOZ+CYvsPqUbOFSw0aDM4y0tV7tiFxL/1XfXPNC6IPg==}
 
-  '@iconify/svelte@4.2.0':
-    resolution: {integrity: sha512-fEl0T7SAPonK7xk6xUlRPDmFDZVDe2Z7ZstlqeDS/sS8ve2uyU+Qa8rTWbIqzZJlRvONkK5kVXiUf9nIc+6OOQ==}
+  '@iconify/svelte@5.2.2':
+    resolution: {integrity: sha512-XMXxD3nzH7yB68C3K4sNwzrJ1TBscODR0ZqCeNf0KGuEMCTSuCo0jHNDZ0o0iRXTylO41NSz/DWam/4atLG1yw==}
     peerDependencies:
-      svelte: '>4.0.0'
+      svelte: '>5.0.0'
 
   '@iconify/types@2.0.0':
     resolution: {integrity: sha512-+wluvCrRhXrhyOmRDJ3q8mux9JkKy5SJ/v8ol2tu4FVjyYvtEzkc/3pK15ET6RKg4b4w4BmTk1+gsCUhf21Ykg==}
@@ -1300,8 +1300,8 @@ packages:
   date-fns@4.4.0:
     resolution: {integrity: sha512-+1UMbeh68lH1SegH83CGWwpb6OHHbpSgr3+s5Eww5M4CAgswBpoWS0AjTOfEJ33HiYKz1hdj/KTFprzXHmq/6w==}
 
-  dayjs@1.11.13:
-    resolution: {integrity: sha512-oaMBel6gjolK862uaPQOVTA7q3TZhuSvuMQAAglQDOWYO9A91IrAOUJEyKVlqJlHE0vq5p5UXxzdPfMH/x6xNg==}
+  dayjs@1.11.21:
+    resolution: {integrity: sha512-98IT+HOahAisibz/yjKbzuOBwYcjJ7BCLPzARyHiyEBmRz4fatF+KPJszEHXsGYjUG234aH/cOjW1wwTbKUZlA==}
 
   debug@4.4.3:
     resolution: {integrity: sha512-RGwwWnwQvkVfavKVt22FGLw+xYSdzARwm0ru6DhTVA3umU5hZc28V3kO4stgYryrTlLpuvgI9GiijltAjNbcqA==}
@@ -1944,8 +1944,8 @@ packages:
     peerDependencies:
       svelte: '>= 5'
 
-  svelte-time@1.1.0:
-    resolution: {integrity: sha512-QmjmlS62+9t+no/xHOEYz1Oics+VUu1lk3RZbnnOGmqK2rCRUedktLhIoB0/3GSGg98+UJb4Pe4h7El+OHquYg==}
+  svelte-time@2.3.0:
+    resolution: {integrity: sha512-XISfzFt1ToijhsaDEH6oDPRSyUGD8eIxGVmpTrKgurCkfVv/H5oopvP7H45j898w5ddauBI4i8KtHGU47Lsr9g==}
 
   svelte@5.56.8:
     resolution: {integrity: sha512-PY8LOw7xP6c8IOiVqdo0sbbZVYhXRSfklOQLAUyGBKqjTX0wx/z4l/9J+PmBpmlLnxzEb1NqltxQ5/wZme/Cmg==}
@@ -2519,7 +2519,7 @@ snapshots:
 
   '@iarna/toml@2.2.5': {}
 
-  '@iconify/svelte@4.2.0(svelte@5.56.8)':
+  '@iconify/svelte@5.2.2(svelte@5.56.8)':
     dependencies:
       '@iconify/types': 2.0.0
       svelte: 5.56.8
@@ -3032,7 +3032,7 @@ snapshots:
 
   date-fns@4.4.0: {}
 
-  dayjs@1.11.13: {}
+  dayjs@1.11.21: {}
 
   debug@4.4.3:
     dependencies:
@@ -3720,9 +3720,9 @@ snapshots:
     dependencies:
       svelte: 5.56.8
 
-  svelte-time@1.1.0:
+  svelte-time@2.3.0:
     dependencies:
-      dayjs: 1.11.13
+      dayjs: 1.11.21
 
   svelte@5.56.8:
     dependencies:
