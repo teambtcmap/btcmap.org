@@ -4,6 +4,11 @@ import type { SavedPlace } from "./SavedPlace";
 
 export type MeResponse = { id: number, name: string, roles: Array<string>, saved_places: Array<SavedPlace>, saved_areas: Array<SavedArea>, 
 /**
+ * Area ids the user is restricted to when acting as an event manager.
+ * Empty means unrestricted.
+ */
+geofence: Array<number>, 
+/**
  * Bech32 npub (`npub1...`) of the Nostr identity linked to this user,
  * or `null` when no pubkey is linked.
  */
