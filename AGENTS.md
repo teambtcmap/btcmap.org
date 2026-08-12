@@ -88,8 +88,12 @@ import type { Place, Report, AreaTags } from '$lib/types';
 - `src/types/btcmap-api/` is generated from btcmap-api's Rust response structs
   (ts-rs) — never hand-edit it; it is excluded from biome and must stay
   byte-identical to the generator's output
-- Regenerate with `pnpm types:api` — requires a btcmap-api checkout next to
-  this repo; commit the resulting diff (it documents the API change)
+- Refresh with `pnpm types:api` — it fetches the committed `bindings/`
+  directory from btcmap-api's master on GitHub (no Rust toolchain or checkout
+  needed; btcmap-api CI guarantees that directory matches its code). Commit
+  the resulting diff — it documents the API change
+- To develop against an unmerged btcmap-api branch:
+  `npx degit "teambtcmap/btcmap-api/bindings#<branch>" src/types/btcmap-api`
 - Import these types (via the `$types` alias) when typing raw v4 API responses,
   e.g. `import type { SearchResponse } from "$types/btcmap-api/SearchResponse"`
 - **Two `Place` types exist during the migration:** `Place` from `$lib/types`
