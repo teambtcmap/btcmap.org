@@ -3,6 +3,7 @@ import { error } from "@sveltejs/kit";
 import { API_BASE } from "$lib/api-base";
 
 import type { RequestHandler } from "./$types";
+import type { SearchResponse } from "$types/btcmap-api/SearchResponse";
 
 // Worldwide free-text search. Backed by /v4/search, which matches every OSM tag
 // value, so a city name finds the places addressed in that city. Scoped to
@@ -43,12 +44,11 @@ export const GET: RequestHandler = async ({ url, fetch }) => {
 		error(res.status, "Search temporarily unavailable");
 	}
 
-	const body = (await res.json()) as {
-		results?: ({ type: string } & Record<string, unknown>)[];
-		total_count?: number;
-		has_more?: boolean;
-	};
-	// Drop the discriminator so each row is exactly a Place.
+	// Partial: the type describes what the current API sends, but this proxy
+	// deliberately tolerates an upstream that omits fields (see tests).
+	const body = (await res.json()) as Partial<SearchResponse>;
+	// Drop the discriminator; `type_filter=place` means every row is a place
+	// at runtime, though the static type stays the area/place union.
 	const places = (body.results ?? []).map(({ type: _type, ...place }) => place);
 
 	// The API caps `limit`, so a broad query ("str" matches every addr:street)
