@@ -83,6 +83,25 @@ import { merchantList } from '$lib/merchantListStore';
 import type { Place, Report, AreaTags } from '$lib/types';
 ```
 
+### Generated API types (`$types/btcmap-api`)
+
+- `src/types/btcmap-api/` is generated from btcmap-api's Rust response structs
+  (ts-rs) — never hand-edit it; it is excluded from biome and must stay
+  byte-identical to the generator's output
+- Refresh with `pnpm types:api` — it fetches the committed `bindings/ts/`
+  directory from btcmap-api's master on GitHub (no Rust toolchain or checkout
+  needed; btcmap-api CI guarantees that directory matches its code). Commit
+  the resulting diff — it documents the API change
+- To develop against an unmerged btcmap-api branch:
+  `npx degit "teambtcmap/btcmap-api/bindings/ts#<branch>" src/types/btcmap-api`
+- Import these types (via the `$types` alias) when typing raw v4 API responses,
+  e.g. `import type { SearchResponse } from "$types/btcmap-api/SearchResponse"`
+- **Two `Place` types exist during the migration:** `Place` from `$lib/types`
+  stays the app-facing type used by stores and components; the generated
+  `$types/btcmap-api/Place` is the API contract shape for the `fields`-driven
+  endpoints (all fields optional). Don't autocomplete the wrong one — if a
+  store or component needs `Place`, it's the `$lib/types` one
+
 ### Comments
 
 - **Avoid JSDoc comments** (`/** */` with `@param`, `@returns`, `@description`, etc.)

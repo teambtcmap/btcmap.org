@@ -14,7 +14,9 @@ const config = {
 		adapter: adapter(),
 		alias: {
 			$components: 'src/components',
-			'$components/*': 'src/components/*'
+			'$components/*': 'src/components/*',
+			$types: 'src/types',
+			'$types/*': 'src/types/*'
 		},
 		serviceWorker: {
 			register: true,

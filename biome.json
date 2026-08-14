@@ -18,7 +18,8 @@
 			"!spritesheet-*.ts",
 			"!playwright-report",
 			"!src/error.html",
-			"!**/*.svg"
+			"!**/*.svg",
+			"!src/types/btcmap-api"
 		]
 	},
 	"assist": {

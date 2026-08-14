@@ -23,6 +23,7 @@
 		"preview": "vite preview",
 		"sync:rtl-plugin": "cp node_modules/@mapbox/mapbox-gl-rtl-text/dist/mapbox-gl-rtl-text.js static/mapbox-gl-rtl-text.js",
 		"test": "vitest",
+		"types:api": "rm -rf src/types/btcmap-api && npx degit teambtcmap/btcmap-api/bindings/ts src/types/btcmap-api",
 		"typecheck": "tsc --project ./tsconfig.json --noEmit --pretty"
 	},
 	"lint-staged": {
