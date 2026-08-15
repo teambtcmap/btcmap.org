@@ -227,7 +227,7 @@ jobs:
         run: |
           set -euo pipefail
 
-          MODEL="anthropic/claude-opus-4.8"
+          MODEL="claude-opus-5"
 
           COMMIT_LOG=$(cat /tmp/commit-log.txt)
           DIFF=$(cat /tmp/diff.txt)
@@ -390,7 +390,7 @@ jobs:
                 { role: "system", content: $system },
                 { role: "user", content: $user }
               ],
-              max_tokens: 4096
+              max_tokens: 8192
             }' > /tmp/api-request.json
 
           HTTP_STATUS=$(curl -s -w '%{http_code}' -o /tmp/api-response.json \
