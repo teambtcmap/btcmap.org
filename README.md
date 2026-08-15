@@ -6,8 +6,8 @@
 
 1. `git clone`\
    to clone the repo and `cd` into the directory
-2. Install [pnpm](https://pnpm.io/installation) (if needed)\
-   If the `pnpm` command is not found, run `mise install` (see note below) or use one of the [standalone installation methods](https://pnpm.io/installation)
+2. Install [pnpm](https://pnpm.io/installation) ≥ 10 (if needed)\
+   If `pnpm` is not found — or `pnpm --version` reports < 10 — run `mise install` (see note below) or use one of the [standalone installation methods](https://pnpm.io/installation)
 3. `pnpm install`\
    to install the packages
 4. `pnpm dev`\
@@ -39,7 +39,7 @@ Remove or comment out the env var to switch back to the production API.
    Copy `.env.example` and save as `.env`
 1. `pnpm build`
 
-_NOTE:_ BTC Map uses Node 22 LTS. If you have [mise](https://mise.jdx.dev/), run `mise install` in the repo root to get the correct Node and pnpm versions. Any pnpm ≥ 10 works: pnpm reads the `packageManager` pin in `package.json` and switches to that exact version automatically, so Corepack is not needed (pnpm [no longer recommends it](https://pnpm.io/installation)).
+_NOTE:_ BTC Map requires Node.js ≥ 22.13 (we use Node 22 LTS). If you have [mise](https://mise.jdx.dev/), run `mise install` in the repo root to get the correct Node and pnpm versions. Any pnpm ≥ 10 works: pnpm reads the `packageManager` pin in `package.json` and switches to that exact version automatically, so Corepack is not needed (pnpm [no longer recommends it](https://pnpm.io/installation)).
 
 #### Icons
 
