@@ -385,6 +385,22 @@ jobs:
                       corpus_parts.append(f.read())
               except FileNotFoundError:
                   pass
+
+          # Diff lines carry +/-/space markers. A model copying 2+ lines from
+          # a hunk omits them, so after whitespace collapsing the corpus can
+          # never contain the quote — multi-line quotes from added code could
+          # never verify (both findings dropped on the 2026-08-15 run quoted
+          # real code). Add a marker-stripped copy of the diff so verbatim
+          # multi-line quotes match.
+          try:
+              with open("/tmp/diff.txt", "r", encoding="utf-8", errors="replace") as f:
+                  stripped = "\n".join(
+                      re.sub(r"^[+\- ]", "", line) for line in f.read().splitlines()
+                  )
+              corpus_parts.append(stripped)
+          except FileNotFoundError:
+              pass
+
           corpus = norm("\n".join(corpus_parts))
 
           # Paths that appear as either side of a `diff --git a/x b/y` header.
