@@ -99,17 +99,63 @@ jobs:
             ':!*.snap' ':!*.lock' ':!static/images/' ':!static/icons/' \
             > /tmp/raw-diff.txt
 
-          DIFF_SIZE=$(wc -c < /tmp/raw-diff.txt)
-          echo "Diff size: ${DIFF_SIZE} bytes"
+          python3 - <<'PY'
+          # Per-file truncation instead of head -c on the whole stream. The
+          # old cut was ordered by git's file listing, so everything after
+          # byte 150000 was invisible with no trace — on 2026-08-15 the model
+          # silently saw 28% of a 540KB period. Now every file's diff appears
+          # (capped per file), and files that still don't fit are listed in a
+          # coverage manifest the model can see.
+          import re
 
-          MAX_SIZE=150000
-          if [[ "$DIFF_SIZE" -gt "$MAX_SIZE" ]]; then
-            echo "Truncating diff from ${DIFF_SIZE} to ${MAX_SIZE} bytes"
-            head -c "$MAX_SIZE" /tmp/raw-diff.txt > /tmp/diff.txt
-            printf '\n\n... [TRUNCATED: diff was %s bytes, showing first %s]\n' "$DIFF_SIZE" "$MAX_SIZE" >> /tmp/diff.txt
-          else
-            cp /tmp/raw-diff.txt /tmp/diff.txt
-          fi
+          MAX_TOTAL = 150_000
+          MAX_PER_FILE = 15_000
+
+          with open("/tmp/raw-diff.txt", encoding="utf-8", errors="replace") as f:
+              raw = f.read()
+
+          chunks = [c for c in re.split(r"(?=^diff --git )", raw, flags=re.M) if c.strip()]
+          out, omitted, truncated, shown = [], [], 0, 0
+          for chunk in chunks:
+              m = re.match(r"diff --git a/.* b/(\S+)", chunk)
+              path = m.group(1) if m else "?"
+              piece = chunk
+              if len(piece) > MAX_PER_FILE:
+                  piece = piece[:MAX_PER_FILE] + (
+                      f"\n... [diff for {path} truncated: {len(chunk)} bytes total]\n"
+                  )
+              if shown + len(piece) > MAX_TOTAL:
+                  omitted.append(f"{path} ({len(chunk)} bytes)")
+                  continue
+              if piece is not chunk:
+                  truncated += 1
+              out.append(piece)
+              shown += len(piece)
+
+          manifest = ""
+          if truncated or omitted:
+              manifest = "\n=== DIFF COVERAGE ===\n"
+              if truncated:
+                  manifest += f"{truncated} file diff(s) above were truncated to {MAX_PER_FILE} bytes each.\n"
+              if omitted:
+                  manifest += (
+                      f"{len(omitted)} file diff(s) did not fit the {MAX_TOTAL}-byte budget and are "
+                      "NOT shown — do not report findings about them:\n"
+                      + "\n".join(f"  - {o}" for o in omitted)
+                      + "\n"
+                  )
+
+          with open("/tmp/diff.txt", "w", encoding="utf-8") as f:
+              f.write("".join(out) + manifest)
+
+          with open("/tmp/pipeline-stats.txt", "w", encoding="utf-8") as f:
+              f.write(
+                  f"diff: {len(raw)} bytes across {len(chunks)} files; {shown} bytes shown "
+                  f"(per-file cap {MAX_PER_FILE}); {truncated} file(s) truncated; "
+                  f"{len(omitted)} file(s) omitted entirely\n"
+              )
+          PY
+          cat /tmp/pipeline-stats.txt
 
       - name: Collect full file contents
         if: steps.commits.outputs.skip != 'true'
@@ -172,6 +218,7 @@ jobs:
           done < /tmp/context-files.txt
 
           echo "Full context: ${TOTAL} bytes across $(wc -l < /tmp/context-files.txt) files"
+          echo "file contents: ${TOTAL} bytes shown of $(wc -l < /tmp/context-files.txt) candidate files (per-file cap ${MAX_FILE}, total budget ${MAX_CONTEXT}; skipped files are marked inline)" >> /tmp/pipeline-stats.txt
 
       - name: AI review
         if: steps.commits.outputs.skip != 'true'
@@ -180,13 +227,22 @@ jobs:
         run: |
           set -euo pipefail
 
+          MODEL="claude-opus-5"
+
           COMMIT_LOG=$(cat /tmp/commit-log.txt)
           DIFF=$(cat /tmp/diff.txt)
           HOTSPOTS=$(cat /tmp/hotspots.txt)
           FILE_CONTENTS=$(cat /tmp/file-contents.txt 2>/dev/null || echo "")
+          PIPELINE_STATS=$(cat /tmp/pipeline-stats.txt 2>/dev/null || echo "(no stats recorded)")
+          WORKFLOW_SOURCE=$(cat .github/workflows/ai-health-review.yml 2>/dev/null || echo "")
           PROJECT_CONTEXT=$(cat CLAUDE.md 2>/dev/null || echo "")
           AGENTS_MD=$(cat AGENTS.md 2>/dev/null || echo "")
           README_MD=$(cat README.md 2>/dev/null || echo "")
+
+          # CLAUDE.md is a symlink to AGENTS.md — don't send the same 15KB twice
+          if [[ -n "$PROJECT_CONTEXT" && "$PROJECT_CONTEXT" == "$AGENTS_MD" ]]; then
+            PROJECT_CONTEXT="(CLAUDE.md is identical to AGENTS.md — see the agents-md block below.)"
+          fi
 
           SYSTEM_PROMPT='You are a senior software engineer performing a biweekly code review for a SvelteKit web application (btcmap.org). Your job is to review recently merged code and provide actionable feedback.
 
@@ -195,8 +251,9 @@ jobs:
           2. "Can we refactor?" — patterns, duplication, or related changes across multiple commits that could be consolidated or improved now that they have all landed.
           3. "Is AGENTS.md outdated?" — compare the AGENTS.md documentation against the actual codebase patterns visible in the diff. Flag any conventions, tooling references, file paths, or project structure notes in AGENTS.md that contradict what the code actually does.
           4. "Is README.md outdated?" — compare the README.md against the actual codebase (commands, setup steps, project structure, dependencies). Flag any instructions, commands, or descriptions that no longer match reality.
+          5. "How should this review process improve?" — you are given the coverage numbers for this run (<pipeline-stats>) and the workflow source that produced this prompt (<review-pipeline>). If something about the pipeline measurably limited THIS run — heavy diff truncation, file contents that did not fit the budget, a prompt instruction that contradicts what you saw in the code, a validation gap — say so concretely. Observations about the pipeline belong in the Process Feedback section, never in Findings.
 
-          Project stack: Svelte 4 / SvelteKit 2 (NOT Svelte v5 — do not suggest runes/$state/$derived/$effect), Tailwind CSS v4, TypeScript, Biome (linter/formatter), Vitest, Playwright, Leaflet maps, axios, localforage.
+          The project stack and conventions are documented in the <project-conventions> and <agents-md> blocks in the user message — treat those as authoritative and flag new code that contradicts them. Do not assume the stack from memory; this prompt has gone stale on that before (it claimed Svelte 4 and Leaflet long after the Svelte 5 and MapLibre migrations).
 
           Review guidelines:
           - Focus on the DIFF, not hypotheticals. Every finding must reference specific code from the diff.
@@ -206,8 +263,7 @@ jobs:
           - Group related findings.
           - If the changes are mostly dependency bumps or locale file updates, say so briefly and focus on substantive code changes.
           - Rate each finding: CRITICAL, HIGH, MEDIUM, or LOW.
-          - Aim for 0-5 findings. Empty or short reports are good outcomes — only add more findings if the period genuinely warrants them, never to "look thorough".
-          - Do NOT suggest migrating to Svelte v5 runes — the project intentionally stays on v4.
+          - There is no findings quota in either direction. Report every issue you can verify from the provided inputs, including ones you are uncertain about — state your confidence in the description and let the severity rating carry the triage; post-processing verifies quotes and a human reviews the rest. Never invent or pad findings to look thorough: an empty report on a quiet period is a good outcome.
           - Do NOT suggest formatting or import ordering changes — Biome handles that.
           - If nothing significant was missed and there are no refactoring opportunities, say so briefly. Do not invent findings.
 
@@ -247,6 +303,9 @@ jobs:
 
           ## README.md Drift
           [Any setup instructions, commands, descriptions, or references in README.md that are outdated or incorrect. Otherwise "README.md is up to date."]
+
+          ## Process Feedback
+          [0-2 concrete suggestions for improving this review pipeline itself, each tied to something that measurably limited this run (see <pipeline-stats> and <review-pipeline>) and naming the workflow step or prompt line to change. The maintainer can turn accepted suggestions into issues with /create-issue. Otherwise "None."]
 
           ## Stats
           - **Commits reviewed:** N
@@ -295,6 +354,18 @@ jobs:
           ${DIFF}
           </diff>
 
+          Coverage numbers for this run — how much of the period you are actually seeing:
+
+          <pipeline-stats>
+          ${PIPELINE_STATS}
+          </pipeline-stats>
+
+          The workflow source that generated this review, for the Process Feedback section only:
+
+          <review-pipeline>
+          ${WORKFLOW_SOURCE}
+          </review-pipeline>
+
           IMPORTANT — These paths are EXCLUDED from the diff and you have NO visibility into their contents:
           - src/lib/i18n/locales/* (all translation JSON files)
           - pnpm-lock.yaml, package-lock.json, *.lock
@@ -310,7 +381,7 @@ jobs:
           printf '%s' "$USER_PROMPT" > /tmp/user-prompt.txt
 
           jq -n \
-            --arg model "anthropic/claude-opus-4.8" \
+            --arg model "$MODEL" \
             --rawfile system /tmp/system-prompt.txt \
             --rawfile user /tmp/user-prompt.txt \
             '{
@@ -319,7 +390,7 @@ jobs:
                 { role: "system", content: $system },
                 { role: "user", content: $user }
               ],
-              max_tokens: 4096
+              max_tokens: 8192
             }' > /tmp/api-request.json
 
           HTTP_STATUS=$(curl -s -w '%{http_code}' -o /tmp/api-response.json \
@@ -343,7 +414,7 @@ jobs:
           cat >> /tmp/review.md << FOOTER
 
           ---
-          _Generated by [AI Health Review](../../actions/workflows/ai-health-review.yml) using GitHub Models._
+          _Generated by [AI Health Review](../../actions/workflows/ai-health-review.yml) using ${MODEL}._
           _Reply with \`/run-now\` to trigger a new review or \`/create-issue <title>\` to create a follow-up issue._
           <!-- cutoff: ${CUTOFF} -->
           FOOTER
@@ -385,6 +456,22 @@ jobs:
                       corpus_parts.append(f.read())
               except FileNotFoundError:
                   pass
+
+          # Diff lines carry +/-/space markers. A model copying 2+ lines from
+          # a hunk omits them, so after whitespace collapsing the corpus can
+          # never contain the quote — multi-line quotes from added code could
+          # never verify (both findings dropped on the 2026-08-15 run quoted
+          # real code). Add a marker-stripped copy of the diff so verbatim
+          # multi-line quotes match.
+          try:
+              with open("/tmp/diff.txt", "r", encoding="utf-8", errors="replace") as f:
+                  stripped = "\n".join(
+                      re.sub(r"^[+\- ]", "", line) for line in f.read().splitlines()
+                  )
+              corpus_parts.append(stripped)
+          except FileNotFoundError:
+              pass
+
           corpus = norm("\n".join(corpus_parts))
 
           # Paths that appear as either side of a `diff --git a/x b/y` header.
@@ -447,7 +534,7 @@ jobs:
               # 1. File existence
               fm = file_re.search(block)
               if not fm:
-                  dropped.append((title, "no **Files:** line"))
+                  dropped.append((title, "no **Files:** line", block))
                   continue
               raw = fm.group(1).strip()
               paths = path_re.findall(raw)
@@ -461,21 +548,21 @@ jobs:
                   if not os.path.isfile(p) and p not in diff_paths
               ]
               if missing:
-                  dropped.append((title, f"missing file(s): {', '.join(missing)}"))
+                  dropped.append((title, f"missing file(s): {', '.join(missing)}", block))
                   continue
 
               # 2. Quote present and verifiable
               qm = quote_re.search(block)
               if not qm:
-                  dropped.append((title, "no **Quote:** code block"))
+                  dropped.append((title, "no **Quote:** code block", block))
                   continue
               quote_norm = norm(qm.group(1))
               if not quote_norm:
-                  dropped.append((title, "empty **Quote:** block"))
+                  dropped.append((title, "empty **Quote:** block", block))
                   continue
               if quote_norm not in corpus:
                   preview = quote_norm[:80] + ("…" if len(quote_norm) > 80 else "")
-                  dropped.append((title, f"quote not found in diff or file-contents: '{preview}'"))
+                  dropped.append((title, f"quote not found in diff or file-contents: '{preview}'", block))
                   continue
 
               kept.append(block)
@@ -485,13 +572,29 @@ jobs:
           if not any(b.strip().startswith("###") for b in kept):
               new_body += "_All findings were dropped by post-processing (failed file or quote verification)._\n\n"
 
+          # Dropped findings previously vanished into the CI log where nobody
+          # saw them — on 2026-08-15 two real findings were lost that way.
+          # Keep them human-reviewable in a collapsed block, clearly labeled
+          # as unverified.
+          if dropped:
+              new_body += (
+                  "<details>\n<summary>⚠️ "
+                  f"{len(dropped)} finding(s) failed automatic verification "
+                  "— shown for human review, may be inaccurate</summary>\n\n"
+                  + "\n\n---\n\n".join(
+                      f"{block.strip()}\n\n_Dropped: {reason}_"
+                      for title, reason, block in dropped
+                  )
+                  + "\n\n</details>\n\n"
+              )
+
           new_text = text[:m.start()] + head + new_body + tail + text[m.end():]
           with open(path, "w", encoding="utf-8") as f:
               f.write(new_text)
 
           if dropped:
               print(f"Dropped {len(dropped)} finding(s):")
-              for title, reason in dropped:
+              for title, reason, _block in dropped:
                   print(f"  - {title}")
                   print(f"      reason: {reason}")
           else:
