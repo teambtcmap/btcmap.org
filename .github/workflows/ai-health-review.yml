@@ -419,6 +419,20 @@ jobs:
               reviewBody = '# Biweekly Codebase Health Review\n\nError: Could not read review file.';
             }
 
+            // GitHub caps issue bodies at 65536 characters; over the cap the
+            // create call hard-fails and no report is published. Truncate the
+            // middle and keep the tail — it carries the cutoff marker the
+            // next run anchors on.
+            const MAX_BODY = 60000;
+            if (reviewBody.length > MAX_BODY) {
+              const originalLength = reviewBody.length;
+              const tail = reviewBody.slice(-1200);
+              reviewBody = reviewBody.slice(0, MAX_BODY - 1300)
+                + '\n\n_[report truncated to fit the GitHub issue-body limit]_\n\n'
+                + tail;
+              core.warning(`Review body truncated from ${originalLength} to ${reviewBody.length} chars`);
+            }
+
             // Ensure label exists
             try {
               await github.rest.issues.getLabel({
