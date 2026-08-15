@@ -380,6 +380,10 @@ jobs:
           printf '%s' "$SYSTEM_PROMPT" > /tmp/system-prompt.txt
           printf '%s' "$USER_PROMPT" > /tmp/user-prompt.txt
 
+          # claude-opus-5 reasons by default and max_tokens caps reasoning +
+          # visible content TOGETHER; at 8192 the whole budget went to
+          # reasoning and message.content came back null (#1248). This is a
+          # ceiling, not a target — only generated tokens are billed.
           jq -n \
             --arg model "$MODEL" \
             --rawfile system /tmp/system-prompt.txt \
@@ -390,7 +394,7 @@ jobs:
                 { role: "system", content: $system },
                 { role: "user", content: $user }
               ],
-              max_tokens: 8192
+              max_tokens: 32000
             }' > /tmp/api-request.json
 
           HTTP_STATUS=$(curl -s -w '%{http_code}' -o /tmp/api-response.json \
@@ -406,8 +410,17 @@ jobs:
             exit 1
           fi
 
-          # Extract AI response
-          jq -r '.choices[0].message.content' /tmp/api-response.json > /tmp/review.md
+          # Extract AI response. `// empty` keeps a missing/null content from
+          # becoming the literal string "null" (#1248); the guard below fails
+          # the job with diagnostics instead of publishing a broken report.
+          jq -r '.choices[0].message.content // empty' /tmp/api-response.json > /tmp/review.md
+
+          if [[ ! -s /tmp/review.md ]]; then
+            FINISH=$(jq -r '.choices[0].finish_reason // "unknown"' /tmp/api-response.json 2>/dev/null || echo "unknown")
+            USAGE=$(jq -c '.usage // {}' /tmp/api-response.json 2>/dev/null || echo "{}")
+            echo "::error::AI response had no message content (finish_reason: ${FINISH}, usage: ${USAGE}) — refusing to publish an empty report"
+            exit 1
+          fi
 
           # Append footer with cutoff timestamp for next run's anchor
           CUTOFF="${{ steps.commits.outputs.cutoff_date }}"
