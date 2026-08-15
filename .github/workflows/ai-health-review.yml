@@ -463,7 +463,7 @@ jobs:
               # 1. File existence
               fm = file_re.search(block)
               if not fm:
-                  dropped.append((title, "no **Files:** line"))
+                  dropped.append((title, "no **Files:** line", block))
                   continue
               raw = fm.group(1).strip()
               paths = path_re.findall(raw)
@@ -477,21 +477,21 @@ jobs:
                   if not os.path.isfile(p) and p not in diff_paths
               ]
               if missing:
-                  dropped.append((title, f"missing file(s): {', '.join(missing)}"))
+                  dropped.append((title, f"missing file(s): {', '.join(missing)}", block))
                   continue
 
               # 2. Quote present and verifiable
               qm = quote_re.search(block)
               if not qm:
-                  dropped.append((title, "no **Quote:** code block"))
+                  dropped.append((title, "no **Quote:** code block", block))
                   continue
               quote_norm = norm(qm.group(1))
               if not quote_norm:
-                  dropped.append((title, "empty **Quote:** block"))
+                  dropped.append((title, "empty **Quote:** block", block))
                   continue
               if quote_norm not in corpus:
                   preview = quote_norm[:80] + ("…" if len(quote_norm) > 80 else "")
-                  dropped.append((title, f"quote not found in diff or file-contents: '{preview}'"))
+                  dropped.append((title, f"quote not found in diff or file-contents: '{preview}'", block))
                   continue
 
               kept.append(block)
@@ -501,13 +501,29 @@ jobs:
           if not any(b.strip().startswith("###") for b in kept):
               new_body += "_All findings were dropped by post-processing (failed file or quote verification)._\n\n"
 
+          # Dropped findings previously vanished into the CI log where nobody
+          # saw them — on 2026-08-15 two real findings were lost that way.
+          # Keep them human-reviewable in a collapsed block, clearly labeled
+          # as unverified.
+          if dropped:
+              new_body += (
+                  "<details>\n<summary>⚠️ "
+                  f"{len(dropped)} finding(s) failed automatic verification "
+                  "— shown for human review, may be inaccurate</summary>\n\n"
+                  + "\n\n---\n\n".join(
+                      f"{block.strip()}\n\n_Dropped: {reason}_"
+                      for title, reason, block in dropped
+                  )
+                  + "\n\n</details>\n\n"
+              )
+
           new_text = text[:m.start()] + head + new_body + tail + text[m.end():]
           with open(path, "w", encoding="utf-8") as f:
               f.write(new_text)
 
           if dropped:
               print(f"Dropped {len(dropped)} finding(s):")
-              for title, reason in dropped:
+              for title, reason, _block in dropped:
                   print(f"  - {title}")
                   print(f"      reason: {reason}")
           else:
