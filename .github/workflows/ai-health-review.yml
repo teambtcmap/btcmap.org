@@ -99,17 +99,63 @@ jobs:
             ':!*.snap' ':!*.lock' ':!static/images/' ':!static/icons/' \
             > /tmp/raw-diff.txt
 
-          DIFF_SIZE=$(wc -c < /tmp/raw-diff.txt)
-          echo "Diff size: ${DIFF_SIZE} bytes"
+          python3 - <<'PY'
+          # Per-file truncation instead of head -c on the whole stream. The
+          # old cut was ordered by git's file listing, so everything after
+          # byte 150000 was invisible with no trace — on 2026-08-15 the model
+          # silently saw 28% of a 540KB period. Now every file's diff appears
+          # (capped per file), and files that still don't fit are listed in a
+          # coverage manifest the model can see.
+          import re
 
-          MAX_SIZE=150000
-          if [[ "$DIFF_SIZE" -gt "$MAX_SIZE" ]]; then
-            echo "Truncating diff from ${DIFF_SIZE} to ${MAX_SIZE} bytes"
-            head -c "$MAX_SIZE" /tmp/raw-diff.txt > /tmp/diff.txt
-            printf '\n\n... [TRUNCATED: diff was %s bytes, showing first %s]\n' "$DIFF_SIZE" "$MAX_SIZE" >> /tmp/diff.txt
-          else
-            cp /tmp/raw-diff.txt /tmp/diff.txt
-          fi
+          MAX_TOTAL = 150_000
+          MAX_PER_FILE = 15_000
+
+          with open("/tmp/raw-diff.txt", encoding="utf-8", errors="replace") as f:
+              raw = f.read()
+
+          chunks = [c for c in re.split(r"(?=^diff --git )", raw, flags=re.M) if c.strip()]
+          out, omitted, truncated, shown = [], [], 0, 0
+          for chunk in chunks:
+              m = re.match(r"diff --git a/.* b/(\S+)", chunk)
+              path = m.group(1) if m else "?"
+              piece = chunk
+              if len(piece) > MAX_PER_FILE:
+                  piece = piece[:MAX_PER_FILE] + (
+                      f"\n... [diff for {path} truncated: {len(chunk)} bytes total]\n"
+                  )
+              if shown + len(piece) > MAX_TOTAL:
+                  omitted.append(f"{path} ({len(chunk)} bytes)")
+                  continue
+              if piece is not chunk:
+                  truncated += 1
+              out.append(piece)
+              shown += len(piece)
+
+          manifest = ""
+          if truncated or omitted:
+              manifest = "\n=== DIFF COVERAGE ===\n"
+              if truncated:
+                  manifest += f"{truncated} file diff(s) above were truncated to {MAX_PER_FILE} bytes each.\n"
+              if omitted:
+                  manifest += (
+                      f"{len(omitted)} file diff(s) did not fit the {MAX_TOTAL}-byte budget and are "
+                      "NOT shown — do not report findings about them:\n"
+                      + "\n".join(f"  - {o}" for o in omitted)
+                      + "\n"
+                  )
+
+          with open("/tmp/diff.txt", "w", encoding="utf-8") as f:
+              f.write("".join(out) + manifest)
+
+          with open("/tmp/pipeline-stats.txt", "w", encoding="utf-8") as f:
+              f.write(
+                  f"diff: {len(raw)} bytes across {len(chunks)} files; {shown} bytes shown "
+                  f"(per-file cap {MAX_PER_FILE}); {truncated} file(s) truncated; "
+                  f"{len(omitted)} file(s) omitted entirely\n"
+              )
+          PY
+          cat /tmp/pipeline-stats.txt
 
       - name: Collect full file contents
         if: steps.commits.outputs.skip != 'true'
@@ -172,6 +218,7 @@ jobs:
           done < /tmp/context-files.txt
 
           echo "Full context: ${TOTAL} bytes across $(wc -l < /tmp/context-files.txt) files"
+          echo "file contents: ${TOTAL} bytes shown of $(wc -l < /tmp/context-files.txt) candidate files (per-file cap ${MAX_FILE}, total budget ${MAX_CONTEXT}; skipped files are marked inline)" >> /tmp/pipeline-stats.txt
 
       - name: AI review
         if: steps.commits.outputs.skip != 'true'
