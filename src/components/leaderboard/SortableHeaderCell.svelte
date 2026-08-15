@@ -45,12 +45,6 @@ let { header, centered = false, trailing }: Props = $props();
 		class:justify-center={centerSelf}
 		class:cursor-pointer={header.column.getCanSort()}
 		onclick={header.column.getToggleSortingHandler()}
-		onkeydown={(e) => {
-			if (e.key === 'Enter' || e.key === ' ') {
-				e.preventDefault();
-				header.column.getToggleSortingHandler()?.(e);
-			}
-		}}
 		tabindex={header.column.getCanSort() ? 0 : -1}
 		aria-label={header.column.getCanSort()
 			? header.column.getIsSorted() === 'asc'
