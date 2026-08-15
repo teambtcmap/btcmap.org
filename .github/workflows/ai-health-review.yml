@@ -233,6 +233,8 @@ jobs:
           DIFF=$(cat /tmp/diff.txt)
           HOTSPOTS=$(cat /tmp/hotspots.txt)
           FILE_CONTENTS=$(cat /tmp/file-contents.txt 2>/dev/null || echo "")
+          PIPELINE_STATS=$(cat /tmp/pipeline-stats.txt 2>/dev/null || echo "(no stats recorded)")
+          WORKFLOW_SOURCE=$(cat .github/workflows/ai-health-review.yml 2>/dev/null || echo "")
           PROJECT_CONTEXT=$(cat CLAUDE.md 2>/dev/null || echo "")
           AGENTS_MD=$(cat AGENTS.md 2>/dev/null || echo "")
           README_MD=$(cat README.md 2>/dev/null || echo "")
@@ -249,6 +251,7 @@ jobs:
           2. "Can we refactor?" — patterns, duplication, or related changes across multiple commits that could be consolidated or improved now that they have all landed.
           3. "Is AGENTS.md outdated?" — compare the AGENTS.md documentation against the actual codebase patterns visible in the diff. Flag any conventions, tooling references, file paths, or project structure notes in AGENTS.md that contradict what the code actually does.
           4. "Is README.md outdated?" — compare the README.md against the actual codebase (commands, setup steps, project structure, dependencies). Flag any instructions, commands, or descriptions that no longer match reality.
+          5. "How should this review process improve?" — you are given this workflow run's own coverage numbers (<pipeline-stats>) and the workflow source that produced this prompt (<review-pipeline>). If something about the pipeline measurably limited THIS run — heavy diff truncation, file contents that did not fit the budget, a prompt instruction that contradicts what you saw in the code, a validation gap — say so concretely. Observations about the pipeline belong in the Process Feedback section, never in Findings.
 
           The project stack and conventions are documented in the <project-conventions> and <agents-md> blocks in the user message — treat those as authoritative and flag new code that contradicts them. Do not assume the stack from memory; this prompt has gone stale on that before (it claimed Svelte 4 and Leaflet long after the Svelte 5 and MapLibre migrations).
 
@@ -301,6 +304,9 @@ jobs:
           ## README.md Drift
           [Any setup instructions, commands, descriptions, or references in README.md that are outdated or incorrect. Otherwise "README.md is up to date."]
 
+          ## Process Feedback
+          [0-2 concrete suggestions for improving this review pipeline itself, each tied to something that measurably limited this run (see <pipeline-stats> and <review-pipeline>) and naming the workflow step or prompt line to change. The maintainer can turn accepted suggestions into issues with /create-issue. Otherwise "None."]
+
           ## Stats
           - **Commits reviewed:** N
           - **Period:** DATE to DATE'
@@ -347,6 +353,18 @@ jobs:
           <diff>
           ${DIFF}
           </diff>
+
+          Coverage numbers for this run — how much of the period you are actually seeing:
+
+          <pipeline-stats>
+          ${PIPELINE_STATS}
+          </pipeline-stats>
+
+          The workflow source that generated this review, for the Process Feedback section only:
+
+          <review-pipeline>
+          ${WORKFLOW_SOURCE}
+          </review-pipeline>
 
           IMPORTANT — These paths are EXCLUDED from the diff and you have NO visibility into their contents:
           - src/lib/i18n/locales/* (all translation JSON files)
