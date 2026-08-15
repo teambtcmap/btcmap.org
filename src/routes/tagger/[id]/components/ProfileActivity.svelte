@@ -1,14 +1,15 @@
 <script lang="ts">
 import type { ColumnDef } from "@tanstack/svelte-table";
-import { createTable, FlexRender } from "@tanstack/svelte-table";
+import { createTable } from "@tanstack/svelte-table";
 import { format } from "date-fns/format";
 import { untrack } from "svelte";
 
 import LeaderboardPagination from "$components/leaderboard/LeaderboardPagination.svelte";
 import LeaderboardSearch from "$components/leaderboard/LeaderboardSearch.svelte";
+import SortableHeaderCell from "$components/leaderboard/SortableHeaderCell.svelte";
 import { _ } from "$lib/i18n";
 import type { BtcmapTableFeatures } from "$lib/tableFeatures";
-import { btcmapTableFeatures, resolveHeaderLabel } from "$lib/tableFeatures";
+import { btcmapTableFeatures, resolveAriaSort } from "$lib/tableFeatures";
 import type { ActivityEvent } from "$lib/types";
 import { debounce } from "$lib/utils";
 
@@ -128,50 +129,9 @@ const searchDebounce = debounce((e) => handleKeyUp(e));
 											.column.id === 'location'
 											? 'w-2/3'
 											: 'w-1/6'}"
-										aria-sort={header.column.getIsSorted() === 'asc'
-											? 'ascending'
-											: header.column.getIsSorted() === 'desc'
-												? 'descending'
-												: 'none'}
+										aria-sort={resolveAriaSort(header)}
 									>
-										{#if !header.isPlaceholder}
-											{@const headerLabel = resolveHeaderLabel(header)}
-											<button
-												type="button"
-												class="flex items-center gap-x-1 leading-tight select-none"
-												class:cursor-pointer={header.column.getCanSort()}
-												onclick={header.column.getToggleSortingHandler()}
-												onkeydown={(e) => {
-													if (e.key === 'Enter' || e.key === ' ') {
-														e.preventDefault();
-														header.column.getToggleSortingHandler()?.(e);
-													}
-												}}
-												tabindex={header.column.getCanSort() ? 0 : -1}
-												aria-label={header.column.getCanSort()
-													? header.column.getIsSorted() === 'asc'
-														? $_('leaderboard.sortByCurrentlyAscending', {
-																values: { column: headerLabel },
-															})
-														: header.column.getIsSorted() === 'desc'
-															? $_('leaderboard.sortByCurrentlyDescending', {
-																	values: { column: headerLabel },
-																})
-															: $_('leaderboard.sortByCurrentlyUnsorted', {
-																	values: { column: headerLabel },
-																})
-													: headerLabel}
-											>
-												<span class="break-words">
-													<FlexRender {header} />
-												</span>
-												{#if header.column.getIsSorted().toString() === 'asc'}
-													<span aria-hidden="true">▲</span>
-												{:else if header.column.getIsSorted().toString() === 'desc'}
-													<span aria-hidden="true">▼</span>
-												{/if}
-											</button>
-										{/if}
+										<SortableHeaderCell {header} />
 									</th>
 								{/each}
 							</tr>

@@ -77,3 +77,16 @@ export const resolveHeaderLabel = <TData extends RowData>(
 	if (typeof def === "function") return String(def(header.getContext()));
 	return typeof def === "string" ? def : header.column.id;
 };
+
+// Maps a column's sort state to the aria-sort value for its <th>.
+// Never-sortable columns return undefined so the attribute is omitted —
+// aria-sort belongs only on headers that participate in sorting.
+export const resolveAriaSort = <TData extends RowData>(
+	header: Header<BtcmapTableFeatures, TData, any>,
+): "ascending" | "descending" | "none" | undefined => {
+	if (!header.column.getCanSort()) return undefined;
+	const sorted = header.column.getIsSorted();
+	if (sorted === "asc") return "ascending";
+	if (sorted === "desc") return "descending";
+	return "none";
+};
