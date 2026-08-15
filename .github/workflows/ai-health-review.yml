@@ -129,18 +129,23 @@ jobs:
             done
           done < /tmp/imports-raw.txt
 
-          # Merge, deduplicate, filter to source files
+          # Merge, deduplicate, filter to source and config files. Without
+          # yml/py/toml/json a workflow-only period had zero full-file
+          # context, so nothing outside the diff hunks was quotable (#1250).
           cat /tmp/diff-files.txt /tmp/imports-resolved.txt \
             | sort -u \
-            | grep -E '\.(ts|svelte|js)$' \
+            | grep -E '\.(ts|svelte|js|yml|yaml|py|toml|json)$' \
             | grep -vE 'node_modules|src/lib/i18n/locales/' > /tmp/context-files-unsorted.txt || true
 
-          # Prioritize: server .ts first, then other .ts, then .svelte
+          # Prioritize: server .ts first, then other .ts, then .svelte, then
+          # everything else that passed the filter (.js and config files were
+          # previously filtered in but never copied into the ordered list)
           > /tmp/context-files.txt
           grep -E '\+server\.ts|\+page\.server\.ts' /tmp/context-files-unsorted.txt >> /tmp/context-files.txt || true
           grep -v -E '\+server\.ts|\+page\.server\.ts' /tmp/context-files-unsorted.txt \
             | grep '\.ts$' >> /tmp/context-files.txt || true
           grep '\.svelte$' /tmp/context-files-unsorted.txt >> /tmp/context-files.txt || true
+          grep -vE '\.(ts|svelte)$' /tmp/context-files-unsorted.txt >> /tmp/context-files.txt || true
 
           TOTAL=0
           > /tmp/file-contents.txt
