@@ -356,14 +356,22 @@ jobs:
           fi
 
           # Extract AI response. `// empty` keeps a missing/null content from
-          # becoming the literal string "null" (#1248); the guard below fails
+          # becoming the literal string "null" (#1248); the guards below fail
           # the job with diagnostics instead of publishing a broken report.
           jq -r '.choices[0].message.content // empty' /tmp/api-response.json > /tmp/review.md
+          FINISH=$(jq -r '.choices[0].finish_reason // "unknown"' /tmp/api-response.json 2>/dev/null || echo "unknown")
+          USAGE=$(jq -c '.usage // {}' /tmp/api-response.json 2>/dev/null || echo "{}")
 
           if [[ ! -s /tmp/review.md ]]; then
-            FINISH=$(jq -r '.choices[0].finish_reason // "unknown"' /tmp/api-response.json 2>/dev/null || echo "unknown")
-            USAGE=$(jq -c '.usage // {}' /tmp/api-response.json 2>/dev/null || echo "{}")
             echo "::error::AI response had no message content (finish_reason: ${FINISH}, usage: ${USAGE}) — refusing to publish an empty report"
+            exit 1
+          fi
+
+          # A report cut off at max_tokens has content, so it passes the
+          # emptiness check, would publish mid-sentence, and can dodge the
+          # findings validator through its non-fatal missing-section path.
+          if [[ "$FINISH" == "length" ]]; then
+            echo "::error::AI response was truncated at max_tokens (usage: ${USAGE}) — refusing to publish a partial report"
             exit 1
           fi
 
