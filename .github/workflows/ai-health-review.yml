@@ -194,6 +194,13 @@ jobs:
             PROJECT_CONTEXT="(CLAUDE.md is identical to AGENTS.md — see the agents-md block below.)"
           fi
 
+          # The prompt embeds this file's own source, so a closing tag written
+          # literally here would also appear inside the embedded copy and end
+          # the block early (#1250). Assemble the fence so the contiguous
+          # literal never occurs in this file.
+          RP_OPEN='<review-''pipeline>'
+          RP_CLOSE='</review-''pipeline>'
+
           SYSTEM_PROMPT='You are a senior software engineer performing a biweekly code review for a SvelteKit web application (btcmap.org). Your job is to review recently merged code and provide actionable feedback.
 
           Your review focuses on four questions:
@@ -312,9 +319,9 @@ jobs:
 
           The workflow source that generated this review, for the Process Feedback section only:
 
-          <review-pipeline>
+          ${RP_OPEN}
           ${WORKFLOW_SOURCE}
-          </review-pipeline>
+          ${RP_CLOSE}
 
           IMPORTANT — These paths are EXCLUDED from the diff and you have NO visibility into their contents:
           - src/lib/i18n/locales/* (all translation JSON files)
