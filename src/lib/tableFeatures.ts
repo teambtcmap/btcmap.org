@@ -77,3 +77,13 @@ export const resolveHeaderLabel = <TData extends RowData>(
 	if (typeof def === "function") return String(def(header.getContext()));
 	return typeof def === "string" ? def : header.column.id;
 };
+
+// Maps a column's sort state to the aria-sort value for its <th>
+export const resolveAriaSort = <TData extends RowData>(
+	header: Header<BtcmapTableFeatures, TData, any>,
+): "ascending" | "descending" | "none" => {
+	const sorted = header.column.getIsSorted();
+	if (sorted === "asc") return "ascending";
+	if (sorted === "desc") return "descending";
+	return "none";
+};
