@@ -69,13 +69,17 @@ let {
 										}}
 										tabindex={header.column.getCanSort() ? 0 : -1}
 										aria-label={header.column.getCanSort()
-											? `Sort by ${headerLabel}, currently ${
-													header.column.getIsSorted() === 'asc'
-														? 'ascending'
-														: header.column.getIsSorted() === 'desc'
-															? 'descending'
-															: 'unsorted'
-												}`
+											? header.column.getIsSorted() === 'asc'
+												? $_('leaderboard.sortByCurrentlyAscending', {
+														values: { column: headerLabel },
+													})
+												: header.column.getIsSorted() === 'desc'
+													? $_('leaderboard.sortByCurrentlyDescending', {
+															values: { column: headerLabel },
+														})
+													: $_('leaderboard.sortByCurrentlyUnsorted', {
+															values: { column: headerLabel },
+														})
 											: headerLabel}
 									>
 										<span class="break-words">
