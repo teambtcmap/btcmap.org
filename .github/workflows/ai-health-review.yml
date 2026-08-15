@@ -263,7 +263,7 @@ jobs:
           - Group related findings.
           - If the changes are mostly dependency bumps or locale file updates, say so briefly and focus on substantive code changes.
           - Rate each finding: CRITICAL, HIGH, MEDIUM, or LOW.
-          - Aim for 0-5 findings. Empty or short reports are good outcomes — only add more findings if the period genuinely warrants them, never to "look thorough".
+          - There is no findings quota in either direction. Report every issue you can verify from the provided inputs, including ones you are uncertain about — state your confidence in the description and let the severity rating carry the triage; post-processing verifies quotes and a human reviews the rest. Never invent or pad findings to look thorough: an empty report on a quiet period is a good outcome.
           - Do NOT suggest formatting or import ordering changes — Biome handles that.
           - If nothing significant was missed and there are no refactoring opportunities, say so briefly. Do not invent findings.
 
