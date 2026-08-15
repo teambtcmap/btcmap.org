@@ -11,8 +11,9 @@ import Icon from "$components/Icon.svelte";
 import IssueCell from "$components/IssueCell.svelte";
 import LeaderboardPagination from "$components/leaderboard/LeaderboardPagination.svelte";
 import LeaderboardSearch from "$components/leaderboard/LeaderboardSearch.svelte";
+import SortableHeaderCell from "$components/leaderboard/SortableHeaderCell.svelte";
 import type { BtcmapTableFeatures } from "$lib/tableFeatures";
-import { btcmapTableFeatures } from "$lib/tableFeatures";
+import { btcmapTableFeatures, resolveAriaSort } from "$lib/tableFeatures";
 import { theme } from "$lib/theme";
 import type { PlaceIssue } from "$lib/types";
 import { debounce, getIssueHelpLink, getIssueIcon, isEven } from "$lib/utils";
@@ -183,20 +184,12 @@ const searchDebounce = debounce((e) => handleKeyUp(e));
 							{#each table.getHeaderGroups() as headerGroup (headerGroup.id)}
 								<tr>
 									{#each headerGroup.headers as header (header.id)}
-										<th colSpan={header.colSpan} class="px-5 pt-5 pb-2.5">
-											{#if !header.isPlaceholder}
-												<button
-													class="flex items-center gap-x-2 select-none"
-													onclick={header.column.getToggleSortingHandler()}
-												>
-													<FlexRender {header} />
-													{#if header.column.getIsSorted().toString() === 'asc'}
-														<Icon type="fa" icon="caret-up" w="8" h="8" />
-													{:else if header.column.getIsSorted().toString() === 'desc'}
-														<Icon type="fa" icon="caret-down" w="8" h="8" />
-													{/if}
-												</button>
-											{/if}
+										<th
+											colSpan={header.colSpan}
+											class="px-5 pt-5 pb-2.5"
+											aria-sort={resolveAriaSort(header)}
+										>
+											<SortableHeaderCell {header} />
 										</th>
 									{/each}
 								</tr>
