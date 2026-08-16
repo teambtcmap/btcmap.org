@@ -309,7 +309,11 @@ $: mode = $merchantList.mode;
 // mobile peek/input pills) has nowhere else to carry it once the floating bar
 // unmounts. Empty in search mode, while loading, or when there's nothing nearby.
 $: nearbyCountLabel =
-	mode === "nearby" && !isLoadingList && totalCount > 0 && pillCount
+	mode === "nearby" &&
+	!isLoadingList &&
+	nearbyStatus !== "error" &&
+	totalCount > 0 &&
+	pillCount
 		? $_("search.nearbyCount", { values: { count: pillCount } })
 		: "";
 $: searchResults = $merchantList.searchResults;
