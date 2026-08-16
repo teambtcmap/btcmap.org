@@ -219,6 +219,27 @@ describe("merchantListStore — searchSession", () => {
 		expect(state.searchResults).toEqual([]);
 	});
 
+	it("a new dispatch aborts the previous in-flight request", async () => {
+		// Two full pause-dispatch cycles: the second dispatch must abort the
+		// first request's signal (executeSearch's opening cancel is the only
+		// thing preventing two concurrent in-flight searches).
+		const signals: AbortSignal[] = [];
+		(fetch as Mock).mockImplementation((_url: string, init: RequestInit) => {
+			signals.push(init.signal as AbortSignal);
+			return new Promise<Response>(() => {});
+		});
+
+		merchantList.search("first query");
+		await dispatch(); // first request in flight
+
+		merchantList.search("second query");
+		await dispatch();
+
+		expect(signals.length).toBe(2);
+		expect(signals[0].aborted).toBe(true);
+		expect(signals[1].aborted).toBe(false);
+	});
+
 	it("a late response after close cannot reopen the panel", async () => {
 		let resolveFetch!: (value: Response) => void;
 		(fetch as Mock).mockImplementationOnce(

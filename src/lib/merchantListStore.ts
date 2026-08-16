@@ -250,9 +250,11 @@ function createMerchantListStore() {
 	// --- searchSession (#1173) --------------------------------------------
 	// The whole search request lifecycle in one place: the debounce, the
 	// abort, and every staleness/open guard. search() is the single entry
-	// point AND the sole writer of searchQuery — nothing outside the session
-	// can update the query without it knowing (the PR #1126 input-clobber
-	// class this extraction exists to prevent).
+	// point and the sole LIVE writer of searchQuery (the PR #1126
+	// input-clobber class this extraction exists to prevent). The legacy
+	// public writers — openWithSearchResults, clearSearchInput,
+	// exitSearchMode — have no production callers and bypass the session's
+	// cancellation; route new code through search() instead.
 	let searchAbortController: AbortController | null = null;
 
 	function cancelSearchRequest() {
@@ -649,9 +651,10 @@ function createMerchantListStore() {
 		},
 
 		// Single entry point for the search input (#1173) — and the sole
-		// writer of searchQuery. Writes the RAW query: the staleness guards
-		// compare verbatim, so trimming here would silently drop results for
-		// queries typed with leading whitespace.
+		// live writer of searchQuery (see the searchSession note above).
+		// Writes the RAW query: the staleness guards compare verbatim, so
+		// trimming here would silently drop results for queries typed with
+		// leading whitespace.
 		search(query: string, opts: { getCenter?: SearchCenterGetter } = {}) {
 			update((state) => ({ ...state, searchQuery: query }));
 			if (query.trim().length >= 3) {
@@ -670,8 +673,9 @@ function createMerchantListStore() {
 		},
 
 		// Discard any pending or in-flight worldwide search without touching
-		// list/details requests (used by the page on teardown paths the
-		// session can't see).
+		// list/details requests. Escape hatch for teardown paths outside the
+		// session; close() and reset() cancel internally, so today only
+		// tests exercise this directly.
 		cancelSearch() {
 			cancelSearchSession();
 		},
