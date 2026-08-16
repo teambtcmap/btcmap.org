@@ -347,10 +347,6 @@ $: {
 // doesn't stare at an empty map wondering what happened.
 $: if ($placesError) errToast($placesError);
 
-// Latest in-flight search request; aborted when a new query supersedes
-// it or the component unmounts.
-let searchAbortController: AbortController | null = null;
-
 // Expand a MapLibre LngLatBounds by `bufferPercent` on each edge, mirroring
 // /map's `getBufferedBounds(0.25)` for the local-markers nearby filter.
 const getBufferedBoundsLngLat = (
@@ -571,100 +567,17 @@ const fitSearchResultBounds = (places: Place[]) => {
 	);
 };
 
-// Mirrors /map's `executeSearch` — abort any prior request, fetch via the
-// SvelteKit endpoint, hand results to the store. Errors surface as toasts.
-const executeSearch = async (query: string) => {
-	searchAbortController?.abort();
-	// Trim so the request matches the dispatch decision (handlePanelSearch gates
-	// on the trimmed length) — otherwise "  abc" is sent verbatim as %20%20abc.
-	const trimmed = query.trim();
-	if (trimmed.length < 3) return;
-
-	trackEvent("search_query");
-	searchAbortController = new AbortController();
-
-	// Close any drawer so it doesn't sit on top of the result list.
-	merchantDrawer.close();
-	merchantList.openSearchMode(true);
-
-	// The server breaks relevance ties by proximity to this point, mirroring the
-	// original client-side search, which ranked purely by distance from the map
-	// centre. Without it, a query like "hamburg" — which no place is named —
-	// leaves every match tied at the lowest rank, and the result cap selects
-	// among them by name length. `map` is undefined until the map initialises,
-	// and the search box is reachable before that.
-	const searchParams = new URLSearchParams({ name: trimmed });
-	if (map) {
-		// wrap() normalises longitude into [-180, 180]. Panning across the
-		// antimeridian leaves getCenter().lng unbounded (e.g. 190), and the API
-		// would take that verbatim as the distance origin, ranking by proximity to
-		// a point that doesn't exist.
-		const center = map.getCenter().wrap();
-		searchParams.set("lat", String(center.lat));
-		searchParams.set("lon", String(center.lng));
-	}
-
-	try {
-		const response = await fetch(`/api/search/places?${searchParams}`, {
-			signal: searchAbortController.signal,
-		});
-		if (!response.ok) throw new Error("Search API error");
-		// `total` is the server's full match count, which can exceed the rows it
-		// returned — the panel reports the gap rather than hiding the truncation.
-		const { places: results, total }: { places: Place[]; total: number } =
-			await response.json();
-		// The panel/sheet may have been closed while we were awaiting the
-		// response (abort only rejects the fetch, not the json() window). Don't
-		// let a late result reopen it.
-		if (!get(merchantList).isOpen) return;
-		// The user kept typing while this request was in flight, so it answers a
-		// query that is no longer on screen. Continuous typing keeps re-arming the
-		// debounce, so no newer request dispatched to abort this one. Dropping it
-		// here matters beyond stale results: openWithSearchResults writes `query`
-		// back into searchQuery, which feeds the search input's `value` prop —
-		// applying it would rewrite the input mid-word and reset the caret.
-		if (get(merchantList).searchQuery !== query) return;
-		merchantList.openWithSearchResults(query, results, total);
-	} catch (error) {
-		if (error instanceof Error && error.name === "AbortError") return;
-		// Same staleness check as the success path. The user has typed past this
-		// query, so a newer request is already scheduled or in flight: toasting
-		// would report a failure for a query that is no longer on screen, and
-		// openSearchMode(false) below would clear the spinner out from under the
-		// newer search. That search reports its own failure if it also fails.
-		if (get(merchantList).searchQuery !== query) return;
-		console.error("Search error:", error);
-		errToast(get(_)("errors.searchUnavailable"));
-		// Mirror the success-path guard: if the panel was closed/collapsed while
-		// the request was in flight, a non-abort failure must not pop it back open.
-		if (!get(merchantList).isOpen) return;
-		// Keep the user's typed query (and search mode) — a transient failure
-		// shouldn't wipe the input or silently drop them back to nearby.
-		merchantList.openSearchMode(false);
-	}
-};
-
-const debouncedPanelSearch = debounce(
-	(query: string) => executeSearch(query),
-	300,
-);
-
-// Single-input model: typing ≥3 chars searches worldwide; anything shorter
-// (incl. empty) falls back to the nearby browse list. No mode toggle.
-const handlePanelSearch = (query: string) => {
-	if (query.trim().length >= 3) {
-		debouncedPanelSearch(query);
-		return;
-	}
-	// Too short / empty → abort any search and return to nearby browse,
-	// keeping whatever the user has typed so far in the input
-	debouncedPanelSearch.cancel();
-	searchAbortController?.abort();
-	if (get(merchantList).mode !== "nearby") {
-		// The search → nearby watcher below refreshes the list for the current
-		// viewport; no need to also call updateMerchantList here.
-		merchantList.setMode("nearby");
-	}
+// The search lifecycle (debounce, abort, staleness/open guards) lives in
+// merchantListStore's searchSession (#1173); the page only supplies the
+// dispatch-time map centre. wrap() normalises longitude into [-180, 180]:
+// panning across the antimeridian leaves getCenter().lng unbounded (e.g.
+// 190), and the API would take that verbatim as the distance origin.
+// Undefined until the map initialises — the search box is reachable
+// before that.
+const readSearchCenter = () => {
+	if (!map) return undefined;
+	const center = map.getCenter().wrap();
+	return { lat: center.lat, lon: center.lng };
 };
 
 // The map moves while search mode is active — clicking a result flies to it. But
@@ -682,14 +595,6 @@ $: {
 	const leftSearch = lastListMode === "search" && listMode === "nearby";
 	lastListMode = listMode;
 	if (leftSearch) updateMerchantList({ force: true });
-}
-
-// Closing/collapsing the list discards any pending or in-flight worldwide
-// search — otherwise a late response calls openSearchMode/openWithSearchResults
-// and pops the panel (or the mobile sheet) back open on its own
-$: if (!$merchantList.isOpen) {
-	debouncedPanelSearch.cancel();
-	searchAbortController?.abort();
 }
 
 // Browser back/forward / external hash mutation → re-sync the drawer.
@@ -1280,9 +1185,6 @@ onDestroy(() => {
 	destroyed = true;
 	triggerEnrichmentIfNeeded.cancel();
 	debouncedUpdateMerchantList.cancel();
-	debouncedPanelSearch.cancel();
-	searchAbortController?.abort();
-	searchAbortController = null;
 	if (typeof window !== "undefined") {
 		window.removeEventListener("hashchange", handleHashChange);
 		window.removeEventListener(MERCHANT_URL_CHANGE_EVENT, handleHashChange);
@@ -1367,7 +1269,7 @@ onDestroy(() => {
 	onHoverEnd={() => {
 		// See onHoverStart above.
 	}}
-	onSearch={handlePanelSearch}
+	onSearch={(query) => merchantList.search(query, { getCenter: readSearchCenter })}
 	onRefresh={() => updateMerchantList({ force: true })}
 	behavior={listBehavior}
 	mapReady={styleLoaded}

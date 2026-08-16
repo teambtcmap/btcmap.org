@@ -648,11 +648,6 @@ function createMerchantListStore() {
 			setSearchModeOpen(isSearching);
 		},
 
-		// Update the search query (used when binding input to store)
-		setSearchQuery(query: string) {
-			update((state) => ({ ...state, searchQuery: query }));
-		},
-
 		// Single entry point for the search input (#1173) — and the sole
 		// writer of searchQuery. Writes the RAW query: the staleness guards
 		// compare verbatim, so trimming here would silently drop results for
