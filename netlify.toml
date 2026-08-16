@@ -4,9 +4,11 @@
 
 [build.environment]
 	# Netlify's build image provisions pnpm via Corepack (local dev doesn't
-	# need Corepack — see README). pnpm 11 needs Corepack >= 0.34.5, bundled
-	# since Node 22.22.1 — "22.22" resolves to the newest 22.22.x, which
-	# enforces that floor; a bare "22" could resolve below it.
+	# need Corepack — see README):
+	# https://docs.netlify.com/build/configure-builds/manage-dependencies/#pnpm
+	# pnpm 11 needs Corepack >= 0.34.5, bundled since Node 22.22.1 — "22.22"
+	# resolves to the newest 22.22.x, which enforces that floor; a bare "22"
+	# could resolve below it.
 	NODE_VERSION = "22.22"
 
 [images]

@@ -39,7 +39,7 @@ Remove or comment out the env var to switch back to the production API.
    Copy `.env.example` and save as `.env`
 1. `pnpm build`
 
-_NOTE:_ BTC Map requires Node.js ≥ 22.13 (we use Node 22 LTS). If you have [mise](https://mise.jdx.dev/), run `mise install` in the repo root to get the correct Node and pnpm versions. Any pnpm ≥ 10 works: pnpm reads the `packageManager` pin in `package.json` and switches to that exact version automatically, so Corepack is not needed locally (pnpm [no longer recommends it](https://pnpm.io/installation)). Netlify builds are the exception: Netlify still provisions pnpm **via Corepack** from that same `packageManager` field — so keep the field pinned to an exact version, and see the comment in `netlify.toml` for the Node-version floor this implies.
+_NOTE:_ BTC Map requires Node.js ≥ 22.13 (we use Node 22 LTS). If you have [mise](https://mise.jdx.dev/), run `mise install` in the repo root to get the correct Node and pnpm versions. Any pnpm ≥ 10 works: pnpm reads the `packageManager` pin in `package.json` and switches to that exact version automatically, so Corepack is not needed locally (pnpm [no longer recommends it](https://pnpm.io/installation)). Netlify builds are the exception: Netlify still provisions pnpm [via Corepack](https://docs.netlify.com/build/configure-builds/manage-dependencies/#pnpm) from that same `packageManager` field — so keep the field pinned to an exact version, and see the comment in `netlify.toml` for the Node-version floor this implies.
 
 #### Icons
 
