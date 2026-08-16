@@ -1,0 +1,6 @@
+import { loadCountryArea } from "$lib/area/routeConfigs";
+
+import type { PageServerLoad } from "./$types";
+
+export const load: PageServerLoad = async ({ params, fetch }) =>
+	loadCountryArea({ params, fetch }, "maintain");

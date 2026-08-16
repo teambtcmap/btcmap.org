@@ -1,19 +1,25 @@
 <script lang="ts">
-import { _, locale } from "svelte-i18n";
-
-import AreaPage from "$components/area/AreaPage.svelte";
+import AreaLayout from "$components/area/AreaLayout.svelte";
 import Breadcrumbs from "$components/Breadcrumbs.svelte";
 import { getCountryName } from "$lib/countryNames";
-import type { AreaPageProps } from "$lib/types";
+import { _, locale } from "$lib/i18n";
 import { buildMetaDescription } from "$lib/utils";
 
-import type { PageData } from "./$types";
+import { page } from "$app/state";
 
-export let data: PageData & AreaPageProps;
+let { children } = $props();
+
+// page.data is rune-backed — directly reactive in runes mode, no bridge.
+const data = $derived(page.data);
 
 let _nameGen = 0;
-let countryDisplayName: string; // set by reactive block below
-$: {
+let countryDisplayName = $state(page.data.name ?? "");
+
+// $derived can't express an async lookup, so the old reactive block's
+// generation guard is ported verbatim: bump the token, set the fallback
+// synchronously, then only apply the resolved name if no newer run has
+// started (stale promises from a fast X→Y area switch never clobber it).
+$effect(() => {
 	const gen = ++_nameGen;
 	const fallback = data.name ?? "";
 	countryDisplayName = fallback;
@@ -24,25 +30,29 @@ $: {
 		.catch(() => {
 			// Keep fallback on error
 		});
-}
+});
 
-$: routes = [
-	{ name: $_(`nav.countries`), url: "/countries" },
+const routes = $derived([
+	{ name: $_("nav.countries"), url: "/countries" },
 	{
 		name: countryDisplayName,
 		url: `/country/${encodeURIComponent(data.id)}`,
 	},
-];
+]);
 
-$: metaDescription = buildMetaDescription(
-	data.description,
-	$_("meta.countryFallbackDescription", {
-		values: { name: countryDisplayName },
-	}),
-	200,
+const metaDescription = $derived(
+	buildMetaDescription(
+		data.description,
+		$_("meta.countryFallbackDescription", {
+			values: { name: countryDisplayName },
+		}),
+		200,
+	),
 );
 
-$: canonicalUrl = `https://btcmap.org/country/${encodeURIComponent(data.id)}/merchants`;
+const canonicalUrl = $derived(
+	`https://btcmap.org/country/${encodeURIComponent(data.id)}/merchants`,
+);
 </script>
 
 <svelte:head>
@@ -58,4 +68,6 @@ $: canonicalUrl = `https://btcmap.org/country/${encodeURIComponent(data.id)}/mer
 </svelte:head>
 
 <Breadcrumbs {routes} />
-<AreaPage type="country" {data} />
+<AreaLayout type="country">
+	{@render children()}
+</AreaLayout>
