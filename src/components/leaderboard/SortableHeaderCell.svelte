@@ -29,25 +29,23 @@ let { header, centered = false, trailing }: Props = $props();
 			class:mx-auto={centered}
 			class:w-fit={centered}
 		>
-			{@render sortButton(headerLabel, false)}
+			{@render headerContent(headerLabel, false)}
 			{@render trailing()}
 		</div>
 	{:else}
-		{@render sortButton(headerLabel, centered)}
+		{@render headerContent(headerLabel, centered)}
 	{/if}
 {/if}
 
-{#snippet sortButton(headerLabel: string, centerSelf: boolean)}
-	<button
-		type="button"
-		class="flex items-center gap-x-1 leading-tight select-none md:gap-x-2"
-		class:mx-auto={centerSelf}
-		class:justify-center={centerSelf}
-		class:cursor-pointer={header.column.getCanSort()}
-		onclick={header.column.getToggleSortingHandler()}
-		tabindex={header.column.getCanSort() ? 0 : -1}
-		aria-label={header.column.getCanSort()
-			? header.column.getIsSorted() === 'asc'
+{#snippet headerContent(headerLabel: string, centerSelf: boolean)}
+	{#if header.column.getCanSort()}
+		<button
+			type="button"
+			class="flex cursor-pointer items-center gap-x-1 leading-tight select-none md:gap-x-2"
+			class:mx-auto={centerSelf}
+			class:justify-center={centerSelf}
+			onclick={header.column.getToggleSortingHandler()}
+			aria-label={header.column.getIsSorted() === 'asc'
 				? $_('leaderboard.sortByCurrentlyAscending', {
 						values: { column: headerLabel },
 					})
@@ -57,16 +55,28 @@ let { header, centered = false, trailing }: Props = $props();
 						})
 					: $_('leaderboard.sortByCurrentlyUnsorted', {
 							values: { column: headerLabel },
-						})
-			: headerLabel}
-	>
-		<span class="break-words">
-			<FlexRender {header} />
+						})}
+		>
+			<span class="break-words">
+				<FlexRender {header} />
+			</span>
+			{#if header.column.getIsSorted() === 'asc'}
+				<span aria-hidden="true">▲</span>
+			{:else if header.column.getIsSorted() === 'desc'}
+				<span aria-hidden="true">▼</span>
+			{/if}
+		</button>
+	{:else}
+		<!-- Not sortable: plain text, no interactive control — a button here
+		     is a nameless no-op in the accessibility tree -->
+		<span
+			class="flex items-center gap-x-1 leading-tight select-none md:gap-x-2"
+			class:mx-auto={centerSelf}
+			class:justify-center={centerSelf}
+		>
+			<span class="break-words">
+				<FlexRender {header} />
+			</span>
 		</span>
-		{#if header.column.getIsSorted() === 'asc'}
-			<span aria-hidden="true">▲</span>
-		{:else if header.column.getIsSorted() === 'desc'}
-			<span aria-hidden="true">▼</span>
-		{/if}
-	</button>
+	{/if}
 {/snippet}
