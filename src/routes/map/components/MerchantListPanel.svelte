@@ -236,12 +236,13 @@ function handleSearchFocus() {
 	trackEvent("search_input_focus", { source: "panel" });
 }
 
-// Single input: typing always drives a worldwide search (the page debounces
-// and, below 3 chars, falls back to the nearby browse list). No mode toggle.
+// Single input: typing always drives a worldwide search (the session
+// debounces and, below 3 chars, falls back to the nearby browse list).
+// The session (via onSearch) is the sole live writer of searchQuery —
+// writing it here too would race the session's staleness guards (the
+// PR #1126 input-clobber class).
 function handleUnifiedInput(e: Event) {
-	const value = (e.target as HTMLInputElement).value;
-	merchantList.setSearchQuery(value);
-	onSearch?.(value);
+	onSearch?.((e.target as HTMLInputElement).value);
 }
 
 function handleUnifiedKeyDown(event: KeyboardEvent) {
@@ -257,7 +258,6 @@ function handleUnifiedKeyDown(event: KeyboardEvent) {
 }
 
 function handleClearInput() {
-	merchantList.setSearchQuery("");
 	onSearch?.("");
 	searchInputComponent?.focus();
 }

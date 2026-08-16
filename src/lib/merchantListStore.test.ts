@@ -45,6 +45,14 @@ vi.mock("$lib/merchantDrawerLogic", () => ({
 		place.boosted_until && new Date(place.boosted_until) > new Date(),
 }));
 
+// merchantListStore's new imports (#1173) drag $app/environment into the
+// graph via merchantDrawerStore/merchantDrawerHash, which crashes at import
+// time under vitest without these.
+vi.mock("$lib/merchantDrawerStore", () => ({
+	merchantDrawer: { close: vi.fn(), open: vi.fn() },
+}));
+vi.mock("$lib/analytics", () => ({ trackEvent: vi.fn() }));
+
 // Hoisted so the vi.mock factory below can reference it before module init
 const { mockUserLocationStore } = vi.hoisted(() => {
 	const { writable } = require("svelte/store");
