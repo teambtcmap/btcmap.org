@@ -16,7 +16,6 @@ import {
 import { SEARCH_SHEET_PEEK_HEIGHT } from "$lib/drawerConfig";
 import { createDrawerGestureController } from "$lib/drawerGestureController";
 import { _ } from "$lib/i18n";
-import type { NearbyListStatus } from "$lib/map/nearbyListStatus";
 import { deriveNearbyListStatus } from "$lib/map/nearbyListStatus";
 import type { ZoomBehavior } from "$lib/map/viewport";
 import { selectVisiblePlaces } from "$lib/map/visiblePlaces";
@@ -402,11 +401,7 @@ function getCategoryButtonClass(
 // One status for the nearby list (see deriveNearbyListStatus): the enum
 // already encodes the precedence the old showZoomInMessage/isTruncated/
 // !isLoadingList guard combination spelled out inline.
-// Explicit `let` (rather than relying on Svelte's implicit reactive-var
-// declaration) so this doesn't read as an assignment to the global
-// `window.status` to tooling that doesn't understand Svelte's `$:` sugar.
-let status: NearbyListStatus;
-$: status = deriveNearbyListStatus({
+$: nearbyStatus = deriveNearbyListStatus({
 	behavior,
 	isLoading: isLoadingList,
 	merchantCount: merchants.length,
@@ -671,13 +666,13 @@ onDestroy(() => {
 						{:else}
 							{$_('search.resultsCount', { values: { count: searchResults.length } })}
 						{/if}
-					{:else if status === 'below-floor' || status === 'too-dense'}
+					{:else if nearbyStatus === 'below-floor' || nearbyStatus === 'too-dense'}
 						<button
 							on:click={handleZoomToNearbyLevel}
 							class="text-link underline-offset-2 hover:underline dark:text-white"
 							>{$_('search.zoomIn')}</button
 						>
-					{:else if status === 'truncated'}
+					{:else if nearbyStatus === 'truncated'}
 						{$_('search.showingNearest', { values: { count: merchants.length } })}
 					{/if}
 				</p>
@@ -793,7 +788,7 @@ onDestroy(() => {
 						{/each}
 					</ul>
 				{/if}
-			{:else if status === 'below-floor' || status === 'too-dense'}
+			{:else if nearbyStatus === 'below-floor' || nearbyStatus === 'too-dense'}
 				<!-- Nearby mode: clickable zoom in prompt -->
 				<button
 					type="button"
@@ -814,7 +809,7 @@ onDestroy(() => {
 						</p>
 					</div>
 				</button>
-			{:else if status === 'loading'}
+			{:else if nearbyStatus === 'loading'}
 				<div
 					class="flex items-center justify-center py-8"
 					role="status"
@@ -822,7 +817,7 @@ onDestroy(() => {
 				>
 					<LoadingSpinner color="text-link dark:text-white" size="h-6 w-6" />
 				</div>
-			{:else if status === 'empty'}
+			{:else if nearbyStatus === 'empty'}
 				<div class="px-3 py-8 text-center text-sm text-body dark:text-white/70">
 					{$_('search.noVisible')}
 				</div>
