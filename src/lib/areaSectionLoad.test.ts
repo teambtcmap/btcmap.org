@@ -95,8 +95,9 @@ describe("loadAreaSection", () => {
 
 		const err = await captureThrow(() =>
 			loadAreaSection(
-				{ params: { area: "bad/area", section: "merchants" }, fetch },
+				{ params: { area: "bad/area" }, fetch },
 				countryConfig,
+				"merchants",
 			),
 		);
 
@@ -112,8 +113,9 @@ describe("loadAreaSection", () => {
 		const fetch = makeFetch();
 
 		const result = await loadAreaSection(
-			{ params: { area: "日本", section: "merchants" }, fetch },
+			{ params: { area: "日本" }, fetch },
 			communityConfig,
+			"merchants",
 		);
 
 		expect(result.data.id).toBe("some-area");
@@ -128,8 +130,9 @@ describe("loadAreaSection", () => {
 
 		const err = await captureThrow(() =>
 			loadAreaSection(
-				{ params: { area: "café", section: "bogus" }, fetch },
+				{ params: { area: "café" }, fetch },
 				communityConfig,
+				"bogus",
 			),
 		);
 
@@ -148,8 +151,9 @@ describe("loadAreaSection", () => {
 
 		const err = await captureThrow(() =>
 			loadAreaSection(
-				{ params: { area: "some-area", section: "merchants" }, fetch },
+				{ params: { area: "some-area" }, fetch },
 				communityConfig,
+				"merchants",
 			),
 		);
 
@@ -165,8 +169,9 @@ describe("loadAreaSection", () => {
 
 		const err = await captureThrow(() =>
 			loadAreaSection(
-				{ params: { area: "some-area", section: "merchants" }, fetch },
+				{ params: { area: "some-area" }, fetch },
 				countryConfig,
+				"merchants",
 			),
 		);
 
@@ -182,8 +187,9 @@ describe("loadAreaSection", () => {
 
 		const err = await captureThrow(() =>
 			loadAreaSection(
-				{ params: { area: "some-area", section: "merchants" }, fetch },
+				{ params: { area: "some-area" }, fetch },
 				communityConfig,
+				"merchants",
 			),
 		);
 
@@ -200,8 +206,9 @@ describe("loadAreaSection", () => {
 
 		const err = await captureThrow(() =>
 			loadAreaSection(
-				{ params: { area: "some-area", section: "merchants" }, fetch },
+				{ params: { area: "some-area" }, fetch },
 				communityConfig,
+				"merchants",
 			),
 		);
 
@@ -218,8 +225,9 @@ describe("loadAreaSection", () => {
 
 		const err = await captureThrow(() =>
 			loadAreaSection(
-				{ params: { area: "some-area", section: "merchants" }, fetch },
+				{ params: { area: "some-area" }, fetch },
 				communityConfig,
+				"merchants",
 			),
 		);
 
@@ -234,8 +242,9 @@ describe("loadAreaSection", () => {
 
 		const err = await captureThrow(() =>
 			loadAreaSection(
-				{ params: { area: "some-area", section: "maintain" }, fetch },
+				{ params: { area: "some-area" }, fetch },
 				communityConfig,
+				"maintain",
 			),
 		);
 
@@ -249,8 +258,9 @@ describe("loadAreaSection", () => {
 		const fetch = makeFetch();
 
 		const result = await loadAreaSection(
-			{ params: { area: "some-area", section: "stats" }, fetch },
+			{ params: { area: "some-area" }, fetch },
 			communityConfig,
+			"stats",
 		);
 
 		expect(result.data).toEqual({
@@ -285,8 +295,9 @@ describe("loadAreaSection", () => {
 		});
 
 		const result = await loadAreaSection(
-			{ params: { area: "some-area", section: "maintain" }, fetch },
+			{ params: { area: "some-area" }, fetch },
 			communityConfig,
+			"maintain",
 		);
 
 		expect(result.data.issues).toHaveLength(10002);
@@ -305,8 +316,9 @@ describe("loadAreaSection", () => {
 
 		const err = await captureThrow(() =>
 			loadAreaSection(
-				{ params: { area: "some-area", section: "maintain" }, fetch },
+				{ params: { area: "some-area" }, fetch },
 				communityConfig,
+				"maintain",
 			),
 		);
 
@@ -324,8 +336,9 @@ describe("loadAreaSection", () => {
 
 		const err = await captureThrow(() =>
 			loadAreaSection(
-				{ params: { area: "some-area", section: "merchants" }, fetch },
+				{ params: { area: "some-area" }, fetch },
 				communityConfig,
+				"merchants",
 			),
 		);
 
@@ -341,11 +354,12 @@ describe("loadAreaSection", () => {
 
 		const err = await captureThrow(() =>
 			loadAreaSection(
-				{ params: { area: "some-area", section: "merchants" }, fetch },
+				{ params: { area: "some-area" }, fetch },
 				{
 					...communityConfig,
 					hasRequiredTags: (tags) => !!tags["icon:square"] && false,
 				},
+				"merchants",
 			),
 		);
 
@@ -372,8 +386,9 @@ describe("loadAreaSection", () => {
 		});
 
 		const result = await loadAreaSection(
-			{ params: { area: "some-area", section: "merchants" }, fetch },
+			{ params: { area: "some-area" }, fetch },
 			communityConfig,
+			"merchants",
 		);
 
 		// Empty strings are dropped; only authored contacts survive
@@ -392,8 +407,9 @@ describe("loadAreaSection", () => {
 			});
 		const load = (fetch: ReturnType<typeof makeFetch>) =>
 			loadAreaSection(
-				{ params: { area: "some-area", section: "merchants" }, fetch },
+				{ params: { area: "some-area" }, fetch },
 				communityConfig,
+				"merchants",
 			);
 
 		// The API serves numbers despite the historical string typing

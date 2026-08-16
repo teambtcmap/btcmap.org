@@ -15,8 +15,8 @@ import type { AreaPageProps, AreaTags, PlaceIssue } from "$lib/types";
 
 type FetchLike = (input: string | URL, init?: RequestInit) => Promise<Response>;
 
-type AreaSectionEvent = {
-	params: { area: string; section: string };
+export type AreaSectionEvent = {
+	params: { area: string };
 	fetch: FetchLike;
 };
 
@@ -107,9 +107,10 @@ const cameraBboxFromTags = (
 export const loadAreaSection = async (
 	{ params, fetch }: AreaSectionEvent,
 	config: AreaSectionConfig,
+	sectionParam: string,
 ): Promise<AreaSectionResult> => {
 	const { area } = params;
-	const section = params.section || "merchants";
+	const section = sectionParam || "merchants";
 
 	if (!config.isValidArea(area)) {
 		throw error(404, config.notFoundMessage);
