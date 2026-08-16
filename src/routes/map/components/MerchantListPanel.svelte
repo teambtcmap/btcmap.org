@@ -13,10 +13,12 @@ import {
 	type CategoryCounts,
 	type CategoryKey,
 } from "$lib/categoryMapping";
-import { MERCHANT_LIST_LOW_ZOOM } from "$lib/constants";
 import { SEARCH_SHEET_PEEK_HEIGHT } from "$lib/drawerConfig";
 import { createDrawerGestureController } from "$lib/drawerGestureController";
 import { _ } from "$lib/i18n";
+import type { NearbyListStatus } from "$lib/map/nearbyListStatus";
+import { deriveNearbyListStatus } from "$lib/map/nearbyListStatus";
+import type { ZoomBehavior } from "$lib/map/viewport";
 import { selectVisiblePlaces } from "$lib/map/visiblePlaces";
 import { merchantDrawer } from "$lib/merchantDrawerStore";
 import { merchantList } from "$lib/merchantListStore";
@@ -55,8 +57,11 @@ export let onZoomToNearbyLevel: (() => void) | undefined = undefined;
 // Callbacks for hover highlighting
 export let onHoverStart: ((place: Place) => void) | undefined = undefined;
 export let onHoverEnd: ((place: Place) => void) | undefined = undefined;
-// Current zoom level to determine if we should show "zoom in" message
-export let currentZoom: number = 0;
+// Which fetch strategy the page is running for the current view — decides
+// the "zoom in" message. Defaults to "none" (safe: shows the prompt) for
+// any consumer that omits the prop; the map page always passes its
+// reactive listBehavior.
+export let behavior: ZoomBehavior = "none";
 // Search callback - called when user types in search input
 export let onSearch: ((query: string) => void) | undefined = undefined;
 // Refresh callback for category filtering
@@ -394,16 +399,19 @@ function getCategoryButtonClass(
 	return "cursor-not-allowed bg-gray-100 text-gray-400 dark:bg-white/5 dark:text-white/30";
 }
 
-// Show "zoom in" prompt when:
-// 1. Below the list floor (no data fetched at this zoom)
-// 2. Results were blanked because the area is too dense (>fetch ceiling):
-//    an empty list but a non-zero total count
-// A genuinely empty area (totalCount === 0) falls through to the
-// "No merchants visible in current view" body state instead.
-$: showZoomInMessage =
-	currentZoom < MERCHANT_LIST_LOW_ZOOM ||
-	(merchants.length === 0 && totalCount > 0);
-$: isTruncated = totalCount > merchants.length;
+// One status for the nearby list (see deriveNearbyListStatus): the enum
+// already encodes the precedence the old showZoomInMessage/isTruncated/
+// !isLoadingList guard combination spelled out inline.
+// Explicit `let` (rather than relying on Svelte's implicit reactive-var
+// declaration) so this doesn't read as an assignment to the global
+// `window.status` to tooling that doesn't understand Svelte's `$:` sugar.
+let status: NearbyListStatus;
+$: status = deriveNearbyListStatus({
+	behavior,
+	isLoading: isLoadingList,
+	merchantCount: merchants.length,
+	totalCount,
+});
 
 // Body scroll lock on mobile when panel is open
 $: if (browser && isOpen !== undefined) {
@@ -663,15 +671,13 @@ onDestroy(() => {
 						{:else}
 							{$_('search.resultsCount', { values: { count: searchResults.length } })}
 						{/if}
-					{:else if showZoomInMessage && !isLoadingList}
-						<!-- Loading spinner takes precedence so a stale count-only state
-						     can't flash this link (mirrors the body branch below) -->
+					{:else if status === 'below-floor' || status === 'too-dense'}
 						<button
 							on:click={handleZoomToNearbyLevel}
 							class="text-link underline-offset-2 hover:underline dark:text-white"
 							>{$_('search.zoomIn')}</button
 						>
-					{:else if isTruncated}
+					{:else if status === 'truncated'}
 						{$_('search.showingNearest', { values: { count: merchants.length } })}
 					{/if}
 				</p>
@@ -787,9 +793,8 @@ onDestroy(() => {
 						{/each}
 					</ul>
 				{/if}
-			{:else if showZoomInMessage && !isLoadingList}
-				<!-- Nearby mode: clickable zoom in prompt (loading spinner takes
-				     precedence so a stale count-only state can't flash this) -->
+			{:else if status === 'below-floor' || status === 'too-dense'}
+				<!-- Nearby mode: clickable zoom in prompt -->
 				<button
 					type="button"
 					on:click={handleZoomToNearbyLevel}
@@ -809,7 +814,7 @@ onDestroy(() => {
 						</p>
 					</div>
 				</button>
-			{:else if isLoadingList}
+			{:else if status === 'loading'}
 				<div
 					class="flex items-center justify-center py-8"
 					role="status"
@@ -817,26 +822,24 @@ onDestroy(() => {
 				>
 					<LoadingSpinner color="text-link dark:text-white" size="h-6 w-6" />
 				</div>
+			{:else if status === 'empty'}
+				<div class="px-3 py-8 text-center text-sm text-body dark:text-white/70">
+					{$_('search.noVisible')}
+				</div>
 			{:else}
-				<!-- Nearby mode: merchant list -->
-				{#if merchants.length === 0}
-					<div class="px-3 py-8 text-center text-sm text-body dark:text-white/70">
-						{$_('search.noVisible')}
-					</div>
-				{:else}
-					<ul class="flex flex-col gap-2 bg-neutral-50 p-2 dark:bg-white/10">
-						{#each merchants as merchant (merchant.id)}
-							<MerchantListItem
-								{merchant}
-								enrichedData={placeDetailsCache.get(merchant.id) || null}
-								isSelected={selectedId === merchant.id}
-								onclick={handleItemClick}
-								onmouseenter={handleMouseEnter}
-								onmouseleave={handleMouseLeave}
-							/>
-						{/each}
-					</ul>
-				{/if}
+				<!-- Nearby mode: merchant list ('truncated' and 'ok') -->
+				<ul class="flex flex-col gap-2 bg-neutral-50 p-2 dark:bg-white/10">
+					{#each merchants as merchant (merchant.id)}
+						<MerchantListItem
+							{merchant}
+							enrichedData={placeDetailsCache.get(merchant.id) || null}
+							isSelected={selectedId === merchant.id}
+							onclick={handleItemClick}
+							onmouseenter={handleMouseEnter}
+							onmouseleave={handleMouseLeave}
+						/>
+					{/each}
+				</ul>
 			{/if}
 		</div>
 		{:else}

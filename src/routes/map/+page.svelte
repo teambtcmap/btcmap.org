@@ -1369,7 +1369,7 @@ onDestroy(() => {
 	}}
 	onSearch={handlePanelSearch}
 	onRefresh={() => updateMerchantList({ force: true })}
-	{currentZoom}
+	behavior={listBehavior}
 	mapReady={styleLoaded}
 	isMobile={isMobileLayout}
 />
