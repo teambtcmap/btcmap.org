@@ -465,6 +465,9 @@ describe("merchantListStore", () => {
 
 				expect(errToast).not.toHaveBeenCalled();
 				expect(warnSpy).not.toHaveBeenCalled();
+				// The axios-cancel branch of isCancellation must leave
+				// listError untouched, same as the AbortError-name branch.
+				expect(get(merchantList).listError).toBe(false);
 			} finally {
 				warnSpy.mockRestore();
 			}
@@ -527,6 +530,8 @@ describe("merchantListStore", () => {
 				await merchantList.fetchCountOnly({ lat: 0, lon: 0 }, 10);
 
 				expect(warnSpy).not.toHaveBeenCalled();
+				// Same pin as the list fetcher: axios-cancel leaves listError alone.
+				expect(get(merchantList).listError).toBe(false);
 			} finally {
 				warnSpy.mockRestore();
 			}
