@@ -1,0 +1,72 @@
+<script lang="ts">
+import AreaLayout from "$components/area/AreaLayout.svelte";
+import Breadcrumbs from "$components/Breadcrumbs.svelte";
+import { _ } from "$lib/i18n";
+import { buildMetaDescription } from "$lib/utils";
+
+import { page } from "$app/state";
+
+let { children } = $props();
+
+// page.data is rune-backed — directly reactive in runes mode, no bridge.
+const data = $derived(page.data);
+
+const routes = $derived([
+	{ name: $_("nav.communities"), url: "/communities" },
+	{ name: data.name, url: `/community/${encodeURIComponent(data.id)}` },
+]);
+
+const metaDescription = $derived(
+	buildMetaDescription(
+		data.description,
+		$_("meta.communityFallbackDescription", { values: { name: data.name } }),
+		200,
+	),
+);
+
+const faviconUrl = $derived(data.iconSquare || null);
+
+// Chrome prefers the site-wide SVG favicon from app.html over any PNG we
+// add in svelte:head, regardless of declaration order. Remove the
+// app.html icon links (keeping only our community one) so the community
+// icon actually shows in the tab. Effects never run during SSR, so the
+// old `browser &&` guard is redundant here and has been dropped.
+$effect(() => {
+	if (faviconUrl) {
+		for (const link of document.querySelectorAll<HTMLLinkElement>(
+			'link[rel="icon"]',
+		)) {
+			if (link.href !== faviconUrl) link.remove();
+		}
+	}
+});
+
+const ogImage = $derived(
+	data.iconSquare || "https://btcmap.org/images/og/communities.png",
+);
+
+const canonicalUrl = $derived(
+	`https://btcmap.org/community/${encodeURIComponent(data.id)}/merchants`,
+);
+</script>
+
+<svelte:head>
+	<title>{data.name || $_('meta.community')}</title>
+	<link rel="canonical" href={canonicalUrl} />
+	<meta name="description" content={metaDescription} />
+	<meta property="og:image" content={ogImage} />
+	<meta property="og:title" content={data.name || $_('meta.community')} />
+	<meta property="og:description" content={metaDescription} />
+	<meta name="twitter:title" content={data.name || $_('meta.community')} />
+	<meta name="twitter:description" content={metaDescription} />
+	<meta name="twitter:image" content={ogImage} />
+	{#if faviconUrl}
+		<link rel="icon" href={faviconUrl} />
+		<link rel="apple-touch-icon" href={faviconUrl} />
+	{/if}
+</svelte:head>
+
+<Breadcrumbs {routes} />
+<AreaLayout type="community">
+	{@render children()}
+</AreaLayout>
