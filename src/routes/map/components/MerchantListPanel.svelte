@@ -404,6 +404,10 @@ $: nearbyStatus = deriveNearbyListStatus({
 	merchantCount: merchants.length,
 	totalCount,
 });
+// The two hidden-behind-the-prompt statuses render identically in the
+// status row and the body — name the condition once.
+$: showsZoomPrompt =
+	nearbyStatus === "below-floor" || nearbyStatus === "too-dense";
 
 // Body scroll lock on mobile when panel is open
 $: if (browser && isOpen !== undefined) {
@@ -663,7 +667,7 @@ onDestroy(() => {
 						{:else}
 							{$_('search.resultsCount', { values: { count: searchResults.length } })}
 						{/if}
-					{:else if nearbyStatus === 'below-floor' || nearbyStatus === 'too-dense'}
+					{:else if showsZoomPrompt}
 						<button
 							on:click={handleZoomToNearbyLevel}
 							class="text-link underline-offset-2 hover:underline dark:text-white"
@@ -785,7 +789,7 @@ onDestroy(() => {
 						{/each}
 					</ul>
 				{/if}
-			{:else if nearbyStatus === 'below-floor' || nearbyStatus === 'too-dense'}
+			{:else if showsZoomPrompt}
 				<!-- Nearby mode: clickable zoom in prompt -->
 				<button
 					type="button"
