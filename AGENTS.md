@@ -7,10 +7,11 @@ This file contains project-specific guidelines and commands for Claude Code to f
 **BEFORE EVERY COMMIT, YOU MUST:**
 
 1. **🎨 Format code:** Run `pnpm run format:fix` (REQUIRED - NO EXCEPTIONS)
-2. **🔍 Type check:** Run `pnpm run check`
-3. **🧹 Lint:** Run `pnpm run lint`
-4. **🧪 Unit tests:** Run `pnpm run test --run`
-5. **📝 Commit format:** Use [Conventional Commits](https://www.conventionalcommits.org/) format with issue number
+2. **🔍 Svelte check:** Run `pnpm run check`
+3. **🔎 TS type check:** Run `pnpm run typecheck`
+4. **🧹 Lint:** Run `pnpm run lint`
+5. **🧪 Unit tests:** Run `pnpm run test --run`
+6. **📝 Commit format:** Use [Conventional Commits](https://www.conventionalcommits.org/) format with issue number
 
 **Failure to run `pnpm run format:fix` before committing will result in inconsistent code formatting.**
 
@@ -172,11 +173,12 @@ Use the appropriate tool attribution based on which tool generated the commit:
 
 1. Make your changes
 2. **🎨 MANDATORY:** Run `pnpm run format:fix` ⚠️ **THIS IS REQUIRED BEFORE EVERY COMMIT** ⚠️
-3. Run `pnpm run check` to perform type checking
-4. Run `pnpm run lint` to verify no errors
-5. Verify the commit type matches the change (e.g., `ci` for CI changes, `feat` only for new features, not config/tooling)
-6. Stage and commit with conventional format
-7. Include issue number if applicable (e.g., `#276`)
+3. Run `pnpm run check` to perform Svelte validation
+4. Run `pnpm run typecheck` to perform project-wide TS type checking
+5. Run `pnpm run lint` to verify no errors
+6. Verify the commit type matches the change (e.g., `ci` for CI changes, `feat` only for new features, not config/tooling)
+7. Stage and commit with conventional format
+8. Include issue number if applicable (e.g., `#276`)
 
 **🚨 CRITICAL REMINDER:** You MUST run `pnpm run format:fix` before staging any commit. This is non-negotiable and ensures consistent code formatting across the entire project.
 
@@ -263,7 +265,7 @@ Use [https://nostrhub.io/nips](https://nostrhub.io/nips) as the definitive NIP s
 - Use `Place` type for v4 API data; the remaining v2 surfaces (area/report/event/user crawls via `createSyncFactory`, per-place issues on the merchant page from `/v2/elements`) use their own types (`Area`, `Report`, `Event`, `User`, `Issue`) — there is no `Element` type anymore
 - Prefer editing existing files over creating new ones
 - Only create documentation files when explicitly requested
-- **Svelte 5, mixed-mode → runes** — the app runs Svelte 5; the table cluster (`src/routes/leaderboard`, `src/components/leaderboard/*`, `IssuesTable`, `ProfileActivity`) is runes-mode, most other components are still legacy (Svelte-4 syntax). Write NEW components in runes mode (`$props`, `$state`, `$derived`, `$effect`). **Boy-scout rule: when a PR makes meaningful changes to a legacy component, convert that file to runes mode in the same PR** — as its own commit, so the conversion diff stays separately reviewable from the feature change. Conversions are whole-file (runes and legacy syntax cannot mix within one file) and include the template idioms: `on:` → event attributes, `<svelte:component>` → dynamic components, slots → snippets where practical. Exceptions — do NOT convert as a drive-by: trivial edits (a one-line fix doesn't obligate converting a large file), and the #1208 hotspots that need deliberate hand-conversion (`CommunityCard`, `MerchantListPanel`, `merchant/[id]/+page.svelte`, `Socials`, `area/MerchantCard`, `routes/map/+page.svelte`). Tick converted files/folders off in #1208. Never use the removed imperative component API (`new Component()`/`$destroy`) — use `mount()`/`unmount()` from `svelte`.
-- **TanStack Table v9** — every table shares the feature set from `src/lib/tableFeatures.ts` (`btcmapTableFeatures`, which registers the typed `'fuzzy'` filterFn). Create tables with `createTable({ features: btcmapTableFeatures, get data() { ... } })` getter options in a runes-mode component; read state via `table.atoms.<slice>.get()`; render with `<FlexRender header={header} />` / `<FlexRender cell={cell} />` / `renderComponent()`. No writable-options stores, no `getCoreRowModel()` — those are v8 patterns.
+- **Svelte 5, mixed-mode → runes** — the app runs Svelte 5; the table cluster (`src/routes/leaderboard`, `src/components/leaderboard/*` — except `AreaLeaderboardItemName`, `GradeDisplay`, and `LeaderboardCountryName`, which are still legacy — `IssuesTable`, `ProfileActivity`) is runes-mode, most other components are still legacy (Svelte-4 syntax). Write NEW components in runes mode (`$props`, `$state`, `$derived`, `$effect`). **Boy-scout rule: when a PR makes meaningful changes to a legacy component, convert that file to runes mode in the same PR** — as its own commit, so the conversion diff stays separately reviewable from the feature change. Conversions are whole-file (runes and legacy syntax cannot mix within one file) and include the template idioms: `on:` → event attributes, `<svelte:component>` → dynamic components, slots → snippets where practical. Exceptions — do NOT convert as a drive-by: trivial edits (a one-line fix doesn't obligate converting a large file), and the #1208 hotspots that need deliberate hand-conversion (`CommunityCard`, `MerchantListPanel`, `merchant/[id]/+page.svelte`, `Socials`, `area/MerchantCard`, `routes/map/+page.svelte`). Tick converted files/folders off in #1208. Never use the removed imperative component API (`new Component()`/`$destroy`) — use `mount()`/`unmount()` from `svelte`.
+- **TanStack Table v9** — every table shares the feature set from `src/lib/tableFeatures.ts` (`btcmapTableFeatures`, which registers the typed `'fuzzy'` filterFn). Create tables with `createTable({ features: btcmapTableFeatures, get data() { ... } })` getter options in a runes-mode component; read state via `table.atoms.<slice>.get()`; render header cells with the shared `$components/leaderboard/SortableHeaderCell.svelte` inside `<th aria-sort={resolveAriaSort(header)}>` (don't hand-roll the sort button — that duplication was removed in #1244); render body cells with `<FlexRender cell={cell} />` / `renderComponent()`. No writable-options stores, no `getCoreRowModel()` — those are v8 patterns.
 - **Tailwind v4** — uses `@tailwindcss/vite` plugin, not the v3 PostCSS setup; do not use `theme.extend` patterns from v3 docs
 - **`$components` path alias** resolves to `src/components/` — use it instead of relative paths or `$lib/components`
