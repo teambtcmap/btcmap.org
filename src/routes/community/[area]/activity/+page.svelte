@@ -22,6 +22,7 @@ $effect(() => {
 });
 </script>
 
+<!-- Area data is SSR-delivered now, so it is initialized by definition; the prop survives until AreaFeed drops its gate. -->
 <AreaActivity
 	alias={data.id}
 	name={data.name}

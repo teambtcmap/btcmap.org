@@ -185,8 +185,8 @@ $: areaReports.set(
 		: undefined,
 );
 
-// Derived, not initialized: the previous `const alias/name` froze the
-// first area's values for the lifetime of the reused component instance —
+// Derived, not initialized: a `const area = data.tags` would freeze the
+// first area's tags for the lifetime of the reused component instance —
 // stale after any client-side area navigation.
 $: area = data.tags;
 const filteredPlaces = writable<Place[]>([]);

@@ -120,9 +120,9 @@ const buildFeatureCollection = (list: Place[]): PlaceFeatureCollection => ({
 
 // Register the area polygon source + outline layer. Re-runs on every style
 // reload so a theme swap doesn't strip the overlay. When the source already
-// exists, setData updates its geometry — this is the AreaPage navigation
-// path (e.g. /community/lugano → /community/zurich reuses this component,
-// see AreaPage.svelte:288-307).
+// exists, setData updates its geometry — this is the merchants-section
+// navigation path (e.g. /community/lugano/merchants → /community/zurich/merchants
+// reuses this component instance, see the dataInitialized reactive below).
 const addAreaLayer = (m: MapLibreMap) => {
 	const existing = m.getSource("area") as GeoJSONSource | undefined;
 	if (existing) {
@@ -433,12 +433,13 @@ $: if (initialRenderComplete && geoJSON && filteredPlaces && !dataInitialized) {
 	initializeMap();
 }
 
-// AreaPage reuses this AreaMap instance across community-to-community
-// (and country-to-country) navigation. When the user clicks through to
-// another area, geoJSON and filteredPlaces change by reference but
-// `dataInitialized` stays true, so initializeMap doesn't re-run. Without
-// this reactive the previous area's outline + pins would persist over
-// the new area's coordinates.
+// The merchants section page (community/[area]/merchants,
+// country/[area]/merchants) reuses this AreaMap instance across
+// community-to-community (and country-to-country) navigation. When the user
+// clicks through to another area, geoJSON and filteredPlaces change by
+// reference but `dataInitialized` stays true, so initializeMap doesn't
+// re-run. Without this reactive the previous area's outline + pins would
+// persist over the new area's coordinates.
 //
 // Compare references (not identity-equality) so that theme-swap-driven
 // styleLoaded toggles don't trigger spurious rebuilds — only true prop

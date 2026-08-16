@@ -4,10 +4,9 @@ import { validateContinents } from "$lib/utils";
 
 export const communityAreaConfig: AreaSectionConfig = {
 	notFoundMessage: "Community Not Found",
-	redirectBase: "/community",
 	// Allow non-Latin aliases while still rejecting malformed path-like values.
 	isValidArea: (area) => !area.includes("/"),
-	// The tags AreaPage renders from — previously enforced client-side
+	// The tags the section pages render from — previously enforced client-side
 	// via the $areas-lookup filter.
 	hasRequiredTags: (tags) =>
 		tags.type === "community" &&
@@ -19,10 +18,9 @@ export const communityAreaConfig: AreaSectionConfig = {
 
 export const countryAreaConfig: AreaSectionConfig = {
 	notFoundMessage: "Country Not Found",
-	redirectBase: "/country",
 	// Alphanumeric, underscores, and hyphens only.
 	isValidArea: (area) => /^[\w-]+$/.test(area),
-	// The tags AreaPage renders from — previously enforced client-side
+	// The tags the section pages render from — previously enforced client-side
 	// via the $areas-lookup filter. (The old lookup's two-letter-id
 	// disambiguation is obsolete: the v3 slug fetch resolves directly.)
 	hasRequiredTags: (tags) =>

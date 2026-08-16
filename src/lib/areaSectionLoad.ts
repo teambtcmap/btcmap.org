@@ -1,13 +1,14 @@
-import { error, isHttpError, redirect } from "@sveltejs/kit";
+import { error, isHttpError } from "@sveltejs/kit";
 
 import { API_BASE } from "$lib/api-base";
 import { extractContacts } from "$lib/area/contacts";
 import type { AreaPageProps, AreaTags, PlaceIssue } from "$lib/types";
 
-// Shared loader for the community/[area]/[section] and country/[area]/[section]
-// pages. Both fetch the same v3 area data and share the same error handling;
-// they differ only in how the area slug is validated, which tags an area must
-// carry to be renderable, the not-found copy, and the redirect base path.
+// Shared loader for the community/[area]/<section> and country/[area]/<section>
+// literal-section routes (merchants, stats, activity, maintain). Both fetch
+// the same v3 area data and share the same error handling; they differ only
+// in how the area slug is validated, which tags an area must carry to be
+// renderable, and the not-found copy.
 //
 // The returned bundle carries the FULL tags (including the geo_json polygon)
 // so the client never has to re-download the multi-MB world areas crawl just
@@ -22,22 +23,20 @@ export type AreaSectionEvent = {
 
 export type AreaSectionConfig = {
 	notFoundMessage: string;
-	redirectBase: string;
 	isValidArea: (area: string) => boolean;
-	// The tags an area must carry to be renderable by AreaPage. This used to
-	// be a client-side $areas-lookup filter that ended in goto("/404") — after
-	// the 5.7 MB crawl. A malformed area now 404s at SSR time instead.
+	// The tags an area must carry to be renderable by the section pages. This
+	// used to be a client-side $areas-lookup filter that ended in
+	// goto("/404") — after the 5.7 MB crawl. A malformed area now 404s at
+	// SSR time instead.
 	hasRequiredTags: (tags: AreaTags) => boolean;
 };
 
 export type AreaSectionResult = {
-	// The shared AreaPage data; the community route additionally derives
+	// The shared area section data; the community route additionally derives
 	// verifiedDate/iconSquare from `tags` below (both optional on AreaPageProps).
 	data: Omit<AreaPageProps, "verifiedDate" | "iconSquare">;
 	tags: AreaTags;
 };
-
-const VALID_SECTIONS = ["merchants", "stats", "activity", "maintain"];
 
 // Place-issues are consumed only by the maintain section's IssuesTable —
 // the other sections' SSR payloads must not carry up to ~150 KB of issue
@@ -114,13 +113,6 @@ export const loadAreaSection = async (
 
 	if (!config.isValidArea(area)) {
 		throw error(404, config.notFoundMessage);
-	}
-
-	if (!VALID_SECTIONS.includes(section)) {
-		throw redirect(
-			302,
-			`${config.redirectBase}/${encodeURIComponent(area)}/merchants`,
-		);
 	}
 
 	try {
