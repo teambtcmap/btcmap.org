@@ -4,11 +4,8 @@ import { get, writable } from "svelte/store";
 import { API_BASE } from "$lib/api-base";
 import { buildFieldsParam, PLACE_FIELD_SETS } from "$lib/api-fields";
 import api from "$lib/axios";
-import {
-	type CategoryCounts,
-	type CategoryKey,
-	createEmptyCategoryCounts,
-} from "$lib/categoryMapping";
+import type { CategoryCounts, CategoryKey } from "$lib/categoryMapping";
+import { createEmptyCategoryCounts } from "$lib/categoryMapping";
 import { MERCHANT_LIST_MAX_ITEMS } from "$lib/constants";
 import { _ } from "$lib/i18n";
 import type { VerifiedFilterYears } from "$lib/map/verifiedFilter";
@@ -37,6 +34,11 @@ export type MerchantListState = {
 	isLoadingList: boolean;
 	// True when fetching enriched details in background (no spinner)
 	isEnrichingDetails: boolean;
+	// True when the last list-shaping fetch (list replace or count) failed
+	// for a non-cancellation reason; cleared by every successful populate
+	// path. Enrichment failures don't set it — they degrade cosmetics
+	// (icons/addresses), not the list itself.
+	listError: boolean;
 	// Panel mode: 'nearby' for location-based list, 'search' for search results
 	mode: MerchantListMode;
 	// Search state
@@ -61,6 +63,7 @@ const initialState: MerchantListState = {
 	placeDetailsCache: new Map(),
 	isLoadingList: false,
 	isEnrichingDetails: false,
+	listError: false,
 	mode: "nearby",
 	searchQuery: "",
 	searchResults: [],
@@ -235,6 +238,7 @@ function createMerchantListStore() {
 				merchants: limited,
 				totalCount: selection.length,
 				isLoadingList: false,
+				listError: false,
 				categoryCounts: counts,
 				selectedCategory: effectiveCategory,
 			}));
@@ -301,6 +305,7 @@ function createMerchantListStore() {
 						merchants: [],
 						totalCount: preCategory.length,
 						isLoadingList: false,
+						listError: false,
 						categoryCounts: counts,
 						selectedCategory: effectiveCategory,
 					}));
@@ -318,16 +323,24 @@ function createMerchantListStore() {
 						totalCount: selection.length,
 						placeDetailsCache,
 						isLoadingList: false,
+						listError: false,
 						categoryCounts: counts,
 						selectedCategory: effectiveCategory,
 					}));
 				}
 			} catch (error) {
-				if (error instanceof Error && !isCancellation(error)) {
+				const failed = error instanceof Error && !isCancellation(error);
+				if (failed) {
 					console.warn("Failed to fetch merchant list:", error.message);
 					errToast(get(_)("errors.loadFailed"));
 				}
-				update((state) => ({ ...state, isLoadingList: false }));
+				// A cancellation is not a failure: the superseding request owns
+				// the flag, so leave whatever it decides untouched.
+				update((state) => ({
+					...state,
+					isLoadingList: false,
+					listError: failed || state.listError,
+				}));
 			}
 		},
 
@@ -386,13 +399,19 @@ function createMerchantListStore() {
 					merchants: [],
 					totalCount: recencyPlaces.length,
 					isLoadingList: false,
+					listError: false,
 					// Preserve existing categoryCounts since we don't have actual merchant data to recalculate them
 				}));
 			} catch (error) {
-				if (error instanceof Error && !isCancellation(error)) {
+				const failed = error instanceof Error && !isCancellation(error);
+				if (failed) {
 					console.warn("Failed to fetch merchant count:", error.message);
 				}
-				update((state) => ({ ...state, isLoadingList: false }));
+				update((state) => ({
+					...state,
+					isLoadingList: false,
+					listError: failed || state.listError,
+				}));
 			}
 		},
 
