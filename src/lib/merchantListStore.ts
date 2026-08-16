@@ -4,11 +4,8 @@ import { get, writable } from "svelte/store";
 import { API_BASE } from "$lib/api-base";
 import { buildFieldsParam, PLACE_FIELD_SETS } from "$lib/api-fields";
 import api from "$lib/axios";
-import {
-	type CategoryCounts,
-	type CategoryKey,
-	createEmptyCategoryCounts,
-} from "$lib/categoryMapping";
+import type { CategoryCounts, CategoryKey } from "$lib/categoryMapping";
+import { createEmptyCategoryCounts } from "$lib/categoryMapping";
 import { MERCHANT_LIST_MAX_ITEMS } from "$lib/constants";
 import { _ } from "$lib/i18n";
 import type { VerifiedFilterYears } from "$lib/map/verifiedFilter";
