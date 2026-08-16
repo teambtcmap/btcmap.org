@@ -371,6 +371,18 @@ const getBufferedBoundsLngLat = (
 	};
 };
 
+// One reactive source for the list fetch behavior. Boosted-only /
+// issues-only: the bulk $places feed already holds the full filtered set
+// at every zoom, and the radius API (api-with-limit) can filter by
+// neither boost nor issue state, so force the local path — the list,
+// count, and panel status stay in sync with the filtered map.
+// MUST stay in source order above every reactive block that calls
+// updateMerchantList() synchronously (the search-exit watcher and the
+// initial-count block): Svelte 4 can't see this dependency through the
+// function body, so ordering falls back to source position.
+$: listBehavior =
+	boostsOnly || issuesOnly ? "local-markers" : getZoomBehavior(currentZoom);
+
 // Refresh the panel's nearby list based on the current viewport. Mirrors
 // /map's `updateMerchantList` minus the panel-offset bookkeeping (out of
 // scope for this commit per the parity plan).
@@ -382,16 +394,10 @@ const updateMerchantList = (opts?: { force?: boolean }) => {
 
 	const bounds = map.getBounds();
 	const center = map.getCenter();
-	// Boosted-only / issues-only: the bulk $places feed already holds the
-	// full filtered set at every zoom, and the radius API (api-with-limit)
-	// can filter by neither boost nor issue state, so force the local path
-	// so the list/count stay in sync with the filtered map.
-	const behavior =
-		boostsOnly || issuesOnly ? "local-markers" : getZoomBehavior(currentZoom);
 	const listOpen = get(merchantList).isOpen;
 	const allowHeavyFetch = opts?.force || listOpen;
 
-	switch (behavior) {
+	switch (listBehavior) {
 		case "local-markers": {
 			// Zoom 15+: filter the already-loaded $places by an expanded
 			// viewport, then enrich with names when the panel is open or we're
