@@ -227,7 +227,7 @@ jobs:
           - If nothing significant was missed and there are no refactoring opportunities, say so briefly. Do not invent findings.
 
           Verification rules (mandatory):
-          - ONLY report issues you can directly verify from the provided diff AND full file contents. If you need a file that is not provided, do NOT report the finding.
+          - ONLY report issues you can directly verify from the provided diff, full file contents, or (for changed pipeline code) the <review-pipeline> block. If you need a file that is not provided, do NOT report the finding.
           - For each finding, you must be able to point to specific lines in the diff or file contents that prove the issue exists. If you cannot, drop it.
           - NEVER assume what a module contains based on its name. Read the provided file contents. If a module is not included, do not make claims about its internals.
           - Before flagging a pattern in new code, check whether existing files in the full file contents use the same pattern. If they do, it is an established project convention — do not flag it.

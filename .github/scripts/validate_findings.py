@@ -53,6 +53,22 @@ try:
 except FileNotFoundError:
     pass
 
+# The <review-pipeline> block embeds the workflow's own source in every
+# prompt, and findings about changed pipeline code may quote it — mirror it
+# into the corpus so those quotes verify even when the file is too big for
+# full-file context or only the scripts changed. The corpus should match
+# what the model was actually shown.
+try:
+    with open(
+        ".github/workflows/ai-health-review.yml",
+        "r",
+        encoding="utf-8",
+        errors="replace",
+    ) as f:
+        corpus_parts.append(f.read())
+except FileNotFoundError:
+    pass
+
 corpus = norm("\n".join(corpus_parts))
 
 # Paths that appear as either side of a `diff --git a/x b/y` header.
