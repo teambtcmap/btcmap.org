@@ -107,7 +107,9 @@ jobs:
         run: |
           set -euo pipefail
           MAX_CONTEXT=120000
-          MAX_FILE=20000
+          # 32KB so the 24KB ai-health-review.yml itself fits — at 20000 the
+          # period's most-changed file was skipped from context (#1253)
+          MAX_FILE=32000
 
           # Files changed in the diff (extract b/ path so renames resolve to the new name)
           grep '^diff --git' /tmp/raw-diff.txt \
