@@ -8,11 +8,8 @@ import LoadingSpinner from "$components/LoadingSpinner.svelte";
 import SearchInput from "$components/SearchInput.svelte";
 import { trackEvent } from "$lib/analytics";
 import { lockBodyScroll, unlockBodyScroll } from "$lib/bodyScrollLock";
-import {
-	CATEGORY_ENTRIES,
-	type CategoryCounts,
-	type CategoryKey,
-} from "$lib/categoryMapping";
+import type { CategoryCounts, CategoryKey } from "$lib/categoryMapping";
+import { CATEGORY_ENTRIES } from "$lib/categoryMapping";
 import { SEARCH_SHEET_PEEK_HEIGHT } from "$lib/drawerConfig";
 import { createDrawerGestureController } from "$lib/drawerGestureController";
 import { _ } from "$lib/i18n";
