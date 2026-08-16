@@ -12,6 +12,7 @@ describe("deriveNearbyListStatus", () => {
 			deriveNearbyListStatus({
 				behavior: "none",
 				isLoading: true,
+				hasError: false,
 				merchantCount: 0,
 				totalCount: 0,
 			}),
@@ -20,6 +21,7 @@ describe("deriveNearbyListStatus", () => {
 			deriveNearbyListStatus({
 				behavior: "api-with-limit",
 				isLoading: true,
+				hasError: false,
 				merchantCount: 0,
 				totalCount: 800,
 			}),
@@ -28,6 +30,7 @@ describe("deriveNearbyListStatus", () => {
 			deriveNearbyListStatus({
 				behavior: "local-markers",
 				isLoading: true,
+				hasError: false,
 				merchantCount: 12,
 				totalCount: 12,
 			}),
@@ -41,6 +44,7 @@ describe("deriveNearbyListStatus", () => {
 			deriveNearbyListStatus({
 				behavior: "none",
 				isLoading: false,
+				hasError: false,
 				merchantCount: 0,
 				totalCount: 0,
 			}),
@@ -49,6 +53,7 @@ describe("deriveNearbyListStatus", () => {
 			deriveNearbyListStatus({
 				behavior: "none",
 				isLoading: false,
+				hasError: false,
 				merchantCount: 0,
 				totalCount: 42,
 			}),
@@ -57,6 +62,7 @@ describe("deriveNearbyListStatus", () => {
 			deriveNearbyListStatus({
 				behavior: "none",
 				isLoading: false,
+				hasError: false,
 				merchantCount: 3,
 				totalCount: 5,
 			}),
@@ -70,6 +76,7 @@ describe("deriveNearbyListStatus", () => {
 			deriveNearbyListStatus({
 				behavior: "api-with-limit",
 				isLoading: false,
+				hasError: false,
 				merchantCount: 0,
 				totalCount: 800,
 			}),
@@ -78,6 +85,7 @@ describe("deriveNearbyListStatus", () => {
 			deriveNearbyListStatus({
 				behavior: "local-markers",
 				isLoading: false,
+				hasError: false,
 				merchantCount: 0,
 				totalCount: 40,
 			}),
@@ -92,6 +100,7 @@ describe("deriveNearbyListStatus", () => {
 			deriveNearbyListStatus({
 				behavior: "local-markers",
 				isLoading: false,
+				hasError: false,
 				merchantCount: 7,
 				totalCount: 7,
 			}),
@@ -100,6 +109,7 @@ describe("deriveNearbyListStatus", () => {
 			deriveNearbyListStatus({
 				behavior: "local-markers",
 				isLoading: false,
+				hasError: false,
 				merchantCount: 0,
 				totalCount: 0,
 			}),
@@ -111,6 +121,7 @@ describe("deriveNearbyListStatus", () => {
 			deriveNearbyListStatus({
 				behavior: "api-with-limit",
 				isLoading: false,
+				hasError: false,
 				merchantCount: 0,
 				totalCount: 0,
 			}),
@@ -122,6 +133,7 @@ describe("deriveNearbyListStatus", () => {
 			deriveNearbyListStatus({
 				behavior: "local-markers",
 				isLoading: false,
+				hasError: false,
 				merchantCount: 250,
 				totalCount: 400,
 			}),
@@ -133,6 +145,7 @@ describe("deriveNearbyListStatus", () => {
 			deriveNearbyListStatus({
 				behavior: "api-with-limit",
 				isLoading: false,
+				hasError: false,
 				merchantCount: 25,
 				totalCount: 25,
 			}),
@@ -146,10 +159,77 @@ describe("deriveNearbyListStatus", () => {
 			deriveNearbyListStatus({
 				behavior: getZoomBehavior(zoom),
 				isLoading: false,
+				hasError: false,
 				merchantCount: 3,
 				totalCount: 3,
 			});
 		expect(at(9.99)).toBe("below-floor");
 		expect(at(10)).toBe("ok");
+	});
+
+	it("returns 'error' when the last fetch failed and nothing is renderable", () => {
+		expect(
+			deriveNearbyListStatus({
+				behavior: "api-with-limit",
+				isLoading: false,
+				hasError: true,
+				merchantCount: 0,
+				totalCount: 0,
+			}),
+		).toBe("error");
+		// A stale too-dense claim must not outrank a known failure.
+		expect(
+			deriveNearbyListStatus({
+				behavior: "api-with-limit",
+				isLoading: false,
+				hasError: true,
+				merchantCount: 0,
+				totalCount: 800,
+			}),
+		).toBe("error");
+	});
+
+	it("keeps stale rows visible after a failed refresh", () => {
+		expect(
+			deriveNearbyListStatus({
+				behavior: "api-with-limit",
+				isLoading: false,
+				hasError: true,
+				merchantCount: 25,
+				totalCount: 25,
+			}),
+		).toBe("ok");
+		expect(
+			deriveNearbyListStatus({
+				behavior: "local-markers",
+				isLoading: false,
+				hasError: true,
+				merchantCount: 250,
+				totalCount: 400,
+			}),
+		).toBe("truncated");
+	});
+
+	it("loading and below-floor take precedence over error", () => {
+		expect(
+			deriveNearbyListStatus({
+				behavior: "api-with-limit",
+				isLoading: true,
+				hasError: true,
+				merchantCount: 0,
+				totalCount: 0,
+			}),
+		).toBe("loading");
+		// The local/none paths clear the flag via setMerchants, but pin the
+		// precedence anyway.
+		expect(
+			deriveNearbyListStatus({
+				behavior: "none",
+				isLoading: false,
+				hasError: true,
+				merchantCount: 0,
+				totalCount: 0,
+			}),
+		).toBe("below-floor");
 	});
 });

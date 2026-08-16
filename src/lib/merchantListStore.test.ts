@@ -180,6 +180,17 @@ describe("merchantListStore", () => {
 			expect(state.merchants.length).toBe(5);
 			expect(state.totalCount).toBe(20);
 		});
+
+		it("should clear listError left over from a failed fetch", async () => {
+			const error = new Error("Network error");
+			(api.get as Mock).mockRejectedValueOnce(error);
+			await merchantList.fetchAndReplaceList({ lat: 0, lon: 0 }, 10);
+			expect(get(merchantList).listError).toBe(true);
+
+			merchantList.setMerchants([createMockPlace()], 0, 0);
+
+			expect(get(merchantList).listError).toBe(false);
+		});
 	});
 
 	describe("merchant sorting", () => {
@@ -458,6 +469,53 @@ describe("merchantListStore", () => {
 				warnSpy.mockRestore();
 			}
 		});
+
+		it("should set listError on failure and clear isLoadingList", async () => {
+			const error = new Error("Network error");
+			(api.get as Mock).mockRejectedValueOnce(error);
+
+			await merchantList.fetchAndReplaceList({ lat: 0, lon: 0 }, 10);
+			const state = get(merchantList);
+
+			expect(state.listError).toBe(true);
+			expect(state.isLoadingList).toBe(false);
+		});
+
+		it("should clear listError on a subsequent successful fetch", async () => {
+			const error = new Error("Network error");
+			(api.get as Mock).mockRejectedValueOnce(error);
+			await merchantList.fetchAndReplaceList({ lat: 0, lon: 0 }, 10);
+			expect(get(merchantList).listError).toBe(true);
+
+			(api.get as Mock).mockResolvedValueOnce({ data: [] });
+			await merchantList.fetchAndReplaceList({ lat: 0, lon: 0 }, 10);
+
+			expect(get(merchantList).listError).toBe(false);
+		});
+
+		it("should leave listError false after a cancelled fetch (AbortError)", async () => {
+			const abortError = new Error("Aborted");
+			abortError.name = "AbortError";
+			(api.get as Mock).mockRejectedValueOnce(abortError);
+
+			await merchantList.fetchAndReplaceList({ lat: 0, lon: 0 }, 10);
+
+			expect(get(merchantList).listError).toBe(false);
+		});
+
+		it("should leave listError unchanged (true) after a cancelled fetch that follows a real failure", async () => {
+			const error = new Error("Network error");
+			(api.get as Mock).mockRejectedValueOnce(error);
+			await merchantList.fetchAndReplaceList({ lat: 0, lon: 0 }, 10);
+			expect(get(merchantList).listError).toBe(true);
+
+			const abortError = new Error("Aborted");
+			abortError.name = "AbortError";
+			(api.get as Mock).mockRejectedValueOnce(abortError);
+			await merchantList.fetchAndReplaceList({ lat: 0, lon: 0 }, 10);
+
+			expect(get(merchantList).listError).toBe(true);
+		});
 	});
 
 	describe("fetchCountOnly", () => {
@@ -611,6 +669,27 @@ describe("merchantListStore", () => {
 			await merchantList.fetchCountOnly({ lat: 0, lon: 0 }, 10);
 
 			expect(errToast).not.toHaveBeenCalled();
+		});
+
+		it("should set listError on failure", async () => {
+			const error = new Error("Network error");
+			(api.get as Mock).mockRejectedValueOnce(error);
+
+			await merchantList.fetchCountOnly({ lat: 0, lon: 0 }, 10);
+
+			expect(get(merchantList).listError).toBe(true);
+		});
+
+		it("should clear listError on success", async () => {
+			const error = new Error("Network error");
+			(api.get as Mock).mockRejectedValueOnce(error);
+			await merchantList.fetchCountOnly({ lat: 0, lon: 0 }, 10);
+			expect(get(merchantList).listError).toBe(true);
+
+			(api.get as Mock).mockResolvedValueOnce({ data: [] });
+			await merchantList.fetchCountOnly({ lat: 0, lon: 0 }, 10);
+
+			expect(get(merchantList).listError).toBe(false);
 		});
 	});
 

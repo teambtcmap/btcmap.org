@@ -302,6 +302,7 @@ $: if (isMobile && $merchantDrawer.isOpen) {
 $: pillCount = formatNearbyPillCount(totalCount);
 $: placeDetailsCache = $merchantList.placeDetailsCache;
 $: isLoadingList = $merchantList.isLoadingList;
+$: listError = $merchantList.listError;
 $: selectedId = $merchantDrawer.merchantId;
 $: mode = $merchantList.mode;
 // Nearby count line shown inside the open panel on desktop, which (unlike the
@@ -401,6 +402,7 @@ function getCategoryButtonClass(
 $: nearbyStatus = deriveNearbyListStatus({
 	behavior,
 	isLoading: isLoadingList,
+	hasError: listError,
 	merchantCount: merchants.length,
 	totalCount,
 });
@@ -817,6 +819,10 @@ onDestroy(() => {
 					aria-label={$_('aria.loading')}
 				>
 					<LoadingSpinner color="text-link dark:text-white" size="h-6 w-6" />
+				</div>
+			{:else if nearbyStatus === 'error'}
+				<div class="px-3 py-8 text-center text-sm text-body dark:text-white/70">
+					{$_('errors.loadFailed')}
 				</div>
 			{:else if nearbyStatus === 'empty'}
 				<div class="px-3 py-8 text-center text-sm text-body dark:text-white/70">
