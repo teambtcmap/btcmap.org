@@ -107,7 +107,9 @@ jobs:
         run: |
           set -euo pipefail
           MAX_CONTEXT=120000
-          MAX_FILE=20000
+          # 32KB so the 24KB ai-health-review.yml itself fits — at 20000 the
+          # period's most-changed file was skipped from context (#1253)
+          MAX_FILE=32000
 
           # Files changed in the diff (extract b/ path so renames resolve to the new name)
           grep '^diff --git' /tmp/raw-diff.txt \
@@ -208,7 +210,7 @@ jobs:
           2. "Can we refactor?" — patterns, duplication, or related changes across multiple commits that could be consolidated or improved now that they have all landed.
           3. "Is AGENTS.md outdated?" — compare the AGENTS.md documentation against the actual codebase patterns visible in the diff. Flag any conventions, tooling references, file paths, or project structure notes in AGENTS.md that contradict what the code actually does.
           4. "Is README.md outdated?" — compare the README.md against the actual codebase (commands, setup steps, project structure, dependencies). Flag any instructions, commands, or descriptions that no longer match reality.
-          5. "How should this review process improve?" — you are given the coverage numbers for this run (<pipeline-stats>) and the workflow source that produced this prompt (<review-pipeline>). If something about the pipeline measurably limited THIS run — heavy diff truncation, file contents that did not fit the budget, a prompt instruction that contradicts what you saw in the code, a validation gap — say so concretely. Observations about the pipeline belong in the Process Feedback section, never in Findings.
+          5. "How should this review process improve?" — you are given the coverage numbers for this run (<pipeline-stats>) and the workflow source that produced this prompt (<review-pipeline>). If something about the pipeline measurably limited THIS run — heavy diff truncation, file contents that did not fit the budget, a prompt instruction that contradicts what you saw in the code, a validation gap — say so concretely. Coverage and limitation observations about THIS run belong in the Process Feedback section. Bugs in committed workflow or script code that changed in the period diff are ordinary Findings — quote them from the diff, the file contents, or the <review-pipeline> block.
 
           The project stack and conventions are documented in the <project-conventions> and <agents-md> blocks in the user message — treat those as authoritative and flag new code that contradicts them. Do not assume the stack from memory; this prompt has gone stale on that before (it claimed Svelte 4 and Leaflet long after the Svelte 5 and MapLibre migrations).
 
@@ -225,7 +227,7 @@ jobs:
           - If nothing significant was missed and there are no refactoring opportunities, say so briefly. Do not invent findings.
 
           Verification rules (mandatory):
-          - ONLY report issues you can directly verify from the provided diff AND full file contents. If you need a file that is not provided, do NOT report the finding.
+          - ONLY report issues you can directly verify from the provided diff, full file contents, or (for changed pipeline code) the <review-pipeline> block. If you need a file that is not provided, do NOT report the finding.
           - For each finding, you must be able to point to specific lines in the diff or file contents that prove the issue exists. If you cannot, drop it.
           - NEVER assume what a module contains based on its name. Read the provided file contents. If a module is not included, do not make claims about its internals.
           - Before flagging a pattern in new code, check whether existing files in the full file contents use the same pattern. If they do, it is an established project convention — do not flag it.
@@ -317,7 +319,7 @@ jobs:
           ${PIPELINE_STATS}
           </pipeline-stats>
 
-          The workflow source that generated this review, for the Process Feedback section only:
+          The workflow source that generated this review — reference for Process Feedback, and quotable in Findings when the workflow or its scripts are part of the period diff:
 
           ${RP_OPEN}
           ${WORKFLOW_SOURCE}
