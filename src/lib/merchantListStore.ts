@@ -1,6 +1,7 @@
 import axios from "axios";
 import { get, writable } from "svelte/store";
 
+import { trackEvent } from "$lib/analytics";
 import { API_BASE } from "$lib/api-base";
 import { buildFieldsParam, PLACE_FIELD_SETS } from "$lib/api-fields";
 import api from "$lib/axios";
@@ -15,14 +16,21 @@ import {
 } from "$lib/map/verifiedFilter";
 import { selectVisiblePlaces } from "$lib/map/visiblePlaces";
 import { isBoosted } from "$lib/merchantDrawerLogic";
+import { merchantDrawer } from "$lib/merchantDrawerStore";
 import { verifiedDatesLoaded } from "$lib/store";
 import type { Place } from "$lib/types";
 import type { UserLocation } from "$lib/userLocationStore";
 import { userLocation } from "$lib/userLocationStore";
-import { calculateDistance, errToast } from "$lib/utils";
+import { calculateDistance, debounce, errToast } from "$lib/utils";
 import { filterPlacesByRecency } from "$lib/verification";
 
 export type MerchantListMode = "nearby" | "search";
+
+// The page supplies the live map centre lazily: the session evaluates the
+// getter at dispatch time (the map can pan during the debounce window), and
+// it returns undefined until the map initialises — the search box is
+// reachable before that.
+export type SearchCenterGetter = () => { lat: number; lon: number } | undefined;
 
 export type MerchantListState = {
 	isOpen: boolean;
@@ -182,6 +190,173 @@ function createMerchantListStore() {
 		cancelDetailsRequest();
 	}
 
+	// Open panel with search results (boosted first, then the server's order)
+	function applySearchResults(
+		query: string,
+		results: Place[],
+		total: number = results.length,
+	) {
+		// The server already ordered these by relevance (exact name match, then
+		// prefix, then substring, then a hit on any other tag) with proximity to
+		// the map centre as the tiebreak. Preserve that — re-sorting by distance
+		// or alphabetically, as the nearby list does, would discard it and bury
+		// an exact name match. Only boosted places are promoted above it.
+		// Array.sort is stable, so equal-boost rows keep the server's order.
+		const sortedResults = [...results].sort((a, b) => {
+			if (isBoosted(a) && !isBoosted(b)) return -1;
+			if (!isBoosted(a) && isBoosted(b)) return 1;
+			return 0;
+		});
+		// Counts come from the shared pipeline on the recency-filtered set;
+		// the panel renders the same pipeline's selection
+		// (filteredSearchResults), so chips and rows can never disagree.
+		const { verifiedWithinYears } = get(store);
+		const { counts: categoryCounts } = selectVisiblePlaces({
+			places: sortedResults,
+			mode: "search",
+			category: "all",
+			recency: verifiedWithinYears,
+			recencyReady: true,
+			boostsOnly: false,
+			issuesOnly: false,
+			issuesReady: true,
+		});
+		update((state) => ({
+			...resetCategoryState(state),
+			isOpen: true,
+			mode: "search",
+			searchQuery: query,
+			searchResults: sortedResults,
+			// Total matches on the server, which can exceed what it returned —
+			// the panel shows "N of TOTAL" so truncation isn't silent.
+			searchTotal: total,
+			isSearching: false,
+			categoryCounts,
+		}));
+	}
+
+	// Open panel in search mode, optionally showing spinner
+	// Use setSearchModeOpen() to open panel ready for input (no spinner)
+	// Use setSearchModeOpen(true) when a search is in progress (shows spinner)
+	function setSearchModeOpen(isSearching: boolean = false) {
+		update((state) => ({
+			...state,
+			isSearching,
+			mode: "search",
+			isOpen: true,
+		}));
+	}
+
+	// --- searchSession (#1173) --------------------------------------------
+	// The whole search request lifecycle in one place: the debounce, the
+	// abort, and every staleness/open guard. search() is the single entry
+	// point AND the sole writer of searchQuery — nothing outside the session
+	// can update the query without it knowing (the PR #1126 input-clobber
+	// class this extraction exists to prevent).
+	let searchAbortController: AbortController | null = null;
+
+	function cancelSearchRequest() {
+		if (searchAbortController) {
+			searchAbortController.abort();
+			searchAbortController = null;
+		}
+	}
+
+	// Ported verbatim from map/+page.svelte's executeSearch — abort any
+	// prior request, fetch via the SvelteKit endpoint, hand results to the
+	// store. Errors surface as toasts.
+	const executeSearch = async (
+		query: string,
+		getCenter?: SearchCenterGetter,
+	) => {
+		cancelSearchRequest();
+		// Trim so the request matches the dispatch decision (search() gates
+		// on the trimmed length) — otherwise "  abc" is sent verbatim as
+		// %20%20abc.
+		const trimmed = query.trim();
+		if (trimmed.length < 3) return;
+
+		trackEvent("search_query");
+		searchAbortController = new AbortController();
+
+		// Close any drawer so it doesn't sit on top of the result list.
+		merchantDrawer.close();
+		setSearchModeOpen(true);
+
+		// The server breaks relevance ties by proximity to this point,
+		// mirroring the original client-side search, which ranked purely by
+		// distance from the map centre. Without it, a query like "hamburg" —
+		// which no place is named — leaves every match tied at the lowest
+		// rank, and the result cap selects among them by name length.
+		// getCenter runs HERE, at dispatch time, not at the keystroke that
+		// armed the debounce: the map can pan during the 300 ms window, and
+		// the page-level code this replaces read the live centre at this
+		// exact moment. Undefined (map not initialised) omits both params —
+		// the API rejects a lone coordinate.
+		const searchParams = new URLSearchParams({ name: trimmed });
+		const center = getCenter?.();
+		if (center) {
+			searchParams.set("lat", String(center.lat));
+			searchParams.set("lon", String(center.lon));
+		}
+
+		try {
+			const response = await fetch(`/api/search/places?${searchParams}`, {
+				signal: searchAbortController.signal,
+			});
+			if (!response.ok) throw new Error("Search API error");
+			// `total` is the server's full match count, which can exceed the
+			// rows it returned — the panel reports the gap rather than hiding
+			// the truncation.
+			const { places: results, total }: { places: Place[]; total: number } =
+				await response.json();
+			// The panel/sheet may have been closed while we were awaiting the
+			// response (abort only rejects the fetch, not the json() window).
+			// Don't let a late result reopen it.
+			if (!get(store).isOpen) return;
+			// The user kept typing while this request was in flight, so it
+			// answers a query that is no longer on screen. Continuous typing
+			// keeps re-arming the debounce, so no newer request dispatched to
+			// abort this one. Dropping it here matters beyond stale results:
+			// applySearchResults writes `query` back into searchQuery, which
+			// feeds the search input's `value` prop — applying it would
+			// rewrite the input mid-word and reset the caret.
+			if (get(store).searchQuery !== query) return;
+			applySearchResults(query, results, total);
+		} catch (error) {
+			if (error instanceof Error && error.name === "AbortError") return;
+			// Same staleness check as the success path. The user has typed
+			// past this query, so a newer request is already scheduled or in
+			// flight: toasting would report a failure for a query that is no
+			// longer on screen, and setSearchModeOpen(false) below would clear
+			// the spinner out from under the newer search. That search reports
+			// its own failure if it also fails.
+			if (get(store).searchQuery !== query) return;
+			console.error("Search error:", error);
+			errToast(get(_)("errors.searchUnavailable"));
+			// Mirror the success-path guard: if the panel was closed/collapsed
+			// while the request was in flight, a non-abort failure must not
+			// pop it back open.
+			if (!get(store).isOpen) return;
+			// Keep the user's typed query (and search mode) — a transient
+			// failure shouldn't wipe the input or silently drop them back to
+			// nearby.
+			setSearchModeOpen(false);
+		}
+	};
+
+	const debouncedExecuteSearch = debounce(
+		(query: string, getCenter?: SearchCenterGetter) => {
+			void executeSearch(query, getCenter);
+		},
+		300,
+	);
+
+	function cancelSearchSession() {
+		debouncedExecuteSearch.cancel();
+		cancelSearchRequest();
+	}
+
 	return {
 		subscribe,
 
@@ -191,6 +366,10 @@ function createMerchantListStore() {
 
 		// Hide the panel, reset category filter and search state, but keep merchant data (count visible on button)
 		close() {
+			// Closing/collapsing discards any pending or in-flight worldwide
+			// search — a late response must not pop the panel (or the mobile
+			// sheet) back open on its own.
+			cancelSearchSession();
 			update((state) => ({
 				...resetCategoryState(state),
 				isOpen: false,
@@ -459,60 +638,47 @@ function createMerchantListStore() {
 			results: Place[],
 			total: number = results.length,
 		) {
-			// The server already ordered these by relevance (exact name match, then
-			// prefix, then substring, then a hit on any other tag) with proximity to
-			// the map centre as the tiebreak. Preserve that — re-sorting by distance
-			// or alphabetically, as the nearby list does, would discard it and bury
-			// an exact name match. Only boosted places are promoted above it.
-			// Array.sort is stable, so equal-boost rows keep the server's order.
-			const sortedResults = [...results].sort((a, b) => {
-				if (isBoosted(a) && !isBoosted(b)) return -1;
-				if (!isBoosted(a) && isBoosted(b)) return 1;
-				return 0;
-			});
-			// Counts come from the shared pipeline on the recency-filtered set;
-			// the panel renders the same pipeline's selection
-			// (filteredSearchResults), so chips and rows can never disagree.
-			const { verifiedWithinYears } = get(store);
-			const { counts: categoryCounts } = selectVisiblePlaces({
-				places: sortedResults,
-				mode: "search",
-				category: "all",
-				recency: verifiedWithinYears,
-				recencyReady: true,
-				boostsOnly: false,
-				issuesOnly: false,
-				issuesReady: true,
-			});
-			update((state) => ({
-				...resetCategoryState(state),
-				isOpen: true,
-				mode: "search",
-				searchQuery: query,
-				searchResults: sortedResults,
-				// Total matches on the server, which can exceed what it returned —
-				// the panel shows "N of TOTAL" so truncation isn't silent.
-				searchTotal: total,
-				isSearching: false,
-				categoryCounts,
-			}));
+			applySearchResults(query, results, total);
 		},
 
 		// Open panel in search mode, optionally showing spinner
 		// Use openSearchMode() to open panel ready for input (no spinner)
 		// Use openSearchMode(true) when a search is in progress (shows spinner)
 		openSearchMode(isSearching: boolean = false) {
-			update((state) => ({
-				...state,
-				isSearching,
-				mode: "search",
-				isOpen: true,
-			}));
+			setSearchModeOpen(isSearching);
 		},
 
 		// Update the search query (used when binding input to store)
 		setSearchQuery(query: string) {
 			update((state) => ({ ...state, searchQuery: query }));
+		},
+
+		// Single entry point for the search input (#1173) — and the sole
+		// writer of searchQuery. Writes the RAW query: the staleness guards
+		// compare verbatim, so trimming here would silently drop results for
+		// queries typed with leading whitespace.
+		search(query: string, opts: { getCenter?: SearchCenterGetter } = {}) {
+			update((state) => ({ ...state, searchQuery: query }));
+			if (query.trim().length >= 3) {
+				debouncedExecuteSearch(query, opts.getCenter);
+				return;
+			}
+			// Too short / empty → abort any search and return to nearby
+			// browse, keeping whatever the user has typed so far in the
+			// input. No isOpen guard and no result clearing: the page's
+			// search → nearby watcher owns the refresh, close() owns the
+			// reset.
+			cancelSearchSession();
+			if (get(store).mode !== "nearby") {
+				update((state) => ({ ...state, mode: "nearby" }));
+			}
+		},
+
+		// Discard any pending or in-flight worldwide search without touching
+		// list/details requests (used by the page on teardown paths the
+		// session can't see).
+		cancelSearch() {
+			cancelSearchSession();
 		},
 
 		// Clear search input and results, but stay in search mode
@@ -618,6 +784,7 @@ function createMerchantListStore() {
 
 		reset() {
 			cancelAllRequests();
+			cancelSearchSession();
 			set(initialState);
 		},
 	};
