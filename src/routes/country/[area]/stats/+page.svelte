@@ -5,7 +5,9 @@ import AreaStats from "$components/area/AreaStats.svelte";
 import { getAreaSectionContext } from "$lib/area/sectionContext";
 import { reportError } from "$lib/store";
 
-let { data } = $props();
+import type { PageProps } from "./$types";
+
+let { data }: PageProps = $props();
 
 const { areaReports } = getAreaSectionContext();
 </script>

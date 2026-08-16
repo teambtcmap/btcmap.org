@@ -4,7 +4,9 @@ import { _ } from "svelte-i18n";
 import AreaTickets from "$components/area/AreaTickets.svelte";
 import IssuesTable from "$components/IssuesTable.svelte";
 
-let { data } = $props();
+import type { PageProps } from "./$types";
+
+let { data }: PageProps = $props();
 </script>
 
 <IssuesTable

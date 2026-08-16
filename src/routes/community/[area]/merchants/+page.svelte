@@ -4,9 +4,10 @@ import AreaMerchantHighlights from "$components/area/AreaMerchantHighlights.svel
 import Boost from "$components/Boost.svelte";
 import { getAreaSectionContext } from "$lib/area/sectionContext";
 
+import type { PageProps } from "./$types";
 import { browser } from "$app/environment";
 
-let { data } = $props();
+let { data }: PageProps = $props();
 
 const { filteredPlaces, sweepDone, areaReports } = getAreaSectionContext();
 </script>

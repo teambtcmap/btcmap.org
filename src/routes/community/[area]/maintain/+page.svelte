@@ -5,7 +5,9 @@ import AreaTickets from "$components/area/AreaTickets.svelte";
 import VerifyCommunityForm from "$components/area/VerifyCommunityForm.svelte";
 import IssuesTable from "$components/IssuesTable.svelte";
 
-let { data } = $props();
+import type { PageProps } from "./$types";
+
+let { data }: PageProps = $props();
 </script>
 
 <IssuesTable

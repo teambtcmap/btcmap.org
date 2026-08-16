@@ -2,6 +2,7 @@
 import AreaLayout from "$components/area/AreaLayout.svelte";
 import Breadcrumbs from "$components/Breadcrumbs.svelte";
 import { _ } from "$lib/i18n";
+import type { AreaPageProps } from "$lib/types";
 import { buildMetaDescription } from "$lib/utils";
 
 import { page } from "$app/state";
@@ -9,7 +10,9 @@ import { page } from "$app/state";
 let { children } = $props();
 
 // page.data is rune-backed — directly reactive in runes mode, no bridge.
-const data = $derived(page.data);
+// Cast restores static typing: SvelteKit's page.data is App.PageData &
+// Record<string, any>, so a bare read flows every field as any.
+const data = $derived(page.data as AreaPageProps);
 
 const routes = $derived([
 	{ name: $_("nav.communities"), url: "/communities" },

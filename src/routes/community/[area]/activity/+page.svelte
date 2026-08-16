@@ -2,7 +2,9 @@
 import AreaActivity from "$components/area/AreaActivity.svelte";
 import { getAreaSectionContext } from "$lib/area/sectionContext";
 
-let { data } = $props();
+import type { PageProps } from "./$types";
+
+let { data }: PageProps = $props();
 
 const {
 	taggers,

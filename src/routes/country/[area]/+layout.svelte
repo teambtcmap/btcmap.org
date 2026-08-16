@@ -3,6 +3,7 @@ import AreaLayout from "$components/area/AreaLayout.svelte";
 import Breadcrumbs from "$components/Breadcrumbs.svelte";
 import { getCountryName } from "$lib/countryNames";
 import { _, locale } from "$lib/i18n";
+import type { AreaPageProps } from "$lib/types";
 import { buildMetaDescription } from "$lib/utils";
 
 import { page } from "$app/state";
@@ -10,10 +11,12 @@ import { page } from "$app/state";
 let { children } = $props();
 
 // page.data is rune-backed — directly reactive in runes mode, no bridge.
-const data = $derived(page.data);
+// Cast restores static typing: SvelteKit's page.data is App.PageData &
+// Record<string, any>, so a bare read flows every field as any.
+const data = $derived(page.data as AreaPageProps);
 
 let _nameGen = 0;
-let countryDisplayName = $state(page.data.name ?? "");
+let countryDisplayName = $state((page.data as AreaPageProps).name ?? "");
 
 // $derived can't express an async lookup, so the old reactive block's
 // generation guard is ported verbatim: bump the token, set the fallback
