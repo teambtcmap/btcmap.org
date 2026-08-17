@@ -4,12 +4,16 @@ import Icon from "$components/Icon.svelte";
 import { _ } from "$lib/i18n";
 import type { DonationType } from "$lib/types";
 
-export let value: string;
-export let textKey: string;
-export let network: DonationType;
-export let showQrToggle: ((type: DonationType) => void) | undefined = undefined;
+type Props = {
+	value: string;
+	textKey: string;
+	network: DonationType;
+	showQrToggle?: (type: DonationType) => void;
+};
 
-$: t = $_;
+let { value, textKey, network, showQrToggle }: Props = $props();
+
+let t = $derived($_);
 </script>
 
 <div>
@@ -42,7 +46,7 @@ $: t = $_;
 					type="button"
 					aria-label={t("supporters.donate.scanOrClick")}
 					class="text-link transition-colors hover:text-hover"
-					on:click={() => showQrToggle(network)}
+					onclick={() => showQrToggle(network)}
 				>
 					<Icon type="fa" icon="qrcode" w="24" h="24" />
 				</button>

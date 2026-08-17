@@ -3,20 +3,24 @@ import { _ } from "$lib/i18n";
 
 import type { Pleb, SponsorshipTier } from "../sponsors";
 
-$: t = $_;
+let t = $derived($_);
 
-export let tier: SponsorshipTier;
-export let plebs: Pleb[];
-export let ctaHref: string;
+type Props = {
+	tier: SponsorshipTier;
+	plebs: Pleb[];
+	ctaHref: string;
+};
+
+let { tier, plebs, ctaHref }: Props = $props();
 
 const tierStyles: Partial<Record<SponsorshipTier["level"], string>> = {
 	// Bitcoin orange is an official brand color (#F7931A)
 	Pleb: "border-[#F7931A]/40 bg-[#F7931A]/5 dark:border-[#F7931A]/40 dark:bg-[#F7931A]/[0.08]",
 };
 
-let activeTooltip: string | null = null;
+let activeTooltip: string | null = $state(null);
 // tracks plebs whose avatar and robohash both failed
-let brokenAvatars = new Set<string>();
+let brokenAvatars = $state(new Set<string>());
 
 function onAvatarError(e: Event, pleb: Pleb) {
 	const img = e.currentTarget as HTMLImageElement;
@@ -30,6 +34,10 @@ function onAvatarError(e: Event, pleb: Pleb) {
 }
 
 function onTouchEnd(pleb: Pleb, e: TouchEvent) {
+	// Keep the tap from bubbling to the svelte:window handler below,
+	// which would immediately clear the tooltip this tap just opened
+	// (was the |stopPropagation modifier pre-runes)
+	e.stopPropagation();
 	if (activeTooltip === pleb.id) {
 		// Already showing — let the tap through to follow the link
 		activeTooltip = null;
@@ -42,7 +50,7 @@ function onTouchEnd(pleb: Pleb, e: TouchEvent) {
 </script>
 
 <svelte:window
-	on:touchend={() => {
+	ontouchend={() => {
 		activeTooltip = null;
 	}}
 />
@@ -61,7 +69,7 @@ function onTouchEnd(pleb: Pleb, e: TouchEvent) {
 					target="_blank"
 					rel="noopener noreferrer"
 					class="group relative transition-transform duration-150 hover:-translate-y-0.5"
-					on:touchend|stopPropagation={(e) => onTouchEnd(pleb, e)}
+					ontouchend={(e) => onTouchEnd(pleb, e)}
 				>
 					{#if brokenAvatars.has(pleb.id)}
 						<div
@@ -74,7 +82,7 @@ function onTouchEnd(pleb: Pleb, e: TouchEvent) {
 							src={pleb.avatar ?? `https://robohash.org/${pleb.id}?set=set1&size=64x64`}
 							alt={pleb.name}
 							class="h-16 w-16 rounded-full border-2 border-white/60 object-cover shadow-md group-hover:border-link dark:border-white/20"
-							on:error={(e) => onAvatarError(e, pleb)}
+							onerror={(e) => onAvatarError(e, pleb)}
 						/>
 					{/if}
 					<!-- Desktop: CSS hover. Mobile: controlled by activeTooltip -->
@@ -89,10 +97,10 @@ function onTouchEnd(pleb: Pleb, e: TouchEvent) {
 					</span>
 				</a>
 			{:else}
-				<!-- svelte-ignore a11y-no-static-element-interactions -->
+				<!-- svelte-ignore a11y_no_static_element_interactions -->
 				<div
 					class="group relative"
-					on:touchend|stopPropagation={(e) => onTouchEnd(pleb, e)}
+					ontouchend={(e) => onTouchEnd(pleb, e)}
 				>
 					{#if brokenAvatars.has(pleb.id)}
 						<div
@@ -105,7 +113,7 @@ function onTouchEnd(pleb: Pleb, e: TouchEvent) {
 							src={pleb.avatar ?? `https://robohash.org/${pleb.id}?set=set1&size=64x64`}
 							alt={pleb.name}
 							class="h-16 w-16 rounded-full border-2 border-white/60 object-cover shadow-md dark:border-white/20"
-							on:error={(e) => onAvatarError(e, pleb)}
+							onerror={(e) => onAvatarError(e, pleb)}
 						/>
 					{/if}
 					<span
