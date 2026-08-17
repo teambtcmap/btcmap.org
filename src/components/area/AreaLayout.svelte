@@ -1,35 +1,29 @@
 <script lang="ts">
 import { _ } from "svelte-i18n";
 
-import { browser } from "$app/environment";
 import { goto } from "$app/navigation";
 import { page } from "$app/state";
 
 export let type: "country" | "community";
-export let data: AreaPageProps;
 
 import type { GeoJSON } from "geojson";
-import { onDestroy, onMount } from "svelte";
-import { toStore } from "svelte/store";
+import { onDestroy, onMount, setContext } from "svelte";
+import { get, toStore, writable } from "svelte/store";
 
-import AreaActivity from "$components/area/AreaActivity.svelte";
 import AreaHeader from "$components/area/AreaHeader.svelte";
-import AreaMap from "$components/area/AreaMap.svelte";
-import AreaMerchantHighlights from "$components/area/AreaMerchantHighlights.svelte";
-import AreaStats from "$components/area/AreaStats.svelte";
-import AreaTickets from "$components/area/AreaTickets.svelte";
-import VerifyCommunityForm from "$components/area/VerifyCommunityForm.svelte";
-import Boost from "$components/Boost.svelte";
 import Icon from "$components/Icon.svelte";
-import IssuesTable from "$components/IssuesTable.svelte";
 import { API_BASE } from "$lib/api-base";
 import { placesInAreaChunked } from "$lib/area/placesInArea";
+import type { AreaSectionContext } from "$lib/area/sectionContext";
+import { AREA_SECTION_CONTEXT } from "$lib/area/sectionContext";
+import type { AreaSection } from "$lib/areaSectionLoad";
+import { AREA_SECTIONS } from "$lib/areaSectionLoad";
 import api from "$lib/axios";
 import { places, placesError, reportError, reports } from "$lib/store";
 import { batchSync } from "$lib/sync/batchSync";
 import { placesPublished } from "$lib/sync/placeCache";
 import { reportsSync } from "$lib/sync/reports";
-import type { AreaPageProps, Place, PlaceIssue, Tagger } from "$lib/types.js";
+import type { AreaPageProps, Place, Report, Tagger } from "$lib/types.js";
 import { errToast } from "$lib/utils";
 
 onMount(() => {
@@ -45,23 +39,27 @@ $: $placesError && errToast($placesError);
 $: $reportError && errToast($reportError);
 
 // One source of truth: the section id IS the route slug IS the i18n key
-// suffix — the previous enum + three parallel Records carried no information.
-const SECTIONS = ["merchants", "stats", "activity", "maintain"] as const;
-type Section = (typeof SECTIONS)[number];
-
+// suffix — AREA_SECTIONS/AreaSection in $lib/areaSectionLoad carry this,
+// shared with every loader call site.
 let scrolled = false;
 
-// toStore bridges $app/state's rune-backed page into a store this
-// legacy-mode component's $: statement can actually track — a bare
-// page.params read inside $: would run once and tab switching (goto to a
-// sibling section) would stop updating activeSection.
-const pageSection = toStore(() => page.params.section);
+// The layout takes no load; merged page.data carries every section's
+// loadAreaSection result and is reactive across child navigations only
+// through this toStore bridge (a bare $: on page.data runs once).
+const pageData = toStore(() => page.data as AreaPageProps);
+$: data = $pageData;
 
-$: activeSection = (SECTIONS as readonly string[]).includes($pageSection ?? "")
-	? ($pageSection as Section)
-	: ("merchants" as Section);
+// The section IS the route: literal child directories replaced the
+// [section] param. Fallback covers the redirect moment only.
+const routeId = toStore(() => page.route.id);
+$: activeSection = (() => {
+	const last = $routeId?.split("/").at(-1) ?? "";
+	return (AREA_SECTIONS as readonly string[]).includes(last)
+		? (last as AreaSection)
+		: ("merchants" as AreaSection);
+})();
 
-const handleSectionChange = (section: Section) => {
+const handleSectionChange = (section: AreaSection) => {
 	goto(`/${type}/${encodeURIComponent(data.id)}/${section}`);
 };
 // taggersInFlight prevents re-fire during the async fetch; taggersLoaded
@@ -72,29 +70,29 @@ const handleSectionChange = (section: Section) => {
 // captures the current value and later compares it to discard its result
 // if a newer fetch has since started (including same-area re-entry,
 // which an area-id guard cannot distinguish).
-let taggersInFlight = false;
-let taggersLoaded = false;
-let taggersLoadError = false;
+const taggersInFlight = writable(false);
+const taggersLoaded = writable(false);
+const taggersLoadError = writable(false);
 let taggersFetchGeneration = 0;
 
 const fetchAreaTopEditors = async () => {
-	if (taggersInFlight || taggersLoaded || !data?.id) return;
+	if (get(taggersInFlight) || get(taggersLoaded) || !data?.id) return;
 
 	// Capture a monotonic token at start. The lastAreaId reactive cannot
 	// cancel an in-flight promise, and an area-id guard alone would miss
 	// same-area re-entry (A→B→A leaves two A fetches pending with matching
 	// ids). The token distinguishes them so stale completions return silently.
 	const gen = ++taggersFetchGeneration;
-	taggersInFlight = true;
+	taggersInFlight.set(true);
 	try {
 		const url = `${API_BASE}/v4/areas/${encodeURIComponent(data.id)}/top-editors?limit=100`;
 		const response = await api.get<Tagger[]>(url);
 		if (gen !== taggersFetchGeneration) return;
-		taggers = response.data;
+		taggers.set(response.data);
 	} catch (error) {
 		if (gen !== taggersFetchGeneration) return;
 		console.warn("Failed to fetch area top editors:", error);
-		taggersLoadError = true;
+		taggersLoadError.set(true);
 	} finally {
 		// Only flip flags if this is still the most recent fetch. Stale
 		// completions return silently above; the newer fetch owns its own
@@ -102,8 +100,8 @@ const fetchAreaTopEditors = async () => {
 		// failure after axiosRetry exhausts its retries) so the UI falls
 		// through to the empty state instead of hanging on the skeleton.
 		if (gen === taggersFetchGeneration) {
-			taggersLoaded = true;
-			taggersInFlight = false;
+			taggersLoaded.set(true);
+			taggersInFlight.set(false);
 		}
 	}
 };
@@ -119,7 +117,7 @@ let sweptAreaId: string | undefined;
 // True once the current area's sweep has published — the merchant
 // highlights' skeleton gate (an empty filteredPlaces before this is
 // "still sweeping", after it is a genuine empty area).
-let sweepDone = false;
+const sweepDone = writable(false);
 
 // Leaving the page entirely must abandon an in-flight sweep at its next
 // chunk boundary — without this it would burn through the remaining ~29k
@@ -134,8 +132,8 @@ const runContainmentSweep = async (areaPlaces: Place[], geoJson: GeoJSON) => {
 		isStale: () => generation !== sweepGeneration,
 	});
 	if (result && generation === sweepGeneration) {
-		filteredPlaces = result;
-		sweepDone = true;
+		filteredPlaces.set(result);
+		sweepDone.set(true);
 	}
 };
 
@@ -147,19 +145,19 @@ const runContainmentSweep = async (areaPlaces: Place[], geoJson: GeoJSON) => {
 let lastAreaId: string | undefined;
 $: if (data?.id !== lastAreaId) {
 	lastAreaId = data.id;
-	taggersInFlight = false;
-	taggersLoaded = false;
-	taggersLoadError = false;
+	taggersInFlight.set(false);
+	taggersLoaded.set(false);
+	taggersLoadError.set(false);
 	// Invalidate any in-flight fetch so its completion can't stomp the new
 	// area's state even if we cross sections and the fetch reactive doesn't
 	// re-fire to bump the token on its own.
 	taggersFetchGeneration++;
-	taggers = [];
-	filteredPlaces = [];
+	taggers.set([]);
+	filteredPlaces.set([]);
 	// Abandon any in-flight containment sweep and let the new area resweep.
 	sweepGeneration++;
 	sweptAreaId = undefined;
-	sweepDone = false;
+	sweepDone.set(false);
 }
 
 // Source order matters (the #1177 lesson): this must sit BELOW the reset
@@ -175,41 +173,36 @@ $: if (area?.geo_json && $placesPublished && sweptAreaId !== data.id) {
 	runContainmentSweep($places, area.geo_json);
 }
 
-// Fire the area top-editors fetch only when the user actually lands on /activity.
-// One REST call replaces the previous per-place enrichment shim.
-$: if (
-	browser &&
-	activeSection === "activity" &&
-	!taggersInFlight &&
-	!taggersLoaded
-) {
-	fetchAreaTopEditors();
-}
-
 // Returns undefined while loading, empty array if no reports for this area, or filtered reports
-$: areaReports =
+// A $:, not a derived(): a derived would capture data.id in its closure
+// and go stale on X→Y navigation.
+const areaReports = writable<Report[] | undefined>(undefined);
+$: areaReports.set(
 	data?.id && $reports.length > 0
 		? $reports
 				.filter((report) => report.area_id === data.id)
 				.sort((a, b) => Date.parse(b.created_at) - Date.parse(a.created_at))
-		: undefined;
+		: undefined,
+);
 
-// Derived, not initialized: the previous `const alias/name` froze the
-// first area's values for the lifetime of the reused component instance —
+// Derived, not initialized: a `const area = data.tags` would freeze the
+// first area's tags for the lifetime of the reused component instance —
 // stale after any client-side area navigation.
 $: area = data.tags;
-$: alias = data.id;
-let name: string;
-$: name = data.name;
-let filteredPlaces: Place[] = [];
+const filteredPlaces = writable<Place[]>([]);
 
-let taggers: Tagger[] = [];
+const taggers = writable<Tagger[]>([]);
 
-let issues: PlaceIssue[] = [];
-// Reactive, not latched at init: issues arrive only with the maintain
-// section's load (per-section pruning in areaSectionLoad), so a
-// merchants -> maintain navigation must pick them up.
-$: issues = data?.issues ?? [];
+setContext(AREA_SECTION_CONTEXT, {
+	filteredPlaces,
+	sweepDone,
+	areaReports,
+	taggers,
+	taggersLoaded,
+	taggersInFlight,
+	taggersLoadError,
+	ensureTaggers: fetchAreaTopEditors,
+} satisfies AreaSectionContext);
 </script>
 
 <main class="my-10 space-y-16 text-center md:my-20">
@@ -219,7 +212,7 @@ $: issues = data?.issues ?? [];
 		on:scroll={() => (scrolled = true)}
 		class="hide-scroll relative grid w-full auto-cols-[minmax(150px,_1fr)] grid-flow-col overflow-x-auto"
 	>
-		{#each SECTIONS as section (section)}
+		{#each AREA_SECTIONS as section (section)}
 			<button
 				on:click={() => handleSectionChange(section)}
 				class="border-b-4 pb-3 text-center text-lg text-link transition-colors hover:border-link {activeSection ===
@@ -240,62 +233,5 @@ $: issues = data?.issues ?? [];
 		{/if}
 	</div>
 
-	{#if activeSection === 'merchants'}
-		<AreaMap
-			{name}
-			geoJSON={area?.geo_json}
-			{filteredPlaces}
-			cameraBbox={data.cameraBbox}
-			upToDatePercent={areaReports?.[0]?.tags.up_to_date_percent}
-		/>
-		<!-- Gate on sweep completion, not dataInitialized: init now finishes
-		     before the sweep, and an empty filteredPlaces mid-sweep is "still
-		     loading", not "no merchants here". -->
-		<AreaMerchantHighlights dataInitialized={sweepDone} {filteredPlaces} />
-		{#if browser}
-			<Boost />
-		{/if}
-	{:else if activeSection === 'stats'}
-		{#if $reportError}
-			<div class="text-center text-primary dark:text-white">
-				<p>{$_('area.errorLoadingData')}</p>
-			</div>
-		{:else if areaReports === undefined}
-			<div class="text-center text-primary dark:text-white">
-				<p>{$_('area.loadingData')}</p>
-			</div>
-		{:else if areaReports.length > 0}
-			<AreaStats {name} {areaReports} areaTags={area} />
-		{:else}
-			<div class="text-center text-primary dark:text-white">
-				<p class="text-xl">{$_('area.dataWithin24Hours')}</p>
-			</div>
-		{/if}
-	{:else if activeSection === 'activity'}
-		<!-- Area data is SSR-delivered now, so it is initialized by definition;
-		     the prop survives until AreaFeed drops its gate. -->
-		<AreaActivity
-			{alias}
-			{name}
-			dataInitialized={true}
-			{taggersLoaded}
-			{taggers}
-			{taggersLoadError}
-		/>
-	{:else if activeSection === 'maintain'}
-		<IssuesTable
-			title={$_('area.taggingIssues', { values: { name: name || $_('area.defaultName') } })}
-			{issues}
-			loading={false}
-		/>
-		<AreaTickets tickets={data.tickets} title={$_('area.openTickets', { values: { name: name || $_('area.defaultName') } })} />
-		{#if type === 'community'}
-			<div
-				id="verify-form"
-				class="mx-auto w-full max-w-[1000px] rounded-3xl border border-link/25 p-8 xl:w-[1000px]"
-			>
-				<VerifyCommunityForm communityName={name} communityAlias={alias} />
-			</div>
-		{/if}
-	{/if}
+	<slot />
 </main>

@@ -214,7 +214,7 @@ Use [https://nostrhub.io/nips](https://nostrhub.io/nips) as the definitive NIP s
 
 **CRITICAL:** Nostr private keys (`nsec`) are stored in plaintext in `localStorage`. Any JavaScript running on the origin can steal them. A single XSS means permanent, unrecoverable key theft across every Nostr client the user uses. **Treat XSS mitigation as the top-priority security concern.**
 
-- **Sanitize event-sourced URLs.** Before binding a relay-provided URL (e.g. a kind:0 `picture`) into `src`/`href`, validate the scheme is `http(s)` — reject `javascript:`, `data:`, and unparseable values (see `safeHttpUrl` in `src/lib/nostrProfile.ts`). Keep `referrerpolicy="no-referrer"` on remote images so the page URL doesn't leak to a hostile host.
+- **Sanitize event-sourced URLs.** Before binding a relay-provided URL (e.g. a kind:0 `picture`) into `src`/`href`, validate the scheme is `http(s)` — reject `javascript:`, `data:`, and unparseable values (see `safeHttpUrl` in `src/lib/safeUrl.ts` — dependency-free on purpose, usable outside Nostr code too, e.g. the community favicon). Keep `referrerpolicy="no-referrer"` on remote images so the page URL doesn't leak to a hostile host.
 - **Never `{@html}` event content.** Bind event-sourced strings as text so Svelte escapes them, or run them through DOMPurify (`src/lib/utils.ts`) first.
 - **Sanitize event-sourced strings interpolated into CSS.** A malicious `font-family` or `url()` value can break out of the CSS context and inject rules.
 - **CSP is defense-in-depth**, not primary defense. Never relax it with `'unsafe-eval'`, `'unsafe-inline'` on `script-src`, or wildcard sources.

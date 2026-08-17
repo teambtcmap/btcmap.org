@@ -34,9 +34,10 @@ test.describe('Community Area Pages', () => {
 	});
 
 	test('navigating to a different community refits the map', async ({ page }) => {
-		// AreaPage reuses the AreaMap component instance across area-to-area
-		// navigation. A bug in this code path (acc93d25 / 352fd1bd) would
-		// leave the previous area's polygon outline + pin set on screen.
+		// The merchants section page reuses the AreaMap component instance
+		// across area-to-area navigation. A bug in this code path
+		// (acc93d25 / 352fd1bd) would leave the previous area's polygon
+		// outline + pin set on screen.
 		// We can't easily probe the WebGL canvas's drawn pins, but we CAN
 		// confirm the map container renders + the URL/title update on both
 		// navigations — proxies for the reactive having fired without

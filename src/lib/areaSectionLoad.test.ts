@@ -5,6 +5,12 @@ import type { AreaTags } from "$lib/types";
 
 import type { AreaSectionConfig } from "./areaSectionLoad";
 import { loadAreaSection } from "./areaSectionLoad";
+// The section-validation redirect itself now lives in these catch-all
+// routes (loadAreaSection no longer validates the section at all — see
+// areaSectionLoad.ts), so the redirect is pinned here instead of against
+// loadAreaSection directly. Both loaders only read params.area.
+import { load as communityCatchAll } from "../routes/community/[area]/[...section]/+page.server";
+import { load as countryCatchAll } from "../routes/country/[area]/[...section]/+page.server";
 
 type ResponseOverrides = {
 	ok?: boolean;
@@ -59,14 +65,12 @@ const makeFetch = (responses: FetchResponses = {}) =>
 
 const communityConfig: AreaSectionConfig = {
 	notFoundMessage: "Community Not Found",
-	redirectBase: "/community",
 	isValidArea: (area) => !area.includes("/"),
 	hasRequiredTags: () => true,
 };
 
 const countryConfig: AreaSectionConfig = {
 	notFoundMessage: "Country Not Found",
-	redirectBase: "/country",
 	isValidArea: (area) => /^[\w-]+$/.test(area),
 	hasRequiredTags: () => true,
 };
@@ -95,8 +99,9 @@ describe("loadAreaSection", () => {
 
 		const err = await captureThrow(() =>
 			loadAreaSection(
-				{ params: { area: "bad/area", section: "merchants" }, fetch },
+				{ params: { area: "bad/area" }, fetch },
 				countryConfig,
+				"merchants",
 			),
 		);
 
@@ -112,8 +117,9 @@ describe("loadAreaSection", () => {
 		const fetch = makeFetch();
 
 		const result = await loadAreaSection(
-			{ params: { area: "日本", section: "merchants" }, fetch },
+			{ params: { area: "日本" }, fetch },
 			communityConfig,
+			"merchants",
 		);
 
 		expect(result.data.id).toBe("some-area");
@@ -123,33 +129,14 @@ describe("loadAreaSection", () => {
 		);
 	});
 
-	it("redirects to the merchants section when the section is invalid", async () => {
-		const fetch = makeFetch();
-
-		const err = await captureThrow(() =>
-			loadAreaSection(
-				{ params: { area: "café", section: "bogus" }, fetch },
-				communityConfig,
-			),
-		);
-
-		expect(isRedirect(err)).toBe(true);
-		if (isRedirect(err)) {
-			expect(err.status).toBe(302);
-			expect(err.location).toBe(
-				`/community/${encodeURIComponent("café")}/merchants`,
-			);
-		}
-		expect(fetch).not.toHaveBeenCalled();
-	});
-
 	it("maps a 404 from the area endpoint to a not-found error", async () => {
 		const fetch = makeFetch({ areas: { ok: false, status: 404 } });
 
 		const err = await captureThrow(() =>
 			loadAreaSection(
-				{ params: { area: "some-area", section: "merchants" }, fetch },
+				{ params: { area: "some-area" }, fetch },
 				communityConfig,
+				"merchants",
 			),
 		);
 
@@ -165,8 +152,9 @@ describe("loadAreaSection", () => {
 
 		const err = await captureThrow(() =>
 			loadAreaSection(
-				{ params: { area: "some-area", section: "merchants" }, fetch },
+				{ params: { area: "some-area" }, fetch },
 				countryConfig,
+				"merchants",
 			),
 		);
 
@@ -182,8 +170,9 @@ describe("loadAreaSection", () => {
 
 		const err = await captureThrow(() =>
 			loadAreaSection(
-				{ params: { area: "some-area", section: "merchants" }, fetch },
+				{ params: { area: "some-area" }, fetch },
 				communityConfig,
+				"merchants",
 			),
 		);
 
@@ -200,8 +189,9 @@ describe("loadAreaSection", () => {
 
 		const err = await captureThrow(() =>
 			loadAreaSection(
-				{ params: { area: "some-area", section: "merchants" }, fetch },
+				{ params: { area: "some-area" }, fetch },
 				communityConfig,
+				"merchants",
 			),
 		);
 
@@ -218,8 +208,9 @@ describe("loadAreaSection", () => {
 
 		const err = await captureThrow(() =>
 			loadAreaSection(
-				{ params: { area: "some-area", section: "merchants" }, fetch },
+				{ params: { area: "some-area" }, fetch },
 				communityConfig,
+				"merchants",
 			),
 		);
 
@@ -234,8 +225,9 @@ describe("loadAreaSection", () => {
 
 		const err = await captureThrow(() =>
 			loadAreaSection(
-				{ params: { area: "some-area", section: "maintain" }, fetch },
+				{ params: { area: "some-area" }, fetch },
 				communityConfig,
+				"maintain",
 			),
 		);
 
@@ -249,8 +241,9 @@ describe("loadAreaSection", () => {
 		const fetch = makeFetch();
 
 		const result = await loadAreaSection(
-			{ params: { area: "some-area", section: "stats" }, fetch },
+			{ params: { area: "some-area" }, fetch },
 			communityConfig,
+			"stats",
 		);
 
 		expect(result.data).toEqual({
@@ -285,8 +278,9 @@ describe("loadAreaSection", () => {
 		});
 
 		const result = await loadAreaSection(
-			{ params: { area: "some-area", section: "maintain" }, fetch },
+			{ params: { area: "some-area" }, fetch },
 			communityConfig,
+			"maintain",
 		);
 
 		expect(result.data.issues).toHaveLength(10002);
@@ -305,8 +299,9 @@ describe("loadAreaSection", () => {
 
 		const err = await captureThrow(() =>
 			loadAreaSection(
-				{ params: { area: "some-area", section: "maintain" }, fetch },
+				{ params: { area: "some-area" }, fetch },
 				communityConfig,
+				"maintain",
 			),
 		);
 
@@ -324,8 +319,9 @@ describe("loadAreaSection", () => {
 
 		const err = await captureThrow(() =>
 			loadAreaSection(
-				{ params: { area: "some-area", section: "merchants" }, fetch },
+				{ params: { area: "some-area" }, fetch },
 				communityConfig,
+				"merchants",
 			),
 		);
 
@@ -341,11 +337,12 @@ describe("loadAreaSection", () => {
 
 		const err = await captureThrow(() =>
 			loadAreaSection(
-				{ params: { area: "some-area", section: "merchants" }, fetch },
+				{ params: { area: "some-area" }, fetch },
 				{
 					...communityConfig,
 					hasRequiredTags: (tags) => !!tags["icon:square"] && false,
 				},
+				"merchants",
 			),
 		);
 
@@ -372,8 +369,9 @@ describe("loadAreaSection", () => {
 		});
 
 		const result = await loadAreaSection(
-			{ params: { area: "some-area", section: "merchants" }, fetch },
+			{ params: { area: "some-area" }, fetch },
 			communityConfig,
+			"merchants",
 		);
 
 		// Empty strings are dropped; only authored contacts survive
@@ -392,8 +390,9 @@ describe("loadAreaSection", () => {
 			});
 		const load = (fetch: ReturnType<typeof makeFetch>) =>
 			loadAreaSection(
-				{ params: { area: "some-area", section: "merchants" }, fetch },
+				{ params: { area: "some-area" }, fetch },
 				communityConfig,
+				"merchants",
 			);
 
 		// The API serves numbers despite the historical string typing
@@ -450,5 +449,39 @@ describe("loadAreaSection", () => {
 			}),
 		);
 		expect(inverted.data.cameraBbox).toBeNull();
+	});
+});
+
+describe("catch-all section redirect", () => {
+	it("community's [...section] loader redirects to merchants", async () => {
+		const err = await captureThrow(async () =>
+			communityCatchAll({
+				params: { area: "café", section: "bogus" },
+			} as never),
+		);
+
+		expect(isRedirect(err)).toBe(true);
+		if (isRedirect(err)) {
+			expect(err.status).toBe(302);
+			expect(err.location).toBe(
+				`/community/${encodeURIComponent("café")}/merchants`,
+			);
+		}
+	});
+
+	it("country's [...section] loader redirects to merchants", async () => {
+		const err = await captureThrow(async () =>
+			countryCatchAll({
+				params: { area: "café", section: "bogus" },
+			} as never),
+		);
+
+		expect(isRedirect(err)).toBe(true);
+		if (isRedirect(err)) {
+			expect(err.status).toBe(302);
+			expect(err.location).toBe(
+				`/country/${encodeURIComponent("café")}/merchants`,
+			);
+		}
 	});
 });
