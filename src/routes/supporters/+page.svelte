@@ -10,28 +10,28 @@ import { theme } from "$lib/theme";
 import type { DonationType } from "$lib/types";
 import { warningToast } from "$lib/utils";
 
-import type { PageData } from "./$types";
+import type { PageProps } from "./$types";
 import DonationOption from "./components/DonationOption.svelte";
 import PlebSection from "./components/PlebSection.svelte";
 import SupportSection from "./components/SupportSection.svelte";
 import type { SponsorshipLevel } from "./sponsors";
 import { individualLevels, sponsors, sponsorshipTiers } from "./sponsors";
 
-export let data: PageData;
+let { data }: PageProps = $props();
 
 const PLEB_TIER_CTA = "https://geyser.fund/project/btcmap/leaderboard";
 
 const onchain = "bc1qt4g28vq480ec4ncl4h67qu4q4k2zel7xu0c2wg";
 const lnurlp = "donations@btcmap.org";
 
-let mounted = false;
+let mounted = $state(false);
 onMount(() => {
 	mounted = true;
 });
 
-let showQr = false;
-$: t = $_;
-let network: DonationType;
+let showQr = $state(false);
+let t = $derived($_);
+let network: DonationType | undefined = $state();
 
 const showQrToggle = (type: DonationType) => {
 	network = type;

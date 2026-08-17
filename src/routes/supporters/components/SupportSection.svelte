@@ -4,9 +4,13 @@ import { theme } from "$lib/theme";
 
 import type { Sponsor, SponsorshipTier } from "../sponsors";
 
-export let tier: SponsorshipTier;
-export let sponsors: Sponsor[];
-export let compact = false;
+type Props = {
+	tier: SponsorshipTier;
+	sponsors: Sponsor[];
+	compact?: boolean;
+};
+
+let { tier, sponsors, compact = false }: Props = $props();
 
 const levelStyles: Partial<Record<SponsorshipTier["level"], string>> = {
 	// Ascending contrast scale — lower tiers blend with the page bg (#E4EBEC / #06171C),
@@ -23,8 +27,8 @@ const levelStyles: Partial<Record<SponsorshipTier["level"], string>> = {
 		"border-[#095D73]/80 bg-[#BDD2D4]/70 shadow-md dark:border-[#095D73]/70 dark:bg-[#095D73]/[0.28]",
 };
 
-$: cardStyle = levelStyles[tier.level] ?? "";
-$: t = $_;
+let cardStyle = $derived(levelStyles[tier.level] ?? "");
+let t = $derived($_);
 </script>
 
 <article class="rounded-2xl border p-6 text-left shadow-sm {cardStyle}">
