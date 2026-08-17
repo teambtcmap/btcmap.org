@@ -13,7 +13,10 @@ export default defineConfig({
 		// to resolve them at runtime and crashes with missing-export /
 		// module-not-found errors. v9 is also ESM-only, so the external
 		// path is unproven on the lambda runtime — inline all of it.
-		noExternal: [/^@tanstack\//, 'remove-accents']
+		// svelte-sonner and its transitive dep runed are Svelte libraries that
+		// vite-plugin-svelte normally inlines on its own — pinned here so the
+		// lambda never depends on that heuristic.
+		noExternal: [/^@tanstack\//, 'remove-accents', 'svelte-sonner', 'runed']
 	},
 	worker: {
 		format: 'es'

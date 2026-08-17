@@ -1,7 +1,7 @@
 <script lang="ts">
-import { SvelteToast } from "@zerodevx/svelte-toast";
 import localforage from "localforage";
 import { onDestroy, onMount } from "svelte";
+import { Toaster } from "svelte-sonner";
 
 import LoadingIndicator from "$components/LoadingIndicator.svelte";
 import Header from "$components/layout/Header.svelte";
@@ -45,12 +45,6 @@ afterNavigate(() => {
 $: if (browser && $locale) {
 	document.documentElement.lang = $locale;
 }
-
-const options = {
-	reversed: true,
-	intro: { y: 192 },
-	pausable: true,
-};
 
 let layoutSyncVisible = false;
 let layoutLoadingStatus = "";
@@ -164,14 +158,17 @@ export let data;
 		</main>
 	{/if}
 
-	<SvelteToast {options} />
+	<!-- 8rem bottom clearance keeps toasts above the map's bottom UI (same
+	     offset the previous svelte-toast container used); expand keeps
+	     concurrent toasts fully readable instead of collapsed behind the
+	     front one — the activity page can fire 3 error toasts at once -->
+	<Toaster
+		position="bottom-center"
+		richColors
+		closeButton
+		expand
+		theme={$theme}
+		offset={{ bottom: "8rem" }}
+		mobileOffset={{ bottom: "8rem" }}
+	/>
 {/if}
-
-<style>
-	:root {
-		--toastContainerTop: auto;
-		--toastContainerRight: auto;
-		--toastContainerBottom: 8rem;
-		--toastContainerLeft: calc(50vw - 8rem);
-	}
-</style>

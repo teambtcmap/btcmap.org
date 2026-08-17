@@ -1,5 +1,4 @@
 import rewind from "@mapbox/geojson-rewind";
-import { toast } from "@zerodevx/svelte-toast";
 import type { Chart } from "chart.js";
 import { geoBounds, geoContains } from "d3-geo";
 import { format } from "date-fns/format";
@@ -10,6 +9,7 @@ import { isToday } from "date-fns/isToday";
 import { parseISO } from "date-fns/parseISO";
 import { subDays } from "date-fns/subDays";
 import { get } from "svelte/store";
+import { toast } from "svelte-sonner";
 
 import { API_BASE } from "$lib/api-base";
 import api from "$lib/axios";
@@ -88,28 +88,15 @@ export function yieldToMain(): Promise<void> {
 }
 
 export const errToast = (m: string) => {
-	toast.push(m, {
-		theme: {
-			"--toastBarBackground": "#DF3C3C",
-		},
-	});
+	toast.error(m);
 };
 
 export const warningToast = (m: string) => {
-	toast.push(m, {
-		theme: {
-			"--toastBarBackground": "#FACA15",
-		},
-		duration: 10000,
-	});
+	toast.warning(m, { duration: 10000 });
 };
 
 export const successToast = (m: string) => {
-	toast.push(m, {
-		theme: {
-			"--toastBarBackground": "#22C55E",
-		},
-	});
+	toast.success(m);
 };
 
 export function getRandomColor() {
