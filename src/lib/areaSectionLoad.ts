@@ -38,6 +38,17 @@ export type AreaSectionResult = {
 	tags: AreaTags;
 };
 
+// One source of truth: the section id IS the route directory IS the
+// i18n key suffix. The union makes a bogus section uncompilable at
+// every loader call site.
+export const AREA_SECTIONS = [
+	"merchants",
+	"stats",
+	"activity",
+	"maintain",
+] as const;
+export type AreaSection = (typeof AREA_SECTIONS)[number];
+
 // Place-issues are consumed only by the maintain section's IssuesTable —
 // the other sections' SSR payloads must not carry up to ~150 KB of issue
 // rows (the US) they never render. Section navigation re-runs this loader,
@@ -106,10 +117,9 @@ const cameraBboxFromTags = (
 export const loadAreaSection = async (
 	{ params, fetch }: AreaSectionEvent,
 	config: AreaSectionConfig,
-	sectionParam: string,
+	section: AreaSection,
 ): Promise<AreaSectionResult> => {
 	const { area } = params;
-	const section = sectionParam || "merchants";
 
 	if (!config.isValidArea(area)) {
 		throw error(404, config.notFoundMessage);

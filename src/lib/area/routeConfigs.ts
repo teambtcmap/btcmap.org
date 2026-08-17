@@ -1,4 +1,8 @@
-import type { AreaSectionConfig, AreaSectionEvent } from "$lib/areaSectionLoad";
+import type {
+	AreaSection,
+	AreaSectionConfig,
+	AreaSectionEvent,
+} from "$lib/areaSectionLoad";
 import { loadAreaSection } from "$lib/areaSectionLoad";
 import { validateContinents } from "$lib/utils";
 
@@ -36,7 +40,7 @@ export const countryAreaConfig: AreaSectionConfig = {
 // verifiedDate/iconSquare out of tags (both optional on AreaPageProps).
 export const loadCommunityArea = async (
 	event: AreaSectionEvent,
-	section: string,
+	section: AreaSection,
 ) => {
 	const { data, tags } = await loadAreaSection(
 		event,
@@ -52,7 +56,7 @@ export const loadCommunityArea = async (
 
 export const loadCountryArea = async (
 	event: AreaSectionEvent,
-	section: string,
+	section: AreaSection,
 ) => {
 	const { data } = await loadAreaSection(event, countryAreaConfig, section);
 	return data;

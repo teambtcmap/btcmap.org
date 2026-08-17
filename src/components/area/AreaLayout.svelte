@@ -16,6 +16,8 @@ import { API_BASE } from "$lib/api-base";
 import { placesInAreaChunked } from "$lib/area/placesInArea";
 import type { AreaSectionContext } from "$lib/area/sectionContext";
 import { AREA_SECTION_CONTEXT } from "$lib/area/sectionContext";
+import type { AreaSection } from "$lib/areaSectionLoad";
+import { AREA_SECTIONS } from "$lib/areaSectionLoad";
 import api from "$lib/axios";
 import { places, placesError, reportError, reports } from "$lib/store";
 import { batchSync } from "$lib/sync/batchSync";
@@ -37,10 +39,8 @@ $: $placesError && errToast($placesError);
 $: $reportError && errToast($reportError);
 
 // One source of truth: the section id IS the route slug IS the i18n key
-// suffix — the previous enum + three parallel Records carried no information.
-const SECTIONS = ["merchants", "stats", "activity", "maintain"] as const;
-type Section = (typeof SECTIONS)[number];
-
+// suffix — AREA_SECTIONS/AreaSection in $lib/areaSectionLoad carry this,
+// shared with every loader call site.
 let scrolled = false;
 
 // The layout takes no load; merged page.data carries every section's
@@ -54,12 +54,12 @@ $: data = $pageData;
 const routeId = toStore(() => page.route.id);
 $: activeSection = (() => {
 	const last = $routeId?.split("/").at(-1) ?? "";
-	return (SECTIONS as readonly string[]).includes(last)
-		? (last as Section)
-		: ("merchants" as Section);
+	return (AREA_SECTIONS as readonly string[]).includes(last)
+		? (last as AreaSection)
+		: ("merchants" as AreaSection);
 })();
 
-const handleSectionChange = (section: Section) => {
+const handleSectionChange = (section: AreaSection) => {
 	goto(`/${type}/${encodeURIComponent(data.id)}/${section}`);
 };
 // taggersInFlight prevents re-fire during the async fetch; taggersLoaded
@@ -212,7 +212,7 @@ setContext(AREA_SECTION_CONTEXT, {
 		on:scroll={() => (scrolled = true)}
 		class="hide-scroll relative grid w-full auto-cols-[minmax(150px,_1fr)] grid-flow-col overflow-x-auto"
 	>
-		{#each SECTIONS as section (section)}
+		{#each AREA_SECTIONS as section (section)}
 			<button
 				on:click={() => handleSectionChange(section)}
 				class="border-b-4 pb-3 text-center text-lg text-link transition-colors hover:border-link {activeSection ===
