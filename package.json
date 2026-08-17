@@ -39,7 +39,6 @@
 		"@nazka/map-gl-js-spiderfy": "^2.0.0",
 		"@tanstack/match-sorter-utils": "^9.1.2",
 		"@tanstack/svelte-table": "^9.1.2",
-		"@zerodevx/svelte-toast": "^0.9.6",
 		"axios": "^1.15.0",
 		"axios-retry": "^4.5.0",
 		"chart.js": "^4.5.1",
@@ -58,6 +57,7 @@
 		"qrcode": "^1.5.4",
 		"svelte-i18n": "^4.0.1",
 		"svelte-outclick": "^4.2.0",
+		"svelte-sonner": "^1.2.1",
 		"svelte-time": "^2.3.0",
 		"svg-captcha": "^1.4.0",
 		"tippy.js": "^6.3.7"
