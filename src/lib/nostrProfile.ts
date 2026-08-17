@@ -1,6 +1,8 @@
 import { decode } from "nostr-tools/nip19";
 import { SimplePool } from "nostr-tools/pool";
 
+import { safeHttpUrl } from "$lib/safeUrl";
+
 // Fields we read from a user's NIP-01 kind:0 metadata event. All optional —
 // a profile may set any subset (or publish nothing at all).
 export type NostrProfile = {
@@ -48,19 +50,6 @@ function toHex(npubOrHex: string): string | null {
 	try {
 		const decoded = decode(value);
 		return decoded.type === "npub" ? (decoded.data as string) : null;
-	} catch {
-		return null;
-	}
-}
-
-// Relay-provided values are untrusted, so a field destined for a resource URL
-// (the picture goes straight into an <img src>) must be a real http(s) URL.
-// Reject javascript:, data:, and anything unparseable rather than handing it
-// to the DOM.
-function safeHttpUrl(value: string): string | null {
-	try {
-		const { protocol } = new URL(value);
-		return protocol === "http:" || protocol === "https:" ? value : null;
 	} catch {
 		return null;
 	}

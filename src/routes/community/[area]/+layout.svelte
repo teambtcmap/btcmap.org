@@ -2,6 +2,7 @@
 import AreaLayout from "$components/area/AreaLayout.svelte";
 import Breadcrumbs from "$components/Breadcrumbs.svelte";
 import { _ } from "$lib/i18n";
+import { safeHttpUrl } from "$lib/safeUrl";
 import type { AreaPageProps } from "$lib/types";
 import { buildMetaDescription } from "$lib/utils";
 
@@ -27,7 +28,10 @@ const metaDescription = $derived(
 	),
 );
 
-const faviconUrl = $derived(data.iconSquare || null);
+// icon:square is an area tag — externally sourced. Fail closed: a
+// non-http(s) or unparseable value drops the custom favicon (and the og
+// image below falls back) rather than reaching href/content unvalidated.
+const faviconUrl = $derived(safeHttpUrl(data.iconSquare));
 
 // Chrome prefers the site-wide SVG favicon from app.html over any PNG we
 // add in svelte:head, regardless of declaration order. Remove the
@@ -45,7 +49,7 @@ $effect(() => {
 });
 
 const ogImage = $derived(
-	data.iconSquare || "https://btcmap.org/images/og/communities.png",
+	faviconUrl || "https://btcmap.org/images/og/communities.png",
 );
 
 const canonicalUrl = $derived(
@@ -64,8 +68,12 @@ const canonicalUrl = $derived(
 	<meta name="twitter:description" content={metaDescription} />
 	<meta name="twitter:image" content={ogImage} />
 	{#if faviconUrl}
-		<link rel="icon" href={faviconUrl} />
-		<link rel="apple-touch-icon" href={faviconUrl} />
+		<link rel="icon" href={faviconUrl} referrerpolicy="no-referrer" />
+		<link
+			rel="apple-touch-icon"
+			href={faviconUrl}
+			referrerpolicy="no-referrer"
+		/>
 	{/if}
 </svelte:head>
 
