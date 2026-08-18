@@ -12,6 +12,7 @@ import type {
 } from "maplibre-gl";
 import { onDestroy, onMount, tick } from "svelte";
 import { get } from "svelte/store";
+import { fade } from "svelte/transition";
 
 import CommunityRail from "$components/CommunityRail.svelte";
 import MapLoadingMain from "$components/MapLoadingMain.svelte";
@@ -26,7 +27,6 @@ import {
 	LABEL_VISIBLE_ZOOM,
 	MAP_DEBOUNCE_DELAY,
 	MAP_PANEL_MARGIN,
-	MERCHANT_DRAWER_WIDTH,
 	MERCHANT_LIST_FETCH_CEILING,
 	MERCHANT_LIST_MIN_ZOOM,
 	MERCHANT_LIST_WIDTH,
@@ -176,16 +176,15 @@ const toggleIssueCode = (code: DerivedIssueCode) => {
 	updateMerchantList({ force: true });
 };
 
-// Desktop chips-bar offset: clear the list panel and the merchant drawer
-// (z-1001/1002, both left-anchored) the same way MerchantDrawerDesktop's
-// drawerLeft does, so the bar is never occluded. Mobile keeps the
+// Desktop chips-bar placement: dock right of the open list panel (browsing
+// the worklist and toggling categories go together), but HIDE while the
+// merchant drawer is open — the user is acting on one place then, and a bar
+// that chases the drawer across the map reads as broken. Mobile keeps the
 // class-driven centered position (the drawer is a bottom sheet there).
 $: chipsDesktopLeft =
 	MAP_PANEL_MARGIN +
-	($merchantList.isOpen ? MERCHANT_LIST_WIDTH + PANEL_DRAWER_GAP : 0) +
-	($merchantDrawer.isOpen && !isMobileLayout
-		? MERCHANT_DRAWER_WIDTH + PANEL_DRAWER_GAP
-		: 0);
+	($merchantList.isOpen ? MERCHANT_LIST_WIDTH + PANEL_DRAWER_GAP : 0);
+$: chipsHiddenForDrawer = !isMobileLayout && $merchantDrawer.isOpen;
 
 // Exit via full reload on purpose: mode membership (issuesOnly, list
 // behavior, filter wiring) is locked at init, same as entering via URL.
@@ -1338,13 +1337,15 @@ onDestroy(() => {
 	single search facade instead. The facade hides when the list panel
 	is open (the panel renders the real search input in the same slot).
 -->
-{#if styleLoaded && issuesOnly && selectedIssueCodes}
+{#if styleLoaded && issuesOnly && selectedIssueCodes && !chipsHiddenForDrawer}
 	<!--
 		Mobile: centered in the free strip between the community rail (left)
 		and the map controls (right). Desktop: tucked under the floating
-		search bar, left-aligned with it, so neither overlays the other.
+		search bar, docked right of the list panel when that is open, and
+		hidden entirely while the merchant drawer is (see chipsHiddenForDrawer).
 	-->
 	<div
+		transition:fade={{ duration: 150 }}
 		class="pointer-events-none absolute top-3 left-1/2 z-[1000] flex w-max max-w-[calc(100vw-7.5rem)] -translate-x-1/2 justify-center md:top-[4.5rem] md:left-(--chips-left) md:max-w-[min(90vw,44rem)] md:translate-x-0 md:justify-start"
 		style="--chips-left: {chipsDesktopLeft}px"
 	>
