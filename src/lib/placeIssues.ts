@@ -56,3 +56,77 @@ export function placeHasIssues(
 ): boolean {
 	return derivePlaceIssues(place, now).length > 0;
 }
+
+// Canonical code order: verification-state codes by urgency, then
+// missing_icon. Drives chip display order, URL serialization, and pin-color
+// precedence.
+export const DERIVED_ISSUE_CODES = [
+	"outdated",
+	"outdated_soon",
+	"not_verified",
+	"missing_icon",
+] as const;
+
+const ALL_CODES: ReadonlySet<DerivedIssueCode> = new Set(DERIVED_ISSUE_CODES);
+
+// The one code a pin color can express. Verification-state codes are
+// mutually exclusive, so the only conflict is <verification> + missing_icon
+// — the verification state wins.
+export function dominantIssue(
+	codes: readonly DerivedIssueCode[],
+): DerivedIssueCode | null {
+	for (const code of DERIVED_ISSUE_CODES) {
+		if (codes.includes(code)) return code;
+	}
+	return null;
+}
+
+// ?issues value → selected categories. Bare param ("" or null) and
+// all-garbage values degrade to every code, preserving the original
+// presence-only contract for existing deep links.
+export function parseIssuesParam(
+	raw: string | null,
+): ReadonlySet<DerivedIssueCode> {
+	const valid = (raw ?? "")
+		.split(",")
+		.map((c) => c.trim())
+		.filter((c): c is DerivedIssueCode =>
+			(DERIVED_ISSUE_CODES as readonly string[]).includes(c),
+		);
+	return valid.length ? new Set(valid) : ALL_CODES;
+}
+
+// Inverse of parseIssuesParam: full set → "" (bare ?issues), subset → csv
+// in canonical order so equal selections produce identical URLs.
+export function serializeIssuesParam(
+	selected: ReadonlySet<DerivedIssueCode>,
+): string {
+	if (selected.size === ALL_CODES.size) return "";
+	return DERIVED_ISSUE_CODES.filter((c) => selected.has(c)).join(",");
+}
+
+export function placeMatchesIssueCodes(
+	place: Partial<Pick<Place, "verified_at" | "icon">>,
+	selected: ReadonlySet<DerivedIssueCode>,
+	now?: number,
+): boolean {
+	return derivePlaceIssues(place, now).some((c) => selected.has(c));
+}
+
+export function countIssuesByCode(
+	places: readonly Partial<Pick<Place, "verified_at" | "icon">>[],
+	now?: number,
+): Record<DerivedIssueCode, number> {
+	const counts: Record<DerivedIssueCode, number> = {
+		outdated: 0,
+		outdated_soon: 0,
+		not_verified: 0,
+		missing_icon: 0,
+	};
+	for (const place of places) {
+		for (const code of derivePlaceIssues(place, now)) {
+			counts[code]++;
+		}
+	}
+	return counts;
+}
