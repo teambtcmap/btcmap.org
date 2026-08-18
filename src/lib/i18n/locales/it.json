@@ -185,23 +185,23 @@
 		"loginAlt": "Accedi"
 	},
 	"issuesMode": {
-		"title": "Issues",
-		"exit": "Exit issues view",
+		"title": "Problemi",
+		"exit": "Esci dalla vista problemi",
 		"chips": {
-			"outdated": "Outdated",
-			"outdated_soon": "Aging",
-			"not_verified": "Not verified",
-			"missing_icon": "Missing icon"
+			"outdated": "Obsoleto",
+			"outdated_soon": "Quasi obsoleto",
+			"not_verified": "Non verificato",
+			"missing_icon": "Icona mancante"
 		},
 		"row": {
-			"title": "Needs attention",
-			"editOsm": "Edit on OSM"
+			"title": "Richiede attenzione",
+			"editOsm": "Modifica su OSM"
 		},
 		"issues": {
-			"outdated": "Not verified in over a year",
-			"outdated_soon": "Verification is almost a year old",
-			"not_verified": "Never verified",
-			"missing_icon": "No category icon tagged"
+			"outdated": "Non verificato da oltre un anno",
+			"outdated_soon": "La verifica sta per compiere un anno",
+			"not_verified": "Mai verificato",
+			"missing_icon": "Nessuna icona di categoria taggata"
 		}
 	},
 	"merchant": {

@@ -185,23 +185,23 @@
 		"loginAlt": "Aanmelden"
 	},
 	"issuesMode": {
-		"title": "Issues",
-		"exit": "Exit issues view",
+		"title": "Problemen",
+		"exit": "Probleemweergave sluiten",
 		"chips": {
-			"outdated": "Outdated",
-			"outdated_soon": "Aging",
-			"not_verified": "Not verified",
-			"missing_icon": "Missing icon"
+			"outdated": "Verouderd",
+			"outdated_soon": "Bijna verouderd",
+			"not_verified": "Niet geverifieerd",
+			"missing_icon": "Icoon ontbreekt"
 		},
 		"row": {
-			"title": "Needs attention",
-			"editOsm": "Edit on OSM"
+			"title": "Aandacht nodig",
+			"editOsm": "Bewerken op OSM"
 		},
 		"issues": {
-			"outdated": "Not verified in over a year",
-			"outdated_soon": "Verification is almost a year old",
-			"not_verified": "Never verified",
-			"missing_icon": "No category icon tagged"
+			"outdated": "Al meer dan een jaar niet geverifieerd",
+			"outdated_soon": "Verificatie is bijna een jaar oud",
+			"not_verified": "Nooit geverifieerd",
+			"missing_icon": "Geen categorie-icoon getagd"
 		}
 	},
 	"merchant": {

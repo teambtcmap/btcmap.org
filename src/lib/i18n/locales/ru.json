@@ -100,23 +100,23 @@
 		"merchantMapAlt": "Карта торговцев"
 	},
 	"issuesMode": {
-		"title": "Issues",
-		"exit": "Exit issues view",
+		"title": "Проблемы",
+		"exit": "Выйти из режима проблем",
 		"chips": {
-			"outdated": "Outdated",
-			"outdated_soon": "Aging",
-			"not_verified": "Not verified",
-			"missing_icon": "Missing icon"
+			"outdated": "Устарело",
+			"outdated_soon": "Скоро устареет",
+			"not_verified": "Не подтверждено",
+			"missing_icon": "Нет значка"
 		},
 		"row": {
-			"title": "Needs attention",
-			"editOsm": "Edit on OSM"
+			"title": "Требует внимания",
+			"editOsm": "Редактировать в OSM"
 		},
 		"issues": {
-			"outdated": "Not verified in over a year",
-			"outdated_soon": "Verification is almost a year old",
-			"not_verified": "Never verified",
-			"missing_icon": "No category icon tagged"
+			"outdated": "Не подтверждалось больше года",
+			"outdated_soon": "Подтверждению скоро исполнится год",
+			"not_verified": "Никогда не подтверждалось",
+			"missing_icon": "Не указан значок категории"
 		}
 	},
 	"merchant": {

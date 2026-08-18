@@ -100,23 +100,23 @@
 		"merchantMapAlt": "Mapa de comerciantes"
 	},
 	"issuesMode": {
-		"title": "Issues",
-		"exit": "Exit issues view",
+		"title": "Problemas",
+		"exit": "Sair da visualização de problemas",
 		"chips": {
-			"outdated": "Outdated",
-			"outdated_soon": "Aging",
-			"not_verified": "Not verified",
-			"missing_icon": "Missing icon"
+			"outdated": "Desatualizado",
+			"outdated_soon": "Quase desatualizado",
+			"not_verified": "Não verificado",
+			"missing_icon": "Sem ícone"
 		},
 		"row": {
-			"title": "Needs attention",
-			"editOsm": "Edit on OSM"
+			"title": "Precisa de atenção",
+			"editOsm": "Editar no OSM"
 		},
 		"issues": {
-			"outdated": "Not verified in over a year",
-			"outdated_soon": "Verification is almost a year old",
-			"not_verified": "Never verified",
-			"missing_icon": "No category icon tagged"
+			"outdated": "Sem verificação há mais de um ano",
+			"outdated_soon": "A verificação está quase completando um ano",
+			"not_verified": "Nunca verificado",
+			"missing_icon": "Nenhum ícone de categoria marcado"
 		}
 	},
 	"merchant": {

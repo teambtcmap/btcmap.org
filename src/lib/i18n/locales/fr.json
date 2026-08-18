@@ -100,23 +100,23 @@
 		"merchantMapAlt": "Carte des commerces"
 	},
 	"issuesMode": {
-		"title": "Issues",
-		"exit": "Exit issues view",
+		"title": "Problèmes",
+		"exit": "Quitter la vue des problèmes",
 		"chips": {
-			"outdated": "Outdated",
-			"outdated_soon": "Aging",
-			"not_verified": "Not verified",
-			"missing_icon": "Missing icon"
+			"outdated": "Obsolète",
+			"outdated_soon": "Bientôt obsolète",
+			"not_verified": "Non vérifié",
+			"missing_icon": "Icône manquante"
 		},
 		"row": {
-			"title": "Needs attention",
-			"editOsm": "Edit on OSM"
+			"title": "Attention requise",
+			"editOsm": "Modifier sur OSM"
 		},
 		"issues": {
-			"outdated": "Not verified in over a year",
-			"outdated_soon": "Verification is almost a year old",
-			"not_verified": "Never verified",
-			"missing_icon": "No category icon tagged"
+			"outdated": "Non vérifié depuis plus d'un an",
+			"outdated_soon": "La vérification aura bientôt un an",
+			"not_verified": "Jamais vérifié",
+			"missing_icon": "Aucune icône de catégorie taguée"
 		}
 	},
 	"merchant": {

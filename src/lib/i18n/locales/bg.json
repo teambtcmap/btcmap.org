@@ -80,23 +80,23 @@
 		"merchantMapAlt": "Карта на търговците"
 	},
 	"issuesMode": {
-		"title": "Issues",
-		"exit": "Exit issues view",
+		"title": "Проблеми",
+		"exit": "Изход от изгледа с проблеми",
 		"chips": {
-			"outdated": "Outdated",
-			"outdated_soon": "Aging",
-			"not_verified": "Not verified",
-			"missing_icon": "Missing icon"
+			"outdated": "Остаряло",
+			"outdated_soon": "Скоро ще остарее",
+			"not_verified": "Непроверено",
+			"missing_icon": "Липсваща икона"
 		},
 		"row": {
-			"title": "Needs attention",
-			"editOsm": "Edit on OSM"
+			"title": "Изисква внимание",
+			"editOsm": "Редактирай в OSM"
 		},
 		"issues": {
-			"outdated": "Not verified in over a year",
-			"outdated_soon": "Verification is almost a year old",
-			"not_verified": "Never verified",
-			"missing_icon": "No category icon tagged"
+			"outdated": "Не е проверявано повече от година",
+			"outdated_soon": "Проверката скоро ще навърши година",
+			"not_verified": "Никога не е проверявано",
+			"missing_icon": "Няма зададена икона на категория"
 		}
 	},
 	"aria": {

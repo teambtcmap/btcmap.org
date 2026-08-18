@@ -100,23 +100,23 @@
 		"merchantMapAlt": "Händlerkarte"
 	},
 	"issuesMode": {
-		"title": "Issues",
-		"exit": "Exit issues view",
+		"title": "Probleme",
+		"exit": "Problem-Ansicht verlassen",
 		"chips": {
-			"outdated": "Outdated",
-			"outdated_soon": "Aging",
-			"not_verified": "Not verified",
-			"missing_icon": "Missing icon"
+			"outdated": "Veraltet",
+			"outdated_soon": "Bald veraltet",
+			"not_verified": "Nicht verifiziert",
+			"missing_icon": "Fehlendes Icon"
 		},
 		"row": {
-			"title": "Needs attention",
-			"editOsm": "Edit on OSM"
+			"title": "Braucht Aufmerksamkeit",
+			"editOsm": "Auf OSM bearbeiten"
 		},
 		"issues": {
-			"outdated": "Not verified in over a year",
-			"outdated_soon": "Verification is almost a year old",
-			"not_verified": "Never verified",
-			"missing_icon": "No category icon tagged"
+			"outdated": "Seit über einem Jahr nicht verifiziert",
+			"outdated_soon": "Verifizierung ist bald ein Jahr alt",
+			"not_verified": "Noch nie verifiziert",
+			"missing_icon": "Kein Kategorie-Icon getaggt"
 		}
 	},
 	"merchant": {
