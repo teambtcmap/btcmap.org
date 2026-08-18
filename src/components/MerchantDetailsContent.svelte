@@ -6,6 +6,7 @@ import BoostCard from "$components/BoostCard.svelte";
 import CompanionAppPill from "$components/CompanionAppPill.svelte";
 import Icon from "$components/Icon.svelte";
 import MerchantComment from "$components/MerchantComment.svelte";
+import MerchantIssuesRow from "$components/MerchantIssuesRow.svelte";
 import OpenStatusPill from "$components/OpenStatusPill.svelte";
 import PaymentMethodPills from "$components/PaymentMethodPills.svelte";
 import SaveButton from "$components/SaveButton.svelte";
@@ -27,6 +28,10 @@ export let isBoosted: boolean;
 export let boostLoading: boolean;
 export let onBoostClick: () => void;
 export let isLoading: boolean = false;
+// ?issues worklist (#921): surface the place's derived issues as a
+// collapsed row. Off by default — only the map drawers opt in, and only
+// while the worklist mode is active.
+export let showIssues: boolean = false;
 
 $: displayName =
 	merchant.localized_name?.[getDisplayLang($locale)] || merchant.name;
@@ -333,6 +338,10 @@ async function fetchComments(placeId: number) {
 				</a>
 			{/if}
 		</div>
+
+		{#if showIssues}
+			<MerchantIssuesRow {merchant} {osmEditUrl} {isLoading} />
+		{/if}
 	</div>
 
 	<BoostCard

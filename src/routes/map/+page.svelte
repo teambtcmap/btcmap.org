@@ -1367,7 +1367,7 @@ onDestroy(() => {
 
 <TileLoadingIndicator visible={tilesLoading && !webglUnsupported} />
 
-<MerchantDrawerHash />
+<MerchantDrawerHash showIssues={issuesOnly} />
 
 <MapControls
 	{map}
