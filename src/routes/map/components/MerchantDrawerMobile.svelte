@@ -328,6 +328,7 @@ export function openDrawer(id: number) {
 								{boostLoading}
 								{showIssues}
 								onBoostClick={handleBoost}
+								isLoading={fetchingMerchant}
 							/>
 						{/if}
 					</div>

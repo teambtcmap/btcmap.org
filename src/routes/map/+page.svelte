@@ -25,9 +25,13 @@ import {
 	DEFAULT_MAP_ZOOM,
 	LABEL_VISIBLE_ZOOM,
 	MAP_DEBOUNCE_DELAY,
+	MAP_PANEL_MARGIN,
+	MERCHANT_DRAWER_WIDTH,
 	MERCHANT_LIST_FETCH_CEILING,
 	MERCHANT_LIST_MIN_ZOOM,
+	MERCHANT_LIST_WIDTH,
 	NEARBY_RADIUS_MULTIPLIER,
+	PANEL_DRAWER_GAP,
 } from "$lib/constants";
 import { SEARCH_SHEET_PEEK_HEIGHT } from "$lib/drawerConfig";
 import { _, getDisplayLang, locale } from "$lib/i18n";
@@ -92,6 +96,7 @@ import { theme } from "$lib/theme";
 import type { Place } from "$lib/types";
 import { userLocation } from "$lib/userLocationStore";
 import { debounce, errToast, isBoosted } from "$lib/utils";
+import { filterPlacesByRecency } from "$lib/verification";
 
 import type { PageData } from "./$types";
 import IssueFilterChips from "./components/IssueFilterChips.svelte";
@@ -170,6 +175,17 @@ const toggleIssueCode = (code: DerivedIssueCode) => {
 	replaceState(url, {});
 	updateMerchantList({ force: true });
 };
+
+// Desktop chips-bar offset: clear the list panel and the merchant drawer
+// (z-1001/1002, both left-anchored) the same way MerchantDrawerDesktop's
+// drawerLeft does, so the bar is never occluded. Mobile keeps the
+// class-driven centered position (the drawer is a bottom sheet there).
+$: chipsDesktopLeft =
+	MAP_PANEL_MARGIN +
+	($merchantList.isOpen ? MERCHANT_LIST_WIDTH + PANEL_DRAWER_GAP : 0) +
+	($merchantDrawer.isOpen && !isMobileLayout
+		? MERCHANT_DRAWER_WIDTH + PANEL_DRAWER_GAP
+		: 0);
 
 // Exit via full reload on purpose: mode membership (issuesOnly, list
 // behavior, filter wiring) is locked at init, same as entering via URL.
@@ -469,8 +485,13 @@ const updateMerchantList = (opts?: { force?: boolean }) => {
 			const issueCodes = selectedIssueCodes;
 			if (issueCodes && get(verifiedDatesLoaded)) {
 				// Chip counts come from the PRE-narrowing viewport set so a
-				// deselected chip still shows what selecting it would add.
-				issueCounts = countIssuesByCode(listed);
+				// deselected chip still shows what selecting it would add — but
+				// AFTER the recency window, matching the pin pipeline
+				// (selectVisiblePlaces applies recency before the issue filter),
+				// so a chip can never promise pins the window excludes.
+				issueCounts = countIssuesByCode(
+					filterPlacesByRecency(listed, get(merchantList).verifiedWithinYears),
+				);
 				listed = listed.filter((p) => placeMatchesIssueCodes(p, issueCodes));
 			}
 			merchantList.setMerchants(listed, center.lat, center.lng);
@@ -663,6 +684,22 @@ $: {
 const handleHashChange = () => {
 	if (typeof window === "undefined") return;
 	merchantDrawer.syncFromHash();
+	// Back/forward can restore a history entry whose ?issues snapshot differs
+	// from the current chip selection (chip toggles replaceState; drawer
+	// opens pushState). Re-parse and re-render only on an actual change.
+	if (issuesOnly) {
+		const restored = parseIssuesParam(
+			new URLSearchParams(window.location.search).get("issues"),
+		);
+		if (
+			selectedIssueCodes &&
+			serializeIssuesParam(restored) !==
+				serializeIssuesParam(selectedIssueCodes)
+		) {
+			selectedIssueCodes = restored;
+			updateMerchantList({ force: true });
+		}
+	}
 };
 
 // Renders exactly the list it is given — all visibility policy (search,
@@ -980,7 +1017,9 @@ onMount(async () => {
 					"icon-image": [
 						"concat",
 						"pin-",
-						["case", ["coalesce", ["get", "boosted"], false], "b", "r"],
+						// Same variant lookup as the point layers, so spiderfied leaves
+						// keep their issue-category colors in ?issues mode.
+						["coalesce", ["get", "variant"], "r"],
 						"-",
 						["coalesce", ["get", "icon"], "question_mark"],
 					],
@@ -1306,7 +1345,8 @@ onDestroy(() => {
 		search bar, left-aligned with it, so neither overlays the other.
 	-->
 	<div
-		class="pointer-events-none absolute top-3 left-1/2 z-[1000] flex w-max max-w-[calc(100vw-7.5rem)] -translate-x-1/2 justify-center md:top-[4.5rem] md:left-3 md:max-w-[min(90vw,44rem)] md:translate-x-0 md:justify-start"
+		class="pointer-events-none absolute top-3 left-1/2 z-[1000] flex w-max max-w-[calc(100vw-7.5rem)] -translate-x-1/2 justify-center md:top-[4.5rem] md:left-(--chips-left) md:max-w-[min(90vw,44rem)] md:translate-x-0 md:justify-start"
+		style="--chips-left: {chipsDesktopLeft}px"
 	>
 		<IssueFilterChips
 			selected={selectedIssueCodes}

@@ -45,15 +45,15 @@ let { selected, counts, onToggle, onExit }: Props = $props();
 				onclick={() => onToggle(code)}
 				class="flex shrink-0 items-center gap-2 rounded-full border px-3 py-1 text-sm whitespace-nowrap transition-colors focus-visible:ring-2 focus-visible:ring-link focus-visible:ring-offset-1 focus-visible:outline-none dark:focus-visible:ring-offset-dark {active
 					? 'border-link bg-link/10 text-primary dark:border-link dark:text-white'
-					: 'border-gray-300 text-body/60 hover:border-link hover:text-body dark:border-white/20 dark:text-white/50 dark:hover:text-white'}"
+					: 'border-gray-300 text-body hover:border-link dark:border-white/20 dark:text-white/80 dark:hover:text-white'}"
 			>
 				<span
-					class="h-2 w-2 rounded-full"
+					class="h-2 w-2 rounded-full {active ? '' : 'opacity-40'}"
 					style="background-color: {PIN_FILLS[ISSUE_PIN_VARIANTS[code]]}"
 				></span>
 				<span>{$_(`issuesMode.chips.${code}`)}</span>
 				{#if counts}
-					<span class="text-xs opacity-70">({counts[code]})</span>
+					<span class="text-xs">({counts[code]})</span>
 				{/if}
 			</button>
 		{/each}

@@ -28,7 +28,9 @@ const chip =
 </script>
 
 {#if !isLoading && codes.length}
-	<div class="border-t border-gray-300 py-2.5 dark:border-white/20">
+	<!-- No own border: the parent's divide-y stack draws the separator, same
+		as the sibling rows (an own border-t would double the rule). -->
+	<div class="py-2.5">
 		<button
 			type="button"
 			onclick={() => (open = !open)}

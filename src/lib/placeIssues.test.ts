@@ -1,5 +1,6 @@
 import { describe, expect, it } from "vitest";
 
+import type { DerivedIssueCode } from "./placeIssues";
 import {
 	countIssuesByCode,
 	DERIVED_ISSUE_CODES,
@@ -169,14 +170,12 @@ describe("serializeIssuesParam", () => {
 	});
 
 	it("round-trips through parseIssuesParam, empty selection included", () => {
-		const subset = new Set([
+		const subset: ReadonlySet<DerivedIssueCode> = new Set([
 			"outdated_soon",
 			"missing_icon",
-		] as const) as ReadonlySet<import("./placeIssues").DerivedIssueCode>;
+		]);
 		expect(parseIssuesParam(serializeIssuesParam(subset))).toEqual(subset);
-		const empty = new Set() as ReadonlySet<
-			import("./placeIssues").DerivedIssueCode
-		>;
+		const empty = new Set<DerivedIssueCode>();
 		expect(serializeIssuesParam(empty)).toBe("none");
 		expect(parseIssuesParam(serializeIssuesParam(empty))).toEqual(empty);
 	});

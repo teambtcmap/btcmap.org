@@ -64,7 +64,10 @@ export function updateMerchantHash(
 		url.searchParams.delete("view");
 	}
 
-	history.pushState(null, "", url.toString());
+	// Keep ?issues csv commas literal: searchParams.set re-encodes the whole
+	// query, and worklist URLs (#921) are meant to be pasted as-is. Commas
+	// are valid query characters, so this decode is parse-equivalent.
+	history.pushState(null, "", url.toString().replace(/%2C/g, ","));
 	window.dispatchEvent(new Event(MERCHANT_URL_CHANGE_EVENT));
 }
 
