@@ -71,7 +71,8 @@ import {
 } from "$lib/merchantDrawerHash";
 import { merchantDrawer } from "$lib/merchantDrawerStore";
 import { merchantList } from "$lib/merchantListStore";
-import { placeHasIssues } from "$lib/placeIssues";
+import type { DerivedIssueCode } from "$lib/placeIssues";
+import { parseIssuesParam, placeMatchesIssueCodes } from "$lib/placeIssues";
 import { savedPlaceIds } from "$lib/session";
 import {
 	places,
@@ -127,9 +128,15 @@ if (outdatedOnly) {
 // narrow the map to places with at least one derived issue — the
 // contributor worklist view (#921). Session-only and page-scoped like
 // ?boosts: no persisted state, no store mode; the filter engages once the
-// verified_at enrichment lands.
+// verified_at enrichment lands. A value narrows to specific categories
+// (?issues=outdated,not_verified); bare ?issues means all of them. The
+// chips bar reassigns selectedIssueCodes as the visitor toggles categories,
+// while mode membership itself stays locked for the session.
 const issuesOnly =
 	browser && new URLSearchParams(window.location.search).has("issues");
+let selectedIssueCodes: ReadonlySet<DerivedIssueCode> | null = issuesOnly
+	? parseIssuesParam(new URLSearchParams(window.location.search).get("issues"))
+	: null;
 
 let mapContainer: HTMLDivElement;
 let map: MapLibreMap | undefined;
@@ -411,8 +418,9 @@ const updateMerchantList = (opts?: { force?: boolean }) => {
 			// Same readiness gate as the marker pipeline: before the
 			// verified_at enrichment lands, the list stays unfiltered
 			// rather than flagging every bulk row as not_verified.
-			if (issuesOnly && get(verifiedDatesLoaded)) {
-				listed = listed.filter((p) => placeHasIssues(p));
+			const issueCodes = selectedIssueCodes;
+			if (issueCodes && get(verifiedDatesLoaded)) {
+				listed = listed.filter((p) => placeMatchesIssueCodes(p, issueCodes));
 			}
 			merchantList.setMerchants(listed, center.lat, center.lng);
 			if (listOpen || currentZoom >= LABEL_VISIBLE_ZOOM) {
@@ -663,7 +671,7 @@ $: if (map && styleLoaded && $places) {
 		boostsOnly: boostsOnly && !inSearch,
 		// Same search exemption for the issues worklist: a searched-for
 		// place must appear even when it has no issues.
-		issuesOnly: issuesOnly && !inSearch,
+		issueCodes: inSearch ? null : selectedIssueCodes,
 		// Trivially ready when the mode is off or exempted, so the dates
 		// landing can't change the signature outside issues mode.
 		issuesReady: !issuesOnly || inSearch || $verifiedDatesLoaded,

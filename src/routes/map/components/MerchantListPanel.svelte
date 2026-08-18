@@ -371,7 +371,7 @@ $: filteredSearchResults = selectVisiblePlaces({
 	recency: verifiedWithinYears,
 	recencyReady: true,
 	boostsOnly: false,
-	issuesOnly: false,
+	issueCodes: null,
 	issuesReady: true,
 }).selection;
 
