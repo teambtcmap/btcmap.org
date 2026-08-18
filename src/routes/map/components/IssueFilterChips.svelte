@@ -21,8 +21,11 @@ type Props = {
 let { selected, counts, onToggle, onExit }: Props = $props();
 </script>
 
+<!-- Container matches MapSearchBar's card (rounded-lg / bg-white / shadow-lg)
+	so the two stacked bars read as one family; the chips inside mirror
+	ActivityTypeFilter. -->
 <div
-	class="pointer-events-auto flex max-w-full items-center gap-1.5 rounded-full border border-gray-300 bg-white/95 py-1.5 pr-1.5 pl-3 shadow-lg backdrop-blur-sm dark:border-white/20 dark:bg-dark/95"
+	class="pointer-events-auto flex max-w-full items-center gap-2 rounded-lg bg-white py-2 pr-2 pl-3 shadow-lg dark:bg-dark dark:shadow-black/30"
 	role="group"
 	aria-label={$_('issuesMode.title')}
 >
