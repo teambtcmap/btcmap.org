@@ -8,7 +8,8 @@ const { ensureSpritesMock } = vi.hoisted(() => ({
 	ensureSpritesMock: vi.fn(),
 }));
 
-vi.mock("$lib/map/maplibreSprites", () => ({
+vi.mock("$lib/map/maplibreSprites", async (importOriginal) => ({
+	...(await importOriginal<object>()),
 	ensureSpritesForPlaces: ensureSpritesMock,
 	loadSvgImage: vi.fn(),
 }));
@@ -114,7 +115,7 @@ describe("render", () => {
 
 		expect(sources["places-heatmap"].setData).not.toHaveBeenCalled();
 		expect(counts).toEqual([2]);
-		expect(ensureSpritesMock).toHaveBeenCalledWith(map, list);
+		expect(ensureSpritesMock).toHaveBeenCalledWith(map, list, null);
 	});
 
 	it("builds feature properties from the injected deps", () => {
@@ -133,6 +134,48 @@ describe("render", () => {
 		expect(feature.properties.name).toBe("Café Eins");
 		expect(feature.properties.saved).toBe(true);
 		expect(feature.properties.boosted).toBe(false);
+	});
+
+	it("carries the boost state in the variant outside issues mode", () => {
+		const { map, sources } = makeFakeMap(CLUSTERED_ZOOM);
+		const pin = makeSource();
+		pin.render(map, [makePlace({ id: 1 }), boostedPlace(2)]);
+
+		const variants = featuresOf(sources.places).map(
+			(f: { properties: { variant: string } }) => f.properties.variant,
+		);
+		expect(variants).toEqual(["r", "b"]);
+	});
+
+	it("colors pins by their dominant selected issue in issues mode", () => {
+		const { map, sources } = makeFakeMap(STANDALONE_ZOOM);
+		const issueCodes = new Set([
+			"outdated",
+			"not_verified",
+			"missing_icon",
+		] as const);
+		const pin = createPlacePinSource({
+			getSavedIds: () => new Set<number>(),
+			getEnrichedCache: () => new Map<number, Place>(),
+			getDisplayLang: () => "en",
+			getIssueCodes: () => issueCodes,
+		});
+		pin.render(map, [
+			// Verified long ago → outdated wins over the missing icon.
+			makePlace({ id: 1, icon: undefined, verified_at: "2000-01-01" }),
+			// Never verified.
+			makePlace({ id: 2, verified_at: undefined }),
+		]);
+
+		const variants = featuresOf(sources.places).map(
+			(f: { properties: { variant: string } }) => f.properties.variant,
+		);
+		expect(variants).toEqual(["od", "nv"]);
+		expect(ensureSpritesMock).toHaveBeenCalledWith(
+			map,
+			expect.anything(),
+			issueCodes,
+		);
 	});
 });
 

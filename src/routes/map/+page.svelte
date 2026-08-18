@@ -157,10 +157,17 @@ let lastRenderSig = "";
 // visibility; this page keeps interactions, spiderfy, camera, and the label
 // palette. The deps are read as snapshots on every render — saved state and
 // enriched names arrive lazily.
+// Snapshot for the pin-color dep below: the selected issue categories once
+// the readiness gate has passed, null otherwise. Written by the render block
+// so every render path (signature change, zoom resync, boosted re-route)
+// reads the same gated value.
+let pinIssueCodes: ReadonlySet<DerivedIssueCode> | null = null;
+
 const pinSource = createPlacePinSource({
 	getSavedIds: () => get(savedPlaceIds),
 	getEnrichedCache: () => get(merchantList).placeDetailsCache,
 	getDisplayLang: () => getDisplayLang(get(locale)),
+	getIssueCodes: () => pinIssueCodes,
 	onRendered: (count) => {
 		if (count > 0) elementsLoaded = true;
 		// E2E test hook: Playwright can't probe WebGL canvas pins like it
@@ -688,6 +695,9 @@ $: if (map && styleLoaded && $places) {
 	].join("~");
 	if (renderSig !== lastRenderSig) {
 		lastRenderSig = renderSig;
+		// Same gate as the selection filter: no issue colors until the dates
+		// are enriched, and none for search results (mode exemption).
+		pinIssueCodes = inputs.issuesReady ? inputs.issueCodes : null;
 		const { selection } = selectVisiblePlaces({
 			...inputs,
 			places: inSearch ? $merchantList.searchResults : $places,

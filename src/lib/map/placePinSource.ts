@@ -12,7 +12,9 @@ import {
 	ensureSpritesForPlaces,
 	hasRealImage,
 	loadSvgImage,
+	pinVariantFor,
 } from "$lib/map/maplibreSprites";
+import type { DerivedIssueCode } from "$lib/placeIssues";
 import type { Place } from "$lib/types";
 import { isBoosted } from "$lib/utils";
 
@@ -23,6 +25,9 @@ export type PlaceFeature = {
 		id: number;
 		boosted: boolean;
 		icon: string;
+		// Sprite body-color variant (see pinVariantFor): boost state normally,
+		// the dominant selected issue category in ?issues mode.
+		variant: string;
 		comments: number;
 		saved: boolean;
 		name: string;
@@ -113,6 +118,10 @@ export type PlacePinSourceDeps = {
 	getSavedIds: () => Set<number>;
 	getEnrichedCache: () => Map<number, Place>;
 	getDisplayLang: () => string;
+	// ?issues-mode pin coloring: the selected categories once the readiness
+	// gate has passed, null otherwise (mode off, search exemption, or dates
+	// not yet enriched). Snapshot per render like the other deps.
+	getIssueCodes?: () => ReadonlySet<DerivedIssueCode> | null;
 	// Fired after each render with the rendered count. The /map page uses it
 	// for the loading-screen gate and the e2e __mapPlacesCount hook.
 	onRendered?: (count: number) => void;
@@ -153,6 +162,7 @@ export const createPlacePinSource = (deps: PlacePinSourceDeps) => {
 		// the viewport-bound /v4/places/search fetch resolves.
 		const enrichedCache = deps.getEnrichedCache();
 		const displayLang = deps.getDisplayLang();
+		const issueCodes = deps.getIssueCodes?.() ?? null;
 		const resolveName = (p: Place): string => {
 			const enriched = enrichedCache.get(p.id);
 			// Priority: enriched localized name → enriched plain name →
@@ -178,6 +188,7 @@ export const createPlacePinSource = (deps: PlacePinSourceDeps) => {
 					// unclustered.
 					boosted: !!isBoosted(p),
 					icon: p.icon ?? "question_mark",
+					variant: pinVariantFor(p, issueCodes),
 					comments: p.comments ?? 0,
 					saved: saved.has(p.id),
 					name: resolveName(p),
@@ -371,11 +382,12 @@ export const createPlacePinSource = (deps: PlacePinSourceDeps) => {
 				// Look up composite sprite (pin shape + baked category icon).
 				// Until the icon's sprite finishes loading, MapLibre logs a
 				// warning and skips the symbol; pins appear as their composite
-				// sprites resolve.
+				// sprites resolve. The variant property carries boost state and
+				// the ?issues category color (see pinVariantFor).
 				"icon-image": [
 					"concat",
 					"pin-",
-					["case", ["coalesce", ["get", "boosted"], false], "b", "r"],
+					["coalesce", ["get", "variant"], "r"],
 					"-",
 					["coalesce", ["get", "icon"], "question_mark"],
 				],
@@ -396,9 +408,13 @@ export const createPlacePinSource = (deps: PlacePinSourceDeps) => {
 			type: "symbol",
 			source: "places-boosted",
 			layout: {
+				// Boosted pins take the issue-category color too in ?issues mode
+				// — the worklist's vocabulary replaces the boost orange there.
 				"icon-image": [
 					"concat",
-					"pin-b-",
+					"pin-",
+					["coalesce", ["get", "variant"], "b"],
+					"-",
 					["coalesce", ["get", "icon"], "question_mark"],
 				],
 				"icon-size": 1,
@@ -654,7 +670,7 @@ export const createPlacePinSource = (deps: PlacePinSourceDeps) => {
 		if (heatmapSource && heatmapEnabled) {
 			heatmapSource.setData(buildFeatureCollection(list));
 		}
-		ensureSpritesForPlaces(map, list);
+		ensureSpritesForPlaces(map, list, deps.getIssueCodes?.() ?? null);
 		deps.onRendered?.(list.length);
 	};
 
