@@ -184,6 +184,16 @@
 		"accountAlt": "Account",
 		"loginAlt": "Log in"
 	},
+	"issuesMode": {
+		"title": "Issues",
+		"exit": "Exit issues view",
+		"chips": {
+			"outdated": "Outdated",
+			"outdated_soon": "Aging",
+			"not_verified": "Not verified",
+			"missing_icon": "Missing icon"
+		}
+	},
 	"merchant": {
 		"tagsNote": "More information on bitcoin mapping tags can be found",
 		"tagsNoteHere": "here",

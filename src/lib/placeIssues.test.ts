@@ -151,6 +151,10 @@ describe("parseIssuesParam", () => {
 	it("degrades an all-garbage value to all codes (presence rule)", () => {
 		expect(parseIssuesParam("bogus,wat")).toEqual(new Set(DERIVED_ISSUE_CODES));
 	});
+
+	it("parses the none sentinel as an explicit empty selection", () => {
+		expect(parseIssuesParam("none")).toEqual(new Set());
+	});
 });
 
 describe("serializeIssuesParam", () => {
@@ -164,12 +168,17 @@ describe("serializeIssuesParam", () => {
 		);
 	});
 
-	it("round-trips through parseIssuesParam", () => {
+	it("round-trips through parseIssuesParam, empty selection included", () => {
 		const subset = new Set([
 			"outdated_soon",
 			"missing_icon",
 		] as const) as ReadonlySet<import("./placeIssues").DerivedIssueCode>;
 		expect(parseIssuesParam(serializeIssuesParam(subset))).toEqual(subset);
+		const empty = new Set() as ReadonlySet<
+			import("./placeIssues").DerivedIssueCode
+		>;
+		expect(serializeIssuesParam(empty)).toBe("none");
+		expect(parseIssuesParam(serializeIssuesParam(empty))).toEqual(empty);
 	});
 });
 

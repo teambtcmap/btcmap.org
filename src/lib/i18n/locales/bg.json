@@ -79,6 +79,16 @@
 		"communityMapAlt": "Карта на общностите",
 		"merchantMapAlt": "Карта на търговците"
 	},
+	"issuesMode": {
+		"title": "Issues",
+		"exit": "Exit issues view",
+		"chips": {
+			"outdated": "Outdated",
+			"outdated_soon": "Aging",
+			"not_verified": "Not verified",
+			"missing_icon": "Missing icon"
+		}
+	},
 	"aria": {
 		"logoAlt": "Лого на BTC Map",
 		"avatarAlt": "Аватар",

@@ -99,6 +99,16 @@
 		"communityMapAlt": "Карта сообщества",
 		"merchantMapAlt": "Карта торговцев"
 	},
+	"issuesMode": {
+		"title": "Issues",
+		"exit": "Exit issues view",
+		"chips": {
+			"outdated": "Outdated",
+			"outdated_soon": "Aging",
+			"not_verified": "Not verified",
+			"missing_icon": "Missing icon"
+		}
+	},
 	"merchant": {
 		"tagsNote": "Более подробная информация о метках доступна",
 		"tagsNoteHere": "здесь",

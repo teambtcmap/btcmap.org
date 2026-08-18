@@ -99,6 +99,16 @@
 		"communityMapAlt": "Carte des communautés",
 		"merchantMapAlt": "Carte des commerces"
 	},
+	"issuesMode": {
+		"title": "Issues",
+		"exit": "Exit issues view",
+		"chips": {
+			"outdated": "Outdated",
+			"outdated_soon": "Aging",
+			"not_verified": "Not verified",
+			"missing_icon": "Missing icon"
+		}
+	},
 	"merchant": {
 		"tagsNote": "Plus d'informations sur les tags de cartographie bitcoin disponibles",
 		"tagsNoteHere": "ici",

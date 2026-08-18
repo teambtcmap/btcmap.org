@@ -81,12 +81,17 @@ export function dominantIssue(
 	return null;
 }
 
+// "?issues=none": every chip toggled off — an explicit empty selection that
+// must survive a reload, distinct from bare ?issues (= all).
+const NONE_SENTINEL = "none";
+
 // ?issues value → selected categories. Bare param ("" or null) and
 // all-garbage values degrade to every code, preserving the original
 // presence-only contract for existing deep links.
 export function parseIssuesParam(
 	raw: string | null,
 ): ReadonlySet<DerivedIssueCode> {
+	if (raw?.trim() === NONE_SENTINEL) return new Set();
 	const valid = (raw ?? "")
 		.split(",")
 		.map((c) => c.trim())
@@ -96,12 +101,14 @@ export function parseIssuesParam(
 	return valid.length ? new Set(valid) : ALL_CODES;
 }
 
-// Inverse of parseIssuesParam: full set → "" (bare ?issues), subset → csv
-// in canonical order so equal selections produce identical URLs.
+// Inverse of parseIssuesParam: full set → "" (bare ?issues), empty set →
+// the none sentinel, subset → csv in canonical order so equal selections
+// produce identical URLs.
 export function serializeIssuesParam(
 	selected: ReadonlySet<DerivedIssueCode>,
 ): string {
 	if (selected.size === ALL_CODES.size) return "";
+	if (selected.size === 0) return NONE_SENTINEL;
 	return DERIVED_ISSUE_CODES.filter((c) => selected.has(c)).join(",");
 }
 

@@ -72,7 +72,12 @@ import {
 import { merchantDrawer } from "$lib/merchantDrawerStore";
 import { merchantList } from "$lib/merchantListStore";
 import type { DerivedIssueCode } from "$lib/placeIssues";
-import { parseIssuesParam, placeMatchesIssueCodes } from "$lib/placeIssues";
+import {
+	countIssuesByCode,
+	parseIssuesParam,
+	placeMatchesIssueCodes,
+	serializeIssuesParam,
+} from "$lib/placeIssues";
 import { savedPlaceIds } from "$lib/session";
 import {
 	places,
@@ -89,12 +94,14 @@ import { userLocation } from "$lib/userLocationStore";
 import { debounce, errToast, isBoosted } from "$lib/utils";
 
 import type { PageData } from "./$types";
+import IssueFilterChips from "./components/IssueFilterChips.svelte";
 import MapControls from "./components/MapControls.svelte";
 import MapSearchBar from "./components/MapSearchBar.svelte";
 import MerchantDrawerHash from "./components/MerchantDrawerHash.svelte";
 import MerchantListPanel from "./components/MerchantListPanel.svelte";
 import TileLoadingIndicator from "./components/TileLoadingIndicator.svelte";
 import { browser } from "$app/environment";
+import { replaceState } from "$app/navigation";
 
 export let data: PageData;
 
@@ -137,6 +144,40 @@ const issuesOnly =
 let selectedIssueCodes: ReadonlySet<DerivedIssueCode> | null = issuesOnly
 	? parseIssuesParam(new URLSearchParams(window.location.search).get("issues"))
 	: null;
+
+// Viewport issue tallies for the chips bar, computed in updateMerchantList's
+// local-markers path (issues mode always forces that path). Null until the
+// verified_at enrichment lands so the chips don't show all-zero counts.
+let issueCounts: Record<DerivedIssueCode, number> | null = null;
+
+// Chip toggle: reassign the set (the render block and updateMerchantList
+// both read it), mirror the selection into ?issues= via a shallow
+// replaceState so the worklist URL stays shareable — no navigation, the
+// mode itself is locked for the session.
+const toggleIssueCode = (code: DerivedIssueCode) => {
+	const next = new Set(selectedIssueCodes ?? []);
+	if (next.has(code)) {
+		next.delete(code);
+	} else {
+		next.add(code);
+	}
+	selectedIssueCodes = next;
+	const url = new URL(window.location.href);
+	url.searchParams.set("issues", serializeIssuesParam(next));
+	// Keep the csv commas literal (searchParams %2C-encodes them) — these
+	// URLs are meant to be pasted into chats as worklist links.
+	url.search = url.search.replace(/%2C/g, ",");
+	replaceState(url, {});
+	updateMerchantList({ force: true });
+};
+
+// Exit via full reload on purpose: mode membership (issuesOnly, list
+// behavior, filter wiring) is locked at init, same as entering via URL.
+const exitIssuesMode = () => {
+	const url = new URL(window.location.href);
+	url.searchParams.delete("issues");
+	window.location.href = url.toString();
+};
 
 let mapContainer: HTMLDivElement;
 let map: MapLibreMap | undefined;
@@ -427,6 +468,9 @@ const updateMerchantList = (opts?: { force?: boolean }) => {
 			// rather than flagging every bulk row as not_verified.
 			const issueCodes = selectedIssueCodes;
 			if (issueCodes && get(verifiedDatesLoaded)) {
+				// Chip counts come from the PRE-narrowing viewport set so a
+				// deselected chip still shows what selecting it would add.
+				issueCounts = countIssuesByCode(listed);
 				listed = listed.filter((p) => placeMatchesIssueCodes(p, issueCodes));
 			}
 			merchantList.setMerchants(listed, center.lat, center.lng);
@@ -1255,6 +1299,24 @@ onDestroy(() => {
 	single search facade instead. The facade hides when the list panel
 	is open (the panel renders the real search input in the same slot).
 -->
+{#if styleLoaded && issuesOnly && selectedIssueCodes}
+	<!--
+		Mobile: centered in the free strip between the community rail (left)
+		and the map controls (right). Desktop: tucked under the floating
+		search bar, left-aligned with it, so neither overlays the other.
+	-->
+	<div
+		class="pointer-events-none absolute top-3 left-1/2 z-[1000] flex w-max max-w-[calc(100vw-7.5rem)] -translate-x-1/2 justify-center md:top-[4.5rem] md:left-3 md:max-w-[min(90vw,44rem)] md:translate-x-0 md:justify-start"
+	>
+		<IssueFilterChips
+			selected={selectedIssueCodes}
+			counts={issueCounts}
+			onToggle={toggleIssueCode}
+			onExit={exitIssuesMode}
+		/>
+	</div>
+{/if}
+
 {#if styleLoaded && !isMobileLayout}
 	<div class="pointer-events-none absolute top-3 left-3 z-[1000]">
 		<MapSearchBar

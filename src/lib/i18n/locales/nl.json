@@ -184,6 +184,16 @@
 		"accountAlt": "Account",
 		"loginAlt": "Aanmelden"
 	},
+	"issuesMode": {
+		"title": "Issues",
+		"exit": "Exit issues view",
+		"chips": {
+			"outdated": "Outdated",
+			"outdated_soon": "Aging",
+			"not_verified": "Not verified",
+			"missing_icon": "Missing icon"
+		}
+	},
 	"merchant": {
 		"tagsNote": "Meer informatie over Bitcoin mapping tags vind je",
 		"tagsNoteHere": "hier",
