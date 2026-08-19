@@ -1,4 +1,4 @@
-import type { Map as MapLibreMap } from "maplibre-gl";
+import type { ExpressionSpecification, Map as MapLibreMap } from "maplibre-gl";
 
 import { resolveMaterialIcon } from "$lib/materialIcons";
 import type { DerivedIssueCode } from "$lib/placeIssues";
@@ -46,6 +46,22 @@ export const PIN_FILLS: Record<PinVariant, string> = {
 
 export const spriteName = (icon: string, variant: PinVariant): string =>
 	`pin-${variant}-${icon}`;
+
+// The one icon-image expression for every pin-rendering surface (unclustered
+// layer, boosted layer, spiderfy leaves): resolves the composite sprite name
+// from the feature's variant property. Shared builder on purpose — a single
+// surface diverging is exactly how spiderfied leaves once lost their issue
+// colors.
+export const pinIconImageExpression = (
+	fallback: PinVariant,
+): ExpressionSpecification =>
+	[
+		"concat",
+		"pin-",
+		["coalesce", ["get", "variant"], fallback],
+		"-",
+		["coalesce", ["get", "icon"], "question_mark"],
+	] as ExpressionSpecification;
 
 // Body color for one place. In issues mode (issueCodes set) the dominant
 // SELECTED issue wins — the hue must explain why the pin is in the worklist

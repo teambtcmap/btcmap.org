@@ -6,12 +6,14 @@ import {
 	shouldClusterBoostedAtZoom,
 } from "$lib/map/boostedClustering";
 import { HEATMAP_STORAGE_KEY } from "$lib/map/heatmap";
+import type { PinVariant } from "$lib/map/maplibreSprites";
 import {
 	addRealImage,
 	ensureCommentBadgeSprite,
 	ensureSpritesForPlaces,
 	hasRealImage,
 	loadSvgImage,
+	pinIconImageExpression,
 	pinVariantFor,
 } from "$lib/map/maplibreSprites";
 import type { DerivedIssueCode } from "$lib/placeIssues";
@@ -27,7 +29,7 @@ export type PlaceFeature = {
 		icon: string;
 		// Sprite body-color variant (see pinVariantFor): boost state normally,
 		// the dominant selected issue category in ?issues mode.
-		variant: string;
+		variant: PinVariant;
 		comments: number;
 		saved: boolean;
 		name: string;
@@ -384,13 +386,7 @@ export const createPlacePinSource = (deps: PlacePinSourceDeps) => {
 				// warning and skips the symbol; pins appear as their composite
 				// sprites resolve. The variant property carries boost state and
 				// the ?issues category color (see pinVariantFor).
-				"icon-image": [
-					"concat",
-					"pin-",
-					["coalesce", ["get", "variant"], "r"],
-					"-",
-					["coalesce", ["get", "icon"], "question_mark"],
-				],
+				"icon-image": pinIconImageExpression("r"),
 				"icon-size": 1,
 				"icon-anchor": "bottom",
 				"icon-allow-overlap": true,
@@ -410,13 +406,7 @@ export const createPlacePinSource = (deps: PlacePinSourceDeps) => {
 			layout: {
 				// Boosted pins take the issue-category color too in ?issues mode
 				// — the worklist's vocabulary replaces the boost orange there.
-				"icon-image": [
-					"concat",
-					"pin-",
-					["coalesce", ["get", "variant"], "b"],
-					"-",
-					["coalesce", ["get", "icon"], "question_mark"],
-				],
+				"icon-image": pinIconImageExpression("b"),
 				"icon-size": 1,
 				"icon-anchor": "bottom",
 				"icon-allow-overlap": true,

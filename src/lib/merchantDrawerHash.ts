@@ -10,6 +10,13 @@ export interface MerchantHashState {
 
 export const MERCHANT_URL_CHANGE_EVENT = "merchant-url-change";
 
+// Keep ?issues csv commas literal in written URLs: URL serialization
+// %2C-encodes them, and worklist links (#921) are meant to be pasted into
+// chats as-is. Commas are valid query characters, so this is
+// parse-equivalent. Shared by every site that writes the query string.
+export const withLiteralCommas = (url: string): string =>
+	url.replace(/%2C/g, ",");
+
 export function parseMerchantHash(): MerchantHashState {
 	if (!browser) {
 		return { merchantId: null, drawerView: "details", isOpen: false };
@@ -64,10 +71,7 @@ export function updateMerchantHash(
 		url.searchParams.delete("view");
 	}
 
-	// Keep ?issues csv commas literal: searchParams.set re-encodes the whole
-	// query, and worklist URLs (#921) are meant to be pasted as-is. Commas
-	// are valid query characters, so this decode is parse-equivalent.
-	history.pushState(null, "", url.toString().replace(/%2C/g, ","));
+	history.pushState(null, "", withLiteralCommas(url.toString()));
 	window.dispatchEvent(new Event(MERCHANT_URL_CHANGE_EVENT));
 }
 

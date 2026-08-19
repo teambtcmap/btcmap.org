@@ -124,12 +124,9 @@ export function countIssuesByCode(
 	places: readonly Partial<Pick<Place, "verified_at" | "icon">>[],
 	now?: number,
 ): Record<DerivedIssueCode, number> {
-	const counts: Record<DerivedIssueCode, number> = {
-		outdated: 0,
-		outdated_soon: 0,
-		not_verified: 0,
-		missing_icon: 0,
-	};
+	const counts = Object.fromEntries(
+		DERIVED_ISSUE_CODES.map((code) => [code, 0]),
+	) as Record<DerivedIssueCode, number>;
 	for (const place of places) {
 		for (const code of derivePlaceIssues(place, now)) {
 			counts[code]++;

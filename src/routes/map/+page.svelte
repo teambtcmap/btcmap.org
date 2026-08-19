@@ -54,6 +54,7 @@ import {
 import {
 	ensureSpritesForPlaces,
 	PIN_FILLS,
+	pinIconImageExpression,
 	pinVariantFor,
 } from "$lib/map/maplibreSprites";
 import { createPlacePinSource } from "$lib/map/placePinSource";
@@ -72,6 +73,7 @@ import {
 import {
 	MERCHANT_URL_CHANGE_EVENT,
 	parseMerchantHash,
+	withLiteralCommas,
 } from "$lib/merchantDrawerHash";
 import { merchantDrawer } from "$lib/merchantDrawerStore";
 import { merchantList } from "$lib/merchantListStore";
@@ -169,10 +171,7 @@ const toggleIssueCode = (code: DerivedIssueCode) => {
 	selectedIssueCodes = next;
 	const url = new URL(window.location.href);
 	url.searchParams.set("issues", serializeIssuesParam(next));
-	// Keep the csv commas literal (searchParams %2C-encodes them) — these
-	// URLs are meant to be pasted into chats as worklist links.
-	url.search = url.search.replace(/%2C/g, ",");
-	replaceState(url, {});
+	replaceState(withLiteralCommas(url.toString()), {});
 	updateMerchantList({ force: true });
 };
 
@@ -1025,15 +1024,9 @@ onMount(async () => {
 				},
 				closeOnLeafClick: true,
 				spiderLeavesLayout: {
-					"icon-image": [
-						"concat",
-						"pin-",
-						// Same variant lookup as the point layers, so spiderfied leaves
-						// keep their issue-category colors in ?issues mode.
-						["coalesce", ["get", "variant"], "r"],
-						"-",
-						["coalesce", ["get", "icon"], "question_mark"],
-					],
+					// Same builder as the point layers, so spiderfied leaves keep
+					// their issue-category colors in ?issues mode.
+					"icon-image": pinIconImageExpression("r"),
 					"icon-size": 1,
 					"icon-anchor": "bottom",
 					"icon-allow-overlap": true,
