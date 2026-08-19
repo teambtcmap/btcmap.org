@@ -103,7 +103,7 @@
 	"issuesMode": {
 		"title": "Problemas",
 		"showAll": "Mostrar todos os locais",
-		"inView": "{count} à vista",
+		"inView": "{count} no mapa",
 		"chips": {
 			"outdated": "Desatualizado",
 			"outdated_soon": "Quase desatualizado",

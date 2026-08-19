@@ -53,7 +53,11 @@ let { selected, counts, totalInView, onToggle, onExit }: Props = $props();
 			{$_('issuesMode.title')}
 		</span>
 		{#if totalInView != null}
-			<span class="truncate text-xs text-body dark:text-white/60">
+			<span
+				class="truncate text-xs text-body dark:text-white/60"
+				aria-live="polite"
+				aria-atomic="true"
+			>
 				· {$_('issuesMode.inView', { values: { count: totalInView } })}
 			</span>
 		{/if}

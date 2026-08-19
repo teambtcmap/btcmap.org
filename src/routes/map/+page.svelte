@@ -869,10 +869,13 @@ onMount(async () => {
 
 	// ?issues mode stacks the mode bar above the peek on mobile; lift the
 	// bottom map chrome over it too. 96px = the bar's fixed height (~88px,
-	// one header line + one chip row) plus the 8px gap.
-	if (issuesOnly && isMobileLayout) {
-		document.documentElement.style.setProperty("--issues-bar-lift", "96px");
-	}
+	// one header line + one chip row) plus the 8px gap. Set unconditionally:
+	// the var lives on documentElement, which survives client-side
+	// navigation, so a mount outside issues mode must reset it to zero.
+	document.documentElement.style.setProperty(
+		"--issues-bar-lift",
+		issuesOnly && isMobileLayout ? "96px" : "0px",
+	);
 
 	// Five basemaps (legacy parity): four vector styles + the OSM raster
 	// style. A stored picker choice wins; otherwise the first-visit default
