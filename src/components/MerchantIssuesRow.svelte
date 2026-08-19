@@ -22,9 +22,6 @@ let { merchant, osmEditUrl, isLoading = false }: Props = $props();
 let open = $state(false);
 
 const codes = $derived(derivePlaceIssues(merchant));
-
-const chip =
-	"inline-flex items-center gap-1.5 rounded-lg border border-gray-300 px-3 py-2 text-xs font-semibold text-primary transition-colors hover:border-link hover:text-link dark:border-white/20 dark:text-white dark:hover:border-link dark:hover:text-link";
 </script>
 
 {#if !isLoading && codes.length}
@@ -69,8 +66,13 @@ const chip =
 				{/each}
 			</ul>
 
-			<div class="mt-3 flex flex-wrap gap-2">
-				<a href={`${resolve('/verify-location')}?id=${merchant.id}`} class={chip}>
+			<!-- Two equal 44px targets side by side (thumb-sized on phones):
+				verify is the primary path, the OSM edit the tagger one. -->
+			<div class="mt-3 flex gap-2">
+				<a
+					href={`${resolve('/verify-location')}?id=${merchant.id}`}
+					class="flex h-11 flex-1 items-center justify-center gap-1.5 rounded-lg bg-link text-xs font-semibold text-white transition-colors hover:bg-hover"
+				>
 					<Icon w="16" h="16" icon="verified" type="material" />
 					{$_('verification.verifyLocation')}
 				</a>
@@ -78,7 +80,7 @@ const chip =
 					href={osmEditUrl}
 					target="_blank"
 					rel="noopener noreferrer"
-					class={chip}
+					class="flex h-11 flex-1 items-center justify-center gap-1.5 rounded-lg border border-gray-300 text-xs font-semibold text-primary transition-colors hover:border-link hover:text-link dark:border-white/20 dark:text-white dark:hover:border-link dark:hover:text-link"
 				>
 					<Icon w="16" h="16" icon="open_in_new" type="material" />
 					{$_('issuesMode.row.editOsm')}
