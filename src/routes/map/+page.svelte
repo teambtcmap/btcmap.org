@@ -53,8 +53,8 @@ import {
 } from "$lib/map/mapHash";
 import {
 	ensureSpritesForPlaces,
-	PIN_FILL_BOOSTED,
-	PIN_FILL_REGULAR,
+	PIN_FILLS,
+	pinVariantFor,
 } from "$lib/map/maplibreSprites";
 import { createPlacePinSource } from "$lib/map/placePinSource";
 import { parseLatLongQuery } from "$lib/map/queryViewport";
@@ -356,9 +356,10 @@ const syncSelectionPulse = (selectedId: number | null) => {
 	// unchanged: boosting from the drawer recolours the pin (teal → orange) and
 	// fires the $places reactive, and the pulse must follow. setProperty,
 	// setLngLat and addTo are idempotent on an already-added marker, so this
-	// stays cheap on every $places tick. Colours come from the same source of
-	// truth as the GL pin sprite so the two can't desync.
-	const color = isBoosted(place) ? PIN_FILL_BOOSTED : PIN_FILL_REGULAR;
+	// stays cheap on every $places tick. Colours come from the same variant
+	// lookup as the GL pin sprite so the two can't desync — issue-colored
+	// pins in ?issues mode get a matching pulse, not the boost/regular one.
+	const color = PIN_FILLS[pinVariantFor(place, pinIssueCodes)];
 	pulseMarker.getElement().style.setProperty("--bm-pulse-color", color);
 	pulseMarker.setLngLat([place.lon, place.lat]).addTo(map);
 	pulsePinId = selectedId;
@@ -786,10 +787,12 @@ $: if (map && styleLoaded && $places) {
 }
 
 // Position the locator pulse. Depends on $places too so a deep-linked merchant
-// gets its pulse once the place data syncs in; syncSelectionPulse no-ops when
-// the target is unchanged or not yet loaded.
+// gets its pulse once the place data syncs in, and on pinIssueCodes so chip
+// toggles recolor an already-selected marker; syncSelectionPulse no-ops when
+// the target is not yet loaded.
 $: if (map && styleLoaded) {
 	void $places;
+	void pinIssueCodes;
 	syncSelectionPulse($merchantDrawer.merchantId);
 }
 
