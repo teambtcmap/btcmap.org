@@ -176,14 +176,13 @@ const toggleIssueCode = (code: DerivedIssueCode) => {
 	updateMerchantList({ force: true });
 };
 
-// Desktop chips-bar placement: dock right of the open list panel (browsing
-// the worklist and toggling categories go together), but HIDE while the
-// merchant drawer is open — the user is acting on one place then, and a bar
-// that chases the drawer across the map reads as broken. Mobile keeps the
-// class-driven centered position (the drawer is a bottom sheet there).
-$: chipsDesktopLeft =
-	MAP_PANEL_MARGIN +
-	($merchantList.isOpen ? MERCHANT_LIST_WIDTH + PANEL_DRAWER_GAP : 0);
+// Desktop chips-bar left edge: the left column is always occupied by the
+// search facade or the list panel (same width), so the bar starts right of
+// that slot in both states — a fixed row, nothing to chase. It still HIDES
+// while the merchant drawer is open: the user is acting on one place then,
+// and the drawer overlaps the top strip.
+const CHIPS_DESKTOP_LEFT =
+	MAP_PANEL_MARGIN + MERCHANT_LIST_WIDTH + PANEL_DRAWER_GAP;
 $: chipsHiddenForDrawer = !isMobileLayout && $merchantDrawer.isOpen;
 
 // Exit via full reload on purpose: mode membership (issuesOnly, list
@@ -868,6 +867,13 @@ onMount(async () => {
 		`${SEARCH_SHEET_PEEK_HEIGHT}px`,
 	);
 
+	// ?issues mode stacks the mode bar above the peek on mobile; lift the
+	// bottom map chrome over it too. 96px = the bar's fixed height (~88px,
+	// one header line + one chip row) plus the 8px gap.
+	if (issuesOnly && isMobileLayout) {
+		document.documentElement.style.setProperty("--issues-bar-lift", "96px");
+	}
+
 	// Five basemaps (legacy parity): four vector styles + the OSM raster
 	// style. A stored picker choice wins; otherwise the first-visit default
 	// is theme-aware (Liberty in light, Carto Dark Matter in dark). Each
@@ -1339,19 +1345,22 @@ onDestroy(() => {
 -->
 {#if styleLoaded && issuesOnly && selectedIssueCodes && !chipsHiddenForDrawer}
 	<!--
-		Mobile: centered in the free strip between the community rail (left)
-		and the map controls (right). Desktop: tucked under the floating
-		search bar, docked right of the list panel when that is open, and
-		hidden entirely while the merchant drawer is (see chipsHiddenForDrawer).
+		Mobile: bottom-anchored directly above the search sheet's peek — the
+		mode bar and the search card form one column with a shared inset (the
+		lifted scale bar/attribution move up with it, see the issues-bar-lift
+		rule below). Desktop: one row across the map area at the panel's top
+		edge, from the left column to just short of the top-right controls;
+		hidden while the merchant drawer is open (see chipsHiddenForDrawer).
 	-->
 	<div
 		transition:fade={{ duration: 150 }}
-		class="pointer-events-none absolute top-3 left-1/2 z-[1000] flex w-max max-w-[calc(100vw-7.5rem)] -translate-x-1/2 justify-center md:top-[4.5rem] md:left-(--chips-left) md:max-w-[min(90vw,44rem)] md:translate-x-0 md:justify-start"
-		style="--chips-left: {chipsDesktopLeft}px"
+		class="pointer-events-none absolute right-3 bottom-(--chips-bottom) left-3 z-[1000] flex md:top-3 md:right-[3.75rem] md:bottom-auto md:left-(--chips-left)"
+		style="--chips-bottom: calc(env(safe-area-inset-bottom) + var(--search-sheet-peek-height, 88px) + 8px); --chips-left: {CHIPS_DESKTOP_LEFT}px"
 	>
 		<IssueFilterChips
 			selected={selectedIssueCodes}
 			counts={issueCounts}
+			totalInView={issueCounts ? $merchantList.totalCount : null}
 			onToggle={toggleIssueCode}
 			onExit={exitIssuesMode}
 		/>
@@ -1395,6 +1404,7 @@ onDestroy(() => {
 	behavior={listBehavior}
 	mapReady={styleLoaded}
 	isMobile={isMobileLayout}
+	issuesMode={issuesOnly}
 />
 
 {#if styleLoaded}
@@ -1442,8 +1452,12 @@ onDestroy(() => {
 	@media (max-width: 767px) {
 		.map-container :global(.maplibregl-ctrl-bottom-left),
 		.map-container :global(.maplibregl-ctrl-bottom-right) {
+			/* --issues-bar-lift is non-zero only in ?issues mode, where the
+			   bottom-anchored mode bar stacks above the peek and the chrome
+			   must clear both. */
 			bottom: calc(
-				env(safe-area-inset-bottom) + var(--search-sheet-peek-height, 88px)
+				env(safe-area-inset-bottom) + var(--search-sheet-peek-height, 88px) +
+					var(--issues-bar-lift, 0px)
 			);
 		}
 	}

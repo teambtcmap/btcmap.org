@@ -186,7 +186,8 @@
 	},
 	"issuesMode": {
 		"title": "Problemi",
-		"exit": "Esci dalla vista problemi",
+		"showAll": "Mostra tutti i luoghi",
+		"inView": "{count} in vista",
 		"chips": {
 			"outdated": "Obsoleto",
 			"outdated_soon": "Quasi obsoleto",

@@ -186,7 +186,8 @@
 	},
 	"issuesMode": {
 		"title": "Issues",
-		"exit": "Exit issues view",
+		"showAll": "Show all places",
+		"inView": "{count} in view",
 		"chips": {
 			"outdated": "Outdated",
 			"outdated_soon": "Aging",

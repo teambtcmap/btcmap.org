@@ -101,7 +101,8 @@
 	},
 	"issuesMode": {
 		"title": "Проблемы",
-		"exit": "Выйти из режима проблем",
+		"showAll": "Показать все места",
+		"inView": "{count} на карте",
 		"chips": {
 			"outdated": "Устарело",
 			"outdated_soon": "Скоро устареет",

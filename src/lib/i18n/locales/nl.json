@@ -186,7 +186,8 @@
 	},
 	"issuesMode": {
 		"title": "Problemen",
-		"exit": "Probleemweergave sluiten",
+		"showAll": "Toon alle locaties",
+		"inView": "{count} in beeld",
 		"chips": {
 			"outdated": "Verouderd",
 			"outdated_soon": "Bijna verouderd",
