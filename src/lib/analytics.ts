@@ -23,6 +23,7 @@ export type EventName =
 	| "locate_click"
 	| "add_location_click"
 	| "community_map_click"
+	| "issues_map_click"
 	| "account_button_click"
 	| "nav_menu_open"
 	| "layers_panel_open"
