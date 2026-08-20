@@ -5,6 +5,9 @@ import MerchantDrawerDesktop from "./MerchantDrawerDesktop.svelte";
 import MerchantDrawerMobile from "./MerchantDrawerMobile.svelte";
 import { browser } from "$app/environment";
 
+// ?issues worklist (#921): forwarded to whichever drawer variant renders.
+export let showIssues = false;
+
 // Initialize immediately to prevent component flash on mount
 // Lock to initial viewport to prevent component swapping mid-session
 let isMobile = browser ? window.innerWidth < BREAKPOINTS.md : false;
@@ -27,7 +30,7 @@ export function openDrawer(id: number) {
 </script>
 
 {#if isMobile}
-	<MerchantDrawerMobile bind:this={mobileDrawer} />
+	<MerchantDrawerMobile bind:this={mobileDrawer} {showIssues} />
 {:else}
-	<MerchantDrawerDesktop bind:this={desktopDrawer} />
+	<MerchantDrawerDesktop bind:this={desktopDrawer} {showIssues} />
 {/if}

@@ -85,6 +85,7 @@
 		"menu": "Menü",
 		"addLocation": "Ort hinzufügen",
 		"communityMap": "Communitykarte",
+		"issuesMap": "Datenprobleme beheben",
 		"merchantMap": "Händlerkarte",
 		"zoomIn": "Vergrößern",
 		"zoomOut": "Verkleinern",
@@ -98,6 +99,27 @@
 		"addLocationAlt": "Ort hinzufügen",
 		"communityMapAlt": "Communitykarte",
 		"merchantMapAlt": "Händlerkarte"
+	},
+	"issuesMode": {
+		"title": "Probleme",
+		"showAll": "Alle Orte anzeigen",
+		"inView": "{count} sichtbar",
+		"chips": {
+			"outdated": "Veraltet",
+			"outdated_soon": "Bald veraltet",
+			"not_verified": "Nicht verifiziert",
+			"missing_icon": "Fehlendes Icon"
+		},
+		"row": {
+			"title": "Braucht Aufmerksamkeit",
+			"editOsm": "Auf OSM bearbeiten"
+		},
+		"issues": {
+			"outdated": "Seit über einem Jahr nicht verifiziert",
+			"outdated_soon": "Verifizierung ist bald ein Jahr alt",
+			"not_verified": "Noch nie verifiziert",
+			"missing_icon": "Kein Kategorie-Icon getaggt"
+		}
 	},
 	"merchant": {
 		"tagsNote": "Weitere Informationen zu Bitcoin-Mapping-Tags finden Sie",

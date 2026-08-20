@@ -1,6 +1,8 @@
-import type { Map as MapLibreMap } from "maplibre-gl";
+import type { ExpressionSpecification, Map as MapLibreMap } from "maplibre-gl";
 
 import { resolveMaterialIcon } from "$lib/materialIcons";
+import type { DerivedIssueCode } from "$lib/placeIssues";
+import { derivePlaceIssues, dominantIssue } from "$lib/placeIssues";
 import type { Place } from "$lib/types";
 import { isBoosted } from "$lib/utils";
 
@@ -18,8 +20,64 @@ export const PIN_PATH =
 export const PIN_FILL_REGULAR = "#0E95AF";
 export const PIN_FILL_BOOSTED = "#F7931A";
 
-export const spriteName = (icon: string, boosted: boolean): string =>
-	`pin-${boosted ? "b" : "r"}-${icon}`;
+// One sprite variant per pin body color: regular teal, boosted orange, and
+// the four ?issues-worklist category colors (see $lib/placeIssues).
+export type PinVariant = "r" | "b" | "od" | "os" | "nv" | "mi";
+
+export const ISSUE_PIN_VARIANTS: Record<DerivedIssueCode, PinVariant> = {
+	outdated: "od",
+	outdated_soon: "os",
+	not_verified: "nv",
+	missing_icon: "mi",
+};
+
+// Issue hues stay away from the regular teal and the boosted orange so the
+// worklist's color vocabulary can't be misread as boost state.
+export const PIN_FILLS: Record<PinVariant, string> = {
+	r: PIN_FILL_REGULAR,
+	b: PIN_FILL_BOOSTED,
+	od: "#DC2626", // outdated — red-600
+	// yellow-600, NOT amber: amber-600 was field-tested and reads as the
+	// boosted orange at map scale.
+	os: "#CA8A04", // outdated_soon
+	nv: "#64748B", // not_verified — slate-500
+	mi: "#7C3AED", // missing_icon — violet-600
+};
+
+export const spriteName = (icon: string, variant: PinVariant): string =>
+	`pin-${variant}-${icon}`;
+
+// The one icon-image expression for every pin-rendering surface (unclustered
+// layer, boosted layer, spiderfy leaves): resolves the composite sprite name
+// from the feature's variant property. Shared builder on purpose — a single
+// surface diverging is exactly how spiderfied leaves once lost their issue
+// colors.
+export const pinIconImageExpression = (
+	fallback: PinVariant,
+): ExpressionSpecification =>
+	[
+		"concat",
+		"pin-",
+		["coalesce", ["get", "variant"], fallback],
+		"-",
+		["coalesce", ["get", "icon"], "question_mark"],
+	] as ExpressionSpecification;
+
+// Body color for one place. In issues mode (issueCodes set) the dominant
+// SELECTED issue wins — the hue must explain why the pin is in the worklist
+// even when chips narrow the view — and replaces the boost color entirely.
+export const pinVariantFor = (
+	place: Place,
+	issueCodes: ReadonlySet<DerivedIssueCode> | null,
+): PinVariant => {
+	if (issueCodes) {
+		const dominant = dominantIssue(
+			derivePlaceIssues(place).filter((c) => issueCodes.has(c)),
+		);
+		if (dominant) return ISSUE_PIN_VARIANTS[dominant];
+	}
+	return isBoosted(place) ? "b" : "r";
+};
 
 // Render scale for composite pin sprites. The outer SVG is rasterized at
 // SCALE× its declared px dimensions (viewBox stays the same), then
@@ -67,9 +125,9 @@ export const fetchIconInnerSvg = async (icon: string): Promise<string> => {
 
 export const buildCompositeSvg = (
 	innerSvg: string,
-	boosted: boolean,
+	variant: PinVariant,
 ): string => {
-	const fill = boosted ? PIN_FILL_BOOSTED : PIN_FILL_REGULAR;
+	const fill = PIN_FILLS[variant];
 	// innerSvg is a complete <svg>...</svg> document; nesting an SVG inside an
 	// outer SVG is valid and rasterizes correctly through <img>.
 	// width/height are SCALE× the viewBox dims; nested vector content (pin
@@ -198,17 +256,17 @@ export const addRealImage = (
 export const ensureSprite = (
 	m: MapLibreMap,
 	icon: string,
-	boosted: boolean,
+	variant: PinVariant,
 ): Promise<void> => {
 	ensureStyleResetListener(m);
-	const name = spriteName(icon, boosted);
+	const name = spriteName(icon, variant);
 	if (hasRealSprite(m, name)) return Promise.resolve();
 	const cache = getSpritePromises(m);
 	const existing = cache.get(name);
 	if (existing) return existing;
 	const promise = (async () => {
 		const inner = await fetchIconInnerSvg(icon);
-		const composite = buildCompositeSvg(inner, boosted);
+		const composite = buildCompositeSvg(inner, variant);
 		const img = await loadSvgImage(composite);
 		if (hasRealSprite(m, name)) return;
 		// Remove any stub the placeholder handler installed before we got here
@@ -231,13 +289,17 @@ export const ensureSprite = (
 	return promise;
 };
 
-export const ensureSpritesForPlaces = (m: MapLibreMap, list: Place[]): void => {
+export const ensureSpritesForPlaces = (
+	m: MapLibreMap,
+	list: Place[],
+	issueCodes: ReadonlySet<DerivedIssueCode> | null = null,
+): void => {
 	const seen = new Set<string>();
 	for (const p of list) {
 		if (p.deleted_at) continue;
 		const icon = p.icon ?? "question_mark";
-		const boosted = Boolean(isBoosted(p));
-		const key = spriteName(icon, boosted);
+		const variant = pinVariantFor(p, issueCodes);
+		const key = spriteName(icon, variant);
 		if (seen.has(key)) continue;
 		seen.add(key);
 		// ensureSprite owns its own in-flight cache, so we don't need to
@@ -246,7 +308,7 @@ export const ensureSpritesForPlaces = (m: MapLibreMap, list: Place[]): void => {
 		// Without this log, "pin renders as a transparent stub" was
 		// undebuggable because the rejection was swallowed by the cache
 		// cleanup handlers inside ensureSprite.
-		ensureSprite(m, icon, boosted).catch((err) => {
+		ensureSprite(m, icon, variant).catch((err) => {
 			console.warn(`ensureSprite failed for ${key}:`, err);
 		});
 	}

@@ -23,6 +23,9 @@ import MerchantPeekContentMobile from "./MerchantPeekContentMobile.svelte";
 import { browser } from "$app/environment";
 import { invalidateAll } from "$app/navigation";
 
+// ?issues worklist (#921): show the merchant's derived-issue row.
+export let showIssues = false;
+
 // Derive state from centralized store
 $: isOpen = $merchantDrawer.isOpen;
 $: merchantId = $merchantDrawer.merchantId;
@@ -323,7 +326,9 @@ export function openDrawer(id: number) {
 								{isUpToDate}
 								{isBoosted}
 								{boostLoading}
+								{showIssues}
 								onBoostClick={handleBoost}
+								isLoading={fetchingMerchant}
 							/>
 						{/if}
 					</div>

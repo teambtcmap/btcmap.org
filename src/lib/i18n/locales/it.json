@@ -166,6 +166,7 @@
 		"menu": "Menu",
 		"addLocation": "Aggiungi posizione",
 		"communityMap": "Mappa community",
+		"issuesMap": "Correggi i problemi dei dati",
 		"merchantMap": "Mappa commercianti",
 		"account": "Account",
 		"login": "Accedi",
@@ -183,6 +184,27 @@
 		"merchantMapAlt": "Mappa commercianti",
 		"accountAlt": "Account",
 		"loginAlt": "Accedi"
+	},
+	"issuesMode": {
+		"title": "Problemi",
+		"showAll": "Mostra tutti i luoghi",
+		"inView": "{count} in vista",
+		"chips": {
+			"outdated": "Obsoleto",
+			"outdated_soon": "Quasi obsoleto",
+			"not_verified": "Non verificato",
+			"missing_icon": "Icona mancante"
+		},
+		"row": {
+			"title": "Richiede attenzione",
+			"editOsm": "Modifica su OSM"
+		},
+		"issues": {
+			"outdated": "Non verificato da oltre un anno",
+			"outdated_soon": "La verifica sta per compiere un anno",
+			"not_verified": "Mai verificato",
+			"missing_icon": "Nessuna icona di categoria taggata"
+		}
 	},
 	"merchant": {
 		"tagsNote": "Ulteriori informazioni sui tag di mappatura bitcoin possono essere trovate",

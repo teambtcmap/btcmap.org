@@ -69,6 +69,10 @@ export let onFitSearchResultBounds: ((places: Place[]) => void) | undefined =
 	undefined;
 // Map style readiness — gates the mobile peek sheet so it doesn't show over the loading screen
 export let mapReady = false;
+// ?issues worklist (#921): the issues bar is the mode's filter control, so
+// the panel hides its merchant-category radios to avoid stacking two
+// filter rows (per the layout wireframe).
+export let issuesMode = false;
 // Layout decision locked at page init (same pattern as MerchantDrawerHash);
 // shared with the floating search bar so exactly one search surface exists
 export let isMobile = false;
@@ -371,7 +375,7 @@ $: filteredSearchResults = selectVisiblePlaces({
 	recency: verifiedWithinYears,
 	recencyReady: true,
 	boostsOnly: false,
-	issuesOnly: false,
+	issueCodes: null,
 	issuesReady: true,
 }).selection;
 
@@ -616,29 +620,32 @@ onDestroy(() => {
 			on:pointerup={onHeaderPointerUp}
 			on:pointercancel={onHeaderPointerCancel}
 		>
-			<!-- Category filter -->
-			<div role="radiogroup" aria-label={$_('aria.filterByCategory')}>
-				<h3 class="sr-only">{$_('categories.filter')}</h3>
-				<div class="flex flex-wrap gap-2">
-					{#each CATEGORY_ENTRIES as [key, _category] (key)}
-						<button
-							type="button"
-							role="radio"
-							on:click={() => handleCategorySelect(key)}
-							disabled={!hasMatchingMerchants(key, categoryCounts)}
-							aria-disabled={!hasMatchingMerchants(key, categoryCounts)}
-							aria-checked={selectedCategory === key}
-							class="rounded-full px-3 py-1 text-xs font-medium transition-colors {getCategoryButtonClass(
-								key,
-								selectedCategory,
-								categoryCounts
-							)}"
-						>
-							{getCategoryLabel(key)}
-						</button>
-					{/each}
+			<!-- Category filter (hidden in ?issues mode — the issues bar is the
+				mode's filter control) -->
+			{#if !issuesMode}
+				<div role="radiogroup" aria-label={$_('aria.filterByCategory')}>
+					<h3 class="sr-only">{$_('categories.filter')}</h3>
+					<div class="flex flex-wrap gap-2">
+						{#each CATEGORY_ENTRIES as [key, _category] (key)}
+							<button
+								type="button"
+								role="radio"
+								on:click={() => handleCategorySelect(key)}
+								disabled={!hasMatchingMerchants(key, categoryCounts)}
+								aria-disabled={!hasMatchingMerchants(key, categoryCounts)}
+								aria-checked={selectedCategory === key}
+								class="rounded-full px-3 py-1 text-xs font-medium transition-colors {getCategoryButtonClass(
+									key,
+									selectedCategory,
+									categoryCounts
+								)}"
+							>
+								{getCategoryLabel(key)}
+							</button>
+						{/each}
+					</div>
 				</div>
-			</div>
+			{/if}
 
 			<!-- Status row -->
 			<div class="mt-3 flex items-center justify-between gap-2">

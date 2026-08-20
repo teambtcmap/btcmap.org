@@ -85,6 +85,7 @@
 		"menu": "Меню",
 		"addLocation": "Добавить место",
 		"communityMap": "Карта сообщества",
+		"issuesMap": "Исправить проблемы с данными",
 		"merchantMap": "Карта торговцев",
 		"zoomIn": "Приблизить",
 		"zoomOut": "Отдалить",
@@ -98,6 +99,27 @@
 		"addLocationAlt": "Добавить место",
 		"communityMapAlt": "Карта сообщества",
 		"merchantMapAlt": "Карта торговцев"
+	},
+	"issuesMode": {
+		"title": "Проблемы",
+		"showAll": "Показать все места",
+		"inView": "{count} на карте",
+		"chips": {
+			"outdated": "Устарело",
+			"outdated_soon": "Скоро устареет",
+			"not_verified": "Не подтверждено",
+			"missing_icon": "Нет значка"
+		},
+		"row": {
+			"title": "Требует внимания",
+			"editOsm": "Редактировать в OSM"
+		},
+		"issues": {
+			"outdated": "Не подтверждалось больше года",
+			"outdated_soon": "Подтверждению скоро исполнится год",
+			"not_verified": "Никогда не подтверждалось",
+			"missing_icon": "Не указан значок категории"
+		}
 	},
 	"merchant": {
 		"tagsNote": "Более подробная информация о метках доступна",

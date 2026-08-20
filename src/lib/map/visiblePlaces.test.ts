@@ -2,6 +2,7 @@ import { get } from "svelte/store";
 import { describe, expect, it } from "vitest";
 
 import { CATEGORIES, placeMatchesCategory } from "$lib/categoryMapping";
+import { DERIVED_ISSUE_CODES } from "$lib/placeIssues";
 import { places } from "$lib/store";
 import type { Place } from "$lib/types";
 import { filterPlacesByRecency } from "$lib/verification";
@@ -38,9 +39,11 @@ const base = {
 	recency: null,
 	recencyReady: true,
 	boostsOnly: false,
-	issuesOnly: false,
+	issueCodes: null,
 	issuesReady: true,
 };
+
+const allIssueCodes = new Set(DERIVED_ISSUE_CODES);
 
 describe("selectVisiblePlaces", () => {
 	it("drops deleted rows unconditionally", () => {
@@ -142,7 +145,7 @@ describe("selectVisiblePlaces", () => {
 		const r = selectVisiblePlaces({
 			...base,
 			places: corpus(),
-			issuesOnly: true,
+			issueCodes: allIssueCodes,
 		});
 		expect(r.selection.length).toBe(4);
 		expect(r.selection.some((p) => p.verified_at === undefined)).toBe(true);
@@ -151,13 +154,33 @@ describe("selectVisiblePlaces", () => {
 		expect(r.counts.all).toBe(4);
 	});
 
+	it("narrows to the selected issue categories only", () => {
+		// Only one corpus row has never been verified (the icon-less cafe).
+		const notVerified = selectVisiblePlaces({
+			...base,
+			places: corpus(),
+			issueCodes: new Set(["not_verified"] as const),
+		});
+		expect(notVerified.selection.length).toBe(1);
+		expect(notVerified.selection[0].verified_at).toBeUndefined();
+
+		// Only one row lacks an icon (the old, verified one).
+		const missingIcon = selectVisiblePlaces({
+			...base,
+			places: corpus(),
+			issueCodes: new Set(["missing_icon"] as const),
+		});
+		expect(missingIcon.selection.length).toBe(1);
+		expect(missingIcon.selection[0].icon).toBeUndefined();
+	});
+
 	it("keeps the issues filter inert until the dates are ready", () => {
 		// Bulk rows before enrichment would ALL classify as not_verified;
 		// the gate keeps the world visible instead.
 		const r = selectVisiblePlaces({
 			...base,
 			places: corpus(),
-			issuesOnly: true,
+			issueCodes: allIssueCodes,
 			issuesReady: false,
 		});
 		expect(r.selection.length).toBe(7);
@@ -200,8 +223,18 @@ describe("computeVisibleSignature", () => {
 			computeVisibleSignature({ ...inputs, boostsOnly: true }, 7, ""),
 		).not.toBe(sig);
 		expect(
-			computeVisibleSignature({ ...inputs, issuesOnly: true }, 7, ""),
+			computeVisibleSignature({ ...inputs, issueCodes: allIssueCodes }, 7, ""),
 		).not.toBe(sig);
+		// A subset selection must not collide with all-codes or with off.
+		expect(
+			computeVisibleSignature(
+				{ ...inputs, issueCodes: new Set(["outdated"] as const) },
+				7,
+				"",
+			),
+		).not.toBe(
+			computeVisibleSignature({ ...inputs, issueCodes: allIssueCodes }, 7, ""),
+		);
 		expect(
 			computeVisibleSignature({ ...inputs, issuesReady: false }, 7, ""),
 		).not.toBe(sig);

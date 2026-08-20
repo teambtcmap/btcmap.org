@@ -1,6 +1,16 @@
 import { describe, expect, it } from "vitest";
 
-import { derivePlaceIssues, placeHasIssues } from "./placeIssues";
+import type { DerivedIssueCode } from "./placeIssues";
+import {
+	countIssuesByCode,
+	DERIVED_ISSUE_CODES,
+	derivePlaceIssues,
+	dominantIssue,
+	parseIssuesParam,
+	placeHasIssues,
+	placeMatchesIssueCodes,
+	serializeIssuesParam,
+} from "./placeIssues";
 
 // Fixed clock so the day-boundary assertions can't flake.
 const NOW = Date.UTC(2026, 0, 1);
@@ -101,5 +111,122 @@ describe("placeHasIssues", () => {
 			placeHasIssues({ verified_at: daysAgo(400), icon: "cafe" }, NOW),
 		).toBe(true);
 		expect(placeHasIssues({ icon: "cafe" }, NOW)).toBe(true);
+	});
+});
+
+describe("dominantIssue", () => {
+	// Verification-state codes are mutually exclusive, so the only real
+	// conflict is <verification code> + missing_icon — verification wins.
+	it("prefers the verification-state code over missing_icon", () => {
+		expect(dominantIssue(["outdated", "missing_icon"])).toBe("outdated");
+		expect(dominantIssue(["not_verified", "missing_icon"])).toBe(
+			"not_verified",
+		);
+		expect(dominantIssue(["outdated_soon", "missing_icon"])).toBe(
+			"outdated_soon",
+		);
+	});
+
+	it("passes through a single code and handles none", () => {
+		expect(dominantIssue(["missing_icon"])).toBe("missing_icon");
+		expect(dominantIssue(["outdated"])).toBe("outdated");
+		expect(dominantIssue([])).toBeNull();
+	});
+});
+
+describe("parseIssuesParam", () => {
+	it("treats a bare ?issues (empty value) as all codes", () => {
+		expect(parseIssuesParam("")).toEqual(new Set(DERIVED_ISSUE_CODES));
+		expect(parseIssuesParam(null)).toEqual(new Set(DERIVED_ISSUE_CODES));
+	});
+
+	it("parses a csv subset, ignoring unknown codes and whitespace", () => {
+		expect(parseIssuesParam("outdated,not_verified")).toEqual(
+			new Set(["outdated", "not_verified"]),
+		);
+		expect(parseIssuesParam(" outdated , bogus ,missing_icon")).toEqual(
+			new Set(["outdated", "missing_icon"]),
+		);
+	});
+
+	it("degrades an all-garbage value to all codes (presence rule)", () => {
+		expect(parseIssuesParam("bogus,wat")).toEqual(new Set(DERIVED_ISSUE_CODES));
+	});
+
+	it("parses the none sentinel as an explicit empty selection", () => {
+		expect(parseIssuesParam("none")).toEqual(new Set());
+	});
+});
+
+describe("serializeIssuesParam", () => {
+	it("serializes the full set as the bare param value", () => {
+		expect(serializeIssuesParam(new Set(DERIVED_ISSUE_CODES))).toBe("");
+	});
+
+	it("serializes subsets as csv in canonical order", () => {
+		expect(serializeIssuesParam(new Set(["not_verified", "outdated"]))).toBe(
+			"outdated,not_verified",
+		);
+	});
+
+	it("round-trips through parseIssuesParam, empty selection included", () => {
+		const subset: ReadonlySet<DerivedIssueCode> = new Set([
+			"outdated_soon",
+			"missing_icon",
+		]);
+		expect(parseIssuesParam(serializeIssuesParam(subset))).toEqual(subset);
+		const empty = new Set<DerivedIssueCode>();
+		expect(serializeIssuesParam(empty)).toBe("none");
+		expect(parseIssuesParam(serializeIssuesParam(empty))).toEqual(empty);
+	});
+});
+
+describe("placeMatchesIssueCodes", () => {
+	it("matches when any derived code is selected", () => {
+		const selected = new Set(["outdated"] as const);
+		expect(
+			placeMatchesIssueCodes(
+				{ verified_at: daysAgo(400), icon: "question_mark" },
+				selected,
+				NOW,
+			),
+		).toBe(true);
+		expect(
+			placeMatchesIssueCodes(
+				{ verified_at: daysAgo(30), icon: "question_mark" },
+				selected,
+				NOW,
+			),
+		).toBe(false);
+	});
+
+	it("never matches a clean place, even with all codes selected", () => {
+		expect(
+			placeMatchesIssueCodes(
+				{ verified_at: daysAgo(30), icon: "cafe" },
+				new Set(DERIVED_ISSUE_CODES),
+				NOW,
+			),
+		).toBe(false);
+	});
+});
+
+describe("countIssuesByCode", () => {
+	it("counts each code across a list independently", () => {
+		const counts = countIssuesByCode(
+			[
+				{ verified_at: daysAgo(400), icon: "question_mark" },
+				{ verified_at: daysAgo(300), icon: "cafe" },
+				{ icon: "cafe" },
+				{ verified_at: daysAgo(30), icon: "cafe" },
+			],
+			NOW,
+		);
+		expect(counts).toEqual({
+			outdated: 1,
+			outdated_soon: 1,
+			not_verified: 1,
+			missing_icon: 1,
+		});
 	});
 });

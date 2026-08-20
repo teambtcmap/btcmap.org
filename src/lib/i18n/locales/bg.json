@@ -65,6 +65,7 @@
 		"menu": "Меню",
 		"addLocation": "Добави място",
 		"communityMap": "Карта на общностите",
+		"issuesMap": "Поправи проблеми с данните",
 		"merchantMap": "Карта на търговците",
 		"zoomIn": "Увеличете",
 		"zoomOut": "Намалете",
@@ -78,6 +79,27 @@
 		"addLocationAlt": "Добави място",
 		"communityMapAlt": "Карта на общностите",
 		"merchantMapAlt": "Карта на търговците"
+	},
+	"issuesMode": {
+		"title": "Проблеми",
+		"showAll": "Покажи всички места",
+		"inView": "{count} на картата",
+		"chips": {
+			"outdated": "Остаряло",
+			"outdated_soon": "Скоро ще остарее",
+			"not_verified": "Непроверено",
+			"missing_icon": "Липсваща икона"
+		},
+		"row": {
+			"title": "Изисква внимание",
+			"editOsm": "Редактирай в OSM"
+		},
+		"issues": {
+			"outdated": "Не е проверявано повече от година",
+			"outdated_soon": "Проверката скоро ще навърши година",
+			"not_verified": "Никога не е проверявано",
+			"missing_icon": "Няма зададена икона на категория"
+		}
 	},
 	"aria": {
 		"logoAlt": "Лого на BTC Map",

@@ -166,6 +166,7 @@
 		"menu": "Menu",
 		"addLocation": "Add location",
 		"communityMap": "Community map",
+		"issuesMap": "Fix data issues",
 		"merchantMap": "Merchant map",
 		"account": "Account",
 		"login": "Log in",
@@ -183,6 +184,27 @@
 		"merchantMapAlt": "Merchant map",
 		"accountAlt": "Account",
 		"loginAlt": "Log in"
+	},
+	"issuesMode": {
+		"title": "Issues",
+		"showAll": "Show all places",
+		"inView": "{count} in view",
+		"chips": {
+			"outdated": "Outdated",
+			"outdated_soon": "Aging",
+			"not_verified": "Not verified",
+			"missing_icon": "Missing icon"
+		},
+		"row": {
+			"title": "Needs attention",
+			"editOsm": "Edit on OSM"
+		},
+		"issues": {
+			"outdated": "Not verified in over a year",
+			"outdated_soon": "Verification is almost a year old",
+			"not_verified": "Never verified",
+			"missing_icon": "No category icon tagged"
+		}
 	},
 	"merchant": {
 		"tagsNote": "More information on bitcoin mapping tags can be found",

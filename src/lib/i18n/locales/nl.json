@@ -166,6 +166,7 @@
 		"menu": "Menu",
 		"addLocation": "Locatie toevoegen",
 		"communityMap": "Communitykaart",
+		"issuesMap": "Dataproblemen oplossen",
 		"merchantMap": "Ondernemerskaart",
 		"account": "Account",
 		"login": "Aanmelden",
@@ -183,6 +184,27 @@
 		"merchantMapAlt": "Ondernemerskaart",
 		"accountAlt": "Account",
 		"loginAlt": "Aanmelden"
+	},
+	"issuesMode": {
+		"title": "Problemen",
+		"showAll": "Toon alle locaties",
+		"inView": "{count} in beeld",
+		"chips": {
+			"outdated": "Verouderd",
+			"outdated_soon": "Bijna verouderd",
+			"not_verified": "Niet geverifieerd",
+			"missing_icon": "Icoon ontbreekt"
+		},
+		"row": {
+			"title": "Aandacht nodig",
+			"editOsm": "Bewerken op OSM"
+		},
+		"issues": {
+			"outdated": "Al meer dan een jaar niet geverifieerd",
+			"outdated_soon": "Verificatie is bijna een jaar oud",
+			"not_verified": "Nooit geverifieerd",
+			"missing_icon": "Geen categorie-icoon getagd"
+		}
 	},
 	"merchant": {
 		"tagsNote": "Meer informatie over Bitcoin mapping tags vind je",

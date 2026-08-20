@@ -160,7 +160,7 @@ const syncPlacesSource = (m: MapLibreMap, list: SavedPlace[]) => {
 	const source = m.getSource("places") as GeoJSONSource | undefined;
 	if (!source) return;
 	source.setData(buildFeatureCollection(list));
-	ensureSprite(m, SAVED_PLACE_ICON, false);
+	ensureSprite(m, SAVED_PLACE_ICON, "r");
 };
 
 // Register sprites + sources + layers once per style. Called from both the

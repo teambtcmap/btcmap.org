@@ -12,6 +12,7 @@ import type {
 } from "maplibre-gl";
 import { onDestroy, onMount, tick } from "svelte";
 import { get } from "svelte/store";
+import { fade } from "svelte/transition";
 
 import CommunityRail from "$components/CommunityRail.svelte";
 import MapLoadingMain from "$components/MapLoadingMain.svelte";
@@ -25,9 +26,12 @@ import {
 	DEFAULT_MAP_ZOOM,
 	LABEL_VISIBLE_ZOOM,
 	MAP_DEBOUNCE_DELAY,
+	MAP_PANEL_MARGIN,
 	MERCHANT_LIST_FETCH_CEILING,
 	MERCHANT_LIST_MIN_ZOOM,
+	MERCHANT_LIST_WIDTH,
 	NEARBY_RADIUS_MULTIPLIER,
+	PANEL_DRAWER_GAP,
 } from "$lib/constants";
 import { SEARCH_SHEET_PEEK_HEIGHT } from "$lib/drawerConfig";
 import { _, getDisplayLang, locale } from "$lib/i18n";
@@ -49,8 +53,9 @@ import {
 } from "$lib/map/mapHash";
 import {
 	ensureSpritesForPlaces,
-	PIN_FILL_BOOSTED,
-	PIN_FILL_REGULAR,
+	PIN_FILLS,
+	pinIconImageExpression,
+	pinVariantFor,
 } from "$lib/map/maplibreSprites";
 import { createPlacePinSource } from "$lib/map/placePinSource";
 import { parseLatLongQuery } from "$lib/map/queryViewport";
@@ -68,10 +73,17 @@ import {
 import {
 	MERCHANT_URL_CHANGE_EVENT,
 	parseMerchantHash,
+	withLiteralCommas,
 } from "$lib/merchantDrawerHash";
 import { merchantDrawer } from "$lib/merchantDrawerStore";
 import { merchantList } from "$lib/merchantListStore";
-import { placeHasIssues } from "$lib/placeIssues";
+import type { DerivedIssueCode } from "$lib/placeIssues";
+import {
+	countIssuesByCode,
+	parseIssuesParam,
+	placeMatchesIssueCodes,
+	serializeIssuesParam,
+} from "$lib/placeIssues";
 import { savedPlaceIds } from "$lib/session";
 import {
 	places,
@@ -86,14 +98,17 @@ import { theme } from "$lib/theme";
 import type { Place } from "$lib/types";
 import { userLocation } from "$lib/userLocationStore";
 import { debounce, errToast, isBoosted } from "$lib/utils";
+import { filterPlacesByRecency } from "$lib/verification";
 
 import type { PageData } from "./$types";
+import IssueFilterChips from "./components/IssueFilterChips.svelte";
 import MapControls from "./components/MapControls.svelte";
 import MapSearchBar from "./components/MapSearchBar.svelte";
 import MerchantDrawerHash from "./components/MerchantDrawerHash.svelte";
 import MerchantListPanel from "./components/MerchantListPanel.svelte";
 import TileLoadingIndicator from "./components/TileLoadingIndicator.svelte";
 import { browser } from "$app/environment";
+import { replaceState } from "$app/navigation";
 
 export let data: PageData;
 
@@ -127,9 +142,55 @@ if (outdatedOnly) {
 // narrow the map to places with at least one derived issue — the
 // contributor worklist view (#921). Session-only and page-scoped like
 // ?boosts: no persisted state, no store mode; the filter engages once the
-// verified_at enrichment lands.
+// verified_at enrichment lands. A value narrows to specific categories
+// (?issues=outdated,not_verified); bare ?issues means all of them. The
+// chips bar reassigns selectedIssueCodes as the visitor toggles categories,
+// while mode membership itself stays locked for the session.
 const issuesOnly =
 	browser && new URLSearchParams(window.location.search).has("issues");
+let selectedIssueCodes: ReadonlySet<DerivedIssueCode> | null = issuesOnly
+	? parseIssuesParam(new URLSearchParams(window.location.search).get("issues"))
+	: null;
+
+// Viewport issue tallies for the chips bar, computed in updateMerchantList's
+// local-markers path (issues mode always forces that path). Null until the
+// verified_at enrichment lands so the chips don't show all-zero counts.
+let issueCounts: Record<DerivedIssueCode, number> | null = null;
+
+// Chip toggle: reassign the set (the render block and updateMerchantList
+// both read it), mirror the selection into ?issues= via a shallow
+// replaceState so the worklist URL stays shareable — no navigation, the
+// mode itself is locked for the session.
+const toggleIssueCode = (code: DerivedIssueCode) => {
+	const next = new Set(selectedIssueCodes ?? []);
+	if (next.has(code)) {
+		next.delete(code);
+	} else {
+		next.add(code);
+	}
+	selectedIssueCodes = next;
+	const url = new URL(window.location.href);
+	url.searchParams.set("issues", serializeIssuesParam(next));
+	replaceState(withLiteralCommas(url.toString()), {});
+	updateMerchantList({ force: true });
+};
+
+// Desktop chips-bar left edge: the left column is always occupied by the
+// search facade or the list panel (same width), so the bar starts right of
+// that slot in both states — a fixed row, nothing to chase. It still HIDES
+// while the merchant drawer is open: the user is acting on one place then,
+// and the drawer overlaps the top strip.
+const CHIPS_DESKTOP_LEFT =
+	MAP_PANEL_MARGIN + MERCHANT_LIST_WIDTH + PANEL_DRAWER_GAP;
+$: chipsHiddenForDrawer = !isMobileLayout && $merchantDrawer.isOpen;
+
+// Exit via full reload on purpose: mode membership (issuesOnly, list
+// behavior, filter wiring) is locked at init, same as entering via URL.
+const exitIssuesMode = () => {
+	const url = new URL(window.location.href);
+	url.searchParams.delete("issues");
+	window.location.href = url.toString();
+};
 
 let mapContainer: HTMLDivElement;
 let map: MapLibreMap | undefined;
@@ -150,10 +211,17 @@ let lastRenderSig = "";
 // visibility; this page keeps interactions, spiderfy, camera, and the label
 // palette. The deps are read as snapshots on every render — saved state and
 // enriched names arrive lazily.
+// Snapshot for the pin-color dep below: the selected issue categories once
+// the readiness gate has passed, null otherwise. Written by the render block
+// so every render path (signature change, zoom resync, boosted re-route)
+// reads the same gated value.
+let pinIssueCodes: ReadonlySet<DerivedIssueCode> | null = null;
+
 const pinSource = createPlacePinSource({
 	getSavedIds: () => get(savedPlaceIds),
 	getEnrichedCache: () => get(merchantList).placeDetailsCache,
 	getDisplayLang: () => getDisplayLang(get(locale)),
+	getIssueCodes: () => pinIssueCodes,
 	onRendered: (count) => {
 		if (count > 0) elementsLoaded = true;
 		// E2E test hook: Playwright can't probe WebGL canvas pins like it
@@ -287,9 +355,10 @@ const syncSelectionPulse = (selectedId: number | null) => {
 	// unchanged: boosting from the drawer recolours the pin (teal → orange) and
 	// fires the $places reactive, and the pulse must follow. setProperty,
 	// setLngLat and addTo are idempotent on an already-added marker, so this
-	// stays cheap on every $places tick. Colours come from the same source of
-	// truth as the GL pin sprite so the two can't desync.
-	const color = isBoosted(place) ? PIN_FILL_BOOSTED : PIN_FILL_REGULAR;
+	// stays cheap on every $places tick. Colours come from the same variant
+	// lookup as the GL pin sprite so the two can't desync — issue-colored
+	// pins in ?issues mode get a matching pulse, not the boost/regular one.
+	const color = PIN_FILLS[pinVariantFor(place, pinIssueCodes)];
 	pulseMarker.getElement().style.setProperty("--bm-pulse-color", color);
 	pulseMarker.setLngLat([place.lon, place.lat]).addTo(map);
 	pulsePinId = selectedId;
@@ -411,8 +480,17 @@ const updateMerchantList = (opts?: { force?: boolean }) => {
 			// Same readiness gate as the marker pipeline: before the
 			// verified_at enrichment lands, the list stays unfiltered
 			// rather than flagging every bulk row as not_verified.
-			if (issuesOnly && get(verifiedDatesLoaded)) {
-				listed = listed.filter((p) => placeHasIssues(p));
+			const issueCodes = selectedIssueCodes;
+			if (issueCodes && get(verifiedDatesLoaded)) {
+				// Chip counts come from the PRE-narrowing viewport set so a
+				// deselected chip still shows what selecting it would add — but
+				// AFTER the recency window, matching the pin pipeline
+				// (selectVisiblePlaces applies recency before the issue filter),
+				// so a chip can never promise pins the window excludes.
+				issueCounts = countIssuesByCode(
+					filterPlacesByRecency(listed, get(merchantList).verifiedWithinYears),
+				);
+				listed = listed.filter((p) => placeMatchesIssueCodes(p, issueCodes));
 			}
 			merchantList.setMerchants(listed, center.lat, center.lng);
 			if (listOpen || currentZoom >= LABEL_VISIBLE_ZOOM) {
@@ -604,6 +682,22 @@ $: {
 const handleHashChange = () => {
 	if (typeof window === "undefined") return;
 	merchantDrawer.syncFromHash();
+	// Back/forward can restore a history entry whose ?issues snapshot differs
+	// from the current chip selection (chip toggles replaceState; drawer
+	// opens pushState). Re-parse and re-render only on an actual change.
+	if (issuesOnly) {
+		const restored = parseIssuesParam(
+			new URLSearchParams(window.location.search).get("issues"),
+		);
+		if (
+			selectedIssueCodes &&
+			serializeIssuesParam(restored) !==
+				serializeIssuesParam(selectedIssueCodes)
+		) {
+			selectedIssueCodes = restored;
+			updateMerchantList({ force: true });
+		}
+	}
 };
 
 // Renders exactly the list it is given — all visibility policy (search,
@@ -663,7 +757,7 @@ $: if (map && styleLoaded && $places) {
 		boostsOnly: boostsOnly && !inSearch,
 		// Same search exemption for the issues worklist: a searched-for
 		// place must appear even when it has no issues.
-		issuesOnly: issuesOnly && !inSearch,
+		issueCodes: inSearch ? null : selectedIssueCodes,
 		// Trivially ready when the mode is off or exempted, so the dates
 		// landing can't change the signature outside issues mode.
 		issuesReady: !issuesOnly || inSearch || $verifiedDatesLoaded,
@@ -680,6 +774,9 @@ $: if (map && styleLoaded && $places) {
 	].join("~");
 	if (renderSig !== lastRenderSig) {
 		lastRenderSig = renderSig;
+		// Same gate as the selection filter: no issue colors until the dates
+		// are enriched, and none for search results (mode exemption).
+		pinIssueCodes = inputs.issuesReady ? inputs.issueCodes : null;
 		const { selection } = selectVisiblePlaces({
 			...inputs,
 			places: inSearch ? $merchantList.searchResults : $places,
@@ -689,10 +786,12 @@ $: if (map && styleLoaded && $places) {
 }
 
 // Position the locator pulse. Depends on $places too so a deep-linked merchant
-// gets its pulse once the place data syncs in; syncSelectionPulse no-ops when
-// the target is unchanged or not yet loaded.
+// gets its pulse once the place data syncs in, and on pinIssueCodes so chip
+// toggles recolor an already-selected marker; syncSelectionPulse no-ops when
+// the target is not yet loaded.
 $: if (map && styleLoaded) {
 	void $places;
+	void pinIssueCodes;
 	syncSelectionPulse($merchantDrawer.merchantId);
 }
 
@@ -768,6 +867,16 @@ onMount(async () => {
 	document.documentElement.style.setProperty(
 		"--search-sheet-peek-height",
 		`${SEARCH_SHEET_PEEK_HEIGHT}px`,
+	);
+
+	// ?issues mode stacks the mode bar above the peek on mobile; lift the
+	// bottom map chrome over it too. 96px = the bar's fixed height (~88px,
+	// one header line + one chip row) plus the 8px gap. Set unconditionally:
+	// the var lives on documentElement, which survives client-side
+	// navigation, so a mount outside issues mode must reset it to zero.
+	document.documentElement.style.setProperty(
+		"--issues-bar-lift",
+		issuesOnly && isMobileLayout ? "96px" : "0px",
 	);
 
 	// Five basemaps (legacy parity): four vector styles + the OSM raster
@@ -915,13 +1024,9 @@ onMount(async () => {
 				},
 				closeOnLeafClick: true,
 				spiderLeavesLayout: {
-					"icon-image": [
-						"concat",
-						"pin-",
-						["case", ["coalesce", ["get", "boosted"], false], "b", "r"],
-						"-",
-						["coalesce", ["get", "icon"], "question_mark"],
-					],
+					// Same builder as the point layers, so spiderfied leaves keep
+					// their issue-category colors in ?issues mode.
+					"icon-image": pinIconImageExpression("r"),
 					"icon-size": 1,
 					"icon-anchor": "bottom",
 					"icon-allow-overlap": true,
@@ -1237,6 +1342,30 @@ onDestroy(() => {
 	single search facade instead. The facade hides when the list panel
 	is open (the panel renders the real search input in the same slot).
 -->
+{#if styleLoaded && issuesOnly && selectedIssueCodes && !chipsHiddenForDrawer}
+	<!--
+		Mobile: bottom-anchored directly above the search sheet's peek — the
+		mode bar and the search card form one column with a shared inset (the
+		lifted scale bar/attribution move up with it, see the issues-bar-lift
+		rule below). Desktop: one row across the map area at the panel's top
+		edge, from the left column to just short of the top-right controls;
+		hidden while the merchant drawer is open (see chipsHiddenForDrawer).
+	-->
+	<div
+		transition:fade={{ duration: 150 }}
+		class="pointer-events-none absolute right-3 bottom-(--chips-bottom) left-3 z-[1000] flex md:top-3 md:right-[3.75rem] md:bottom-auto md:left-(--chips-left)"
+		style="--chips-bottom: calc(env(safe-area-inset-bottom) + var(--search-sheet-peek-height, 88px) + 8px); --chips-left: {CHIPS_DESKTOP_LEFT}px"
+	>
+		<IssueFilterChips
+			selected={selectedIssueCodes}
+			counts={issueCounts}
+			totalInView={issueCounts ? $merchantList.totalCount : null}
+			onToggle={toggleIssueCode}
+			onExit={exitIssuesMode}
+		/>
+	</div>
+{/if}
+
 {#if styleLoaded && !isMobileLayout}
 	<div class="pointer-events-none absolute top-3 left-3 z-[1000]">
 		<MapSearchBar
@@ -1274,6 +1403,7 @@ onDestroy(() => {
 	behavior={listBehavior}
 	mapReady={styleLoaded}
 	isMobile={isMobileLayout}
+	issuesMode={issuesOnly}
 />
 
 {#if styleLoaded}
@@ -1287,7 +1417,7 @@ onDestroy(() => {
 
 <TileLoadingIndicator visible={tilesLoading && !webglUnsupported} />
 
-<MerchantDrawerHash />
+<MerchantDrawerHash showIssues={issuesOnly} />
 
 <MapControls
 	{map}
@@ -1321,8 +1451,12 @@ onDestroy(() => {
 	@media (max-width: 767px) {
 		.map-container :global(.maplibregl-ctrl-bottom-left),
 		.map-container :global(.maplibregl-ctrl-bottom-right) {
+			/* --issues-bar-lift is non-zero only in ?issues mode, where the
+			   bottom-anchored mode bar stacks above the peek and the chrome
+			   must clear both. */
 			bottom: calc(
-				env(safe-area-inset-bottom) + var(--search-sheet-peek-height, 88px)
+				env(safe-area-inset-bottom) + var(--search-sheet-peek-height, 88px) +
+					var(--issues-bar-lift, 0px)
 			);
 		}
 	}

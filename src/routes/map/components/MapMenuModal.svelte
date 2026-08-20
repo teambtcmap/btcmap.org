@@ -32,6 +32,18 @@ const iconClass = "h-5 w-5 flex-none dark:invert";
 				<img src="/icons/marker.svg" alt="" class={iconClass} />
 				<span>{$_("mapControls.addLocation")}</span>
 			</a>
+			<!-- Full reload on purpose (data-sveltekit-reload): ?issues mode is
+				locked at page init, and a same-route client-side navigation
+				would not remount /map. -->
+			<a
+				href="/map?issues"
+				data-sveltekit-reload
+				class={rowClass}
+				on:click={() => trackEvent("issues_map_click")}
+			>
+				<img src="/icons/warning.svg" alt="" class={iconClass} />
+				<span>{$_("mapControls.issuesMap")}</span>
+			</a>
 			<a
 				href="/communities/map"
 				class={rowClass}

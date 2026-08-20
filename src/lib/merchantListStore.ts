@@ -218,7 +218,7 @@ function createMerchantListStore() {
 			recency: verifiedWithinYears,
 			recencyReady: true,
 			boostsOnly: false,
-			issuesOnly: false,
+			issueCodes: null,
 			issuesReady: true,
 		});
 		update((state) => ({
@@ -402,7 +402,7 @@ function createMerchantListStore() {
 				recency: verifiedWithinYears,
 				recencyReady: verifiedWithinYears == null || get(verifiedDatesLoaded),
 				boostsOnly: false,
-				issuesOnly: false,
+				issueCodes: null,
 				issuesReady: true,
 			});
 
@@ -466,7 +466,7 @@ function createMerchantListStore() {
 						recency: verifiedWithinYears,
 						recencyReady: true,
 						boostsOnly: false,
-						issuesOnly: false,
+						issueCodes: null,
 						issuesReady: true,
 					});
 
@@ -747,7 +747,7 @@ function createMerchantListStore() {
 						recency: years,
 						recencyReady: true,
 						boostsOnly: false,
-						issuesOnly: false,
+						issueCodes: null,
 						issuesReady: true,
 					});
 					return {

@@ -85,6 +85,7 @@
 		"menu": "Menu",
 		"addLocation": "Ajouter un lieu",
 		"communityMap": "Carte des communautés",
+		"issuesMap": "Corriger les problèmes de données",
 		"merchantMap": "Carte des commerces",
 		"zoomIn": "Zoomer",
 		"zoomOut": "Dézoomer",
@@ -98,6 +99,27 @@
 		"addLocationAlt": "Ajouter un lieu",
 		"communityMapAlt": "Carte des communautés",
 		"merchantMapAlt": "Carte des commerces"
+	},
+	"issuesMode": {
+		"title": "Problèmes",
+		"showAll": "Afficher tous les lieux",
+		"inView": "{count} visibles",
+		"chips": {
+			"outdated": "Obsolète",
+			"outdated_soon": "Bientôt obsolète",
+			"not_verified": "Non vérifié",
+			"missing_icon": "Icône manquante"
+		},
+		"row": {
+			"title": "Attention requise",
+			"editOsm": "Modifier sur OSM"
+		},
+		"issues": {
+			"outdated": "Non vérifié depuis plus d'un an",
+			"outdated_soon": "La vérification aura bientôt un an",
+			"not_verified": "Jamais vérifié",
+			"missing_icon": "Aucune icône de catégorie taguée"
+		}
 	},
 	"merchant": {
 		"tagsNote": "Plus d'informations sur les tags de cartographie bitcoin disponibles",
