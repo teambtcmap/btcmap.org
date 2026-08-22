@@ -2,7 +2,11 @@ import type { AxiosProgressEvent } from "axios";
 import { get } from "svelte/store";
 
 import { API_BASE } from "$lib/api-base";
-import { buildFieldsParam, PLACE_FIELD_SETS } from "$lib/api-fields";
+import {
+	buildFieldsParam,
+	PLACE_FIELD_SETS,
+	PLACE_FIELDS,
+} from "$lib/api-fields";
 import api from "$lib/axios";
 import {
 	completePlaceUrl,
@@ -11,6 +15,7 @@ import {
 } from "$lib/placeDetails";
 import {
 	mapUpdates,
+	paymentDataLoaded,
 	places,
 	placesError,
 	placesLoadingProgress,
@@ -94,6 +99,22 @@ const getStaticFileDate = async (): Promise<string> => {
 	return getTwoWeeksAgoDate();
 };
 
+// Serializes the $places enrichment merges (verified dates, payment tags).
+// Each enricher reads the whole array, rebuilds it, and republishes; two
+// running concurrently — a combo deep link like ?issues&lightning dispatches
+// both in one reactive flush — would build from the same snapshot and the
+// later places.set would silently erase the earlier merge, with its
+// readiness flag already latched (hiding pins for the rest of the session).
+// Fetches stay concurrent; only the read→merge→publish window is exclusive.
+// The chain itself never rejects — each section's errors belong to its
+// caller.
+let enrichmentChain: Promise<unknown> = Promise.resolve();
+const withEnrichmentLock = <T>(section: () => Promise<T>): Promise<T> => {
+	const run = enrichmentChain.then(section);
+	enrichmentChain = run.catch(() => undefined);
+	return run;
+};
+
 // The bulk CDN feed (places.json) carries no verification date, so a place's
 // baseline date is unknown until this runs. Fetch verified_at for every place
 // in one lean call and merge it into $places by id. Fetched LAZILY — only when
@@ -122,25 +143,107 @@ export const ensureVerifiedDates = async (): Promise<void> => {
 		// flag false keeps the filter inert (shows everything) and lets a later
 		// sync retry.
 		if (verifiedById.size === 0) return;
-		const current = get(places);
-		// If the bulk places haven't loaded yet (the dates fetch won the race),
-		// bail without latching or caching — otherwise we'd persist an empty
-		// places_v4 and flip the gate true with no data, hiding everything. The
-		// caller re-runs once $places is populated.
-		if (current.length === 0) return;
-		const enriched = current.map((p) => {
-			const verified_at = verifiedById.get(p.id);
-			return verified_at && verified_at !== p.verified_at
-				? { ...p, verified_at }
-				: p;
+		await withEnrichmentLock(async () => {
+			// Re-check under the lock: a concurrent caller may have latched
+			// while this one waited.
+			if (get(verifiedDatesLoaded)) return;
+			const current = get(places);
+			// If the bulk places haven't loaded yet (the dates fetch won the race),
+			// bail without latching or caching — otherwise we'd persist an empty
+			// places_v4 and flip the gate true with no data, hiding everything. The
+			// caller re-runs once $places is populated.
+			if (current.length === 0) return;
+			const enriched = current.map((p) => {
+				const verified_at = verifiedById.get(p.id);
+				return verified_at && verified_at !== p.verified_at
+					? { ...p, verified_at }
+					: p;
+			});
+			// Always publishes (persistence is best-effort inside placeCache), so
+			// the enrichment survives a failed blob write — matching the old
+			// publish-first ordering this replaced.
+			await publishPlaces(enriched);
+			verifiedDatesLoaded.set(true);
 		});
-		// Always publishes (persistence is best-effort inside placeCache), so
-		// the enrichment survives a failed blob write — matching the old
-		// publish-first ordering this replaced.
-		await publishPlaces(enriched);
-		verifiedDatesLoaded.set(true);
 	} catch (error) {
 		console.warn("Could not load verification dates:", error);
+	}
+};
+
+// The bulk feed (MAP_SYNC) carries no payment-method tags, so the embed
+// payment filter (?onchain&lightning&nfc — see $lib/map/paymentFilter) has
+// nothing to match until this runs. Fetch the three tags for every place in
+// one lean call and merge them into $places by id. Fetched LAZILY — only
+// when a payment deep link is present (normal visitors never call this) and
+// once per session. Sets paymentDataLoaded so the filter flips from inert to
+// active. Best-effort: on failure the flag stays false and the filter keeps
+// showing everything.
+type PaymentTagsRow = Pick<
+	Place,
+	| "id"
+	| "osm:payment:onchain"
+	| "osm:payment:lightning"
+	| "osm:payment:lightning_contactless"
+>;
+
+export const ensurePaymentMethods = async (): Promise<void> => {
+	if (get(paymentDataLoaded)) return;
+	try {
+		const response = await api.get<PaymentTagsRow[]>(
+			`${API_BASE}/v4/places?fields=id,${buildFieldsParam(PLACE_FIELDS.PAYMENT_METHOD)}`,
+		);
+		if (!Array.isArray(response.data)) return;
+		const paymentById = new Map<number, PaymentTagsRow>();
+		for (const item of response.data) {
+			if (
+				typeof item?.id === "number" &&
+				(item["osm:payment:onchain"] !== undefined ||
+					item["osm:payment:lightning"] !== undefined ||
+					item["osm:payment:lightning_contactless"] !== undefined)
+			) {
+				paymentById.set(item.id, item);
+			}
+		}
+		// Same latch guard as ensureVerifiedDates: an empty/degenerate response
+		// must NOT flip the gate true, or the filter would hide every pin with
+		// no tags to match. Leaving the flag false keeps the filter inert
+		// (shows everything) and lets a later call retry.
+		if (paymentById.size === 0) return;
+		await withEnrichmentLock(async () => {
+			// Re-check under the lock: a concurrent caller may have latched
+			// while this one waited.
+			if (get(paymentDataLoaded)) return;
+			const current = get(places);
+			// If the bulk places haven't loaded yet (the tags fetch won the race),
+			// bail without latching or caching — the caller re-runs once $places
+			// is populated.
+			if (current.length === 0) return;
+			const enriched = current.map((p) => {
+				const row = paymentById.get(p.id);
+				if (
+					!row ||
+					(row["osm:payment:onchain"] === p["osm:payment:onchain"] &&
+						row["osm:payment:lightning"] === p["osm:payment:lightning"] &&
+						row["osm:payment:lightning_contactless"] ===
+							p["osm:payment:lightning_contactless"])
+				) {
+					return p;
+				}
+				return {
+					...p,
+					"osm:payment:onchain": row["osm:payment:onchain"],
+					"osm:payment:lightning": row["osm:payment:lightning"],
+					"osm:payment:lightning_contactless":
+						row["osm:payment:lightning_contactless"],
+				};
+			});
+			// Always publishes (persistence is best-effort inside placeCache), so
+			// the enrichment survives a failed blob write.
+			await publishPlaces(enriched);
+			paymentDataLoaded.set(true);
+		});
+	} catch (error) {
+		console.warn("Could not load payment methods:", error);
 	}
 };
 

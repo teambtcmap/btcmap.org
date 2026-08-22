@@ -40,6 +40,12 @@ export const placesLoadingProgress = writable<number>(0); // 0-100 percentage
 // src/lib/sync/places.ts (ensureVerifiedDates).
 export const verifiedDatesLoaded = writable(false);
 
+// True once the lazy payment-tag enrichment has loaded. The tags are only
+// fetched when a payment deep link (?onchain&lightning&nfc) is present, so
+// the embed filter gates on this to stay inert until the tags are present.
+// See src/lib/sync/places.ts (ensurePaymentMethods).
+export const paymentDataLoaded = writable(false);
+
 export const users: Writable<User[]> = writable([]);
 export const userError = writable("");
 

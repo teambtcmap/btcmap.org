@@ -377,6 +377,9 @@ $: filteredSearchResults = selectVisiblePlaces({
 	boostsOnly: false,
 	issueCodes: null,
 	issuesReady: true,
+	// Search is exempt from the embed payment narrowing, matching the pins.
+	paymentFilter: null,
+	paymentReady: true,
 }).selection;
 
 // Helper function to check if a category has matching merchants

@@ -41,6 +41,8 @@ const base = {
 	boostsOnly: false,
 	issueCodes: null,
 	issuesReady: true,
+	paymentFilter: null,
+	paymentReady: true,
 };
 
 const allIssueCodes = new Set(DERIVED_ISSUE_CODES);
@@ -186,6 +188,65 @@ describe("selectVisiblePlaces", () => {
 		expect(r.selection.length).toBe(7);
 	});
 
+	// The embed payment filter (?onchain&lightning&nfc, #1269): a dedicated
+	// corpus so the tag combinations are explicit — the shared corpus stays
+	// payment-agnostic.
+	const paymentCorpus = () => [
+		place({ "osm:payment:onchain": "yes", "osm:payment:lightning": "yes" }),
+		place({ "osm:payment:lightning": "yes" }),
+		place({ "osm:payment:lightning_contactless": "yes" }),
+		place({ "osm:payment:onchain": "no" as "yes" }),
+		place({}),
+		place({ "osm:payment:lightning": "yes", deleted_at: old() }),
+	];
+
+	it("narrows to places tagged yes for every flagged method when ready", () => {
+		const lightningOnly = selectVisiblePlaces({
+			...base,
+			places: paymentCorpus(),
+			paymentFilter: { onchain: false, lightning: true, nfc: false },
+		});
+		expect(lightningOnly.selection.length).toBe(2);
+
+		const both = selectVisiblePlaces({
+			...base,
+			places: paymentCorpus(),
+			paymentFilter: { onchain: true, lightning: true, nfc: false },
+		});
+		expect(both.selection.length).toBe(1);
+
+		const nfc = selectVisiblePlaces({
+			...base,
+			places: paymentCorpus(),
+			paymentFilter: { onchain: false, lightning: false, nfc: true },
+		});
+		expect(nfc.selection.length).toBe(1);
+		expect(nfc.selection[0]["osm:payment:lightning_contactless"]).toBe("yes");
+	});
+
+	it("keeps the payment filter inert until the tags are ready", () => {
+		// Bulk rows before the payment enrichment carry no tags at all; the
+		// gate keeps the world visible instead of hiding every pin.
+		const r = selectVisiblePlaces({
+			...base,
+			places: paymentCorpus(),
+			paymentFilter: { onchain: false, lightning: true, nfc: false },
+			paymentReady: false,
+		});
+		expect(r.selection.length).toBe(5);
+	});
+
+	it("counts chips on the payment-filtered set", () => {
+		// Payment applies pre-category (unlike boosts): inside an embed the
+		// chips must describe the narrowed world, not promise hidden pins.
+		const r = selectVisiblePlaces({
+			...base,
+			places: paymentCorpus(),
+			paymentFilter: { onchain: false, lightning: true, nfc: false },
+		});
+		expect(r.counts.all).toBe(2);
+	});
+
 	it("composes boosts after category (empty intersections are honest)", () => {
 		const r = selectVisiblePlaces({
 			...base,
@@ -237,6 +298,39 @@ describe("computeVisibleSignature", () => {
 		);
 		expect(
 			computeVisibleSignature({ ...inputs, issuesReady: false }, 7, ""),
+		).not.toBe(sig);
+		expect(
+			computeVisibleSignature(
+				{
+					...inputs,
+					paymentFilter: { onchain: true, lightning: false, nfc: false },
+				},
+				7,
+				"",
+			),
+		).not.toBe(sig);
+		// Distinct method combinations must not collide with each other.
+		expect(
+			computeVisibleSignature(
+				{
+					...inputs,
+					paymentFilter: { onchain: true, lightning: false, nfc: false },
+				},
+				7,
+				"",
+			),
+		).not.toBe(
+			computeVisibleSignature(
+				{
+					...inputs,
+					paymentFilter: { onchain: false, lightning: true, nfc: false },
+				},
+				7,
+				"",
+			),
+		);
+		expect(
+			computeVisibleSignature({ ...inputs, paymentReady: false }, 7, ""),
 		).not.toBe(sig);
 		expect(
 			computeVisibleSignature({ ...inputs, mode: "search" }, 7, "1,2"),

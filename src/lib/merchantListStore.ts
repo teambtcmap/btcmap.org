@@ -220,6 +220,10 @@ function createMerchantListStore() {
 			boostsOnly: false,
 			issueCodes: null,
 			issuesReady: true,
+			// Search is exempt from the embed payment narrowing (same policy
+			// as boosts): an explicit query should surface all matches.
+			paymentFilter: null,
+			paymentReady: true,
 		});
 		update((state) => ({
 			...resetCategoryState(state),
@@ -404,6 +408,11 @@ function createMerchantListStore() {
 				boostsOnly: false,
 				issueCodes: null,
 				issuesReady: true,
+				// The map page pre-applies the payment deep link to its
+				// local-markers list before calling setMerchants, same division
+				// of labor as boosts and issues.
+				paymentFilter: null,
+				paymentReady: true,
 			});
 
 			const sorted = sortMerchants(
@@ -468,6 +477,11 @@ function createMerchantListStore() {
 						boostsOnly: false,
 						issueCodes: null,
 						issuesReady: true,
+						// A payment deep link forces the local-markers list path
+						// (listBehavior on the map page), so these API radius rows
+						// never meet the filter.
+						paymentFilter: null,
+						paymentReady: true,
 					});
 
 				// Check if we should hide results (too many at low zoom)
@@ -749,6 +763,10 @@ function createMerchantListStore() {
 						boostsOnly: false,
 						issueCodes: null,
 						issuesReady: true,
+						// Search is exempt from the embed payment narrowing (same
+						// policy as boosts): an explicit query surfaces all matches.
+						paymentFilter: null,
+						paymentReady: true,
 					});
 					return {
 						...state,

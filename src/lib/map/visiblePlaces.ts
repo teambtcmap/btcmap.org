@@ -5,6 +5,11 @@ import {
 	countMerchantsByCategory,
 	placeMatchesCategory,
 } from "$lib/categoryMapping";
+import type { PaymentMethodFilter } from "$lib/map/paymentFilter";
+import {
+	placeMatchesPaymentFilter,
+	serializePaymentFilter,
+} from "$lib/map/paymentFilter";
 import type { VerifiedFilterYears } from "$lib/map/verifiedFilter";
 import type { DerivedIssueCode } from "$lib/placeIssues";
 import { placeMatchesIssueCodes, serializeIssuesParam } from "$lib/placeIssues";
@@ -45,10 +50,22 @@ export type VisibleSelectionInputs = {
 	// the filter stays inert (rather than flagging every row as
 	// not_verified) until enrichment lands.
 	issuesReady: boolean;
+	// The embed payment-method deep link (?onchain&lightning&nfc, #1269):
+	// null when off; otherwise every flagged method must be tagged "yes"
+	// (AND, legacy Leaflet parity — see $lib/map/paymentFilter). Applied
+	// pre-category: inside an embed the chips must describe the narrowed
+	// world. Callers resolve search exemption like boosts.
+	paymentFilter: PaymentMethodFilter | null;
+	// Same readiness contract as recencyReady: the bulk feed carries no
+	// payment tags until ensurePaymentMethods() enriches it, so bulk-feed
+	// consumers gate on $paymentDataLoaded and the filter stays inert
+	// (rather than hiding every pin) until the tags land.
+	paymentReady: boolean;
 };
 
 export type VisibleSelection = {
-	// The final visible set: recency → category → boosts, deleted rows dropped.
+	// The final visible set: recency → payment → issues → category → boosts,
+	// deleted rows dropped.
 	selection: Place[];
 	// The recency-filtered, PRE-category set — what chip counts and density
 	// ceilings are computed on (a selected chip must not hide the other
@@ -69,6 +86,12 @@ export function selectVisiblePlaces(
 	let preCategory = inputs.recencyReady
 		? filterPlacesByRecency(live, inputs.recency)
 		: live;
+	const paymentFilter = inputs.paymentFilter;
+	if (paymentFilter && inputs.paymentReady) {
+		preCategory = preCategory.filter((p) =>
+			placeMatchesPaymentFilter(p, paymentFilter),
+		);
+	}
 	const issueCodes = inputs.issueCodes;
 	if (issueCodes && inputs.issuesReady) {
 		preCategory = preCategory.filter((p) =>
@@ -115,6 +138,8 @@ export function computeVisibleSignature(
 			? serializeIssuesParam(inputs.issueCodes) || "all"
 			: "off",
 		inputs.issuesReady,
+		serializePaymentFilter(inputs.paymentFilter),
+		inputs.paymentReady,
 		revision,
 		searchResultIds,
 	].join("|");

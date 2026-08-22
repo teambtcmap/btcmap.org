@@ -57,6 +57,10 @@ import {
 	pinIconImageExpression,
 	pinVariantFor,
 } from "$lib/map/maplibreSprites";
+import {
+	parsePaymentFilter,
+	placeMatchesPaymentFilter,
+} from "$lib/map/paymentFilter";
 import { createPlacePinSource } from "$lib/map/placePinSource";
 import { parseLatLongQuery } from "$lib/map/queryViewport";
 import type { VerifiedFilterYears } from "$lib/map/verifiedFilter";
@@ -86,6 +90,7 @@ import {
 } from "$lib/placeIssues";
 import { savedPlaceIds } from "$lib/session";
 import {
+	paymentDataLoaded,
 	places,
 	placesById,
 	placesError,
@@ -93,7 +98,7 @@ import {
 	placesLoadingStatus,
 	verifiedDatesLoaded,
 } from "$lib/store";
-import { ensureVerifiedDates } from "$lib/sync/places";
+import { ensurePaymentMethods, ensureVerifiedDates } from "$lib/sync/places";
 import { theme } from "$lib/theme";
 import type { Place } from "$lib/types";
 import { userLocation } from "$lib/userLocationStore";
@@ -126,6 +131,16 @@ let merchantListPanel: MerchantListPanel;
 const boostsOnly =
 	browser &&
 	new URLSearchParams(window.location.search).get("boosts") === "true";
+
+// Embed payment-method filter (?onchain&lightning&nfc — presence alone
+// counts, AND semantics, matching the legacy Leaflet params the Embedding
+// wiki documents; restored after the #398 rewrite dropped them, #1269).
+// Session-constant like ?boosts: iframes set it in the src URL, there is no
+// UI toggle. Narrows the pins and the nearby list to places whose flagged
+// methods are tagged "yes", once the lazy tag enrichment lands.
+const paymentFilter = browser
+	? parsePaymentFilter(new URLSearchParams(window.location.search))
+	: null;
 
 // "Outdated only" deep link (?outdated, any value — presence alone counts,
 // matching the legacy Leaflet param): seed the verified-recency filter's
@@ -437,16 +452,19 @@ const getBufferedBoundsLngLat = (
 };
 
 // One reactive source for the list fetch behavior. Boosted-only /
-// issues-only: the bulk $places feed already holds the full filtered set
-// at every zoom, and the radius API (api-with-limit) can filter by
-// neither boost nor issue state, so force the local path — the list,
-// count, and panel status stay in sync with the filtered map.
+// issues-only / payment-filtered: the bulk $places feed already holds the
+// full filtered set at every zoom, and the radius API (api-with-limit) can
+// filter by neither boost, issue, nor payment state, so force the local
+// path — the list, count, and panel status stay in sync with the filtered
+// map.
 // MUST stay in source order above every reactive block that calls
 // updateMerchantList() synchronously (the search-exit watcher and the
 // initial-count block): Svelte 4 can't see this dependency through the
 // function body, so ordering falls back to source position.
 $: listBehavior =
-	boostsOnly || issuesOnly ? "local-markers" : getZoomBehavior(currentZoom);
+	boostsOnly || issuesOnly || paymentFilter != null
+		? "local-markers"
+		: getZoomBehavior(currentZoom);
 
 // Refresh the panel's nearby list based on the current viewport. Mirrors
 // /map's `updateMerchantList` minus the panel-offset bookkeeping (out of
@@ -477,6 +495,16 @@ const updateMerchantList = (opts?: { force?: boolean }) => {
 					p.lon <= buffered.east,
 			);
 			let listed = boostsOnly ? visible.filter(isBoosted) : visible;
+			// Same readiness gate as the marker pipeline: before the payment
+			// tag enrichment lands, the list stays unfiltered rather than
+			// hiding every bulk row (none carry payment tags yet). Applied
+			// before the issue tallies so chip counts describe the narrowed
+			// embed world, matching selectVisiblePlaces.
+			if (paymentFilter && get(paymentDataLoaded)) {
+				listed = listed.filter((p) =>
+					placeMatchesPaymentFilter(p, paymentFilter),
+				);
+			}
 			// Same readiness gate as the marker pipeline: before the
 			// verified_at enrichment lands, the list stays unfiltered
 			// rather than flagging every bulk row as not_verified.
@@ -493,6 +521,17 @@ const updateMerchantList = (opts?: { force?: boolean }) => {
 				listed = listed.filter((p) => placeMatchesIssueCodes(p, issueCodes));
 			}
 			merchantList.setMerchants(listed, center.lat, center.lng);
+			// E2E test hook, same idea as __mapPlacesCount: the payment/boost/
+			// issue deep links force this local path and pre-narrow the list,
+			// and the specs need a DOM-independent way to pin that the list
+			// surface narrows with the pins. Only set here — the api-with-limit
+			// path never sees the filters, so a wiring regression leaves the
+			// hook unset and the spec fails. No-op outside tests.
+			if (typeof window !== "undefined") {
+				(
+					window as unknown as { __nearbyListCount?: number }
+				).__nearbyListCount = listed.length;
+			}
 			if (listOpen || currentZoom >= LABEL_VISIBLE_ZOOM) {
 				if (allowHeavyFetch || currentZoom >= LABEL_VISIBLE_ZOOM) {
 					const radiusKm =
@@ -761,6 +800,12 @@ $: if (map && styleLoaded && $places) {
 		// Trivially ready when the mode is off or exempted, so the dates
 		// landing can't change the signature outside issues mode.
 		issuesReady: !issuesOnly || inSearch || $verifiedDatesLoaded,
+		// Markers exempt search mode from the payment narrowing, same
+		// policy as boosts: an explicit query should surface all matches.
+		paymentFilter: inSearch ? null : paymentFilter,
+		// Trivially ready when the filter is off or exempted, so the tag
+		// enrichment landing can't change the signature outside payment mode.
+		paymentReady: !paymentFilter || inSearch || $paymentDataLoaded,
 	};
 	const renderSig = [
 		computeVisibleSignature(
@@ -826,6 +871,22 @@ $: if (
 ) {
 	didInitialVerifiedLoad = true;
 	void ensureVerifiedDates().then(() => updateMerchantList({ force: true }));
+}
+
+// A payment deep link (?onchain&lightning&nfc): load the payment tags once
+// the bulk places are in (same race guard as the verified block above), so
+// the embed arrives filtered without any interaction.
+let didInitialPaymentLoad = false;
+$: if (
+	browser &&
+	map &&
+	styleLoaded &&
+	$places.length > 0 &&
+	!didInitialPaymentLoad &&
+	paymentFilter != null
+) {
+	didInitialPaymentLoad = true;
+	void ensurePaymentMethods().then(() => updateMerchantList({ force: true }));
 }
 
 // Globe projection is page state: a basemap swap resets the projection to

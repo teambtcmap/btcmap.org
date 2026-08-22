@@ -49,14 +49,30 @@ export const PLACE_FIELDS = {
 		"osm:check_date:currency:XBT",
 		"osm:note",
 	] as const satisfies (keyof Place)[],
+	// The three tags the embed payment filter (?onchain&lightning&nfc) and
+	// the list's payment icons match on.
+	PAYMENT_METHOD: [
+		"osm:payment:onchain",
+		"osm:payment:lightning",
+		"osm:payment:lightning_contactless",
+	] as const satisfies (keyof Place)[],
 } as const;
 
 export const PLACE_FIELD_SETS = {
 	// verified_at rides along on incremental updates so a changed place keeps
 	// its date through a sync (no flicker) and the recency filter never needs a
 	// full re-fetch to stay fresh — the baseline is loaded once, lazily, by
-	// ensureVerifiedDates() when the filter is first engaged.
-	MAP_SYNC: [...PLACE_FIELDS.CORE, ...PLACE_FIELDS.SYNC, "verified_at"],
+	// ensureVerifiedDates() when the filter is first engaged. The payment tags
+	// ride along for the same reason: incremental rows replace enriched rows
+	// wholesale, and without them a mid-session update would silently drop a
+	// place out of a payment-filtered embed (ensurePaymentMethods() loads the
+	// baseline lazily, like the dates).
+	MAP_SYNC: [
+		...PLACE_FIELDS.CORE,
+		...PLACE_FIELDS.SYNC,
+		"verified_at",
+		...PLACE_FIELDS.PAYMENT_METHOD,
+	],
 	COMPLETE_PLACE: [
 		...PLACE_FIELDS.CORE,
 		...PLACE_FIELDS.SYNC,
@@ -68,9 +84,7 @@ export const PLACE_FIELD_SETS = {
 		"localized_name",
 		"address",
 		"verified_at",
-		"osm:payment:onchain",
-		"osm:payment:lightning",
-		"osm:payment:lightning_contactless",
+		...PLACE_FIELDS.PAYMENT_METHOD,
 	] as const satisfies (keyof Place)[],
 } as const;
 
