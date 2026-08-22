@@ -9,6 +9,7 @@ import {
 	MERCHANT_LIST_MAX_ITEMS,
 } from "$lib/constants";
 import { VERIFIED_FILTER_STORAGE_KEY } from "$lib/map/verifiedFilter";
+import { paymentTagsLoaded } from "$lib/store";
 import type { Place } from "$lib/types";
 import { filterPlacesByRecency } from "$lib/verification";
 
@@ -329,6 +330,66 @@ describe("merchantListStore", () => {
 
 			const after = get(merchantList).merchants.map((m) => m.id);
 			expect(after).toEqual(before);
+		});
+	});
+
+	// The ?onchain&lightning&nfc embed filter narrows radius lists and the
+	// count badge only while the pins narrow too (paymentTagsLoaded): before
+	// the tag enrichment lands — or after it failed — every surface must
+	// stay unfiltered together, or the list contradicts the map (the
+	// #1158-#1162 disagreement class).
+	describe("payment filter readiness gating", () => {
+		const rows = () => [
+			createMockPlace({ id: 1, "osm:payment:lightning": "yes" }),
+			createMockPlace({ id: 2 }),
+		];
+
+		afterEach(() => {
+			paymentTagsLoaded.set(false);
+		});
+
+		it("fetchAndReplaceList stays unfiltered until the tags are ready", async () => {
+			merchantList.setPaymentMethods(new Set(["lightning"] as const));
+			(api.get as Mock).mockResolvedValueOnce({ data: rows() });
+
+			await merchantList.fetchAndReplaceList({ lat: 0, lon: 0 }, 10);
+
+			expect(get(merchantList).merchants.length).toBe(2);
+		});
+
+		it("fetchAndReplaceList narrows once the tags are ready", async () => {
+			merchantList.setPaymentMethods(new Set(["lightning"] as const));
+			paymentTagsLoaded.set(true);
+			(api.get as Mock).mockResolvedValueOnce({ data: rows() });
+
+			await merchantList.fetchAndReplaceList({ lat: 0, lon: 0 }, 10);
+
+			const state = get(merchantList);
+			expect(state.merchants.length).toBe(1);
+			expect(state.merchants[0].id).toBe(1);
+		});
+
+		it("fetchCountOnly requests lean fields and counts everything until ready", async () => {
+			merchantList.setPaymentMethods(new Set(["lightning"] as const));
+			(api.get as Mock).mockResolvedValueOnce({ data: rows() });
+
+			await merchantList.fetchCountOnly({ lat: 0, lon: 0 }, 10);
+
+			expect(get(merchantList).totalCount).toBe(2);
+			const url = (api.get as Mock).mock.calls[0][0] as string;
+			expect(url).not.toContain("osm:payment");
+		});
+
+		it("fetchCountOnly widens fields and narrows the count once ready", async () => {
+			merchantList.setPaymentMethods(new Set(["lightning"] as const));
+			paymentTagsLoaded.set(true);
+			(api.get as Mock).mockResolvedValueOnce({ data: rows() });
+
+			await merchantList.fetchCountOnly({ lat: 0, lon: 0 }, 10);
+
+			expect(get(merchantList).totalCount).toBe(1);
+			const url = (api.get as Mock).mock.calls[0][0] as string;
+			expect(url).toContain("osm:payment:lightning");
 		});
 	});
 

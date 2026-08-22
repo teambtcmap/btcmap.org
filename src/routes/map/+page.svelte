@@ -57,7 +57,10 @@ import {
 	pinIconImageExpression,
 	pinVariantFor,
 } from "$lib/map/maplibreSprites";
-import { parsePaymentMethodsParam } from "$lib/map/paymentMethodFilter";
+import {
+	parsePaymentMethodsParam,
+	placeMatchesPaymentMethods,
+} from "$lib/map/paymentMethodFilter";
 import { createPlacePinSource } from "$lib/map/placePinSource";
 import { parseLatLongQuery } from "$lib/map/queryViewport";
 import type { VerifiedFilterYears } from "$lib/map/verifiedFilter";
@@ -490,6 +493,17 @@ const updateMerchantList = (opts?: { force?: boolean }) => {
 					p.lon <= buffered.east,
 			);
 			let listed = boostsOnly ? visible.filter(isBoosted) : visible;
+			// The store's pipeline narrows the list itself (setMerchants
+			// consumes state.paymentMethods), but the ?issues chip tallies
+			// below are computed from THIS page-side snapshot — narrow it
+			// here too so the chips can never count places the embed filter
+			// hides. Same readiness gate as the pipeline: inert until the
+			// payment-tag enrichment lands.
+			if (paymentMethods && get(paymentTagsLoaded)) {
+				listed = listed.filter((p) =>
+					placeMatchesPaymentMethods(p, paymentMethods),
+				);
+			}
 			// Same readiness gate as the marker pipeline: before the
 			// verified_at enrichment lands, the list stays unfiltered
 			// rather than flagging every bulk row as not_verified.
@@ -506,6 +520,17 @@ const updateMerchantList = (opts?: { force?: boolean }) => {
 				listed = listed.filter((p) => placeMatchesIssueCodes(p, issueCodes));
 			}
 			merchantList.setMerchants(listed, center.lat, center.lng);
+			// E2E test hook, same idea as __mapPlacesCount: the payment-filter
+			// spec needs a DOM-independent way to pin that the list surface
+			// narrows with the pins (the wiring the #398 rewrite silently
+			// lost). Only set on this local path, so the spec also fails if a
+			// rewrite stops routing filtered sessions through it. No-op
+			// outside tests.
+			if (typeof window !== "undefined") {
+				(
+					window as unknown as { __nearbyListCount?: number }
+				).__nearbyListCount = listed.length;
+			}
 			if (listOpen || currentZoom >= LABEL_VISIBLE_ZOOM) {
 				if (allowHeavyFetch || currentZoom >= LABEL_VISIBLE_ZOOM) {
 					const radiusKm =
@@ -859,7 +884,15 @@ $: if (
 	paymentMethods
 ) {
 	didInitialPaymentLoad = true;
-	void ensurePaymentMethods().then(() => updateMerchantList({ force: true }));
+	void ensurePaymentMethods().then(() => {
+		// ensurePaymentMethods never rejects — failure means the gate is
+		// still false. Un-latch so the next $places publication retries (at
+		// sync cadence): unlike the verified filter there is no UI control
+		// to re-trigger this, and a transient failure would otherwise leave
+		// the embed silently unfiltered for the whole session.
+		if (!get(paymentTagsLoaded)) didInitialPaymentLoad = false;
+		updateMerchantList({ force: true });
+	});
 }
 
 // Globe projection is page state: a basemap swap resets the projection to
