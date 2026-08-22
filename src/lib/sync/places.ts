@@ -95,6 +95,73 @@ const getStaticFileDate = async (): Promise<string> => {
 	return getTwoWeeksAgoDate();
 };
 
+// Serializes the $places enrichment merges (verified dates, payment tags).
+// Each enricher reads the whole array, rebuilds it, and republishes; two
+// running concurrently — a combo deep link like ?issues&lightning dispatches
+// both in one reactive flush — would build from the same snapshot and the
+// later places.set would silently erase the earlier merge, with its
+// readiness flag already latched (hiding pins for the rest of the session).
+// Fetches stay concurrent; only the read→merge→publish window is exclusive.
+// The chain itself never rejects — each section's errors belong to its
+// caller.
+let enrichmentChain: Promise<unknown> = Promise.resolve();
+const withEnrichmentLock = <T>(section: () => Promise<T>): Promise<T> => {
+	const run = enrichmentChain.then(section);
+	enrichmentChain = run.catch(() => undefined);
+	return run;
+};
+
+const PAYMENT_TAG_FIELDS = [
+	"osm:payment:onchain",
+	"osm:payment:lightning",
+	"osm:payment:lightning_contactless",
+] as const;
+
+type PaymentTagsRow = {
+	id: number;
+	"osm:payment:onchain"?: "yes";
+	"osm:payment:lightning"?: "yes";
+	"osm:payment:lightning_contactless"?: "yes";
+};
+
+// Bulk republishes (elementsSync's merge path and its CDN fallback) rebuild
+// rows from the disk cache or the CDN baseline — which carry no enrichment
+// when persistence is unavailable (routine for embeds in iframes with
+// blocked third-party storage). Once an enrichment has latched, its
+// readiness flag stays true, so publishing bare rows would blank every
+// filtered pin with nothing re-fetching. Re-apply the session's cached
+// enrichment to outgoing rows, filling ONLY fields the row doesn't already
+// carry — an incremental MAP_SYNC row's own values are fresher than the
+// session cache and must win.
+let verifiedDatesCache: Map<number, string> | null = null;
+let paymentTagsCache: Map<number, PaymentTagsRow> | null = null;
+
+export const applyEnrichmentCaches = (rows: Place[]): Place[] => {
+	const dates = get(verifiedDatesLoaded) ? verifiedDatesCache : null;
+	const tags = get(paymentTagsLoaded) ? paymentTagsCache : null;
+	if (!dates && !tags) return rows;
+	return rows.map((p) => {
+		let next: Place | null = null;
+		const dateFill = dates?.get(p.id);
+		if (dateFill && p.verified_at === undefined) {
+			next = { ...p, verified_at: dateFill };
+		}
+		if (tags && PAYMENT_TAG_FIELDS.every((field) => p[field] === undefined)) {
+			const item = tags.get(p.id);
+			if (
+				item &&
+				PAYMENT_TAG_FIELDS.some((field) => item[field] !== undefined)
+			) {
+				next = next ?? { ...p };
+				for (const field of PAYMENT_TAG_FIELDS) {
+					next[field] = item[field];
+				}
+			}
+		}
+		return next ?? p;
+	});
+};
+
 // The bulk CDN feed (places.json) carries no verification date, so a place's
 // baseline date is unknown until this runs. Fetch verified_at for every place
 // in one lean call and merge it into $places by id. Fetched LAZILY — only when
@@ -123,23 +190,29 @@ export const ensureVerifiedDates = async (): Promise<void> => {
 		// flag false keeps the filter inert (shows everything) and lets a later
 		// sync retry.
 		if (verifiedById.size === 0) return;
-		const current = get(places);
-		// If the bulk places haven't loaded yet (the dates fetch won the race),
-		// bail without latching or caching — otherwise we'd persist an empty
-		// places_v4 and flip the gate true with no data, hiding everything. The
-		// caller re-runs once $places is populated.
-		if (current.length === 0) return;
-		const enriched = current.map((p) => {
-			const verified_at = verifiedById.get(p.id);
-			return verified_at && verified_at !== p.verified_at
-				? { ...p, verified_at }
-				: p;
+		await withEnrichmentLock(async () => {
+			// Re-check under the lock: a concurrent caller may have latched
+			// while this one waited.
+			if (get(verifiedDatesLoaded)) return;
+			const current = get(places);
+			// If the bulk places haven't loaded yet (the dates fetch won the race),
+			// bail without latching or caching — otherwise we'd persist an empty
+			// places_v4 and flip the gate true with no data, hiding everything. The
+			// caller re-runs once $places is populated.
+			if (current.length === 0) return;
+			const enriched = current.map((p) => {
+				const verified_at = verifiedById.get(p.id);
+				return verified_at && verified_at !== p.verified_at
+					? { ...p, verified_at }
+					: p;
+			});
+			verifiedDatesCache = verifiedById;
+			// Always publishes (persistence is best-effort inside placeCache), so
+			// the enrichment survives a failed blob write — matching the old
+			// publish-first ordering this replaced.
+			await publishPlaces(enriched);
+			verifiedDatesLoaded.set(true);
 		});
-		// Always publishes (persistence is best-effort inside placeCache), so
-		// the enrichment survives a failed blob write — matching the old
-		// publish-first ordering this replaced.
-		await publishPlaces(enriched);
-		verifiedDatesLoaded.set(true);
 	} catch (error) {
 		console.warn("Could not load verification dates:", error);
 	}
@@ -157,45 +230,54 @@ export const ensureVerifiedDates = async (): Promise<void> => {
 export const ensurePaymentMethods = async (): Promise<void> => {
 	if (get(paymentTagsLoaded)) return;
 	try {
-		const response = await api.get<
-			{
-				id: number;
-				"osm:payment:onchain"?: "yes";
-				"osm:payment:lightning"?: "yes";
-				"osm:payment:lightning_contactless"?: "yes";
-			}[]
-		>(
+		const response = await api.get<PaymentTagsRow[]>(
 			`${API_BASE}/v4/places?fields=id,osm:payment:onchain,osm:payment:lightning,osm:payment:lightning_contactless`,
 		);
 		if (!Array.isArray(response.data)) return;
-		const tagsById = new Map(
-			response.data.map((item) => [item.id, item] as const),
-		);
-		// Same degenerate-response guard as ensureVerifiedDates: don't latch
-		// the flag (or republish) off an empty payload — stay inert and let a
-		// later call retry.
-		if (tagsById.size === 0) return;
-		const current = get(places);
-		if (current.length === 0) return;
-		const enriched = current.map((p) => {
-			const item = tagsById.get(p.id);
-			if (!item) return p;
-			let changed = false;
-			const next = { ...p };
-			for (const field of [
-				"osm:payment:onchain",
-				"osm:payment:lightning",
-				"osm:payment:lightning_contactless",
-			] as const) {
-				if (item[field] && next[field] !== item[field]) {
-					next[field] = item[field];
-					changed = true;
-				}
+		const tagsById = new Map<number, PaymentTagsRow>();
+		let taggedRows = 0;
+		for (const item of response.data) {
+			if (typeof item?.id !== "number") continue;
+			tagsById.set(item.id, item);
+			if (PAYMENT_TAG_FIELDS.some((field) => item[field] !== undefined)) {
+				taggedRows++;
 			}
-			return changed ? next : p;
+		}
+		// Degenerate-response guard, stricter than a bare row count: an
+		// id-only payload (e.g. the fields param ignored upstream) must not
+		// latch the flag — the clearing merge below would also strip every
+		// cached tag, then hide every pin. Stay inert and let a later call
+		// retry, same contract as ensureVerifiedDates.
+		if (taggedRows === 0) return;
+		await withEnrichmentLock(async () => {
+			// Re-check under the lock: a concurrent caller may have latched
+			// while this one waited.
+			if (get(paymentTagsLoaded)) return;
+			const current = get(places);
+			// If the bulk places haven't loaded yet (the tags fetch won the
+			// race), bail without latching or caching — the caller re-runs once
+			// $places is populated.
+			if (current.length === 0) return;
+			const enriched = current.map((p) => {
+				const item = tagsById.get(p.id);
+				if (!item) return p;
+				let changed = false;
+				const next = { ...p };
+				for (const field of PAYMENT_TAG_FIELDS) {
+					// Diff-assign INCLUDING undefined: a tag removed upstream
+					// must clear a stale persisted "yes", or the place stays
+					// inside a filtered embed forever.
+					if (next[field] !== item[field]) {
+						next[field] = item[field];
+						changed = true;
+					}
+				}
+				return changed ? next : p;
+			});
+			paymentTagsCache = tagsById;
+			await publishPlaces(enriched);
+			paymentTagsLoaded.set(true);
 		});
-		await publishPlaces(enriched);
-		paymentTagsLoaded.set(true);
 	} catch (error) {
 		console.warn("Could not load payment methods:", error);
 	}
@@ -455,8 +537,12 @@ export const elementsSync = async () => {
 				} else if (placesData.length > 0) {
 					// publishPlaces always updates the store (the session keeps
 					// working on broken storage); persistence failure surfaces via
-					// the sync path's own error toast.
-					const { persisted } = await publishPlaces(placesData);
+					// the sync path's own error toast. Cached-enrichment fill-in
+					// keeps latched filters (recency, payment embed) working when
+					// this publish was rebuilt from an unenriched source.
+					const { persisted } = await publishPlaces(
+						applyEnrichmentCaches(placesData),
+					);
 					if (persisted) {
 						// Only save sync timestamp if API succeeded, to avoid creating
 						// gaps where updates between old and new timestamp are
@@ -522,8 +608,12 @@ export const elementsSync = async () => {
 
 					if (parsedPlaces.length > 0) {
 						// Publish-only: localforage already failed reading, so don't
-						// bank on writing — matching the pre-existing behavior.
-						await publishPlaces(parsedPlaces, { persist: false });
+						// bank on writing — matching the pre-existing behavior. The
+						// CDN baseline carries no enrichment at all, so the cached
+						// fill-in matters most on this exact path.
+						await publishPlaces(applyEnrichmentCaches(parsedPlaces), {
+							persist: false,
+						});
 					}
 				} catch (error) {
 					placesError.set(
