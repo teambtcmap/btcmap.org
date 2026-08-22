@@ -9,11 +9,11 @@ import type { CategoryCounts, CategoryKey } from "$lib/categoryMapping";
 import { createEmptyCategoryCounts } from "$lib/categoryMapping";
 import { MERCHANT_LIST_MAX_ITEMS } from "$lib/constants";
 import { _ } from "$lib/i18n";
-import type { PaymentMethod } from "$lib/map/paymentMethodFilter";
-import {
-	type PaymentTaggedPlace,
-	placeMatchesPaymentMethods,
+import type {
+	PaymentMethod,
+	PaymentTaggedPlace,
 } from "$lib/map/paymentMethodFilter";
+import { placeMatchesPaymentMethods } from "$lib/map/paymentMethodFilter";
 import type { VerifiedFilterYears } from "$lib/map/verifiedFilter";
 import {
 	getStoredVerifiedFilter,
@@ -488,9 +488,14 @@ function createMerchantListStore() {
 						boostsOnly: false,
 						issueCodes: null,
 						issuesReady: true,
-						// Radius rows carry the payment tags natively (LIST_ITEM).
+						// Radius rows carry the payment tags natively (LIST_ITEM),
+						// but the gate mirrors the pins' anyway: while the bulk
+						// markers are still inert (enrichment pending or failed) a
+						// narrowed list would contradict the unfiltered map — the
+						// #1158-#1162 disagreement class this pipeline exists to
+						// prevent.
 						paymentMethods,
-						paymentsReady: true,
+						paymentsReady: paymentMethods == null || get(paymentTagsLoaded),
 					});
 
 				// Check if we should hide results (too many at low zoom)
@@ -575,13 +580,20 @@ function createMerchantListStore() {
 			// never disagree; a mid-flight filter change re-invokes this method,
 			// which aborts the stale request above.
 			const { verifiedWithinYears, paymentMethods } = get(store);
+			// The badge narrows by payment only while the pins do (same
+			// readiness flag): before the tag enrichment lands — or after it
+			// failed — the markers show everything, and a narrowed count over
+			// an unfiltered map would contradict it.
+			const activePaymentMethods = get(paymentTagsLoaded)
+				? paymentMethods
+				: null;
 			// Widen the lean payload with exactly the fields the active filters
 			// need: verified_at for the recency window, the payment tags for
 			// the ?onchain&lightning&nfc embed filter (#1269).
 			const fields = [
 				"id",
 				...(verifiedWithinYears == null ? [] : ["verified_at"]),
-				...(paymentMethods == null
+				...(activePaymentMethods == null
 					? []
 					: [
 							"osm:payment:onchain",
@@ -597,9 +609,9 @@ function createMerchantListStore() {
 					Pick<Place, "id"> & Pick<Place, "verified_at"> & PaymentTaggedPlace
 				>(center, radiusKm, fields, listAbortController.signal);
 				let counted = filterPlacesByRecency(validItems, verifiedWithinYears);
-				if (paymentMethods) {
+				if (activePaymentMethods) {
 					counted = counted.filter((p) =>
-						placeMatchesPaymentMethods(p, paymentMethods),
+						placeMatchesPaymentMethods(p, activePaymentMethods),
 					);
 				}
 

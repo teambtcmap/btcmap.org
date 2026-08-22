@@ -5,8 +5,8 @@ import {
 	countMerchantsByCategory,
 	placeMatchesCategory,
 } from "$lib/categoryMapping";
+import type { PaymentMethod } from "$lib/map/paymentMethodFilter";
 import {
-	type PaymentMethod,
 	placeMatchesPaymentMethods,
 	serializePaymentMethodsParam,
 } from "$lib/map/paymentMethodFilter";
