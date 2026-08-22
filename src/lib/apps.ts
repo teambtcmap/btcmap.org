@@ -395,7 +395,7 @@ export const appConfigs: AppConfig[] = [
 		id: "bull-bitcoin",
 		name: "Bull Bitcoin Wallet",
 		logo: "/images/apps/bull-bitcoin.png",
-		tag: "coming-soon",
+		tag: "powered-by-btcmap",
 		sponsor: false,
 		stores: [
 			{
