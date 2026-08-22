@@ -14,6 +14,15 @@
 		<link rel="preload" href="/icons/boosted-icon-pin.svg" as="image" type="image/svg+xml" />
 
 		<script>
+			// Netlify's CDN collapses duplicate slashes before the SSR function runs, so only
+			// the browser ever sees a hand-typed //map. SvelteKit derives the client-side
+			// `base` — and therefore every resolve() href, the service worker scope and the
+			// router's path matching — from location, so normalize before anything boots.
+			const canonicalPath = location.pathname.replace(/\/{2,}/g, '/');
+			if (canonicalPath !== location.pathname) {
+				location.replace(canonicalPath + location.search + location.hash);
+			}
+
 			// Theme initialization - runs before Svelte hydrates to prevent flash
 			const theme =
 				localStorage.theme === 'dark' ||
