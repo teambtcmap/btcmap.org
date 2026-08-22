@@ -40,6 +40,12 @@ export const placesLoadingProgress = writable<number>(0); // 0-100 percentage
 // src/lib/sync/places.ts (ensureVerifiedDates).
 export const verifiedDatesLoaded = writable(false);
 
+// True once the lazy payment-tag enrichment has loaded. The ?onchain&lightning&nfc
+// embed filter (#1269) needs osm:payment:* fields, which neither the bulk CDN
+// feed nor (pre-#1269) MAP_SYNC rows carry — same lazy pattern as
+// verifiedDatesLoaded above. See src/lib/sync/places.ts (ensurePaymentMethods).
+export const paymentTagsLoaded = writable(false);
+
 export const users: Writable<User[]> = writable([]);
 export const userError = writable("");
 
