@@ -2,6 +2,7 @@ import { get } from "svelte/store";
 import { describe, expect, it } from "vitest";
 
 import { CATEGORIES, placeMatchesCategory } from "$lib/categoryMapping";
+import { PAYMENT_METHODS } from "$lib/map/paymentMethodFilter";
 import { DERIVED_ISSUE_CODES } from "$lib/placeIssues";
 import { places } from "$lib/store";
 import type { Place } from "$lib/types";
@@ -41,6 +42,8 @@ const base = {
 	boostsOnly: false,
 	issueCodes: null,
 	issuesReady: true,
+	paymentMethods: null,
+	paymentsReady: true,
 };
 
 const allIssueCodes = new Set(DERIVED_ISSUE_CODES);
@@ -186,6 +189,56 @@ describe("selectVisiblePlaces", () => {
 		expect(r.selection.length).toBe(7);
 	});
 
+	it("narrows to places accepting every selected payment method", () => {
+		const rows = [
+			place({ "osm:payment:onchain": "yes" }),
+			place({ "osm:payment:lightning": "yes" }),
+			place({ "osm:payment:onchain": "yes", "osm:payment:lightning": "yes" }),
+		];
+		const r = selectVisiblePlaces({
+			...base,
+			places: rows,
+			paymentMethods: new Set(["onchain", "lightning"] as const),
+		});
+		expect(r.selection.length).toBe(1);
+		expect(r.counts.all).toBe(1);
+	});
+
+	it("keeps the payments filter inert until the tags are ready", () => {
+		// Bulk rows carry no osm:payment:* fields; before the lazy
+		// enrichment lands the filter must hide nothing.
+		const rows = [place(), place({ icon: "restaurant" })];
+		const r = selectVisiblePlaces({
+			...base,
+			places: rows,
+			paymentMethods: new Set(PAYMENT_METHODS),
+			paymentsReady: false,
+		});
+		expect(r.selection.length).toBe(2);
+	});
+
+	it("applies the payments filter before category counts", () => {
+		const rows = [
+			place({
+				icon: "restaurant",
+				"osm:payment:lightning": "yes",
+				verified_at: recent(),
+			}),
+			place({ icon: "restaurant", verified_at: recent() }),
+		];
+		const r = selectVisiblePlaces({
+			...base,
+			places: rows,
+			category: "restaurants",
+			paymentMethods: new Set(["lightning"] as const),
+		});
+		expect(r.selection.length).toBe(1);
+		// Counts describe the payment-filtered pre-category set, so chips
+		// never promise places the embed filter excludes.
+		expect(r.counts.all).toBe(1);
+		expect(r.counts.restaurants).toBe(1);
+	});
+
 	it("composes boosts after category (empty intersections are honest)", () => {
 		const r = selectVisiblePlaces({
 			...base,
@@ -237,6 +290,29 @@ describe("computeVisibleSignature", () => {
 		);
 		expect(
 			computeVisibleSignature({ ...inputs, issuesReady: false }, 7, ""),
+		).not.toBe(sig);
+		expect(
+			computeVisibleSignature(
+				{ ...inputs, paymentMethods: new Set(["lightning"] as const) },
+				7,
+				"",
+			),
+		).not.toBe(sig);
+		expect(
+			computeVisibleSignature(
+				{ ...inputs, paymentMethods: new Set(["nfc"] as const) },
+				7,
+				"",
+			),
+		).not.toBe(
+			computeVisibleSignature(
+				{ ...inputs, paymentMethods: new Set(["lightning"] as const) },
+				7,
+				"",
+			),
+		);
+		expect(
+			computeVisibleSignature({ ...inputs, paymentsReady: false }, 7, ""),
 		).not.toBe(sig);
 		expect(
 			computeVisibleSignature({ ...inputs, mode: "search" }, 7, "1,2"),

@@ -11,6 +11,7 @@ import {
 } from "$lib/placeDetails";
 import {
 	mapUpdates,
+	paymentTagsLoaded,
 	places,
 	placesError,
 	placesLoadingProgress,
@@ -141,6 +142,62 @@ export const ensureVerifiedDates = async (): Promise<void> => {
 		verifiedDatesLoaded.set(true);
 	} catch (error) {
 		console.warn("Could not load verification dates:", error);
+	}
+};
+
+// The bulk feed (CDN places.json) carries no payment tags, so the
+// ?onchain&lightning&nfc embed filter (#1269) has nothing to match on until
+// this runs. Fetch the three payment fields for every place in one lean call
+// and merge them into $places by id. Fetched LAZILY — only when an embed
+// param is present — and once per session (the flag is in-memory). Sets
+// paymentTagsLoaded so the filter flips from inert to active. Later MAP_SYNC
+// updates carry the tags themselves (see MAP_SYNC in api-fields), so changed
+// places stay fresh within the session too. Best-effort: on failure the flag
+// stays false and the filter keeps showing everything.
+export const ensurePaymentMethods = async (): Promise<void> => {
+	if (get(paymentTagsLoaded)) return;
+	try {
+		const response = await api.get<
+			{
+				id: number;
+				"osm:payment:onchain"?: "yes";
+				"osm:payment:lightning"?: "yes";
+				"osm:payment:lightning_contactless"?: "yes";
+			}[]
+		>(
+			`${API_BASE}/v4/places?fields=id,osm:payment:onchain,osm:payment:lightning,osm:payment:lightning_contactless`,
+		);
+		if (!Array.isArray(response.data)) return;
+		const tagsById = new Map(
+			response.data.map((item) => [item.id, item] as const),
+		);
+		// Same degenerate-response guard as ensureVerifiedDates: don't latch
+		// the flag (or republish) off an empty payload — stay inert and let a
+		// later call retry.
+		if (tagsById.size === 0) return;
+		const current = get(places);
+		if (current.length === 0) return;
+		const enriched = current.map((p) => {
+			const item = tagsById.get(p.id);
+			if (!item) return p;
+			let changed = false;
+			const next = { ...p };
+			for (const field of [
+				"osm:payment:onchain",
+				"osm:payment:lightning",
+				"osm:payment:lightning_contactless",
+			] as const) {
+				if (item[field] && next[field] !== item[field]) {
+					next[field] = item[field];
+					changed = true;
+				}
+			}
+			return changed ? next : p;
+		});
+		await publishPlaces(enriched);
+		paymentTagsLoaded.set(true);
+	} catch (error) {
+		console.warn("Could not load payment methods:", error);
 	}
 };
 

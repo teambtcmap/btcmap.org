@@ -56,7 +56,17 @@ export const PLACE_FIELD_SETS = {
 	// its date through a sync (no flicker) and the recency filter never needs a
 	// full re-fetch to stay fresh — the baseline is loaded once, lazily, by
 	// ensureVerifiedDates() when the filter is first engaged.
-	MAP_SYNC: [...PLACE_FIELDS.CORE, ...PLACE_FIELDS.SYNC, "verified_at"],
+	MAP_SYNC: [
+		...PLACE_FIELDS.CORE,
+		...PLACE_FIELDS.SYNC,
+		"verified_at",
+		// Payment tags ride along (#1269): without them a MAP_SYNC update
+		// replaces a place wholesale and would wipe the payment-tag
+		// enrichment ensurePaymentMethods() merged in mid-session.
+		"osm:payment:onchain",
+		"osm:payment:lightning",
+		"osm:payment:lightning_contactless",
+	],
 	COMPLETE_PLACE: [
 		...PLACE_FIELDS.CORE,
 		...PLACE_FIELDS.SYNC,

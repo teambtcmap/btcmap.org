@@ -5,6 +5,11 @@ import {
 	countMerchantsByCategory,
 	placeMatchesCategory,
 } from "$lib/categoryMapping";
+import {
+	type PaymentMethod,
+	placeMatchesPaymentMethods,
+	serializePaymentMethodsParam,
+} from "$lib/map/paymentMethodFilter";
 import type { VerifiedFilterYears } from "$lib/map/verifiedFilter";
 import type { DerivedIssueCode } from "$lib/placeIssues";
 import { placeMatchesIssueCodes, serializeIssuesParam } from "$lib/placeIssues";
@@ -45,10 +50,21 @@ export type VisibleSelectionInputs = {
 	// the filter stays inert (rather than flagging every row as
 	// not_verified) until enrichment lands.
 	issuesReady: boolean;
+	// The ?onchain&lightning&nfc embed filter (#1269): null when off; otherwise
+	// a place stays visible only when it accepts EVERY selected method. Unlike
+	// boosts/issues there is no search exemption — an embedded map must keep
+	// its payment promise everywhere.
+	paymentMethods: ReadonlySet<PaymentMethod> | null;
+	// Same readiness contract as the two gates above: the bulk CDN feed and
+	// MAP_SYNC rows lack payment tags entirely, so consumers gate on
+	// $paymentTagsLoaded and stay inert rather than hiding every row. API
+	// rows (search / radius LIST_ITEM) carry the tags natively and pass true.
+	paymentsReady: boolean;
 };
 
 export type VisibleSelection = {
-	// The final visible set: recency → category → boosts, deleted rows dropped.
+	// The final visible set: recency → issues → payments → category → boosts,
+	// deleted rows dropped.
 	selection: Place[];
 	// The recency-filtered, PRE-category set — what chip counts and density
 	// ceilings are computed on (a selected chip must not hide the other
@@ -73,6 +89,12 @@ export function selectVisiblePlaces(
 	if (issueCodes && inputs.issuesReady) {
 		preCategory = preCategory.filter((p) =>
 			placeMatchesIssueCodes(p, issueCodes),
+		);
+	}
+	if (inputs.paymentMethods && inputs.paymentsReady) {
+		const methods = inputs.paymentMethods;
+		preCategory = preCategory.filter((p) =>
+			placeMatchesPaymentMethods(p, methods),
 		);
 	}
 	const counts = countMerchantsByCategory(preCategory);
@@ -115,6 +137,10 @@ export function computeVisibleSignature(
 			? serializeIssuesParam(inputs.issueCodes) || "all"
 			: "off",
 		inputs.issuesReady,
+		inputs.paymentMethods
+			? serializePaymentMethodsParam(inputs.paymentMethods)
+			: "off",
+		inputs.paymentsReady,
 		revision,
 		searchResultIds,
 	].join("|");

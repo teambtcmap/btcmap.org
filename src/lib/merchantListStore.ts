@@ -9,6 +9,11 @@ import type { CategoryCounts, CategoryKey } from "$lib/categoryMapping";
 import { createEmptyCategoryCounts } from "$lib/categoryMapping";
 import { MERCHANT_LIST_MAX_ITEMS } from "$lib/constants";
 import { _ } from "$lib/i18n";
+import type { PaymentMethod } from "$lib/map/paymentMethodFilter";
+import {
+	type PaymentTaggedPlace,
+	placeMatchesPaymentMethods,
+} from "$lib/map/paymentMethodFilter";
 import type { VerifiedFilterYears } from "$lib/map/verifiedFilter";
 import {
 	getStoredVerifiedFilter,
@@ -17,7 +22,7 @@ import {
 import { selectVisiblePlaces } from "$lib/map/visiblePlaces";
 import { isBoosted } from "$lib/merchantDrawerLogic";
 import { merchantDrawer } from "$lib/merchantDrawerStore";
-import { verifiedDatesLoaded } from "$lib/store";
+import { paymentTagsLoaded, verifiedDatesLoaded } from "$lib/store";
 import type { Place } from "$lib/types";
 import type { UserLocation } from "$lib/userLocationStore";
 import { userLocation } from "$lib/userLocationStore";
@@ -62,6 +67,11 @@ export type MerchantListState = {
 	categoryCounts: CategoryCounts;
 	// "Verified within N years" filter (null = Any/off); persisted to localStorage
 	verifiedWithinYears: VerifiedFilterYears;
+	// ?onchain&lightning&nfc embed filter (#1269), seeded by the map page from
+	// the URL and locked for the session — no persistence, no user toggle.
+	// null = off. Consumed by every selectVisiblePlaces call site in this
+	// store so pins, lists, and counts can't disagree.
+	paymentMethods: ReadonlySet<PaymentMethod> | null;
 };
 
 const initialState: MerchantListState = {
@@ -80,6 +90,7 @@ const initialState: MerchantListState = {
 	selectedCategory: "all",
 	categoryCounts: createEmptyCategoryCounts(),
 	verifiedWithinYears: getStoredVerifiedFilter(),
+	paymentMethods: null,
 };
 
 // Helper function to reset category state
@@ -210,7 +221,7 @@ function createMerchantListStore() {
 		// Counts come from the shared pipeline on the recency-filtered set;
 		// the panel renders the same pipeline's selection
 		// (filteredSearchResults), so chips and rows can never disagree.
-		const { verifiedWithinYears } = get(store);
+		const { verifiedWithinYears, paymentMethods } = get(store);
 		const { counts: categoryCounts } = selectVisiblePlaces({
 			places: sortedResults,
 			mode: "search",
@@ -220,6 +231,9 @@ function createMerchantListStore() {
 			boostsOnly: false,
 			issueCodes: null,
 			issuesReady: true,
+			// /v4/search rows carry the payment tags natively (LIST_ITEM).
+			paymentMethods,
+			paymentsReady: true,
 		});
 		update((state) => ({
 			...resetCategoryState(state),
@@ -390,7 +404,8 @@ function createMerchantListStore() {
 			centerLon?: number,
 			limit: number = MERCHANT_LIST_MAX_ITEMS,
 		) {
-			const { selectedCategory, verifiedWithinYears } = get(store);
+			const { selectedCategory, verifiedWithinYears, paymentMethods } =
+				get(store);
 			// The shared pipeline applies the recency window (gated on the lazy
 			// dates being loaded, matching the markers), computes chip counts on
 			// the pre-category set, and applies the auto-reset rule — one
@@ -404,6 +419,10 @@ function createMerchantListStore() {
 				boostsOnly: false,
 				issueCodes: null,
 				issuesReady: true,
+				// Bulk-feed rows lack payment tags until the lazy enrichment
+				// lands; inert until then (same gate the markers use).
+				paymentMethods,
+				paymentsReady: paymentMethods == null || get(paymentTagsLoaded),
 			});
 
 			const sorted = sortMerchants(
@@ -457,7 +476,8 @@ function createMerchantListStore() {
 				// otherwise-too-dense area under the ceiling, so the filter stays
 				// effective at zoom 10-14. The density ceiling compares the
 				// PRE-category set — a selected chip must not defeat it.
-				const { selectedCategory, verifiedWithinYears } = get(store);
+				const { selectedCategory, verifiedWithinYears, paymentMethods } =
+					get(store);
 				const { selection, preCategory, counts, effectiveCategory } =
 					selectVisiblePlaces({
 						places: validPlaces,
@@ -468,6 +488,9 @@ function createMerchantListStore() {
 						boostsOnly: false,
 						issueCodes: null,
 						issuesReady: true,
+						// Radius rows carry the payment tags natively (LIST_ITEM).
+						paymentMethods,
+						paymentsReady: true,
 					});
 
 				// Check if we should hide results (too many at low zoom)
@@ -551,19 +574,34 @@ function createMerchantListStore() {
 			// One snapshot so the fields param and the post-response filter can
 			// never disagree; a mid-flight filter change re-invokes this method,
 			// which aborts the stale request above.
-			const { verifiedWithinYears } = get(store);
-			const fields = verifiedWithinYears == null ? "id" : "id,verified_at";
+			const { verifiedWithinYears, paymentMethods } = get(store);
+			// Widen the lean payload with exactly the fields the active filters
+			// need: verified_at for the recency window, the payment tags for
+			// the ?onchain&lightning&nfc embed filter (#1269).
+			const fields = [
+				"id",
+				...(verifiedWithinYears == null ? [] : ["verified_at"]),
+				...(paymentMethods == null
+					? []
+					: [
+							"osm:payment:onchain",
+							"osm:payment:lightning",
+							"osm:payment:lightning_contactless",
+						]),
+			].join(",");
 
 			try {
 				// Typed to the payload actually requested — these rows are not
 				// full Places and must not be handed to anything expecting one.
 				const validItems = await searchPlacesInRadius<
-					Pick<Place, "id" | "verified_at">
+					Pick<Place, "id"> & Pick<Place, "verified_at"> & PaymentTaggedPlace
 				>(center, radiusKm, fields, listAbortController.signal);
-				const recencyPlaces = filterPlacesByRecency(
-					validItems,
-					verifiedWithinYears,
-				);
+				let counted = filterPlacesByRecency(validItems, verifiedWithinYears);
+				if (paymentMethods) {
+					counted = counted.filter((p) =>
+						placeMatchesPaymentMethods(p, paymentMethods),
+					);
+				}
 
 				// A response that raced a filter change can settle before the
 				// re-invocation aborts it (e.g. during applyVerifiedFilter's
@@ -578,7 +616,7 @@ function createMerchantListStore() {
 				update((state) => ({
 					...state,
 					merchants: [],
-					totalCount: recencyPlaces.length,
+					totalCount: counted.length,
 					isLoadingList: false,
 					listError: false,
 					// Preserve existing categoryCounts since we don't have actual merchant data to recalculate them
@@ -749,6 +787,9 @@ function createMerchantListStore() {
 						boostsOnly: false,
 						issueCodes: null,
 						issuesReady: true,
+						paymentMethods: state.paymentMethods,
+						// Search rows carry the payment tags natively (LIST_ITEM).
+						paymentsReady: true,
 					});
 					return {
 						...state,
@@ -764,6 +805,13 @@ function createMerchantListStore() {
 		// Reset the selected category to 'all'
 		resetCategory() {
 			update((state) => resetCategoryState(state));
+		},
+
+		// Seed the ?onchain&lightning&nfc embed filter (#1269). Session-only:
+		// the page parses the URL once at init and calls this — no persistence,
+		// no user-facing toggle. Pass null to turn the filter off.
+		setPaymentMethods(methods: ReadonlySet<PaymentMethod> | null) {
+			update((state) => ({ ...state, paymentMethods: methods }));
 		},
 
 		// Re-sort merchants using current user location (if available)

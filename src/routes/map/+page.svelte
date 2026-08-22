@@ -57,6 +57,7 @@ import {
 	pinIconImageExpression,
 	pinVariantFor,
 } from "$lib/map/maplibreSprites";
+import { parsePaymentMethodsParam } from "$lib/map/paymentMethodFilter";
 import { createPlacePinSource } from "$lib/map/placePinSource";
 import { parseLatLongQuery } from "$lib/map/queryViewport";
 import type { VerifiedFilterYears } from "$lib/map/verifiedFilter";
@@ -86,6 +87,7 @@ import {
 } from "$lib/placeIssues";
 import { savedPlaceIds } from "$lib/session";
 import {
+	paymentTagsLoaded,
 	places,
 	placesById,
 	placesError,
@@ -93,7 +95,7 @@ import {
 	placesLoadingStatus,
 	verifiedDatesLoaded,
 } from "$lib/store";
-import { ensureVerifiedDates } from "$lib/sync/places";
+import { ensurePaymentMethods, ensureVerifiedDates } from "$lib/sync/places";
 import { theme } from "$lib/theme";
 import type { Place } from "$lib/types";
 import { userLocation } from "$lib/userLocationStore";
@@ -151,6 +153,17 @@ const issuesOnly =
 let selectedIssueCodes: ReadonlySet<DerivedIssueCode> | null = issuesOnly
 	? parseIssuesParam(new URLSearchParams(window.location.search).get("issues"))
 	: null;
+
+// Payment-method embed filter (#1269): bare ?onchain&lightning&nfc params
+// (presence alone, legacy Leaflet contract) narrow everything to places that
+// accept every selected method. Locked for the session like ?boosts/?issues;
+// seeded into the store so lists and counts filter identically to pins.
+const paymentMethods = browser
+	? parsePaymentMethodsParam(new URLSearchParams(window.location.search))
+	: null;
+if (paymentMethods) {
+	merchantList.setPaymentMethods(paymentMethods);
+}
 
 // Viewport issue tallies for the chips bar, computed in updateMerchantList's
 // local-markers path (issues mode always forces that path). Null until the
@@ -761,6 +774,11 @@ $: if (map && styleLoaded && $places) {
 		// Trivially ready when the mode is off or exempted, so the dates
 		// landing can't change the signature outside issues mode.
 		issuesReady: !issuesOnly || inSearch || $verifiedDatesLoaded,
+		// Payment embed filter applies in search mode TOO (an embedded map
+		// keeps its promise everywhere); only the bulk feed needs the
+		// enrichment gate — search rows carry the tags natively.
+		paymentMethods,
+		paymentsReady: paymentMethods == null || inSearch || $paymentTagsLoaded,
 	};
 	const renderSig = [
 		computeVisibleSignature(
@@ -826,6 +844,22 @@ $: if (
 ) {
 	didInitialVerifiedLoad = true;
 	void ensureVerifiedDates().then(() => updateMerchantList({ force: true }));
+}
+
+// Same lazy-enrichment handshake for the payment embed filter (#1269): the
+// bulk feed has no osm:payment:* tags until this lands, then one forced
+// refresh re-runs pins + list through the (now active) pipeline.
+let didInitialPaymentLoad = false;
+$: if (
+	browser &&
+	map &&
+	styleLoaded &&
+	$places.length > 0 &&
+	!didInitialPaymentLoad &&
+	paymentMethods
+) {
+	didInitialPaymentLoad = true;
+	void ensurePaymentMethods().then(() => updateMerchantList({ force: true }));
 }
 
 // Globe projection is page state: a basemap swap resets the projection to

@@ -368,6 +368,7 @@ function handleDismissLocation() {
 // The rendered search rows come from the same pipeline as the pins and the
 // chip counts (selectVisiblePlaces), so the list can never disagree with
 // either again.
+$: paymentMethods = $merchantList.paymentMethods;
 $: filteredSearchResults = selectVisiblePlaces({
 	places: searchResults,
 	mode: "search",
@@ -377,6 +378,9 @@ $: filteredSearchResults = selectVisiblePlaces({
 	boostsOnly: false,
 	issueCodes: null,
 	issuesReady: true,
+	// /v4/search rows carry the payment tags natively (LIST_ITEM).
+	paymentMethods,
+	paymentsReady: true,
 }).selection;
 
 // Helper function to check if a category has matching merchants
