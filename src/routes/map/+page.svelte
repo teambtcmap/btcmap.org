@@ -131,8 +131,11 @@ let placementActive = false;
 // Placement mode owns the bottom sheet's z-[1002] slot; a merchant drawer
 // opened before (or during, via a stray pin click below) placement starts
 // would otherwise stack on top of it. close() also cleans up ?merchant/?view
-// the same way the existing empty-map-click close path does.
-$: if (placementActive) merchantDrawer.close();
+// the same way the existing empty-map-click close path does. Guard on isOpen
+// (matching that same close path) so ordinary placement entry doesn't push a
+// duplicate, unchanged-URL history entry via close()'s unconditional
+// updateMerchantHash(null) → pushState.
+$: if (placementActive && $merchantDrawer.isOpen) merchantDrawer.close();
 
 // "Boosted locations only" map filter (?boosts=true). The tools modal sets it
 // via a full page reload, so it's constant for the session; it narrows both the
