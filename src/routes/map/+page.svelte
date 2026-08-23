@@ -106,6 +106,7 @@ import { debounce, errToast, isBoosted } from "$lib/utils";
 import { filterPlacesByRecency } from "$lib/verification";
 
 import type { PageData } from "./$types";
+import AddPlaceMode from "./components/AddPlaceMode.svelte";
 import IssueFilterChips from "./components/IssueFilterChips.svelte";
 import MapControls from "./components/MapControls.svelte";
 import MapSearchBar from "./components/MapSearchBar.svelte";
@@ -124,6 +125,8 @@ const isMobileLayout = browser && window.innerWidth < BREAKPOINTS.md;
 
 // Lets the floating search bar hand focus to the panel's input as it unmounts
 let merchantListPanel: MerchantListPanel;
+
+let placementActive = false;
 
 // "Boosted locations only" map filter (?boosts=true). The tools modal sets it
 // via a full page reload, so it's constant for the session; it narrows both the
@@ -964,6 +967,7 @@ onMount(async () => {
 	// near their own country instead of the global default.
 	const hashCoords = parseHashCoords();
 	const searchParams = new URLSearchParams(window.location.search);
+	placementActive = searchParams.has("add");
 	const queryView = hashCoords ? null : parseLatLongQuery(searchParams);
 	// Distinguish "no ?lat/long" from "malformed ?lat/long" so an embed
 	// linking with bad coords gets a visible hint instead of silently
@@ -1433,7 +1437,7 @@ onDestroy(() => {
 	</div>
 {/if}
 
-{#if styleLoaded && !isMobileLayout}
+{#if styleLoaded && !isMobileLayout && !placementActive}
 	<div class="pointer-events-none absolute top-3 left-3 z-[1000]">
 		<MapSearchBar
 			onActivate={async () => {
@@ -1452,28 +1456,30 @@ onDestroy(() => {
 	</div>
 {/if}
 
-<MerchantListPanel
-	bind:this={merchantListPanel}
-	onPanToNearbyMerchant={panToNearbyMerchant}
-	onZoomToSearchResult={zoomToSearchResult}
-	onZoomToNearbyLevel={zoomToNearbyLevel}
-	onFitSearchResultBounds={fitSearchResultBounds}
-	onHoverStart={() => {
-		// Hover highlight requires feature-state plumbing that isn't
-		// wired here yet — deferred to a follow-up polish.
-	}}
-	onHoverEnd={() => {
-		// See onHoverStart above.
-	}}
-	onSearch={(query) => merchantList.search(query, { getCenter: readSearchCenter })}
-	onRefresh={() => updateMerchantList({ force: true })}
-	behavior={listBehavior}
-	mapReady={styleLoaded}
-	isMobile={isMobileLayout}
-	issuesMode={issuesOnly}
-/>
+{#if !placementActive}
+	<MerchantListPanel
+		bind:this={merchantListPanel}
+		onPanToNearbyMerchant={panToNearbyMerchant}
+		onZoomToSearchResult={zoomToSearchResult}
+		onZoomToNearbyLevel={zoomToNearbyLevel}
+		onFitSearchResultBounds={fitSearchResultBounds}
+		onHoverStart={() => {
+			// Hover highlight requires feature-state plumbing that isn't
+			// wired here yet — deferred to a follow-up polish.
+		}}
+		onHoverEnd={() => {
+			// See onHoverStart above.
+		}}
+		onSearch={(query) => merchantList.search(query, { getCenter: readSearchCenter })}
+		onRefresh={() => updateMerchantList({ force: true })}
+		behavior={listBehavior}
+		mapReady={styleLoaded}
+		isMobile={isMobileLayout}
+		issuesMode={issuesOnly}
+	/>
+{/if}
 
-{#if styleLoaded}
+{#if styleLoaded && !placementActive}
 	<CommunityRail
 		lat={currentLat}
 		lon={currentLon}
@@ -1499,6 +1505,10 @@ onDestroy(() => {
 	{globeOn}
 	onToggleGlobe={toggleGlobe}
 />
+
+{#if styleLoaded && !issuesOnly}
+	<AddPlaceMode {map} bind:active={placementActive} isMobile={isMobileLayout} />
+{/if}
 
 <style>
 	.map-container {
