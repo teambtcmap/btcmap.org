@@ -23,6 +23,7 @@ import TextLink from "$components/TextLink.svelte";
 import { _, locale } from "$lib/i18n";
 import type { BtcmapMapHandle } from "$lib/map/createMap";
 import { createBtcmapMap } from "$lib/map/createMap";
+import { parseCoordsParams } from "$lib/placementMode";
 import { theme } from "$lib/theme";
 import { errToast, isValidLatitude, isValidLongitude } from "$lib/utils";
 
@@ -330,6 +331,16 @@ onMount(async () => {
 	if (browser) {
 		// fetch and add captcha
 		fetchCaptcha();
+
+		// Coordinates handed over from the map's placement mode (?lat&long).
+		// Calling placeMarker before the map exists is safe: it records the
+		// coords and the mapLoaded reactive drops the owed marker later.
+		const coords = parseCoordsParams(
+			new URLSearchParams(window.location.search),
+		);
+		if (coords) {
+			placeMarker(coords.lat, coords.long, { fly: true, syncInputs: true });
+		}
 
 		// Initialize the map
 		await initializeMap();
