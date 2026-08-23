@@ -287,10 +287,10 @@ const submitForm = (event: SubmitEvent) => {
 				name: name.value,
 				nameEn: nameEn.value,
 				address: address.value,
-				lat: lat ? lat.toString() : "",
-				long: long ? long.toString() : "",
+				lat: lat !== undefined ? lat.toString() : "",
+				long: long !== undefined ? long.toString() : "",
 				osm:
-					lat && long
+					lat !== undefined && long !== undefined
 						? `https://www.openstreetmap.org/edit#map=21/${lat}/${long}`
 						: "",
 				category: category.value,
