@@ -7,9 +7,13 @@ import { buildAddLocationUrl } from "$lib/placementMode";
 
 import { goto } from "$app/navigation";
 
-export let map: MapLibreMap | undefined;
-export let active = false;
-export let isMobile = false;
+type Props = {
+	map: MapLibreMap | undefined;
+	active?: boolean;
+	isMobile?: boolean;
+};
+
+let { map, active = $bindable(false), isMobile = false }: Props = $props();
 
 // Keep ?add in the URL so placement mode is linkable. Same raw
 // history.replaceState idiom as writeHashCoords ($lib/map/mapHash.ts),
@@ -74,14 +78,14 @@ const confirm = () => {
 		<div class="mt-4 flex gap-3">
 			<button
 				type="button"
-				on:click={cancel}
+				onclick={cancel}
 				class="h-12 rounded-xl border border-input px-5 font-semibold text-body dark:text-offwhite"
 			>
 				{$_("map.placement.cancel")}
 			</button>
 			<button
 				type="button"
-				on:click={confirm}
+				onclick={confirm}
 				class="h-12 flex-1 rounded-xl bg-bitcoin font-semibold text-white hover:bg-bitcoinHover"
 			>
 				{$_("map.placement.confirm")}
@@ -94,7 +98,7 @@ const confirm = () => {
 	     search sheet's peek, on desktop it sits near the bottom edge -->
 	<button
 		type="button"
-		on:click={enter}
+		onclick={enter}
 		class="bottom-(--fab-bottom) absolute left-3 z-[1000] flex h-12 items-center gap-2 rounded-full bg-bitcoin px-4 font-semibold text-white shadow-lg hover:bg-bitcoinHover"
 		style="--fab-bottom: calc(env(safe-area-inset-bottom) + {isMobile
 			? SEARCH_SHEET_PEEK_HEIGHT + 12
