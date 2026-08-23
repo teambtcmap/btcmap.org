@@ -128,6 +128,12 @@ let merchantListPanel: MerchantListPanel;
 
 let placementActive = false;
 
+// Placement mode owns the bottom sheet's z-[1002] slot; a merchant drawer
+// opened before (or during, via a stray pin click below) placement starts
+// would otherwise stack on top of it. close() also cleans up ?merchant/?view
+// the same way the existing empty-map-click close path does.
+$: if (placementActive) merchantDrawer.close();
+
 // "Boosted locations only" map filter (?boosts=true). The tools modal sets it
 // via a full page reload, so it's constant for the session; it narrows both the
 // map markers and the nearby list to currently-boosted places.
@@ -967,7 +973,7 @@ onMount(async () => {
 	// near their own country instead of the global default.
 	const hashCoords = parseHashCoords();
 	const searchParams = new URLSearchParams(window.location.search);
-	placementActive = searchParams.has("add");
+	placementActive = !issuesOnly && searchParams.has("add");
 	const queryView = hashCoords ? null : parseLatLongQuery(searchParams);
 	// Distinguish "no ?lat/long" from "malformed ?lat/long" so an embed
 	// linking with bad coords gets a visible hint instead of silently
@@ -1088,6 +1094,7 @@ onMount(async () => {
 			spiderfier = new Spiderfy(map, {
 				forceSpiderifyMinZoom: CLUSTERING_DISABLED_ZOOM,
 				onLeafClick: (feature) => {
+					if (placementActive) return;
 					const placeId = feature.properties?.id;
 					if (typeof placeId === "number") {
 						merchantDrawer.open(placeId, "details");
@@ -1127,6 +1134,7 @@ onMount(async () => {
 			// into the store. Both layers share the same handler since boosted
 			// pins live in their own source above the clustered one.
 			const onPinClick = (e: MapLayerMouseEvent) => {
+				if (placementActive) return;
 				const feature = e.features?.[0] as MapGeoJSONFeature | undefined;
 				const placeId = feature?.properties?.id;
 				if (typeof placeId !== "number") return;
