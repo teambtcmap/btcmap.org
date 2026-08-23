@@ -276,7 +276,14 @@
 		"viewDetails": "Detalles"
 	},
 	"map": {
-		"bitcoinMerchantMapTitle": "Mapa de Comercios Bitcoin"
+		"bitcoinMerchantMapTitle": "Mapa de Comercios Bitcoin",
+		"placement": {
+			"fab": "Add a place",
+			"title": "Place the pin",
+			"hint": "Drag the map until the pin sits on the business entrance, then confirm.",
+			"cancel": "Cancel",
+			"confirm": "Add a place here"
+		}
 	},
 	"info": {
 		"contact": "Contacto",
