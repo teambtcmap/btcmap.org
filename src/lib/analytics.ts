@@ -44,7 +44,9 @@ export type EventName =
 	| "save_prompt_login_click"
 	| "login_create_account_click"
 	| "backup_modal_shown"
-	| "backup_credentials_copied";
+	| "backup_credentials_copied"
+	| "add_place_enter"
+	| "add_place_confirm";
 
 declare global {
 	interface Window {

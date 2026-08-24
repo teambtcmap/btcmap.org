@@ -1,6 +1,7 @@
 <script lang="ts">
 import type { Map as MapLibreMap } from "maplibre-gl";
 
+import { trackEvent } from "$lib/analytics";
 import { SEARCH_SHEET_PEEK_HEIGHT } from "$lib/drawerConfig";
 import { _ } from "$lib/i18n";
 import { buildAddLocationUrl } from "$lib/placementMode";
@@ -32,9 +33,10 @@ const syncUrl = () => {
 	);
 };
 
-const enter = () => {
+const enter = (method: string) => {
 	active = true;
 	syncUrl();
+	trackEvent("add_place_enter", { method });
 };
 
 const cancel = () => {
@@ -45,6 +47,7 @@ const cancel = () => {
 const confirm = () => {
 	if (!map) return;
 	const center = map.getCenter();
+	trackEvent("add_place_confirm");
 	goto(buildAddLocationUrl(center.lat, center.lng));
 };
 </script>
@@ -98,7 +101,7 @@ const confirm = () => {
 	     search sheet's peek, on desktop it sits near the bottom edge -->
 	<button
 		type="button"
-		onclick={enter}
+		onclick={() => enter("fab")}
 		class="bottom-(--fab-bottom) absolute left-3 z-[1000] flex h-12 items-center gap-2 rounded-full bg-bitcoin px-4 font-semibold text-white shadow-lg hover:bg-bitcoinHover"
 		style="--fab-bottom: calc(env(safe-area-inset-bottom) + {isMobile
 			? SEARCH_SHEET_PEEK_HEIGHT + 12

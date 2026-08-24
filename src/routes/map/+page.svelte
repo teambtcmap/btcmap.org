@@ -977,6 +977,7 @@ onMount(async () => {
 	const hashCoords = parseHashCoords();
 	const searchParams = new URLSearchParams(window.location.search);
 	placementActive = !issuesOnly && searchParams.has("add");
+	if (placementActive) trackEvent("add_place_enter", { method: "url" });
 	const queryView = hashCoords ? null : parseLatLongQuery(searchParams);
 	// Distinguish "no ?lat/long" from "malformed ?lat/long" so an embed
 	// linking with bad coords gets a visible hint instead of silently
