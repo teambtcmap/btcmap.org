@@ -6,7 +6,6 @@ import type {
 } from "maplibre-gl";
 
 import { trackEvent } from "$lib/analytics";
-import { SEARCH_SHEET_PEEK_HEIGHT } from "$lib/drawerConfig";
 import { _ } from "$lib/i18n";
 import { buildAddLocationUrl } from "$lib/placementMode";
 
@@ -15,17 +14,18 @@ import { goto } from "$app/navigation";
 type Props = {
 	map: MapLibreMap | undefined;
 	active?: boolean;
-	isMobile?: boolean;
 };
 
-let { map, active = $bindable(false), isMobile = false }: Props = $props();
+let { map, active = $bindable(false) }: Props = $props();
 
 // Keep ?add in the URL so placement mode is linkable. Same raw
 // history.replaceState idiom as writeHashCoords ($lib/map/mapHash.ts),
 // which preserves location.search on every viewport write — so ?add
 // survives map moves and the hash survives this toggle. Other query
 // params (e.g. ?issues) must be preserved, so edit, don't rebuild.
-const syncUrl = () => {
+// Runs as an effect (reading `active` tracks it) so external activation —
+// the page flipping bind:active from the menu entry — syncs too.
+$effect(() => {
 	const params = new URLSearchParams(window.location.search);
 	if (active) params.set("add", "");
 	else params.delete("add");
@@ -35,17 +35,15 @@ const syncUrl = () => {
 		"",
 		`${window.location.pathname}${query}${window.location.hash}`,
 	);
-};
+});
 
 const enter = (method: string) => {
 	active = true;
-	syncUrl();
 	trackEvent("add_place_enter", { method });
 };
 
 const cancel = () => {
 	active = false;
-	syncUrl();
 };
 
 const confirm = () => {
@@ -189,19 +187,4 @@ $effect(() => {
 			</button>
 		</div>
 	</div>
-{:else}
-	<!-- bottom-(--fab-bottom) + style var mirrors the IssueFilterChips
-	     positioning idiom on this page; on mobile the FAB clears the
-	     search sheet's peek, on desktop it sits near the bottom edge -->
-	<button
-		type="button"
-		onclick={() => enter("fab")}
-		class="bottom-(--fab-bottom) absolute left-3 z-[1000] flex h-12 items-center gap-2 rounded-full bg-bitcoin px-4 font-semibold text-white shadow-lg hover:bg-bitcoinHover"
-		style="--fab-bottom: calc(env(safe-area-inset-bottom) + {isMobile
-			? SEARCH_SHEET_PEEK_HEIGHT + 12
-			: 24}px)"
-	>
-		<span class="text-xl leading-none">+</span>
-		{$_("map.placement.fab")}
-	</button>
 {/if}

@@ -9,9 +9,16 @@ import { session } from "$lib/session";
 type Props = {
 	open?: boolean;
 	variant?: "main" | "communities";
+	// When set (/map outside issues mode), the add row starts placement mode
+	// on the map instead of linking to the standalone form.
+	onAddPlace?: (() => void) | null;
 };
 
-let { open = $bindable(false), variant = "main" }: Props = $props();
+let {
+	open = $bindable(false),
+	variant = "main",
+	onAddPlace = null,
+}: Props = $props();
 
 const loggedIn = $derived(!!$session);
 
@@ -28,14 +35,28 @@ const iconClass = "h-5 w-5 flex-none dark:invert";
 		</a>
 
 		{#if variant === "main"}
-			<a
-				href="/add-location"
-				class={rowClass}
-				onclick={() => trackEvent("add_location_click")}
-			>
-				<img src="/icons/marker.svg" alt="" class={iconClass} />
-				<span>{$_("mapControls.addLocation")}</span>
-			</a>
+			{#if onAddPlace}
+				<button
+					type="button"
+					class="{rowClass} w-full text-left"
+					onclick={() => {
+						open = false;
+						onAddPlace?.();
+					}}
+				>
+					<img src="/icons/marker.svg" alt="" class={iconClass} />
+					<span>{$_("mapControls.addLocation")}</span>
+				</button>
+			{:else}
+				<a
+					href="/add-location"
+					class={rowClass}
+					onclick={() => trackEvent("add_location_click")}
+				>
+					<img src="/icons/marker.svg" alt="" class={iconClass} />
+					<span>{$_("mapControls.addLocation")}</span>
+				</a>
+			{/if}
 			<!-- Full reload on purpose (data-sveltekit-reload): ?issues mode is
 				locked at page init, and a same-route client-side navigation
 				would not remount /map. -->

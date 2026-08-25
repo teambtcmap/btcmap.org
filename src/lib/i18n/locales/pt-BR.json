@@ -274,7 +274,6 @@
 	"map": {
 		"bitcoinMerchantMapTitle": "Mapa de Comerciantes Bitcoin",
 		"placement": {
-			"fab": "Add a place",
 			"title": "Place the pin",
 			"hint": "Drag the map until the pin sits on the business entrance, then confirm.",
 			"cancel": "Cancel",

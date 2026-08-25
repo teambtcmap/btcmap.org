@@ -48,6 +48,9 @@ export let enableGlobe = false;
 // every style.load, queued swaps included) can reliably re-apply it.
 export let globeOn = false;
 export let onToggleGlobe: (() => void) | null = null;
+// Forwarded to the menu modal's add row; null keeps the plain
+// /add-location link (communities variant, ?issues mode).
+export let onAddPlace: (() => void) | null = null;
 
 let toolsModalOpen = false;
 let menuModalOpen = false;
@@ -170,4 +173,4 @@ onDestroy(() => {
 	onToggleGlobe={enableGlobe ? onToggleGlobe : null}
 />
 
-<MapMenuModal bind:open={menuModalOpen} {variant} />
+<MapMenuModal bind:open={menuModalOpen} {variant} {onAddPlace} />

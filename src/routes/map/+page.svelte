@@ -128,6 +128,13 @@ let merchantListPanel: MerchantListPanel;
 
 let placementActive = false;
 
+// Menu-modal entry point; AddPlaceMode's URL-sync effect picks up the
+// bind:active flip, so this only has to set state and report the method.
+const startPlacement = () => {
+	placementActive = true;
+	trackEvent("add_place_enter", { method: "menu" });
+};
+
 // Placement mode owns the bottom sheet's z-[1002] slot; a merchant drawer
 // opened before (or during, via a stray pin click below) placement starts
 // would otherwise stack on top of it. close() also cleans up ?merchant/?view
@@ -1516,10 +1523,11 @@ onDestroy(() => {
 	enableGlobe
 	{globeOn}
 	onToggleGlobe={toggleGlobe}
+	onAddPlace={issuesOnly ? null : startPlacement}
 />
 
 {#if styleLoaded && !issuesOnly}
-	<AddPlaceMode {map} bind:active={placementActive} isMobile={isMobileLayout} />
+	<AddPlaceMode {map} bind:active={placementActive} />
 {/if}
 
 <style>
