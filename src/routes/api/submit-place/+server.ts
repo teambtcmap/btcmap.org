@@ -9,10 +9,13 @@ import { isValidLatitude, isValidLongitude } from "$lib/utils";
 import type { RequestHandler } from "./$types";
 import { env } from "$env/dynamic/private";
 
-const str = (value: unknown): string =>
+// Coerces non-strings to "" — for the optional free-text fields only.
+const asString = (value: unknown): string =>
 	typeof value === "string" ? value : "";
 
-export const POST: RequestHandler = async ({ request }) => {
+// Event fetch (not global) so a relative API_BASE like /btcmap-api-proxy
+// resolves server-side — same pattern as the other api/ routes.
+export const POST: RequestHandler = async ({ request, fetch }) => {
 	let body;
 	try {
 		body = await request.json();
@@ -28,7 +31,7 @@ export const POST: RequestHandler = async ({ request }) => {
 		error(418);
 	}
 
-	validateCaptcha(str(body.captchaSecret), str(body.captchaTest));
+	validateCaptcha(asString(body.captchaSecret), asString(body.captchaTest));
 
 	// The submit token is server-held (Netlify env var); without it the
 	// pipeline cannot work, so fail loudly rather than dropping submissions.
@@ -37,41 +40,46 @@ export const POST: RequestHandler = async ({ request }) => {
 		error(503, "Service unavailable");
 	}
 
-	const name = str(body.name).trim();
-	const category = str(body.category).trim();
-	const lat = Number(body.lat);
-	const long = Number(body.long);
+	const name = asString(body.name).trim();
+	const category = asString(body.category).trim();
+	// Strict number check: Number(null) and Number("") are 0, which would
+	// silently turn a null-ish coordinate into a valid-looking Null Island
+	// submission instead of a 400.
+	const lat: unknown = body.lat;
+	const long: unknown = body.long;
 	if (!name) error(400, "Name is required");
 	if (!category) error(400, "Category is required");
-	if (!isValidLatitude(lat) || !isValidLongitude(long)) {
+	if (
+		typeof lat !== "number" ||
+		typeof long !== "number" ||
+		!isValidLatitude(lat) ||
+		!isValidLongitude(long)
+	) {
 		error(400, "Invalid coordinates");
 	}
 
 	const submission: AddLocationSubmission = {
 		name,
-		nameEn: str(body.nameEn),
-		address: str(body.address),
+		nameEn: asString(body.nameEn),
+		address: asString(body.address),
 		lat,
 		long,
 		category,
-		methods: Array.isArray(body.methods) ? body.methods.map(str) : [],
-		website: str(body.website),
-		phone: str(body.phone),
-		hours: str(body.hours),
-		notes: str(body.notes),
-		source: str(body.source),
-		sourceOther: str(body.sourceOther),
-		contact: str(body.contact),
+		methods: Array.isArray(body.methods) ? body.methods.map(asString) : [],
+		website: asString(body.website),
+		phone: asString(body.phone),
+		hours: asString(body.hours),
+		notes: asString(body.notes),
+		source: asString(body.source),
+		sourceOther: asString(body.sourceOther),
+		contact: asString(body.contact),
 	};
 
 	const params = buildSubmitPlaceParams(submission, crypto.randomUUID());
-	// BTCMAP_API_RPC_URL stays the explicit override: API_BASE can be a
-	// relative dev-proxy path, which a server-side fetch cannot resolve.
-	const rpcUrl = env.BTCMAP_API_RPC_URL || `${API_BASE}/rpc`;
 
 	let response;
 	try {
-		response = await fetch(rpcUrl, {
+		response = await fetch(`${API_BASE}/rpc`, {
 			method: "POST",
 			headers: {
 				"Content-Type": "application/json",
