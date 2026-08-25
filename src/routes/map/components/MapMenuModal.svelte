@@ -6,10 +6,21 @@ import { session } from "$lib/session";
 
 // Page-navigation menu, modal twin of the tools panel. Two variants mirror
 // the old NavButtonsControl: "main" (/map) and "communities" (/communities/map).
-export let open = false;
-export let variant: "main" | "communities" = "main";
+type Props = {
+	open?: boolean;
+	variant?: "main" | "communities";
+	// When set (/map outside issues mode), the add row starts placement mode
+	// on the map instead of linking to the standalone form.
+	onAddPlace?: (() => void) | null;
+};
 
-$: loggedIn = !!$session;
+let {
+	open = $bindable(false),
+	variant = "main",
+	onAddPlace = null,
+}: Props = $props();
+
+const loggedIn = $derived(!!$session);
 
 const rowClass =
 	"flex items-center gap-3 rounded-lg px-3 py-3 text-body hover:bg-gray-100 dark:text-white dark:hover:bg-white/5";
@@ -18,20 +29,34 @@ const iconClass = "h-5 w-5 flex-none dark:invert";
 
 <Modal bind:open title={$_("mapControls.menu")} titleId="map-menu-title">
 	<nav class="space-y-1">
-		<a href="/" class={rowClass} on:click={() => trackEvent("home_button_click")}>
+		<a href="/" class={rowClass} onclick={() => trackEvent("home_button_click")}>
 			<img src="/icons/home.svg" alt="" class={iconClass} />
 			<span>{$_("mapControls.goToHome")}</span>
 		</a>
 
 		{#if variant === "main"}
-			<a
-				href="/add-location"
-				class={rowClass}
-				on:click={() => trackEvent("add_location_click")}
-			>
-				<img src="/icons/marker.svg" alt="" class={iconClass} />
-				<span>{$_("mapControls.addLocation")}</span>
-			</a>
+			{#if onAddPlace}
+				<button
+					type="button"
+					class="{rowClass} w-full text-left"
+					onclick={() => {
+						open = false;
+						onAddPlace?.();
+					}}
+				>
+					<img src="/icons/marker.svg" alt="" class={iconClass} />
+					<span>{$_("mapControls.addLocation")}</span>
+				</button>
+			{:else}
+				<a
+					href="/add-location"
+					class={rowClass}
+					onclick={() => trackEvent("add_location_click")}
+				>
+					<img src="/icons/marker.svg" alt="" class={iconClass} />
+					<span>{$_("mapControls.addLocation")}</span>
+				</a>
+			{/if}
 			<!-- Full reload on purpose (data-sveltekit-reload): ?issues mode is
 				locked at page init, and a same-route client-side navigation
 				would not remount /map. -->
@@ -39,7 +64,7 @@ const iconClass = "h-5 w-5 flex-none dark:invert";
 				href="/map?issues"
 				data-sveltekit-reload
 				class={rowClass}
-				on:click={() => trackEvent("issues_map_click")}
+				onclick={() => trackEvent("issues_map_click")}
 			>
 				<img src="/icons/warning.svg" alt="" class={iconClass} />
 				<span>{$_("mapControls.issuesMap")}</span>
@@ -47,7 +72,7 @@ const iconClass = "h-5 w-5 flex-none dark:invert";
 			<a
 				href="/communities/map"
 				class={rowClass}
-				on:click={() => trackEvent("community_map_click")}
+				onclick={() => trackEvent("community_map_click")}
 			>
 				<img src="/icons/group.svg" alt="" class={iconClass} />
 				<span>{$_("mapControls.communityMap")}</span>
@@ -62,7 +87,7 @@ const iconClass = "h-5 w-5 flex-none dark:invert";
 		<a
 			href={loggedIn ? "/user/activity" : "/login"}
 			class={rowClass}
-			on:click={() => trackEvent("account_button_click", { logged_in: loggedIn })}
+			onclick={() => trackEvent("account_button_click", { logged_in: loggedIn })}
 		>
 			<img src="/icons/account.svg" alt="" class={iconClass} />
 			<span>{loggedIn ? $_("mapControls.account") : $_("mapControls.login")}</span>

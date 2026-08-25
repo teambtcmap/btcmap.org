@@ -106,6 +106,7 @@ import { debounce, errToast, isBoosted } from "$lib/utils";
 import { filterPlacesByRecency } from "$lib/verification";
 
 import type { PageData } from "./$types";
+import AddPlaceMode from "./components/AddPlaceMode.svelte";
 import IssueFilterChips from "./components/IssueFilterChips.svelte";
 import MapControls from "./components/MapControls.svelte";
 import MapSearchBar from "./components/MapSearchBar.svelte";
@@ -124,6 +125,24 @@ const isMobileLayout = browser && window.innerWidth < BREAKPOINTS.md;
 
 // Lets the floating search bar hand focus to the panel's input as it unmounts
 let merchantListPanel: MerchantListPanel;
+
+let placementActive = false;
+
+// Menu-modal entry point; AddPlaceMode's URL-sync effect picks up the
+// bind:active flip, so this only has to set state and report the method.
+const startPlacement = () => {
+	placementActive = true;
+	trackEvent("add_place_enter", { method: "menu" });
+};
+
+// Placement mode owns the bottom sheet's z-[1002] slot; a merchant drawer
+// opened before (or during, via a stray pin click below) placement starts
+// would otherwise stack on top of it. close() also cleans up ?merchant/?view
+// the same way the existing empty-map-click close path does. Guard on isOpen
+// (matching that same close path) so ordinary placement entry doesn't push a
+// duplicate, unchanged-URL history entry via close()'s unconditional
+// updateMerchantHash(null) → pushState.
+$: if (placementActive && $merchantDrawer.isOpen) merchantDrawer.close();
 
 // "Boosted locations only" map filter (?boosts=true). The tools modal sets it
 // via a full page reload, so it's constant for the session; it narrows both the
@@ -964,6 +983,20 @@ onMount(async () => {
 	// near their own country instead of the global default.
 	const hashCoords = parseHashCoords();
 	const searchParams = new URLSearchParams(window.location.search);
+	placementActive = !issuesOnly && searchParams.has("add");
+	if (placementActive) trackEvent("add_place_enter", { method: "url" });
+	if (issuesOnly && searchParams.has("add")) {
+		// Placement mode is unavailable in the issues worklist, and
+		// AddPlaceMode (whose effect owns ?add) never mounts there — strip
+		// the dead param so it can't linger in shared/bookmarked URLs.
+		searchParams.delete("add");
+		const query = searchParams.toString() ? `?${searchParams.toString()}` : "";
+		history.replaceState(
+			history.state,
+			"",
+			`${window.location.pathname}${query}${window.location.hash}`,
+		);
+	}
 	const queryView = hashCoords ? null : parseLatLongQuery(searchParams);
 	// Distinguish "no ?lat/long" from "malformed ?lat/long" so an embed
 	// linking with bad coords gets a visible hint instead of silently
@@ -1084,6 +1117,7 @@ onMount(async () => {
 			spiderfier = new Spiderfy(map, {
 				forceSpiderifyMinZoom: CLUSTERING_DISABLED_ZOOM,
 				onLeafClick: (feature) => {
+					if (placementActive) return;
 					const placeId = feature.properties?.id;
 					if (typeof placeId === "number") {
 						merchantDrawer.open(placeId, "details");
@@ -1123,6 +1157,7 @@ onMount(async () => {
 			// into the store. Both layers share the same handler since boosted
 			// pins live in their own source above the clustered one.
 			const onPinClick = (e: MapLayerMouseEvent) => {
+				if (placementActive) return;
 				const feature = e.features?.[0] as MapGeoJSONFeature | undefined;
 				const placeId = feature?.properties?.id;
 				if (typeof placeId !== "number") return;
@@ -1433,7 +1468,7 @@ onDestroy(() => {
 	</div>
 {/if}
 
-{#if styleLoaded && !isMobileLayout}
+{#if styleLoaded && !isMobileLayout && !placementActive}
 	<div class="pointer-events-none absolute top-3 left-3 z-[1000]">
 		<MapSearchBar
 			onActivate={async () => {
@@ -1452,28 +1487,30 @@ onDestroy(() => {
 	</div>
 {/if}
 
-<MerchantListPanel
-	bind:this={merchantListPanel}
-	onPanToNearbyMerchant={panToNearbyMerchant}
-	onZoomToSearchResult={zoomToSearchResult}
-	onZoomToNearbyLevel={zoomToNearbyLevel}
-	onFitSearchResultBounds={fitSearchResultBounds}
-	onHoverStart={() => {
-		// Hover highlight requires feature-state plumbing that isn't
-		// wired here yet — deferred to a follow-up polish.
-	}}
-	onHoverEnd={() => {
-		// See onHoverStart above.
-	}}
-	onSearch={(query) => merchantList.search(query, { getCenter: readSearchCenter })}
-	onRefresh={() => updateMerchantList({ force: true })}
-	behavior={listBehavior}
-	mapReady={styleLoaded}
-	isMobile={isMobileLayout}
-	issuesMode={issuesOnly}
-/>
+{#if !placementActive}
+	<MerchantListPanel
+		bind:this={merchantListPanel}
+		onPanToNearbyMerchant={panToNearbyMerchant}
+		onZoomToSearchResult={zoomToSearchResult}
+		onZoomToNearbyLevel={zoomToNearbyLevel}
+		onFitSearchResultBounds={fitSearchResultBounds}
+		onHoverStart={() => {
+			// Hover highlight requires feature-state plumbing that isn't
+			// wired here yet — deferred to a follow-up polish.
+		}}
+		onHoverEnd={() => {
+			// See onHoverStart above.
+		}}
+		onSearch={(query) => merchantList.search(query, { getCenter: readSearchCenter })}
+		onRefresh={() => updateMerchantList({ force: true })}
+		behavior={listBehavior}
+		mapReady={styleLoaded}
+		isMobile={isMobileLayout}
+		issuesMode={issuesOnly}
+	/>
+{/if}
 
-{#if styleLoaded}
+{#if styleLoaded && !placementActive}
 	<CommunityRail
 		lat={currentLat}
 		lon={currentLon}
@@ -1498,7 +1535,12 @@ onDestroy(() => {
 	enableGlobe
 	{globeOn}
 	onToggleGlobe={toggleGlobe}
+	onAddPlace={issuesOnly ? null : startPlacement}
 />
+
+{#if styleLoaded && !issuesOnly}
+	<AddPlaceMode {map} bind:active={placementActive} />
+{/if}
 
 <style>
 	.map-container {

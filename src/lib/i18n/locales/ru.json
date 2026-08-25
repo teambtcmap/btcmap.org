@@ -276,7 +276,13 @@
 		"viewDetails": "Детали"
 	},
 	"map": {
-		"bitcoinMerchantMapTitle": "Биткоин карта"
+		"bitcoinMerchantMapTitle": "Биткоин карта",
+		"placement": {
+			"title": "Place the pin",
+			"hint": "Drag the map until the pin sits on the business entrance, then confirm.",
+			"cancel": "Cancel",
+			"confirm": "Add a place here"
+		}
 	},
 	"info": {
 		"contact": "Контакты",

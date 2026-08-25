@@ -23,6 +23,7 @@ import TextLink from "$components/TextLink.svelte";
 import { _, locale } from "$lib/i18n";
 import type { BtcmapMapHandle } from "$lib/map/createMap";
 import { createBtcmapMap } from "$lib/map/createMap";
+import { parseCoordsParams } from "$lib/placementMode";
 import { theme } from "$lib/theme";
 import { errToast, isValidLatitude, isValidLongitude } from "$lib/utils";
 
@@ -286,10 +287,10 @@ const submitForm = (event: SubmitEvent) => {
 				name: name.value,
 				nameEn: nameEn.value,
 				address: address.value,
-				lat: lat ? lat.toString() : "",
-				long: long ? long.toString() : "",
+				lat: lat !== undefined ? lat.toString() : "",
+				long: long !== undefined ? long.toString() : "",
 				osm:
-					lat && long
+					lat !== undefined && long !== undefined
 						? `https://www.openstreetmap.org/edit#map=21/${lat}/${long}`
 						: "",
 				category: category.value,
@@ -330,6 +331,16 @@ onMount(async () => {
 	if (browser) {
 		// fetch and add captcha
 		fetchCaptcha();
+
+		// Coordinates handed over from the map's placement mode (?lat&long).
+		// Calling placeMarker before the map exists is safe: it records the
+		// coords and the mapLoaded reactive drops the owed marker later.
+		const coords = parseCoordsParams(
+			new URLSearchParams(window.location.search),
+		);
+		if (coords) {
+			placeMarker(coords.lat, coords.long, { fly: true, syncInputs: true });
+		}
 
 		// Initialize the map
 		await initializeMap();

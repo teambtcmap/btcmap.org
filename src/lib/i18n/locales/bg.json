@@ -715,7 +715,13 @@
 		"viewDetails": "Детайли"
 	},
 	"map": {
-		"bitcoinMerchantMapTitle": "Карта на биткойн търговци"
+		"bitcoinMerchantMapTitle": "Карта на биткойн търговци",
+		"placement": {
+			"title": "Place the pin",
+			"hint": "Drag the map until the pin sits on the business entrance, then confirm.",
+			"cancel": "Cancel",
+			"confirm": "Add a place here"
+		}
 	},
 	"success": {
 		"linkCopied": "Връзката е копирана в клипборда!",

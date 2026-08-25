@@ -365,7 +365,13 @@
 		"viewDetails": "Details"
 	},
 	"map": {
-		"bitcoinMerchantMapTitle": "Bitcoin Merchant Map"
+		"bitcoinMerchantMapTitle": "Bitcoin Merchant Map",
+		"placement": {
+			"title": "Place the pin",
+			"hint": "Drag the map until the pin sits on the business entrance, then confirm.",
+			"cancel": "Cancel",
+			"confirm": "Add a place here"
+		}
 	},
 	"info": {
 		"contact": "Contact",

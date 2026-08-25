@@ -365,7 +365,13 @@
 		"viewDetails": "Dettagli"
 	},
 	"map": {
-		"bitcoinMerchantMapTitle": "Mappa dei commercianti Bitcoin"
+		"bitcoinMerchantMapTitle": "Mappa dei commercianti Bitcoin",
+		"placement": {
+			"title": "Place the pin",
+			"hint": "Drag the map until the pin sits on the business entrance, then confirm.",
+			"cancel": "Cancel",
+			"confirm": "Add a place here"
+		}
 	},
 	"info": {
 		"contact": "Contatto",
