@@ -33,7 +33,7 @@ To test the frontend against a local [btcmap-api](https://github.com/teambtcmap/
 
 Remove or comment out the env var to switch back to the production API.
 
-**Note:** The add-location form submits through `/api/submit-place`, which calls btcmap-api's `submit_place` RPC and needs `BTCMAP_API_TOKEN` (plus `BTCMAP_API_RPC_URL` when testing against a local API).
+**Note:** The add-location form submits through `/api/submit-place`, which calls btcmap-api's `submit_place` RPC and needs `BTCMAP_IMPORT_TOKEN` (plus `BTCMAP_API_RPC_URL` when testing against a local API).
 
 ### Build project
 

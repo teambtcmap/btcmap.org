@@ -31,8 +31,8 @@ export const POST: RequestHandler = async ({ request }) => {
 
 	// The submit token is server-held (Netlify env var); without it the
 	// pipeline cannot work, so fail loudly rather than dropping submissions.
-	if (!env.BTCMAP_API_TOKEN) {
-		console.error("[submit-place] BTCMAP_API_TOKEN is not configured");
+	if (!env.BTCMAP_IMPORT_TOKEN) {
+		console.error("[submit-place] BTCMAP_IMPORT_TOKEN is not configured");
 		error(503, "Service unavailable");
 	}
 
@@ -72,7 +72,7 @@ export const POST: RequestHandler = async ({ request }) => {
 			method: "POST",
 			headers: {
 				"Content-Type": "application/json",
-				Authorization: `Bearer ${env.BTCMAP_API_TOKEN}`,
+				Authorization: `Bearer ${env.BTCMAP_IMPORT_TOKEN}`,
 			},
 			body: JSON.stringify({
 				jsonrpc: "2.0",
