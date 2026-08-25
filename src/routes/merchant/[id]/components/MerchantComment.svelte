@@ -3,9 +3,13 @@ import Time from "svelte-time";
 
 import type { MerchantPageData } from "$lib/types";
 
-export let text: MerchantPageData["comments"][number]["text"];
-export let time: MerchantPageData["comments"][number]["created_at"];
-export let compact = false;
+type Props = {
+	text: MerchantPageData["comments"][number]["text"];
+	time: MerchantPageData["comments"][number]["created_at"];
+	compact?: boolean;
+};
+
+let { text, time, compact = false }: Props = $props();
 </script>
 
 <div
