@@ -11,6 +11,7 @@ import OpenStatusPill from "$components/OpenStatusPill.svelte";
 import PaymentMethodPills from "$components/PaymentMethodPills.svelte";
 import ShowTags from "$components/ShowTags.svelte";
 import TaggingIssues from "$components/TaggingIssues.svelte";
+import { commentAnchorFromHash, commentDomId } from "$lib/commentPermalink";
 import { _, getDisplayLang, locale } from "$lib/i18n";
 import { boost, placesById, resetBoost } from "$lib/store";
 import type { MerchantActivityEvent, MerchantPageData } from "$lib/types";
@@ -25,6 +26,7 @@ import MerchantHero from "./components/MerchantHero.svelte";
 import MerchantTabs from "./components/MerchantTabs.svelte";
 import MerchantVerifyRow from "./components/MerchantVerifyRow.svelte";
 import { browser } from "$app/environment";
+import { page } from "$app/stores";
 
 // Server data is consumed directly; only the fields the page itself renders
 // (hero, payment indicator, action chips, activity) are mirrored here.
@@ -103,7 +105,20 @@ const handleBoost = () => {
 let eventCount = 50;
 $: eventsPaginated = merchantEvents.slice(0, eventCount);
 
+// Which comment the current #comment-<id> permalink targets. Read the hash
+// from $page.url, not window.location: Kit updates the store inside its
+// link click handler before the browser applies the fragment navigation,
+// so the window value can be one hash behind at that point.
+$: targetCommentAnchor = commentAnchorFromHash($page.url.hash);
+
 onMount(async () => {
+	// A shared permalink misses the browser's native anchor scroll because
+	// the page body renders after the i18n loading gate; land on the comment
+	// once it is in the DOM.
+	if (targetCommentAnchor) {
+		document.getElementById(targetCommentAnchor)?.scrollIntoView();
+	}
+
 	if (browser) {
 		// Refresh localforage so the main map / saved lists reflect current data.
 		try {
@@ -217,7 +232,13 @@ const ogImage = `https://api.btcmap.org/og/element/${data.id}`;
 					{#if comments && comments.length}
 						<div class="divide-y divide-gray-200 dark:divide-white/10">
 							{#each [...comments].reverse() as comment (comment.id)}
-								<MerchantComment text={comment.text} time={comment['created_at']} compact />
+								<MerchantComment
+									commentId={comment.id}
+									text={comment.text}
+									time={comment['created_at']}
+									highlighted={targetCommentAnchor === commentDomId(comment.id)}
+									compact
+								/>
 							{/each}
 						</div>
 					{:else}

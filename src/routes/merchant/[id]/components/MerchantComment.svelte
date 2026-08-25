@@ -1,18 +1,34 @@
 <script lang="ts">
 import Time from "svelte-time";
 
+import { commentDomId } from "$lib/commentPermalink";
 import type { MerchantPageData } from "$lib/types";
 
 type Props = {
+	commentId: MerchantPageData["comments"][number]["id"];
 	text: MerchantPageData["comments"][number]["text"];
 	time: MerchantPageData["comments"][number]["created_at"];
 	compact?: boolean;
+	// Driven by the page from the current #comment-<id> hash. CSS :target
+	// can't do this: on a fresh load the comment renders after the i18n
+	// gate, long after the browser gave up finding the fragment target.
+	highlighted?: boolean;
 };
 
-let { text, time, compact = false }: Props = $props();
+let {
+	commentId,
+	text,
+	time,
+	compact = false,
+	highlighted = false,
+}: Props = $props();
 </script>
 
 <div
+	id={commentDomId(commentId)}
+	class="scroll-mt-24 transition-colors {highlighted
+		? 'bg-link/10 dark:bg-link/15'
+		: ''}"
 	class:items-center={!compact}
 	class:items-start={compact}
 	class:space-y-2={!compact}
@@ -50,7 +66,9 @@ let { text, time, compact = false }: Props = $props();
 				class:text-center={!compact}
 				class:lg:inline={!compact}
 			>
-				<Time timestamp={time} />
+				<a href="#{commentDomId(commentId)}" class="hover:underline">
+					<Time timestamp={time} />
+				</a>
 			</span>
 		</div>
 	</div>
