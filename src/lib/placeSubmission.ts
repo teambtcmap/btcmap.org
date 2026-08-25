@@ -16,7 +16,7 @@ export type AddLocationSubmission = {
 };
 
 export type SubmitPlaceParams = {
-	origin: "website";
+	origin: "btcmap-website";
 	external_id: string;
 	lat: number;
 	lon: number;
@@ -50,7 +50,7 @@ export const buildSubmitPlaceParams = (
 		Object.entries(optional).filter(([, value]) => value.trim() !== ""),
 	);
 	return {
-		origin: "website",
+		origin: "btcmap-website",
 		external_id: externalId,
 		lat: form.lat,
 		lon: form.long,

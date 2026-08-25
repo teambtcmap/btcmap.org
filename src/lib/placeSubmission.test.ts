@@ -22,7 +22,7 @@ const fullForm = {
 describe("buildSubmitPlaceParams", () => {
 	it("maps the core fields and renames long to lon", () => {
 		const params = buildSubmitPlaceParams(fullForm, "uuid-1");
-		expect(params.origin).toBe("website");
+		expect(params.origin).toBe("btcmap-website");
 		expect(params.external_id).toBe("uuid-1");
 		expect(params.lat).toBe(52.48841);
 		expect(params.lon).toBe(13.42986);
