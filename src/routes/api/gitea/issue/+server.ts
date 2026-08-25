@@ -16,11 +16,6 @@ type IssueConfig = {
 };
 
 const CONFIG = {
-	"add-location": {
-		repo: "btcmap-data",
-		labelId: GITEA_LABELS.DATA.ADD_LOCATION,
-		hasAreaLabels: true,
-	},
 	"verify-location": {
 		repo: "btcmap-data",
 		labelId: GITEA_LABELS.DATA.VERIFY_LOCATION,
@@ -79,27 +74,6 @@ function generateBody(
 	const taggingInstructions = `If you are a new contributor please read our Tagging Instructions [here](https://wiki.btcmap.org/Tagging-Merchants).`;
 
 	switch (type) {
-		case "add-location":
-			return `Merchant name: ${data.name}
-English name (name:en): ${data.nameEn || ""}
-Address: ${data.address}
-Lat: ${data.lat}
-Long: ${data.long}
-Associated areas: ${areasText}
-OSM: ${data.osm}
-Category: ${data.category}
-Payment methods: ${data.methods}
-Website: ${data.website}
-Phone: ${data.phone}
-Opening hours: ${data.hours}
-Notes: ${data.notes}
-Data Source: ${data.source}
-Details (if applicable): ${data.sourceOther}
-Contact: ${data.contact}
-Created at: ${timestamp}
-
-${taggingInstructions}`;
-
 		case "verify-location":
 			return `Merchant name: ${data.name}
 Merchant location: ${data.location}
