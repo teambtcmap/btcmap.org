@@ -28,4 +28,10 @@ describe("parseCoordsParams", () => {
 		expect(parseCoordsParams(new URLSearchParams("lat=91&long=0"))).toBeNull();
 		expect(parseCoordsParams(new URLSearchParams("lat=0&long=181"))).toBeNull();
 	});
+
+	it("rejects the legacy bounds form (two lat/long pairs)", () => {
+		expect(
+			parseCoordsParams(new URLSearchParams("lat=1&long=2&lat=3&long=4")),
+		).toBeNull();
+	});
 });
