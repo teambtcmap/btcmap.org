@@ -248,7 +248,6 @@ let noLocationSelected = false;
 let noMethodSelected = false;
 let submitted = false;
 let submitting = false;
-let submissionIssueNumber: number;
 
 const handleCheckboxClick = () => {
 	noMethodSelected = false;
@@ -286,6 +285,11 @@ const submitForm = (event: SubmitEvent) => {
 		noMethodSelected = true;
 		errToast(get(_)("errors.noPaymentMethod"));
 	} else {
+		if (lat === undefined || long === undefined) {
+			noLocationSelected = true;
+			errToast(get(_)("errors.noLocationSelected"));
+			return;
+		}
 		submitting = true;
 		if (onchain.checked) {
 			methods.push("onchain");
@@ -298,22 +302,17 @@ const submitForm = (event: SubmitEvent) => {
 		}
 
 		axios
-			.post("/api/gitea/issue", {
-				type: "add-location",
+			.post("/api/submit-place", {
 				captchaSecret,
 				captchaTest: captchaInput.value,
 				honey: honeyInput.value,
 				name: name.value,
 				nameEn: nameEn.value,
 				address: address.value,
-				lat: lat !== undefined ? lat.toString() : "",
-				long: long !== undefined ? long.toString() : "",
-				osm:
-					lat !== undefined && long !== undefined
-						? `https://www.openstreetmap.org/edit#map=21/${lat}/${long}`
-						: "",
+				lat,
+				long,
 				category: category.value,
-				methods: methods.toString(),
+				methods,
 				website: website.value,
 				phone: phone.value,
 				hours: hours.value,
@@ -322,13 +321,12 @@ const submitForm = (event: SubmitEvent) => {
 				sourceOther: sourceOther ? sourceOther : "",
 				contact: contact.value,
 			})
-			.then((response) => {
-				submissionIssueNumber = response.data.number;
+			.then(() => {
 				submitted = true;
 			})
 			.catch((error) => {
 				methods = [];
-				if (error.response.data.message.includes("Captcha")) {
+				if (error.response?.data?.message?.includes("Captcha")) {
 					errToast(error.response.data.message);
 				} else {
 					errToast(get(_)("errors.formSubmission"));
@@ -896,7 +894,7 @@ $: if (map && mapLoaded) {
 	<FormSuccess
 		type={$_('addLocation.formSuccessType')}
 		text={$_('addLocation.formSuccessText')}
-		issue={submissionIssueNumber}
+		showIssueLink={false}
 		on:click={resetForm}
 	/>
 {/if}
