@@ -18,6 +18,7 @@ import Icon from "$components/Icon.svelte";
 import HeaderPlaceholder from "$components/layout/HeaderPlaceholder.svelte";
 import MapLoadingEmbed from "$components/MapLoadingEmbed.svelte";
 import MapUnsupportedFallback from "$components/MapUnsupportedFallback.svelte";
+import PlacementPinIcon from "$components/PlacementPinIcon.svelte";
 import PrimaryButton from "$components/PrimaryButton.svelte";
 import TextLink from "$components/TextLink.svelte";
 import { _, locale } from "$lib/i18n";
@@ -28,6 +29,24 @@ import { theme } from "$lib/theme";
 import { errToast, isValidLatitude, isValidLongitude } from "$lib/utils";
 
 import { browser } from "$app/environment";
+import { page } from "$app/stores";
+
+// Arrival from the map's placement mode: valid ?lat&long flips the page
+// into a details-first state — the marketing hero gives way to a pin
+// confirmation and the location section acknowledges the handed-over pin
+// instead of asking the user to search for one. Derived from the page
+// store so SSR already renders the right variant (no hydration flash).
+$: arrivalCoords = parseCoordsParams($page.url.searchParams);
+let showAddressSearch = false;
+// One-shot desktop nicety: hand focus to the name field once the inputs
+// unlock (captcha + picker map gate them via `disabled`).
+let nameFocusPending = false;
+$: if (nameFocusPending && captchaSecret && mapLoaded && name) {
+	nameFocusPending = false;
+	// Wait out the same render that flips the input's `disabled` off —
+	// focusing a still-disabled element is a silent no-op.
+	tick().then(() => name?.focus());
+}
 
 let captchaContent = "";
 let isCaptchaLoading = true;
@@ -335,11 +354,14 @@ onMount(async () => {
 		// Coordinates handed over from the map's placement mode (?lat&long).
 		// Calling placeMarker before the map exists is safe: it records the
 		// coords and the mapLoaded reactive drops the owed marker later.
-		const coords = parseCoordsParams(
-			new URLSearchParams(window.location.search),
-		);
-		if (coords) {
-			placeMarker(coords.lat, coords.long, { fly: true, syncInputs: true });
+		if (arrivalCoords) {
+			placeMarker(arrivalCoords.lat, arrivalCoords.long, {
+				fly: true,
+				syncInputs: true,
+			});
+			// Keyboard-first on desktop only: popping the on-screen keyboard
+			// on mobile would cover the confirmation the user just landed on.
+			nameFocusPending = window.matchMedia("(pointer: fine)").matches;
 		}
 
 		// Initialize the map
@@ -382,17 +404,35 @@ $: if (map && mapLoaded) {
 		<HeaderPlaceholder />
 	{/if}
 
-	<p class="mt-10 text-center text-2xl font-semibold text-primary md:text-3xl dark:text-white">
-		{$_('addLocation.subheading')}
-	</p>
-
-	<p class="mt-10 text-center text-lg font-semibold text-primary md:text-xl dark:text-white">
-		{$_('addLocation.businessOwner')}
-		<TextLink link="https://wiki.btcmap.org/Merchant-Best-Practices" external
-			>{$_('addLocation.bestPractices')}</TextLink
+	{#if arrivalCoords}
+		<!-- Same pin glyph as the map's placement crosshair — the visual cue
+		     that the pin the user just confirmed is the one this page holds. -->
+		<div
+			class="mx-auto mt-10 flex max-w-xl items-center gap-3 rounded-2xl border-2 border-bitcoin/40 bg-bitcoin/10 px-4 py-3"
 		>
-		{$_('addLocation.guide')}
-	</p>
+			<PlacementPinIcon width={24} class="shrink-0" />
+			<div>
+				<p class="font-semibold text-primary dark:text-white">
+					{$_('addLocation.pinConfirmedTitle')}
+				</p>
+				<p class="text-sm text-body dark:text-offwhite">
+					{$_('addLocation.pinConfirmedHint')}
+				</p>
+			</div>
+		</div>
+	{:else}
+		<p class="mt-10 text-center text-2xl font-semibold text-primary md:text-3xl dark:text-white">
+			{$_('addLocation.subheading')}
+		</p>
+
+		<p class="mt-10 text-center text-lg font-semibold text-primary md:text-xl dark:text-white">
+			{$_('addLocation.businessOwner')}
+			<TextLink link="https://wiki.btcmap.org/Merchant-Best-Practices" external
+				>{$_('addLocation.bestPractices')}</TextLink
+			>
+			{$_('addLocation.guide')}
+		</p>
+	{/if}
 
 	<div class="mt-16 pb-20 md:pb-32 lg:flex lg:justify-between lg:gap-10">
 		<section id="form" class="mx-auto w-full lg:w-1/2 lg:border-r lg:border-input lg:pr-10">
@@ -450,18 +490,24 @@ $: if (map && mapLoaded) {
 						{#if noLocationSelected}
 							<span class="font-semibold text-error">{$_('addLocation.noLocationError')}</span>
 						{/if}
+						{#if !arrivalCoords || showAddressSearch}
+							<p class="mt-2 mb-1 text-sm font-semibold text-primary/80 dark:text-white/80">
+								{$_('addLocation.searchByAddressLabel')}
+							</p>
+							<div class="mb-3">
+								<AddressSearch
+									disabled={!captchaSecret || !mapLoaded}
+									locale={$locale ?? 'en'}
+									on:select={handleAddressSelect}
+								/>
+							</div>
+						{/if}
 						<p class="mt-2 mb-1 text-sm font-semibold text-primary/80 dark:text-white/80">
-							{$_('addLocation.searchByAddressLabel')}
-						</p>
-						<div class="mb-3">
-							<AddressSearch
-								disabled={!captchaSecret || !mapLoaded}
-								locale={$locale ?? 'en'}
-								on:select={handleAddressSelect}
-							/>
-						</div>
-						<p class="mt-2 mb-1 text-sm font-semibold text-primary/80 dark:text-white/80">
-							{$_('addLocation.orSelectOnMapLabel')}
+							{#if arrivalCoords && !showAddressSearch}
+								{$_('addLocation.pinFromMapLabel')}
+							{:else}
+								{$_('addLocation.orSelectOnMapLabel')}
+							{/if}
 						</p>
 						<div class="relative mb-2">
 							<div
@@ -474,6 +520,17 @@ $: if (map && mapLoaded) {
 								<MapLoadingEmbed style="h-[300px] md:h-[400px] border-2 border-input rounded-2xl" />
 							{/if}
 						</div>
+						{#if arrivalCoords && !showAddressSearch}
+							<div class="mb-2">
+								<button
+									type="button"
+									class="text-sm font-semibold text-link hover:text-hover focus:outline-link"
+									on:click={() => (showAddressSearch = true)}
+								>
+									{$_('addLocation.adjustWithSearch')}
+								</button>
+							</div>
+						{/if}
 						<div class="flex space-x-2">
 							<div class="w-full">
 								<input
