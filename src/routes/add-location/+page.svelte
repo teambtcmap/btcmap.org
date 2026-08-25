@@ -18,6 +18,7 @@ import Icon from "$components/Icon.svelte";
 import HeaderPlaceholder from "$components/layout/HeaderPlaceholder.svelte";
 import MapLoadingEmbed from "$components/MapLoadingEmbed.svelte";
 import MapUnsupportedFallback from "$components/MapUnsupportedFallback.svelte";
+import PlacementPinIcon from "$components/PlacementPinIcon.svelte";
 import PrimaryButton from "$components/PrimaryButton.svelte";
 import TextLink from "$components/TextLink.svelte";
 import { _, locale } from "$lib/i18n";
@@ -409,15 +410,7 @@ $: if (map && mapLoaded) {
 		<div
 			class="mx-auto mt-10 flex max-w-xl items-center gap-3 rounded-2xl border-2 border-bitcoin/40 bg-bitcoin/10 px-4 py-3"
 		>
-			<svg width="24" height="30" viewBox="0 0 24 30" class="shrink-0" aria-hidden="true">
-				<path
-					d="M12 29s9-11.5 9-18A9 9 0 103 11c0 6.5 9 18 9 18z"
-					fill="#F7931A"
-					stroke="#fff"
-					stroke-width="1.6"
-				/>
-				<circle cx="12" cy="11" r="4.6" fill="#fff" />
-			</svg>
+			<PlacementPinIcon width={24} class="shrink-0" />
 			<div>
 				<p class="font-semibold text-primary dark:text-white">
 					{$_('addLocation.pinConfirmedTitle')}
