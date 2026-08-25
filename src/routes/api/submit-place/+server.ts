@@ -1,5 +1,6 @@
 import { error, json } from "@sveltejs/kit";
 
+import { API_BASE } from "$lib/api-base";
 import type { AddLocationSubmission } from "$lib/placeSubmission";
 import { buildSubmitPlaceParams } from "$lib/placeSubmission";
 import { validateCaptcha } from "$lib/server/captcha";
@@ -64,7 +65,9 @@ export const POST: RequestHandler = async ({ request }) => {
 	};
 
 	const params = buildSubmitPlaceParams(submission, crypto.randomUUID());
-	const rpcUrl = env.BTCMAP_API_RPC_URL || "https://api.btcmap.org/rpc";
+	// BTCMAP_API_RPC_URL stays the explicit override: API_BASE can be a
+	// relative dev-proxy path, which a server-side fetch cannot resolve.
+	const rpcUrl = env.BTCMAP_API_RPC_URL || `${API_BASE}/rpc`;
 
 	let response;
 	try {
@@ -80,6 +83,9 @@ export const POST: RequestHandler = async ({ request }) => {
 				method: "submit_place",
 				params,
 			}),
+			// Abort before Netlify's ~10s function kill so a hung upstream
+			// surfaces as our logged 502, not an opaque platform timeout.
+			signal: AbortSignal.timeout(8_000),
 		});
 	} catch (e) {
 		console.error("[submit-place] RPC fetch failed", e);
