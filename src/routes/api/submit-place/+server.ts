@@ -81,11 +81,13 @@ export const POST: RequestHandler = async ({ request }) => {
 				params,
 			}),
 		});
-	} catch {
+	} catch (e) {
+		console.error("[submit-place] RPC fetch failed", e);
 		error(502, "Could not submit the location, please try again later.");
 	}
 
 	let rpcBody;
+	let errorBody = "";
 	if (response.ok) {
 		try {
 			rpcBody = await response.json();
@@ -93,6 +95,7 @@ export const POST: RequestHandler = async ({ request }) => {
 			error(502, "Could not submit the location, please try again later.");
 		}
 	} else {
+		errorBody = await response.text().catch(() => "");
 		rpcBody = null;
 	}
 
@@ -101,6 +104,7 @@ export const POST: RequestHandler = async ({ request }) => {
 			"[submit-place] RPC failure",
 			response.status,
 			rpcBody?.error,
+			errorBody ? errorBody.slice(0, 500) : undefined,
 		);
 		error(502, "Could not submit the location, please try again later.");
 	}
