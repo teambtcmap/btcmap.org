@@ -41,6 +41,13 @@ describe("validateCaptcha", () => {
 		expect(caughtStatus(() => validateCaptcha(secret, "nope"))).toBe(400);
 	});
 
+	it("rejects garbage ciphertext with 400 instead of throwing", () => {
+		// decrypt.final() throws on bad padding ("00") and non-hex input
+		// ("zz") — both must surface as the captcha 400, not a 500.
+		expect(caughtStatus(() => validateCaptcha("00", "x"))).toBe(400);
+		expect(caughtStatus(() => validateCaptcha("zz", ""))).toBe(400);
+	});
+
 	it("rejects a reused secret with 400", () => {
 		const secret = encryptSecret("ABC14");
 		expect(caughtStatus(() => validateCaptcha(secret, "ABC14"))).toBeNull();

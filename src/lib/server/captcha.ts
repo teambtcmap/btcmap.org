@@ -46,10 +46,18 @@ export function validateCaptcha(
 	const algorithm = "aes-256-cbc" as string;
 	const key = serverKey as unknown as CipherKey;
 	const iv = initVector as unknown as BinaryLike;
-	const decrypt = crypto.createDecipheriv(algorithm, key, iv);
 
-	let secret = decrypt.update(captchaSecret, "hex", "utf8");
-	secret += decrypt.final("utf8");
+	let secret = "";
+	try {
+		const decrypt = crypto.createDecipheriv(algorithm, key, iv);
+		secret = decrypt.update(captchaSecret, "hex", "utf8");
+		secret += decrypt.final("utf8");
+	} catch {
+		// Garbage ciphertext (bots probing with a hand-crafted secret) must
+		// fail like a wrong answer, not surface as an unhandled 500 —
+		// decrypt.final() throws on invalid hex or bad padding.
+		error(400, "Captcha test failed, please try again or contact BTC Map.");
+	}
 
 	if (captchaTest !== secret) {
 		error(400, "Captcha test failed, please try again or contact BTC Map.");
