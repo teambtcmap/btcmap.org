@@ -985,6 +985,18 @@ onMount(async () => {
 	const searchParams = new URLSearchParams(window.location.search);
 	placementActive = !issuesOnly && searchParams.has("add");
 	if (placementActive) trackEvent("add_place_enter", { method: "url" });
+	if (issuesOnly && searchParams.has("add")) {
+		// Placement mode is unavailable in the issues worklist, and
+		// AddPlaceMode (whose effect owns ?add) never mounts there — strip
+		// the dead param so it can't linger in shared/bookmarked URLs.
+		searchParams.delete("add");
+		const query = searchParams.toString() ? `?${searchParams.toString()}` : "";
+		history.replaceState(
+			history.state,
+			"",
+			`${window.location.pathname}${query}${window.location.hash}`,
+		);
+	}
 	const queryView = hashCoords ? null : parseLatLongQuery(searchParams);
 	// Distinguish "no ?lat/long" from "malformed ?lat/long" so an embed
 	// linking with bad coords gets a visible hint instead of silently
