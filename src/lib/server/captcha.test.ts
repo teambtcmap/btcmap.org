@@ -1,11 +1,13 @@
 import { vi } from "vitest";
 
-vi.mock("$env/dynamic/private", () => ({
-	env: {
-		SERVER_CRYPTO_KEY: "aa".repeat(32),
-		SERVER_INIT_VECTOR: "bb".repeat(16),
-	},
+// Mutable so individual tests can simulate misconfiguration; vi.hoisted
+// runs before the hoisted vi.mock factory below.
+const mockEnv = vi.hoisted(() => ({
+	SERVER_CRYPTO_KEY: "aa".repeat(32),
+	SERVER_INIT_VECTOR: "bb".repeat(16),
 }));
+
+vi.mock("$env/dynamic/private", () => ({ env: mockEnv }));
 
 import crypto from "node:crypto";
 import { describe, expect, it } from "vitest";
@@ -52,5 +54,17 @@ describe("validateCaptcha", () => {
 		const secret = encryptSecret("ABC14");
 		expect(caughtStatus(() => validateCaptcha(secret, "ABC14"))).toBeNull();
 		expect(caughtStatus(() => validateCaptcha(secret, "ABC14"))).toBe(400);
+	});
+
+	it("reports a malformed server key as 503, not a captcha 400", () => {
+		// Hex typos silently truncate on decode — wrong length must read as
+		// misconfiguration, never blamed on the user's captcha answer.
+		const secret = encryptSecret("ABC15");
+		mockEnv.SERVER_CRYPTO_KEY = "aa".repeat(31);
+		try {
+			expect(caughtStatus(() => validateCaptcha(secret, "ABC15"))).toBe(503);
+		} finally {
+			mockEnv.SERVER_CRYPTO_KEY = "aa".repeat(32);
+		}
 	});
 });

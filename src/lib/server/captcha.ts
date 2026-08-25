@@ -43,6 +43,17 @@ export function validateCaptcha(
 	const initVector = Buffer.from(env.SERVER_INIT_VECTOR, "hex");
 	const serverKey = Buffer.from(env.SERVER_CRYPTO_KEY, "hex");
 
+	// Buffer.from(..., "hex") silently truncates at the first invalid
+	// character, so a typo'd key/IV surfaces here as a wrong length. That
+	// is server misconfiguration (503) — it must not fall into the decrypt
+	// catch below, which reports user-supplied garbage as a captcha 400.
+	if (serverKey.length !== 32 || initVector.length !== 16) {
+		console.error(
+			"[captcha] SERVER_CRYPTO_KEY/SERVER_INIT_VECTOR malformed (wrong length after hex decode)",
+		);
+		error(503, "Service unavailable");
+	}
+
 	const algorithm = "aes-256-cbc" as string;
 	const key = serverKey as unknown as CipherKey;
 	const iv = initVector as unknown as BinaryLike;
