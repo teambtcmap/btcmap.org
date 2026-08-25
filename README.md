@@ -30,9 +30,10 @@ To test the frontend against a local [btcmap-api](https://github.com/teambtcmap/
    - `VITE_API_BASE_URL=/btcmap-api-proxy` — routes through the Vite dev proxy (avoids CORS; works for client-side calls and SSR load functions that use SvelteKit's `event.fetch`)
    - `VITE_API_BASE_URL=http://127.0.0.1:8000` — direct; works everywhere including SSR axios calls, but requires the API to send CORS headers
 3. Start the frontend: `pnpm dev`
-4. For form submissions: place/location add and verify forms use `/api/submit-place` which calls btcmap-api's `submit_place` RPC, requiring `BTCMAP_API_TOKEN` (and optionally `BTCMAP_API_RPC_URL` for local API testing).
 
 Remove or comment out the env var to switch back to the production API.
+
+**Note:** The add-location form submits through `/api/submit-place`, which calls btcmap-api's `submit_place` RPC and needs `BTCMAP_API_TOKEN` (plus `BTCMAP_API_RPC_URL` when testing against a local API).
 
 ### Build project
 
