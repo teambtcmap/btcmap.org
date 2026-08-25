@@ -5,6 +5,7 @@ import type {
 	MapMouseEvent,
 } from "maplibre-gl";
 
+import PlacementPinIcon from "$components/PlacementPinIcon.svelte";
 import { trackEvent } from "$lib/analytics";
 import { _ } from "$lib/i18n";
 import { buildAddLocationUrl } from "$lib/placementMode";
@@ -150,15 +151,7 @@ $effect(() => {
 	<div
 		class="pointer-events-none absolute left-1/2 top-1/2 z-[1001] -translate-x-1/2 -translate-y-full drop-shadow-lg"
 	>
-		<svg width="40" height="50" viewBox="0 0 24 30">
-			<path
-				d="M12 29s9-11.5 9-18A9 9 0 103 11c0 6.5 9 18 9 18z"
-				fill="#F7931A"
-				stroke="#fff"
-				stroke-width="1.6"
-			/>
-			<circle cx="12" cy="11" r="4.6" fill="#fff" />
-		</svg>
+		<PlacementPinIcon width={40} />
 	</div>
 
 	<div
