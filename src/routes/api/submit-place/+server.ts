@@ -12,7 +12,16 @@ const str = (value: unknown): string =>
 	typeof value === "string" ? value : "";
 
 export const POST: RequestHandler = async ({ request }) => {
-	const body = await request.json();
+	let body;
+	try {
+		body = await request.json();
+	} catch {
+		error(400, "Invalid request body");
+	}
+
+	if (!body || typeof body !== "object") {
+		error(400, "Invalid request body");
+	}
 
 	if (body.honey) {
 		error(418);
@@ -57,21 +66,36 @@ export const POST: RequestHandler = async ({ request }) => {
 	const params = buildSubmitPlaceParams(submission, crypto.randomUUID());
 	const rpcUrl = env.BTCMAP_API_RPC_URL || "https://api.btcmap.org/rpc";
 
-	const response = await fetch(rpcUrl, {
-		method: "POST",
-		headers: {
-			"Content-Type": "application/json",
-			Authorization: `Bearer ${env.BTCMAP_API_TOKEN}`,
-		},
-		body: JSON.stringify({
-			jsonrpc: "2.0",
-			id: params.external_id,
-			method: "submit_place",
-			params,
-		}),
-	});
+	let response;
+	try {
+		response = await fetch(rpcUrl, {
+			method: "POST",
+			headers: {
+				"Content-Type": "application/json",
+				Authorization: `Bearer ${env.BTCMAP_API_TOKEN}`,
+			},
+			body: JSON.stringify({
+				jsonrpc: "2.0",
+				id: params.external_id,
+				method: "submit_place",
+				params,
+			}),
+		});
+	} catch {
+		error(502, "Could not submit the location, please try again later.");
+	}
 
-	const rpcBody = response.ok ? await response.json() : null;
+	let rpcBody;
+	if (response.ok) {
+		try {
+			rpcBody = await response.json();
+		} catch {
+			error(502, "Could not submit the location, please try again later.");
+		}
+	} else {
+		rpcBody = null;
+	}
+
 	if (!rpcBody || rpcBody.error || !rpcBody.result) {
 		console.error(
 			"[submit-place] RPC failure",
