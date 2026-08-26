@@ -466,6 +466,7 @@
 		"categoryPlaceholder": "Ресторан и т.д.",
 		"categorySelectPlaceholder": "Select a category…",
 		"categoryOtherOption": "Other…",
+		"moreDetailsToggle": "Add more details (address, website, opening hours…)",
 		"paymentMethodsLegend": "Выберите принимаемые способы оплаты",
 		"paymentMethodError": "Пожалуйста, исправьте...",
 		"onchainLabel": "Ончейн",

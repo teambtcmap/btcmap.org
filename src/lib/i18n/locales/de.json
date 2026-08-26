@@ -466,6 +466,7 @@
 		"categoryPlaceholder": "Restaurant usw.",
 		"categorySelectPlaceholder": "Select a category…",
 		"categoryOtherOption": "Other…",
+		"moreDetailsToggle": "Add more details (address, website, opening hours…)",
 		"paymentMethodsLegend": "Akzeptierte Zahlungsmethoden auswählen",
 		"paymentMethodError": "Bitte korrigiere dies...",
 		"onchainLabel": "On-Chain",

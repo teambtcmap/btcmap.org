@@ -169,6 +169,7 @@ let lat: number | undefined;
 let long: number | undefined;
 let selected = false;
 let showAdvanced = false;
+let showMoreDetails = false;
 let latInput = "";
 let longInput = "";
 let latError = "";
@@ -478,25 +479,6 @@ $: if (map && mapLoaded) {
 					</div>
 
 					<div>
-						<div>
-							<label for="name-en" class="mb-2 block font-semibold">
-								{$_('addLocation.nameEnLabel')}
-								<span class="font-normal">{$_('forms.optional')}</span>
-							</label>
-							<FormHelperText text={$_('addLocation.nameEnTooltip')} />
-						</div>
-						<input
-							disabled={!captchaSecret || !mapLoaded}
-							type="text"
-							name="nameEn"
-							id="name-en"
-							placeholder={$_('addLocation.merchantEnglishNamePlaceholder')}
-							class="w-full rounded-2xl border-2 border-input p-3 transition-all focus:outline-link disabled:cursor-not-allowed disabled:bg-gray-100 disabled:text-gray-500 dark:bg-white/[0.15] dark:disabled:bg-gray-700 dark:disabled:text-gray-400"
-							bind:this={nameEn}
-						/>
-					</div>
-
-					<div>
 						<label for="location-picker" class="mb-2 block font-semibold"
 							>{$_('forms.selectLocation')}</label
 						>
@@ -603,24 +585,6 @@ $: if (map && mapLoaded) {
 							{/if}
 						</div>
 					</div>
-
-				<div>
-					<div class="mb-2">
-						<label for="address" class="block font-semibold">{$_('addLocation.addressLabel')}</label>
-						<FormHelperText text={$_('addLocation.addressTooltip')} />
-					</div>
-					
-					<input
-						disabled={!captchaSecret || !mapLoaded}
-						type="text"
-						name="address"
-						id="address"
-						placeholder={$_('addLocation.addressPlaceholder')}
-						class="w-full rounded-2xl border-2 border-input p-3 transition-all focus:outline-link disabled:cursor-not-allowed disabled:bg-gray-100 disabled:text-gray-500 dark:bg-white/[0.15] dark:disabled:bg-gray-700 dark:disabled:text-gray-400"
-						bind:this={address}
-						on:input={() => (addressFilledBySearch = false)}
-					/>
-				</div>
 
 					<div>
 						<label for="category" class="mb-2 block font-semibold">{$_('forms.category')}</label>
@@ -737,60 +701,111 @@ $: if (map && mapLoaded) {
 					</fieldset>
 
 					<div>
-						<label for="website" class="mb-2 block font-semibold"
-							>{$_('forms.website')} <span class="font-normal">{$_('forms.optional')}</span></label
+						<button
+							type="button"
+							class="text-sm font-semibold text-link hover:text-hover focus:outline-link"
+							aria-expanded={showMoreDetails}
+							on:click={() => (showMoreDetails = !showMoreDetails)}
 						>
-						<input
-							disabled={!captchaSecret || !mapLoaded}
-							type="url"
-							name="website"
-							placeholder={$_('addLocation.websitePlaceholder')}
-							class="w-full rounded-2xl border-2 border-input p-3 transition-all focus:outline-link disabled:cursor-not-allowed disabled:bg-gray-100 disabled:text-gray-500 dark:bg-white/[0.15] dark:disabled:bg-gray-700 dark:disabled:text-gray-400"
-							bind:this={website}
-						/>
+							{showMoreDetails ? '▾' : '▸'}
+							{$_('addLocation.moreDetailsToggle')}
+						</button>
 					</div>
 
-					<div>
-						<label for="phone" class="mb-2 block font-semibold"
-							>{$_('forms.phone')} <span class="font-normal">{$_('forms.optional')}</span></label
-						>
-						<input
-							disabled={!captchaSecret || !mapLoaded}
-							type="tel"
-							name="phone"
-							placeholder={$_('addLocation.phonePlaceholder')}
-							class="w-full rounded-2xl border-2 border-input p-3 transition-all focus:outline-link disabled:cursor-not-allowed disabled:bg-gray-100 disabled:text-gray-500 dark:bg-white/[0.15] dark:disabled:bg-gray-700 dark:disabled:text-gray-400"
-							bind:this={phone}
-						/>
-					</div>
+					<div class="space-y-5" class:hidden={!showMoreDetails}>
+						<div>
+							<div>
+								<label for="name-en" class="mb-2 block font-semibold">
+									{$_('addLocation.nameEnLabel')}
+									<span class="font-normal">{$_('forms.optional')}</span>
+								</label>
+								<FormHelperText text={$_('addLocation.nameEnTooltip')} />
+							</div>
+							<input
+								disabled={!captchaSecret || !mapLoaded}
+								type="text"
+								name="nameEn"
+								id="name-en"
+								placeholder={$_('addLocation.merchantEnglishNamePlaceholder')}
+								class="w-full rounded-2xl border-2 border-input p-3 transition-all focus:outline-link disabled:cursor-not-allowed disabled:bg-gray-100 disabled:text-gray-500 dark:bg-white/[0.15] dark:disabled:bg-gray-700 dark:disabled:text-gray-400"
+								bind:this={nameEn}
+							/>
+						</div>
 
-					<div>
-						<label for="hours" class="mb-2 block font-semibold"
-							>{$_('forms.openingHours')}
-							<span class="font-normal">{$_('forms.optional')}</span></label
-						>
-						<input
-							disabled={!captchaSecret || !mapLoaded}
-							type="text"
-							name="hours"
-							placeholder={$_('addLocation.hoursPlaceholder')}
-							class="w-full rounded-2xl border-2 border-input p-3 transition-all focus:outline-link disabled:cursor-not-allowed disabled:bg-gray-100 disabled:text-gray-500 dark:bg-white/[0.15] dark:disabled:bg-gray-700 dark:disabled:text-gray-400"
-							bind:this={hours}
-						/>
-					</div>
+						<div>
+							<div class="mb-2">
+								<label for="address" class="block font-semibold">{$_('addLocation.addressLabel')}</label>
+								<FormHelperText text={$_('addLocation.addressTooltip')} />
+							</div>
 
-					<div>
-						<label for="notes" class="mb-2 block font-semibold"
-							>{$_('forms.notes')} <span class="font-normal">{$_('forms.optional')}</span></label
-						>
-						<textarea
-							disabled={!captchaSecret || !mapLoaded}
-							name="notes"
-							placeholder={$_('addLocation.notesPlaceholder')}
-							rows="3"
-							class="w-full rounded-2xl border-2 border-input p-3 transition-all focus:outline-link disabled:cursor-not-allowed disabled:bg-gray-100 disabled:text-gray-500 dark:bg-white/[0.15] dark:disabled:bg-gray-700 dark:disabled:text-gray-400"
-							bind:this={notes}
-						></textarea>
+							<input
+								disabled={!captchaSecret || !mapLoaded}
+								type="text"
+								name="address"
+								id="address"
+								placeholder={$_('addLocation.addressPlaceholder')}
+								class="w-full rounded-2xl border-2 border-input p-3 transition-all focus:outline-link disabled:cursor-not-allowed disabled:bg-gray-100 disabled:text-gray-500 dark:bg-white/[0.15] dark:disabled:bg-gray-700 dark:disabled:text-gray-400"
+								bind:this={address}
+								on:input={() => (addressFilledBySearch = false)}
+							/>
+						</div>
+
+						<div>
+							<label for="website" class="mb-2 block font-semibold"
+								>{$_('forms.website')} <span class="font-normal">{$_('forms.optional')}</span></label
+							>
+							<input
+								disabled={!captchaSecret || !mapLoaded}
+								type="url"
+								name="website"
+								placeholder={$_('addLocation.websitePlaceholder')}
+								class="w-full rounded-2xl border-2 border-input p-3 transition-all focus:outline-link disabled:cursor-not-allowed disabled:bg-gray-100 disabled:text-gray-500 dark:bg-white/[0.15] dark:disabled:bg-gray-700 dark:disabled:text-gray-400"
+								bind:this={website}
+							/>
+						</div>
+
+						<div>
+							<label for="phone" class="mb-2 block font-semibold"
+								>{$_('forms.phone')} <span class="font-normal">{$_('forms.optional')}</span></label
+							>
+							<input
+								disabled={!captchaSecret || !mapLoaded}
+								type="tel"
+								name="phone"
+								placeholder={$_('addLocation.phonePlaceholder')}
+								class="w-full rounded-2xl border-2 border-input p-3 transition-all focus:outline-link disabled:cursor-not-allowed disabled:bg-gray-100 disabled:text-gray-500 dark:bg-white/[0.15] dark:disabled:bg-gray-700 dark:disabled:text-gray-400"
+								bind:this={phone}
+							/>
+						</div>
+
+						<div>
+							<label for="hours" class="mb-2 block font-semibold"
+								>{$_('forms.openingHours')}
+								<span class="font-normal">{$_('forms.optional')}</span></label
+							>
+							<input
+								disabled={!captchaSecret || !mapLoaded}
+								type="text"
+								name="hours"
+								placeholder={$_('addLocation.hoursPlaceholder')}
+								class="w-full rounded-2xl border-2 border-input p-3 transition-all focus:outline-link disabled:cursor-not-allowed disabled:bg-gray-100 disabled:text-gray-500 dark:bg-white/[0.15] dark:disabled:bg-gray-700 dark:disabled:text-gray-400"
+								bind:this={hours}
+							/>
+						</div>
+
+						<div>
+							<label for="notes" class="mb-2 block font-semibold"
+								>{$_('forms.notes')} <span class="font-normal">{$_('forms.optional')}</span></label
+							>
+							<textarea
+								disabled={!captchaSecret || !mapLoaded}
+								name="notes"
+								placeholder={$_('addLocation.notesPlaceholder')}
+								rows="3"
+								class="w-full rounded-2xl border-2 border-input p-3 transition-all focus:outline-link disabled:cursor-not-allowed disabled:bg-gray-100 disabled:text-gray-500 dark:bg-white/[0.15] dark:disabled:bg-gray-700 dark:disabled:text-gray-400"
+								bind:this={notes}
+							></textarea>
+						</div>
 					</div>
 
 					<div>
