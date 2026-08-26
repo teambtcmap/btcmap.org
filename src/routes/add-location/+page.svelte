@@ -222,6 +222,9 @@ function handleAddressSelect(
 	if (address && (address.value.trim() === "" || addressFilledBySearch)) {
 		address.value = displayName;
 		addressFilledBySearch = true;
+		// The address field lives behind the "Add more details" expander —
+		// surface it so the filled-in value isn't silently hidden.
+		showMoreDetails = true;
 	}
 }
 
