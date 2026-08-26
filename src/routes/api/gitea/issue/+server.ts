@@ -3,8 +3,9 @@ import crypto from "node:crypto";
 import { error } from "@sveltejs/kit";
 import { get } from "svelte/store";
 
-import { GITEA_LABELS } from "$lib/constants";
+import { GITEA_LABEL_NAMES, GITEA_LABELS } from "$lib/constants";
 import { createIssueWithLabels, type GiteaRepo } from "$lib/gitea";
+import { buildOsmPayloadBlock } from "$lib/osmPayload";
 import { areas } from "$lib/store";
 import { getAreaIdsByCoordinates } from "$lib/utils";
 
@@ -43,6 +44,11 @@ type IssueConfig = {
 	repo: GiteaRepo;
 	labelId: number;
 	hasAreaLabels: boolean;
+	// Extra name-based labels resolved/created at submission time.
+	extraLabels?: readonly string[];
+	// When true, append a machine-readable OSM payload block so an approved
+	// issue can be pushed to OSM automatically (see api/gitea/webhook).
+	osmPayload?: "create" | "update";
 };
 
 const CONFIG = {
@@ -50,6 +56,30 @@ const CONFIG = {
 		repo: "btcmap-data",
 		labelId: GITEA_LABELS.DATA.ADD_LOCATION,
 		hasAreaLabels: true,
+	},
+	// Wizard: new physical merchant. Same triage label as add-location, but
+	// carries a structured payload for the approve-and-push-to-OSM flow.
+	"add-location-wizard": {
+		repo: "btcmap-data",
+		labelId: GITEA_LABELS.DATA.ADD_LOCATION,
+		hasAreaLabels: true,
+		osmPayload: "create",
+	},
+	// Wizard: user updates a merchant that already exists on OSM.
+	"update-location": {
+		repo: "btcmap-data",
+		labelId: GITEA_LABELS.DATA.VERIFY_LOCATION,
+		hasAreaLabels: true,
+		extraLabels: [GITEA_LABEL_NAMES.UPDATE_LOCATION],
+		osmPayload: "update",
+	},
+	// Wizard: business with no physical location visitors can go to (online shops
+	// and mobile/on-site services). Stored for a future listing; not on the map.
+	"online-or-mobile": {
+		repo: "btcmap-data",
+		labelId: GITEA_LABELS.DATA.ADD_LOCATION,
+		hasAreaLabels: false,
+		extraLabels: [GITEA_LABEL_NAMES.ONLINE_OR_MOBILE],
 	},
 	"verify-location": {
 		repo: "btcmap-data",
@@ -157,6 +187,59 @@ Created at: ${timestamp}
 
 ${taggingInstructions}`;
 
+		case "add-location-wizard":
+			return `Merchant name: ${data.name}
+English name (name:en): ${data.nameEn || ""}
+Physical location: yes (submitted via wizard)
+Address: ${data.address || ""}
+Location description: ${data.locationDescription || ""}
+Lat: ${data.lat}
+Long: ${data.long}
+Associated areas: ${areasText}
+OSM: ${data.osm}
+Category: ${data.category}
+Payment methods: ${data.methods}
+Website: ${data.website}
+Phone: ${data.phone}
+Opening hours: ${data.hours}
+Notes: ${data.notes}
+Data Source: ${data.source}
+Details (if applicable): ${data.sourceOther}
+Contact: ${data.contact}
+Created at: ${timestamp}
+
+${taggingInstructions}`;
+
+		case "update-location":
+			return `Merchant name: ${data.name}
+Existing merchant: ${data.osmType || "node"}/${data.osmId}
+OSM: ${data.osm}
+Coordinates: ${data.lat}, ${data.long}
+Associated areas: ${areasText}
+Updated website: ${data.website}
+Updated phone: ${data.phone}
+Updated opening hours: ${data.hours}
+Updated social links: ${data.socialLinks}
+Updated payment methods: ${data.methods}
+Notes: ${data.notes}
+Contact: ${data.contact}
+Created at: ${timestamp}
+
+${taggingInstructions}`;
+
+		case "online-or-mobile":
+			return `Business name: ${data.name}
+Physical location: no (online shop or mobile/on-site service)
+Website: ${data.website}
+Social links: ${data.socialLinks}
+Category: ${data.category}
+Payment methods: ${data.methods}
+Notes: ${data.notes}
+Contact: ${data.contact}
+Created at: ${timestamp}
+
+Online-or-mobile submission. Not shown on the map yet; stored for a future listing of businesses without a visitable location.`;
+
 		case "verify-location":
 			return `Merchant name: ${data.name}
 Merchant location: ${data.location}
@@ -222,8 +305,10 @@ export const POST: RequestHandler = async ({ request }) => {
 
 	validateCaptcha(captchaSecret, captchaTest);
 
-	// type is now narrowed to IssueType after validation
-	const config = CONFIG[type];
+	// type is now narrowed to IssueType after validation. Widen to IssueConfig so
+	// optional fields (osmPayload, extraLabels) present on only some entries are
+	// accessible without the `satisfies` union narrowing them away.
+	const config: IssueConfig = CONFIG[type];
 	let areaLabels: string[] = [];
 	let areasText = "";
 
@@ -240,8 +325,19 @@ export const POST: RequestHandler = async ({ request }) => {
 		});
 	}
 
-	const body = generateBody(type, data, areasText);
+	let body = generateBody(type, data, areasText);
+
+	// For wizard flows that support automated OSM pushes, append a
+	// machine-readable payload block that api/gitea/webhook parses on approval.
+	if (config.osmPayload) {
+		body += `\n\n${buildOsmPayloadBlock(config.osmPayload, data)}`;
+	}
+
 	const title = String(data.name);
+
+	// Merge config-level name labels (e.g. online-only, update-location) with
+	// the coordinate-derived area labels; both are resolved/created by name.
+	const nameLabels = [...(config.extraLabels ?? []), ...areaLabels];
 
 	console.debug("[gitea/issue] Creating issue", {
 		type,
@@ -254,7 +350,7 @@ export const POST: RequestHandler = async ({ request }) => {
 		body,
 		[config.labelId],
 		config.repo,
-		areaLabels,
+		nameLabels,
 	);
 
 	console.debug("[gitea/issue] Issue created", {

@@ -9,6 +9,11 @@ declare global {
 		interface PageData {
 			geo?: GeoLocation;
 		}
+		// Shallow-routing state. The add-location wizard stores its current step
+		// here so browser back/forward navigates between steps.
+		interface PageState {
+			wizardStep?: "intro" | "online" | "map" | "update" | "new" | "success";
+		}
 		// interface Platform {}
 	}
 

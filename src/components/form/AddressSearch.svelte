@@ -13,7 +13,19 @@ export let disabled = false;
 export let locale = "en";
 
 const dispatch = createEventDispatcher<{
-	select: { lat: number; lng: number; displayName: string };
+	select: {
+		lat: number;
+		lng: number;
+		displayName: string;
+		// Enriched OSM metadata, present when the match is a tagged POI.
+		name?: string;
+		category?: string;
+		website?: string;
+		phone?: string;
+		openingHours?: string;
+		osmType?: string;
+		osmId?: string;
+	};
 }>();
 
 // Per-instance ID prefix so multiple AddressSearch components on the
@@ -43,7 +55,18 @@ $: if (
 }
 
 function emitSelect(r: GeocodeResult) {
-	dispatch("select", { lat: r.lat, lng: r.lon, displayName: r.displayName });
+	dispatch("select", {
+		lat: r.lat,
+		lng: r.lon,
+		displayName: r.displayName,
+		name: r.name,
+		category: r.category,
+		website: r.website,
+		phone: r.phone,
+		openingHours: r.openingHours,
+		osmType: r.osmType,
+		osmId: r.osmId,
+	});
 }
 
 function closeResults() {
