@@ -544,7 +544,7 @@ $: if (map && mapLoaded) {
 								</button>
 							</div>
 						{/if}
-						<div class="flex space-x-2">
+						<div class="flex space-x-2" class:hidden={!!arrivalCoords && !showAddressSearch}>
 							<div class="w-full">
 								<input
 									id="lat"
@@ -586,7 +586,7 @@ $: if (map && mapLoaded) {
 								{/if}
 							</div>
 						</div>
-						<div class="mt-2">
+						<div class="mt-2" class:hidden={!!arrivalCoords && !showAddressSearch}>
 							<button
 								type="button"
 								class="text-sm font-semibold text-link hover:text-hover focus:outline-link"
