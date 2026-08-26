@@ -464,6 +464,8 @@
 		"addressTooltip": "Все места должны иметь физическое местоположение. При желании введите адрес. Сервисы без фиксированного местоположения не могут быть отображены на карте.",
 		"addressPlaceholder": "2100 Freedom Drive...",
 		"categoryPlaceholder": "Ресторан и т.д.",
+		"categorySelectPlaceholder": "Select a category…",
+		"categoryOtherOption": "Other…",
 		"paymentMethodsLegend": "Выберите принимаемые способы оплаты",
 		"paymentMethodError": "Пожалуйста, исправьте...",
 		"onchainLabel": "Ончейн",

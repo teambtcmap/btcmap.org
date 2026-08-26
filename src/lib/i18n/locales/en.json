@@ -562,6 +562,8 @@
 		"addressTooltip": "All locations are required to have a physical presence. Optionally enter an address here if that makes sense where the merchant is located. Services without locations are not map-able.",
 		"addressPlaceholder": "2100 Freedom Drive...",
 		"categoryPlaceholder": "Restaurant etc.",
+		"categorySelectPlaceholder": "Select a category…",
+		"categoryOtherOption": "Other…",
 		"paymentMethodsLegend": "Select accepted payment methods",
 		"paymentMethodError": "Please fix this...",
 		"onchainLabel": "On-chain",

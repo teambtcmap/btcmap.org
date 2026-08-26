@@ -466,6 +466,8 @@
 		"addressTooltip": "Todos os locais devem ter presença física. Opcionalmente, insira um endereço aqui se fizer sentido onde o comerciante está localizado. Serviços sem localização não podem ser mapeados.",
 		"addressPlaceholder": "Avenida Liberdade, 2100...",
 		"categoryPlaceholder": "Restaurante etc.",
+		"categorySelectPlaceholder": "Select a category…",
+		"categoryOtherOption": "Other…",
 		"paymentMethodsLegend": "Selecione os métodos de pagamento aceitos",
 		"paymentMethodError": "Por favor corrija isso...",
 		"onchainLabel": "On-chain",

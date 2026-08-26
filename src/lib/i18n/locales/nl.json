@@ -562,6 +562,8 @@
 		"addressTooltip": "Elke locatie vereist een fysiek bezoekadres. Diensten zonder locatie kunnen niet aan de kaart worden toegevoegd.",
 		"addressPlaceholder": "Vrijheidsdreef 21",
 		"categoryPlaceholder": "Restaurant etc.",
+		"categorySelectPlaceholder": "Select a category…",
+		"categoryOtherOption": "Other…",
 		"paymentMethodsLegend": "Selecteer geaccepteerde betaalmethoden",
 		"paymentMethodError": "Los dit alstublieft op...",
 		"onchainLabel": "On-chain",

@@ -562,6 +562,8 @@
 		"addressTooltip": "Tutte le posizioni devono avere una presenza fisica. Inserisci opzionalmente un indirizzo qui se ha senso per il luogo in cui si trova il commerciante. I servizi senza una posizione fisica non possono essere mappati.",
 		"addressPlaceholder": "2100 Freedom Drive...",
 		"categoryPlaceholder": "Ristorante ecc.",
+		"categorySelectPlaceholder": "Select a category…",
+		"categoryOtherOption": "Other…",
 		"paymentMethodsLegend": "Seleziona i metodi di pagamento accettati",
 		"paymentMethodError": "Si prega di correggere questo...",
 		"onchainLabel": "On-chain",

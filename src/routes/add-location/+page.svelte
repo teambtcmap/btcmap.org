@@ -13,6 +13,7 @@ import { get } from "svelte/store";
 import FormHelperText from "$components/FormHelperText.svelte";
 import FormSuccess from "$components/FormSuccess.svelte";
 import AddressSearch from "$components/form/AddressSearch.svelte";
+import type { FormSelectOption } from "$components/form/FormSelect.svelte";
 import FormSelect from "$components/form/FormSelect.svelte";
 import Icon from "$components/Icon.svelte";
 import HeaderPlaceholder from "$components/layout/HeaderPlaceholder.svelte";
@@ -21,6 +22,7 @@ import MapUnsupportedFallback from "$components/MapUnsupportedFallback.svelte";
 import PlacementPinIcon from "$components/PlacementPinIcon.svelte";
 import PrimaryButton from "$components/PrimaryButton.svelte";
 import TextLink from "$components/TextLink.svelte";
+import { CATEGORIES, CATEGORY_GROUPS } from "$lib/categoryMapping";
 import { _, locale } from "$lib/i18n";
 import type { BtcmapMapHandle } from "$lib/map/createMap";
 import { createBtcmapMap } from "$lib/map/createMap";
@@ -87,6 +89,8 @@ function resetForm() {
 	showAdvanced = false;
 	source = undefined;
 	sourceOther = undefined;
+	categorySelect = undefined;
+	categoryOther = undefined;
 
 	// Wait for the DOM to update with the form back in place
 	tick().then(async () => {
@@ -94,7 +98,6 @@ function resetForm() {
 		if (name) name.value = "";
 		if (nameEn) nameEn.value = "";
 		if (address) address.value = "";
-		if (category) category.value = "";
 		if (website) website.value = "";
 		if (phone) phone.value = "";
 		if (hours) hours.value = "";
@@ -231,7 +234,16 @@ function toggleAdvanced() {
 		if (long !== undefined) longInput = long.toFixed(5);
 	}
 }
-let category: HTMLInputElement;
+let categorySelect: string | undefined;
+let categoryOther: string | undefined;
+let categoryOtherElement: HTMLInputElement;
+
+// Map taxonomy minus the "all" pseudo-bucket, plus the Other escape
+// hatch — labels verbatim from the map UI.
+const categoryOptions: FormSelectOption[] = CATEGORIES.filter(
+	(key) => key !== "all",
+).map((key) => ({ value: key, label: CATEGORY_GROUPS[key].label }));
+
 let methods: ("onchain" | "lightning" | "nfc")[] = [];
 let onchain: HTMLInputElement;
 let lightning: HTMLInputElement;
@@ -311,7 +323,10 @@ const submitForm = (event: SubmitEvent) => {
 				address: address.value,
 				lat,
 				long,
-				category: category.value,
+				category:
+					categorySelect === "Other"
+						? (categoryOther ?? "").trim()
+						: (categorySelect ?? ""),
 				methods,
 				website: website.value,
 				phone: phone.value,
@@ -609,15 +624,36 @@ $: if (map && mapLoaded) {
 
 					<div>
 						<label for="category" class="mb-2 block font-semibold">{$_('forms.category')}</label>
-						<input
-							disabled={!captchaSecret || !mapLoaded}
-							type="text"
-							name="category"
+						<FormSelect
 							id="category"
-							placeholder={$_('addLocation.categoryPlaceholder')}
-							class="w-full rounded-2xl border-2 border-input p-3 transition-all focus:outline-link disabled:cursor-not-allowed disabled:bg-gray-100 disabled:text-gray-500 dark:bg-white/[0.15] dark:disabled:bg-gray-700 dark:disabled:text-gray-400"
-							bind:this={category}
+							disabled={!captchaSecret || !mapLoaded}
+							name="category"
+							required
+							options={[
+								{ value: '', label: $_('addLocation.categorySelectPlaceholder') },
+								...categoryOptions,
+								{ value: 'Other', label: $_('addLocation.categoryOtherOption') }
+							]}
+							bind:value={categorySelect}
+							on:change={async () => {
+								if (categorySelect === 'Other') {
+									await tick();
+									categoryOtherElement.focus();
+								}
+							}}
 						/>
+						{#if categorySelect === 'Other'}
+							<input
+								disabled={!captchaSecret || !mapLoaded}
+								required
+								type="text"
+								name="category-other"
+								placeholder={$_('addLocation.categoryPlaceholder')}
+								class="mt-2 w-full rounded-2xl border-2 border-input p-3 transition-all focus:outline-link disabled:cursor-not-allowed disabled:bg-gray-100 disabled:text-gray-500 dark:bg-white/[0.15] dark:disabled:bg-gray-700 dark:disabled:text-gray-400"
+								bind:value={categoryOther}
+								bind:this={categoryOtherElement}
+							/>
+						{/if}
 					</div>
 
 					<fieldset>
