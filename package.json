@@ -44,7 +44,7 @@
 		"chart.js": "^4.5.1",
 		"d3-geo": "^3.1.1",
 		"date-fns": "^4.3.0",
-		"dompurify": "^3.4.12",
+		"dompurify": "^3.4.14",
 		"globals": "^17.11.0",
 		"husky": "^9.1.7",
 		"i18n-iso-countries": "^7.14.0",
