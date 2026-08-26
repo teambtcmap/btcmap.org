@@ -467,6 +467,7 @@
 		"categorySelectPlaceholder": "Select a category…",
 		"categoryOtherOption": "Other…",
 		"moreDetailsToggle": "Add more details (address, website, opening hours…)",
+		"categoryOtherRequired": "Please enter a category.",
 		"paymentMethodsLegend": "Sélectionnez les méthodes de paiement acceptées",
 		"paymentMethodError": "Veuillez corriger ceci...",
 		"onchainLabel": "On-chain",

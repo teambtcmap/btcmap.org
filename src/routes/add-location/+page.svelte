@@ -87,6 +87,7 @@ function resetForm() {
 	latError = "";
 	longError = "";
 	showAdvanced = false;
+	showMoreDetails = false;
 	source = undefined;
 	sourceOther = undefined;
 	categorySelect = undefined;
@@ -291,6 +292,11 @@ $: if (mapLoaded && lat !== undefined && long !== undefined && !marker) {
 
 const submitForm = (event: SubmitEvent) => {
 	event.preventDefault();
+	if (categorySelect === "Other" && !(categoryOther ?? "").trim()) {
+		errToast(get(_)("addLocation.categoryOtherRequired"));
+		categoryOtherElement.focus();
+		return;
+	}
 	if (!selected) {
 		noLocationSelected = true;
 		errToast(get(_)("errors.noLocationSelected"));
