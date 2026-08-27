@@ -10,7 +10,11 @@ import PlacementPinIcon from "$components/PlacementPinIcon.svelte";
 import { trackEvent } from "$lib/analytics";
 import { _ } from "$lib/i18n";
 import type { NearbyPlace } from "$lib/placementMode";
-import { buildAddLocationUrl, findNearbyPlaces } from "$lib/placementMode";
+import {
+	buildAddLocationUrl,
+	fetchNearbyPlaceNames,
+	findNearbyPlaces,
+} from "$lib/placementMode";
 import { places } from "$lib/store";
 
 import { goto } from "$app/navigation";
@@ -22,7 +26,11 @@ type Props = {
 
 let { map, active = $bindable(false) }: Props = $props();
 
-let nearby: NearbyPlace[] | null = $state(null);
+// Raw (non-deep-proxying) state: `nearby` is always reassigned wholesale
+// (never mutated in place), and the confirm() identity guard below relies on
+// `nearby === hits` holding after a plain assignment — $state would wrap the
+// array in a new proxy on assignment, breaking that reference check.
+let nearby: NearbyPlace[] | null = $state.raw(null);
 
 // Symmetric focus management for the confirm<->interrupt swap: whichever
 // button unmounts, the surviving sheet's equivalent button takes focus
@@ -79,6 +87,16 @@ const confirm = async () => {
 	trackEvent("add_place_nearby_shown", { count: hits.length });
 	await tick();
 	backButtonEl?.focus();
+
+	const names = await fetchNearbyPlaceNames(center.lat, center.lng);
+	// Identity guard: Back, Cancel, a map move, or a newer confirm all
+	// replace/clear `nearby` — never patch a list the user left.
+	if (nearby !== hits || names.size === 0) return;
+	nearby = hits.map((hit) =>
+		names.has(hit.place.id)
+			? { ...hit, place: { ...hit.place, name: names.get(hit.place.id) } }
+			: hit,
+	);
 };
 
 const addAnyway = () => {

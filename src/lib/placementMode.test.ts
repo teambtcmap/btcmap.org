@@ -1,9 +1,10 @@
-import { describe, expect, it } from "vitest";
+import { afterEach, describe, expect, it, vi } from "vitest";
 
 import type { Place } from "$lib/types";
 
 import {
 	buildAddLocationUrl,
+	fetchNearbyPlaceNames,
 	findNearbyPlaces,
 	parseCoordsParams,
 } from "./placementMode";
@@ -90,5 +91,47 @@ describe("findNearbyPlaces", () => {
 
 	it("returns empty for an empty store", () => {
 		expect(findNearbyPlaces(LAT, LONG, [])).toEqual([]);
+	});
+});
+
+describe("fetchNearbyPlaceNames", () => {
+	afterEach(() => {
+		vi.unstubAllGlobals();
+	});
+
+	it("maps valid rows by id, skipping empty names and non-numeric ids", async () => {
+		vi.stubGlobal(
+			"fetch",
+			vi.fn(async () => ({
+				ok: true,
+				json: async () => [
+					{ id: 1, name: "Kiosk 87" },
+					{ id: 2, name: "" },
+					{ id: "x", name: "bad" },
+				],
+			})),
+		);
+		const names = await fetchNearbyPlaceNames(42.2762511, 42.7024218);
+		expect(names).toEqual(new Map([[1, "Kiosk 87"]]));
+	});
+
+	it("returns an empty Map when the response is not ok", async () => {
+		vi.stubGlobal(
+			"fetch",
+			vi.fn(async () => ({ ok: false, json: async () => [] })),
+		);
+		const names = await fetchNearbyPlaceNames(42.2762511, 42.7024218);
+		expect(names).toEqual(new Map());
+	});
+
+	it("returns an empty Map when fetch rejects", async () => {
+		vi.stubGlobal(
+			"fetch",
+			vi.fn(async () => {
+				throw new Error("network error");
+			}),
+		);
+		const names = await fetchNearbyPlaceNames(42.2762511, 42.7024218);
+		expect(names).toEqual(new Map());
 	});
 });

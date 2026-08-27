@@ -1,3 +1,4 @@
+import { API_BASE } from "$lib/api-base";
 import { parseLatLongQuery } from "$lib/map/queryViewport";
 import type { Place } from "$lib/types";
 import { calculateDistance } from "$lib/utils";
@@ -41,3 +42,32 @@ export const findNearbyPlaces = (
 		.filter(({ distanceM }) => distanceM <= NEARBY_RADIUS_M)
 		.sort((a, b) => a.distanceM - b.distanceM)
 		.slice(0, NEARBY_LIMIT);
+
+// The static CDN feed deliberately ships no name field (map-perf
+// constraint), so candidate names come from a tiny radius search at
+// interrupt time; any failure degrades to the unnamed fallback.
+export const fetchNearbyPlaceNames = async (
+	lat: number,
+	long: number,
+): Promise<Map<number, string>> => {
+	const names = new Map<number, string>();
+	try {
+		const response = await fetch(
+			`${API_BASE}/v4/places/search/?lat=${lat}&lon=${long}&radius_km=${NEARBY_RADIUS_M / 1000}&fields=id,name`,
+			{ signal: AbortSignal.timeout(5000) },
+		);
+		if (!response.ok) return names;
+		const rows: unknown = await response.json();
+		if (!Array.isArray(rows)) return names;
+		for (const row of rows) {
+			const id = (row as { id?: unknown }).id;
+			const name = (row as { name?: unknown }).name;
+			if (typeof id === "number" && typeof name === "string" && name) {
+				names.set(id, name);
+			}
+		}
+	} catch {
+		// Timeout/network failure — candidates just keep the fallback label.
+	}
+	return names;
+};

@@ -6,7 +6,11 @@ import { stubMapData, waitForMarkersToLoad } from './helpers';
 // Step 3 of the add-location redesign (#1134): confirming a placement pin
 // near existing places interrupts with a duplicate check before the form.
 // Hermetic via stubMapData — Stub Cafe (~6 m from the shared viewport
-// center) is the only STUB_PLACES entry inside the 75 m radius.
+// center) is the only STUB_PLACES entry inside the 75 m radius. The static
+// feed carries no `name` field in production, so the first test stubs
+// name-less places and layers a /v4/places/search/ route on top (registered
+// after stubMapData so it wins) to supply the candidate's name, mirroring
+// how the interrupt actually resolves names at show time.
 test.describe('Placement dedupe interrupt', () => {
 	test.use({ serviceWorkers: 'block' });
 
@@ -22,12 +26,28 @@ test.describe('Placement dedupe interrupt', () => {
 	test('confirm near an existing place shows the interrupt; Back returns', async ({
 		page
 	}) => {
-		await stubMapData(page);
+		// Name-less places, matching the real static feed (no `name` key).
+		await stubMapData(page, [
+			{ id: 1, lat: 42.2762, lon: 42.7024, icon: 'restaurant' },
+			{ id: 2, lat: 42.277, lon: 42.703, icon: 'question_mark' },
+			{ id: 3, lat: 42.2755, lon: 42.7018, icon: 'cafe' }
+		]);
+		// Registered after stubMapData so this route wins (Playwright matches
+		// routes in reverse registration order) and supplies the candidate name
+		// the interrupt fetches at show time.
+		await page.route('**/v4/places/search/**', (route) =>
+			route.fulfill({
+				status: 200,
+				contentType: 'application/json',
+				body: JSON.stringify([{ id: 1, name: 'Stub Cafe' }])
+			})
+		);
 		await startPlacement(page);
 
 		await page.getByRole('button', { name: 'Add a place here' }).click();
 		await expect(page.getByText('Is it one of these?')).toBeVisible();
 		// Only the in-radius candidate is listed, linked to its merchant page.
+		// The name arrives via the radius search stub, not the (name-less) feed.
 		const candidate = page.getByRole('link', { name: /Stub Cafe/ });
 		await expect(candidate).toHaveAttribute('href', '/merchant/1');
 		await expect(page.getByRole('link', { name: /Stub Shop/ })).toHaveCount(0);
@@ -61,5 +81,24 @@ test.describe('Placement dedupe interrupt', () => {
 
 		await page.getByRole('button', { name: 'Add a place here' }).click();
 		await expect(page).toHaveURL(/\/add-location\?lat=42\.27\d+&long=42\.70\d+/);
+	});
+
+	test('falls back to Unnamed place when the name lookup returns nothing', async ({
+		page
+	}) => {
+		// Name-less places, matching the real static feed (no `name` key). No
+		// extra search route — stubMapData's catch-all already answers [].
+		await stubMapData(page, [
+			{ id: 1, lat: 42.2762, lon: 42.7024, icon: 'restaurant' },
+			{ id: 2, lat: 42.277, lon: 42.703, icon: 'question_mark' },
+			{ id: 3, lat: 42.2755, lon: 42.7018, icon: 'cafe' }
+		]);
+		await startPlacement(page);
+
+		await page.getByRole('button', { name: 'Add a place here' }).click();
+		await expect(page.getByText('Is it one of these?')).toBeVisible();
+		const candidate = page.getByRole('link', { name: /Unnamed place/ });
+		await expect(candidate).toBeVisible();
+		await expect(candidate).toHaveAttribute('href', '/merchant/1');
 	});
 });
