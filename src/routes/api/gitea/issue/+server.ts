@@ -1,43 +1,13 @@
-import type { BinaryLike, CipherKey } from "node:crypto";
-import crypto from "node:crypto";
 import { error } from "@sveltejs/kit";
 import { get } from "svelte/store";
 
 import { GITEA_LABELS } from "$lib/constants";
 import { createIssueWithLabels, type GiteaRepo } from "$lib/gitea";
+import { validateCaptcha } from "$lib/server/captcha";
 import { areas } from "$lib/store";
 import { getAreaIdsByCoordinates } from "$lib/utils";
 
 import type { RequestHandler } from "./$types";
-import { env } from "$env/dynamic/private";
-
-// TTL-based cache for used captcha secrets to prevent memory leaks
-const CAPTCHA_TTL_MS = 10 * 60 * 1000; // 10 minutes
-const usedCaptchas = new Map<string, number>();
-
-function addUsedCaptcha(secret: string): void {
-	usedCaptchas.set(secret, Date.now());
-	// Clean up expired entries periodically
-	if (usedCaptchas.size > 100) {
-		const now = Date.now();
-		for (const [key, timestamp] of usedCaptchas) {
-			if (now - timestamp > CAPTCHA_TTL_MS) {
-				usedCaptchas.delete(key);
-			}
-		}
-	}
-}
-
-function isCaptchaUsed(secret: string): boolean {
-	const timestamp = usedCaptchas.get(secret);
-	if (!timestamp) return false;
-	// Check if expired
-	if (Date.now() - timestamp > CAPTCHA_TTL_MS) {
-		usedCaptchas.delete(secret);
-		return false;
-	}
-	return true;
-}
 
 type IssueConfig = {
 	repo: GiteaRepo;
@@ -46,11 +16,6 @@ type IssueConfig = {
 };
 
 const CONFIG = {
-	"add-location": {
-		repo: "btcmap-data",
-		labelId: GITEA_LABELS.DATA.ADD_LOCATION,
-		hasAreaLabels: true,
-	},
 	"verify-location": {
 		repo: "btcmap-data",
 		labelId: GITEA_LABELS.DATA.VERIFY_LOCATION,
@@ -77,33 +42,6 @@ type IssueType = keyof typeof CONFIG;
 
 function isValidIssueType(type: unknown): type is IssueType {
 	return typeof type === "string" && type in CONFIG;
-}
-
-function validateCaptcha(captchaSecret: string, captchaTest: string): void {
-	if (!env.SERVER_CRYPTO_KEY || !env.SERVER_INIT_VECTOR) {
-		error(503, "Service unavailable");
-	}
-
-	const initVector = Buffer.from(env.SERVER_INIT_VECTOR, "hex");
-	const serverKey = Buffer.from(env.SERVER_CRYPTO_KEY, "hex");
-
-	const algorithm = "aes-256-cbc" as string;
-	const key = serverKey as unknown as CipherKey;
-	const iv = initVector as unknown as BinaryLike;
-	const decrypt = crypto.createDecipheriv(algorithm, key, iv);
-
-	let secret = decrypt.update(captchaSecret, "hex", "utf8");
-	secret += decrypt.final("utf8");
-
-	if (captchaTest !== secret) {
-		error(400, "Captcha test failed, please try again or contact BTC Map.");
-	}
-
-	if (isCaptchaUsed(captchaSecret)) {
-		error(400, "Captcha has already been used, please try another.");
-	} else {
-		addUsedCaptcha(captchaSecret);
-	}
 }
 
 async function getAreaLabelsFromCoordinates(
@@ -136,27 +74,6 @@ function generateBody(
 	const taggingInstructions = `If you are a new contributor please read our Tagging Instructions [here](https://wiki.btcmap.org/Tagging-Merchants).`;
 
 	switch (type) {
-		case "add-location":
-			return `Merchant name: ${data.name}
-English name (name:en): ${data.nameEn || ""}
-Address: ${data.address}
-Lat: ${data.lat}
-Long: ${data.long}
-Associated areas: ${areasText}
-OSM: ${data.osm}
-Category: ${data.category}
-Payment methods: ${data.methods}
-Website: ${data.website}
-Phone: ${data.phone}
-Opening hours: ${data.hours}
-Notes: ${data.notes}
-Data Source: ${data.source}
-Details (if applicable): ${data.sourceOther}
-Contact: ${data.contact}
-Created at: ${timestamp}
-
-${taggingInstructions}`;
-
 		case "verify-location":
 			return `Merchant name: ${data.name}
 Merchant location: ${data.location}

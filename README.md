@@ -33,6 +33,8 @@ To test the frontend against a local [btcmap-api](https://github.com/teambtcmap/
 
 Remove or comment out the env var to switch back to the production API.
 
+**Note:** The add-location form submits through `/api/submit-place`, which calls btcmap-api's `submit_place` RPC and needs `BTCMAP_IMPORT_TOKEN`. The RPC target follows `VITE_API_BASE_URL` (the endpoint uses SvelteKit's event fetch, so the dev-proxy path works server-side too).
+
 ### Build project
 
 1. Create `.env`  
