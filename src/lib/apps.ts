@@ -371,7 +371,7 @@ export const appConfigs: AppConfig[] = [
 		id: "blink",
 		name: "Blink",
 		logo: "/images/apps/blink.png",
-		tag: "coming-soon",
+		tag: "powered-by-btcmap",
 		sponsor: false,
 		stores: [
 			{
@@ -383,6 +383,11 @@ export const appConfigs: AppConfig[] = [
 				store: "apk",
 				platform: "android",
 				url: "https://github.com/blinkbitcoin/blink-mobile/releases/latest",
+			},
+			{
+				store: "zapstore",
+				platform: "android",
+				url: "https://zapstore.dev/apps/com.galoyapp",
 			},
 			{
 				store: "app-store",
