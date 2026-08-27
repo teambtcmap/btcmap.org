@@ -50,7 +50,9 @@ test.describe('Placement dedupe interrupt', () => {
 		// The name arrives via the radius search stub, not the (name-less) feed.
 		const candidate = page.getByRole('link', { name: /Stub Cafe/ });
 		await expect(candidate).toHaveAttribute('href', '/merchant/1');
-		await expect(page.getByRole('link', { name: /Stub Shop/ })).toHaveCount(0);
+		// Radius filter: of the three stub places only id 1 (~6 m) is inside
+		// 75 m — exactly one candidate row renders.
+		await expect(page.locator('a[href^="/merchant/"]')).toHaveCount(1);
 		// No navigation happened yet.
 		await expect(page).toHaveURL(/\/map/);
 
