@@ -8,7 +8,9 @@ import type {
 import PlacementPinIcon from "$components/PlacementPinIcon.svelte";
 import { trackEvent } from "$lib/analytics";
 import { _ } from "$lib/i18n";
-import { buildAddLocationUrl } from "$lib/placementMode";
+import type { NearbyPlace } from "$lib/placementMode";
+import { buildAddLocationUrl, findNearbyPlaces } from "$lib/placementMode";
+import { places } from "$lib/store";
 
 import { goto } from "$app/navigation";
 
@@ -18,6 +20,8 @@ type Props = {
 };
 
 let { map, active = $bindable(false) }: Props = $props();
+
+let nearby: NearbyPlace[] | null = $state(null);
 
 // Keep ?add in the URL so placement mode is linkable. Same raw
 // history.replaceState idiom as writeHashCoords ($lib/map/mapHash.ts),
@@ -44,14 +48,39 @@ const enter = (method: string) => {
 };
 
 const cancel = () => {
+	nearby = null;
 	active = false;
+};
+
+// add_place_confirm keeps meaning "handed off to the form" — it fires on
+// both the direct path and the add-anyway path, so the funnel metric is
+// unchanged by the interrupt.
+const navigateToForm = (lat: number, long: number) => {
+	trackEvent("add_place_confirm");
+	goto(buildAddLocationUrl(lat, long));
 };
 
 const confirm = () => {
 	if (!map) return;
 	const center = map.getCenter();
-	trackEvent("add_place_confirm");
-	goto(buildAddLocationUrl(center.lat, center.lng));
+	const hits = findNearbyPlaces(center.lat, center.lng, $places);
+	if (hits.length === 0) {
+		navigateToForm(center.lat, center.lng);
+		return;
+	}
+	nearby = hits;
+	trackEvent("add_place_nearby_shown", { count: hits.length });
+};
+
+const addAnyway = () => {
+	if (!map) return;
+	const center = map.getCenter();
+	trackEvent("add_place_nearby_continue");
+	navigateToForm(center.lat, center.lng);
+};
+
+const backToConfirm = () => {
+	nearby = null;
 };
 
 // Long-press (touch) and right-click (desktop) both jump straight into
@@ -143,6 +172,20 @@ $effect(() => {
 		currentMap.off("contextmenu", onContextMenu);
 	};
 });
+
+// Moving the map moves the pin, so a shown candidate list is stale —
+// drop back to the confirm sheet.
+$effect(() => {
+	if (!map || nearby === null) return;
+	const currentMap = map;
+	const onMoveStart = () => {
+		nearby = null;
+	};
+	currentMap.on("movestart", onMoveStart);
+	return () => {
+		currentMap.off("movestart", onMoveStart);
+	};
+});
 </script>
 
 {#if active}
@@ -157,27 +200,69 @@ $effect(() => {
 	<div
 		class="absolute bottom-0 left-0 right-0 z-[1002] rounded-t-2xl bg-white p-4 pb-6 shadow-lg dark:bg-dark"
 	>
-		<p class="text-lg font-semibold text-primary dark:text-white">
-			{$_("map.placement.title")}
-		</p>
-		<p class="mt-1 text-sm text-body dark:text-offwhite">
-			{$_("map.placement.hint")}
-		</p>
-		<div class="mt-4 flex gap-3">
-			<button
-				type="button"
-				onclick={cancel}
-				class="h-12 rounded-xl border border-input px-5 font-semibold text-body dark:text-offwhite"
-			>
-				{$_("map.placement.cancel")}
-			</button>
-			<button
-				type="button"
-				onclick={confirm}
-				class="h-12 flex-1 rounded-xl bg-bitcoin font-semibold text-white hover:bg-bitcoinHover"
-			>
-				{$_("map.placement.confirm")}
-			</button>
-		</div>
+		{#if nearby === null}
+			<p class="text-lg font-semibold text-primary dark:text-white">
+				{$_("map.placement.title")}
+			</p>
+			<p class="mt-1 text-sm text-body dark:text-offwhite">
+				{$_("map.placement.hint")}
+			</p>
+			<div class="mt-4 flex gap-3">
+				<button
+					type="button"
+					onclick={cancel}
+					class="h-12 rounded-xl border border-input px-5 font-semibold text-body dark:text-offwhite"
+				>
+					{$_("map.placement.cancel")}
+				</button>
+				<button
+					type="button"
+					onclick={confirm}
+					class="h-12 flex-1 rounded-xl bg-bitcoin font-semibold text-white hover:bg-bitcoinHover"
+				>
+					{$_("map.placement.confirm")}
+				</button>
+			</div>
+		{:else}
+			<p class="text-lg font-semibold text-primary dark:text-white">
+				{$_("map.placement.nearbyTitle")}
+			</p>
+			<p class="mt-1 text-sm text-body dark:text-offwhite">
+				{$_("map.placement.nearbyHint")}
+			</p>
+			<ul class="mt-3 max-h-40 space-y-1 overflow-y-auto">
+				{#each nearby as { place, distanceM } (place.id)}
+					<li>
+						<a
+							href="/merchant/{place.id}"
+							class="flex items-baseline justify-between gap-3 rounded-lg px-2 py-1.5 hover:underline"
+						>
+							<span class="font-semibold text-link"
+								>{place.name ?? $_("map.placement.nearbyUnnamed")}</span
+							>
+							<span class="shrink-0 text-sm text-body dark:text-offwhite"
+								>{Math.round(distanceM)} m</span
+							>
+						</a>
+					</li>
+				{/each}
+			</ul>
+			<div class="mt-4 flex gap-3">
+				<button
+					type="button"
+					onclick={backToConfirm}
+					class="h-12 rounded-xl border border-input px-5 font-semibold text-body dark:text-offwhite"
+				>
+					{$_("map.placement.nearbyBack")}
+				</button>
+				<button
+					type="button"
+					onclick={addAnyway}
+					class="h-12 flex-1 rounded-xl bg-bitcoin font-semibold text-white hover:bg-bitcoinHover"
+				>
+					{$_("map.placement.nearbyContinue")}
+				</button>
+			</div>
+		{/if}
 	</div>
 {/if}
