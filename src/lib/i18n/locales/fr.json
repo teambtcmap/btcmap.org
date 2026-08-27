@@ -278,15 +278,15 @@
 	"map": {
 		"bitcoinMerchantMapTitle": "Carte des commerces Bitcoin",
 		"placement": {
-			"title": "Place the pin",
-			"hint": "Drag the map until the pin sits on the business entrance, then confirm.",
-			"cancel": "Cancel",
-			"confirm": "Add a place here",
-			"nearbyTitle": "Is it one of these?",
-			"nearbyHint": "These places already exist near your pin — open one to check, or add a new place.",
-			"nearbyUnnamed": "Unnamed place",
-			"nearbyBack": "Back",
-			"nearbyContinue": "None of these — add a new place"
+			"title": "Placez l'épingle",
+			"hint": "Déplacez la carte jusqu'à ce que l'épingle soit sur l'entrée du commerce, puis confirmez.",
+			"cancel": "Annuler",
+			"confirm": "Ajouter un lieu ici",
+			"nearbyTitle": "Est-ce l'un de ceux-ci ?",
+			"nearbyHint": "Ces lieux existent déjà près de votre épingle — ouvrez-en un pour vérifier, ou ajoutez un nouveau lieu.",
+			"nearbyUnnamed": "Lieu sans nom",
+			"nearbyBack": "Retour",
+			"nearbyContinue": "Aucun de ceux-ci — ajouter un nouveau lieu"
 		}
 	},
 	"info": {
