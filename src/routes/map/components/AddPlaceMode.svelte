@@ -4,6 +4,7 @@ import type {
 	Map as MapLibreMap,
 	MapMouseEvent,
 } from "maplibre-gl";
+import { tick } from "svelte";
 
 import PlacementPinIcon from "$components/PlacementPinIcon.svelte";
 import { trackEvent } from "$lib/analytics";
@@ -22,6 +23,12 @@ type Props = {
 let { map, active = $bindable(false) }: Props = $props();
 
 let nearby: NearbyPlace[] | null = $state(null);
+
+// Symmetric focus management for the confirm<->interrupt swap: whichever
+// button unmounts, the surviving sheet's equivalent button takes focus
+// instead of it falling back to <body>.
+let backButtonEl: HTMLButtonElement | undefined = $state();
+let confirmButtonEl: HTMLButtonElement | undefined = $state();
 
 // Keep ?add in the URL so placement mode is linkable. Same raw
 // history.replaceState idiom as writeHashCoords ($lib/map/mapHash.ts),
@@ -60,7 +67,7 @@ const navigateToForm = (lat: number, long: number) => {
 	goto(buildAddLocationUrl(lat, long));
 };
 
-const confirm = () => {
+const confirm = async () => {
 	if (!map) return;
 	const center = map.getCenter();
 	const hits = findNearbyPlaces(center.lat, center.lng, $places);
@@ -70,6 +77,8 @@ const confirm = () => {
 	}
 	nearby = hits;
 	trackEvent("add_place_nearby_shown", { count: hits.length });
+	await tick();
+	backButtonEl?.focus();
 };
 
 const addAnyway = () => {
@@ -79,8 +88,10 @@ const addAnyway = () => {
 	navigateToForm(center.lat, center.lng);
 };
 
-const backToConfirm = () => {
+const backToConfirm = async () => {
 	nearby = null;
+	await tick();
+	confirmButtonEl?.focus();
 };
 
 // Long-press (touch) and right-click (desktop) both jump straight into
@@ -216,6 +227,7 @@ $effect(() => {
 					{$_("map.placement.cancel")}
 				</button>
 				<button
+					bind:this={confirmButtonEl}
 					type="button"
 					onclick={confirm}
 					class="h-12 flex-1 rounded-xl bg-bitcoin font-semibold text-white hover:bg-bitcoinHover"
@@ -235,10 +247,14 @@ $effect(() => {
 					<li>
 						<a
 							href="/merchant/{place.id}"
+							onclick={() =>
+								trackEvent("add_place_nearby_candidate_click", {
+									placeId: place.id,
+								})}
 							class="flex items-baseline justify-between gap-3 rounded-lg px-2 py-1.5 hover:underline"
 						>
 							<span class="font-semibold text-link"
-								>{place.name ?? $_("map.placement.nearbyUnnamed")}</span
+								>{place.name || $_("map.placement.nearbyUnnamed")}</span
 							>
 							<span class="shrink-0 text-sm text-body dark:text-offwhite"
 								>{Math.round(distanceM)} m</span
@@ -249,6 +265,7 @@ $effect(() => {
 			</ul>
 			<div class="mt-4 flex gap-3">
 				<button
+					bind:this={backButtonEl}
 					type="button"
 					onclick={backToConfirm}
 					class="h-12 rounded-xl border border-input px-5 font-semibold text-body dark:text-offwhite"

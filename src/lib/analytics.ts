@@ -48,7 +48,8 @@ export type EventName =
 	| "add_place_enter"
 	| "add_place_confirm"
 	| "add_place_nearby_shown"
-	| "add_place_nearby_continue";
+	| "add_place_nearby_continue"
+	| "add_place_nearby_candidate_click";
 
 declare global {
 	interface Window {
