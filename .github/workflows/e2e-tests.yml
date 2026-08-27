@@ -24,6 +24,14 @@ jobs:
           needs-env: 'true'
           needs-sync: 'true'
 
+      # .env.example ships empty captcha keys, which leaves /captcha broken
+      # and every captcha-gated form control permanently disabled — specs
+      # that interact with those controls need working (throwaway) keys.
+      - name: Generate captcha crypto keys
+        run: |
+          echo "SERVER_CRYPTO_KEY=$(openssl rand -hex 32)" >> .env
+          echo "SERVER_INIT_VECTOR=$(openssl rand -hex 16)" >> .env
+
       - name: Cache Playwright browsers
         id: playwright-cache
         uses: actions/cache@v6

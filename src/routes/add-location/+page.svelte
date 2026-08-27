@@ -13,6 +13,7 @@ import { get } from "svelte/store";
 import FormHelperText from "$components/FormHelperText.svelte";
 import FormSuccess from "$components/FormSuccess.svelte";
 import AddressSearch from "$components/form/AddressSearch.svelte";
+import type { FormSelectOption } from "$components/form/FormSelect.svelte";
 import FormSelect from "$components/form/FormSelect.svelte";
 import Icon from "$components/Icon.svelte";
 import HeaderPlaceholder from "$components/layout/HeaderPlaceholder.svelte";
@@ -21,6 +22,7 @@ import MapUnsupportedFallback from "$components/MapUnsupportedFallback.svelte";
 import PlacementPinIcon from "$components/PlacementPinIcon.svelte";
 import PrimaryButton from "$components/PrimaryButton.svelte";
 import TextLink from "$components/TextLink.svelte";
+import { CATEGORIES, CATEGORY_GROUPS } from "$lib/categoryMapping";
 import { _, locale } from "$lib/i18n";
 import type { BtcmapMapHandle } from "$lib/map/createMap";
 import { createBtcmapMap } from "$lib/map/createMap";
@@ -85,8 +87,11 @@ function resetForm() {
 	latError = "";
 	longError = "";
 	showAdvanced = false;
+	showMoreDetails = false;
 	source = undefined;
 	sourceOther = undefined;
+	categorySelect = undefined;
+	categoryOther = undefined;
 
 	// Wait for the DOM to update with the form back in place
 	tick().then(async () => {
@@ -94,7 +99,6 @@ function resetForm() {
 		if (name) name.value = "";
 		if (nameEn) nameEn.value = "";
 		if (address) address.value = "";
-		if (category) category.value = "";
 		if (website) website.value = "";
 		if (phone) phone.value = "";
 		if (hours) hours.value = "";
@@ -166,6 +170,7 @@ let lat: number | undefined;
 let long: number | undefined;
 let selected = false;
 let showAdvanced = false;
+let showMoreDetails = false;
 let latInput = "";
 let longInput = "";
 let latError = "";
@@ -217,6 +222,9 @@ function handleAddressSelect(
 	if (address && (address.value.trim() === "" || addressFilledBySearch)) {
 		address.value = displayName;
 		addressFilledBySearch = true;
+		// The address field lives behind the "Add more details" expander —
+		// surface it so the filled-in value isn't silently hidden.
+		showMoreDetails = true;
 	}
 }
 
@@ -231,7 +239,16 @@ function toggleAdvanced() {
 		if (long !== undefined) longInput = long.toFixed(5);
 	}
 }
-let category: HTMLInputElement;
+let categorySelect: string | undefined;
+let categoryOther: string | undefined;
+let categoryOtherElement: HTMLInputElement;
+
+// Map taxonomy minus the "all" pseudo-bucket, plus the Other escape
+// hatch — labels verbatim from the map UI.
+const categoryOptions: FormSelectOption[] = CATEGORIES.filter(
+	(key) => key !== "all",
+).map((key) => ({ value: key, label: CATEGORY_GROUPS[key].label }));
+
 let methods: ("onchain" | "lightning" | "nfc")[] = [];
 let onchain: HTMLInputElement;
 let lightning: HTMLInputElement;
@@ -278,6 +295,11 @@ $: if (mapLoaded && lat !== undefined && long !== undefined && !marker) {
 
 const submitForm = (event: SubmitEvent) => {
 	event.preventDefault();
+	if (categorySelect === "Other" && !(categoryOther ?? "").trim()) {
+		errToast(get(_)("addLocation.categoryOtherRequired"));
+		categoryOtherElement.focus();
+		return;
+	}
 	if (!selected) {
 		noLocationSelected = true;
 		errToast(get(_)("errors.noLocationSelected"));
@@ -311,7 +333,10 @@ const submitForm = (event: SubmitEvent) => {
 				address: address.value,
 				lat,
 				long,
-				category: category.value,
+				category:
+					categorySelect === "Other"
+						? (categoryOther ?? "").trim()
+						: (categorySelect ?? ""),
 				methods,
 				website: website.value,
 				phone: phone.value,
@@ -463,25 +488,6 @@ $: if (map && mapLoaded) {
 					</div>
 
 					<div>
-						<div>
-							<label for="name-en" class="mb-2 block font-semibold">
-								{$_('addLocation.nameEnLabel')}
-								<span class="font-normal">{$_('forms.optional')}</span>
-							</label>
-							<FormHelperText text={$_('addLocation.nameEnTooltip')} />
-						</div>
-						<input
-							disabled={!captchaSecret || !mapLoaded}
-							type="text"
-							name="nameEn"
-							id="name-en"
-							placeholder={$_('addLocation.merchantEnglishNamePlaceholder')}
-							class="w-full rounded-2xl border-2 border-input p-3 transition-all focus:outline-link disabled:cursor-not-allowed disabled:bg-gray-100 disabled:text-gray-500 dark:bg-white/[0.15] dark:disabled:bg-gray-700 dark:disabled:text-gray-400"
-							bind:this={nameEn}
-						/>
-					</div>
-
-					<div>
 						<label for="location-picker" class="mb-2 block font-semibold"
 							>{$_('forms.selectLocation')}</label
 						>
@@ -529,7 +535,7 @@ $: if (map && mapLoaded) {
 								</button>
 							</div>
 						{/if}
-						<div class="flex space-x-2">
+						<div class="flex space-x-2" class:hidden={!!arrivalCoords && !showAddressSearch}>
 							<div class="w-full">
 								<input
 									id="lat"
@@ -571,7 +577,7 @@ $: if (map && mapLoaded) {
 								{/if}
 							</div>
 						</div>
-						<div class="mt-2">
+						<div class="mt-2" class:hidden={!!arrivalCoords && !showAddressSearch}>
 							<button
 								type="button"
 								class="text-sm font-semibold text-link hover:text-hover focus:outline-link"
@@ -589,35 +595,38 @@ $: if (map && mapLoaded) {
 						</div>
 					</div>
 
-				<div>
-					<div class="mb-2">
-						<label for="address" class="block font-semibold">{$_('addLocation.addressLabel')}</label>
-						<FormHelperText text={$_('addLocation.addressTooltip')} />
-					</div>
-					
-					<input
-						disabled={!captchaSecret || !mapLoaded}
-						type="text"
-						name="address"
-						id="address"
-						placeholder={$_('addLocation.addressPlaceholder')}
-						class="w-full rounded-2xl border-2 border-input p-3 transition-all focus:outline-link disabled:cursor-not-allowed disabled:bg-gray-100 disabled:text-gray-500 dark:bg-white/[0.15] dark:disabled:bg-gray-700 dark:disabled:text-gray-400"
-						bind:this={address}
-						on:input={() => (addressFilledBySearch = false)}
-					/>
-				</div>
-
 					<div>
 						<label for="category" class="mb-2 block font-semibold">{$_('forms.category')}</label>
-						<input
-							disabled={!captchaSecret || !mapLoaded}
-							type="text"
-							name="category"
+						<FormSelect
 							id="category"
-							placeholder={$_('addLocation.categoryPlaceholder')}
-							class="w-full rounded-2xl border-2 border-input p-3 transition-all focus:outline-link disabled:cursor-not-allowed disabled:bg-gray-100 disabled:text-gray-500 dark:bg-white/[0.15] dark:disabled:bg-gray-700 dark:disabled:text-gray-400"
-							bind:this={category}
+							disabled={!captchaSecret || !mapLoaded}
+							name="category"
+							required
+							options={[
+								{ value: '', label: $_('addLocation.categorySelectPlaceholder') },
+								...categoryOptions,
+								{ value: 'Other', label: $_('addLocation.categoryOtherOption') }
+							]}
+							bind:value={categorySelect}
+							on:change={async () => {
+								if (categorySelect === 'Other') {
+									await tick();
+									categoryOtherElement.focus();
+								}
+							}}
 						/>
+						{#if categorySelect === 'Other'}
+							<input
+								disabled={!captchaSecret || !mapLoaded}
+								required
+								type="text"
+								name="category-other"
+								placeholder={$_('addLocation.categoryPlaceholder')}
+								class="mt-2 w-full rounded-2xl border-2 border-input p-3 transition-all focus:outline-link disabled:cursor-not-allowed disabled:bg-gray-100 disabled:text-gray-500 dark:bg-white/[0.15] dark:disabled:bg-gray-700 dark:disabled:text-gray-400"
+								bind:value={categoryOther}
+								bind:this={categoryOtherElement}
+							/>
+						{/if}
 					</div>
 
 					<fieldset>
@@ -701,60 +710,111 @@ $: if (map && mapLoaded) {
 					</fieldset>
 
 					<div>
-						<label for="website" class="mb-2 block font-semibold"
-							>{$_('forms.website')} <span class="font-normal">{$_('forms.optional')}</span></label
+						<button
+							type="button"
+							class="text-sm font-semibold text-link hover:text-hover focus:outline-link"
+							aria-expanded={showMoreDetails}
+							on:click={() => (showMoreDetails = !showMoreDetails)}
 						>
-						<input
-							disabled={!captchaSecret || !mapLoaded}
-							type="url"
-							name="website"
-							placeholder={$_('addLocation.websitePlaceholder')}
-							class="w-full rounded-2xl border-2 border-input p-3 transition-all focus:outline-link disabled:cursor-not-allowed disabled:bg-gray-100 disabled:text-gray-500 dark:bg-white/[0.15] dark:disabled:bg-gray-700 dark:disabled:text-gray-400"
-							bind:this={website}
-						/>
+							{showMoreDetails ? '▾' : '▸'}
+							{$_('addLocation.moreDetailsToggle')}
+						</button>
 					</div>
 
-					<div>
-						<label for="phone" class="mb-2 block font-semibold"
-							>{$_('forms.phone')} <span class="font-normal">{$_('forms.optional')}</span></label
-						>
-						<input
-							disabled={!captchaSecret || !mapLoaded}
-							type="tel"
-							name="phone"
-							placeholder={$_('addLocation.phonePlaceholder')}
-							class="w-full rounded-2xl border-2 border-input p-3 transition-all focus:outline-link disabled:cursor-not-allowed disabled:bg-gray-100 disabled:text-gray-500 dark:bg-white/[0.15] dark:disabled:bg-gray-700 dark:disabled:text-gray-400"
-							bind:this={phone}
-						/>
-					</div>
+					<div class="space-y-5" class:hidden={!showMoreDetails}>
+						<div>
+							<div>
+								<label for="name-en" class="mb-2 block font-semibold">
+									{$_('addLocation.nameEnLabel')}
+									<span class="font-normal">{$_('forms.optional')}</span>
+								</label>
+								<FormHelperText text={$_('addLocation.nameEnTooltip')} />
+							</div>
+							<input
+								disabled={!captchaSecret || !mapLoaded}
+								type="text"
+								name="nameEn"
+								id="name-en"
+								placeholder={$_('addLocation.merchantEnglishNamePlaceholder')}
+								class="w-full rounded-2xl border-2 border-input p-3 transition-all focus:outline-link disabled:cursor-not-allowed disabled:bg-gray-100 disabled:text-gray-500 dark:bg-white/[0.15] dark:disabled:bg-gray-700 dark:disabled:text-gray-400"
+								bind:this={nameEn}
+							/>
+						</div>
 
-					<div>
-						<label for="hours" class="mb-2 block font-semibold"
-							>{$_('forms.openingHours')}
-							<span class="font-normal">{$_('forms.optional')}</span></label
-						>
-						<input
-							disabled={!captchaSecret || !mapLoaded}
-							type="text"
-							name="hours"
-							placeholder={$_('addLocation.hoursPlaceholder')}
-							class="w-full rounded-2xl border-2 border-input p-3 transition-all focus:outline-link disabled:cursor-not-allowed disabled:bg-gray-100 disabled:text-gray-500 dark:bg-white/[0.15] dark:disabled:bg-gray-700 dark:disabled:text-gray-400"
-							bind:this={hours}
-						/>
-					</div>
+						<div>
+							<div class="mb-2">
+								<label for="address" class="block font-semibold">{$_('addLocation.addressLabel')}</label>
+								<FormHelperText text={$_('addLocation.addressTooltip')} />
+							</div>
 
-					<div>
-						<label for="notes" class="mb-2 block font-semibold"
-							>{$_('forms.notes')} <span class="font-normal">{$_('forms.optional')}</span></label
-						>
-						<textarea
-							disabled={!captchaSecret || !mapLoaded}
-							name="notes"
-							placeholder={$_('addLocation.notesPlaceholder')}
-							rows="3"
-							class="w-full rounded-2xl border-2 border-input p-3 transition-all focus:outline-link disabled:cursor-not-allowed disabled:bg-gray-100 disabled:text-gray-500 dark:bg-white/[0.15] dark:disabled:bg-gray-700 dark:disabled:text-gray-400"
-							bind:this={notes}
-						></textarea>
+							<input
+								disabled={!captchaSecret || !mapLoaded}
+								type="text"
+								name="address"
+								id="address"
+								placeholder={$_('addLocation.addressPlaceholder')}
+								class="w-full rounded-2xl border-2 border-input p-3 transition-all focus:outline-link disabled:cursor-not-allowed disabled:bg-gray-100 disabled:text-gray-500 dark:bg-white/[0.15] dark:disabled:bg-gray-700 dark:disabled:text-gray-400"
+								bind:this={address}
+								on:input={() => (addressFilledBySearch = false)}
+							/>
+						</div>
+
+						<div>
+							<label for="website" class="mb-2 block font-semibold"
+								>{$_('forms.website')} <span class="font-normal">{$_('forms.optional')}</span></label
+							>
+							<input
+								disabled={!captchaSecret || !mapLoaded}
+								type="url"
+								name="website"
+								placeholder={$_('addLocation.websitePlaceholder')}
+								class="w-full rounded-2xl border-2 border-input p-3 transition-all focus:outline-link disabled:cursor-not-allowed disabled:bg-gray-100 disabled:text-gray-500 dark:bg-white/[0.15] dark:disabled:bg-gray-700 dark:disabled:text-gray-400"
+								bind:this={website}
+							/>
+						</div>
+
+						<div>
+							<label for="phone" class="mb-2 block font-semibold"
+								>{$_('forms.phone')} <span class="font-normal">{$_('forms.optional')}</span></label
+							>
+							<input
+								disabled={!captchaSecret || !mapLoaded}
+								type="tel"
+								name="phone"
+								placeholder={$_('addLocation.phonePlaceholder')}
+								class="w-full rounded-2xl border-2 border-input p-3 transition-all focus:outline-link disabled:cursor-not-allowed disabled:bg-gray-100 disabled:text-gray-500 dark:bg-white/[0.15] dark:disabled:bg-gray-700 dark:disabled:text-gray-400"
+								bind:this={phone}
+							/>
+						</div>
+
+						<div>
+							<label for="hours" class="mb-2 block font-semibold"
+								>{$_('forms.openingHours')}
+								<span class="font-normal">{$_('forms.optional')}</span></label
+							>
+							<input
+								disabled={!captchaSecret || !mapLoaded}
+								type="text"
+								name="hours"
+								placeholder={$_('addLocation.hoursPlaceholder')}
+								class="w-full rounded-2xl border-2 border-input p-3 transition-all focus:outline-link disabled:cursor-not-allowed disabled:bg-gray-100 disabled:text-gray-500 dark:bg-white/[0.15] dark:disabled:bg-gray-700 dark:disabled:text-gray-400"
+								bind:this={hours}
+							/>
+						</div>
+
+						<div>
+							<label for="notes" class="mb-2 block font-semibold"
+								>{$_('forms.notes')} <span class="font-normal">{$_('forms.optional')}</span></label
+							>
+							<textarea
+								disabled={!captchaSecret || !mapLoaded}
+								name="notes"
+								placeholder={$_('addLocation.notesPlaceholder')}
+								rows="3"
+								class="w-full rounded-2xl border-2 border-input p-3 transition-all focus:outline-link disabled:cursor-not-allowed disabled:bg-gray-100 disabled:text-gray-500 dark:bg-white/[0.15] dark:disabled:bg-gray-700 dark:disabled:text-gray-400"
+								bind:this={notes}
+							></textarea>
+						</div>
 					</div>
 
 					<div>
