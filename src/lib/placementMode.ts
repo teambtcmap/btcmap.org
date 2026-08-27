@@ -1,7 +1,9 @@
-import { API_BASE } from "$lib/api-base";
 import { parseLatLongQuery } from "$lib/map/queryViewport";
+import { buildRadiusSearchUrl, filterValidPlaces } from "$lib/radiusSearch";
 import type { Place } from "$lib/types";
 import { calculateDistance } from "$lib/utils";
+
+import type { Place as ApiPlace } from "$types/btcmap-api/Place";
 
 // 5 decimal places (~1 m) matches the precision /add-location displays
 // and snaps to in placeMarker().
@@ -53,17 +55,22 @@ export const fetchNearbyPlaceNames = async (
 	const names = new Map<number, string>();
 	try {
 		const response = await fetch(
-			`${API_BASE}/v4/places/search/?lat=${lat}&lon=${long}&radius_km=${NEARBY_RADIUS_M / 1000}&fields=id,name`,
+			buildRadiusSearchUrl(
+				{ lat, lon: long },
+				NEARBY_RADIUS_M / 1000,
+				"id,name",
+			),
 			{ signal: AbortSignal.timeout(5000) },
 		);
 		if (!response.ok) return names;
 		const rows: unknown = await response.json();
 		if (!Array.isArray(rows)) return names;
-		for (const row of rows) {
-			const id = (row as { id?: unknown }).id;
-			const name = (row as { name?: unknown }).name;
-			if (typeof id === "number" && typeof name === "string" && name) {
-				names.set(id, name);
+		const validRows = filterValidPlaces(
+			rows as Pick<ApiPlace, "id" | "name">[],
+		);
+		for (const row of validRows) {
+			if (typeof row.name === "string" && row.name) {
+				names.set(row.id, row.name);
 			}
 		}
 	} catch {
