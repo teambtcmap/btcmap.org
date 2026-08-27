@@ -46,7 +46,9 @@ export type EventName =
 	| "backup_modal_shown"
 	| "backup_credentials_copied"
 	| "add_place_enter"
-	| "add_place_confirm";
+	| "add_place_confirm"
+	| "add_place_nearby_shown"
+	| "add_place_nearby_continue";
 
 declare global {
 	interface Window {
