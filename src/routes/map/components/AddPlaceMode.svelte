@@ -31,6 +31,10 @@ let { map, active = $bindable(false) }: Props = $props();
 // `nearby === hits` holding after a plain assignment — $state would wrap the
 // array in a new proxy on assignment, breaking that reference check.
 let nearby: NearbyPlace[] | null = $state.raw(null);
+// True once the async name lookup for the current `nearby` list has
+// settled (success, empty, or failure) — gates the "Unnamed place"
+// fallback so it doesn't flash before names have had a chance to arrive.
+let namesLoaded = $state(false);
 
 // Symmetric focus management for the confirm<->interrupt swap: whichever
 // button unmounts, the surviving sheet's equivalent button takes focus
@@ -84,6 +88,7 @@ const confirm = async () => {
 		return;
 	}
 	nearby = hits;
+	namesLoaded = false;
 	trackEvent("add_place_nearby_shown", { count: hits.length });
 	await tick();
 	backButtonEl?.focus();
@@ -91,12 +96,15 @@ const confirm = async () => {
 	const names = await fetchNearbyPlaceNames(center.lat, center.lng);
 	// Identity guard: Back, Cancel, a map move, or a newer confirm all
 	// replace/clear `nearby` — never patch a list the user left.
-	if (nearby !== hits || names.size === 0) return;
-	nearby = hits.map((hit) =>
-		names.has(hit.place.id)
-			? { ...hit, place: { ...hit.place, name: names.get(hit.place.id) } }
-			: hit,
-	);
+	if (nearby !== hits) return;
+	namesLoaded = true;
+	if (names.size > 0) {
+		nearby = hits.map((hit) =>
+			names.has(hit.place.id)
+				? { ...hit, place: { ...hit.place, name: names.get(hit.place.id) } }
+				: hit,
+		);
+	}
 };
 
 const addAnyway = () => {
@@ -272,7 +280,8 @@ $effect(() => {
 							class="flex items-baseline justify-between gap-3 rounded-lg px-2 py-1.5 hover:underline"
 						>
 							<span class="font-semibold text-link"
-								>{place.name || $_("map.placement.nearbyUnnamed")}</span
+								>{place.name ||
+									(namesLoaded ? $_("map.placement.nearbyUnnamed") : "…")}</span
 							>
 							<span class="shrink-0 text-sm text-body dark:text-offwhite"
 								>{Math.round(distanceM)} m</span
