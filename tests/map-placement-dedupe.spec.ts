@@ -5,12 +5,14 @@ import { stubMapData, waitForMarkersToLoad } from './helpers';
 
 // Step 3 of the add-location redesign (#1134): confirming a placement pin
 // near existing places interrupts with a duplicate check before the form.
-// Hermetic via stubMapData — Stub Cafe (~6 m from the shared viewport
-// center) is the only STUB_PLACES entry inside the 75 m radius. The static
-// feed carries no `name` field in production, so the first test stubs
-// name-less places and layers a /v4/places/search/ route on top (registered
-// after stubMapData so it wins) to supply the candidate's name, mirroring
-// how the interrupt actually resolves names at show time.
+// Hermetic via stubMapData. The dedupe radius is viewport-derived (nearby
+// list formula, clamped 250 m–1 km) — at these specs' zoom-17 desktop
+// viewport it works out to ~1 km, so in-radius fixtures sit at the center
+// and out-of-radius decoys ~2.2 km away. The static feed carries no `name`
+// field in production, so the first test stubs name-less places and layers
+// a /v4/places/search/ route on top (registered after stubMapData so it
+// wins) to supply the candidate's name, mirroring how the interrupt
+// actually resolves names at show time.
 test.describe('Placement dedupe interrupt', () => {
 	test.use({ serviceWorkers: 'block' });
 
@@ -20,17 +22,18 @@ test.describe('Placement dedupe interrupt', () => {
 		await waitForMarkersToLoad(page, { skipApiWait: true });
 		await page.getByRole('button', { name: /^menu$/i }).click();
 		await page.getByRole('button', { name: 'Add location' }).click();
-		await expect(page.getByText('Place the pin')).toBeVisible();
+		await expect(page.getByText('Place the pin', { exact: true })).toBeVisible();
 	};
 
 	test('confirm near an existing place shows the interrupt; Back returns', async ({
 		page
 	}) => {
 		// Name-less places, matching the real static feed (no `name` key).
+		// Ids 2–3 sit ~2.2 km north — outside the 1 km radius cap.
 		await stubMapData(page, [
 			{ id: 1, lat: 42.2762, lon: 42.7024, icon: 'restaurant' },
-			{ id: 2, lat: 42.277, lon: 42.703, icon: 'question_mark' },
-			{ id: 3, lat: 42.2755, lon: 42.7018, icon: 'cafe' }
+			{ id: 2, lat: 42.2963, lon: 42.7024, icon: 'question_mark' },
+			{ id: 3, lat: 42.2963, lon: 42.7124, icon: 'cafe' }
 		]);
 		// Registered after stubMapData so this route wins (Playwright matches
 		// routes in reverse registration order) and supplies the candidate name
@@ -50,14 +53,14 @@ test.describe('Placement dedupe interrupt', () => {
 		// The name arrives via the radius search stub, not the (name-less) feed.
 		const candidate = page.getByRole('link', { name: /Stub Cafe/ });
 		await expect(candidate).toHaveAttribute('href', '/merchant/1');
-		// Radius filter: of the three stub places only id 1 (~6 m) is inside
-		// 75 m — exactly one candidate row renders.
+		// Radius filter: only id 1 (~6 m) sits inside the clamped ~1 km
+		// radius; ids 2–3 are ~2.2 km north — exactly one candidate renders.
 		await expect(page.locator('a[href^="/merchant/"]')).toHaveCount(1);
 		// No navigation happened yet.
 		await expect(page).toHaveURL(/\/map/);
 
 		await page.getByRole('button', { name: 'Back' }).click();
-		await expect(page.getByText('Place the pin')).toBeVisible();
+		await expect(page.getByText('Place the pin', { exact: true })).toBeVisible();
 		await expect(page.getByText('Is it one of these?')).toBeHidden();
 	});
 
@@ -88,12 +91,11 @@ test.describe('Placement dedupe interrupt', () => {
 	test('falls back to Unnamed place when the name lookup returns nothing', async ({
 		page
 	}) => {
-		// Name-less places, matching the real static feed (no `name` key). No
-		// extra search route — stubMapData's catch-all already answers [].
+		// A single name-less place, matching the real static feed (no `name`
+		// key). No extra search route — stubMapData's catch-all already
+		// answers [], so the lookup settles empty and the fallback shows.
 		await stubMapData(page, [
-			{ id: 1, lat: 42.2762, lon: 42.7024, icon: 'restaurant' },
-			{ id: 2, lat: 42.277, lon: 42.703, icon: 'question_mark' },
-			{ id: 3, lat: 42.2755, lon: 42.7018, icon: 'cafe' }
+			{ id: 1, lat: 42.2762, lon: 42.7024, icon: 'restaurant' }
 		]);
 		await startPlacement(page);
 
@@ -102,5 +104,30 @@ test.describe('Placement dedupe interrupt', () => {
 		const candidate = page.getByRole('link', { name: /Unnamed place/ });
 		await expect(candidate).toBeVisible();
 		await expect(candidate).toHaveAttribute('href', '/merchant/1');
+	});
+
+	test('low zoom gates confirm behind a zoom-in step', async ({ page }) => {
+		await stubMapData(page);
+		await page.setViewportSize({ width: 1280, height: 720 });
+		await page.goto('/map#13/42.2762511/42.7024218', { waitUntil: 'load' });
+		await waitForMarkersToLoad(page, { skipApiWait: true });
+		await page.getByRole('button', { name: /^menu$/i }).click();
+		await page.getByRole('button', { name: 'Add location' }).click();
+		await expect(page.getByText('Place the pin', { exact: true })).toBeVisible();
+
+		// Below detail zoom the primary action is the zoom step, not confirm.
+		const zoomButton = page.getByRole('button', {
+			name: 'Zoom in to place the pin'
+		});
+		await expect(zoomButton).toBeVisible();
+		await expect(
+			page.getByRole('button', { name: 'Add a place here' })
+		).toBeHidden();
+
+		await zoomButton.click();
+		// easeTo animates to zoom 15; the gate lifts when it lands.
+		await expect(
+			page.getByRole('button', { name: 'Add a place here' })
+		).toBeVisible();
 	});
 });
