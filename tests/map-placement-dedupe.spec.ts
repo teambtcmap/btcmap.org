@@ -71,9 +71,7 @@ test.describe('Placement dedupe interrupt', () => {
 		await startPlacement(page);
 
 		await page.getByRole('button', { name: 'Add a place here' }).click();
-		await page
-			.getByRole('button', { name: 'None of these — add a new place' })
-			.click();
+		await page.getByRole('button', { name: 'Add a new place' }).click();
 		await expect(page).toHaveURL(/\/add-location\?lat=42\.27\d+&long=42\.70\d+/);
 	});
 

@@ -362,7 +362,7 @@ $effect(() => {
 				<button
 					type="button"
 					onclick={addAnyway}
-					class="h-12 flex-1 rounded-xl bg-bitcoin font-semibold text-white hover:bg-bitcoinHover"
+					class="min-h-12 flex-1 rounded-xl bg-bitcoin px-3 py-2 font-semibold text-white hover:bg-bitcoinHover"
 				>
 					{$_("map.placement.nearbyContinue")}
 				</button>
