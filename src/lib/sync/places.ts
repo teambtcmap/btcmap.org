@@ -10,13 +10,11 @@ import {
 	primePlaceDetails,
 } from "$lib/placeDetails";
 import {
-	mapUpdates,
 	paymentTagsLoaded,
 	places,
 	placesError,
 	placesLoadingProgress,
 	placesLoadingStatus,
-	placesSyncCount,
 	verifiedDatesLoaded,
 } from "$lib/store";
 import { clearTables } from "$lib/sync/clearTables";
@@ -308,10 +306,6 @@ export const elementsSync = async () => {
 
 		await Promise.resolve(cachedPlaces)
 			.then(async (cachedPlaces) => {
-				// add to sync count to only show data refresh after initial load
-				const count = get(placesSyncCount);
-				placesSyncCount.set(count + 1);
-
 				let placesData: Place[] = [];
 
 				// Step 1: Get base data from static CDN if no cache exists
@@ -486,11 +480,6 @@ export const elementsSync = async () => {
 							updatedPlaceIds,
 							recentUpdates,
 						);
-
-						// Show refresh indicator if we got updates and had cached data
-						if (cachedPlaces) {
-							mapUpdates.set(true);
-						}
 					}
 
 					apiSucceeded = true;
@@ -583,9 +572,6 @@ export const elementsSync = async () => {
 				console.error(err);
 
 				// Fallback: try to load from static CDN
-				const count = get(placesSyncCount);
-				placesSyncCount.set(count + 1);
-
 				try {
 					// Fetch as text to parse in worker
 					const staticResponse = await api.get(
