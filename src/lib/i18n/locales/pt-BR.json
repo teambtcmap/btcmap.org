@@ -278,6 +278,7 @@
 			"hint": "Arraste o mapa até o pino ficar sobre a entrada do estabelecimento e depois confirme.",
 			"cancel": "Cancelar",
 			"confirm": "Adicionar um local aqui",
+			"zoomIn": "Aproxime o mapa para posicionar o pino",
 			"nearbyTitle": "É um destes?",
 			"nearbyHint": "Estes locais já existem perto do seu pino — abra um para conferir ou adicione um novo local.",
 			"nearbyUnnamed": "Local sem nome",

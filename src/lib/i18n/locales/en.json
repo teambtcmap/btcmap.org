@@ -371,6 +371,7 @@
 			"hint": "Drag the map until the pin sits on the business entrance, then confirm.",
 			"cancel": "Cancel",
 			"confirm": "Add a place here",
+			"zoomIn": "Zoom in to place the pin",
 			"nearbyTitle": "Is it one of these?",
 			"nearbyHint": "These places already exist near your pin — open one to check, or add a new place.",
 			"nearbyUnnamed": "Unnamed place",

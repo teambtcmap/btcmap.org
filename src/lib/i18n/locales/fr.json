@@ -282,6 +282,7 @@
 			"hint": "Déplacez la carte jusqu'à ce que l'épingle soit sur l'entrée du commerce, puis confirmez.",
 			"cancel": "Annuler",
 			"confirm": "Ajouter un lieu ici",
+			"zoomIn": "Zoomez pour placer l'épingle",
 			"nearbyTitle": "Est-ce l'un de ceux-ci ?",
 			"nearbyHint": "Ces lieux existent déjà près de votre épingle — ouvrez-en un pour vérifier, ou ajoutez un nouveau lieu.",
 			"nearbyUnnamed": "Lieu sans nom",

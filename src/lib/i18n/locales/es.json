@@ -282,6 +282,7 @@
 			"hint": "Arrastra el mapa hasta que el pin quede sobre la entrada del negocio y luego confirma.",
 			"cancel": "Cancelar",
 			"confirm": "Añadir un lugar aquí",
+			"zoomIn": "Acerca el mapa para colocar el pin",
 			"nearbyTitle": "¿Es uno de estos?",
 			"nearbyHint": "Estos lugares ya existen cerca de tu pin — abre uno para comprobarlo o añade un nuevo lugar.",
 			"nearbyUnnamed": "Lugar sin nombre",
