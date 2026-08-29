@@ -13,7 +13,6 @@ type Props = {
 	label?: string;
 	// Announced/shown in place of `label` while the copy confirmation is up.
 	copiedLabel?: string;
-	iconType?: "fa" | "material";
 	class?: string;
 };
 
@@ -22,11 +21,11 @@ let {
 	size = "24",
 	label = undefined,
 	copiedLabel = undefined,
-	iconType = "fa",
 	class: className = "text-link transition-colors hover:text-hover",
 }: Props = $props();
 
 let copied = $state(false);
+const currentLabel = $derived(copied ? (copiedLabel ?? label) : label);
 let resetTimeout: ReturnType<typeof setTimeout> | undefined;
 
 const copy = async (field: string) => {
@@ -59,13 +58,13 @@ onDestroy(() => clearTimeout(resetTimeout));
 <button
 	type="button"
 	class={className}
-	aria-label={copied ? (copiedLabel ?? label) : label}
-	title={copied ? (copiedLabel ?? label) : label}
+	aria-label={currentLabel}
+	title={currentLabel}
 	onclick={() => copy(value)}
 >
 	{#if copied}
-		<Icon type={iconType} icon="check" w={size} h={size} />
+		<Icon icon="check" w={size} h={size} />
 	{:else}
-		<Icon type={iconType} icon={iconType === 'material' ? 'content_copy' : 'clipboard'} w={size} h={size} />
+		<Icon icon="content_copy" w={size} h={size} />
 	{/if}
 </button>

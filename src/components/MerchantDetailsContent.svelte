@@ -168,7 +168,6 @@ async function fetchComments(placeId: number) {
 					<CopyButton
 						value={merchant.address}
 						size="14"
-						iconType="material"
 						label={$_('merchant.copyAddress')}
 						copiedLabel={$_('merchant.addressCopied')}
 						class="-mt-0.5 flex h-6 w-6 shrink-0 items-center justify-center rounded-md text-body/60 transition-colors hover:bg-gray-100 hover:text-link dark:text-white/60 dark:hover:bg-white/10 dark:hover:text-white"
