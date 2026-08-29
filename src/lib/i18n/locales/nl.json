@@ -196,11 +196,11 @@
 			"missing_icon": "Icoon ontbreekt"
 		},
 		"row": {
-			"title": "Aandacht nodig",
+			"title": "Aandacht vereist",
 			"editOsm": "Bewerken op OSM"
 		},
 		"issues": {
-			"outdated": "Al meer dan een jaar niet geverifieerd",
+			"outdated": "Meer dan een jaar niet geverifieerd",
 			"outdated_soon": "Verificatie is bijna een jaar oud",
 			"not_verified": "Nooit geverifieerd",
 			"missing_icon": "Geen categorie-icoon getagd"
@@ -367,10 +367,10 @@
 	"map": {
 		"bitcoinMerchantMapTitle": "Bitcoin acceptatiekaart",
 		"placement": {
-			"title": "Place the pin",
-			"hint": "Drag the map until the pin sits on the business entrance, then confirm.",
-			"cancel": "Cancel",
-			"confirm": "Add a place here"
+			"title": "Plaats de pin",
+			"hint": "Sleep de kaart tot de pin op de bedrijfsingang staat en bevestig.",
+			"cancel": "Annuleren",
+			"confirm": "Voeg hier een locatie toe"
 		}
 	},
 	"info": {
@@ -548,10 +548,10 @@
 		"noLocationError": "Selecteer een locatie...",
 		"searchByAddressLabel": "Zoek naar een adres",
 		"orSelectOnMapLabel": "…of klik op de kaart",
-		"pinConfirmedTitle": "Location picked on the map",
-		"pinConfirmedHint": "Add the business details below — you can still fine-tune the pin.",
-		"pinFromMapLabel": "Your pin from the map — click or tap to fine-tune",
-		"adjustWithSearch": "Search for an address instead",
+		"pinConfirmedTitle": "Locatie op de kaart geselecteerd",
+		"pinConfirmedHint": "Voeg de bedrijfsgegevens hieronder toe — je kunt de locatie van de pin nog steeds aanpassen.",
+		"pinFromMapLabel": "Jouw pin op de kaart — klik of tik om de locatie aan te passen",
+		"adjustWithSearch": "Zoek in plaats daarvan naar een adres",
 		"latitude": "Breedtegraad",
 		"longitude": "Lengtegraad",
 		"advancedToggle": "Geavanceerd: coördinaten handmatig invoeren",
@@ -562,10 +562,10 @@
 		"addressTooltip": "Elke locatie vereist een fysiek bezoekadres. Diensten zonder locatie kunnen niet aan de kaart worden toegevoegd.",
 		"addressPlaceholder": "Vrijheidsdreef 21",
 		"categoryPlaceholder": "Restaurant etc.",
-		"categorySelectPlaceholder": "Select a category…",
-		"categoryOtherOption": "Other…",
-		"moreDetailsToggle": "Add more details (address, website, opening hours…)",
-		"categoryOtherRequired": "Please enter a category.",
+		"categorySelectPlaceholder": "Kies een categorie…",
+		"categoryOtherOption": "Anders…",
+		"moreDetailsToggle": "Voeg meer details toe (adres, website, openingstijden…)",
+		"categoryOtherRequired": "Vul een categorie in",
 		"paymentMethodsLegend": "Selecteer geaccepteerde betaalmethoden",
 		"paymentMethodError": "Los dit alstublieft op...",
 		"onchainLabel": "On-chain",
@@ -599,10 +599,10 @@
 		"networkError": "Adres opzoeken mislukt. Probeer het opnieuw, of klik op de kaart om een pin te plaatsen."
 	},
 	"formSuccess": {
-		"submittedTitle": "{type} Ingediend!",
-		"monitorProgress": "Je kunt de voortgang van je inzending ook hier volgen:",
+		"submittedTitle": "{type} ingediend!",
+		"monitorProgress": "Je kunt de voortgang van je inzending hier volgen:",
 		"issueLink": "Ticket #{issue}",
-		"submitAnother": "Nog één indienen {type}"
+		"submitAnother": "Stuur er nog een in {type}"
 	},
 	"verifyLocation": {
 		"subheading": "Help mee om de gegevens voor iedereen beter te maken",
@@ -624,8 +624,8 @@
 		"outdatedPlaceholder": "Geef aan welke informatie onjuist is en verstrek de nieuwe gegevens voor deze locatie",
 		"verifyLabel": "Hoe heb je dit gecontroleerd?",
 		"verifyPlaceholder": "Geef hier aanvullende informatie op",
-		"successType": "Rapporteer",
-		"successMessage": "Bedankt voor het invullen van dit rapport! We gaan je gegevens bekijken en zo snel mogelijk bijwerken.",
+		"successType": "Rapport",
+		"successMessage": "Bedankt dat je de tijd hebt genomen om dit rapport in te vullen. We gaan je gegevens bekijken en zo snel mogelijk bijwerken.",
 		"submitReport": "Rapport indienen"
 	},
 	"dashboard": {
