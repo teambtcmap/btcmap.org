@@ -152,6 +152,8 @@
 		"deletedDetail": "Данные ниже устарели и приведены только для справки.",
 		"merchantName": "Название торговца",
 		"address": "Адрес",
+		"copyAddress": "Копировать адрес",
+		"addressCopied": "Адрес скопирован",
 		"openingHours": "Часы работы",
 		"openNow": "Открыто",
 		"closed": "Закрыто",

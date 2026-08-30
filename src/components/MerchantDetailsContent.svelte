@@ -4,6 +4,7 @@ import { onDestroy } from "svelte";
 
 import BoostCard from "$components/BoostCard.svelte";
 import CompanionAppPill from "$components/CompanionAppPill.svelte";
+import CopyButton from "$components/CopyButton.svelte";
 import Icon from "$components/Icon.svelte";
 import MerchantComment from "$components/MerchantComment.svelte";
 import MerchantIssuesRow from "$components/MerchantIssuesRow.svelte";
@@ -159,8 +160,18 @@ async function fetchComments(placeId: number) {
 			{/if}
 
 			{#if merchant.address}
-				<p class="mt-0.5 text-sm text-body dark:text-white" title={$_('merchant.address')}>
-					{merchant.address}
+				<p
+					class="mt-0.5 flex items-start gap-1 text-sm text-body dark:text-white"
+					title={$_('merchant.address')}
+				>
+					<span class="min-w-0">{merchant.address}</span>
+					<CopyButton
+						value={merchant.address}
+						size="14"
+						label={$_('merchant.copyAddress')}
+						copiedLabel={$_('merchant.addressCopied')}
+						class="-mt-0.5 flex h-6 w-6 shrink-0 items-center justify-center rounded-md text-body/60 transition-colors hover:bg-gray-100 hover:text-link dark:text-white/60 dark:hover:bg-white/10 dark:hover:text-white"
+					/>
 				</p>
 			{:else if isLoading}
 				<div class="mt-1 h-5 w-1/2 animate-pulse rounded bg-link/50"></div>

@@ -241,6 +241,8 @@
 		"deletedDetail": "De onderstaande gegevens zijn niet meer actueel en staan er puur ter informatie.",
 		"merchantName": "Naam ondernemer",
 		"address": "Adres",
+		"copyAddress": "Adres kopiëren",
+		"addressCopied": "Adres gekopieerd",
 		"openingHours": "Openingstijden",
 		"openNow": "Nu open",
 		"closed": "Gesloten",
