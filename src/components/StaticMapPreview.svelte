@@ -11,12 +11,13 @@ import { theme } from "$lib/theme";
 
 import { browser } from "$app/environment";
 
-// Lightweight, NON-interactive map preview used as the merchant hero
-// backdrop. Deliberately has no controls, no sprites and no merchant
-// layers — it exists purely to give a sense of place behind the identity
-// overlay.
+// Lightweight, NON-interactive map preview: the merchant hero backdrop and
+// the add-location pin preview. Deliberately has no controls, no sprites
+// and no merchant layers — it exists purely to give a sense of place under
+// whatever the caller overlays (identity card, pin glyph).
 export let lat: number;
 export let long: number;
+export let zoom = 15;
 let className = "";
 
 export { className as class };
@@ -39,7 +40,7 @@ const init = async () => {
 		controls: false,
 		mapOptions: {
 			center: [long, lat],
-			zoom: 15,
+			zoom,
 			interactive: false,
 		},
 		isCancelled: () => destroyed,
@@ -100,8 +101,8 @@ $: if (map && styleLoaded) {
 	mapHandle?.setTheme($theme);
 }
 
-// Follow the merchant when the coords change (e.g. param-only navigation),
-// since the component instance is reused across /merchant/[id] params.
+// Follow the coords when they change (e.g. param-only navigation), since
+// the component instance is reused across /merchant/[id] params.
 $: if (map && typeof lat === "number" && typeof long === "number") {
 	map.setCenter([long, lat]);
 }
