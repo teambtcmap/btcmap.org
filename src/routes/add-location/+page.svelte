@@ -1,9 +1,7 @@
 <script lang="ts">
 import axios from "axios";
 import DOMPurify from "dompurify";
-import type { Map as MapLibreMap } from "maplibre-gl";
-import "maplibre-gl/dist/maplibre-gl.css";
-import { onDestroy, onMount, tick } from "svelte";
+import { onMount, tick } from "svelte";
 import { get } from "svelte/store";
 
 import FormHelperText from "$components/FormHelperText.svelte";
@@ -12,14 +10,12 @@ import type { FormSelectOption } from "$components/form/FormSelect.svelte";
 import FormSelect from "$components/form/FormSelect.svelte";
 import Icon from "$components/Icon.svelte";
 import HeaderPlaceholder from "$components/layout/HeaderPlaceholder.svelte";
-import MapLoadingEmbed from "$components/MapLoadingEmbed.svelte";
 import PlacementPinIcon from "$components/PlacementPinIcon.svelte";
 import PrimaryButton from "$components/PrimaryButton.svelte";
+import StaticMapPreview from "$components/StaticMapPreview.svelte";
 import { CATEGORIES, CATEGORY_GROUPS } from "$lib/categoryMapping";
 import { CLUSTERING_DISABLED_ZOOM } from "$lib/constants";
-import { _, locale } from "$lib/i18n";
-import type { BtcmapMapHandle } from "$lib/map/createMap";
-import { createBtcmapMap } from "$lib/map/createMap";
+import { _ } from "$lib/i18n";
 import { buildPlacementUrl } from "$lib/placementMode";
 import { theme } from "$lib/theme";
 import { errToast } from "$lib/utils";
@@ -67,42 +63,10 @@ const fetchCaptcha = () => {
 		});
 };
 
-// Static preview of the confirmed pin: non-interactive, no controls, the
-// pin glyph is a DOM overlay at the centre (same offset as the map's
-// placement crosshair). Fine-tuning happens back on the map via adjustUrl.
-// No WebGL fallback by design — placement itself needs the map, so a
-// browser without it never arrives here with a pin.
-async function initializeMap() {
-	const outcome = await createBtcmapMap({
-		container: mapElement,
-		theme: $theme,
-		mapOptions: {
-			center: [coords.long, coords.lat],
-			zoom: CLUSTERING_DISABLED_ZOOM,
-			interactive: false,
-		},
-		controls: false,
-		isCancelled: () => destroyed,
-		registerOverlays: () => {},
-		onFirstLoad: () => {
-			mapLoaded = true;
-		},
-	});
-
-	if (outcome.status !== "ready") return;
-	if (destroyed) {
-		outcome.handle.destroy();
-		return;
-	}
-	mapHandle = outcome.handle;
-	map = outcome.handle.map;
-}
-
 let name: HTMLInputElement;
 let nameEn: HTMLInputElement;
 let address: HTMLInputElement;
 let showMoreDetails = false;
-let mapHandle: BtcmapMapHandle | undefined;
 
 let categorySelect: string | undefined;
 let categoryOther: string | undefined;
@@ -195,13 +159,7 @@ const submitForm = (event: SubmitEvent) => {
 	}
 };
 
-// location picker map
-let mapElement: HTMLDivElement;
-let map: MapLibreMap | undefined;
-let mapLoaded = false;
-let destroyed = false;
-
-onMount(async () => {
+onMount(() => {
 	if (browser) {
 		// fetch and add captcha
 		fetchCaptcha();
@@ -209,27 +167,8 @@ onMount(async () => {
 		// Keyboard-first on desktop only: popping the on-screen keyboard
 		// on mobile would cover the confirmation the user just landed on.
 		nameFocusPending = window.matchMedia("(pointer: fine)").matches;
-
-		// Initialize the map
-		await initializeMap();
 	}
 });
-
-onDestroy(() => {
-	destroyed = true;
-	mapHandle?.destroy();
-	mapHandle = undefined;
-	map = undefined;
-});
-
-// The facade's setTheme handles change detection; the pin overlay is
-// plain DOM and survives style swaps on its own.
-$: if (map && mapLoaded) {
-	mapHandle?.setTheme($theme);
-}
-// A same-route navigation with new ?lat&long re-runs the load but not
-// onMount — keep the preview on the current pin.
-$: map?.jumpTo({ center: [coords.long, coords.lat] });
 </script>
 
 <svelte:head>
@@ -303,26 +242,30 @@ $: map?.jumpTo({ center: [coords.long, coords.lat] });
 						<p id="pin-label" class="mb-2 block font-semibold">
 							{$_('addLocation.pinFromMapLabel')}
 						</p>
-						<!-- Static preview, no picker: the whole box links back into
-						     placement mode with the crosshair on this pin. -->
-						<a
-							href={adjustUrl}
-							aria-labelledby="pin-label"
-							class="relative mb-2 block overflow-hidden rounded-2xl border-2 border-input focus:outline-link"
+						<!-- Static preview. The adjust link is stacked on top of the map
+						     rather than wrapping it, so none of MapLibre's interactive
+						     attribution nests inside the anchor; its corner is raised
+						     above the link so credits stay one tap away, as on the
+						     merchant hero. -->
+						<div
+							class="relative mb-2 h-[300px] overflow-hidden rounded-2xl border-2 border-input md:h-[400px] [&_.maplibregl-ctrl-bottom-right]:z-20"
 						>
+							<StaticMapPreview
+								lat={coords.lat}
+								long={coords.long}
+								zoom={CLUSTERING_DISABLED_ZOOM}
+							/>
+							<a
+								href={adjustUrl}
+								aria-labelledby="pin-label"
+								class="absolute inset-0 z-10 focus:outline-link"
+							></a>
 							<div
-								bind:this={mapElement}
-								class="pointer-events-none h-[300px] !bg-teal md:h-[400px] dark:!bg-dark"
-							></div>
-							{#if !mapLoaded}
-								<MapLoadingEmbed style="h-[300px] md:h-[400px]" />
-							{/if}
-							<div
-								class="pointer-events-none absolute top-1/2 left-1/2 z-30 -translate-x-1/2 -translate-y-full drop-shadow-lg"
+								class="pointer-events-none absolute top-1/2 left-1/2 z-10 -translate-x-1/2 -translate-y-full drop-shadow-lg"
 							>
 								<PlacementPinIcon width={40} />
 							</div>
-						</a>
+						</div>
 					</div>
 
 					<div>
@@ -684,6 +627,6 @@ $: map?.jumpTo({ center: [coords.long, coords.lat] });
 		type={$_('addLocation.formSuccessType')}
 		text={$_('addLocation.formSuccessText')}
 		showIssueLink={false}
-		on:click={() => goto('/map?add=nav')}
+		on:click={() => goto('/map?add=another')}
 	/>
 {/if}

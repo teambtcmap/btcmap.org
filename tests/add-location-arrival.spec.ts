@@ -13,6 +13,8 @@ test.describe('Add Location — map-placed pin arrival', () => {
 	test('valid coords render the confirmation state with a minimap linking back to the pin', async ({
 		page
 	}) => {
+		// Registered up front: the click-through at the end lands on the map.
+		await stubMapData(page);
 		await page.goto('/add-location?lat=52.52000&long=13.40500');
 		await page.waitForLoadState('domcontentloaded');
 
@@ -34,6 +36,13 @@ test.describe('Add Location — map-placed pin arrival', () => {
 		).toBeHidden();
 		await expect(page.locator('#lat')).toHaveCount(0);
 		await expect(page.locator('.maplibregl-ctrl-zoom-in')).toHaveCount(0);
+
+		// The link is the hit target on top of the preview (MapLibre's
+		// attribution corner aside) — clicking it reopens placement mode
+		// centred on the pin.
+		await adjust.click();
+		await expect(page).toHaveURL(/\/map\?add=.*#17(?:\.0+)?\/52\.5200\d\/13\.4050\d/);
+		await expect(page.getByText('Place the pin', { exact: true })).toBeVisible();
 	});
 
 	test('plain /add-location is sent to placement mode', async ({ page }) => {
