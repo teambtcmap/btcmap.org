@@ -461,7 +461,7 @@ export const appConfigs: AppConfig[] = [
 		logo: "/images/apps/skate-spots.png",
 		tag: "powered-by-btcmap",
 		sponsor: true,
-		sponsorOrder: 3.5,
+		sponsorOrder: 6,
 		stores: [
 			{
 				store: "zapstore",
