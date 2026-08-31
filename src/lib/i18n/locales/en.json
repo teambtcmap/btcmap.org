@@ -241,6 +241,8 @@
 		"deletedDetail": "The data shown below is outdated and for reference only.",
 		"merchantName": "Merchant name",
 		"address": "Address",
+		"copyAddress": "Copy address",
+		"addressCopied": "Address copied",
 		"openingHours": "Opening hours",
 		"openNow": "Open now",
 		"closed": "Closed",

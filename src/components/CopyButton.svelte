@@ -1,9 +1,32 @@
 <script lang="ts">
+import { onDestroy } from "svelte";
+
 import Icon from "$components/Icon.svelte";
 
-export let value: string;
+type Props = {
+	value: string;
+	// Icon edge length in px. The drawer needs a much smaller mark than the
+	// invoice/donation call-outs this component was originally built for.
+	size?: string;
+	// Accessible name, also used as the hover tooltip. Icon-only buttons have
+	// no text content, so without this the button is unnamed for screen readers.
+	label?: string;
+	// Announced/shown in place of `label` while the copy confirmation is up.
+	copiedLabel?: string;
+	class?: string;
+};
 
-let copied = false;
+let {
+	value,
+	size = "24",
+	label = undefined,
+	copiedLabel = undefined,
+	class: className = "text-link transition-colors hover:text-hover",
+}: Props = $props();
+
+let copied = $state(false);
+const currentLabel = $derived(copied ? (copiedLabel ?? label) : label);
+let resetTimeout: ReturnType<typeof setTimeout> | undefined;
 
 const copy = async (field: string) => {
 	let success = false;
@@ -24,15 +47,24 @@ const copy = async (field: string) => {
 	}
 	if (success) {
 		copied = true;
-		setTimeout(() => (copied = false), 2100);
+		clearTimeout(resetTimeout);
+		resetTimeout = setTimeout(() => (copied = false), 2100);
 	}
 };
+
+onDestroy(() => clearTimeout(resetTimeout));
 </script>
 
-<button class="text-link transition-colors hover:text-hover" on:click={() => copy(value)}>
+<button
+	type="button"
+	class={className}
+	aria-label={currentLabel}
+	title={currentLabel}
+	onclick={() => copy(value)}
+>
 	{#if copied}
-		<Icon type="fa" icon="check" w="24" h="24" />
+		<Icon icon="check" w={size} h={size} />
 	{:else}
-		<Icon type="fa" icon="clipboard" w="24" h="24" />
+		<Icon icon="content_copy" w={size} h={size} />
 	{/if}
 </button>

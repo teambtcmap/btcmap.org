@@ -152,6 +152,8 @@
 		"deletedDetail": "Os dados mostrados abaixo estão desatualizados e são apenas para referência.",
 		"merchantName": "Nome do comerciante",
 		"address": "Endereço",
+		"copyAddress": "Copiar endereço",
+		"addressCopied": "Endereço copiado",
 		"openingHours": "Horário de funcionamento",
 		"openNow": "Aberto agora",
 		"closed": "Fechado",
