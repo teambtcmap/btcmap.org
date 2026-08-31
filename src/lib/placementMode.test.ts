@@ -4,6 +4,7 @@ import type { Place } from "$lib/types";
 
 import {
 	buildAddLocationUrl,
+	clampDedupeRadiusKm,
 	fetchNearbyPlaceNames,
 	findNearbyPlaces,
 	parseCoordsParams,
@@ -67,7 +68,7 @@ describe("findNearbyPlaces", () => {
 		const near = makePlace(1, LAT + 0.0005, LONG);
 		const nearer = makePlace(2, LAT + 0.0002, LONG);
 		const far = makePlace(3, LAT + 0.001, LONG);
-		const result = findNearbyPlaces(LAT, LONG, [near, far, nearer]);
+		const result = findNearbyPlaces(LAT, LONG, [near, far, nearer], 75);
 		expect(result.map(({ place }) => place.id)).toEqual([2, 1]);
 		expect(result[0].distanceM).toBeGreaterThan(20);
 		expect(result[0].distanceM).toBeLessThan(25);
@@ -79,18 +80,39 @@ describe("findNearbyPlaces", () => {
 		const deleted = makePlace(1, LAT, LONG, {
 			deleted_at: "2026-01-01T00:00:00Z",
 		});
-		expect(findNearbyPlaces(LAT, LONG, [deleted])).toEqual([]);
+		expect(findNearbyPlaces(LAT, LONG, [deleted], 75)).toEqual([]);
 	});
 
 	it("caps the list at NEARBY_LIMIT", () => {
 		const cluster = Array.from({ length: 7 }, (_, i) =>
 			makePlace(i + 1, LAT + i * 0.00005, LONG),
 		);
-		expect(findNearbyPlaces(LAT, LONG, cluster)).toHaveLength(5);
+		expect(findNearbyPlaces(LAT, LONG, cluster, 75)).toHaveLength(5);
 	});
 
 	it("returns empty for an empty store", () => {
-		expect(findNearbyPlaces(LAT, LONG, [])).toEqual([]);
+		expect(findNearbyPlaces(LAT, LONG, [], 75)).toEqual([]);
+	});
+
+	it("respects the radius parameter", () => {
+		// ~555 m north of the pin: inside a 1 km radius, far outside 75 m.
+		const mid = makePlace(9, LAT + 0.005, LONG);
+		expect(findNearbyPlaces(LAT, LONG, [mid], 1000)).toHaveLength(1);
+		expect(findNearbyPlaces(LAT, LONG, [mid], 75)).toHaveLength(0);
+	});
+});
+
+describe("clampDedupeRadiusKm", () => {
+	it("clamps below the floor to 0.25", () => {
+		expect(clampDedupeRadiusKm(0.08)).toBe(0.25);
+	});
+
+	it("passes mid-range values through", () => {
+		expect(clampDedupeRadiusKm(0.6)).toBe(0.6);
+	});
+
+	it("caps above the ceiling at 1", () => {
+		expect(clampDedupeRadiusKm(4.8)).toBe(1);
 	});
 });
 
@@ -111,8 +133,18 @@ describe("fetchNearbyPlaceNames", () => {
 				],
 			})),
 		);
-		const names = await fetchNearbyPlaceNames(42.2762511, 42.7024218);
+		const names = await fetchNearbyPlaceNames(42.2762511, 42.7024218, 0.075);
 		expect(names).toEqual(new Map([[1, "Kiosk 87"]]));
+	});
+
+	it("passes the given radius to the search URL", async () => {
+		const fetchMock = vi.fn(async (_url: string, _init?: RequestInit) => ({
+			ok: true,
+			json: async () => [],
+		}));
+		vi.stubGlobal("fetch", fetchMock);
+		await fetchNearbyPlaceNames(1, 2, 1);
+		expect(fetchMock.mock.calls[0]?.[0]).toContain("radius_km=1&");
 	});
 
 	it("returns an empty Map when the response is not ok", async () => {
@@ -120,7 +152,7 @@ describe("fetchNearbyPlaceNames", () => {
 			"fetch",
 			vi.fn(async () => ({ ok: false, json: async () => [] })),
 		);
-		const names = await fetchNearbyPlaceNames(42.2762511, 42.7024218);
+		const names = await fetchNearbyPlaceNames(42.2762511, 42.7024218, 0.075);
 		expect(names).toEqual(new Map());
 	});
 
@@ -131,7 +163,7 @@ describe("fetchNearbyPlaceNames", () => {
 				throw new Error("network error");
 			}),
 		);
-		const names = await fetchNearbyPlaceNames(42.2762511, 42.7024218);
+		const names = await fetchNearbyPlaceNames(42.2762511, 42.7024218, 0.075);
 		expect(names).toEqual(new Map());
 	});
 });

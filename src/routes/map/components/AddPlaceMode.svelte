@@ -8,10 +8,17 @@ import { tick } from "svelte";
 
 import PlacementPinIcon from "$components/PlacementPinIcon.svelte";
 import { trackEvent } from "$lib/analytics";
+import {
+	CLUSTERING_DISABLED_ZOOM,
+	MERCHANT_LIST_MIN_ZOOM,
+	NEARBY_RADIUS_MULTIPLIER,
+} from "$lib/constants";
 import { _ } from "$lib/i18n";
+import { calculateRadiusKmFromLngLatBounds } from "$lib/map/viewport";
 import type { NearbyPlace } from "$lib/placementMode";
 import {
 	buildAddLocationUrl,
+	clampDedupeRadiusKm,
 	fetchNearbyPlaceNames,
 	findNearbyPlaces,
 } from "$lib/placementMode";
@@ -66,6 +73,32 @@ const enter = (method: string) => {
 	trackEvent("add_place_enter", { method });
 };
 
+let currentZoom = $state(0);
+
+// Track zoom while placement is active — the confirm gate and the
+// viewport-derived dedupe radius both depend on it.
+$effect(() => {
+	if (!map || !active) return;
+	const currentMap = map;
+	currentZoom = currentMap.getZoom();
+	const onZoom = () => {
+		currentZoom = currentMap.getZoom();
+	};
+	currentMap.on("zoom", onZoom);
+	return () => {
+		currentMap.off("zoom", onZoom);
+	};
+});
+
+// Below the map's detail zoom (names visible, nearby list on loaded
+// markers) a "confirmed" pin is street-guess precision — gate it.
+const zoomTooLow = $derived(currentZoom < MERCHANT_LIST_MIN_ZOOM);
+
+const zoomToPlace = () => {
+	if (!map) return;
+	map.easeTo({ zoom: MERCHANT_LIST_MIN_ZOOM, duration: 500 });
+};
+
 const cancel = () => {
 	nearby = null;
 	active = false;
@@ -82,7 +115,19 @@ const navigateToForm = (lat: number, long: number) => {
 const confirm = async () => {
 	if (!map) return;
 	const center = map.getCenter();
-	const hits = findNearbyPlaces(center.lat, center.lng, $places);
+	// Same radius formula as the map page's nearby list, clamped so the
+	// dedupe check neither shrinks below street-confusion range nor scans
+	// whole districts when zoomed out.
+	const viewportRadiusKm =
+		calculateRadiusKmFromLngLatBounds(map.getBounds()) *
+		NEARBY_RADIUS_MULTIPLIER;
+	const radiusKm = clampDedupeRadiusKm(viewportRadiusKm);
+	const hits = findNearbyPlaces(
+		center.lat,
+		center.lng,
+		$places,
+		radiusKm * 1000,
+	);
 	if (hits.length === 0) {
 		navigateToForm(center.lat, center.lng);
 		return;
@@ -93,7 +138,7 @@ const confirm = async () => {
 	await tick();
 	backButtonEl?.focus();
 
-	const names = await fetchNearbyPlaceNames(center.lat, center.lng);
+	const names = await fetchNearbyPlaceNames(center.lat, center.lng, radiusKm);
 	// Identity guard: Back, Cancel, a map move, or a newer confirm all
 	// replace/clear `nearby` — never patch a list the user left.
 	if (nearby !== hits) return;
@@ -126,7 +171,12 @@ const backToConfirm = async () => {
 // always recoverable via Cancel.
 const enterAt = (lngLat: LngLatLike, method: string) => {
 	if (!map || active) return;
-	map.easeTo({ center: lngLat, duration: 300 });
+	// Point-intent entries land at detail zoom — zoom in only, never out.
+	map.easeTo({
+		center: lngLat,
+		zoom: Math.max(map.getZoom(), CLUSTERING_DISABLED_ZOOM),
+		duration: 300,
+	});
 	enter(method);
 };
 
@@ -252,14 +302,24 @@ $effect(() => {
 				>
 					{$_("map.placement.cancel")}
 				</button>
-				<button
-					bind:this={confirmButtonEl}
-					type="button"
-					onclick={confirm}
-					class="h-12 flex-1 rounded-xl bg-bitcoin font-semibold text-white hover:bg-bitcoinHover"
-				>
-					{$_("map.placement.confirm")}
-				</button>
+				{#if zoomTooLow}
+					<button
+						type="button"
+						onclick={zoomToPlace}
+						class="h-12 flex-1 rounded-xl bg-bitcoin font-semibold text-white hover:bg-bitcoinHover"
+					>
+						{$_("map.placement.zoomIn")}
+					</button>
+				{:else}
+					<button
+						bind:this={confirmButtonEl}
+						type="button"
+						onclick={confirm}
+						class="h-12 flex-1 rounded-xl bg-bitcoin font-semibold text-white hover:bg-bitcoinHover"
+					>
+						{$_("map.placement.confirm")}
+					</button>
+				{/if}
 			</div>
 		{:else}
 			<p class="text-lg font-semibold text-primary dark:text-white">
@@ -302,7 +362,7 @@ $effect(() => {
 				<button
 					type="button"
 					onclick={addAnyway}
-					class="h-12 flex-1 rounded-xl bg-bitcoin font-semibold text-white hover:bg-bitcoinHover"
+					class="min-h-12 flex-1 rounded-xl bg-bitcoin px-3 py-2 font-semibold text-white hover:bg-bitcoinHover"
 				>
 					{$_("map.placement.nearbyContinue")}
 				</button>

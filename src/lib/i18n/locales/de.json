@@ -284,11 +284,12 @@
 			"hint": "Verschiebe die Karte, bis der Pin auf dem Eingang des Geschäfts sitzt, und bestätige dann.",
 			"cancel": "Abbrechen",
 			"confirm": "Hier einen Ort hinzufügen",
+			"zoomIn": "Zoome näher heran, um den Pin zu platzieren",
 			"nearbyTitle": "Ist es einer von diesen?",
 			"nearbyHint": "Diese Orte existieren bereits in der Nähe deines Pins — öffne einen zum Prüfen oder füge einen neuen Ort hinzu.",
 			"nearbyUnnamed": "Unbenannter Ort",
 			"nearbyBack": "Zurück",
-			"nearbyContinue": "Keiner davon — neuen Ort hinzufügen"
+			"nearbyContinue": "Neuen Ort hinzufügen"
 		}
 	},
 	"info": {

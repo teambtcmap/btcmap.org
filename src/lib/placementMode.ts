@@ -22,18 +22,31 @@ export const parseCoordsParams = (
 	return { lat: parsed.lat, long: parsed.lng };
 };
 
-export const NEARBY_RADIUS_M = 75;
 export const NEARBY_LIMIT = 5;
+// Dedupe radius bounds: the live radius is viewport-derived (same formula
+// as the merchant nearby list), floored so street-confusion duplicates
+// (found up to ~1 km apart in practice) stay catchable when zoomed far
+// in, and capped so zoomed-out confirms don't scan whole districts.
+export const DEDUPE_MIN_RADIUS_KM = 0.25;
+export const DEDUPE_MAX_RADIUS_KM = 1;
+
+export const clampDedupeRadiusKm = (viewportRadiusKm: number): number =>
+	Math.min(
+		Math.max(viewportRadiusKm, DEDUPE_MIN_RADIUS_KM),
+		DEDUPE_MAX_RADIUS_KM,
+	);
 
 export type NearbyPlace = { place: Place; distanceM: number };
 
 // Duplicate check for the placement confirm step: existing (non-deleted)
-// places within NEARBY_RADIUS_M of the pin, closest first, capped at
-// NEARBY_LIMIT. calculateDistance returns km.
+// places within radiusM of the pin (caller-supplied — viewport-derived,
+// clamped), closest first, capped at NEARBY_LIMIT. calculateDistance
+// returns km.
 export const findNearbyPlaces = (
 	lat: number,
 	long: number,
 	places: Place[],
+	radiusM: number,
 ): NearbyPlace[] =>
 	places
 		.filter((place) => !place.deleted_at)
@@ -41,25 +54,23 @@ export const findNearbyPlaces = (
 			place,
 			distanceM: calculateDistance(lat, long, place.lat, place.lon) * 1000,
 		}))
-		.filter(({ distanceM }) => distanceM <= NEARBY_RADIUS_M)
+		.filter(({ distanceM }) => distanceM <= radiusM)
 		.sort((a, b) => a.distanceM - b.distanceM)
 		.slice(0, NEARBY_LIMIT);
 
 // The static CDN feed deliberately ships no name field (map-perf
-// constraint), so candidate names come from a tiny radius search at
-// interrupt time; any failure degrades to the unnamed fallback.
+// constraint), so candidate names come from a radius search at interrupt
+// time — radiusKm is the caller's clamped viewport radius, matching the
+// local distance filter. Any failure degrades to the unnamed fallback.
 export const fetchNearbyPlaceNames = async (
 	lat: number,
 	long: number,
+	radiusKm: number,
 ): Promise<Map<number, string>> => {
 	const names = new Map<number, string>();
 	try {
 		const response = await fetch(
-			buildRadiusSearchUrl(
-				{ lat, lon: long },
-				NEARBY_RADIUS_M / 1000,
-				"id,name",
-			),
+			buildRadiusSearchUrl({ lat, lon: long }, radiusKm, "id,name"),
 			{ signal: AbortSignal.timeout(5000) },
 		);
 		if (!response.ok) return names;

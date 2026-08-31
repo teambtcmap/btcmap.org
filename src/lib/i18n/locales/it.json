@@ -373,11 +373,12 @@
 			"hint": "Trascina la mappa finché il segnaposto non si trova sull'ingresso dell'attività, poi conferma.",
 			"cancel": "Annulla",
 			"confirm": "Aggiungi un luogo qui",
+			"zoomIn": "Ingrandisci per posizionare il segnaposto",
 			"nearbyTitle": "È uno di questi?",
 			"nearbyHint": "Questi luoghi esistono già vicino al tuo segnaposto — aprine uno per controllare, oppure aggiungi un nuovo luogo.",
 			"nearbyUnnamed": "Luogo senza nome",
 			"nearbyBack": "Indietro",
-			"nearbyContinue": "Nessuno di questi — aggiungi un nuovo luogo"
+			"nearbyContinue": "Aggiungi un nuovo luogo"
 		}
 	},
 	"info": {
