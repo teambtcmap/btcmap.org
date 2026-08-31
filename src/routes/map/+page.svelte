@@ -88,7 +88,6 @@ import {
 	placeMatchesIssueCodes,
 	serializeIssuesParam,
 } from "$lib/placeIssues";
-import { addEntryMethod } from "$lib/placementMode";
 import { savedPlaceIds } from "$lib/session";
 import {
 	paymentTagsLoaded,
@@ -985,12 +984,10 @@ onMount(async () => {
 	const hashCoords = parseHashCoords();
 	const searchParams = new URLSearchParams(window.location.search);
 	placementActive = !issuesOnly && searchParams.has("add");
-	// ?add's value names the entry point (allow-listed in addEntryMethod);
-	// a bare ?add= is a shared/deep link.
+	// The entry method comes from the route's load (captured before
+	// AddPlaceMode's URL effect normalises ?add=<entry> to a bare ?add=).
 	if (placementActive) {
-		trackEvent("add_place_enter", {
-			method: addEntryMethod(searchParams.get("add")),
-		});
+		trackEvent("add_place_enter", { method: data.addEntryMethod });
 	}
 	if (issuesOnly && searchParams.has("add")) {
 		// Placement mode is unavailable in the issues worklist, and
