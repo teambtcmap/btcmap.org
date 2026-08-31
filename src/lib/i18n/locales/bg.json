@@ -600,6 +600,8 @@
 		"links": "Връзки",
 		"activity": "Активност на {name}",
 		"address": "Адрес",
+		"copyAddress": "Копиране на адреса",
+		"addressCopied": "Адресът е копиран",
 		"call": "Обади се",
 		"comments": "Коментари",
 		"commentsCount": "Коментари ({count})",

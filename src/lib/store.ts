@@ -28,7 +28,6 @@ export const placesById = derived(
 	($places) => new Map($places.map((p) => [p.id, p])),
 );
 export const placesError = writable("");
-export const placesSyncCount = writable(0);
 
 // Progress tracking for places sync
 export const placesLoadingStatus = writable<string>(""); // e.g. "Downloading places...", "Processing data..."
@@ -59,8 +58,6 @@ export const reports: Writable<Report[]> = writable([]);
 export const reportError = writable("");
 
 export const syncStatus: Writable<boolean> = writable();
-
-export const mapUpdates = writable(false);
 
 export const selectedMerchant: Writable<Place | null> = writable(null);
 
