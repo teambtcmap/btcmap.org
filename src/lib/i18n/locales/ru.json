@@ -280,10 +280,15 @@
 	"map": {
 		"bitcoinMerchantMapTitle": "Биткоин карта",
 		"placement": {
-			"title": "Place the pin",
-			"hint": "Drag the map until the pin sits on the business entrance, then confirm.",
-			"cancel": "Cancel",
-			"confirm": "Add a place here"
+			"title": "Разместите метку",
+			"hint": "Перемещайте карту, пока метка не окажется на входе заведения, затем подтвердите.",
+			"cancel": "Отмена",
+			"confirm": "Добавить место здесь",
+			"nearbyTitle": "Это одно из этих мест?",
+			"nearbyHint": "Эти места уже существуют рядом с вашей меткой — откройте одно из них, чтобы проверить, или добавьте новое место.",
+			"nearbyUnnamed": "Место без названия",
+			"nearbyBack": "Назад",
+			"nearbyContinue": "Ни одно из них — добавить новое место"
 		}
 	},
 	"info": {

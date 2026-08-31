@@ -280,10 +280,15 @@
 	"map": {
 		"bitcoinMerchantMapTitle": "Bitcoin Händlerkarte",
 		"placement": {
-			"title": "Place the pin",
-			"hint": "Drag the map until the pin sits on the business entrance, then confirm.",
-			"cancel": "Cancel",
-			"confirm": "Add a place here"
+			"title": "Pin platzieren",
+			"hint": "Verschiebe die Karte, bis der Pin auf dem Eingang des Geschäfts sitzt, und bestätige dann.",
+			"cancel": "Abbrechen",
+			"confirm": "Hier einen Ort hinzufügen",
+			"nearbyTitle": "Ist es einer von diesen?",
+			"nearbyHint": "Diese Orte existieren bereits in der Nähe deines Pins — öffne einen zum Prüfen oder füge einen neuen Ort hinzu.",
+			"nearbyUnnamed": "Unbenannter Ort",
+			"nearbyBack": "Zurück",
+			"nearbyContinue": "Keiner davon — neuen Ort hinzufügen"
 		}
 	},
 	"info": {

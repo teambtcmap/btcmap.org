@@ -372,7 +372,12 @@
 			"title": "Plaats de pin",
 			"hint": "Sleep de kaart tot de pin op de bedrijfsingang staat en bevestig.",
 			"cancel": "Annuleren",
-			"confirm": "Voeg hier een locatie toe"
+			"confirm": "Voeg hier een locatie toe",
+			"nearbyTitle": "Is het een van deze?",
+			"nearbyHint": "Deze locaties bestaan al in de buurt van je pin — open er een om te controleren, of voeg een nieuwe locatie toe.",
+			"nearbyUnnamed": "Naamloze locatie",
+			"nearbyBack": "Terug",
+			"nearbyContinue": "Geen van deze — nieuwe locatie toevoegen"
 		}
 	},
 	"info": {

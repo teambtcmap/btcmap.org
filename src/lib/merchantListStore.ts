@@ -2,7 +2,6 @@ import axios from "axios";
 import { get, writable } from "svelte/store";
 
 import { trackEvent } from "$lib/analytics";
-import { API_BASE } from "$lib/api-base";
 import { buildFieldsParam, PLACE_FIELD_SETS } from "$lib/api-fields";
 import api from "$lib/axios";
 import type { CategoryCounts, CategoryKey } from "$lib/categoryMapping";
@@ -22,6 +21,7 @@ import {
 import { selectVisiblePlaces } from "$lib/map/visiblePlaces";
 import { isBoosted } from "$lib/merchantDrawerLogic";
 import { merchantDrawer } from "$lib/merchantDrawerStore";
+import { buildRadiusSearchUrl, filterValidPlaces } from "$lib/radiusSearch";
 import { paymentTagsLoaded, verifiedDatesLoaded } from "$lib/store";
 import type { Place } from "$lib/types";
 import type { UserLocation } from "$lib/userLocationStore";
@@ -145,17 +145,14 @@ function isCancellation(error: Error): boolean {
 	return axios.isCancel(error) || error.name === "AbortError";
 }
 
-// Filter out invalid API response items missing required id field
-function filterValidPlaces<T extends { id?: unknown }>(items: T[]): T[] {
-	return items.filter((item): item is T => typeof item?.id === "number");
-}
-
 // The one radius-search fetcher behind the three list reducers
-// (fetchAndReplaceList, fetchCountOnly, fetchEnrichedDetails). Owns the URL
-// shape, the 10s transport policy, the array-shape validation (the API can
-// return an HTML error page), and the dropping of rows without a numeric id.
-// What each reducer does with the rows — and how loudly it fails — stays
-// that reducer's own policy.
+// (fetchAndReplaceList, fetchCountOnly, fetchEnrichedDetails). Owns the
+// transport policy (axios, 10s timeout, caller-managed AbortSignal) and the
+// error-shape policy (the array-shape check below — the API can return an
+// HTML error page). The URL shape and the dropping of rows without a
+// numeric id live in $lib/radiusSearch, shared with the placement dedupe
+// name lookup. What each reducer does with the rows — and how loudly it
+// fails — stays that reducer's own policy.
 async function searchPlacesInRadius<T extends { id?: unknown }>(
 	center: { lat: number; lon: number },
 	radiusKm: number,
@@ -163,7 +160,7 @@ async function searchPlacesInRadius<T extends { id?: unknown }>(
 	signal: AbortSignal,
 ): Promise<T[]> {
 	const response = await api.get<T[]>(
-		`${API_BASE}/v4/places/search/?lat=${center.lat}&lon=${center.lon}&radius_km=${radiusKm}&fields=${fields}`,
+		buildRadiusSearchUrl(center, radiusKm, fields),
 		{ timeout: 10000, signal },
 	);
 	if (!Array.isArray(response.data)) {

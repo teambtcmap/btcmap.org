@@ -727,10 +727,15 @@
 	"map": {
 		"bitcoinMerchantMapTitle": "Карта на биткойн търговци",
 		"placement": {
-			"title": "Place the pin",
-			"hint": "Drag the map until the pin sits on the business entrance, then confirm.",
-			"cancel": "Cancel",
-			"confirm": "Add a place here"
+			"title": "Поставете маркера",
+			"hint": "Преместете картата, докато маркерът застане върху входа на обекта, след което потвърдете.",
+			"cancel": "Отказ",
+			"confirm": "Добавете място тук",
+			"nearbyTitle": "Едно от тези ли е?",
+			"nearbyHint": "Тези места вече съществуват близо до вашия маркер — отворете някое, за да проверите, или добавете ново място.",
+			"nearbyUnnamed": "Място без име",
+			"nearbyBack": "Назад",
+			"nearbyContinue": "Нито едно от тези — добавяне на ново място"
 		}
 	},
 	"success": {
