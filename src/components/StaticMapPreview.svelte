@@ -101,10 +101,10 @@ $: if (map && styleLoaded) {
 	mapHandle?.setTheme($theme);
 }
 
-// Follow the coords when they change (e.g. param-only navigation), since
-// the component instance is reused across /merchant/[id] params.
+// Follow the coords/zoom when they change (e.g. param-only navigation),
+// since the component instance is reused across /merchant/[id] params.
 $: if (map && typeof lat === "number" && typeof long === "number") {
-	map.setCenter([long, lat]);
+	map.jumpTo({ center: [long, lat], zoom });
 }
 
 onDestroy(() => {
