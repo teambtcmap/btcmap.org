@@ -8,6 +8,7 @@ import {
 	PIN_FILL_REGULAR,
 	PIN_FILLS,
 	pinVariantFor,
+	resolveIconifyName,
 	spriteName,
 } from "./maplibreSprites";
 
@@ -79,4 +80,28 @@ describe("sprite naming and fills", () => {
 		const svg = buildCompositeSvg("<svg></svg>", "nv");
 		expect(svg).toContain(`fill="${PIN_FILLS.nv}"`);
 	});
+});
+
+describe("resolveIconifyName", () => {
+	it("substitutes the Bitcoin glyph for the untagged placeholder", () => {
+		expect(resolveIconifyName("question_mark")).toBe(
+			"material-symbols:currency-bitcoin",
+		);
+	});
+
+	it("uses the default ic:outline form for ids that exist there", () => {
+		expect(resolveIconifyName("local_cafe")).toBe("ic:outline-local-cafe");
+		expect(resolveIconifyName("18_up_rating")).toBe("ic:outline-18-up-rating");
+	});
+
+	// These ids have no ic:outline counterpart, so without a table entry they
+	// resolve to a 404 name. The sprite pipeline papers over that with its
+	// material-symbols retry, but Icon.svelte has no fallback and renders
+	// nothing at all — a blank icon in the list, drawer and area cards.
+	it.each(["destruction", "dresser", "adult_content"])(
+		"keeps %s off the broken ic:outline path",
+		(icon) => {
+			expect(resolveIconifyName(icon)).toMatch(/^material-symbols:/);
+		},
+	);
 });
