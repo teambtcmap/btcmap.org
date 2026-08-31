@@ -1,7 +1,14 @@
-import { test, expect } from '@playwright/test';
+import { expect, test } from '@playwright/test';
+
+import { stubMapData } from './helpers';
 
 test.describe('Home Page', () => {
-	test('add location opens', async ({ page }) => {
+	// The CTA lands in the map's placement mode (#1134) — stub the map's
+	// data so the hop stays hermetic.
+	test.use({ serviceWorkers: 'block' });
+
+	test('add location opens placement mode on the map', async ({ page }) => {
+		await stubMapData(page);
 		await page.goto('');
 
 		await page.waitForLoadState('domcontentloaded');
@@ -13,6 +20,7 @@ test.describe('Home Page', () => {
 
 		await page.getByRole('link', { name: 'Add Location' }).click();
 
-		await expect(page.getByRole('heading', { name: 'Add Location' })).toBeVisible();
+		await expect(page).toHaveURL(/\/map\?add=/);
+		await expect(page.getByText('Place the pin', { exact: true })).toBeVisible();
 	});
 });

@@ -49,7 +49,7 @@ export let enableGlobe = false;
 export let globeOn = false;
 export let onToggleGlobe: (() => void) | null = null;
 // Forwarded to the menu modal's add row; null keeps the plain
-// /add-location link (communities variant, ?issues mode).
+// /map?add=nav link (communities variant, ?issues mode).
 export let onAddPlace: (() => void) | null = null;
 
 let toolsModalOpen = false;

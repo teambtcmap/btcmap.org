@@ -984,7 +984,13 @@ onMount(async () => {
 	const hashCoords = parseHashCoords();
 	const searchParams = new URLSearchParams(window.location.search);
 	placementActive = !issuesOnly && searchParams.has("add");
-	if (placementActive) trackEvent("add_place_enter", { method: "url" });
+	// ?add's value names the entry point (nav link, /add-location redirect,
+	// the form's adjust-pin link); a bare ?add= is a shared/deep link.
+	if (placementActive) {
+		trackEvent("add_place_enter", {
+			method: searchParams.get("add") || "url",
+		});
+	}
 	if (issuesOnly && searchParams.has("add")) {
 		// Placement mode is unavailable in the issues worklist, and
 		// AddPlaceMode (whose effect owns ?add) never mounts there — strip

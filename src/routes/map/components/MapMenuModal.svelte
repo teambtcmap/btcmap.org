@@ -48,8 +48,11 @@ const iconClass = "h-5 w-5 flex-none dark:invert";
 					<span>{$_("mapControls.addLocation")}</span>
 				</button>
 			{:else}
+				<!-- Placement lives on /map; from ?issues mode that is a same-route
+					hop, so force a reload (same reason as the issues link below). -->
 				<a
-					href="/add-location"
+					href="/map?add=nav"
+					data-sveltekit-reload
 					class={rowClass}
 					onclick={() => trackEvent("add_location_click")}
 				>

@@ -100,7 +100,7 @@ $: statsDropdownLinks = [
 $: maintainDropdownLinks = [
 	{
 		title: $_("nav.addLocation"),
-		url: "/add-location",
+		url: "/map?add=nav",
 		icon: "add" as MobileNavIconName,
 	},
 	{

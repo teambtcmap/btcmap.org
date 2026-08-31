@@ -81,7 +81,7 @@ $: latest = filteredPlaces?.toSorted((a, b) => b.id - a.id).slice(0, 6);
 			{:else}
 				<p class="text-center text-primary sm:text-left dark:text-white">
 					{$_('areaHighlights.noLatest')} <TextLink
-						link={resolve('/add-location')}>{$_('areaHighlights.addNewMerchant')}</TextLink
+						link="{resolve('/map')}?add=nav">{$_('areaHighlights.addNewMerchant')}</TextLink
 					> {$_('areaHighlights.now')}
 				</p>
 			{/if}

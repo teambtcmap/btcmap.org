@@ -99,7 +99,7 @@ function openAppModal(app: AppConfig) {
 						>{$_('home.openMap')}</a
 					>
 					<a
-						href={resolve('/add-location')}
+						href="{resolve('/map')}?add=nav"
 						class="rounded-full bg-link px-7 py-3.5 text-lg font-semibold text-white transition-colors hover:bg-hover"
 						>{$_('home.addLocation')}</a
 					>
