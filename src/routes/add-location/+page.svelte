@@ -1,49 +1,43 @@
 <script lang="ts">
 import axios from "axios";
 import DOMPurify from "dompurify";
-import type {
-	Map as MapLibreMap,
-	Marker as MapLibreMarker,
-	MapMouseEvent,
-} from "maplibre-gl";
+import type { Map as MapLibreMap } from "maplibre-gl";
 import "maplibre-gl/dist/maplibre-gl.css";
 import { onDestroy, onMount, tick } from "svelte";
 import { get } from "svelte/store";
 
 import FormHelperText from "$components/FormHelperText.svelte";
 import FormSuccess from "$components/FormSuccess.svelte";
-import AddressSearch from "$components/form/AddressSearch.svelte";
 import type { FormSelectOption } from "$components/form/FormSelect.svelte";
 import FormSelect from "$components/form/FormSelect.svelte";
 import Icon from "$components/Icon.svelte";
 import HeaderPlaceholder from "$components/layout/HeaderPlaceholder.svelte";
 import MapLoadingEmbed from "$components/MapLoadingEmbed.svelte";
-import MapUnsupportedFallback from "$components/MapUnsupportedFallback.svelte";
 import PlacementPinIcon from "$components/PlacementPinIcon.svelte";
 import PrimaryButton from "$components/PrimaryButton.svelte";
-import TextLink from "$components/TextLink.svelte";
 import { CATEGORIES, CATEGORY_GROUPS } from "$lib/categoryMapping";
+import { CLUSTERING_DISABLED_ZOOM } from "$lib/constants";
 import { _, locale } from "$lib/i18n";
 import type { BtcmapMapHandle } from "$lib/map/createMap";
 import { createBtcmapMap } from "$lib/map/createMap";
-import { parseCoordsParams } from "$lib/placementMode";
+import { buildPlacementUrl } from "$lib/placementMode";
 import { theme } from "$lib/theme";
-import { errToast, isValidLatitude, isValidLongitude } from "$lib/utils";
+import { errToast } from "$lib/utils";
 
+import type { PageData } from "./$types";
 import { browser } from "$app/environment";
-import { page } from "$app/stores";
+import { goto } from "$app/navigation";
 
-// Arrival from the map's placement mode: valid ?lat&long flips the page
-// into a details-first state — the marketing hero gives way to a pin
-// confirmation and the location section acknowledges the handed-over pin
-// instead of asking the user to search for one. Derived from the page
-// store so SSR already renders the right variant (no hydration flash).
-$: arrivalCoords = parseCoordsParams($page.url.searchParams);
-let showAddressSearch = false;
+// The pin always comes from the map's placement mode — the route's load
+// guard redirects anything without valid ?lat&long there — so the page is
+// details-first by construction (SSR included, no hydration flash).
+export let data: PageData;
+$: coords = data.coords;
+$: adjustUrl = buildPlacementUrl(coords.lat, coords.long);
 // One-shot desktop nicety: hand focus to the name field once the inputs
-// unlock (captcha + picker map gate them via `disabled`).
+// unlock (the captcha gates them via `disabled`).
 let nameFocusPending = false;
-$: if (nameFocusPending && captchaSecret && mapLoaded && name) {
+$: if (nameFocusPending && captchaSecret && name) {
 	nameFocusPending = false;
 	// Wait out the same render that flips the input's `disabled` off —
 	// focusing a still-disabled element is a silent no-op.
@@ -73,66 +67,21 @@ const fetchCaptcha = () => {
 		});
 };
 
-function resetForm() {
-	submitted = false;
-	submitting = false;
-	methods = [];
-	selected = false;
-	noLocationSelected = false;
-	noMethodSelected = false;
-	lat = undefined;
-	long = undefined;
-	latInput = "";
-	longInput = "";
-	latError = "";
-	longError = "";
-	showAdvanced = false;
-	showMoreDetails = false;
-	source = undefined;
-	sourceOther = undefined;
-	categorySelect = undefined;
-	categoryOther = undefined;
-
-	// Wait for the DOM to update with the form back in place
-	tick().then(async () => {
-		// Clear form fields
-		if (name) name.value = "";
-		if (nameEn) nameEn.value = "";
-		if (address) address.value = "";
-		if (website) website.value = "";
-		if (phone) phone.value = "";
-		if (hours) hours.value = "";
-		if (notes) notes.value = "";
-		if (contact) contact.value = "";
-		if (captchaInput) captchaInput.value = "";
-		if (onchain) onchain.checked = false;
-		if (lightning) lightning.checked = false;
-		if (nfc) nfc.checked = false;
-
-		// Refresh captcha
-		fetchCaptcha();
-
-		// Reinitialize the map
-		await initializeMap();
-	});
-}
-
+// Static preview of the confirmed pin: non-interactive, no controls, the
+// pin glyph is a DOM overlay at the centre (same offset as the map's
+// placement crosshair). Fine-tuning happens back on the map via adjustUrl.
+// No WebGL fallback by design — placement itself needs the map, so a
+// browser without it never arrives here with a pin.
 async function initializeMap() {
-	// Clean up any existing map (e.g. resetForm re-init).
-	mapHandle?.destroy();
-	mapHandle = undefined;
-	map = undefined;
-	marker?.remove();
-	marker = undefined;
-	mapLoaded = false;
-
-	// The bring-up (WebGL check, import, worker/RTL, controls, theme-swap
-	// state machine) lives in createBtcmapMap. No overlays: the picked-
-	// location marker is DOM-level and survives style swaps on its own.
 	const outcome = await createBtcmapMap({
 		container: mapElement,
 		theme: $theme,
-		mapOptions: { center: [0, 0], zoom: 2 },
+		mapOptions: {
+			center: [coords.long, coords.lat],
+			zoom: CLUSTERING_DISABLED_ZOOM,
+			interactive: false,
+		},
+		controls: false,
 		isCancelled: () => destroyed,
 		registerOverlays: () => {},
 		onFirstLoad: () => {
@@ -140,105 +89,21 @@ async function initializeMap() {
 		},
 	});
 
-	if (outcome.status === "unsupported") {
-		webglUnsupported = true;
-		return;
-	}
-	if (outcome.status === "cancelled") return;
+	if (outcome.status !== "ready") return;
 	if (destroyed) {
 		outcome.handle.destroy();
 		return;
 	}
 	mapHandle = outcome.handle;
 	map = outcome.handle.map;
-	maplibreRef = outcome.handle.maplibre;
-
-	map.on("click", (e: MapMouseEvent) => {
-		if (!captchaSecret) return;
-		placeMarker(e.lngLat.lat, e.lngLat.lng, {
-			fly: false,
-			syncInputs: true,
-		});
-	});
 }
 
 let name: HTMLInputElement;
 let nameEn: HTMLInputElement;
 let address: HTMLInputElement;
-let addressFilledBySearch = false;
-let lat: number | undefined;
-let long: number | undefined;
-let selected = false;
-let showAdvanced = false;
 let showMoreDetails = false;
-let latInput = "";
-let longInput = "";
-let latError = "";
-let longError = "";
-let marker: MapLibreMarker | undefined;
-let maplibreRef: typeof import("maplibre-gl") | undefined;
 let mapHandle: BtcmapMapHandle | undefined;
 
-function placeMarker(
-	newLat: number,
-	newLong: number,
-	{ fly, syncInputs }: { fly: boolean; syncInputs: boolean },
-) {
-	// When syncing from a map click, snap to displayed precision so the
-	// reactive parser's equality check (parsedLat !== lat) holds and we
-	// don't re-emit a flyTo on the next tick.
-	let finalLat = newLat;
-	let finalLong = newLong;
-	if (syncInputs) {
-		latInput = newLat.toFixed(5);
-		longInput = newLong.toFixed(5);
-		finalLat = Number(latInput);
-		finalLong = Number(longInput);
-	}
-	lat = finalLat;
-	long = finalLong;
-	selected = true;
-	noLocationSelected = false;
-	if (!maplibreRef || !map) return;
-	if (marker) {
-		marker.setLngLat([finalLong, finalLat]);
-	} else {
-		marker = new maplibreRef.Marker()
-			.setLngLat([finalLong, finalLat])
-			.addTo(map);
-	}
-	if (fly) {
-		map.flyTo({ center: [finalLong, finalLat], zoom: 17, duration: 800 });
-	}
-}
-
-function handleAddressSelect(
-	e: CustomEvent<{ lat: number; lng: number; displayName: string }>,
-) {
-	const { lat, lng, displayName } = e.detail;
-	placeMarker(lat, lng, { fly: true, syncInputs: true });
-	// Fill the Address field if it's empty or was last filled by a previous
-	// search. If the user has typed their own address, leave it alone.
-	if (address && (address.value.trim() === "" || addressFilledBySearch)) {
-		address.value = displayName;
-		addressFilledBySearch = true;
-		// The address field lives behind the "Add more details" expander —
-		// surface it so the filled-in value isn't silently hidden.
-		showMoreDetails = true;
-	}
-}
-
-function toggleAdvanced() {
-	showAdvanced = !showAdvanced;
-	if (!showAdvanced) {
-		// Leaving advanced mode: clear any error state and snap displayed
-		// values to the same 5-dp precision used for read-only display.
-		latError = "";
-		longError = "";
-		if (lat !== undefined) latInput = lat.toFixed(5);
-		if (long !== undefined) longInput = long.toFixed(5);
-	}
-}
 let categorySelect: string | undefined;
 let categoryOther: string | undefined;
 let categoryOtherElement: HTMLInputElement;
@@ -261,7 +126,6 @@ let contact: HTMLInputElement;
 let source: "Business Owner" | "Customer" | "Other" | undefined;
 let sourceOther: string | undefined;
 let sourceOtherElement: HTMLTextAreaElement;
-let noLocationSelected = false;
 let noMethodSelected = false;
 let submitted = false;
 let submitting = false;
@@ -270,29 +134,6 @@ const handleCheckboxClick = () => {
 	noMethodSelected = false;
 };
 
-$: if (showAdvanced) {
-	const trimmedLat = latInput.trim();
-	const trimmedLong = longInput.trim();
-	const parsedLat = trimmedLat === "" ? Number.NaN : Number(trimmedLat);
-	const parsedLong = trimmedLong === "" ? Number.NaN : Number(trimmedLong);
-	const latOk = isValidLatitude(parsedLat);
-	const longOk = isValidLongitude(parsedLong);
-	latError =
-		trimmedLat !== "" && !latOk ? $_("addLocation.latitudeInvalid") : "";
-	longError =
-		trimmedLong !== "" && !longOk ? $_("addLocation.longitudeInvalid") : "";
-	if (latOk && longOk && (parsedLat !== lat || parsedLong !== long)) {
-		placeMarker(parsedLat, parsedLong, { fly: true, syncInputs: false });
-	}
-}
-
-// If the user typed valid coords before the map finished loading,
-// placeMarker() returned early (no map yet). Once the map is ready,
-// drop the marker that's owed.
-$: if (mapLoaded && lat !== undefined && long !== undefined && !marker) {
-	placeMarker(lat, long, { fly: true, syncInputs: false });
-}
-
 const submitForm = (event: SubmitEvent) => {
 	event.preventDefault();
 	if (categorySelect === "Other" && !(categoryOther ?? "").trim()) {
@@ -300,18 +141,10 @@ const submitForm = (event: SubmitEvent) => {
 		categoryOtherElement.focus();
 		return;
 	}
-	if (!selected) {
-		noLocationSelected = true;
-		errToast(get(_)("errors.noLocationSelected"));
-	} else if (!onchain.checked && !lightning.checked && !nfc.checked) {
+	if (!onchain.checked && !lightning.checked && !nfc.checked) {
 		noMethodSelected = true;
 		errToast(get(_)("errors.noPaymentMethod"));
 	} else {
-		if (lat === undefined || long === undefined) {
-			noLocationSelected = true;
-			errToast(get(_)("errors.noLocationSelected"));
-			return;
-		}
 		submitting = true;
 		if (onchain.checked) {
 			methods.push("onchain");
@@ -331,8 +164,8 @@ const submitForm = (event: SubmitEvent) => {
 				name: name.value,
 				nameEn: nameEn.value,
 				address: address.value,
-				lat,
-				long,
+				lat: coords.lat,
+				long: coords.long,
 				category:
 					categorySelect === "Other"
 						? (categoryOther ?? "").trim()
@@ -366,7 +199,6 @@ const submitForm = (event: SubmitEvent) => {
 let mapElement: HTMLDivElement;
 let map: MapLibreMap | undefined;
 let mapLoaded = false;
-let webglUnsupported = false;
 let destroyed = false;
 
 onMount(async () => {
@@ -374,18 +206,9 @@ onMount(async () => {
 		// fetch and add captcha
 		fetchCaptcha();
 
-		// Coordinates handed over from the map's placement mode (?lat&long).
-		// Calling placeMarker before the map exists is safe: it records the
-		// coords and the mapLoaded reactive drops the owed marker later.
-		if (arrivalCoords) {
-			placeMarker(arrivalCoords.lat, arrivalCoords.long, {
-				fly: true,
-				syncInputs: true,
-			});
-			// Keyboard-first on desktop only: popping the on-screen keyboard
-			// on mobile would cover the confirmation the user just landed on.
-			nameFocusPending = window.matchMedia("(pointer: fine)").matches;
-		}
+		// Keyboard-first on desktop only: popping the on-screen keyboard
+		// on mobile would cover the confirmation the user just landed on.
+		nameFocusPending = window.matchMedia("(pointer: fine)").matches;
 
 		// Initialize the map
 		await initializeMap();
@@ -399,11 +222,14 @@ onDestroy(() => {
 	map = undefined;
 });
 
-// The facade's setTheme handles change detection; the picked-location
-// marker is DOM-level and survives style swaps on its own.
+// The facade's setTheme handles change detection; the pin overlay is
+// plain DOM and survives style swaps on its own.
 $: if (map && mapLoaded) {
 	mapHandle?.setTheme($theme);
 }
+// A same-route navigation with new ?lat&long re-runs the load but not
+// onMount — keep the preview on the current pin.
+$: map?.jumpTo({ center: [coords.long, coords.lat] });
 </script>
 
 <svelte:head>
@@ -427,35 +253,21 @@ $: if (map && mapLoaded) {
 		<HeaderPlaceholder />
 	{/if}
 
-	{#if arrivalCoords}
-		<!-- Same pin glyph as the map's placement crosshair — the visual cue
-		     that the pin the user just confirmed is the one this page holds. -->
-		<div
-			class="mx-auto mt-10 flex max-w-xl items-center gap-3 rounded-2xl border-2 border-bitcoin/40 bg-bitcoin/10 px-4 py-3"
-		>
-			<PlacementPinIcon width={24} class="shrink-0" />
-			<div>
-				<p class="font-semibold text-primary dark:text-white">
-					{$_('addLocation.pinConfirmedTitle')}
-				</p>
-				<p class="text-sm text-body dark:text-offwhite">
-					{$_('addLocation.pinConfirmedHint')}
-				</p>
-			</div>
+	<!-- Same pin glyph as the map's placement crosshair — the visual cue
+	     that the pin the user just confirmed is the one this page holds. -->
+	<div
+		class="mx-auto mt-10 flex max-w-xl items-center gap-3 rounded-2xl border-2 border-bitcoin/40 bg-bitcoin/10 px-4 py-3"
+	>
+		<PlacementPinIcon width={24} class="shrink-0" />
+		<div>
+			<p class="font-semibold text-primary dark:text-white">
+				{$_('addLocation.pinConfirmedTitle')}
+			</p>
+			<p class="text-sm text-body dark:text-offwhite">
+				{$_('addLocation.pinConfirmedHint')}
+			</p>
 		</div>
-	{:else}
-		<p class="mt-10 text-center text-2xl font-semibold text-primary md:text-3xl dark:text-white">
-			{$_('addLocation.subheading')}
-		</p>
-
-		<p class="mt-10 text-center text-lg font-semibold text-primary md:text-xl dark:text-white">
-			{$_('addLocation.businessOwner')}
-			<TextLink link="https://wiki.btcmap.org/Merchant-Best-Practices" external
-				>{$_('addLocation.bestPractices')}</TextLink
-			>
-			{$_('addLocation.guide')}
-		</p>
-	{/if}
+	</div>
 
 	<div class="mt-16 pb-20 md:pb-32 lg:flex lg:justify-between lg:gap-10">
 		<section id="form" class="mx-auto w-full lg:w-1/2 lg:border-r lg:border-input lg:pr-10">
@@ -476,7 +288,7 @@ $: if (map && mapLoaded) {
 					<div>
 						<label for="name" class="mb-2 block font-semibold">{$_('forms.merchantName')}</label>
 						<input
-							disabled={!captchaSecret || !mapLoaded}
+							disabled={!captchaSecret}
 							type="text"
 							name="name"
 							id="name"
@@ -488,118 +300,36 @@ $: if (map && mapLoaded) {
 					</div>
 
 					<div>
-						<label for="location-picker" class="mb-2 block font-semibold"
-							>{$_('forms.selectLocation')}</label
-						>
-						{#if noLocationSelected}
-							<span class="font-semibold text-error">{$_('addLocation.noLocationError')}</span>
-						{/if}
-						{#if !arrivalCoords || showAddressSearch}
-							<p class="mt-2 mb-1 text-sm font-semibold text-primary/80 dark:text-white/80">
-								{$_('addLocation.searchByAddressLabel')}
-							</p>
-							<div class="mb-3">
-								<AddressSearch
-									disabled={!captchaSecret || !mapLoaded}
-									locale={$locale ?? 'en'}
-									on:select={handleAddressSelect}
-								/>
-							</div>
-						{/if}
-						<p class="mt-2 mb-1 text-sm font-semibold text-primary/80 dark:text-white/80">
-							{#if arrivalCoords && !showAddressSearch}
-								{$_('addLocation.pinFromMapLabel')}
-							{:else}
-								{$_('addLocation.orSelectOnMapLabel')}
-							{/if}
+						<p id="pin-label" class="mb-2 block font-semibold">
+							{$_('addLocation.pinFromMapLabel')}
 						</p>
-						<div class="relative mb-2">
+						<!-- Static preview, no picker: the whole box links back into
+						     placement mode with the crosshair on this pin. -->
+						<a
+							href={adjustUrl}
+							aria-labelledby="pin-label"
+							class="relative mb-2 block overflow-hidden rounded-2xl border-2 border-input focus:outline-link"
+						>
 							<div
 								bind:this={mapElement}
-								class="z-10 h-[300px] !cursor-crosshair rounded-2xl border-2 border-input !bg-teal md:h-[400px] dark:!bg-dark"
+								class="pointer-events-none h-[300px] !bg-teal md:h-[400px] dark:!bg-dark"
 							></div>
-							{#if webglUnsupported}
-								<MapUnsupportedFallback />
-							{:else if !mapLoaded}
-								<MapLoadingEmbed style="h-[300px] md:h-[400px] border-2 border-input rounded-2xl" />
+							{#if !mapLoaded}
+								<MapLoadingEmbed style="h-[300px] md:h-[400px]" />
 							{/if}
-						</div>
-						{#if arrivalCoords && !showAddressSearch}
-							<div class="mb-2">
-								<button
-									type="button"
-									class="text-sm font-semibold text-link hover:text-hover focus:outline-link"
-									on:click={() => (showAddressSearch = true)}
-								>
-									{$_('addLocation.adjustWithSearch')}
-								</button>
-							</div>
-						{/if}
-						<div class="flex space-x-2" class:hidden={!!arrivalCoords && !showAddressSearch}>
-							<div class="w-full">
-								<input
-									id="lat"
-									aria-label={$_('addLocation.latitude')}
-									aria-invalid={!!latError}
-									aria-describedby={latError ? 'lat-error' : undefined}
-									readonly={!showAdvanced}
-									bind:value={latInput}
-									type="text"
-									inputmode="decimal"
-									name="lat"
-									placeholder={$_('addLocation.latitude')}
-									class="w-full rounded-2xl border-2 border-input p-3 transition-all focus:outline-link read-only:cursor-default read-only:bg-gray-100 read-only:text-gray-500 dark:bg-white/[0.15] dark:read-only:bg-gray-700 dark:read-only:text-gray-400"
-								/>
-								{#if latError}
-									<span id="lat-error" class="block font-semibold text-error">
-										{latError}
-									</span>
-								{/if}
-							</div>
-							<div class="w-full">
-								<input
-									id="long"
-									aria-label={$_('addLocation.longitude')}
-									aria-invalid={!!longError}
-									aria-describedby={longError ? 'long-error' : undefined}
-									readonly={!showAdvanced}
-									bind:value={longInput}
-									type="text"
-									inputmode="decimal"
-									name="long"
-									placeholder={$_('addLocation.longitude')}
-									class="w-full rounded-2xl border-2 border-input p-3 transition-all focus:outline-link read-only:cursor-default read-only:bg-gray-100 read-only:text-gray-500 dark:bg-white/[0.15] dark:read-only:bg-gray-700 dark:read-only:text-gray-400"
-								/>
-								{#if longError}
-									<span id="long-error" class="block font-semibold text-error">
-										{longError}
-									</span>
-								{/if}
-							</div>
-						</div>
-						<div class="mt-2" class:hidden={!!arrivalCoords && !showAddressSearch}>
-							<button
-								type="button"
-								class="text-sm font-semibold text-link hover:text-hover focus:outline-link"
-								aria-expanded={showAdvanced}
-								on:click={toggleAdvanced}
+							<div
+								class="pointer-events-none absolute top-1/2 left-1/2 z-30 -translate-x-1/2 -translate-y-full drop-shadow-lg"
 							>
-								{showAdvanced ? '▾' : '▸'}
-								{$_('addLocation.advancedToggle')}
-							</button>
-							{#if showAdvanced}
-								<p class="mt-2 text-sm text-primary/80 dark:text-white/70">
-									{$_('addLocation.advancedHint')}
-								</p>
-							{/if}
-						</div>
+								<PlacementPinIcon width={40} />
+							</div>
+						</a>
 					</div>
 
 					<div>
 						<label for="category" class="mb-2 block font-semibold">{$_('forms.category')}</label>
 						<FormSelect
 							id="category"
-							disabled={!captchaSecret || !mapLoaded}
+							disabled={!captchaSecret}
 							name="category"
 							required
 							options={[
@@ -617,7 +347,7 @@ $: if (map && mapLoaded) {
 						/>
 						{#if categorySelect === 'Other'}
 							<input
-								disabled={!captchaSecret || !mapLoaded}
+								disabled={!captchaSecret}
 								required
 								type="text"
 								name="category-other"
@@ -640,7 +370,7 @@ $: if (map && mapLoaded) {
 							<div>
 								<input
 									class="h-4 w-4 accent-link"
-									disabled={!captchaSecret || !mapLoaded}
+									disabled={!captchaSecret}
 									type="checkbox"
 									name="onchain"
 									id="onchain"
@@ -663,7 +393,7 @@ $: if (map && mapLoaded) {
 							<div>
 								<input
 									class="h-4 w-4 accent-link"
-									disabled={!captchaSecret || !mapLoaded}
+									disabled={!captchaSecret}
 									type="checkbox"
 									name="lightning"
 									id="lightning"
@@ -686,7 +416,7 @@ $: if (map && mapLoaded) {
 							<div>
 								<input
 									class="h-4 w-4 accent-link"
-									disabled={!captchaSecret || !mapLoaded}
+									disabled={!captchaSecret}
 									type="checkbox"
 									name="nfc"
 									id="nfc"
@@ -731,7 +461,7 @@ $: if (map && mapLoaded) {
 								<FormHelperText text={$_('addLocation.nameEnTooltip')} />
 							</div>
 							<input
-								disabled={!captchaSecret || !mapLoaded}
+								disabled={!captchaSecret}
 								type="text"
 								name="nameEn"
 								id="name-en"
@@ -748,14 +478,13 @@ $: if (map && mapLoaded) {
 							</div>
 
 							<input
-								disabled={!captchaSecret || !mapLoaded}
+								disabled={!captchaSecret}
 								type="text"
 								name="address"
 								id="address"
 								placeholder={$_('addLocation.addressPlaceholder')}
 								class="w-full rounded-2xl border-2 border-input p-3 transition-all focus:outline-link disabled:cursor-not-allowed disabled:bg-gray-100 disabled:text-gray-500 dark:bg-white/[0.15] dark:disabled:bg-gray-700 dark:disabled:text-gray-400"
 								bind:this={address}
-								on:input={() => (addressFilledBySearch = false)}
 							/>
 						</div>
 
@@ -764,7 +493,7 @@ $: if (map && mapLoaded) {
 								>{$_('forms.website')} <span class="font-normal">{$_('forms.optional')}</span></label
 							>
 							<input
-								disabled={!captchaSecret || !mapLoaded}
+								disabled={!captchaSecret}
 								type="url"
 								name="website"
 								placeholder={$_('addLocation.websitePlaceholder')}
@@ -778,7 +507,7 @@ $: if (map && mapLoaded) {
 								>{$_('forms.phone')} <span class="font-normal">{$_('forms.optional')}</span></label
 							>
 							<input
-								disabled={!captchaSecret || !mapLoaded}
+								disabled={!captchaSecret}
 								type="tel"
 								name="phone"
 								placeholder={$_('addLocation.phonePlaceholder')}
@@ -793,7 +522,7 @@ $: if (map && mapLoaded) {
 								<span class="font-normal">{$_('forms.optional')}</span></label
 							>
 							<input
-								disabled={!captchaSecret || !mapLoaded}
+								disabled={!captchaSecret}
 								type="text"
 								name="hours"
 								placeholder={$_('addLocation.hoursPlaceholder')}
@@ -807,7 +536,7 @@ $: if (map && mapLoaded) {
 								>{$_('forms.notes')} <span class="font-normal">{$_('forms.optional')}</span></label
 							>
 							<textarea
-								disabled={!captchaSecret || !mapLoaded}
+								disabled={!captchaSecret}
 								name="notes"
 								placeholder={$_('addLocation.notesPlaceholder')}
 								rows="3"
@@ -823,7 +552,7 @@ $: if (map && mapLoaded) {
 						>
 						<FormSelect
 							id="source"
-							disabled={!captchaSecret || !mapLoaded}
+							disabled={!captchaSecret}
 							name="source"
 							required
 							bind:value={source}
@@ -844,7 +573,7 @@ $: if (map && mapLoaded) {
 								{$_('addLocation.dataSourceOtherPrompt')}
 							</p>
 							<textarea
-								disabled={!captchaSecret || !mapLoaded}
+								disabled={!captchaSecret}
 								required
 								name="source-other"
 								placeholder={$_('addLocation.dataSourceOtherPlaceholder')}
@@ -861,7 +590,7 @@ $: if (map && mapLoaded) {
 							{$_('addLocation.contactDescription')}
 						</p>
 						<input
-							disabled={!captchaSecret || !mapLoaded}
+							disabled={!captchaSecret}
 							required
 							type="email"
 							name="contact"
@@ -892,7 +621,7 @@ $: if (map && mapLoaded) {
 								{/if}
 							</div>
 							<input
-								disabled={!captchaSecret || !mapLoaded}
+								disabled={!captchaSecret}
 								required
 								type="text"
 								name="captcha"
@@ -913,7 +642,7 @@ $: if (map && mapLoaded) {
 
 					<PrimaryButton
 						loading={submitting}
-						disabled={submitting || !captchaSecret || !mapLoaded}
+						disabled={submitting || !captchaSecret}
 						style="w-full py-3 rounded-xl"
 					>
 						{$_('forms.submitLocation')}
@@ -955,6 +684,6 @@ $: if (map && mapLoaded) {
 		type={$_('addLocation.formSuccessType')}
 		text={$_('addLocation.formSuccessText')}
 		showIssueLink={false}
-		on:click={resetForm}
+		on:click={() => goto('/map?add=nav')}
 	/>
 {/if}

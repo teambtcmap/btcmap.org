@@ -1,52 +1,54 @@
 import { expect, test } from '@playwright/test';
 
-// Arrival state for pins handed over from the map's placement mode (#1134):
-// valid ?lat&long swaps the marketing hero for a confirmation banner and
-// labels the mini-map as the picked pin instead of asking the user to search.
+import { stubMapData } from './helpers';
+
+// Arrival state for pins handed over from the map's placement mode (#1134).
+// The form only ever opens with valid ?lat&long: the route's load guard
+// sends everything else — nav links, bookmarks, malformed deep links — to
+// placement mode, so the duplicate check can't be skipped. The redirect
+// cases land on the map page, hence stubMapData + the service-worker block.
 test.describe('Add Location — map-placed pin arrival', () => {
-	test('valid coords render the confirmation state with a marker', async ({
+	test.use({ serviceWorkers: 'block' });
+
+	test('valid coords render the confirmation state with a minimap linking back to the pin', async ({
 		page
 	}) => {
 		await page.goto('/add-location?lat=52.52000&long=13.40500');
 		await page.waitForLoadState('domcontentloaded');
 
 		await expect(page.getByText('Location picked on the map')).toBeVisible();
-		// The marketing hero gives way to the banner.
-		await expect(page.getByText('Accept bitcoin? Get found')).toBeHidden();
-		await expect(
-			page.getByText('Your pin from the map — click or tap to fine-tune')
-		).toBeVisible();
+		// The minimap is a static preview wrapped in a link that reopens
+		// placement mode with the crosshair on this pin.
+		const adjust = page.getByRole('link', {
+			name: 'Your pin from the map — click or tap to fine-tune'
+		});
+		await expect(adjust).toHaveAttribute(
+			'href',
+			'/map?add=adjust#17/52.52000/13.40500'
+		);
+		await expect(page.locator('.maplibregl-canvas')).toBeVisible();
+		// No picker machinery: address search, coordinate inputs and map
+		// controls are gone with the redirect guard.
 		await expect(
 			page.getByText('Search for an address', { exact: true })
 		).toBeHidden();
-
-		// Handover synced the coordinate inputs…
-		await expect(page.getByLabel('Latitude')).toHaveValue('52.52000');
-		await expect(page.getByLabel('Longitude')).toHaveValue('13.40500');
-		// …and once the picker map is up, the owed marker lands on it.
-		await expect(page.locator('.maplibregl-ctrl-zoom-in')).toBeVisible();
-		await expect(page.locator('.maplibregl-marker')).toHaveCount(1);
-
-		// Escape hatch restores the default search-first layout.
-		await page
-			.getByRole('button', { name: 'Search for an address instead' })
-			.click();
-		await expect(
-			page.getByText('Search for an address', { exact: true })
-		).toBeVisible();
-		await expect(
-			page.getByRole('button', { name: 'Search for an address instead' })
-		).toBeHidden();
+		await expect(page.locator('#lat')).toHaveCount(0);
+		await expect(page.locator('.maplibregl-ctrl-zoom-in')).toHaveCount(0);
 	});
 
-	test('plain /add-location keeps the default layout', async ({ page }) => {
+	test('plain /add-location is sent to placement mode', async ({ page }) => {
+		await stubMapData(page);
 		await page.goto('/add-location');
-		await page.waitForLoadState('domcontentloaded');
 
-		await expect(page.getByText('Accept bitcoin? Get found')).toBeVisible();
-		await expect(page.getByText('Location picked on the map')).toBeHidden();
-		await expect(
-			page.getByText('Search for an address', { exact: true })
-		).toBeVisible();
+		await expect(page).toHaveURL(/\/map\?add=/);
+		await expect(page.getByText('Place the pin', { exact: true })).toBeVisible();
+	});
+
+	test('malformed coords are sent to placement mode too', async ({ page }) => {
+		await stubMapData(page);
+		await page.goto('/add-location?lat=95&long=13.405');
+
+		await expect(page).toHaveURL(/\/map\?add=/);
+		await expect(page.getByText('Place the pin', { exact: true })).toBeVisible();
 	});
 });
