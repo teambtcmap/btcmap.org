@@ -3,6 +3,7 @@ import { afterEach, describe, expect, it, vi } from "vitest";
 import type { Place } from "$lib/types";
 
 import {
+	addEntryMethod,
 	buildAddLocationUrl,
 	buildPlacementUrl,
 	clampDedupeRadiusKm,
@@ -27,6 +28,17 @@ describe("buildPlacementUrl", () => {
 		expect(buildPlacementUrl(52.52, 13.405)).toBe(
 			"/map?add=adjust#17/52.52000/13.40500",
 		);
+	});
+});
+
+describe("addEntryMethod", () => {
+	it("passes known entry points through and folds the rest into url", () => {
+		expect(addEntryMethod("nav")).toBe("nav");
+		expect(addEntryMethod("redirect")).toBe("redirect");
+		expect(addEntryMethod("adjust")).toBe("adjust");
+		expect(addEntryMethod("")).toBe("url");
+		expect(addEntryMethod(null)).toBe("url");
+		expect(addEntryMethod("<script>")).toBe("url");
 	});
 });
 

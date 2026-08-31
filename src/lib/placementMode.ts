@@ -31,6 +31,21 @@ export const parseCoordsParams = (
 	return { lat: parsed.lat, long: parsed.lng };
 };
 
+// ?add's value names how placement mode was entered, for the
+// add_place_enter funnel: nav links, the /add-location redirect guard, the
+// form's adjust-pin link, the PWA shortcut, the post-submit "another"
+// button. Anything else — a bare ?add= deep link or a hand-edited value —
+// counts as a plain URL entry so the analytics dimension stays bounded.
+const ADD_ENTRY_METHODS = new Set([
+	"nav",
+	"redirect",
+	"adjust",
+	"shortcut",
+	"another",
+]);
+export const addEntryMethod = (value: string | null): string =>
+	value && ADD_ENTRY_METHODS.has(value) ? value : "url";
+
 export const NEARBY_LIMIT = 5;
 // Dedupe radius bounds: the live radius is viewport-derived (same formula
 // as the merchant nearby list), floored so street-confusion duplicates

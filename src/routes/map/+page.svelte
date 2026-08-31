@@ -88,6 +88,7 @@ import {
 	placeMatchesIssueCodes,
 	serializeIssuesParam,
 } from "$lib/placeIssues";
+import { addEntryMethod } from "$lib/placementMode";
 import { savedPlaceIds } from "$lib/session";
 import {
 	paymentTagsLoaded,
@@ -984,11 +985,11 @@ onMount(async () => {
 	const hashCoords = parseHashCoords();
 	const searchParams = new URLSearchParams(window.location.search);
 	placementActive = !issuesOnly && searchParams.has("add");
-	// ?add's value names the entry point (nav link, /add-location redirect,
-	// the form's adjust-pin link); a bare ?add= is a shared/deep link.
+	// ?add's value names the entry point (allow-listed in addEntryMethod);
+	// a bare ?add= is a shared/deep link.
 	if (placementActive) {
 		trackEvent("add_place_enter", {
-			method: searchParams.get("add") || "url",
+			method: addEntryMethod(searchParams.get("add")),
 		});
 	}
 	if (issuesOnly && searchParams.has("add")) {
