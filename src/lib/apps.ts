@@ -456,6 +456,26 @@ export const appConfigs: AppConfig[] = [
 		],
 	},
 	{
+		id: "skate-spots",
+		name: "Skate Spots",
+		logo: "/images/apps/skate-spots.png",
+		tag: "powered-by-btcmap",
+		sponsor: true,
+		sponsorOrder: 6,
+		stores: [
+			{
+				store: "zapstore",
+				platform: "android",
+				url: "https://zapstore.dev/apps/org.skatespots.app",
+			},
+			{
+				store: "web",
+				platform: "web",
+				url: "https://skate-spots.org",
+			},
+		],
+	},
+	{
 		id: "trustless",
 		name: "Trustless",
 		logo: "/images/apps/trustless.png",
