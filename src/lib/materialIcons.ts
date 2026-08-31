@@ -23,9 +23,15 @@ export const materialExceptions: Record<string, string> = {
 	potted_plant: "material-symbols:potted-plant-outline",
 	footprint: "material-symbols:footprint-outline",
 	water_pump: "material-symbols:water-pump-outline",
-	adult_content: "material-symbols:explicit-outline",
 	raven: "material-symbols:raven-outline",
 	surgical: "material-symbols:surgical-outline",
+	destruction: "material-symbols:destruction-outline",
+	dresser: "material-symbols:dresser-outline",
+	// Renamed upstream to 18_up_rating (which needs no entry — ic:outline has
+	// it). Kept because the static CDN bulk feed still serves the old id, and
+	// cold-cache clients derive updated_since from that file's Last-Modified —
+	// which is NEWER than the rename, so the delta never corrects them.
+	adult_content: "material-symbols:18-up-rating-outline",
 };
 
 // Resolves a Material icon name to its Iconify name: an explicit override
