@@ -1,6 +1,6 @@
 import { redirect } from "@sveltejs/kit";
 
-import { parseCoordsParams } from "$lib/placementMode";
+import { parseCoordsParams, placementEntryUrl } from "$lib/placementMode";
 
 import type { PageLoad } from "./$types";
 
@@ -11,6 +11,6 @@ import type { PageLoad } from "./$types";
 // client-side navigations redirect alike.
 export const load: PageLoad = ({ url }) => {
 	const coords = parseCoordsParams(url.searchParams);
-	if (!coords) redirect(302, "/map?add=redirect");
+	if (!coords) redirect(302, placementEntryUrl("redirect"));
 	return { coords };
 };

@@ -10,6 +10,7 @@ import type { AppConfig } from "$lib/apps";
 import { appConfigs } from "$lib/apps";
 import IconApps from "$lib/icons/IconApps.svelte";
 import type { AppIconName } from "$lib/icons/types";
+import { placementEntryUrl } from "$lib/placementMode";
 import { theme } from "$lib/theme";
 
 import { goto } from "$app/navigation";
@@ -99,7 +100,7 @@ function openAppModal(app: AppConfig) {
 						>{$_('home.openMap')}</a
 					>
 					<a
-						href="{resolve('/map')}?add=nav"
+						href={placementEntryUrl('nav')}
 						class="rounded-full bg-link px-7 py-3.5 text-lg font-semibold text-white transition-colors hover:bg-hover"
 						>{$_('home.addLocation')}</a
 					>

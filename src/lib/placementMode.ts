@@ -17,7 +17,7 @@ export const buildAddLocationUrl = (lat: number, long: number): string =>
 // method for the add_place_enter funnel (AddPlaceMode's URL effect
 // normalises it back to a bare ?add= once the map is up).
 export const buildPlacementUrl = (lat: number, long: number): string =>
-	`/map?add=adjust#${CLUSTERING_DISABLED_ZOOM}/${lat.toFixed(5)}/${long.toFixed(5)}`;
+	`${placementEntryUrl("adjust")}#${CLUSTERING_DISABLED_ZOOM}/${lat.toFixed(5)}/${long.toFixed(5)}`;
 
 // Delegates to the map's ?lat&long viewport parser so there is a single
 // implementation of the empty-string and ±90/±180 guards. Only a single
@@ -31,20 +31,35 @@ export const parseCoordsParams = (
 	return { lat: parsed.lat, long: parsed.lng };
 };
 
-// ?add's value names how placement mode was entered, for the
-// add_place_enter funnel: nav links, the /add-location redirect guard, the
-// form's adjust-pin link, the PWA shortcut, the post-submit "another"
-// button. Anything else — a bare ?add= deep link or a hand-edited value —
-// counts as a plain URL entry so the analytics dimension stays bounded.
-const ADD_ENTRY_METHODS = new Set([
+// How placement mode was entered — the add_place_enter funnel dimension.
+// ?add's value names the entry point: nav links, the /add-location redirect
+// guard, the form's adjust-pin link, the PWA shortcut, the post-submit
+// "another" button. Anything else — a bare ?add deep link or a hand-edited
+// value — is a plain URL entry, so the dimension stays bounded.
+export type AddEntryMethod =
+	| "nav"
+	| "redirect"
+	| "adjust"
+	| "shortcut"
+	| "another"
+	| "url";
+// The entry points that are linked to; "url" is what unknown values fold into.
+export type PlacementEntry = Exclude<AddEntryMethod, "url">;
+const PLACEMENT_ENTRIES: ReadonlySet<string> = new Set<PlacementEntry>([
 	"nav",
 	"redirect",
 	"adjust",
 	"shortcut",
 	"another",
 ]);
-export const addEntryMethod = (value: string | null): string =>
-	value && ADD_ENTRY_METHODS.has(value) ? value : "url";
+export const addEntryMethod = (value: string | null): AddEntryMethod =>
+	value && PLACEMENT_ENTRIES.has(value) ? (value as PlacementEntry) : "url";
+
+// The one place that spells the placement-mode URL for code; the static
+// assets that can't import it (webmanifest shortcut, llms.txt) mirror the
+// shape by hand.
+export const placementEntryUrl = (entry: PlacementEntry): string =>
+	`/map?add=${entry}`;
 
 export const NEARBY_LIMIT = 5;
 // Dedupe radius bounds: the live radius is viewport-derived (same formula

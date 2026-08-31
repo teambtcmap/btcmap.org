@@ -16,7 +16,7 @@ import StaticMapPreview from "$components/StaticMapPreview.svelte";
 import { CATEGORIES, CATEGORY_GROUPS } from "$lib/categoryMapping";
 import { CLUSTERING_DISABLED_ZOOM } from "$lib/constants";
 import { _ } from "$lib/i18n";
-import { buildPlacementUrl } from "$lib/placementMode";
+import { buildPlacementUrl, placementEntryUrl } from "$lib/placementMode";
 import { theme } from "$lib/theme";
 import { errToast } from "$lib/utils";
 
@@ -627,6 +627,6 @@ onMount(() => {
 		type={$_('addLocation.formSuccessType')}
 		text={$_('addLocation.formSuccessText')}
 		showIssueLink={false}
-		on:click={() => goto('/map?add=another')}
+		on:click={() => goto(placementEntryUrl('another'))}
 	/>
 {/if}

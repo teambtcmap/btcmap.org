@@ -10,6 +10,7 @@ import {
 	fetchNearbyPlaceNames,
 	findNearbyPlaces,
 	parseCoordsParams,
+	placementEntryUrl,
 } from "./placementMode";
 
 describe("buildAddLocationUrl", () => {
@@ -28,6 +29,13 @@ describe("buildPlacementUrl", () => {
 		expect(buildPlacementUrl(52.52, 13.405)).toBe(
 			"/map?add=adjust#17/52.52000/13.40500",
 		);
+	});
+});
+
+describe("placementEntryUrl", () => {
+	it("spells the placement-mode URL for a named entry point", () => {
+		expect(placementEntryUrl("nav")).toBe("/map?add=nav");
+		expect(placementEntryUrl("redirect")).toBe("/map?add=redirect");
 	});
 });
 

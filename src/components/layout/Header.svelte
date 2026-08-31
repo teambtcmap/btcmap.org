@@ -6,6 +6,7 @@ import ThemeToggle from "$components/ThemeToggle.svelte";
 import { _ } from "$lib/i18n";
 import IconMobileNav from "$lib/icons/IconMobileNav.svelte";
 import type { MobileNavIconName } from "$lib/icons/types";
+import { placementEntryUrl } from "$lib/placementMode";
 import type { DropdownLink } from "$lib/types";
 
 import { afterNavigate } from "$app/navigation";
@@ -100,7 +101,7 @@ $: statsDropdownLinks = [
 $: maintainDropdownLinks = [
 	{
 		title: $_("nav.addLocation"),
-		url: "/map?add=nav",
+		url: placementEntryUrl("nav"),
 		icon: "add" as MobileNavIconName,
 	},
 	{
