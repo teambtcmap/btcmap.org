@@ -41,3 +41,6 @@ opencode.json
 
 # Claude Code
 .claude/
+
+# Python bytecode from the health-review script tests
+__pycache__/
