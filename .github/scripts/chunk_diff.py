@@ -11,7 +11,11 @@ import os
 import re
 
 TMP = os.environ.get("HEALTH_REVIEW_TMP", "/tmp")
-MAX_TOTAL = 150_000
+# 150KB covered ~55% of a 394KB biweekly period even with tiering (39 app
+# files omitted, 37 of them src/routes). Replaying that period, 250KB
+# shows every app-tier file at the 15KB cap; the extra ~100KB is roughly
+# 25-30k input tokens per run.
+MAX_TOTAL = 250_000
 MAX_PER_FILE = 15_000
 # Tests are the least review-worthy bytes per finding and the most numerous
 # files in a feature-heavy period; once the budget is contested they get a
