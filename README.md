@@ -56,6 +56,13 @@ _NOTE:_ BTC Map requires Node.js ≥ 22.13 (we use Node 22 LTS). If you have [mi
   pnpm playwright install
 ```
 
+`.env.example` ships `SERVER_CRYPTO_KEY` and `SERVER_INIT_VECTOR` empty, which leaves `/captcha` broken and every captcha-gated form control disabled — specs that interact with those controls fail. Generate throwaway keys once (this is what CI does):
+
+```sh
+  echo "SERVER_CRYPTO_KEY=$(openssl rand -hex 32)" >> .env
+  echo "SERVER_INIT_VECTOR=$(openssl rand -hex 16)" >> .env
+```
+
 #### Run tests
 
 ```sh
