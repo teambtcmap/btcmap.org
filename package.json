@@ -79,7 +79,7 @@
 		"jsdom": "^30.0.1",
 		"lint-staged": "^17.4.1",
 		"postcss": "^8.5.26",
-		"svelte": "^5.56.10",
+		"svelte": "^5.57.0",
 		"svelte-check": "^4.7.6",
 		"tailwindcss": "^4.3.0",
 		"typescript": "^6.0.3",
