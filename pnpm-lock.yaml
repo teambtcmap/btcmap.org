@@ -60,8 +60,8 @@ importers:
         specifier: ^18.0.10
         version: 18.0.10
       nostr-tools:
-        specifier: ^2.24.3
-        version: 2.24.3(typescript@6.0.3)
+        specifier: ^2.25.0
+        version: 2.25.0(typescript@6.0.3)
       opening_hours:
         specifier: ^3.13.0
         version: 3.14.0(typescript@6.0.3)
@@ -1815,8 +1815,8 @@ packages:
   next-tick@1.1.0:
     resolution: {integrity: sha512-CXdUiJembsNjuToQvxayPZF9Vqht7hewsvy2sOWafLvi2awflj9mOC6bHIg50orX8IJvWKY9wYQ/zB2kogPslQ==}
 
-  nostr-tools@2.24.3:
-    resolution: {integrity: sha512-8vPgdWuje+H0v2bnxo1/hZOi8VLLMqGjfO+Oxqkx+J22r76rIt/iICKZKBoTXWAP2qTYKCQv89M4A3PRc48JYw==}
+  nostr-tools@2.25.0:
+    resolution: {integrity: sha512-AFdf2jv7F5CtLTwZ0JlQS+Ms+Mo7a8w3pASikHEA2dr4M2Mk5eCDZGaOYfDXlauVzx5b7c5H0F6WQsEFiKlW3Q==}
     peerDependencies:
       typescript: '>=5.0.0'
     peerDependenciesMeta:
@@ -3621,7 +3621,7 @@ snapshots:
 
   next-tick@1.1.0: {}
 
-  nostr-tools@2.24.3(typescript@6.0.3):
+  nostr-tools@2.25.0(typescript@6.0.3):
     dependencies:
       '@noble/ciphers': 2.1.1
       '@noble/curves': 2.0.1
