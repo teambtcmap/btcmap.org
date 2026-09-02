@@ -22,7 +22,9 @@ MAX_PER_FILE = 15_000
 # tighter cap so they stay visible without crowding out the source they test.
 MAX_PER_TEST_FILE = 5_000
 
-TEST_RE = re.compile(r"\.(test|spec)\.[cm]?[jt]sx?$")
+# JS/TS test naming plus Python test modules — this pipeline's own tests
+# live under .github/scripts/ and must not take the .github tier's cap.
+TEST_RE = re.compile(r"\.(test|spec)\.[cm]?[jt]sx?$|(?:^|/)test_[^/]+\.py$")
 
 # Budget tiers, filled in this order once the diff exceeds MAX_TOTAL. git
 # emits file diffs in path order, so first-come-first-served spent the

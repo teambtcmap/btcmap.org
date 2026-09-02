@@ -52,7 +52,11 @@ def shown_chunk(diff: str, path: str) -> str:
 
 
 def is_test(path: str) -> bool:
-    return bool(re.search(r"\.(test|spec)\.[cm]?[jt]sx?$", path)) or path.startswith("tests/")
+    return (
+        bool(re.search(r"\.(test|spec)\.[cm]?[jt]sx?$", path))
+        or bool(re.search(r"(?:^|/)test_[^/]+\.py$", path))
+        or path.startswith("tests/")
+    )
 
 
 # Alphabetical (git) order is deliberately adverse: .github and the
@@ -70,6 +74,10 @@ TESTS = [f"src/lib/t{i:02d}.test.ts" for i in range(60)] + [
     "tests/a.spec.ts",
     "tests/b.spec.ts",
     "tests/c.spec.ts",
+    # Python test module: this pipeline's own tests live under
+    # .github/scripts/, and the tests tier must outrank the .github tier
+    # for them too.
+    ".github/scripts/test_helpers.py",
 ]
 OVER_BUDGET = [
     file_diff(p, 40_000 if p == "src/routes/map/+page.svelte" else 20_000)
@@ -106,6 +114,11 @@ class OverBudget(unittest.TestCase):
         self.assertIn("[diff for src/routes/map/+page.svelte truncated: ", app_chunk)
         self.assertLess(len(test_chunk), 6_000)
         self.assertIn(f"[diff for {TESTS[0]} truncated: ", test_chunk)
+
+    def test_python_test_modules_take_the_test_cap(self):
+        chunk = shown_chunk(self.diff, ".github/scripts/test_helpers.py")
+        self.assertLess(len(chunk), 6_000)
+        self.assertIn("[diff for .github/scripts/test_helpers.py truncated: ", chunk)
 
     def test_manifest_defers_to_file_contents_instead_of_forbidding(self):
         manifest = self.diff.split(MANIFEST)[1]
