@@ -52,7 +52,7 @@
 		"localforage": "^1.10.0",
 		"maplibre-gl": "^6.6.0",
 		"marked": "^18.0.10",
-		"nostr-tools": "^2.24.3",
+		"nostr-tools": "^2.25.0",
 		"opening_hours": "^3.13.0",
 		"qrcode": "^1.5.4",
 		"svelte-i18n": "^4.0.1",
