@@ -107,8 +107,8 @@ jobs:
         run: |
           set -euo pipefail
           MAX_CONTEXT=120000
-          # 32KB so the 24KB ai-health-review.yml itself fits — at 20000 the
-          # period's most-changed file was skipped from context (#1253)
+          # At 20000 the period's most-changed file was skipped from context
+          # (#1253); the budget below is the binding constraint in practice.
           MAX_FILE=32000
 
           # Files changed in the diff (extract b/ path so renames resolve to the new name)
@@ -134,10 +134,13 @@ jobs:
           # Merge, deduplicate, filter to source and config files. Without
           # yml/py/toml/json a workflow-only period had zero full-file
           # context, so nothing outside the diff hunks was quotable (#1250).
+          # This workflow itself is sent in full as <review-pipeline> (and
+          # mirrored into the validator's quote corpus), so it is dropped
+          # here rather than spending a fifth of the budget on a duplicate.
           cat /tmp/diff-files.txt /tmp/imports-resolved.txt \
             | sort -u \
             | grep -E '\.(ts|svelte|js|yml|yaml|py|toml|json)$' \
-            | grep -vE 'node_modules|src/lib/i18n/locales/' > /tmp/context-files-unsorted.txt || true
+            | grep -vE 'node_modules|src/lib/i18n/locales/|^\.github/workflows/ai-health-review\.yml$' > /tmp/context-files-unsorted.txt || true
 
           # Prioritize: server .ts first, then other .ts, then .svelte, then
           # everything else that passed the filter (.js and config files were

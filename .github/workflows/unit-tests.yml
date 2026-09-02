@@ -25,3 +25,8 @@ jobs:
 
       - name: Run Vitest tests
         run: pnpm run test
+
+      # The AI health review's chunking/validation scripts are plain
+      # Python with no runtime deps — the runner's python3 is enough.
+      - name: Run health-review pipeline script tests
+        run: python3 -m unittest discover -s .github/scripts -p 'test_*.py'
