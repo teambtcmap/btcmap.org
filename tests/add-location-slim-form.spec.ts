@@ -1,15 +1,21 @@
 import { expect, test } from '@playwright/test';
 
+import { stubReverseGeocode } from './helpers';
+
 // Step 2 of the add-location redesign: slim details form (#1134) —
 // category picker and optional fields behind the "Add more details"
 // expander. The page only opens with a map-placed pin (load guard), so
-// every visit carries ?lat&long.
+// every visit carries ?lat&long. The arrival address lookup (#1315) is
+// stubbed to keep these hermetic; the SW block lets page.route see it.
 const PIN = '/add-location?lat=52.52000&long=13.40500';
 
 test.describe('Add Location — slim form', () => {
+	test.use({ serviceWorkers: 'block' });
+
 	test('category is a picker and Other reveals a required text input', async ({
 		page
 	}) => {
+		await stubReverseGeocode(page);
 		await page.goto(PIN);
 		await page.waitForLoadState('domcontentloaded');
 
@@ -28,6 +34,7 @@ test.describe('Add Location — slim form', () => {
 	test('optional fields sit behind the expander and stay functional', async ({
 		page
 	}) => {
+		await stubReverseGeocode(page);
 		await page.goto(PIN);
 		await page.waitForLoadState('domcontentloaded');
 

@@ -1,13 +1,13 @@
 {
 	"addLocation": {
-		"addressLabel": "Адрес (по избор)",
+		"addressSuggestedHint": "Предложение от OpenStreetMap за вашия маркер — проверете дали отговаря на входа на обекта и го коригирайте при нужда.",
+		"addressLookupPending": "Търсене на адреса…",
 		"addressPlaceholder": "ул. Свобода 2100...",
-		"addressTooltip": "Всички места трябва да имат физическо присъствие. По избор въведете адрес, ако има смисъл за местоположението на търговеца. Услуги без местоположение не могат да бъдат нанесени на карта.",
 		"captchaPlaceholder": "Моля, въведете текста от captcha.",
 		"categoryPlaceholder": "Ресторант и т.н.",
 		"categorySelectPlaceholder": "Изберете категория…",
 		"categoryOtherOption": "Друго…",
-		"moreDetailsToggle": "Добавете още подробности (адрес, уебсайт, работно време…)",
+		"moreDetailsToggle": "Добавете още подробности (уебсайт, работно време…)",
 		"categoryOtherRequired": "Моля, въведете категория.",
 		"contactDescription": "Ако имаме въпроси, ще се свържем с вас, за да добавим мястото успешно. Проверете папката „Спам“ ако писмото не е влязло в нея.",
 		"contactPlaceholder": "hello@btcmap.org",

@@ -13,9 +13,11 @@ import HeaderPlaceholder from "$components/layout/HeaderPlaceholder.svelte";
 import PlacementPinIcon from "$components/PlacementPinIcon.svelte";
 import PrimaryButton from "$components/PrimaryButton.svelte";
 import StaticMapPreview from "$components/StaticMapPreview.svelte";
+import { trackEvent } from "$lib/analytics";
 import { CATEGORIES, CATEGORY_GROUPS } from "$lib/categoryMapping";
 import { CLUSTERING_DISABLED_ZOOM } from "$lib/constants";
-import { _ } from "$lib/i18n";
+import { reverseGeocode } from "$lib/geocoding";
+import { _, locale } from "$lib/i18n";
 import { buildPlacementUrl, placementEntryUrl } from "$lib/placementMode";
 import { theme } from "$lib/theme";
 import { errToast } from "$lib/utils";
@@ -67,6 +69,30 @@ let name: HTMLInputElement;
 let nameEn: HTMLInputElement;
 let address: HTMLInputElement;
 let showMoreDetails = false;
+
+// Address suggestion from the pin (#1315). Fires once per arrival — the
+// load guard guarantees coords, and adjust round-trips remount the page
+// with fresh ones. A fulfilled suggestion flips the field to required, so
+// it can be corrected but not blanked out; any miss leaves it optional
+// and empty, exactly the pre-suggestion behavior.
+let addressPending = true;
+let addressRequired = false;
+
+const suggestAddress = async () => {
+	const suggestion = await reverseGeocode(
+		coords.lat,
+		coords.long,
+		get(locale) ?? "en",
+	);
+	addressPending = false;
+	trackEvent("add_place_address_prefill", {
+		outcome: suggestion ? "hit" : "miss",
+	});
+	if (suggestion && address && !address.value) {
+		address.value = suggestion;
+		addressRequired = true;
+	}
+};
 
 let categorySelect: string | undefined;
 let categoryOther: string | undefined;
@@ -163,6 +189,8 @@ onMount(() => {
 	if (browser) {
 		// fetch and add captcha
 		fetchCaptcha();
+
+		suggestAddress();
 
 		// Keyboard-first on desktop only: popping the on-screen keyboard
 		// on mobile would cover the confirmation the user just landed on.
@@ -266,6 +294,30 @@ onMount(() => {
 								<PlacementPinIcon width={40} />
 							</div>
 						</div>
+					</div>
+
+					<div>
+						<div class="mb-2">
+							<label for="address" class="block font-semibold">
+								{$_('forms.address')}
+								{#if !addressRequired}
+									<span class="font-normal">{$_('forms.optional')}</span>
+								{/if}
+							</label>
+							<FormHelperText text={$_('addLocation.addressSuggestedHint')} />
+						</div>
+						<input
+							disabled={!captchaSecret}
+							required={addressRequired}
+							type="text"
+							name="address"
+							id="address"
+							placeholder={addressPending
+								? $_('addLocation.addressLookupPending')
+								: $_('addLocation.addressPlaceholder')}
+							class="w-full rounded-2xl border-2 border-input p-3 transition-all focus:outline-link disabled:cursor-not-allowed disabled:bg-gray-100 disabled:text-gray-500 dark:bg-white/[0.15] dark:disabled:bg-gray-700 dark:disabled:text-gray-400"
+							bind:this={address}
+						/>
 					</div>
 
 					<div>
@@ -411,23 +463,6 @@ onMount(() => {
 								placeholder={$_('addLocation.merchantEnglishNamePlaceholder')}
 								class="w-full rounded-2xl border-2 border-input p-3 transition-all focus:outline-link disabled:cursor-not-allowed disabled:bg-gray-100 disabled:text-gray-500 dark:bg-white/[0.15] dark:disabled:bg-gray-700 dark:disabled:text-gray-400"
 								bind:this={nameEn}
-							/>
-						</div>
-
-						<div>
-							<div class="mb-2">
-								<label for="address" class="block font-semibold">{$_('addLocation.addressLabel')}</label>
-								<FormHelperText text={$_('addLocation.addressTooltip')} />
-							</div>
-
-							<input
-								disabled={!captchaSecret}
-								type="text"
-								name="address"
-								id="address"
-								placeholder={$_('addLocation.addressPlaceholder')}
-								class="w-full rounded-2xl border-2 border-input p-3 transition-all focus:outline-link disabled:cursor-not-allowed disabled:bg-gray-100 disabled:text-gray-500 dark:bg-white/[0.15] dark:disabled:bg-gray-700 dark:disabled:text-gray-400"
-								bind:this={address}
 							/>
 						</div>
 
