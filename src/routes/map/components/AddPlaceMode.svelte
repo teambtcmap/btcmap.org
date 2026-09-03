@@ -284,8 +284,12 @@ $effect(() => {
 		<PlacementPinIcon width={40} />
 	</div>
 
+	<!-- Mobile: edge-to-edge bottom sheet (pb-6 clears the home indicator).
+	     Desktop: the sheet would stretch the buttons across the whole
+	     viewport, so float it as a centered card instead — max-w-xl matches
+	     the add-location form column it hands off to. -->
 	<div
-		class="absolute bottom-0 left-0 right-0 z-[1002] rounded-t-2xl bg-white p-4 pb-6 shadow-lg dark:bg-dark"
+		class="absolute bottom-0 left-0 right-0 z-[1002] rounded-t-2xl bg-white p-4 pb-6 shadow-lg md:bottom-6 md:left-1/2 md:right-auto md:w-full md:max-w-xl md:-translate-x-1/2 md:rounded-2xl md:border md:border-input md:pb-4 dark:bg-dark"
 	>
 		{#if nearby === null}
 			<p class="text-lg font-semibold text-primary dark:text-white">
