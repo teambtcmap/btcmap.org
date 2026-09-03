@@ -111,9 +111,13 @@ const leaveRawMode = () => {
 
 // Fixed width: time inputs size intrinsically and drift a few pixels
 // between rows otherwise — a set width keeps the dashes and remove
-// buttons in clean columns across every range row.
+// buttons in clean columns across every range row. Sized for 12-hour
+// locales ("09:00 AM"); mobile engines drop the picker icon, so sub-sm
+// can be a step narrower. The dark color-scheme makes the browser draw
+// its clock indicator (a black glyph by default) in the light-on-dark
+// palette.
 const timeClass =
-	"w-28 rounded-lg border-2 border-input p-2 text-sm focus:outline-link disabled:cursor-not-allowed disabled:bg-gray-100 dark:bg-white/[0.15]";
+	"w-32 rounded-lg border-2 border-input p-2 text-sm focus:outline-link disabled:cursor-not-allowed disabled:bg-gray-100 sm:w-36 dark:bg-white/[0.15] dark:[color-scheme:dark]";
 </script>
 
 <div class="space-y-3">
