@@ -32,6 +32,38 @@ test.describe('Add Location — address suggestion from the pin', () => {
 		await expect(address).toHaveValue('Corrected 1, 10115 Berlin');
 	});
 
+	test('typing before the lookup settles keeps the text and still locks required', async ({
+		page
+	}) => {
+		// Delayed stub: the user gets to the field before the hit lands, so
+		// the suggestion must not overwrite their text — but the field still
+		// flips to required (review finding on #1316).
+		await page.route(
+			(u) => u.hostname === 'nominatim.openstreetmap.org',
+			async (route) => {
+				await new Promise((resolve) => setTimeout(resolve, 1500));
+				await route.fulfill({
+					status: 200,
+					contentType: 'application/json',
+					body: JSON.stringify({
+						address: {
+							house_number: '21',
+							road: 'Freiheitsstraße',
+							city: 'Berlin',
+							postcode: '10115'
+						}
+					})
+				});
+			}
+		);
+		await page.goto(PIN);
+
+		const address = page.locator('#address');
+		await address.fill('My own address 5');
+		await expect(address).toHaveAttribute('required', '');
+		await expect(address).toHaveValue('My own address 5');
+	});
+
 	test('a failed lookup leaves the field empty and optional', async ({
 		page
 	}) => {

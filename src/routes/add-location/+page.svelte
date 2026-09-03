@@ -88,9 +88,14 @@ const suggestAddress = async () => {
 	trackEvent("add_place_address_prefill", {
 		outcome: suggestion ? "hit" : "miss",
 	});
-	if (suggestion && address && !address.value) {
-		address.value = suggestion;
+	// Required on every hit — OSM knows an address here, so blank is never
+	// right. The value guard only protects text typed (or autofilled) while
+	// the lookup was in flight from being overwritten.
+	if (suggestion) {
 		addressRequired = true;
+		if (address && !address.value) {
+			address.value = suggestion;
+		}
 	}
 };
 
