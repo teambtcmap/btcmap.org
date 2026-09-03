@@ -280,11 +280,14 @@ onMount(() => {
 						     attribution nests inside the anchor; its corner is raised
 						     above the link so credits stay one tap away, as on the
 						     merchant hero. -->
-						<!-- `isolate` forces a stacking context so WebKit clips the
-						     composited WebGL canvas to the rounded corners — without
-						     it the map edges bleed past the border radius. -->
+						<!-- Composited WebGL canvases escape ancestor rounded clipping:
+						     `isolate` fixes Blink/WebKit, but Firefox's GPU compositor
+						     ignores ancestor overflow AND clip-path for the canvas
+						     layer — only a radius on the canvas itself clips reliably
+						     everywhere. 14px = the container's 1rem minus its 2px
+						     border, so the curves stay concentric. -->
 						<div
-							class="relative isolate mb-2 h-[300px] overflow-hidden rounded-2xl border-2 border-input md:h-[400px] [&_.maplibregl-ctrl-bottom-right]:z-20"
+							class="relative isolate mb-2 h-[300px] overflow-hidden rounded-2xl border-2 border-input md:h-[400px] [&_.maplibregl-canvas]:rounded-[14px] [&_.maplibregl-ctrl-bottom-right]:z-20"
 						>
 							<StaticMapPreview
 								lat={coords.lat}
