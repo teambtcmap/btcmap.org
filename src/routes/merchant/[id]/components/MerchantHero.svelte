@@ -18,7 +18,14 @@ export let boosted = false;
 export let deleted = false;
 </script>
 
-<section class="overflow-hidden rounded-3xl border border-gray-300 dark:border-white/20 dark:bg-white/5">
+<!-- Composited WebGL canvases escape ancestor rounded clipping: `isolate`
+     fixes Blink/WebKit, but Firefox's GPU compositor ignores ancestor
+     overflow AND clip-path for the canvas layer — only a radius on the
+     canvas itself clips reliably everywhere. 23px = the section's 1.5rem
+     minus its 1px border, so the curves stay concentric. -->
+<section
+	class="isolate overflow-hidden rounded-3xl border border-gray-300 dark:border-white/20 dark:bg-white/5 [&_.maplibregl-canvas]:rounded-[23px]"
+>
 	<div class="relative h-52">
 		<StaticMapPreview {lat} {long} />
 

@@ -13,9 +13,11 @@ import HeaderPlaceholder from "$components/layout/HeaderPlaceholder.svelte";
 import PlacementPinIcon from "$components/PlacementPinIcon.svelte";
 import PrimaryButton from "$components/PrimaryButton.svelte";
 import StaticMapPreview from "$components/StaticMapPreview.svelte";
+import { trackEvent } from "$lib/analytics";
 import { CATEGORIES, CATEGORY_GROUPS } from "$lib/categoryMapping";
 import { CLUSTERING_DISABLED_ZOOM } from "$lib/constants";
-import { _ } from "$lib/i18n";
+import { reverseGeocode } from "$lib/geocoding";
+import { _, locale } from "$lib/i18n";
 import { buildPlacementUrl, placementEntryUrl } from "$lib/placementMode";
 import { theme } from "$lib/theme";
 import { errToast } from "$lib/utils";
@@ -67,6 +69,35 @@ let name: HTMLInputElement;
 let nameEn: HTMLInputElement;
 let address: HTMLInputElement;
 let showMoreDetails = false;
+
+// Address suggestion from the pin (#1315). Fires once per arrival — the
+// load guard guarantees coords, and adjust round-trips remount the page
+// with fresh ones. A fulfilled suggestion flips the field to required, so
+// it can be corrected but not blanked out; any miss leaves it optional
+// and empty, exactly the pre-suggestion behavior.
+let addressPending = true;
+let addressRequired = false;
+
+const suggestAddress = async () => {
+	const suggestion = await reverseGeocode(
+		coords.lat,
+		coords.long,
+		get(locale) ?? "en",
+	);
+	addressPending = false;
+	trackEvent("add_place_address_prefill", {
+		outcome: suggestion ? "hit" : "miss",
+	});
+	// Required on every hit — OSM knows an address here, so blank is never
+	// right. The value guard only protects text typed (or autofilled) while
+	// the lookup was in flight from being overwritten.
+	if (suggestion) {
+		addressRequired = true;
+		if (address && !address.value) {
+			address.value = suggestion;
+		}
+	}
+};
 
 let categorySelect: string | undefined;
 let categoryOther: string | undefined;
@@ -164,6 +195,8 @@ onMount(() => {
 		// fetch and add captcha
 		fetchCaptcha();
 
+		suggestAddress();
+
 		// Keyboard-first on desktop only: popping the on-screen keyboard
 		// on mobile would cover the confirmation the user just landed on.
 		nameFocusPending = window.matchMedia("(pointer: fine)").matches;
@@ -247,8 +280,14 @@ onMount(() => {
 						     attribution nests inside the anchor; its corner is raised
 						     above the link so credits stay one tap away, as on the
 						     merchant hero. -->
+						<!-- Composited WebGL canvases escape ancestor rounded clipping:
+						     `isolate` fixes Blink/WebKit, but Firefox's GPU compositor
+						     ignores ancestor overflow AND clip-path for the canvas
+						     layer — only a radius on the canvas itself clips reliably
+						     everywhere. 14px = the container's 1rem minus its 2px
+						     border, so the curves stay concentric. -->
 						<div
-							class="relative mb-2 h-[300px] overflow-hidden rounded-2xl border-2 border-input md:h-[400px] [&_.maplibregl-ctrl-bottom-right]:z-20"
+							class="relative isolate mb-2 h-[300px] overflow-hidden rounded-2xl border-2 border-input md:h-[400px] [&_.maplibregl-canvas]:rounded-[14px] [&_.maplibregl-ctrl-bottom-right]:z-20"
 						>
 							<StaticMapPreview
 								lat={coords.lat}
@@ -266,6 +305,30 @@ onMount(() => {
 								<PlacementPinIcon width={40} />
 							</div>
 						</div>
+					</div>
+
+					<div>
+						<div class="mb-2">
+							<label for="address" class="block font-semibold">
+								{$_('forms.address')}
+								{#if !addressRequired}
+									<span class="font-normal">{$_('forms.optional')}</span>
+								{/if}
+							</label>
+							<FormHelperText text={$_('addLocation.addressSuggestedHint')} />
+						</div>
+						<input
+							disabled={!captchaSecret}
+							required={addressRequired}
+							type="text"
+							name="address"
+							id="address"
+							placeholder={addressPending
+								? $_('addLocation.addressLookupPending')
+								: $_('addLocation.addressPlaceholder')}
+							class="w-full rounded-2xl border-2 border-input p-3 transition-all focus:outline-link disabled:cursor-not-allowed disabled:bg-gray-100 disabled:text-gray-500 dark:bg-white/[0.15] dark:disabled:bg-gray-700 dark:disabled:text-gray-400"
+							bind:this={address}
+						/>
 					</div>
 
 					<div>
@@ -411,23 +474,6 @@ onMount(() => {
 								placeholder={$_('addLocation.merchantEnglishNamePlaceholder')}
 								class="w-full rounded-2xl border-2 border-input p-3 transition-all focus:outline-link disabled:cursor-not-allowed disabled:bg-gray-100 disabled:text-gray-500 dark:bg-white/[0.15] dark:disabled:bg-gray-700 dark:disabled:text-gray-400"
 								bind:this={nameEn}
-							/>
-						</div>
-
-						<div>
-							<div class="mb-2">
-								<label for="address" class="block font-semibold">{$_('addLocation.addressLabel')}</label>
-								<FormHelperText text={$_('addLocation.addressTooltip')} />
-							</div>
-
-							<input
-								disabled={!captchaSecret}
-								type="text"
-								name="address"
-								id="address"
-								placeholder={$_('addLocation.addressPlaceholder')}
-								class="w-full rounded-2xl border-2 border-input p-3 transition-all focus:outline-link disabled:cursor-not-allowed disabled:bg-gray-100 disabled:text-gray-500 dark:bg-white/[0.15] dark:disabled:bg-gray-700 dark:disabled:text-gray-400"
-								bind:this={address}
 							/>
 						</div>
 

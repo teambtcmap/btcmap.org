@@ -71,6 +71,9 @@ sw.addEventListener("fetch", (event) => {
 	// endpoints like invoice status returns stale results.
 	if (
 		url.hostname === "api.btcmap.org" ||
+		// Third-party geodata lookup (add-location address suggestion):
+		// network-only — a cached or offline-faked address is worse than none.
+		url.hostname === "nominatim.openstreetmap.org" ||
 		url.pathname.startsWith("/api/") ||
 		url.pathname.startsWith("/btcmap-api-proxy") ||
 		url.pathname.startsWith("/rpc")

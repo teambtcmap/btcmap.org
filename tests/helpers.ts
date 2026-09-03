@@ -105,6 +105,33 @@ export async function waitForMarkersToLoad(
 	);
 }
 
+// Stub the Nominatim reverse lookup the add-location form fires on arrival
+// (#1315). The default fixture composes to "Freiheitsstraße 21, 10115
+// Berlin"; pass null to answer with Nominatim's unresolvable-point payload
+// so a spec exercises the optional-field fallback. Register BEFORE goto —
+// the lookup fires from onMount.
+export async function stubReverseGeocode(
+	page: Page,
+	result: Record<string, unknown> | null = {
+		address: {
+			house_number: '21',
+			road: 'Freiheitsstraße',
+			city: 'Berlin',
+			postcode: '10115'
+		}
+	}
+) {
+	await page.route(
+		(u) => u.hostname === 'nominatim.openstreetmap.org',
+		(route) =>
+			route.fulfill({
+				status: 200,
+				contentType: 'application/json',
+				body: JSON.stringify(result ?? { error: 'Unable to geocode' })
+			})
+	);
+}
+
 // Setup console error collection for a test. Call this in beforeEach hook.
 export function setupConsoleErrorCollection(page: Page) {
 	const errors: string[] = [];

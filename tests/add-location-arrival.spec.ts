@@ -1,6 +1,6 @@
 import { expect, test } from '@playwright/test';
 
-import { stubMapData } from './helpers';
+import { stubMapData, stubReverseGeocode } from './helpers';
 
 // Arrival state for pins handed over from the map's placement mode (#1134).
 // The form only ever opens with valid ?lat&long: the route's load guard
@@ -15,6 +15,9 @@ test.describe('Add Location — map-placed pin arrival', () => {
 	}) => {
 		// Registered up front: the click-through at the end lands on the map.
 		await stubMapData(page);
+		// The form now fires an address lookup on arrival (#1315) — stubbed
+		// so this spec stays hermetic.
+		await stubReverseGeocode(page);
 		await page.goto('/add-location?lat=52.52000&long=13.40500');
 		await page.waitForLoadState('domcontentloaded');
 
