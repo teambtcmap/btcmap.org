@@ -550,6 +550,7 @@
 		"preview": "Risultato",
 		"none": "Non impostato",
 		"invalid": "Questo non sembra un orario valido.",
+		"incompleteRange": "A una fascia oraria manca l'orario di apertura o di chiusura — non verrà salvata.",
 		"rawHint": "Modifica degli orari nel formato OSM grezzo:",
 		"useSimpleEditor": "Torna all'editor semplice (cancella il valore attuale)",
 		"days": {

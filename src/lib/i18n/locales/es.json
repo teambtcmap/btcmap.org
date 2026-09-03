@@ -458,6 +458,7 @@
 		"preview": "Resultado",
 		"none": "Sin definir",
 		"invalid": "Esto no parece un horario válido.",
+		"incompleteRange": "A un tramo horario le falta la hora de apertura o de cierre — no se guardará.",
 		"rawHint": "Editando el horario en formato OSM sin procesar:",
 		"useSimpleEditor": "Volver al editor sencillo (borra el valor actual)",
 		"days": {

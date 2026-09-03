@@ -63,6 +63,19 @@ const validationError = $derived.by(() => {
 	}
 });
 
+// An open day whose range lost a time silently drops out of the generated
+// string (review finding on #1317) — the value stays truthful, but the
+// user gets told the day won't be saved as shown.
+const incompleteError = $derived(
+	!rawMode &&
+		!always24 &&
+		days.some(
+			(d) => d.open && !d.is24 && d.ranges.some((r) => !r.from || !r.to),
+		)
+		? $_("openingHours.incompleteRange")
+		: "",
+);
+
 const toggleDay = (i: number) => {
 	days[i].open = !days[i].open;
 	if (days[i].open && days[i].ranges.length === 0) {
@@ -160,7 +173,10 @@ const timeClass =
 									{$_('openingHours.allDay')}
 								</label>
 								{#if !day.is24}
-									{#each day.ranges as range, r (r)}
+									<!-- Keyed by the range object, not the index: a splice
+									     then reuses the right DOM nodes (focus, partial
+									     input) for the rows that remain. -->
+									{#each day.ranges as range, r (range)}
 										<div class="flex items-center gap-2">
 											<input
 												type="time"
@@ -227,6 +243,9 @@ const timeClass =
 		</div>
 	{/if}
 
+	{#if incompleteError}
+		<p class="text-sm font-semibold text-error">{incompleteError}</p>
+	{/if}
 	{#if validationError}
 		<p class="text-sm font-semibold text-error">{validationError}</p>
 	{/if}

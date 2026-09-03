@@ -458,6 +458,7 @@
 		"preview": "Résultat",
 		"none": "Non renseigné",
 		"invalid": "Cela ne ressemble pas à des horaires valides.",
+		"incompleteRange": "Il manque l'heure d'ouverture ou de fermeture à une plage — elle ne sera pas enregistrée.",
 		"rawHint": "Modification des horaires au format brut OSM :",
 		"useSimpleEditor": "Revenir à l'éditeur simple (efface la valeur actuelle)",
 		"days": {

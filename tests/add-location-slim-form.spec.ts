@@ -73,6 +73,21 @@ test.describe('Add Location — slim form', () => {
 			'Mo 09:00-17:00'
 		);
 
+		// Clearing a time drops the day from the generated string — that
+		// must be said out loud, not silent (#1317 review finding).
+		const openingTime = page.getByLabel('Opening time');
+		await openingTime.fill('');
+		await expect(page.locator('#opening-hours-editor code')).toHaveText(
+			'Not set'
+		);
+		await expect(
+			page.getByText(/missing its opening or closing time/)
+		).toBeVisible();
+		await openingTime.fill('09:00');
+		await expect(
+			page.getByText(/missing its opening or closing time/)
+		).toBeHidden();
+
 		// The 24/7 shortcut overrides the grid.
 		await page.getByRole('checkbox', { name: 'Open 24/7' }).check();
 		await expect(page.locator('#opening-hours-editor code')).toHaveText('24/7');

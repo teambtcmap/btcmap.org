@@ -550,6 +550,7 @@
 		"preview": "Resultaat",
 		"none": "Niet ingesteld",
 		"invalid": "Dit lijken geen geldige openingstijden.",
+		"incompleteRange": "Bij een tijdvak ontbreekt de openings- of sluitingstijd — het wordt niet opgeslagen.",
 		"rawHint": "Openingstijden bewerken in ruw OSM-formaat:",
 		"useSimpleEditor": "Terug naar de eenvoudige editor (wist de huidige waarde)",
 		"days": {

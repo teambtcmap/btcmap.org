@@ -550,6 +550,7 @@
 		"preview": "Result",
 		"none": "Not set",
 		"invalid": "This doesn't look like valid opening hours.",
+		"incompleteRange": "A time range is missing its opening or closing time and won't be saved.",
 		"rawHint": "Editing opening hours in raw OSM format:",
 		"useSimpleEditor": "Switch back to the simple editor (clears current value)",
 		"days": {

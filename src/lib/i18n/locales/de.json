@@ -458,6 +458,7 @@
 		"preview": "Ergebnis",
 		"none": "Nicht angegeben",
 		"invalid": "Das sieht nicht nach gültigen Öffnungszeiten aus.",
+		"incompleteRange": "Einem Zeitraum fehlt die Öffnungs- oder Schließzeit — er wird nicht gespeichert.",
 		"rawHint": "Öffnungszeiten im OSM-Rohformat bearbeiten:",
 		"useSimpleEditor": "Zurück zum einfachen Editor (verwirft den aktuellen Wert)",
 		"days": {

@@ -460,6 +460,7 @@
 		"preview": "Resultado",
 		"none": "Não definido",
 		"invalid": "Isso não parece um horário válido.",
+		"incompleteRange": "Uma faixa de horário está sem o horário de abertura ou de fechamento — ela não será salva.",
 		"rawHint": "Editando o horário no formato bruto do OSM:",
 		"useSimpleEditor": "Voltar ao editor simples (apaga o valor atual)",
 		"days": {
