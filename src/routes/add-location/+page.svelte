@@ -225,7 +225,7 @@ onMount(() => {
 				</div>
 				<form on:submit={submitForm} class="w-full space-y-5 text-primary dark:text-white">
 					<div>
-						<label for="name" class="mb-2 block font-semibold">{$_('forms.merchantName')}</label>
+						<label for="name" class="mb-2 block font-semibold">{$_('addLocation.nameLabel')}</label>
 						<input
 							disabled={!captchaSecret}
 							type="text"
