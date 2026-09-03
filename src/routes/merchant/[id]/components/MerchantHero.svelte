@@ -18,7 +18,12 @@ export let boosted = false;
 export let deleted = false;
 </script>
 
-<section class="overflow-hidden rounded-3xl border border-gray-300 dark:border-white/20 dark:bg-white/5">
+<!-- `isolate` forces a stacking context so WebKit clips the composited
+     WebGL canvas to the rounded corners — without it the map edges bleed
+     past the border radius. -->
+<section
+	class="isolate overflow-hidden rounded-3xl border border-gray-300 dark:border-white/20 dark:bg-white/5"
+>
 	<div class="relative h-52">
 		<StaticMapPreview {lat} {long} />
 
