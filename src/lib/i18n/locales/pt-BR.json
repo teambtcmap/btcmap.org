@@ -448,6 +448,31 @@
 		"address": "Endereço",
 		"captchaPlaceholder": "Por favor insira o texto do captcha."
 	},
+	"openingHours": {
+		"open247": "Aberto 24/7",
+		"allDay": "O dia todo",
+		"from": "Horário de abertura",
+		"to": "Horário de fechamento",
+		"closed": "Fechado",
+		"addRange": "Adicionar horário",
+		"removeRange": "Remover esta faixa de horário",
+		"copyToAll": "Copiar o primeiro dia aberto para todos os dias",
+		"preview": "Resultado",
+		"none": "Não definido",
+		"invalid": "Isso não parece um horário válido.",
+		"incompleteRange": "Uma faixa de horário está sem o horário de abertura ou de fechamento — ela não será salva.",
+		"rawHint": "Editando o horário no formato bruto do OSM:",
+		"useSimpleEditor": "Voltar ao editor simples (apaga o valor atual)",
+		"days": {
+			"Mo": "Segunda-feira",
+			"Tu": "Terça-feira",
+			"We": "Quarta-feira",
+			"Th": "Quinta-feira",
+			"Fr": "Sexta-feira",
+			"Sa": "Sábado",
+			"Su": "Domingo"
+		}
+	},
 	"addLocation": {
 		"title": "Adicionar Local",
 		"heading": "Feito para você",
@@ -476,7 +501,7 @@
 		"nfcLabel": "Sem contato",
 		"websitePlaceholder": "https://bitcoin.org",
 		"phonePlaceholder": "Número",
-		"hoursPlaceholder": "Seg-Sex 08:30-20:00",
+		"hoursToggle": "Definir o horário de funcionamento",
 		"notesPlaceholder": "Por favor adicione mais detalhes aqui como informações adicionais do comerciante, contatos, redes sociais, etc.",
 		"dataSourceLabel": "Fonte dos Dados",
 		"dataSourcePlaceholder": "Por favor selecione uma opção",

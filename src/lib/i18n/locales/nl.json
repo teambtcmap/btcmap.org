@@ -538,6 +538,31 @@
 		"address": "Adres",
 		"captchaPlaceholder": "Voer de captcha-tekst in."
 	},
+	"openingHours": {
+		"open247": "24/7 geopend",
+		"allDay": "De hele dag",
+		"from": "Openingstijd",
+		"to": "Sluitingstijd",
+		"closed": "Gesloten",
+		"addRange": "Tijdvak toevoegen",
+		"removeRange": "Dit tijdvak verwijderen",
+		"copyToAll": "Eerste geopende dag naar alle dagen kopiëren",
+		"preview": "Resultaat",
+		"none": "Niet ingesteld",
+		"invalid": "Dit lijken geen geldige openingstijden.",
+		"incompleteRange": "Bij een tijdvak ontbreekt de openings- of sluitingstijd — het wordt niet opgeslagen.",
+		"rawHint": "Openingstijden bewerken in ruw OSM-formaat:",
+		"useSimpleEditor": "Terug naar de eenvoudige editor (wist de huidige waarde)",
+		"days": {
+			"Mo": "Maandag",
+			"Tu": "Dinsdag",
+			"We": "Woensdag",
+			"Th": "Donderdag",
+			"Fr": "Vrijdag",
+			"Sa": "Zaterdag",
+			"Su": "Zondag"
+		}
+	},
 	"addLocation": {
 		"title": "Locatie toevoegen",
 		"heading": "Volledig ontzorgd",
@@ -566,7 +591,7 @@
 		"nfcLabel": "Lightning NFC (contactloos)",
 		"websitePlaceholder": "https://bitcoin.org",
 		"phonePlaceholder": "Nummer",
-		"hoursPlaceholder": "Ma-Vr 08:30-20:00 uur",
+		"hoursToggle": "Openingstijden instellen",
 		"notesPlaceholder": "Plaats hier aanvullende informatie, waaronder extra bedrijfsgegevens, contactgegevens, socialemediakanalen, etc.",
 		"dataSourceLabel": "Gegevensbron",
 		"dataSourcePlaceholder": "Selecteer een optie",

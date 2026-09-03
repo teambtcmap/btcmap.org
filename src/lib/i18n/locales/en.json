@@ -538,6 +538,31 @@
 		"address": "Address",
 		"captchaPlaceholder": "Please enter the captcha text."
 	},
+	"openingHours": {
+		"open247": "Open 24/7",
+		"allDay": "All day",
+		"from": "Opening time",
+		"to": "Closing time",
+		"closed": "Closed",
+		"addRange": "Add hours",
+		"removeRange": "Remove this time range",
+		"copyToAll": "Copy first open day to all days",
+		"preview": "Result",
+		"none": "Not set",
+		"invalid": "This doesn't look like valid opening hours.",
+		"incompleteRange": "A time range is missing its opening or closing time and won't be saved.",
+		"rawHint": "Editing opening hours in raw OSM format:",
+		"useSimpleEditor": "Switch back to the simple editor (clears current value)",
+		"days": {
+			"Mo": "Monday",
+			"Tu": "Tuesday",
+			"We": "Wednesday",
+			"Th": "Thursday",
+			"Fr": "Friday",
+			"Sa": "Saturday",
+			"Su": "Sunday"
+		}
+	},
 	"addLocation": {
 		"title": "Add Location",
 		"heading": "Done-for-you",
@@ -566,7 +591,7 @@
 		"nfcLabel": "Contactless",
 		"websitePlaceholder": "https://bitcoin.org",
 		"phonePlaceholder": "Number",
-		"hoursPlaceholder": "Mo-Fr 08:30-20:00",
+		"hoursToggle": "Set opening hours",
 		"notesPlaceholder": "Please add further details here like additional merchant details, contacts, socials, etc.",
 		"dataSourceLabel": "Data Source",
 		"dataSourcePlaceholder": "Please select an option",
