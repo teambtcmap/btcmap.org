@@ -1,13 +1,16 @@
 import { expect, test } from '@playwright/test';
 
 // Step 2 of the add-location redesign: slim details form (#1134) —
-// category picker, coordinate fields hidden for map-placed pins, and
-// optional fields behind the "Add more details" expander.
+// category picker and optional fields behind the "Add more details"
+// expander. The page only opens with a map-placed pin (load guard), so
+// every visit carries ?lat&long.
+const PIN = '/add-location?lat=52.52000&long=13.40500';
+
 test.describe('Add Location — slim form', () => {
 	test('category is a picker and Other reveals a required text input', async ({
 		page
 	}) => {
-		await page.goto('/add-location');
+		await page.goto(PIN);
 		await page.waitForLoadState('domcontentloaded');
 
 		const category = page.locator('#category');
@@ -22,27 +25,10 @@ test.describe('Add Location — slim form', () => {
 		await expect(other).toHaveAttribute('required', '');
 	});
 
-	test('map-placed pins hide the coordinate fields; escape hatch restores them', async ({
-		page
-	}) => {
-		await page.goto('/add-location?lat=52.52000&long=13.40500');
-		await page.waitForLoadState('domcontentloaded');
-
-		await expect(page.locator('#lat')).toBeHidden();
-		await expect(
-			page.getByRole('button', { name: /Advanced — enter coordinates manually/ })
-		).toBeHidden();
-
-		await page
-			.getByRole('button', { name: 'Search for an address instead' })
-			.click();
-		await expect(page.locator('#lat')).toBeVisible();
-	});
-
 	test('optional fields sit behind the expander and stay functional', async ({
 		page
 	}) => {
-		await page.goto('/add-location');
+		await page.goto(PIN);
 		await page.waitForLoadState('domcontentloaded');
 
 		const websiteInput = page.locator('input[name="website"]');

@@ -984,7 +984,11 @@ onMount(async () => {
 	const hashCoords = parseHashCoords();
 	const searchParams = new URLSearchParams(window.location.search);
 	placementActive = !issuesOnly && searchParams.has("add");
-	if (placementActive) trackEvent("add_place_enter", { method: "url" });
+	// The entry method comes from the route's load (captured before
+	// AddPlaceMode's URL effect normalises ?add=<entry> to a bare ?add=).
+	if (placementActive) {
+		trackEvent("add_place_enter", { method: data.addEntryMethod });
+	}
 	if (issuesOnly && searchParams.has("add")) {
 		// Placement mode is unavailable in the issues worklist, and
 		// AddPlaceMode (whose effect owns ?add) never mounts there — strip

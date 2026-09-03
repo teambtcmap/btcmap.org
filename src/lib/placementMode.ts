@@ -1,3 +1,4 @@
+import { CLUSTERING_DISABLED_ZOOM } from "$lib/constants";
 import { parseLatLongQuery } from "$lib/map/queryViewport";
 import { buildRadiusSearchUrl, filterValidPlaces } from "$lib/radiusSearch";
 import type { Place } from "$lib/types";
@@ -10,6 +11,14 @@ import type { Place as ApiPlace } from "$types/btcmap-api/Place";
 export const buildAddLocationUrl = (lat: number, long: number): string =>
 	`/add-location?lat=${lat.toFixed(5)}&long=${long.toFixed(5)}`;
 
+// Inverse handover: the form's minimap links back into placement mode with
+// the crosshair on the pin. The hash is the map's own zoom/lat/lng format
+// (parseHashCoords) at the point-entry zoom; ?add=adjust marks the entry
+// method for the add_place_enter funnel (AddPlaceMode's URL effect
+// normalises it back to a bare ?add= once the map is up).
+export const buildPlacementUrl = (lat: number, long: number): string =>
+	`${placementEntryUrl("adjust")}#${CLUSTERING_DISABLED_ZOOM}/${lat.toFixed(5)}/${long.toFixed(5)}`;
+
 // Delegates to the map's ?lat&long viewport parser so there is a single
 // implementation of the empty-string and ±90/±180 guards. Only a single
 // point is a valid placement handover — the legacy bounds form (two
@@ -21,6 +30,36 @@ export const parseCoordsParams = (
 	if (parsed?.kind !== "point") return null;
 	return { lat: parsed.lat, long: parsed.lng };
 };
+
+// How placement mode was entered — the add_place_enter funnel dimension.
+// ?add's value names the entry point: nav links, the /add-location redirect
+// guard, the form's adjust-pin link, the PWA shortcut, the post-submit
+// "another" button. Anything else — a bare ?add deep link or a hand-edited
+// value — is a plain URL entry, so the dimension stays bounded.
+export type AddEntryMethod =
+	| "nav"
+	| "redirect"
+	| "adjust"
+	| "shortcut"
+	| "another"
+	| "url";
+// The entry points that are linked to; "url" is what unknown values fold into.
+export type PlacementEntry = Exclude<AddEntryMethod, "url">;
+const PLACEMENT_ENTRIES: ReadonlySet<string> = new Set<PlacementEntry>([
+	"nav",
+	"redirect",
+	"adjust",
+	"shortcut",
+	"another",
+]);
+export const addEntryMethod = (value: string | null): AddEntryMethod =>
+	value && PLACEMENT_ENTRIES.has(value) ? (value as PlacementEntry) : "url";
+
+// The one place that spells the placement-mode URL for code; the static
+// assets that can't import it (webmanifest shortcut, llms.txt) mirror the
+// shape by hand.
+export const placementEntryUrl = (entry: PlacementEntry): string =>
+	`/map?add=${entry}`;
 
 export const NEARBY_LIMIT = 5;
 // Dedupe radius bounds: the live radius is viewport-derived (same formula

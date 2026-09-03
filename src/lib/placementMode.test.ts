@@ -3,11 +3,14 @@ import { afterEach, describe, expect, it, vi } from "vitest";
 import type { Place } from "$lib/types";
 
 import {
+	addEntryMethod,
 	buildAddLocationUrl,
+	buildPlacementUrl,
 	clampDedupeRadiusKm,
 	fetchNearbyPlaceNames,
 	findNearbyPlaces,
 	parseCoordsParams,
+	placementEntryUrl,
 } from "./placementMode";
 
 describe("buildAddLocationUrl", () => {
@@ -15,6 +18,35 @@ describe("buildAddLocationUrl", () => {
 		expect(buildAddLocationUrl(32.649012345, -16.910299999)).toBe(
 			"/add-location?lat=32.64901&long=-16.91030",
 		);
+	});
+});
+
+describe("buildPlacementUrl", () => {
+	it("reopens placement mode on the pin at the point-entry zoom", () => {
+		// ?add=adjust lets the funnel tell form re-entries apart; the hash
+		// centres the map (parseHashCoords: zoom/lat/lng) at the same 5-dp
+		// precision the form displays.
+		expect(buildPlacementUrl(52.52, 13.405)).toBe(
+			"/map?add=adjust#17/52.52000/13.40500",
+		);
+	});
+});
+
+describe("placementEntryUrl", () => {
+	it("spells the placement-mode URL for a named entry point", () => {
+		expect(placementEntryUrl("nav")).toBe("/map?add=nav");
+		expect(placementEntryUrl("redirect")).toBe("/map?add=redirect");
+	});
+});
+
+describe("addEntryMethod", () => {
+	it("passes known entry points through and folds the rest into url", () => {
+		expect(addEntryMethod("nav")).toBe("nav");
+		expect(addEntryMethod("redirect")).toBe("redirect");
+		expect(addEntryMethod("adjust")).toBe("adjust");
+		expect(addEntryMethod("")).toBe("url");
+		expect(addEntryMethod(null)).toBe("url");
+		expect(addEntryMethod("<script>")).toBe("url");
 	});
 });
 

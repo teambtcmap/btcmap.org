@@ -1,10 +1,9 @@
 <script lang="ts">
 import Icon from "$components/Icon.svelte";
 import SaveButton from "$components/SaveButton.svelte";
+import StaticMapPreview from "$components/StaticMapPreview.svelte";
 import { _ } from "$lib/i18n";
 import { buildMerchantMapHref } from "$lib/merchantDrawerHash";
-
-import MerchantStaticMap from "./MerchantStaticMap.svelte";
 
 // Compact identity hero: a non-interactive map preview with Save +
 // "View on main map" overlaid on top and the name/address on a scrim below.
@@ -21,7 +20,7 @@ export let deleted = false;
 
 <section class="overflow-hidden rounded-3xl border border-gray-300 dark:border-white/20 dark:bg-white/5">
 	<div class="relative h-52">
-		<MerchantStaticMap {lat} {long} />
+		<StaticMapPreview {lat} {long} />
 
 		<!-- location marker, centred on the merchant -->
 		<div

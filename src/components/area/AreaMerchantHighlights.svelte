@@ -2,10 +2,9 @@
 import MerchantCard from "$components/area/MerchantCard.svelte";
 import TextLink from "$components/TextLink.svelte";
 import { _ } from "$lib/i18n";
+import { placementEntryUrl } from "$lib/placementMode";
 import type { Place } from "$lib/types";
 import { isBoosted } from "$lib/utils";
-
-import { resolve } from "$app/paths";
 
 export let dataInitialized: boolean;
 export let filteredPlaces: Place[];
@@ -81,7 +80,7 @@ $: latest = filteredPlaces?.toSorted((a, b) => b.id - a.id).slice(0, 6);
 			{:else}
 				<p class="text-center text-primary sm:text-left dark:text-white">
 					{$_('areaHighlights.noLatest')} <TextLink
-						link={resolve('/add-location')}>{$_('areaHighlights.addNewMerchant')}</TextLink
+						link={placementEntryUrl('nav')}>{$_('areaHighlights.addNewMerchant')}</TextLink
 					> {$_('areaHighlights.now')}
 				</p>
 			{/if}

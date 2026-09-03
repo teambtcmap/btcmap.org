@@ -103,8 +103,11 @@ sw.addEventListener("fetch", (event) => {
 		try {
 			const response = await fetch(event.request);
 
-			// Only cache non-map resources to avoid serving stale map styles/sprites
-			if (response.status === 200 && !isMapResource) {
+			// Only cache non-map resources to avoid serving stale map styles/sprites.
+			// Redirected responses (e.g. /add-location → /map?add=) are skipped:
+			// Cache.put rejects them, and caching the target under the original
+			// URL would serve the wrong page offline.
+			if (response.status === 200 && !response.redirected && !isMapResource) {
 				cache.put(event.request, response.clone());
 			}
 

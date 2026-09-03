@@ -45,10 +45,9 @@ test.describe('Map menu', () => {
 		const dialog = page.getByRole('dialog', { name: /^menu$/i });
 		await expect(dialog).toBeVisible();
 		// Placement mode is deliberately unavailable in the issues worklist,
-		// so the row falls back to the standalone form.
-		await expect(dialog.getByRole('link', { name: 'Add location' })).toHaveAttribute(
-			'href',
-			'/add-location'
-		);
+		// so the row falls back to a full-reload link into placement mode.
+		const addLink = dialog.getByRole('link', { name: 'Add location' });
+		await expect(addLink).toHaveAttribute('href', '/map?add=nav');
+		await expect(addLink).toHaveAttribute('data-sveltekit-reload', '');
 	});
 });

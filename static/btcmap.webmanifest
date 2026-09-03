@@ -553,8 +553,8 @@
 		{
 			"name": "Add location",
 			"short_name": "Add",
-			"description": "Add a locaion to OSM",
-			"url": "/add-location",
+			"description": "Add a location to OSM",
+			"url": "/map?add=shortcut",
 			"icons": [
 				{
 					"src": "/icons/pwa/maskable/maskable_icon_x96.png",

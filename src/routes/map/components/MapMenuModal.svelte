@@ -2,6 +2,7 @@
 import Modal from "$components/Modal.svelte";
 import { trackEvent } from "$lib/analytics";
 import { _ } from "$lib/i18n";
+import { placementEntryUrl } from "$lib/placementMode";
 import { session } from "$lib/session";
 
 // Page-navigation menu, modal twin of the tools panel. Two variants mirror
@@ -48,8 +49,11 @@ const iconClass = "h-5 w-5 flex-none dark:invert";
 					<span>{$_("mapControls.addLocation")}</span>
 				</button>
 			{:else}
+				<!-- Placement lives on /map; from ?issues mode that is a same-route
+					hop, so force a reload (same reason as the issues link below). -->
 				<a
-					href="/add-location"
+					href={placementEntryUrl("nav")}
+					data-sveltekit-reload
 					class={rowClass}
 					onclick={() => trackEvent("add_location_click")}
 				>
