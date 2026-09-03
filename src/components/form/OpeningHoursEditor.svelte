@@ -109,8 +109,11 @@ const leaveRawMode = () => {
 	always24 = false;
 };
 
+// Fixed width: time inputs size intrinsically and drift a few pixels
+// between rows otherwise — a set width keeps the dashes and remove
+// buttons in clean columns across every range row.
 const timeClass =
-	"rounded-lg border-2 border-input p-2 text-sm focus:outline-link disabled:cursor-not-allowed disabled:bg-gray-100 dark:bg-white/[0.15]";
+	"w-28 rounded-lg border-2 border-input p-2 text-sm focus:outline-link disabled:cursor-not-allowed disabled:bg-gray-100 dark:bg-white/[0.15]";
 </script>
 
 <div class="space-y-3">
@@ -161,7 +164,9 @@ const timeClass =
 							<span>{$_(`openingHours.days.${OSM_DAYS[i]}`)}</span>
 						</label>
 						{#if day.open}
-							<div class="flex flex-col gap-2">
+							<!-- pt-2 mirrors the day label's, so the "All day" row tops
+							     align with the day name instead of floating above it. -->
+							<div class="flex flex-col gap-2 pt-2">
 								<label class="flex items-center gap-1 text-sm">
 									<input
 										type="checkbox"
@@ -196,9 +201,11 @@ const timeClass =
 												aria-label={$_('openingHours.to')}
 											/>
 											{#if day.ranges.length > 1}
+												<!-- Sized and bordered like the time inputs so it
+												     reads as a control, not a stray glyph. -->
 												<button
 													type="button"
-													class="px-2 text-lg text-error hover:opacity-70"
+													class="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg border-2 border-input text-base font-semibold text-error transition-colors hover:bg-error/10 focus:outline-link disabled:cursor-not-allowed disabled:opacity-50"
 													onclick={() => removeRange(i, r)}
 													{disabled}
 													aria-label={$_('openingHours.removeRange')}
