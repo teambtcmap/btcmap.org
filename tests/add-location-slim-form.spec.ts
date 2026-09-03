@@ -53,4 +53,32 @@ test.describe('Add Location — slim form', () => {
 		await toggle.click();
 		await expect(websiteInput).toHaveValue('https://example.com');
 	});
+
+	test('opening hours unfold as a day grid and produce OSM syntax', async ({
+		page
+	}) => {
+		await stubReverseGeocode(page);
+		await page.goto(PIN);
+		await page.waitForLoadState('domcontentloaded');
+
+		// The editor sits behind its own accordion row inside the expander.
+		await page.getByRole('button', { name: /Add more details/ }).click();
+		const toggle = page.getByRole('button', { name: /Set opening hours/ });
+		await expect(toggle).toHaveAttribute('aria-expanded', 'false');
+		await toggle.click();
+
+		// Open Monday with the default 09:00–17:00 range.
+		await page.getByRole('checkbox', { name: 'Monday' }).check();
+		await expect(page.locator('#opening-hours-editor code')).toHaveText(
+			'Mo 09:00-17:00'
+		);
+
+		// The 24/7 shortcut overrides the grid.
+		await page.getByRole('checkbox', { name: 'Open 24/7' }).check();
+		await expect(page.locator('#opening-hours-editor code')).toHaveText('24/7');
+
+		// Collapsing keeps the generated value visible as a summary.
+		await toggle.click();
+		await expect(page.locator('code', { hasText: '24/7' })).toBeVisible();
+	});
 });

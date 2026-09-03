@@ -8,6 +8,7 @@ import FormHelperText from "$components/FormHelperText.svelte";
 import FormSuccess from "$components/FormSuccess.svelte";
 import type { FormSelectOption } from "$components/form/FormSelect.svelte";
 import FormSelect from "$components/form/FormSelect.svelte";
+import OpeningHoursEditor from "$components/form/OpeningHoursEditor.svelte";
 import Icon from "$components/Icon.svelte";
 import HeaderPlaceholder from "$components/layout/HeaderPlaceholder.svelte";
 import PlacementPinIcon from "$components/PlacementPinIcon.svelte";
@@ -115,7 +116,10 @@ let lightning: HTMLInputElement;
 let nfc: HTMLInputElement;
 let website: HTMLInputElement;
 let phone: HTMLInputElement;
-let hours: HTMLInputElement;
+// Structured editor state instead of an element ref: the day-grid editor
+// binds the OSM opening_hours string it generates.
+let hoursValue = "";
+let showHoursEditor = false;
 let notes: HTMLTextAreaElement;
 let contact: HTMLInputElement;
 let source: "Business Owner" | "Customer" | "Other" | undefined;
@@ -168,7 +172,7 @@ const submitForm = (event: SubmitEvent) => {
 				methods,
 				website: website.value,
 				phone: phone.value,
-				hours: hours.value,
+				hours: hoursValue,
 				notes: notes.value,
 				source,
 				sourceOther: sourceOther ? sourceOther : "",
@@ -506,18 +510,33 @@ onMount(() => {
 						</div>
 
 						<div>
-							<label for="hours" class="mb-2 block font-semibold"
-								>{$_('forms.openingHours')}
-								<span class="font-normal">{$_('forms.optional')}</span></label
+							<p class="mb-2 font-semibold">
+								{$_('forms.openingHours')}
+								<span class="font-normal">{$_('forms.optional')}</span>
+							</p>
+							<!-- Nested accordion, same idiom as the details expander: the
+							     seven-day grid only unfolds for people who care about
+							     hours. Collapsing unmounts the editor; the generated
+							     string survives in hoursValue and is parsed back into
+							     the grid on re-open. -->
+							<button
+								type="button"
+								class="text-sm font-semibold text-link hover:text-hover focus:outline-link"
+								aria-expanded={showHoursEditor}
+								aria-controls="opening-hours-editor"
+								on:click={() => (showHoursEditor = !showHoursEditor)}
 							>
-							<input
-								disabled={!captchaSecret}
-								type="text"
-								name="hours"
-								placeholder={$_('addLocation.hoursPlaceholder')}
-								class="w-full rounded-2xl border-2 border-input p-3 transition-all focus:outline-link disabled:cursor-not-allowed disabled:bg-gray-100 disabled:text-gray-500 dark:bg-white/[0.15] dark:disabled:bg-gray-700 dark:disabled:text-gray-400"
-								bind:this={hours}
-							/>
+								{showHoursEditor ? '▾' : '▸'}
+								{$_('addLocation.hoursToggle')}
+							</button>
+							{#if !showHoursEditor && hoursValue}
+								<code class="ml-2 font-mono text-sm text-body dark:text-offwhite">{hoursValue}</code>
+							{/if}
+							{#if showHoursEditor}
+								<div id="opening-hours-editor" class="mt-3">
+									<OpeningHoursEditor bind:value={hoursValue} disabled={!captchaSecret} />
+								</div>
+							{/if}
 						</div>
 
 						<div>
