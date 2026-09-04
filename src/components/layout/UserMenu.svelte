@@ -5,6 +5,7 @@ import BackupModal from "$components/auth/BackupModal.svelte";
 import Icon from "$components/Icon.svelte";
 import NostrAvatar from "$components/NostrAvatar.svelte";
 import { hasNewActivity } from "$lib/activityNotifier";
+import { trackEvent } from "$lib/analytics";
 import { _ } from "$lib/i18n";
 import { fetchProfile } from "$lib/nostrProfile";
 import { session } from "$lib/session";
@@ -150,6 +151,14 @@ afterNavigate(() => {
 					>
 						<Icon type="material" icon="login" w="16" h="16" />
 						{$_("nav.login")}
+					</a>
+					<a
+						href="/signup"
+						on:click={() => trackEvent("signup_button_click")}
+						class="flex items-center gap-2 px-4 py-2 text-sm text-primary transition-colors hover:bg-gray-100 dark:text-white dark:hover:bg-white/10"
+					>
+						<Icon type="material" icon="person_add" w="16" h="16" />
+						{$_("nav.signup")}
 					</a>
 				{/if}
 			</div>

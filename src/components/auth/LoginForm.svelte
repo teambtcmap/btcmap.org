@@ -106,8 +106,7 @@ async function handleSubmit() {
 	<p class="mt-4 text-center text-sm text-body dark:text-white/70">
 		{$_("login.noAccount")}
 		<TextLink
-			link="https://developer.btcmap.org"
-			external
+			link="/signup"
 			on:click={() => trackEvent("login_create_account_click")}
 		>
 			{$_("login.createAccount")}

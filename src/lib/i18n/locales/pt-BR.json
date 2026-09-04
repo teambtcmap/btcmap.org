@@ -34,7 +34,8 @@
 		"taggingActivity": "Atividade de Etiquetagem",
 		"taggingIssues": "Problemas de Etiquetagem",
 		"communities": "Comunidades",
-		"countries": "Países"
+		"countries": "Países",
+		"signup": "Cadastrar"
 	},
 	"search": {
 		"placeholderPlaces": "Pesquisar lugares...",
@@ -75,6 +76,7 @@
 		"goToHome": "Ir para a página inicial",
 		"account": "Conta",
 		"login": "Entrar",
+		"signup": "Cadastrar",
 		"accountAlt": "Conta",
 		"loginAlt": "Entrar",
 		"worldView": "Visão de globo",
@@ -1145,11 +1147,23 @@
 		"nostrSigning": "Assinando…",
 		"nostrFailed": "A assinatura Nostr foi rejeitada",
 		"nostrError": "Não foi possível concluir o login com Nostr",
-		"nsecToggle": "Ou cole seu nsec",
+		"nostrNoExtension": "Nenhuma extensão Nostr encontrada. Instale uma como Alby ou nos2x e recarregue a página.",
 		"nsecLabel": "Chave secreta Nostr",
 		"nsecWarning": "Seu nsec é enviado apenas para o seu navegador para entrar uma vez — nunca é armazenado nem transmitido.",
 		"nsecSubmit": "Entrar com nsec",
 		"nsecInvalid": "Isso não parece um nsec válido",
-		"or": "ou"
+		"otherMethods": "Outras formas de entrar"
+	},
+	"signup": {
+		"title": "Cadastrar",
+		"description": "Escolha um nome de usuário e uma senha para criar sua conta.",
+		"username": "Nome de usuário",
+		"password": "Senha",
+		"passwordHint": "Use pelo menos {min} caracteres.",
+		"submit": "Criar conta",
+		"creating": "Criando conta...",
+		"error": "Não foi possível criar a conta. O nome de usuário pode já estar em uso.",
+		"haveAccount": "Já tem uma conta?",
+		"signIn": "Entrar com senha ou Nostr"
 	}
 }

@@ -34,7 +34,8 @@
 		"taggingActivity": "Actividad de Etiquetado",
 		"taggingIssues": "Problemas de Etiquetado",
 		"communities": "Comunidades",
-		"countries": "Países"
+		"countries": "Países",
+		"signup": "Registrarse"
 	},
 	"search": {
 		"placeholderPlaces": "Buscar lugares...",
@@ -75,6 +76,7 @@
 		"goToHome": "Ir a la página de inicio",
 		"account": "Cuenta",
 		"login": "Iniciar sesión",
+		"signup": "Registrarse",
 		"accountAlt": "Cuenta",
 		"loginAlt": "Iniciar sesión",
 		"worldView": "Vista de globo",
@@ -1171,11 +1173,23 @@
 		"nostrSigning": "Firmando…",
 		"nostrFailed": "La firma de Nostr fue rechazada",
 		"nostrError": "No se pudo completar el inicio de sesión con Nostr",
-		"nsecToggle": "O pega tu nsec",
+		"nostrNoExtension": "No se encontró ninguna extensión de Nostr. Instala una como Alby o nos2x y recarga la página.",
 		"nsecLabel": "Clave secreta de Nostr",
 		"nsecWarning": "Tu nsec se envía solo a tu navegador para iniciar sesión una vez — nunca se almacena ni se transmite.",
 		"nsecSubmit": "Inicia sesión con nsec",
 		"nsecInvalid": "Eso no parece un nsec válido",
-		"or": "o"
+		"otherMethods": "Otras formas de iniciar sesión"
+	},
+	"signup": {
+		"title": "Registrarse",
+		"description": "Elige un nombre de usuario y una contraseña para crear tu cuenta.",
+		"username": "Nombre de usuario",
+		"password": "Contraseña",
+		"passwordHint": "Usa al menos {min} caracteres.",
+		"submit": "Crear cuenta",
+		"creating": "Creando cuenta...",
+		"error": "No se pudo crear la cuenta. Es posible que el nombre de usuario ya esté en uso.",
+		"haveAccount": "¿Ya tienes una cuenta?",
+		"signIn": "Iniciar sesión con contraseña o Nostr"
 	}
 }

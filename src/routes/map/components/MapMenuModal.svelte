@@ -96,5 +96,15 @@ const iconClass = "h-5 w-5 flex-none dark:invert";
 			<img src="/icons/account.svg" alt="" class={iconClass} />
 			<span>{loggedIn ? $_("mapControls.account") : $_("mapControls.login")}</span>
 		</a>
+		{#if !loggedIn}
+			<a
+				href="/signup"
+				class={rowClass}
+				onclick={() => trackEvent("signup_button_click")}
+			>
+				<img src="/icons/account.svg" alt="" class={iconClass} />
+				<span>{$_("mapControls.signup")}</span>
+			</a>
+		{/if}
 	</nav>
 </Modal>

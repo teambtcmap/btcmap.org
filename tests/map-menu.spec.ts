@@ -27,6 +27,10 @@ test.describe('Map menu', () => {
 		).toHaveAttribute('href', '/communities/map');
 		// Account row reflects session state (logged out -> Log in / login).
 		await expect(dialog.getByRole('link', { name: /log in|account/i })).toBeVisible();
+		// Logged-out menu also exposes a separate Sign up row linking to /signup.
+		const signupLink = dialog.getByRole('link', { name: /^sign up$/i });
+		await expect(signupLink).toBeVisible();
+		await expect(signupLink).toHaveAttribute('href', '/signup');
 
 		// The add row is an action, not a link (#1134): it closes the menu
 		// and starts placement mode on the map — confirm sheet plus ?add.

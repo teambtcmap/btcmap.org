@@ -40,6 +40,7 @@
 		"myActivity": "Mijn activiteiten",
 		"account": "Account",
 		"login": "Aanmelden",
+		"signup": "Registreren",
 		"logout": "Afmelden",
 		"backupAccount": "Back-up account"
 	},
@@ -87,12 +88,24 @@
 		"nostrSigning": "Ondertekenen…",
 		"nostrFailed": "Nostr-handtekening geweigerd",
 		"nostrError": "Nostr-aanmelding kon niet worden voltooid",
-		"nsecToggle": "Of plak je nsec-sleutel",
+		"nostrNoExtension": "Geen Nostr-extensie gevonden. Installeer er een zoals Alby of nos2x en herlaad de pagina.",
 		"nsecLabel": "Nostr privésleutel",
 		"nsecWarning": "Je nsec wordt alleen naar je browser gestuurd om jezelf aan te melden — het wordt nooit opgeslagen of gedeeld.",
 		"nsecSubmit": "Aanmelden met nsec",
 		"nsecInvalid": "Dat ziet er niet uit als een geldige nsec",
-		"or": "of"
+		"otherMethods": "Andere manieren om aan te melden"
+	},
+	"signup": {
+		"title": "Registreren",
+		"description": "Kies een gebruikersnaam en wachtwoord om je account aan te maken.",
+		"username": "Gebruikersnaam",
+		"password": "Wachtwoord",
+		"passwordHint": "Gebruik minstens {min} tekens.",
+		"submit": "Account aanmaken",
+		"creating": "Account aanmaken...",
+		"error": "Account kon niet worden aangemaakt. De gebruikersnaam is mogelijk al in gebruik.",
+		"haveAccount": "Heb je al een account?",
+		"signIn": "Aanmelden met wachtwoord of Nostr"
 	},
 	"backup": {
 		"title": "Back-up account",
@@ -170,6 +183,7 @@
 		"merchantMap": "Ondernemerskaart",
 		"account": "Account",
 		"login": "Aanmelden",
+		"signup": "Registreren",
 		"zoomIn": "Inzoomen",
 		"zoomOut": "Uitzoomen",
 		"basemapTitle": "Achtergrondkaart",
