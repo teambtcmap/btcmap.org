@@ -86,24 +86,20 @@ function saveToStorage(session: Session | null) {
 	}
 }
 
-// Credentials chosen on /signup. null means throwaway: the API generates
+// Credentials chosen on /signup. Absent means throwaway: the API generates
 // the username and we generate the password.
-type Credentials = { username: string; password: string };
+export type SignupCredentials = { username: string; password: string };
 
-// Trims the username and enforces both-or-neither: a blank username with
-// a password, or a username without one, is a caller bug.
+// Trims the username; a blank one is a caller bug, not a throwaway.
 function normalizeCredentials(
-	username?: string,
-	password?: string,
-): Credentials | null {
-	const name = username?.trim() ?? "";
-	if (!name && !password) return null;
-	if (!name || !password) {
-		throw new Error(
-			"session.signUp: username and password must both be provided",
-		);
+	credentials?: SignupCredentials,
+): SignupCredentials | null {
+	if (!credentials) return null;
+	const username = credentials.username.trim();
+	if (!username || !credentials.password) {
+		throw new Error("session.signUp: username and password must be non-empty");
 	}
-	return { username: name, password };
+	return { username, password: credentials.password };
 }
 
 function createSessionStore() {
@@ -114,7 +110,7 @@ function createSessionStore() {
 	let signUpInFlight: Promise<Session> | null = null;
 
 	const doSignUp = async (
-		credentials: Credentials | null,
+		credentials: SignupCredentials | null,
 	): Promise<Session> => {
 		// Calls the SvelteKit server route which proxies to the btcmap API.
 		// This avoids CORS preflight issues (the API returns 404 on OPTIONS).
@@ -157,25 +153,24 @@ function createSessionStore() {
 			if (stored) set(stored);
 		},
 
-		// Create an account via the existing REST endpoints. With no args this
-		// produces a throwaway (used by the SaveAuthPrompt flow). With both
-		// username and password, the user picks their own credentials and the
-		// resulting session is marked non-auto-generated. A half-supplied pair
-		// rejects: it is a caller bug, not a throwaway.
+		// Create an account via the existing REST endpoints. Without
+		// credentials this produces a throwaway (used by the SaveAuthPrompt
+		// flow). With credentials, the user picks their own and the resulting
+		// session is marked non-auto-generated.
 		//
 		// Only throwaway calls share the in-flight promise (double-clicks on
 		// the SaveButton must not create two server-side accounts). Explicit
 		// signups are never coalesced: the form's loading state already blocks
 		// double submits, and sharing a promise across different credentials
 		// would hand one caller another caller's account.
-		signUp: (username?: string, password?: string): Promise<Session> => {
-			let credentials: Credentials | null;
+		signUp: (credentials?: SignupCredentials): Promise<Session> => {
+			let normalized: SignupCredentials | null;
 			try {
-				credentials = normalizeCredentials(username, password);
+				normalized = normalizeCredentials(credentials);
 			} catch (err) {
 				return Promise.reject(err);
 			}
-			if (credentials) return doSignUp(credentials);
+			if (normalized) return doSignUp(normalized);
 			if (signUpInFlight) return signUpInFlight;
 			signUpInFlight = doSignUp(null).finally(() => {
 				signUpInFlight = null;

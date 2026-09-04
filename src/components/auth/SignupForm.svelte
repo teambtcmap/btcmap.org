@@ -30,7 +30,7 @@ async function handleSubmit(event: SubmitEvent) {
 	loading = true;
 
 	try {
-		const current = await session.signUp(trimmed, password);
+		const current = await session.signUp({ username: trimmed, password });
 		trackEvent("signup_create_account_success");
 		await onSuccess(current);
 	} catch (err) {
