@@ -34,7 +34,8 @@
 		"taggingActivity": "Activité de marquage",
 		"taggingIssues": "Problèmes de marquage",
 		"communities": "Communautés",
-		"countries": "Pays"
+		"countries": "Pays",
+		"signup": "S'inscrire"
 	},
 	"search": {
 		"placeholderPlaces": "Rechercher des lieux...",

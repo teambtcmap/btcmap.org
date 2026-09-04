@@ -34,7 +34,8 @@
 		"taggingActivity": "Tagging-Aktivität",
 		"taggingIssues": "Tagging-Probleme",
 		"communities": "Communities",
-		"countries": "Länder"
+		"countries": "Länder",
+		"signup": "Registrieren"
 	},
 	"search": {
 		"placeholderPlaces": "Orte suchen...",

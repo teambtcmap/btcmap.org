@@ -34,7 +34,8 @@
 		"taggingActivity": "Actividad de Etiquetado",
 		"taggingIssues": "Problemas de Etiquetado",
 		"communities": "Comunidades",
-		"countries": "Países"
+		"countries": "Países",
+		"signup": "Registrarse"
 	},
 	"search": {
 		"placeholderPlaces": "Buscar lugares...",

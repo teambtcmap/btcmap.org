@@ -34,7 +34,8 @@
 		"taggingActivity": "Активность редакторов",
 		"taggingIssues": "Открытые задачи",
 		"communities": "Сообщества",
-		"countries": "Страны"
+		"countries": "Страны",
+		"signup": "Регистрация"
 	},
 	"search": {
 		"placeholderPlaces": "Поиск мест...",
