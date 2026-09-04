@@ -12,15 +12,24 @@ import { errToast } from "$lib/utils";
 const MIN_PASSWORD_LENGTH = 8;
 const MAX_PASSWORD_LENGTH = 64;
 
-// Caller receives the new session after a successful signup, matching the
-// LoginForm / NostrLoginForm contract so this can be reused inside modals.
-export let onSuccess: (session: Session) => void | Promise<void>;
+type Props = {
+	// Caller receives the new session after a successful signup, matching the
+	// LoginForm / NostrLoginForm contract so this can be reused inside modals.
+	onSuccess: (session: Session) => void | Promise<void>;
+};
 
-let username = "";
-let password = "";
-let loading = false;
+let { onSuccess }: Props = $props();
 
-async function handleSubmit() {
+let username = $state("");
+let password = $state("");
+let loading = $state(false);
+
+const submitDisabled = $derived(
+	loading || username.trim().length === 0 || password.length === 0,
+);
+
+async function handleSubmit(event: SubmitEvent) {
+	event.preventDefault();
 	const trimmed = username.trim();
 	if (!trimmed || !password) return;
 	if (password.length < MIN_PASSWORD_LENGTH) {
@@ -47,7 +56,7 @@ async function handleSubmit() {
 }
 </script>
 
-<form on:submit|preventDefault={handleSubmit} class="space-y-4">
+<form onsubmit={handleSubmit} class="space-y-4">
 	<div>
 		<label
 			for="signup-username"
@@ -88,7 +97,7 @@ async function handleSubmit() {
 
 	<PrimaryButton
 		type="submit"
-		disabled={loading || !username.trim() || !password}
+		disabled={submitDisabled}
 		style="w-full rounded-lg px-4 py-2 disabled:opacity-50"
 	>
 		{loading ? $_("signup.creating") : $_("signup.submit")}
