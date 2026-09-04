@@ -1173,12 +1173,11 @@
 		"nostrSigning": "Wird signiert…",
 		"nostrFailed": "Nostr-Signatur wurde abgelehnt",
 		"nostrError": "Nostr-Anmeldung konnte nicht abgeschlossen werden",
-		"nsecToggle": "Oder füge deinen nsec ein",
 		"nsecLabel": "Geheimer Nostr-Schlüssel",
 		"nsecWarning": "Dein nsec wird nur an deinen Browser gesendet, um dich einmalig anzumelden — er wird niemals gespeichert oder übertragen.",
 		"nsecSubmit": "Mit nsec anmelden",
 		"nsecInvalid": "Das sieht nicht nach einem gültigen nsec aus",
-		"or": "oder"
+		"otherMethods": "Andere Anmeldemöglichkeiten"
 	},
 	"signup": {
 		"title": "Registrieren",

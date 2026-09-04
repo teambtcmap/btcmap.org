@@ -30,16 +30,18 @@ async function handleSuccess(current: Session) {
 			{$_("login.title")}
 		</h1>
 
+		<LoginForm onSuccess={handleSuccess} />
+
+		<!-- Our own username/password auth comes first; secondary methods
+		     (Nostr today, OSM later) sit together under one labelled divider. -->
+		<div class="flex items-center gap-3">
+			<div class="h-px flex-1 bg-gray-300 dark:bg-white/20"></div>
+			<span class="text-xs text-body dark:text-white/50">{$_("login.otherMethods")}</span>
+			<div class="h-px flex-1 bg-gray-300 dark:bg-white/20"></div>
+		</div>
+
 		<div class="space-y-3">
 			<NostrLoginForm onSuccess={handleSuccess} />
 		</div>
-
-		<div class="flex items-center gap-3">
-			<div class="h-px flex-1 bg-gray-300 dark:bg-white/20"></div>
-			<span class="text-xs text-body dark:text-white/50">{$_("login.or")}</span>
-			<div class="h-px flex-1 bg-gray-300 dark:bg-white/20"></div>
-		</div>
-
-		<LoginForm onSuccess={handleSuccess} />
 	</div>
 </div>

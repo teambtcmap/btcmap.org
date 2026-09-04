@@ -88,12 +88,11 @@
 		"nostrSigning": "Signing…",
 		"nostrFailed": "Nostr signature was rejected",
 		"nostrError": "Could not complete Nostr login",
-		"nsecToggle": "Or paste your nsec",
 		"nsecLabel": "Nostr secret key",
 		"nsecWarning": "Your nsec is sent only to your browser to log in once — it is never stored or transmitted.",
 		"nsecSubmit": "Log in with nsec",
 		"nsecInvalid": "That does not look like a valid nsec",
-		"or": "or"
+		"otherMethods": "Other ways to log in"
 	},
 	"signup": {
 		"title": "Sign up",

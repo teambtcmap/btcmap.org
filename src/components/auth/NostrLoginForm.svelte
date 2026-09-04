@@ -168,6 +168,6 @@ $: anyLoading = nostrLoading || nsecLoading;
 		on:click={() => (showNsecInput = true)}
 		class="w-full text-center text-sm text-link transition-colors hover:text-hover"
 	>
-		{$_("login.nsecToggle")}
+		{$_("login.nsecSubmit")}
 	</button>
 {/if}

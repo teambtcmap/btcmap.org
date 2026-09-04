@@ -88,12 +88,11 @@
 		"nostrSigning": "Ondertekenen…",
 		"nostrFailed": "Nostr-handtekening geweigerd",
 		"nostrError": "Nostr-aanmelding kon niet worden voltooid",
-		"nsecToggle": "Of plak je nsec-sleutel",
 		"nsecLabel": "Nostr privésleutel",
 		"nsecWarning": "Je nsec wordt alleen naar je browser gestuurd om jezelf aan te melden — het wordt nooit opgeslagen of gedeeld.",
 		"nsecSubmit": "Aanmelden met nsec",
 		"nsecInvalid": "Dat ziet er niet uit als een geldige nsec",
-		"or": "of"
+		"otherMethods": "Andere manieren om aan te melden"
 	},
 	"signup": {
 		"title": "Registreren",

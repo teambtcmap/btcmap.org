@@ -1173,12 +1173,11 @@
 		"nostrSigning": "Signature…",
 		"nostrFailed": "La signature Nostr a été rejetée",
 		"nostrError": "Impossible de finaliser la connexion Nostr",
-		"nsecToggle": "Ou collez votre nsec",
 		"nsecLabel": "Clé secrète Nostr",
 		"nsecWarning": "Votre nsec n'est envoyé qu'à votre navigateur pour vous connecter une seule fois — il n'est jamais stocké ni transmis.",
 		"nsecSubmit": "Se connecter avec nsec",
 		"nsecInvalid": "Cela ne ressemble pas à un nsec valide",
-		"or": "ou"
+		"otherMethods": "Autres façons de se connecter"
 	},
 	"signup": {
 		"title": "S'inscrire",

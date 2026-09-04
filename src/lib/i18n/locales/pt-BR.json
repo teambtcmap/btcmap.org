@@ -1147,12 +1147,11 @@
 		"nostrSigning": "Assinando…",
 		"nostrFailed": "A assinatura Nostr foi rejeitada",
 		"nostrError": "Não foi possível concluir o login com Nostr",
-		"nsecToggle": "Ou cole seu nsec",
 		"nsecLabel": "Chave secreta Nostr",
 		"nsecWarning": "Seu nsec é enviado apenas para o seu navegador para entrar uma vez — nunca é armazenado nem transmitido.",
 		"nsecSubmit": "Entrar com nsec",
 		"nsecInvalid": "Isso não parece um nsec válido",
-		"or": "ou"
+		"otherMethods": "Outras formas de entrar"
 	},
 	"signup": {
 		"title": "Cadastrar",

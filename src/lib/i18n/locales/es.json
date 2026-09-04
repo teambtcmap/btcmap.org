@@ -1173,12 +1173,11 @@
 		"nostrSigning": "Firmando…",
 		"nostrFailed": "La firma de Nostr fue rechazada",
 		"nostrError": "No se pudo completar el inicio de sesión con Nostr",
-		"nsecToggle": "O pega tu nsec",
 		"nsecLabel": "Clave secreta de Nostr",
 		"nsecWarning": "Tu nsec se envía solo a tu navegador para iniciar sesión una vez — nunca se almacena ni se transmite.",
 		"nsecSubmit": "Inicia sesión con nsec",
 		"nsecInvalid": "Eso no parece un nsec válido",
-		"or": "o"
+		"otherMethods": "Otras formas de iniciar sesión"
 	},
 	"signup": {
 		"title": "Registrarse",
