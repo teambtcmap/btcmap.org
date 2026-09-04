@@ -2,6 +2,7 @@
 import { get } from "svelte/store";
 
 import LoginForm from "$components/auth/LoginForm.svelte";
+import NostrLoginForm from "$components/auth/NostrLoginForm.svelte";
 import SignupForm from "$components/auth/SignupForm.svelte";
 import Modal from "$components/Modal.svelte";
 import PrimaryButton from "$components/PrimaryButton.svelte";
@@ -140,6 +141,14 @@ async function handleLoginSuccess(current: Session) {
 		</div>
 	{:else if view === "login"}
 		<LoginForm compact onSuccess={handleLoginSuccess} />
+		<div class="my-4 flex items-center gap-3">
+			<div class="h-px flex-1 bg-gray-300 dark:bg-white/20"></div>
+			<span class="text-xs text-body dark:text-white/50">
+				{$_("login.otherMethods")}
+			</span>
+			<div class="h-px flex-1 bg-gray-300 dark:bg-white/20"></div>
+		</div>
+		<NostrLoginForm onSuccess={handleLoginSuccess} />
 		<TextLink
 			type="button"
 			onclick={() => (view = "choice")}
