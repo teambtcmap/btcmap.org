@@ -122,9 +122,6 @@ let hoursValue = "";
 let showHoursEditor = false;
 let notes: HTMLTextAreaElement;
 let contact: HTMLInputElement;
-let source: "Business Owner" | "Customer" | "Other" | undefined;
-let sourceOther: string | undefined;
-let sourceOtherElement: HTMLTextAreaElement;
 let noMethodSelected = false;
 let submitted = false;
 let submitting = false;
@@ -174,8 +171,6 @@ const submitForm = (event: SubmitEvent) => {
 				phone: phone.value,
 				hours: hoursValue,
 				notes: notes.value,
-				source,
-				sourceOther: sourceOther ? sourceOther : "",
 				contact: contact.value,
 			})
 			.then(() => {
@@ -552,44 +547,6 @@ onMount(() => {
 								bind:this={notes}
 							></textarea>
 						</div>
-					</div>
-
-					<div>
-						<label for="source" class="mb-2 block font-semibold"
-							>{$_('addLocation.dataSourceLabel')}</label
-						>
-						<FormSelect
-							id="source"
-							disabled={!captchaSecret}
-							name="source"
-							required
-							bind:value={source}
-							on:change={async () => {
-								if (source === 'Other') {
-									await tick();
-									sourceOtherElement.focus();
-								}
-							}}
-						>
-							<option value="">{$_('addLocation.dataSourcePlaceholder')}</option>
-							<option value="Business Owner">{$_('addLocation.dataSourceOwner')}</option>
-							<option value="Customer">{$_('addLocation.dataSourceCustomer')}</option>
-							<option value="Other">{$_('addLocation.dataSourceOther')}</option>
-						</FormSelect>
-						{#if source === 'Other'}
-							<p class="my-2 text-justify text-sm">
-								{$_('addLocation.dataSourceOtherPrompt')}
-							</p>
-							<textarea
-								disabled={!captchaSecret}
-								required
-								name="source-other"
-								placeholder={$_('addLocation.dataSourceOtherPlaceholder')}
-								class="w-full rounded-2xl border-2 border-input p-3 transition-all focus:outline-link disabled:cursor-not-allowed disabled:bg-gray-100 disabled:text-gray-500 dark:bg-white/[0.15] dark:disabled:bg-gray-700 dark:disabled:text-gray-400"
-								bind:value={sourceOther}
-								bind:this={sourceOtherElement}
-							></textarea>
-						{/if}
 					</div>
 
 					<div>

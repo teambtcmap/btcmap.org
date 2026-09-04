@@ -70,8 +70,6 @@ export const POST: RequestHandler = async ({ request, fetch }) => {
 		phone: asString(body.phone),
 		hours: asString(body.hours),
 		notes: asString(body.notes),
-		source: asString(body.source),
-		sourceOther: asString(body.sourceOther),
 		contact: asString(body.contact),
 	};
 
