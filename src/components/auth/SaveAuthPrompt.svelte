@@ -1,5 +1,4 @@
 <script lang="ts">
-import { createEventDispatcher } from "svelte";
 import { get } from "svelte/store";
 
 import BackupCredentials from "$components/auth/BackupCredentials.svelte";
@@ -20,51 +19,53 @@ import type { Session } from "$lib/session";
 import { session } from "$lib/session";
 import { errToast, successToast } from "$lib/utils";
 
-export let id: number;
-export let type: SavedItemType;
-export let open = false;
+type Props = {
+	id: number;
+	type: SavedItemType;
+	open?: boolean;
+};
 
-const dispatch = createEventDispatcher<{
-	saved: undefined;
-	close: undefined;
-}>();
+let { id, type, open = $bindable(false) }: Props = $props();
 
 type View = "choice" | "login" | "backup";
-let view: View = "choice";
-let creating = false;
+let view = $state<View>("choice");
+let creating = $state(false);
 
-$: promptTitleKey =
-	type === "area" ? "save.prompt.titleArea" : "save.prompt.titlePlace";
-$: promptDescriptionKey =
+const promptTitleKey = $derived(
+	type === "area" ? "save.prompt.titleArea" : "save.prompt.titlePlace",
+);
+const promptDescriptionKey = $derived(
 	type === "area"
 		? "save.prompt.descriptionArea"
-		: "save.prompt.descriptionPlace";
-$: accountCreatedKey =
-	type === "area" ? "save.accountCreatedArea" : "save.accountCreatedPlace";
+		: "save.prompt.descriptionPlace",
+);
+const accountCreatedKey = $derived(
+	type === "area" ? "save.accountCreatedArea" : "save.accountCreatedPlace",
+);
 
-// Inline so Svelte's reactive dependency tracker picks up $_ lexically —
-// otherwise locale changes don't retitle the modal until `view` changes.
-$: title =
+// $_ is read inside the derived so a locale change retitles the modal.
+const title = $derived(
 	view === "backup"
 		? $_("backup.title")
 		: view === "login"
 			? $_("login.title")
-			: $_(promptTitleKey);
+			: $_(promptTitleKey),
+);
 
 // Reset view state whenever the modal is (re)opened/closed.
-$: if (!open) {
-	view = "choice";
-	creating = false;
-}
+$effect.pre(() => {
+	if (!open) {
+		view = "choice";
+		creating = false;
+	}
+});
 
 async function performInitialSave(current: Session) {
 	const existing = getSavedList(current, type);
 	// No-op if already saved — the atomic POST would still succeed (API
 	// dedupes) but we avoid the round-trip and the misleading toast.
-	if (existing.includes(id)) {
-		dispatch("saved");
-		return;
-	}
+	if (existing.includes(id)) return;
+
 	setSavedList(type, [...existing, id]);
 	try {
 		const serverList = await addSavedItem(type, current.token, id);
@@ -74,7 +75,6 @@ async function performInitialSave(current: Session) {
 			type,
 			source: "save_prompt",
 		});
-		dispatch("saved");
 	} catch (err) {
 		setSavedList(type, existing);
 		errToast($_("merchant.saveFailed"));
@@ -104,7 +104,6 @@ async function handleCreateAccount() {
 	} catch (err) {
 		console.error("SaveAuthPrompt.handleCreateAccount failed", err);
 		open = false;
-		dispatch("close");
 	} finally {
 		creating = false;
 	}
@@ -119,13 +118,10 @@ async function handleLoginSuccess(current: Session) {
 		// the short-circuit "already saved" check might miss and we pay for
 		// an extra (idempotent) POST.
 		await hydrateSavedFromServer(current.token);
-
 		const refreshed = get(session);
 		if (!refreshed) throw new Error("session missing after login");
-
 		await performInitialSave(refreshed);
 		open = false;
-		dispatch("close");
 	} catch (err) {
 		console.error("SaveAuthPrompt.handleLoginSuccess failed", err);
 	}
@@ -133,7 +129,6 @@ async function handleLoginSuccess(current: Session) {
 
 function handleDone() {
 	open = false;
-	dispatch("close");
 }
 </script>
 
@@ -145,7 +140,7 @@ function handleDone() {
 		<div class="space-y-3">
 			<PrimaryButton
 				type="button"
-				on:click={handleCreateAccount}
+				onclick={handleCreateAccount}
 				disabled={creating}
 				style="w-full rounded-lg px-4 py-2 disabled:opacity-50"
 			>
@@ -153,7 +148,7 @@ function handleDone() {
 			</PrimaryButton>
 			<button
 				type="button"
-				on:click={() => {
+				onclick={() => {
 					trackEvent("save_prompt_login_click", { type });
 					view = "login";
 				}}
@@ -166,7 +161,7 @@ function handleDone() {
 		<LoginForm compact onSuccess={handleLoginSuccess} />
 		<TextLink
 			type="button"
-			on:click={() => (view = "choice")}
+			onclick={() => (view = "choice")}
 			style="mt-4 text-sm"
 		>
 			← {$_("save.prompt.back")}
@@ -182,7 +177,7 @@ function handleDone() {
 		/>
 		<PrimaryButton
 			type="button"
-			on:click={handleDone}
+			onclick={handleDone}
 			style="mt-6 w-full rounded-lg px-4 py-2"
 		>
 			{$_("save.prompt.done")}
