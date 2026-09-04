@@ -1190,6 +1190,6 @@
 		"creating": "Création du compte...",
 		"error": "Impossible de créer le compte. Le nom d'utilisateur est peut-être déjà pris.",
 		"haveAccount": "Vous avez déjà un compte ?",
-		"signIn": "Se connecter"
+		"signIn": "Se connecter avec un mot de passe ou Nostr"
 	}
 }

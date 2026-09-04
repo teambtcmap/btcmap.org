@@ -1190,6 +1190,6 @@
 		"creating": "Creando cuenta...",
 		"error": "No se pudo crear la cuenta. Es posible que el nombre de usuario ya esté en uso.",
 		"haveAccount": "¿Ya tienes una cuenta?",
-		"signIn": "Iniciar sesión"
+		"signIn": "Iniciar sesión con contraseña o Nostr"
 	}
 }

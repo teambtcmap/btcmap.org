@@ -105,7 +105,7 @@
 		"creating": "Creazione account...",
 		"error": "Impossibile creare l'account. Il nome utente potrebbe essere già in uso.",
 		"haveAccount": "Hai già un account?",
-		"signIn": "Accedi"
+		"signIn": "Accedi con password o Nostr"
 	},
 	"backup": {
 		"title": "Backup dell'account",

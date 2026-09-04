@@ -1190,6 +1190,6 @@
 		"creating": "Konto wird erstellt...",
 		"error": "Konto konnte nicht erstellt werden. Der Benutzername ist möglicherweise bereits vergeben.",
 		"haveAccount": "Du hast bereits ein Konto?",
-		"signIn": "Anmelden"
+		"signIn": "Mit Passwort oder Nostr anmelden"
 	}
 }

@@ -1164,6 +1164,6 @@
 		"creating": "Criando conta...",
 		"error": "Não foi possível criar a conta. O nome de usuário pode já estar em uso.",
 		"haveAccount": "Já tem uma conta?",
-		"signIn": "Entrar"
+		"signIn": "Entrar com senha ou Nostr"
 	}
 }
