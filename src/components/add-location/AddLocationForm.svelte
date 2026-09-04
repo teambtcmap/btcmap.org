@@ -75,34 +75,52 @@ $effect(() => {
 	}
 });
 
-// Address suggestion from the pin (#1315). Fires once per arrival — hosts
-// guarantee coords, and adjust round-trips remount the form with fresh
-// ones. A fulfilled suggestion flips the field to required, so it can be
-// corrected but not blanked out; any miss leaves it optional and empty,
-// exactly the pre-suggestion behavior.
+// Address suggestion from the pin (#1315). Re-runs whenever the pin
+// moves — a live-adjust host, or history navigation between two arrivals
+// keeps this instance alive with new coords. A fulfilled suggestion flips
+// the field to required, so it can be corrected but not blanked out; a
+// miss leaves it optional, exactly the pre-suggestion behavior.
 let addressPending = $state(true);
 let addressRequired = $state(false);
+// What the lookup last wrote — tells an untouched suggestion apart from
+// user-typed text when the pin moves, and gates a superseded lookup.
+let lastSuggested = "";
+let lookupToken = 0;
 
-const suggestAddress = async () => {
-	const suggestion = await reverseGeocode(
-		coords.lat,
-		coords.long,
-		get(locale) ?? "en",
-	);
+const suggestAddress = async (lat: number, long: number) => {
+	const token = ++lookupToken;
+	addressPending = true;
+	const suggestion = await reverseGeocode(lat, long, get(locale) ?? "en");
+	// The pin moved again while this lookup was in flight — drop it.
+	if (token !== lookupToken) return;
 	addressPending = false;
 	trackEvent("add_place_address_prefill", {
 		outcome: suggestion ? "hit" : "miss",
 	});
 	// Required on every hit — OSM knows an address here, so blank is never
-	// right. The value guard only protects text typed (or autofilled) while
-	// the lookup was in flight from being overwritten.
+	// right. The value guard only replaces an empty field or the previous
+	// pin's untouched suggestion; text the user typed (or autofill wrote)
+	// stays put.
 	if (suggestion) {
 		addressRequired = true;
-		if (address && !address.value) {
+		if (address && (!address.value || address.value === lastSuggested)) {
 			address.value = suggestion;
 		}
+		lastSuggested = suggestion;
+	} else {
+		addressRequired = false;
+		if (address && address.value === lastSuggested) {
+			address.value = "";
+		}
+		lastSuggested = "";
 	}
 };
+
+$effect(() => {
+	// Mount included — coords are the only tracked reads (everything else
+	// sits behind the await).
+	suggestAddress(coords.lat, coords.long);
+});
 
 let categorySelect = $state<string>();
 let categoryOther = $state<string>();
@@ -194,8 +212,6 @@ const submitForm = (event: SubmitEvent) => {
 onMount(() => {
 	// fetch and add captcha
 	fetchCaptcha();
-
-	suggestAddress();
 
 	// Keyboard-first on desktop only: popping the on-screen keyboard
 	// on mobile would cover the confirmation the user just landed on.
