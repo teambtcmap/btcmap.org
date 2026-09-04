@@ -1,8 +1,8 @@
 <script lang="ts">
 import { get } from "svelte/store";
 
-import BackupCredentials from "$components/auth/BackupCredentials.svelte";
 import LoginForm from "$components/auth/LoginForm.svelte";
+import SignupForm from "$components/auth/SignupForm.svelte";
 import Modal from "$components/Modal.svelte";
 import PrimaryButton from "$components/PrimaryButton.svelte";
 import TextLink from "$components/TextLink.svelte";
@@ -17,7 +17,7 @@ import {
 } from "$lib/savedItems";
 import type { Session } from "$lib/session";
 import { session } from "$lib/session";
-import { errToast, successToast } from "$lib/utils";
+import { errToast } from "$lib/utils";
 
 type Props = {
 	id: number;
@@ -27,9 +27,8 @@ type Props = {
 
 let { id, type, open = $bindable(false) }: Props = $props();
 
-type View = "choice" | "login" | "backup";
+type View = "choice" | "login" | "signup";
 let view = $state<View>("choice");
-let creating = $state(false);
 
 const promptTitleKey = $derived(
 	type === "area" ? "save.prompt.titleArea" : "save.prompt.titlePlace",
@@ -39,14 +38,11 @@ const promptDescriptionKey = $derived(
 		? "save.prompt.descriptionArea"
 		: "save.prompt.descriptionPlace",
 );
-const accountCreatedKey = $derived(
-	type === "area" ? "save.accountCreatedArea" : "save.accountCreatedPlace",
-);
 
 // $_ is read inside the derived so a locale change retitles the modal.
 const title = $derived(
-	view === "backup"
-		? $_("backup.title")
+	view === "signup"
+		? $_("signup.title")
 		: view === "login"
 			? $_("login.title")
 			: $_(promptTitleKey),
@@ -56,7 +52,6 @@ const title = $derived(
 $effect.pre(() => {
 	if (!open) {
 		view = "choice";
-		creating = false;
 	}
 });
 
@@ -83,29 +78,15 @@ async function performInitialSave(current: Session) {
 	}
 }
 
-async function handleCreateAccount() {
-	if (creating) return;
-	creating = true;
-	trackEvent("save_prompt_create_account_click", { type });
+// A fresh account has nothing saved yet, so no hydrate round-trip: save
+// the item straight away and close. performInitialSave toasts on its
+// own errors.
+async function handleSignupSuccess(current: Session) {
 	try {
-		const current = await session.signUp();
-		// If the user dismissed the modal while signUp was pending, don't
-		// mutate view/show toasts — that would leak "backup" view into the
-		// next open. The account still exists locally and can be backed up
-		// via the UserMenu.
-		if (!open) return;
-		// Commit the backup view before the save attempt so a failing save
-		// can't strand a new account without the user ever seeing their
-		// credentials. performInitialSave toasts on its own errors.
-		view = "backup";
-		trackEvent("backup_modal_shown", { source: "save_prompt" });
-		successToast($_(accountCreatedKey));
-		await performInitialSave(current).catch(() => {});
-	} catch (err) {
-		console.error("SaveAuthPrompt.handleCreateAccount failed", err);
+		await performInitialSave(current);
 		open = false;
-	} finally {
-		creating = false;
+	} catch (err) {
+		console.error("SaveAuthPrompt.handleSignupSuccess failed", err);
 	}
 }
 
@@ -126,10 +107,6 @@ async function handleLoginSuccess(current: Session) {
 		console.error("SaveAuthPrompt.handleLoginSuccess failed", err);
 	}
 }
-
-function handleDone() {
-	open = false;
-}
 </script>
 
 <Modal bind:open {title} titleId="save-auth-prompt-title">
@@ -140,9 +117,11 @@ function handleDone() {
 		<div class="space-y-3">
 			<PrimaryButton
 				type="button"
-				onclick={handleCreateAccount}
-				disabled={creating}
-				style="w-full rounded-lg px-4 py-2 disabled:opacity-50"
+				onclick={() => {
+					trackEvent("save_prompt_create_account_click", { type });
+					view = "signup";
+				}}
+				style="w-full rounded-lg px-4 py-2"
 			>
 				{$_("save.prompt.createAccount")}
 			</PrimaryButton>
@@ -166,21 +145,14 @@ function handleDone() {
 		>
 			← {$_("save.prompt.back")}
 		</TextLink>
-	{:else if view === "backup" && $session}
-		<p class="mb-4 text-sm text-body dark:text-white/70">
-			{$_("backup.description")}
-		</p>
-		<BackupCredentials
-			idPrefix="save-prompt"
-			username={$session.username}
-			password={$session.password}
-		/>
-		<PrimaryButton
+	{:else if view === "signup"}
+		<SignupForm onSuccess={handleSignupSuccess} />
+		<TextLink
 			type="button"
-			onclick={handleDone}
-			style="mt-6 w-full rounded-lg px-4 py-2"
+			onclick={() => (view = "choice")}
+			style="mt-4 text-sm"
 		>
-			{$_("save.prompt.done")}
-		</PrimaryButton>
+			← {$_("save.prompt.back")}
+		</TextLink>
 	{/if}
 </Modal>

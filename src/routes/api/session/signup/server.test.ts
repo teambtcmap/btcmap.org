@@ -23,18 +23,18 @@ function upstream(opts: {
 	} as unknown as Response;
 }
 
-// Happy-path upstream: user creation echoes the requested name (or hands
-// out a generated one), token creation returns a token.
+// Happy-path upstream: user creation echoes the requested name, token
+// creation returns a token.
 function happyUpstream() {
 	return vi
 		.fn()
 		.mockImplementation(async (url: string, init: { body: string }) => {
 			if (url.endsWith("/v4/users")) {
-				const sent = JSON.parse(init.body) as { name?: string };
+				const sent = JSON.parse(init.body) as { name: string };
 				return upstream({
 					ok: true,
 					status: 201,
-					json: () => Promise.resolve({ name: sent.name ?? "generated-name" }),
+					json: () => Promise.resolve({ name: sent.name }),
 				});
 			}
 			return upstream({
@@ -69,15 +69,34 @@ describe("POST /api/session/signup", () => {
 	});
 
 	it("400 when password is missing", async () => {
-		await expect(call(makeRequest({}), vi.fn())).rejects.toMatchObject({
-			status: 400,
-		});
+		await expect(
+			call(makeRequest({ name: "alice" }), vi.fn()),
+		).rejects.toMatchObject({ status: 400 });
 	});
 
 	it("400 when password exceeds 200 characters", async () => {
 		const fetchImpl = vi.fn();
 		await expect(
-			call(makeRequest({ password: "x".repeat(201) }), fetchImpl),
+			call(
+				makeRequest({ name: "alice", password: "x".repeat(201) }),
+				fetchImpl,
+			),
+		).rejects.toMatchObject({ status: 400 });
+		expect(fetchImpl).not.toHaveBeenCalled();
+	});
+
+	it("400 when name is omitted", async () => {
+		const fetchImpl = vi.fn();
+		await expect(
+			call(makeRequest({ password: "correct-horse" }), fetchImpl),
+		).rejects.toMatchObject({ status: 400 });
+		expect(fetchImpl).not.toHaveBeenCalled();
+	});
+
+	it("400 when name is blank", async () => {
+		const fetchImpl = vi.fn();
+		await expect(
+			call(makeRequest({ name: "   ", password: "correct-horse" }), fetchImpl),
 		).rejects.toMatchObject({ status: 400 });
 		expect(fetchImpl).not.toHaveBeenCalled();
 	});
@@ -85,7 +104,7 @@ describe("POST /api/session/signup", () => {
 	it("400 when password is shorter than 8 characters", async () => {
 		const fetchImpl = vi.fn();
 		await expect(
-			call(makeRequest({ password: "short7!" }), fetchImpl),
+			call(makeRequest({ name: "alice", password: "short7!" }), fetchImpl),
 		).rejects.toMatchObject({ status: 400 });
 		expect(fetchImpl).not.toHaveBeenCalled();
 	});
@@ -109,37 +128,6 @@ describe("POST /api/session/signup", () => {
 		expect(fetchImpl).not.toHaveBeenCalled();
 	});
 
-	it("creates a throwaway when name is omitted", async () => {
-		const fetchImpl = happyUpstream();
-		const res = await call(
-			makeRequest({ password: "correct-horse" }),
-			fetchImpl,
-		);
-		expect(await res.json()).toEqual({
-			username: "generated-name",
-			token: "tok",
-		});
-
-		const [url, init] = fetchImpl.mock.calls[0];
-		expect(url).toContain("/v4/users");
-		expect(JSON.parse(init.body)).toEqual({ password: "correct-horse" });
-	});
-
-	it("treats a blank name as omitted", async () => {
-		const fetchImpl = happyUpstream();
-		const res = await call(
-			makeRequest({ name: "   ", password: "correct-horse" }),
-			fetchImpl,
-		);
-		expect(await res.json()).toEqual({
-			username: "generated-name",
-			token: "tok",
-		});
-		expect(JSON.parse(fetchImpl.mock.calls[0][1].body)).toEqual({
-			password: "correct-horse",
-		});
-	});
-
 	it("forwards a trimmed name and mints the token for it", async () => {
 		const fetchImpl = happyUpstream();
 		const res = await call(
@@ -160,7 +148,10 @@ describe("POST /api/session/signup", () => {
 	it("502 when user creation throws (timeout/network)", async () => {
 		const fetchImpl = vi.fn().mockRejectedValue(new Error("timeout"));
 		await expect(
-			call(makeRequest({ password: "correct-horse" }), fetchImpl),
+			call(
+				makeRequest({ name: "alice", password: "correct-horse" }),
+				fetchImpl,
+			),
 		).rejects.toMatchObject({ status: 502 });
 	});
 
@@ -169,7 +160,10 @@ describe("POST /api/session/signup", () => {
 			.fn()
 			.mockResolvedValue(upstream({ ok: false, status: 500 }));
 		await expect(
-			call(makeRequest({ password: "correct-horse" }), fetchImpl),
+			call(
+				makeRequest({ name: "alice", password: "correct-horse" }),
+				fetchImpl,
+			),
 		).rejects.toMatchObject({ status: 500 });
 	});
 
@@ -180,7 +174,10 @@ describe("POST /api/session/signup", () => {
 				upstream({ ok: true, status: 201, json: () => Promise.resolve({}) }),
 			);
 		await expect(
-			call(makeRequest({ password: "correct-horse" }), fetchImpl),
+			call(
+				makeRequest({ name: "alice", password: "correct-horse" }),
+				fetchImpl,
+			),
 		).rejects.toMatchObject({ status: 502 });
 	});
 });

@@ -7,9 +7,9 @@ import { session } from "$lib/session";
 
 export let open = false;
 
-// SaveAuthPrompt fires its own backup_modal_shown with source=save_prompt
-// (it reuses BackupCredentials inline, not this modal), so this component
-// only needs to report opens from UserMenu.
+// Only UserMenu opens this modal: it exists for legacy auto-generated
+// sessions that still need to read their credentials once. New accounts
+// come from /signup with user-chosen credentials and never see it.
 let wasOpen = false;
 $: if (open && !wasOpen) {
 	trackEvent("backup_modal_shown", { source: "user_menu" });

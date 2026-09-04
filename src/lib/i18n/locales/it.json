@@ -121,8 +121,6 @@
 		"copyFailed": "Copia fallita — si prega di copiare manualmente"
 	},
 	"save": {
-		"accountCreatedPlace": "Account creato — i tuoi posti salvati sono memorizzati su questo dispositivo.",
-		"accountCreatedArea": "Account creato — le tue aree salvate sono memorizzate su questo dispositivo.",
 		"prompt": {
 			"titlePlace": "Salva questo posto",
 			"titleArea": "Salva questa area",
@@ -130,8 +128,7 @@
 			"descriptionArea": "Accedi al tuo account esistente, o creane uno nuovo per mantenere le tue aree salvate.",
 			"createAccount": "Crea account",
 			"login": "Accedi",
-			"back": "Indietro",
-			"done": "Fatto"
+			"back": "Indietro"
 		}
 	},
 	"search": {
