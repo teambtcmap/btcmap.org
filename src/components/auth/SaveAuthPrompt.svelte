@@ -79,14 +79,16 @@ async function performInitialSave(current: Session) {
 }
 
 // A fresh account has nothing saved yet, so no hydrate round-trip: save
-// the item straight away and close. performInitialSave toasts on its
-// own errors.
+// the item straight away. Close either way: the account exists now, and
+// leaving the form open would invite a second signup. performInitialSave
+// toasts its own errors; the user is logged in and can press Save again.
 async function handleSignupSuccess(current: Session) {
 	try {
 		await performInitialSave(current);
-		open = false;
 	} catch (err) {
 		console.error("SaveAuthPrompt.handleSignupSuccess failed", err);
+	} finally {
+		open = false;
 	}
 }
 
