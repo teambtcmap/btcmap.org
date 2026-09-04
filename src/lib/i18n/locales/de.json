@@ -1173,6 +1173,7 @@
 		"nostrSigning": "Wird signiert…",
 		"nostrFailed": "Nostr-Signatur wurde abgelehnt",
 		"nostrError": "Nostr-Anmeldung konnte nicht abgeschlossen werden",
+		"nostrNoExtension": "Keine Nostr-Erweiterung gefunden. Installiere z. B. Alby oder nos2x und lade die Seite neu.",
 		"nsecLabel": "Geheimer Nostr-Schlüssel",
 		"nsecWarning": "Dein nsec wird nur an deinen Browser gesendet, um dich einmalig anzumelden — er wird niemals gespeichert oder übertragen.",
 		"nsecSubmit": "Mit nsec anmelden",

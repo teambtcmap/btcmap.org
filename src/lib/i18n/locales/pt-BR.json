@@ -1147,6 +1147,7 @@
 		"nostrSigning": "Assinando…",
 		"nostrFailed": "A assinatura Nostr foi rejeitada",
 		"nostrError": "Não foi possível concluir o login com Nostr",
+		"nostrNoExtension": "Nenhuma extensão Nostr encontrada. Instale uma como Alby ou nos2x e recarregue a página.",
 		"nsecLabel": "Chave secreta Nostr",
 		"nsecWarning": "Seu nsec é enviado apenas para o seu navegador para entrar uma vez — nunca é armazenado nem transmitido.",
 		"nsecSubmit": "Entrar com nsec",

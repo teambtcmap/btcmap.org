@@ -88,6 +88,7 @@
 		"nostrSigning": "Firma in corso…",
 		"nostrFailed": "Firma Nostr rifiutata",
 		"nostrError": "Impossibile completare l'accesso con Nostr",
+		"nostrNoExtension": "Nessuna estensione Nostr trovata. Installane una come Alby o nos2x e ricarica la pagina.",
 		"nsecLabel": "Chiave segreta Nostr",
 		"nsecWarning": "Il tuo nsec viene inviato solo al tuo browser per accedere una volta — non viene mai memorizzato né trasmesso.",
 		"nsecSubmit": "Accedi con nsec",

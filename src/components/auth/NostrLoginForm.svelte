@@ -1,5 +1,4 @@
 <script lang="ts">
-import { onMount } from "svelte";
 import { get } from "svelte/store";
 
 import api from "$lib/axios";
@@ -24,25 +23,12 @@ type Props = {
 
 let { onSuccess }: Props = $props();
 
-let hasNostrExtension = $state(false);
 let showNsecInput = $state(false);
 let nsec = $state("");
 let nostrLoading = $state(false);
 let nsecLoading = $state(false);
 
 const anyLoading = $derived(nostrLoading || nsecLoading);
-
-onMount(() => {
-	// Extensions inject window.nostr before page load, but a few are slow.
-	// One re-check after a short delay covers the late-injection case
-	// without blocking first paint when no extension is present.
-	hasNostrExtension = getNostrExtension() !== null;
-	if (hasNostrExtension) return;
-	const t = setTimeout(() => {
-		hasNostrExtension = getNostrExtension() !== null;
-	}, 300);
-	return () => clearTimeout(t);
-});
 
 async function exchangeSignedEvent(signedEvent: SignedAuthEvent) {
 	const res = await api.post("/api/session/nostr", {
@@ -69,6 +55,13 @@ async function loginWithExtension() {
 	// before disabled takes effect. Without the guard, the user would see
 	// two extension-signing popups for one click.
 	if (nostrLoading) return;
+	// Detect at click time rather than at mount: extensions inject
+	// window.nostr at their own pace, and a user without one gets told what
+	// to install instead of never seeing the option.
+	if (getNostrExtension() === null) {
+		errToast($_("login.nostrNoExtension"));
+		return;
+	}
 	nostrLoading = true;
 	try {
 		const signed = await signAuthWithExtension();
@@ -126,16 +119,14 @@ async function loginWithNsec(event: SubmitEvent) {
 }
 </script>
 
-{#if hasNostrExtension}
-	<button
-		type="button"
-		onclick={loginWithExtension}
-		disabled={anyLoading}
-		class="w-full rounded-lg bg-purple-600 px-4 py-2 font-semibold text-white transition-colors hover:bg-purple-700 disabled:opacity-50"
-	>
-		{nostrLoading ? $_("login.nostrSigning") : $_("login.nostrExtension")}
-	</button>
-{/if}
+<button
+	type="button"
+	onclick={loginWithExtension}
+	disabled={anyLoading}
+	class="w-full rounded-lg bg-purple-600 px-4 py-2 font-semibold text-white transition-colors hover:bg-purple-700 disabled:opacity-50"
+>
+	{nostrLoading ? $_("login.nostrSigning") : $_("login.nostrExtension")}
+</button>
 
 {#if showNsecInput}
 	<form onsubmit={loginWithNsec} class="space-y-2">

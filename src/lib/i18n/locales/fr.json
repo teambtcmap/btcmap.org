@@ -1173,6 +1173,7 @@
 		"nostrSigning": "Signature…",
 		"nostrFailed": "La signature Nostr a été rejetée",
 		"nostrError": "Impossible de finaliser la connexion Nostr",
+		"nostrNoExtension": "Aucune extension Nostr trouvée. Installez-en une comme Alby ou nos2x, puis rechargez la page.",
 		"nsecLabel": "Clé secrète Nostr",
 		"nsecWarning": "Votre nsec n'est envoyé qu'à votre navigateur pour vous connecter une seule fois — il n'est jamais stocké ni transmis.",
 		"nsecSubmit": "Se connecter avec nsec",

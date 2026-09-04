@@ -88,6 +88,7 @@
 		"nostrSigning": "Signing…",
 		"nostrFailed": "Nostr signature was rejected",
 		"nostrError": "Could not complete Nostr login",
+		"nostrNoExtension": "No Nostr extension found. Install one such as Alby or nos2x, then reload this page.",
 		"nsecLabel": "Nostr secret key",
 		"nsecWarning": "Your nsec is sent only to your browser to log in once — it is never stored or transmitted.",
 		"nsecSubmit": "Log in with nsec",

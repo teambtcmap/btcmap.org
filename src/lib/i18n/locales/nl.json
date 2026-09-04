@@ -88,6 +88,7 @@
 		"nostrSigning": "Ondertekenen…",
 		"nostrFailed": "Nostr-handtekening geweigerd",
 		"nostrError": "Nostr-aanmelding kon niet worden voltooid",
+		"nostrNoExtension": "Geen Nostr-extensie gevonden. Installeer er een zoals Alby of nos2x en herlaad de pagina.",
 		"nsecLabel": "Nostr privésleutel",
 		"nsecWarning": "Je nsec wordt alleen naar je browser gestuurd om jezelf aan te melden — het wordt nooit opgeslagen of gedeeld.",
 		"nsecSubmit": "Aanmelden met nsec",

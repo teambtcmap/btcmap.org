@@ -1173,6 +1173,7 @@
 		"nostrSigning": "Firmando…",
 		"nostrFailed": "La firma de Nostr fue rechazada",
 		"nostrError": "No se pudo completar el inicio de sesión con Nostr",
+		"nostrNoExtension": "No se encontró ninguna extensión de Nostr. Instala una como Alby o nos2x y recarga la página.",
 		"nsecLabel": "Clave secreta de Nostr",
 		"nsecWarning": "Tu nsec se envía solo a tu navegador para iniciar sesión una vez — nunca se almacena ni se transmite.",
 		"nsecSubmit": "Inicia sesión con nsec",
