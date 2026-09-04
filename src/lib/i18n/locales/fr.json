@@ -1186,7 +1186,6 @@
 		"username": "Nom d'utilisateur",
 		"password": "Mot de passe",
 		"passwordHint": "Utilisez au moins {min} caractères.",
-		"passwordTooShort": "Le mot de passe doit comporter au moins {min} caractères.",
 		"submit": "Créer un compte",
 		"creating": "Création du compte...",
 		"error": "Impossible de créer le compte. Le nom d'utilisateur est peut-être déjà pris.",

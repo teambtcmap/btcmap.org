@@ -7,8 +7,9 @@ import { session } from "$lib/session";
 import { errToast } from "$lib/utils";
 
 // Client-side password length policy. The REST POST /v4/users endpoint does
-// NOT enforce a minimum, so this is purely a UX guard — instant feedback
-// before a round-trip.
+// NOT enforce a minimum, so this is purely a UX guard: the input's native
+// minlength blocks submit with the browser's own message, the same way
+// `required` works on the other forms.
 const MIN_PASSWORD_LENGTH = 8;
 const MAX_PASSWORD_LENGTH = 64;
 
@@ -32,12 +33,6 @@ async function handleSubmit(event: SubmitEvent) {
 	event.preventDefault();
 	const trimmed = username.trim();
 	if (!trimmed || !password) return;
-	if (password.length < MIN_PASSWORD_LENGTH) {
-		errToast(
-			$_("signup.passwordTooShort", { values: { min: MIN_PASSWORD_LENGTH } }),
-		);
-		return;
-	}
 	loading = true;
 
 	try {

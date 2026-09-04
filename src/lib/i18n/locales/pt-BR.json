@@ -1160,7 +1160,6 @@
 		"username": "Nome de usuário",
 		"password": "Senha",
 		"passwordHint": "Use pelo menos {min} caracteres.",
-		"passwordTooShort": "A senha deve ter pelo menos {min} caracteres.",
 		"submit": "Criar conta",
 		"creating": "Criando conta...",
 		"error": "Não foi possível criar a conta. O nome de usuário pode já estar em uso.",
