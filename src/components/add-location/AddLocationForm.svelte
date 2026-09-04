@@ -29,8 +29,12 @@ import { errToast } from "$lib/utils";
 type Props = {
 	coords: { lat: number; long: number };
 	onsuccess: () => void;
+	// The standalone page shows a static minimap with an adjust link; a
+	// host on the live map hides it — there the map itself is the preview
+	// and the crosshair pin is the live position.
+	showPinPreview?: boolean;
 };
-let { coords, onsuccess }: Props = $props();
+let { coords, onsuccess, showPinPreview = true }: Props = $props();
 
 const adjustUrl = $derived(buildPlacementUrl(coords.lat, coords.long));
 
@@ -234,10 +238,11 @@ onMount(() => {
 		/>
 	</div>
 
-	<div>
-		<p id="pin-label" class="mb-2 block font-semibold">
-			{$_('addLocation.pinFromMapLabel')}
-		</p>
+	{#if showPinPreview}
+		<div>
+			<p id="pin-label" class="mb-2 block font-semibold">
+				{$_('addLocation.pinFromMapLabel')}
+			</p>
 		<!-- Static preview. The adjust link is stacked on top of the map
 		     rather than wrapping it, so none of MapLibre's interactive
 		     attribution nests inside the anchor; its corner is raised
@@ -264,7 +269,8 @@ onMount(() => {
 				<PlacementPinIcon width={40} />
 			</div>
 		</div>
-	</div>
+		</div>
+	{/if}
 
 	<div>
 		<div class="mb-2">
