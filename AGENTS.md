@@ -13,7 +13,7 @@ Guidelines for coding agents working on this codebase (`CLAUDE.md` is a symlink 
 5. **🧪 Unit tests:** Run `pnpm run test --run`
 6. **📝 Commit format:** Use [Conventional Commits](https://www.conventionalcommits.org/) format with issue number
 
-A husky pre-commit hook (lint-staged) runs `biome check --write` on staged `*.{js,ts,svelte,json,css}` files, so formatting lands at commit time either way; running `pnpm run format:fix` first keeps the hook a no-op and the diff predictable. Biome formats only the `<script>` block of a `.svelte` file; template and style whitespace stay yours to keep consistent.
+A husky pre-commit hook (lint-staged) runs `biome check --write --no-errors-on-unmatched` on staged `*.{js,ts,svelte,json,css}` files: formatting, safe lint fixes and import sorting land at commit time either way. Running `pnpm run lint:fix` (the same `biome check --write`) before staging keeps the hook a no-op and the diff predictable; `format:fix` alone covers only formatting. Biome formats only the `<script>` block of a `.svelte` file; template and style whitespace stay yours to keep consistent.
 
 `pnpm run check` runs `svelte-kit sync` before `svelte-check`. If `pnpm run typecheck` reports errors in files you never touched right after adding a route, the generated types are stale: run `pnpm run check` first.
 
@@ -107,7 +107,7 @@ import type { Place, Report, AreaTags } from '$lib/types';
 
 ### Tests
 
-- A module with a sibling `*.test.ts` (e.g. `src/lib/session.ts`) gets new cases for every behaviour change in the same PR, written before the change so they fail first
+- A module with a sibling `*.test.ts` (e.g. `src/lib/session.ts`) gets new cases for every behavior change in the same PR, written before the change so they fail first
 - Server routes under `src/routes/api/**` get a `server.test.ts` beside `+server.ts`, modeled on `src/routes/api/session/nostr/server.test.ts`: stub `request` and `fetch`, assert the status of every error path and the forwarded upstream call on success
 - There are no component tests (no testing-library). Keep logic that needs testing in `$lib` modules and keep components thin
 
@@ -192,9 +192,9 @@ Use the appropriate tool attribution based on which tool generated the commit:
 When editing locale files in `src/lib/i18n/locales/*.json`:
 
 - **Never translate proper names or usernames.** Personal names (e.g. `Nathan Day`), brand names, and online handles (e.g. `secondl1ght`, `karnage`) must be kept verbatim across all locales. Translating them produces incorrect, sometimes nonsensical output (e.g. "Nathan Dag", "tweedelig").
-- **Keep keys aligned with `en.json`.** When adding or renaming keys, update every locale file so the key sets match. Missing keys silently fall back to English at runtime. A section already missing keys in some locale is not a licence to leave the new key out too. Before committing, list what each locale lacks; none of the keys your PR adds may appear:
+- **Keep keys aligned with `en.json`.** When adding or renaming keys, update every locale file so the key sets match. Missing keys silently fall back to English at runtime. A section already missing keys in some locale is not a licence to leave the new key out too. Before committing, list where each locale diverges from `en.json` in either direction; the keys your PR adds or removes must not show up:
   ```bash
-  for f in src/lib/i18n/locales/*.json; do jq -r --arg f "$f" --slurpfile en src/lib/i18n/locales/en.json '([paths(scalars)|join(".")]) as $k | (($en[0]|[paths(scalars)|join(".")]) - $k)[] | "\($f): \(.)"' "$f"; done
+  for f in src/lib/i18n/locales/*.json; do jq -r --arg f "$f" --slurpfile en src/lib/i18n/locales/en.json '([paths(scalars)|join(".")]) as $k | ($en[0]|[paths(scalars)|join(".")]) as $e | (($e - $k)[] | "\($f): missing \(.)"), (($k - $e)[] | "\($f): extra \(.)")' "$f"; done
   ```
 - **Use the file's existing HTML-entity style for diacritics** (`&euml;`, `&ouml;`, `&uuml;`, `&eacute;`, `&mdash;`) rather than mixing literal Unicode and entity forms within the same locale.
 - **Don't translate honeypot fields.** Anti-spam honeypot inputs (the `name="honey"` fields on add-location, verify-location, communities/add, tagger-onboarding, and VerifyCommunityForm) are rendered with `class="hidden"` and never seen by humans, so translating their `placeholder` provides zero UX value while bloating every locale. Inline the placeholder as a hardcoded English string at the call site instead of referencing an i18n key.
@@ -214,7 +214,7 @@ User-facing URLs (Atom feed `href` attributes, OpenGraph image URLs) should rema
 
 - `Session.password` (`src/lib/session.ts`) holds a password only for auto-generated throwaway accounts, so the backup modal can show it once. Logins and self-service signups with user-chosen credentials store `""`: the user knows them, and a chosen password in `localStorage` turns the throwaway-account XSS trade-off (documented in the file header) into real credential theft
 - `autoGenerated` gates the backup nag in `UserMenu`; a session with `autoGenerated: false` never gets to see a stored password, so storing one there is pure liability
-- The `src/routes/api/session/*` routes proxy the btcmap API server-side to dodge CORS. Bound every body field like the login route does (username ≤ 100, password ≤ 200 chars) and mirror the sibling route's status mapping so the client's `errToast` branches stay uniform
+- The `src/routes/api/session/*` routes proxy the btcmap API server-side to dodge CORS. Validate and cap every body field like the login route does (username ≤ 100, password ≤ 200 chars) and mirror the sibling route's status mapping so the client's `errToast` branches stay uniform
 
 ## Nostr
 
