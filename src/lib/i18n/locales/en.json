@@ -84,14 +84,14 @@
 		"error": "Something went wrong. Please try again.",
 		"noAccount": "Don't have an account?",
 		"createAccount": "Create one here",
-		"nostrExtension": "Sign in with Nostr extension",
+		"nostrExtension": "Log in with Nostr extension",
 		"nostrSigning": "Signing…",
 		"nostrFailed": "Nostr signature was rejected",
 		"nostrError": "Could not complete Nostr login",
 		"nsecToggle": "Or paste your nsec",
 		"nsecLabel": "Nostr secret key",
-		"nsecWarning": "Your nsec is sent only to your browser to sign in once — it is never stored or transmitted.",
-		"nsecSubmit": "Sign in with nsec",
+		"nsecWarning": "Your nsec is sent only to your browser to log in once — it is never stored or transmitted.",
+		"nsecSubmit": "Log in with nsec",
 		"nsecInvalid": "That does not look like a valid nsec",
 		"or": "or"
 	},
@@ -105,7 +105,7 @@
 		"creating": "Creating account...",
 		"error": "Could not create account. The username may already be taken.",
 		"haveAccount": "Already have an account?",
-		"signIn": "Sign in with a password or Nostr"
+		"signIn": "Log in with a password or Nostr"
 	},
 	"backup": {
 		"title": "Back up account",
