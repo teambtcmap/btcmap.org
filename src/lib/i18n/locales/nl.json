@@ -40,6 +40,7 @@
 		"myActivity": "Mijn activiteiten",
 		"account": "Account",
 		"login": "Aanmelden",
+		"signup": "Registreren",
 		"logout": "Afmelden",
 		"backupAccount": "Back-up account"
 	},
@@ -93,6 +94,19 @@
 		"nsecSubmit": "Aanmelden met nsec",
 		"nsecInvalid": "Dat ziet er niet uit als een geldige nsec",
 		"or": "of"
+	},
+	"signup": {
+		"title": "Registreren",
+		"description": "Kies een gebruikersnaam en wachtwoord om je account aan te maken.",
+		"username": "Gebruikersnaam",
+		"password": "Wachtwoord",
+		"passwordHint": "Gebruik minstens {min} tekens.",
+		"passwordTooShort": "Wachtwoord moet minstens {min} tekens lang zijn.",
+		"submit": "Account aanmaken",
+		"creating": "Account aanmaken...",
+		"error": "Account kon niet worden aangemaakt. De gebruikersnaam is mogelijk al in gebruik.",
+		"haveAccount": "Heb je al een account?",
+		"signIn": "Aanmelden"
 	},
 	"backup": {
 		"title": "Back-up account",
@@ -170,6 +184,7 @@
 		"merchantMap": "Ondernemerskaart",
 		"account": "Account",
 		"login": "Aanmelden",
+		"signup": "Registreren",
 		"zoomIn": "Inzoomen",
 		"zoomOut": "Uitzoomen",
 		"basemapTitle": "Achtergrondkaart",

@@ -5,12 +5,13 @@ import { API_BASE } from "$lib/api-base";
 import type { RequestHandler } from "./$types";
 
 // POST /api/session/signup
-// Creates a throwaway BTC Map account and returns a Bearer token.
-// Calls two API endpoints server-side to avoid browser CORS issues:
-//   1. POST /v4/users          → create account
+// Creates a BTC Map account and returns a Bearer token. The username is
+// optional — when omitted the API generates a random one. Calls two API
+// endpoints server-side to avoid browser CORS issues:
+//   1. POST /v4/users              → create account
 //   2. POST /v4/users/{name}/tokens → get Bearer token
 export const POST: RequestHandler = async ({ request, fetch }) => {
-	let body: { password?: unknown };
+	let body: { name?: unknown; password?: unknown };
 	try {
 		body = await request.json();
 	} catch {
@@ -25,13 +26,18 @@ export const POST: RequestHandler = async ({ request, fetch }) => {
 		error(400, "Missing required parameter: password");
 	}
 
+	const name =
+		typeof body.name === "string" && body.name.trim().length > 0
+			? body.name.trim()
+			: undefined;
+
 	let userRes: Response;
 	try {
 		// Step 1: Create user
 		userRes = await fetch(`${API_BASE}/v4/users`, {
 			method: "POST",
 			headers: { "Content-Type": "application/json" },
-			body: JSON.stringify({ password }),
+			body: JSON.stringify(name ? { name, password } : { password }),
 		});
 	} catch (err) {
 		console.error("Failed to create user:", err);
@@ -39,7 +45,8 @@ export const POST: RequestHandler = async ({ request, fetch }) => {
 	}
 
 	if (!userRes.ok) {
-		console.error("Failed to create user:", await userRes.text());
+		const detail = await userRes.text();
+		console.error("Failed to create user:", detail);
 		error(userRes.status, "Failed to create account");
 	}
 

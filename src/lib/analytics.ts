@@ -25,6 +25,8 @@ export type EventName =
 	| "community_map_click"
 	| "issues_map_click"
 	| "account_button_click"
+	| "signup_button_click"
+	| "signup_create_account_success"
 	| "nav_menu_open"
 	| "layers_panel_open"
 	| "worldview_toggle"

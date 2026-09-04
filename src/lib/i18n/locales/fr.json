@@ -75,6 +75,7 @@
 		"goToHome": "Aller à la page d'accueil",
 		"account": "Compte",
 		"login": "Se connecter",
+		"signup": "S'inscrire",
 		"accountAlt": "Compte",
 		"loginAlt": "Se connecter",
 		"worldView": "Vue globe",
@@ -1177,5 +1178,18 @@
 		"nsecSubmit": "Se connecter avec nsec",
 		"nsecInvalid": "Cela ne ressemble pas à un nsec valide",
 		"or": "ou"
+	},
+	"signup": {
+		"title": "S'inscrire",
+		"description": "Choisissez un nom d'utilisateur et un mot de passe pour créer votre compte.",
+		"username": "Nom d'utilisateur",
+		"password": "Mot de passe",
+		"passwordHint": "Utilisez au moins {min} caractères.",
+		"passwordTooShort": "Le mot de passe doit comporter au moins {min} caractères.",
+		"submit": "Créer un compte",
+		"creating": "Création du compte...",
+		"error": "Impossible de créer le compte. Le nom d'utilisateur est peut-être déjà pris.",
+		"haveAccount": "Vous avez déjà un compte ?",
+		"signIn": "Se connecter"
 	}
 }

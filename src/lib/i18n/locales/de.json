@@ -75,6 +75,7 @@
 		"goToHome": "Zur Startseite gehen",
 		"account": "Konto",
 		"login": "Anmelden",
+		"signup": "Registrieren",
 		"accountAlt": "Konto",
 		"loginAlt": "Anmelden",
 		"worldView": "Globusansicht",
@@ -1177,5 +1178,18 @@
 		"nsecSubmit": "Mit nsec anmelden",
 		"nsecInvalid": "Das sieht nicht nach einem gültigen nsec aus",
 		"or": "oder"
+	},
+	"signup": {
+		"title": "Registrieren",
+		"description": "Wähle einen Benutzernamen und ein Passwort, um dein Konto zu erstellen.",
+		"username": "Benutzername",
+		"password": "Passwort",
+		"passwordHint": "Verwende mindestens {min} Zeichen.",
+		"passwordTooShort": "Das Passwort muss mindestens {min} Zeichen lang sein.",
+		"submit": "Konto erstellen",
+		"creating": "Konto wird erstellt...",
+		"error": "Konto konnte nicht erstellt werden. Der Benutzername ist möglicherweise bereits vergeben.",
+		"haveAccount": "Du hast bereits ein Konto?",
+		"signIn": "Anmelden"
 	}
 }

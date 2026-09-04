@@ -75,6 +75,7 @@
 		"goToHome": "Ir a la página de inicio",
 		"account": "Cuenta",
 		"login": "Iniciar sesión",
+		"signup": "Registrarse",
 		"accountAlt": "Cuenta",
 		"loginAlt": "Iniciar sesión",
 		"worldView": "Vista de globo",
@@ -1177,5 +1178,18 @@
 		"nsecSubmit": "Inicia sesión con nsec",
 		"nsecInvalid": "Eso no parece un nsec válido",
 		"or": "o"
+	},
+	"signup": {
+		"title": "Registrarse",
+		"description": "Elige un nombre de usuario y una contraseña para crear tu cuenta.",
+		"username": "Nombre de usuario",
+		"password": "Contraseña",
+		"passwordHint": "Usa al menos {min} caracteres.",
+		"passwordTooShort": "La contraseña debe tener al menos {min} caracteres.",
+		"submit": "Crear cuenta",
+		"creating": "Creando cuenta...",
+		"error": "No se pudo crear la cuenta. Es posible que el nombre de usuario ya esté en uso.",
+		"haveAccount": "¿Ya tienes una cuenta?",
+		"signIn": "Iniciar sesión"
 	}
 }

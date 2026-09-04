@@ -40,6 +40,7 @@
 		"myActivity": "My Activity",
 		"account": "Account",
 		"login": "Log in",
+		"signup": "Sign up",
 		"logout": "Log out",
 		"backupAccount": "Back up account"
 	},
@@ -93,6 +94,19 @@
 		"nsecSubmit": "Sign in with nsec",
 		"nsecInvalid": "That does not look like a valid nsec",
 		"or": "or"
+	},
+	"signup": {
+		"title": "Sign up",
+		"description": "Pick a username and password to create your account.",
+		"username": "Username",
+		"password": "Password",
+		"passwordHint": "Use at least {min} characters.",
+		"passwordTooShort": "Password must be at least {min} characters.",
+		"submit": "Create account",
+		"creating": "Creating account...",
+		"error": "Could not create account. The username may already be taken.",
+		"haveAccount": "Already have an account?",
+		"signIn": "Sign in"
 	},
 	"backup": {
 		"title": "Back up account",
@@ -170,6 +184,7 @@
 		"merchantMap": "Merchant map",
 		"account": "Account",
 		"login": "Log in",
+		"signup": "Sign up",
 		"zoomIn": "Zoom in",
 		"zoomOut": "Zoom out",
 		"basemapTitle": "Basemap",

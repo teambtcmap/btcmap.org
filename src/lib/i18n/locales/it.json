@@ -40,6 +40,7 @@
 		"myActivity": "La mia attività",
 		"account": "Account",
 		"login": "Accedi",
+		"signup": "Registrati",
 		"logout": "Esci",
 		"backupAccount": "Backup dell'account"
 	},
@@ -93,6 +94,19 @@
 		"nsecSubmit": "Accedi con nsec",
 		"nsecInvalid": "Questo non sembra un nsec valido",
 		"or": "oppure"
+	},
+	"signup": {
+		"title": "Registrati",
+		"description": "Scegli un nome utente e una password per creare il tuo account.",
+		"username": "Nome utente",
+		"password": "Password",
+		"passwordHint": "Usa almeno {min} caratteri.",
+		"passwordTooShort": "La password deve contenere almeno {min} caratteri.",
+		"submit": "Crea account",
+		"creating": "Creazione account...",
+		"error": "Impossibile creare l'account. Il nome utente potrebbe essere già in uso.",
+		"haveAccount": "Hai già un account?",
+		"signIn": "Accedi"
 	},
 	"backup": {
 		"title": "Backup dell'account",
@@ -170,6 +184,7 @@
 		"merchantMap": "Mappa commercianti",
 		"account": "Account",
 		"login": "Accedi",
+		"signup": "Registrati",
 		"zoomIn": "Ingrandisci",
 		"zoomOut": "Rimpicciolisci",
 		"basemapTitle": "Basemap",
