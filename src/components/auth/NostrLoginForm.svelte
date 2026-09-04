@@ -16,15 +16,21 @@ import type { Session } from "$lib/session";
 import { session } from "$lib/session";
 import { errToast } from "$lib/utils";
 
-// Mirrors LoginForm's contract: caller decides what happens after a
-// successful login (navigate, complete a pending save, etc.).
-export let onSuccess: (session: Session) => void | Promise<void>;
+type Props = {
+	// Mirrors LoginForm's contract: caller decides what happens after a
+	// successful login (navigate, complete a pending save, etc.).
+	onSuccess: (session: Session) => void | Promise<void>;
+};
 
-let hasNostrExtension = false;
-let showNsecInput = false;
-let nsec = "";
-let nostrLoading = false;
-let nsecLoading = false;
+let { onSuccess }: Props = $props();
+
+let hasNostrExtension = $state(false);
+let showNsecInput = $state(false);
+let nsec = $state("");
+let nostrLoading = $state(false);
+let nsecLoading = $state(false);
+
+const anyLoading = $derived(nostrLoading || nsecLoading);
 
 onMount(() => {
 	// Extensions inject window.nostr before page load, but a few are slow.
@@ -77,8 +83,9 @@ async function loginWithExtension() {
 	}
 }
 
-async function loginWithNsec() {
-	// Re-entry guard: form's on:submit can fire via Enter or rapid double-
+async function loginWithNsec(event: SubmitEvent) {
+	event.preventDefault();
+	// Re-entry guard: the form's submit can fire via Enter or rapid double-
 	// click before the disabled state on the button takes effect, which
 	// would decode + sign the same nsec twice and double-fire the network
 	// exchange.
@@ -117,14 +124,12 @@ async function loginWithNsec() {
 		nsecLoading = false;
 	}
 }
-
-$: anyLoading = nostrLoading || nsecLoading;
 </script>
 
 {#if hasNostrExtension}
 	<button
 		type="button"
-		on:click={loginWithExtension}
+		onclick={loginWithExtension}
 		disabled={anyLoading}
 		class="w-full rounded-lg bg-purple-600 px-4 py-2 font-semibold text-white transition-colors hover:bg-purple-700 disabled:opacity-50"
 	>
@@ -133,7 +138,7 @@ $: anyLoading = nostrLoading || nsecLoading;
 {/if}
 
 {#if showNsecInput}
-	<form on:submit|preventDefault={loginWithNsec} class="space-y-2">
+	<form onsubmit={loginWithNsec} class="space-y-2">
 		<label
 			for="nsec"
 			class="block text-sm font-semibold text-primary dark:text-white"
@@ -165,7 +170,7 @@ $: anyLoading = nostrLoading || nsecLoading;
 {:else}
 	<button
 		type="button"
-		on:click={() => (showNsecInput = true)}
+		onclick={() => (showNsecInput = true)}
 		class="w-full text-center text-sm text-link transition-colors hover:text-hover"
 	>
 		{$_("login.nsecSubmit")}
