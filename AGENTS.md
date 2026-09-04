@@ -1,6 +1,6 @@
 # BTC Map Development Guidelines
 
-This file contains project-specific guidelines and commands for Claude Code to follow when working on this codebase.
+Guidelines for coding agents working on this codebase (`CLAUDE.md` is a symlink to this file).
 
 ## ⚠️ PRE-COMMIT CHECKLIST
 
@@ -13,7 +13,9 @@ This file contains project-specific guidelines and commands for Claude Code to f
 5. **🧪 Unit tests:** Run `pnpm run test --run`
 6. **📝 Commit format:** Use [Conventional Commits](https://www.conventionalcommits.org/) format with issue number
 
-**Failure to run `pnpm run format:fix` before committing will result in inconsistent code formatting.**
+A husky pre-commit hook (lint-staged) runs `biome check --write` on staged `*.{js,ts,svelte,json,css}` files, so formatting lands at commit time either way; running `pnpm run format:fix` first keeps the hook a no-op and the diff predictable. Biome formats only the `<script>` block of a `.svelte` file; template and style whitespace stay yours to keep consistent.
+
+`pnpm run check` runs `svelte-kit sync` before `svelte-check`. If `pnpm run typecheck` reports errors in files you never touched right after adding a route, the generated types are stale: run `pnpm run check` first.
 
 ## Code Quality Commands
 
@@ -103,6 +105,12 @@ import type { Place, Report, AreaTags } from '$lib/types';
   endpoints (all fields optional). Don't autocomplete the wrong one — if a
   store or component needs `Place`, it's the `$lib/types` one
 
+### Tests
+
+- A module with a sibling `*.test.ts` (e.g. `src/lib/session.ts`) gets new cases for every behaviour change in the same PR, written before the change so they fail first
+- Server routes under `src/routes/api/**` get a `server.test.ts` beside `+server.ts`, modeled on `src/routes/api/session/nostr/server.test.ts`: stub `request` and `fetch`, assert the status of every error path and the forwarded upstream call on success
+- There are no component tests (no testing-library). Keep logic that needs testing in `$lib` modules and keep components thin
+
 ### Comments
 
 - **Avoid JSDoc comments** (`/** */` with `@param`, `@returns`, `@description`, etc.)
@@ -128,8 +136,6 @@ export const updateSinglePlace = async (placeId: string | number): Promise<Place
 ```
 
 ## Git Commit Guidelines
-
-**⚠️ CRITICAL: Always run `pnpm run format:fix` before committing!**
 
 Follow [Conventional Commits](https://www.conventionalcommits.org/) format for all commits:
 
@@ -172,22 +178,24 @@ Use the appropriate tool attribution based on which tool generated the commit:
 ### Workflow:
 
 1. Make your changes
-2. **🎨 MANDATORY:** Run `pnpm run format:fix` ⚠️ **THIS IS REQUIRED BEFORE EVERY COMMIT** ⚠️
+2. Run `pnpm run format:fix`
 3. Run `pnpm run check` to perform Svelte validation
 4. Run `pnpm run typecheck` to perform project-wide TS type checking
 5. Run `pnpm run lint` to verify no errors
 6. Verify the commit type matches the change (e.g., `ci` for CI changes, `feat` only for new features, not config/tooling)
 7. Stage and commit with conventional format
-8. Include issue number if applicable (e.g., `#276`)
-
-**🚨 CRITICAL REMINDER:** You MUST run `pnpm run format:fix` before staging any commit. This is non-negotiable and ensures consistent code formatting across the entire project.
+8. Include the issue number (e.g., `#276`). No issue yet? Create one first (CONTRIBUTING.md asks for an issue per feature) with `gh issue create` along the templates in `.github/ISSUE_TEMPLATE/`, then reference it in every commit and in the PR title so a squash-merge keeps it
+9. Write the PR body along `.github/pull_request_template.md` and verify every claim in it against the diff before posting: which locales, which entry points, which events fire. Reviewers read the body as the spec
 
 ## i18n / Translations
 
 When editing locale files in `src/lib/i18n/locales/*.json`:
 
 - **Never translate proper names or usernames.** Personal names (e.g. `Nathan Day`), brand names, and online handles (e.g. `secondl1ght`, `karnage`) must be kept verbatim across all locales. Translating them produces incorrect, sometimes nonsensical output (e.g. "Nathan Dag", "tweedelig").
-- **Keep keys aligned with `en.json`.** When adding or renaming keys, update every locale file so the key sets match. Missing keys silently fall back to English at runtime.
+- **Keep keys aligned with `en.json`.** When adding or renaming keys, update every locale file so the key sets match. Missing keys silently fall back to English at runtime. A section already missing keys in some locale is not a licence to leave the new key out too. Before committing, list what each locale lacks; none of the keys your PR adds may appear:
+  ```bash
+  for f in src/lib/i18n/locales/*.json; do jq -r --arg f "$f" --slurpfile en src/lib/i18n/locales/en.json '([paths(scalars)|join(".")]) as $k | (($en[0]|[paths(scalars)|join(".")]) - $k)[] | "\($f): \(.)"' "$f"; done
+  ```
 - **Use the file's existing HTML-entity style for diacritics** (`&euml;`, `&ouml;`, `&uuml;`, `&eacute;`, `&mdash;`) rather than mixing literal Unicode and entity forms within the same locale.
 - **Don't translate honeypot fields.** Anti-spam honeypot inputs (the `name="honey"` fields on add-location, verify-location, communities/add, tagger-onboarding, and VerifyCommunityForm) are rendered with `class="hidden"` and never seen by humans, so translating their `placeholder` provides zero UX value while bloating every locale. Inline the placeholder as a hardcoded English string at the call site instead of referencing an i18n key.
 
@@ -201,6 +209,12 @@ All API fetch calls use `API_BASE` from `$lib/api-base.ts` instead of hardcoding
 When adding new API calls, always use `${API_BASE}/...` (imported from `$lib/api-base`) with the correct version/endpoint (e.g. `/v2/`, `/v3/`, `/v4/`, `/rpc`) — never hardcode `https://api.btcmap.org` directly.
 
 User-facing URLs (Atom feed `href` attributes, OpenGraph image URLs) should remain hardcoded to the production API since they're rendered in HTML and must resolve publicly.
+
+## Accounts & sessions
+
+- `Session.password` (`src/lib/session.ts`) holds a password only for auto-generated throwaway accounts, so the backup modal can show it once. Logins and self-service signups with user-chosen credentials store `""`: the user knows them, and a chosen password in `localStorage` turns the throwaway-account XSS trade-off (documented in the file header) into real credential theft
+- `autoGenerated` gates the backup nag in `UserMenu`; a session with `autoGenerated: false` never gets to see a stored password, so storing one there is pure liability
+- The `src/routes/api/session/*` routes proxy the btcmap API server-side to dodge CORS. Bound every body field like the login route does (username ≤ 100, password ≤ 200 chars) and mirror the sibling route's status mapping so the client's `errToast` branches stay uniform
 
 ## Nostr
 
@@ -266,7 +280,8 @@ Use [https://nostrhub.io/nips](https://nostrhub.io/nips) as the definitive NIP s
 - Prefer editing existing files over creating new ones
 - Only create documentation files when explicitly requested
 - **Area pages (`/community/[area]/*`, `/country/[area]/*`)** — sections are literal route directories (`merchants|stats|activity|maintain`, the `AREA_SECTIONS`/`AreaSection` union in `$lib/areaSectionLoad.ts`), not a `[section]` param; the `[...section]` catch-all only 302s unknown sections to `/merchants`. Each section's `+page.server.ts` is a one-liner calling `loadCommunityArea`/`loadCountryArea` from `$lib/area/routeConfigs.ts` (there is no layout `load` — every section runs the full `loadAreaSection`, keeping tab-switch refetch parity), and each `+page.svelte` is a one-line wrapper around the shared `$components/area/Area*Section.svelte`. The per-type `+layout.svelte` mounts `$components/area/AreaLayout.svelte`, which owns the chrome, the containment sweep, the taggers fetch and the `areaReports` tri-state (`undefined` loading / `[]` none / data — don't collapse it) and shares them through store-valued context (`AREA_SECTION_CONTEXT` / `getAreaSectionContext()` in `$lib/area/sectionContext.ts`). That context is the only sanctioned way for a section component to read `filteredPlaces`, `sweepDone`, `areaReports` or the taggers — don't re-derive them from `page.data`. Page instances are reused across X→Y area navigation, so section-side triggers (e.g. `ensureTaggers()`) belong in a reactive `$effect` over the context stores, never in `onMount`.
-- **Svelte 5, mixed-mode → runes** — the app runs Svelte 5; the table cluster (`src/routes/leaderboard`, `src/components/leaderboard/*` — except `AreaLeaderboardItemName`, `GradeDisplay`, and `LeaderboardCountryName`, which are still legacy — `IssuesTable`, `ProfileActivity`) is runes-mode, most other components are still legacy (Svelte-4 syntax). Write NEW components in runes mode (`$props`, `$state`, `$derived`, `$effect`). **Boy-scout rule: when a PR makes meaningful changes to a legacy component, convert that file to runes mode in the same PR** — as its own commit, so the conversion diff stays separately reviewable from the feature change. Conversions are whole-file (runes and legacy syntax cannot mix within one file) and include the template idioms: `on:` → event attributes, `<svelte:component>` → dynamic components, slots → snippets where practical. Exceptions — do NOT convert as a drive-by: trivial edits (a one-line fix doesn't obligate converting a large file), and the #1208 hotspots that need deliberate hand-conversion (`CommunityCard`, `MerchantListPanel`, `merchant/[id]/+page.svelte`, `Socials`, `area/MerchantCard`, `routes/map/+page.svelte`, and `area/AreaLayout` — its sweep reset/trigger `$:` pair relies on source-order evaluation, the #1177 lesson; a runes conversion has to re-establish that ordering by hand). Tick converted files/folders off in #1208. Never use the removed imperative component API (`new Component()`/`$destroy`) — use `mount()`/`unmount()` from `svelte`.
+- **Svelte 5, mixed-mode → runes** — the app runs Svelte 5; the table cluster (`src/routes/leaderboard`, `src/components/leaderboard/*` — except `AreaLeaderboardItemName`, `GradeDisplay`, and `LeaderboardCountryName`, which are still legacy — `IssuesTable`, `ProfileActivity`) is runes-mode, most other components are still legacy (Svelte-4 syntax). Write NEW components in runes mode (`$props`, `$state`, `$derived`, `$effect`), also when the new file is modeled on a legacy sibling: a new form copied from `LoginForm` is still a new file, port it while writing. Runes references to copy from: `src/routes/map/components/MapMenuModal.svelte` (typed `Props` + `$props()`, `$bindable`, `$derived`, `onclick`) and `src/components/form/OpeningHoursEditor.svelte`. A form handler takes the `SubmitEvent` and calls `event.preventDefault()` itself; `on:submit|preventDefault` is legacy syntax. **Boy-scout rule: when a PR makes meaningful changes to a legacy component, convert that file to runes mode in the same PR** — as its own commit, so the conversion diff stays separately reviewable from the feature change. Conversions are whole-file (runes and legacy syntax cannot mix within one file) and include the template idioms: `on:` → event attributes, `<svelte:component>` → dynamic components, slots → snippets where practical. Exceptions — do NOT convert as a drive-by: trivial edits (a one-line fix doesn't obligate converting a large file), and the #1208 hotspots that need deliberate hand-conversion (`CommunityCard`, `MerchantListPanel`, `merchant/[id]/+page.svelte`, `Socials`, `area/MerchantCard`, `routes/map/+page.svelte`, and `area/AreaLayout` — its sweep reset/trigger `$:` pair relies on source-order evaluation, the #1177 lesson; a runes conversion has to re-establish that ordering by hand). Tick converted files/folders off in #1208. Never use the removed imperative component API (`new Component()`/`$destroy`) — use `mount()`/`unmount()` from `svelte`.
 - **TanStack Table v9** — every table shares the feature set from `src/lib/tableFeatures.ts` (`btcmapTableFeatures`, which registers the typed `'fuzzy'` filterFn). Create tables with `createTable({ features: btcmapTableFeatures, get data() { ... } })` getter options in a runes-mode component; read state via `table.atoms.<slice>.get()`; render header cells with the shared `$components/leaderboard/SortableHeaderCell.svelte` inside `<th aria-sort={resolveAriaSort(header)}>` (don't hand-roll the sort button — that duplication was removed in #1244); render body cells with `<FlexRender cell={cell} />` / `renderComponent()`. No writable-options stores, no `getCoreRowModel()` — those are v8 patterns.
 - **Tailwind v4** — uses `@tailwindcss/vite` plugin, not the v3 PostCSS setup; do not use `theme.extend` patterns from v3 docs
 - **`$components` path alias** resolves to `src/components/` — use it instead of relative paths or `$lib/components`
+- **Analytics** — every user-facing entry point (link, button, menu row) fires `trackEvent` with a name from the `EventName` union in `src/lib/analytics.ts`; add the name there first. Funnels pair a `*_click` with a `*_success` event, and a link that appears in several menus fires the same event from each
