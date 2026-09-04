@@ -1,7 +1,7 @@
 import type { Page } from '@playwright/test';
 import { expect, test } from '@playwright/test';
 
-import { stubMapData, waitForMarkersToLoad } from './helpers';
+import { stubMapData, stubReverseGeocode, waitForMarkersToLoad } from './helpers';
 
 // Step 3 of the add-location redesign (#1134): confirming a placement pin
 // near existing places interrupts with a duplicate check before the form.
@@ -64,26 +64,32 @@ test.describe('Placement dedupe interrupt', () => {
 		await expect(page.getByText('Is it one of these?')).toBeHidden();
 	});
 
-	test('add-anyway continues to the form with the pin coords', async ({
+	test('add-anyway continues to the in-map form with the pin coords', async ({
 		page
 	}) => {
 		await stubMapData(page);
+		await stubReverseGeocode(page);
 		await startPlacement(page);
 
 		await page.getByRole('button', { name: 'Add a place here' }).click();
 		await page.getByRole('button', { name: 'Add a new place' }).click();
-		await expect(page).toHaveURL(/\/add-location\?lat=42\.27\d+&long=42\.70\d+/);
+		// The form opens on the map itself (#1134): the URL stays /map, with
+		// ?add=form marking the state and the pin still in the hash.
+		await expect(page).toHaveURL(/\/map\?add=form#\d+(\.\d+)?\/42\.27\d+\/42\.70\d+/);
+		await expect(page.locator('#name')).toBeVisible();
 	});
 
-	test('no nearby places goes straight to the form', async ({ page }) => {
+	test('no nearby places goes straight to the in-map form', async ({ page }) => {
 		// One stub place far outside the radius — markers load, no candidates.
 		await stubMapData(page, [
 			{ id: 9, lat: 42.3, lon: 42.75, icon: 'cafe', name: 'Far Place' }
 		]);
+		await stubReverseGeocode(page);
 		await startPlacement(page);
 
 		await page.getByRole('button', { name: 'Add a place here' }).click();
-		await expect(page).toHaveURL(/\/add-location\?lat=42\.27\d+&long=42\.70\d+/);
+		await expect(page).toHaveURL(/\/map\?add=form#\d+(\.\d+)?\/42\.27\d+\/42\.70\d+/);
+		await expect(page.locator('#name')).toBeVisible();
 	});
 
 	test('falls back to Unnamed place when the name lookup returns nothing', async ({

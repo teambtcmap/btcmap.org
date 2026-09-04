@@ -17,14 +17,13 @@ import { _ } from "$lib/i18n";
 import { calculateRadiusKmFromLngLatBounds } from "$lib/map/viewport";
 import type { NearbyPlace } from "$lib/placementMode";
 import {
-	buildAddLocationUrl,
 	clampDedupeRadiusKm,
 	fetchNearbyPlaceNames,
 	findNearbyPlaces,
 } from "$lib/placementMode";
 import { places } from "$lib/store";
 
-import { goto } from "$app/navigation";
+import AddPlaceFormPanel from "./AddPlaceFormPanel.svelte";
 
 type Props = {
 	map: MapLibreMap | undefined;
@@ -49,16 +48,26 @@ let namesLoaded = $state(false);
 let backButtonEl: HTMLButtonElement | undefined = $state();
 let confirmButtonEl: HTMLButtonElement | undefined = $state();
 
-// Keep ?add in the URL so placement mode is linkable. Same raw
+// The in-map form host (#1134): confirming hands the pin to the form
+// panel instead of navigating to /add-location. The pin (crosshair =
+// map center) stays live on desktop, so every settled move refreshes
+// the form's coords.
+let formOpen = $state(false);
+let formCoords = $state<{ lat: number; long: number } | null>(null);
+
+// Keep ?add in the URL so placement mode is linkable (?add=form while
+// the form is open — the pin itself lives in the hash). Same raw
 // history.replaceState idiom as writeHashCoords ($lib/map/mapHash.ts),
 // which preserves location.search on every viewport write — so ?add
 // survives map moves and the hash survives this toggle. Other query
 // params (e.g. ?issues) must be preserved, so edit, don't rebuild.
-// Runs as an effect (reading `active` tracks it) so external activation —
-// the page flipping bind:active from the menu entry — syncs too.
+// Runs as an effect (reading `active`/`formOpen` tracks them) so
+// external activation — the page flipping bind:active from the menu
+// entry — syncs too.
 $effect(() => {
 	const params = new URLSearchParams(window.location.search);
-	if (active) params.set("add", "");
+	if (active && formOpen) params.set("add", "form");
+	else if (active) params.set("add", "");
 	else params.delete("add");
 	const query = params.toString() ? `?${params.toString()}` : "";
 	history.replaceState(
@@ -66,6 +75,56 @@ $effect(() => {
 		"",
 		`${window.location.pathname}${query}${window.location.hash}`,
 	);
+});
+
+// Browser back/forward walks the add-flow states: the form pushes an
+// entry on open (see openForm), so popping lands back on the placement
+// entry — same history-walks-the-UI idiom as the merchant drawer.
+$effect(() => {
+	const onPop = () => {
+		const params = new URLSearchParams(window.location.search);
+		const wasOpen = formOpen;
+		active = params.has("add");
+		formOpen = active && params.get("add") === "form";
+		if (formOpen && !formCoords && map) {
+			const center = map.getCenter();
+			formCoords = { lat: center.lat, long: center.lng };
+		}
+		if (wasOpen && !formOpen && active) {
+			tick().then(() => confirmButtonEl?.focus());
+		}
+	};
+	window.addEventListener("popstate", onPop);
+	return () => window.removeEventListener("popstate", onPop);
+});
+
+// Reload / deep link with ?add=form: the hash already restored the
+// viewport, so the map center IS the pin — reopen the form there. The
+// param is captured at init because the URL-sync effect above rewrites
+// it (to bare ?add=) on its first run, before this effect can look.
+const arrivedWithForm =
+	new URLSearchParams(window.location.search).get("add") === "form";
+let restoredFromUrl = false;
+$effect(() => {
+	if (restoredFromUrl || !arrivedWithForm || !map || !active) return;
+	restoredFromUrl = true;
+	const center = map.getCenter();
+	formCoords = { lat: center.lat, long: center.lng };
+	formOpen = true;
+});
+
+// Desktop live adjust: the map stays interactive beside the panel and
+// the crosshair remains the pin, so each settled move hands the new
+// center to the form (whose address lookup re-runs on coords changes).
+$effect(() => {
+	if (!map || !formOpen) return;
+	const currentMap = map;
+	const onMoveEnd = () => {
+		const center = currentMap.getCenter();
+		formCoords = { lat: center.lat, long: center.lng };
+	};
+	currentMap.on("moveend", onMoveEnd);
+	return () => currentMap.off("moveend", onMoveEnd);
 });
 
 const enter = (method: string) => {
@@ -107,9 +166,46 @@ const cancel = () => {
 // add_place_confirm keeps meaning "handed off to the form" — it fires on
 // both the direct path and the add-anyway path, so the funnel metric is
 // unchanged by the interrupt.
-const navigateToForm = (lat: number, long: number) => {
+const openForm = (lat: number, long: number) => {
 	trackEvent("add_place_confirm");
-	goto(buildAddLocationUrl(lat, long));
+	nearby = null;
+	formCoords = { lat, long };
+	// Push (not replace): Back closes the form onto the placement entry
+	// below. The URL-sync effect then re-writes the same URL, a no-op.
+	const params = new URLSearchParams(window.location.search);
+	params.set("add", "form");
+	history.pushState(
+		history.state,
+		"",
+		`${window.location.pathname}?${params.toString()}${window.location.hash}`,
+	);
+	formOpen = true;
+};
+
+const closeForm = () => {
+	// The open pushed an entry — going back restores the placement entry
+	// and the popstate listener flips the state (and restores focus).
+	history.back();
+};
+
+const addAnother = () => {
+	trackEvent("add_place_enter", { method: "another" });
+	history.back();
+};
+
+const exitToMap = () => {
+	// Push the cleaned URL so Back can still walk into the flow's states,
+	// then drop both modes; the URL effect re-writes the same URL, a no-op.
+	const params = new URLSearchParams(window.location.search);
+	params.delete("add");
+	const query = params.toString() ? `?${params.toString()}` : "";
+	history.pushState(
+		history.state,
+		"",
+		`${window.location.pathname}${query}${window.location.hash}`,
+	);
+	formOpen = false;
+	active = false;
 };
 
 const confirm = async () => {
@@ -129,7 +225,7 @@ const confirm = async () => {
 		radiusKm * 1000,
 	);
 	if (hits.length === 0) {
-		navigateToForm(center.lat, center.lng);
+		openForm(center.lat, center.lng);
 		return;
 	}
 	nearby = hits;
@@ -156,7 +252,7 @@ const addAnyway = () => {
 	if (!map) return;
 	const center = map.getCenter();
 	trackEvent("add_place_nearby_continue");
-	navigateToForm(center.lat, center.lng);
+	openForm(center.lat, center.lng);
 };
 
 const backToConfirm = async () => {
@@ -284,6 +380,17 @@ $effect(() => {
 		<PlacementPinIcon width={40} />
 	</div>
 
+	{#if formOpen && formCoords}
+		<!-- The form host: full-screen sheet on mobile, right panel on
+		     desktop. Replaces the confirm/interrupt sheets; the crosshair
+		     above stays — it is still the live pin. -->
+		<AddPlaceFormPanel
+			coords={formCoords}
+			onclose={closeForm}
+			onaddanother={addAnother}
+			onexit={exitToMap}
+		/>
+	{:else}
 	<!-- Mobile: edge-to-edge bottom sheet (pb-6 clears the home indicator).
 	     Desktop: the sheet would stretch the buttons across the whole
 	     viewport, so float it as a centered card instead — max-w-xl matches
@@ -373,4 +480,5 @@ $effect(() => {
 			</div>
 		{/if}
 	</div>
+	{/if}
 {/if}
