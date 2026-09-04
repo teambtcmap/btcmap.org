@@ -2,16 +2,10 @@
 import PrimaryButton from "$components/PrimaryButton.svelte";
 import { trackEvent } from "$lib/analytics";
 import { _ } from "$lib/i18n";
+import { PASSWORD_MAX_LENGTH, PASSWORD_MIN_LENGTH } from "$lib/passwordPolicy";
 import type { Session } from "$lib/session";
 import { session } from "$lib/session";
 import { errToast } from "$lib/utils";
-
-// Client-side password length policy. The REST POST /v4/users endpoint does
-// NOT enforce a minimum, so this is purely a UX guard: the input's native
-// minlength blocks submit with the browser's own message, the same way
-// `required` works on the other forms.
-const MIN_PASSWORD_LENGTH = 8;
-const MAX_PASSWORD_LENGTH = 64;
 
 type Props = {
 	// Caller receives the new session after a successful signup, matching the
@@ -81,12 +75,12 @@ async function handleSubmit(event: SubmitEvent) {
 			type="password"
 			bind:value={password}
 			autocomplete="new-password"
-			minlength={MIN_PASSWORD_LENGTH}
-			maxlength={MAX_PASSWORD_LENGTH}
+			minlength={PASSWORD_MIN_LENGTH}
+			maxlength={PASSWORD_MAX_LENGTH}
 			class="w-full rounded-lg border border-gray-300 bg-white px-3 py-2 text-primary dark:border-white/20 dark:bg-dark dark:text-white"
 		/>
 		<p class="mt-1 text-xs text-body dark:text-white/50">
-			{$_("signup.passwordHint", { values: { min: MIN_PASSWORD_LENGTH } })}
+			{$_("signup.passwordHint", { values: { min: PASSWORD_MIN_LENGTH } })}
 		</p>
 	</div>
 

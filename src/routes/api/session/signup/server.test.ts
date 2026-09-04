@@ -82,10 +82,21 @@ describe("POST /api/session/signup", () => {
 		expect(fetchImpl).not.toHaveBeenCalled();
 	});
 
+	it("400 when password is shorter than 8 characters", async () => {
+		const fetchImpl = vi.fn();
+		await expect(
+			call(makeRequest({ password: "short7!" }), fetchImpl),
+		).rejects.toMatchObject({ status: 400 });
+		expect(fetchImpl).not.toHaveBeenCalled();
+	});
+
 	it("400 when name exceeds 100 characters", async () => {
 		const fetchImpl = vi.fn();
 		await expect(
-			call(makeRequest({ name: "n".repeat(101), password: "pw" }), fetchImpl),
+			call(
+				makeRequest({ name: "n".repeat(101), password: "correct-horse" }),
+				fetchImpl,
+			),
 		).rejects.toMatchObject({ status: 400 });
 		expect(fetchImpl).not.toHaveBeenCalled();
 	});
@@ -93,14 +104,17 @@ describe("POST /api/session/signup", () => {
 	it("400 when name is not a string", async () => {
 		const fetchImpl = vi.fn();
 		await expect(
-			call(makeRequest({ name: 42, password: "pw" }), fetchImpl),
+			call(makeRequest({ name: 42, password: "correct-horse" }), fetchImpl),
 		).rejects.toMatchObject({ status: 400 });
 		expect(fetchImpl).not.toHaveBeenCalled();
 	});
 
 	it("creates a throwaway when name is omitted", async () => {
 		const fetchImpl = happyUpstream();
-		const res = await call(makeRequest({ password: "pw" }), fetchImpl);
+		const res = await call(
+			makeRequest({ password: "correct-horse" }),
+			fetchImpl,
+		);
 		expect(await res.json()).toEqual({
 			username: "generated-name",
 			token: "tok",
@@ -108,13 +122,13 @@ describe("POST /api/session/signup", () => {
 
 		const [url, init] = fetchImpl.mock.calls[0];
 		expect(url).toContain("/v4/users");
-		expect(JSON.parse(init.body)).toEqual({ password: "pw" });
+		expect(JSON.parse(init.body)).toEqual({ password: "correct-horse" });
 	});
 
 	it("treats a blank name as omitted", async () => {
 		const fetchImpl = happyUpstream();
 		const res = await call(
-			makeRequest({ name: "   ", password: "pw" }),
+			makeRequest({ name: "   ", password: "correct-horse" }),
 			fetchImpl,
 		);
 		expect(await res.json()).toEqual({
@@ -122,31 +136,31 @@ describe("POST /api/session/signup", () => {
 			token: "tok",
 		});
 		expect(JSON.parse(fetchImpl.mock.calls[0][1].body)).toEqual({
-			password: "pw",
+			password: "correct-horse",
 		});
 	});
 
 	it("forwards a trimmed name and mints the token for it", async () => {
 		const fetchImpl = happyUpstream();
 		const res = await call(
-			makeRequest({ name: "  alice  ", password: "pw" }),
+			makeRequest({ name: "  alice  ", password: "correct-horse" }),
 			fetchImpl,
 		);
 		expect(await res.json()).toEqual({ username: "alice", token: "tok" });
 
 		expect(JSON.parse(fetchImpl.mock.calls[0][1].body)).toEqual({
 			name: "alice",
-			password: "pw",
+			password: "correct-horse",
 		});
 		const [tokenUrl, tokenInit] = fetchImpl.mock.calls[1];
 		expect(tokenUrl).toContain("/v4/users/alice/tokens");
-		expect(tokenInit.headers.Authorization).toBe("Bearer pw");
+		expect(tokenInit.headers.Authorization).toBe("Bearer correct-horse");
 	});
 
 	it("502 when user creation throws (timeout/network)", async () => {
 		const fetchImpl = vi.fn().mockRejectedValue(new Error("timeout"));
 		await expect(
-			call(makeRequest({ password: "pw" }), fetchImpl),
+			call(makeRequest({ password: "correct-horse" }), fetchImpl),
 		).rejects.toMatchObject({ status: 502 });
 	});
 
@@ -155,7 +169,7 @@ describe("POST /api/session/signup", () => {
 			.fn()
 			.mockResolvedValue(upstream({ ok: false, status: 500 }));
 		await expect(
-			call(makeRequest({ password: "pw" }), fetchImpl),
+			call(makeRequest({ password: "correct-horse" }), fetchImpl),
 		).rejects.toMatchObject({ status: 500 });
 	});
 
@@ -166,7 +180,7 @@ describe("POST /api/session/signup", () => {
 				upstream({ ok: true, status: 201, json: () => Promise.resolve({}) }),
 			);
 		await expect(
-			call(makeRequest({ password: "pw" }), fetchImpl),
+			call(makeRequest({ password: "correct-horse" }), fetchImpl),
 		).rejects.toMatchObject({ status: 502 });
 	});
 });

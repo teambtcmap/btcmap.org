@@ -1,6 +1,7 @@
 import { error, json } from "@sveltejs/kit";
 
 import { API_BASE } from "$lib/api-base";
+import { PASSWORD_MAX_LENGTH, PASSWORD_MIN_LENGTH } from "$lib/passwordPolicy";
 
 import type { RequestHandler } from "./$types";
 
@@ -22,8 +23,14 @@ export const POST: RequestHandler = async ({ request, fetch }) => {
 	}
 	const password = body.password;
 
-	// Same bounds as the login route (username ≤ 100, password ≤ 200).
-	if (!password || typeof password !== "string" || password.length > 200) {
+	// Upper bound as in the login route; the minimum mirrors the signup form's
+	// policy so a direct request can't create a weak-password account.
+	if (
+		!password ||
+		typeof password !== "string" ||
+		password.length < PASSWORD_MIN_LENGTH ||
+		password.length > PASSWORD_MAX_LENGTH
+	) {
 		error(400, "Missing or invalid password");
 	}
 
