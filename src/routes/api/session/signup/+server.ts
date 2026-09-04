@@ -22,14 +22,21 @@ export const POST: RequestHandler = async ({ request, fetch }) => {
 	}
 	const password = body.password;
 
-	if (!password || typeof password !== "string") {
-		error(400, "Missing required parameter: password");
+	// Same bounds as the login route (username ≤ 100, password ≤ 200).
+	if (!password || typeof password !== "string" || password.length > 200) {
+		error(400, "Missing or invalid password");
 	}
 
+	const rawName = body.name;
+	if (rawName != null && typeof rawName !== "string") {
+		error(400, "Invalid name");
+	}
+	// name is optional: omitted or blank means the API generates one.
 	const name =
-		typeof body.name === "string" && body.name.trim().length > 0
-			? body.name.trim()
-			: undefined;
+		typeof rawName === "string" ? rawName.trim() || undefined : undefined;
+	if (name !== undefined && name.length > 100) {
+		error(400, "Invalid name");
+	}
 
 	let userRes: Response;
 	try {
