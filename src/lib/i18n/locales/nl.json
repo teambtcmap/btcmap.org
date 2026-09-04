@@ -121,8 +121,6 @@
 		"copyFailed": "Kopiëren mislukt, kopieer alsjeblieft handmatig"
 	},
 	"save": {
-		"accountCreatedPlace": "Account aangemaakt, je opgeslagen locaties worden op dit apparaat bewaard.",
-		"accountCreatedArea": "Account aangemaakt, je opgeslagen gebieden worden op dit apparaat bewaard.",
 		"prompt": {
 			"titlePlace": "Sla deze locatie op",
 			"titleArea": "Sla dit gebied op",
@@ -130,8 +128,7 @@
 			"descriptionArea": "Meld je aan met je huidige account of maak een nieuw account aan, zodat je opgeslagen gebieden bewaard blijven.",
 			"createAccount": "Account aanmaken",
 			"login": "Aanmelden",
-			"back": "Terug",
-			"done": "Gereed"
+			"back": "Terug"
 		}
 	},
 	"search": {

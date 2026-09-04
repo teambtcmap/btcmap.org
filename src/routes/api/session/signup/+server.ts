@@ -6,9 +6,10 @@ import { PASSWORD_MAX_LENGTH, PASSWORD_MIN_LENGTH } from "$lib/passwordPolicy";
 import type { RequestHandler } from "./$types";
 
 // POST /api/session/signup
-// Creates a BTC Map account and returns a Bearer token. The username is
-// optional — when omitted the API generates a random one. Calls two API
-// endpoints server-side to avoid browser CORS issues:
+// Creates a BTC Map account and returns a Bearer token. Both name and
+// password are required: the API's optional-name mode (random username)
+// is no longer exposed since throwaway accounts were retired. Calls two
+// API endpoints server-side to avoid browser CORS issues:
 //   1. POST /v4/users              → create account
 //   2. POST /v4/users/{name}/tokens → get Bearer token
 export const POST: RequestHandler = async ({ request, fetch }) => {
@@ -34,15 +35,9 @@ export const POST: RequestHandler = async ({ request, fetch }) => {
 		error(400, "Missing or invalid password");
 	}
 
-	const rawName = body.name;
-	if (rawName != null && typeof rawName !== "string") {
-		error(400, "Invalid name");
-	}
-	// name is optional: omitted or blank means the API generates one.
-	const name =
-		typeof rawName === "string" ? rawName.trim() || undefined : undefined;
-	if (name !== undefined && name.length > 100) {
-		error(400, "Invalid name");
+	const name = typeof body.name === "string" ? body.name.trim() : "";
+	if (!name || name.length > 100) {
+		error(400, "Missing or invalid name");
 	}
 
 	let userRes: Response;
@@ -51,7 +46,7 @@ export const POST: RequestHandler = async ({ request, fetch }) => {
 		userRes = await fetch(`${API_BASE}/v4/users`, {
 			method: "POST",
 			headers: { "Content-Type": "application/json" },
-			body: JSON.stringify(name ? { name, password } : { password }),
+			body: JSON.stringify({ name, password }),
 		});
 	} catch (err) {
 		console.error("Failed to create user:", err);
