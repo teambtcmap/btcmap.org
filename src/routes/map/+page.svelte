@@ -1491,7 +1491,9 @@ onDestroy(() => {
 	</div>
 {/if}
 
-{#if !placementActive}
+<!-- Hidden, not unmounted, during placement: unmounting dropped the
+     panel's search state, so Cancel came back to an empty list. -->
+<div hidden={placementActive}>
 	<MerchantListPanel
 		bind:this={merchantListPanel}
 		onPanToNearbyMerchant={panToNearbyMerchant}
@@ -1512,7 +1514,7 @@ onDestroy(() => {
 		isMobile={isMobileLayout}
 		issuesMode={issuesOnly}
 	/>
-{/if}
+</div>
 
 {#if styleLoaded && !placementActive}
 	<CommunityRail
