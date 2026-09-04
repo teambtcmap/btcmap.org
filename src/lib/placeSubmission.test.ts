@@ -14,8 +14,6 @@ const fullForm = {
 	phone: "+49 30 123456",
 	hours: "Mo-Fr 10:00-18:00",
 	notes: "Ring the bell",
-	source: "Business Owner",
-	sourceOther: "",
 	contact: "owner@example.com",
 };
 
@@ -40,13 +38,16 @@ describe("buildSubmitPlaceParams", () => {
 			phone: "+49 30 123456",
 			opening_hours: "Mo-Fr 10:00-18:00",
 			notes: "Ring the bell",
-			data_source: "Business Owner",
 			contact: "owner@example.com",
 			osm_edit_url:
 				"https://www.openstreetmap.org/edit#map=21/52.48841/13.42986",
 		});
-		// sourceOther was empty — must not appear
-		expect("data_source_details" in extra_fields).toBe(false);
+		// nameEn empty in this variant — must not appear
+		const { extra_fields: sparse } = buildSubmitPlaceParams(
+			{ ...fullForm, nameEn: "" },
+			"uuid-1",
+		);
+		expect("name:en" in sparse).toBe(false);
 	});
 
 	it("keeps zero coordinates", () => {

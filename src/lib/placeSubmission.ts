@@ -10,8 +10,6 @@ export type AddLocationSubmission = {
 	phone: string;
 	hours: string;
 	notes: string;
-	source: string;
-	sourceOther: string;
 	contact: string;
 };
 
@@ -41,8 +39,6 @@ export const buildSubmitPlaceParams = (
 		phone: form.phone,
 		opening_hours: form.hours,
 		notes: form.notes,
-		data_source: form.source,
-		data_source_details: form.sourceOther,
 		contact: form.contact,
 		osm_edit_url: `https://www.openstreetmap.org/edit#map=21/${form.lat}/${form.long}`,
 	};
