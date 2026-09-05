@@ -29,9 +29,11 @@ import { errToast } from "$lib/utils";
 type Props = {
 	coords: { lat: number; long: number };
 	onsuccess: () => void;
-	// The standalone page shows a static minimap with an adjust link; a
-	// host on the live map hides it — there the map itself is the preview
-	// and the crosshair pin is the live position.
+	// Transitional: the standalone /add-location page still shows a
+	// static minimap with an adjust link; the live-map host hides it —
+	// there the map itself is the preview and the crosshair pin is the
+	// live position. When that page is retired to a redirect (#1134),
+	// this prop and the minimap block go with it.
 	showPinPreview?: boolean;
 };
 let { coords, onsuccess, showPinPreview = true }: Props = $props();
