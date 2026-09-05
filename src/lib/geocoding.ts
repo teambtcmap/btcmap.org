@@ -111,6 +111,10 @@ export const searchAddress = async (
 
 	const results: GeocodeResult[] = [];
 	for (const entry of response.data) {
+		// Reject empty strings before Number(): Number("") is 0, which
+		// would turn a missing coordinate into a valid-looking Null
+		// Island value.
+		if (!entry.lat?.trim() || !entry.lon?.trim()) continue;
 		const lat = Number(entry.lat);
 		const lon = Number(entry.lon);
 		if (Number.isFinite(lat) && Number.isFinite(lon)) {

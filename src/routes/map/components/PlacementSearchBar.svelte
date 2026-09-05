@@ -79,7 +79,9 @@ const jump = (result: GeocodeResult) => {
 				</p>
 			{:else if results}
 				<ul>
-					{#each results as result (result.displayName)}
+					<!-- Nominatim can return identical display names — key by the
+				     full tuple so rows never share one. -->
+				{#each results as result (`${result.lat}/${result.lon}/${result.displayName}`)}
 						<li>
 							<button
 								type="button"
