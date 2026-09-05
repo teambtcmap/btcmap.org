@@ -502,6 +502,8 @@
 		"contactDescription": "Si nous avons des questions complémentaires, nous vous contacterons pour ajouter ce lieu avec succès. Pour accélérer le processus, veuillez vérifier votre dossier spam.",
 		"submittingAs": "Envoi en tant que {username}",
 		"contactSignedInHint": "Votre envoi est lié à votre compte. Ajoutez un e-mail uniquement si vous souhaitez des questions de suivi — il n'est jamais affiché publiquement.",
+		"submitAnonymously": "Ce n'est pas vous ? Envoyer anonymement",
+		"submitAsAccount": "Utiliser mon compte ({username})",
 		"contactPlaceholder": "hello@btcmap.org",
 		"captchaPlaceholder": "Veuillez saisir le texte du captcha.",
 		"formSuccessType": "Lieu",

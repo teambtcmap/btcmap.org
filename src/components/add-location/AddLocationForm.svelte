@@ -141,6 +141,14 @@ let contact = $state<HTMLInputElement>();
 let noMethodSelected = $state(false);
 let submitting = $state(false);
 
+// Per-submission anonymity (#1334): someone on a shared device can
+// detach the signed-in account from THIS submission without logging
+// out. Detached = the plain anonymous contract (required email, no
+// Authorization header).
+let submitAnonymously = $state(false);
+let showDetach = $state(false);
+const identityAttached = $derived(!!$session && !submitAnonymously);
+
 const handleCheckboxClick = () => {
 	noMethodSelected = false;
 };
@@ -192,8 +200,9 @@ const submitForm = (event: SubmitEvent) => {
 					contact: contact?.value,
 				},
 				// The endpoint verifies the token and attaches the account to
-				// the submission (#1334); no session, no header — anonymous.
-				$session
+				// the submission (#1334); no session (or a detached one), no
+				// header — anonymous.
+				identityAttached && $session
 					? { headers: { Authorization: `Bearer ${$session.token}` } }
 					: undefined,
 			)
@@ -484,29 +493,59 @@ onMount(() => {
 	<div>
 		<label for="contact" class="mb-2 block font-semibold">
 			{$_('forms.contact')}
-			{#if $session}
+			{#if identityAttached}
 				<span class="font-normal">{$_('forms.optional')}</span>
 			{/if}
 		</label>
-		{#if $session}
+		{#if identityAttached && $session}
 			<!-- The submission carries the account (verified server-side), so
-			     the email is a follow-up channel, not the identity. -->
-			<p
-				class="mb-2 inline-flex items-center gap-2 rounded-full border border-input bg-link/5 px-3 py-1.5 text-sm font-semibold text-primary dark:text-white"
-			>
-				{$_('addLocation.submittingAs', { values: { username: $session.username } })}
-			</p>
+			     the email is a follow-up channel, not the identity. The chip
+			     reveals the shared-device escape hatch: detach the account
+			     from this one submission. -->
+			<div class="mb-2 flex flex-wrap items-center gap-2">
+				<button
+					type="button"
+					aria-expanded={showDetach}
+					onclick={() => (showDetach = !showDetach)}
+					class="inline-flex items-center gap-2 rounded-full border border-input bg-link/5 px-3 py-1.5 text-sm font-semibold text-primary transition-colors hover:bg-link/10 focus:outline-link dark:text-white"
+				>
+					{$_('addLocation.submittingAs', { values: { username: $session.username } })}
+					<span aria-hidden="true">{showDetach ? '▴' : '▾'}</span>
+				</button>
+				{#if showDetach}
+					<button
+						type="button"
+						onclick={() => {
+							submitAnonymously = true;
+							showDetach = false;
+						}}
+						class="text-sm font-semibold text-link hover:text-hover focus:outline-link"
+					>
+						{$_('addLocation.submitAnonymously')}
+					</button>
+				{/if}
+			</div>
 			<p class="mb-2 text-justify text-sm">
 				{$_('addLocation.contactSignedInHint')}
 			</p>
 		{:else}
+			{#if $session}
+				<!-- Detached: the anonymous contract applies, with an undo. -->
+				<button
+					type="button"
+					onclick={() => (submitAnonymously = false)}
+					class="mb-2 text-sm font-semibold text-link hover:text-hover focus:outline-link"
+				>
+					{$_('addLocation.submitAsAccount', { values: { username: $session.username } })}
+				</button>
+			{/if}
 			<p class="mb-2 text-justify text-sm">
 				{$_('addLocation.contactDescription')}
 			</p>
 		{/if}
 		<input
 			disabled={!captchaSecret}
-			required={!$session}
+			required={!identityAttached}
 			type="email"
 			name="contact"
 			id="contact"

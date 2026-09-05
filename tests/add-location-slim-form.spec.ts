@@ -142,10 +142,27 @@ test.describe('Add Location — slim form', () => {
 
 		// The identity chip replaces the anonymous contact copy, and the
 		// email field is no longer required — the account is the identity.
-		await expect(page.getByText('Submitting as satoshi')).toBeVisible();
+		const chip = page.getByRole('button', { name: /Submitting as satoshi/ });
+		await expect(chip).toBeVisible();
 		await expect(page.locator('#contact')).not.toHaveAttribute('required');
 		await expect(page.locator('label[for="contact"]')).toContainText(
 			'(optional)'
 		);
+
+		// The chip reveals the shared-device escape hatch: detaching flips
+		// the section back to the anonymous contract, with an undo.
+		await chip.click();
+		await page
+			.getByRole('button', { name: 'Not you? Submit anonymously' })
+			.click();
+		await expect(chip).toBeHidden();
+		await expect(page.locator('#contact')).toHaveAttribute('required', '');
+		const undo = page.getByRole('button', { name: 'Use my account (satoshi)' });
+		await expect(undo).toBeVisible();
+		await undo.click();
+		await expect(
+			page.getByRole('button', { name: /Submitting as satoshi/ })
+		).toBeVisible();
+		await expect(page.locator('#contact')).not.toHaveAttribute('required');
 	});
 });

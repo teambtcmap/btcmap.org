@@ -603,6 +603,8 @@
 		"contactDescription": "In caso di domande di approfondimento, ti contatteremo per aggiungere correttamente questa posizione. Per velocizzare il processo, controlla la cartella spam nel caso in cui la mail finisca lì.",
 		"submittingAs": "Invio come {username}",
 		"contactSignedInHint": "Il tuo invio è collegato al tuo account. Aggiungi un'email solo se desideri domande di follow-up — non viene mai mostrata pubblicamente.",
+		"submitAnonymously": "Non sei tu? Invia in forma anonima",
+		"submitAsAccount": "Usa il mio account ({username})",
 		"contactPlaceholder": "hello@btcmap.org",
 		"captchaPlaceholder": "Inserisci il testo del captcha.",
 		"formSuccessType": "Posizione",
