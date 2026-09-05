@@ -382,6 +382,10 @@
 		"placement": {
 			"title": "Posiziona il segnaposto",
 			"hint": "Trascina la mappa finché il segnaposto non si trova sull'ingresso dell'attività, poi conferma.",
+			"searchPlaceholder": "Digita un indirizzo per andarci",
+			"searchAction": "Cerca",
+			"searchNoResults": "Nessun risultato per questo indirizzo.",
+			"searchFailed": "Ricerca dell'indirizzo non riuscita — riprova.",
 			"cancel": "Annulla",
 			"confirm": "Aggiungi un luogo qui",
 			"zoomIn": "Ingrandisci per posizionare il segnaposto",

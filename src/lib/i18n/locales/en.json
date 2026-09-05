@@ -382,6 +382,10 @@
 		"placement": {
 			"title": "Place the pin",
 			"hint": "Drag the map until the pin sits on the business entrance, then confirm.",
+			"searchPlaceholder": "Type an address to jump there",
+			"searchAction": "Search",
+			"searchNoResults": "Nothing found for that address.",
+			"searchFailed": "Address lookup failed — please try again.",
 			"cancel": "Cancel",
 			"confirm": "Add a place here",
 			"zoomIn": "Zoom in to place the pin",

@@ -284,6 +284,10 @@
 		"placement": {
 			"title": "Pin platzieren",
 			"hint": "Verschiebe die Karte, bis der Pin auf dem Eingang des Geschäfts sitzt, und bestätige dann.",
+			"searchPlaceholder": "Adresse eingeben, um dorthin zu springen",
+			"searchAction": "Suchen",
+			"searchNoResults": "Zu dieser Adresse wurde nichts gefunden.",
+			"searchFailed": "Adresssuche fehlgeschlagen — bitte versuche es erneut.",
 			"cancel": "Abbrechen",
 			"confirm": "Hier einen Ort hinzufügen",
 			"zoomIn": "Zoome näher heran, um den Pin zu platzieren",

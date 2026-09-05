@@ -284,6 +284,10 @@
 		"placement": {
 			"title": "Coloca el pin",
 			"hint": "Arrastra el mapa hasta que el pin quede sobre la entrada del negocio y luego confirma.",
+			"searchPlaceholder": "Escribe una dirección para ir allí",
+			"searchAction": "Buscar",
+			"searchNoResults": "No se encontró nada para esa dirección.",
+			"searchFailed": "La búsqueda de dirección falló — inténtalo de nuevo.",
 			"cancel": "Cancelar",
 			"confirm": "Añadir un lugar aquí",
 			"zoomIn": "Acerca el mapa para colocar el pin",

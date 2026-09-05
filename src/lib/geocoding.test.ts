@@ -1,7 +1,7 @@
 import axios from "axios";
 import { afterEach, describe, expect, it, vi } from "vitest";
 
-import { reverseGeocode } from "./geocoding";
+import { reverseGeocode, searchAddress } from "./geocoding";
 
 vi.mock("axios");
 const mockedAxios = vi.mocked(axios, true);
@@ -94,5 +94,51 @@ describe("reverseGeocode", () => {
 		mockedAxios.get.mockRejectedValueOnce(new Error("timeout"));
 
 		await expect(reverseGeocode(50, 10, "en")).resolves.toBeNull();
+	});
+});
+
+describe("searchAddress", () => {
+	it("calls Nominatim search with the expected URL and params", async () => {
+		mockedAxios.get.mockResolvedValueOnce({ data: [] });
+
+		await searchAddress("Brandenburger Tor", "de");
+
+		expect(mockedAxios.get).toHaveBeenCalledTimes(1);
+		const [url, config] = mockedAxios.get.mock.calls[0];
+		expect(url).toBe("https://nominatim.openstreetmap.org/search");
+		expect(config?.params).toMatchObject({
+			q: "Brandenburger Tor",
+			format: "jsonv2",
+			limit: 5,
+			"accept-language": "de",
+		});
+	});
+
+	it("maps results and drops entries with non-numeric coordinates", async () => {
+		mockedAxios.get.mockResolvedValueOnce({
+			data: [
+				{ lat: "52.5163", lon: "13.3777", display_name: "Brandenburger Tor" },
+				{ lat: "not-a-number", lon: "13.3", display_name: "Broken" },
+				{ lat: "52.52", lon: "", display_name: "Also broken" },
+			],
+		});
+
+		const results = await searchAddress("tor", "en");
+
+		expect(results).toEqual([
+			{ lat: 52.5163, lon: 13.3777, displayName: "Brandenburger Tor" },
+		]);
+	});
+
+	it("returns an empty list for no matches", async () => {
+		mockedAxios.get.mockResolvedValueOnce({ data: [] });
+
+		expect(await searchAddress("xyzzy", "en")).toEqual([]);
+	});
+
+	it("rejects on request failure so callers can tell failure from no-match", async () => {
+		mockedAxios.get.mockRejectedValueOnce(new Error("timeout"));
+
+		await expect(searchAddress("tor", "en")).rejects.toThrow("timeout");
 	});
 });
