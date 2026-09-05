@@ -66,6 +66,13 @@ export const POST: RequestHandler = async ({ request, fetch }) => {
 
 	const name = asString(body.name).trim();
 	const category = asString(body.category).trim();
+	// The anonymous contract needs a follow-up channel: without a verified
+	// account, a blank contact would produce a submission nobody can reach
+	// (the client enforces this too, but a stale token flips a submission
+	// anonymous server-side after the client relaxed the field).
+	if (!submittedBy && !asString(body.contact).trim()) {
+		error(400, "A contact email is required for anonymous submissions");
+	}
 	// Strict number check: Number(null) and Number("") are 0, which would
 	// silently turn a null-ish coordinate into a valid-looking Null Island
 	// submission instead of a 400.

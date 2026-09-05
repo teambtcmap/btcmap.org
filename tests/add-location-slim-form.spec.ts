@@ -119,8 +119,8 @@ test.describe('Add Location — slim form', () => {
 	}) => {
 		await stubMapData(page);
 		await stubReverseGeocode(page);
-		// Seeded before any app script runs — the session store reads
-		// localStorage at module init.
+		// Seeded before any app script runs — the session store hydrates
+		// from localStorage when session.init() runs in onMount.
 		await page.addInitScript(() => {
 			localStorage.setItem(
 				'btcmap_session',

@@ -145,10 +145,11 @@ let submitting = $state(false);
 // Per-submission anonymity (#1334): someone on a shared device can
 // detach the signed-in account from THIS submission without logging
 // out. Detached = the plain anonymous contract (required email, no
-// Authorization header).
+// Authorization header). The token check guards against a corrupted
+// stored session (empty token) posing as an attachable identity.
 let submitAnonymously = $state(false);
 let showDetach = $state(false);
-const identityAttached = $derived(!!$session && !submitAnonymously);
+const identityAttached = $derived(!!$session?.token && !submitAnonymously);
 
 const handleCheckboxClick = () => {
 	noMethodSelected = false;
@@ -211,8 +212,11 @@ const submitForm = (event: SubmitEvent) => {
 				onsuccess();
 			})
 			.catch((error) => {
-				if (error.response?.data?.message?.includes("Captcha")) {
-					errToast(error.response.data.message);
+				// Our endpoint's 4xx messages are written for users (captcha,
+				// missing contact on an anonymous fallback, …) — show them.
+				const message = error.response?.data?.message;
+				if (message && error.response.status < 500) {
+					errToast(message);
 				} else {
 					errToast(get(_)("errors.formSubmission"));
 				}
