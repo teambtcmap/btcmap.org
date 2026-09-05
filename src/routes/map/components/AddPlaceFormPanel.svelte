@@ -1,20 +1,16 @@
 <script lang="ts">
-import { fly } from "svelte/transition";
-
 import AddLocationForm from "$components/add-location/AddLocationForm.svelte";
 import CloseButton from "$components/CloseButton.svelte";
 import PrimaryButton from "$components/PrimaryButton.svelte";
-import { MAP_PANEL_MARGIN, MERCHANT_DRAWER_WIDTH } from "$lib/constants";
 import { _ } from "$lib/i18n";
 
-// In-map host for the add-location form (#1134). Desktop wears the
-// merchant drawer's exact dialect — left-docked card, same sizing and
-// chrome — so the map keeps one panel language; the map and its
+import MapPanelShell from "./MapPanelShell.svelte";
+
+// In-map host for the add-location form (#1134), wearing the shared
+// MapPanelShell: left-docked drawer card on desktop — the map and its
 // crosshair pin stay live beside it, and the host refreshes `coords` on
-// every settled move. Mobile is a full-screen sheet: a long form wants
-// full height and native scroll, not the peek-drawer's drag gestures.
-// (The drawers themselves stay merchant-specific — reusing their shell
-// literally would pull the #1208 hand-conversion hotspots in here.)
+// every settled move — and a full-screen sheet on mobile, since a long
+// form wants full height and native scroll, not peek-drawer gestures.
 type Props = {
 	coords: { lat: number; long: number };
 	// Back to the placement sheet (the close button and Escape).
@@ -27,10 +23,6 @@ let { coords, onclose, onaddanother, onexit }: Props = $props();
 
 let submitted = $state(false);
 
-// Mount-time is fine: a mid-session viewport-class change would only
-// soften the entry animation, nothing else.
-const desktop = window.matchMedia("(min-width: 768px)").matches;
-
 const onKeydown = (event: KeyboardEvent) => {
 	if (event.key === "Escape") {
 		event.preventDefault();
@@ -41,22 +33,13 @@ const onKeydown = (event: KeyboardEvent) => {
 
 <svelte:window onkeydown={onKeydown} />
 
-<!-- Card classes and max-height mirror MerchantDrawerDesktop verbatim,
-     attribution corner left uncovered. -->
-<section
-	aria-label={$_('addLocation.title')}
-	in:fly={desktop ? { x: -MERCHANT_DRAWER_WIDTH, duration: 300 } : { y: 200, duration: 300 }}
-	class="absolute inset-0 z-[1002] overflow-y-auto bg-white md:inset-auto md:top-3 md:left-(--drawer-left) md:max-h-[calc(100%-0.75rem-max(3rem,env(safe-area-inset-bottom)))] md:w-full md:max-w-(--drawer-w) md:rounded-lg md:shadow-lg dark:bg-dark"
-	style="--drawer-left: {MAP_PANEL_MARGIN}px; --drawer-w: {MERCHANT_DRAWER_WIDTH}px"
->
-	<div
-		class="sticky top-0 z-10 flex items-center justify-between rounded-t-lg bg-white p-2 dark:bg-dark"
-	>
+<MapPanelShell label={$_('addLocation.title')}>
+	{#snippet header()}
 		<h2 class="pl-2 text-lg font-semibold text-primary dark:text-white">
 			{$_('addLocation.title')}
 		</h2>
 		<CloseButton on:click={onclose} ariaLabel={$_('map.placement.cancel')} />
-	</div>
+	{/snippet}
 
 	{#if !submitted}
 		<div class="px-4 pb-[calc(env(safe-area-inset-bottom)+1.5rem)] md:pb-4">
@@ -95,4 +78,4 @@ const onKeydown = (event: KeyboardEvent) => {
 			</button>
 		</div>
 	{/if}
-</section>
+</MapPanelShell>
