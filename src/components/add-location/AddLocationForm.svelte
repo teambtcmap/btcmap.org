@@ -4,6 +4,8 @@ import DOMPurify from "dompurify";
 import { onMount, tick } from "svelte";
 import { get } from "svelte/store";
 
+import LoginForm from "$components/auth/LoginForm.svelte";
+import NostrLoginForm from "$components/auth/NostrLoginForm.svelte";
 import FormHelperText from "$components/FormHelperText.svelte";
 import type { FormSelectOption } from "$components/form/FormSelect.svelte";
 import FormSelect from "$components/form/FormSelect.svelte";
@@ -26,7 +28,9 @@ import { errToast } from "$lib/utils";
 // state; on a completed submission the form calls `onsuccess`.
 type Props = {
 	coords: { lat: number; long: number };
-	onsuccess: () => void;
+	// `attributed` = the submission went out with a verified account
+	// attached — the host's success screen skips the account nudge then.
+	onsuccess: (attributed: boolean) => void;
 };
 let { coords, onsuccess }: Props = $props();
 
@@ -149,7 +153,17 @@ let submitting = $state(false);
 // stored session (empty token) posing as an attachable identity.
 let submitAnonymously = $state(false);
 let showDetach = $state(false);
+// The signed-out inline sign-in (#1334): the existing auth forms expand
+// in place, so typed fields survive — no navigation.
+let showSignIn = $state(false);
 const identityAttached = $derived(!!$session?.token && !submitAnonymously);
+
+const onAuthSuccess = () => {
+	// The forms set the session store themselves — collapse and let the
+	// chip take over (a fresh login also clears a previous detach).
+	showSignIn = false;
+	submitAnonymously = false;
+};
 
 const handleCheckboxClick = () => {
 	noMethodSelected = false;
@@ -209,7 +223,7 @@ const submitForm = (event: SubmitEvent) => {
 					: undefined,
 			)
 			.then(() => {
-				onsuccess();
+				onsuccess(identityAttached);
 			})
 			.catch((error) => {
 				// Our endpoint's 4xx messages are written for users (captcha,
@@ -562,6 +576,41 @@ onMount(() => {
 			<p class="mb-2 text-justify text-sm">
 				{$_('addLocation.contactDescription')}
 			</p>
+			{#if !$session}
+				<!-- The other #1334 touchpoint: sign in without leaving the
+				     form — the auth forms expand in place, typed fields
+				     survive, and the chip takes over on success. -->
+				<div class="mb-2">
+					<button
+						type="button"
+						aria-expanded={showSignIn}
+						onclick={() => (showSignIn = !showSignIn)}
+						class="flex items-center gap-1 text-sm font-semibold text-link hover:text-hover focus:outline-link"
+					>
+						{$_('addLocation.signInPrompt')}
+						<Icon
+							type="material"
+							icon="expand_more"
+							w="16"
+							h="16"
+							class={showSignIn ? 'rotate-180' : ''}
+						/>
+					</button>
+					{#if showSignIn}
+						<div class="mt-3 rounded-2xl border-2 border-input p-4">
+							<LoginForm compact onSuccess={onAuthSuccess} />
+							<div class="my-4 flex items-center gap-3">
+								<div class="h-px flex-1 bg-gray-300 dark:bg-white/20"></div>
+								<span class="text-xs text-body dark:text-white/50">
+									{$_('login.otherMethods')}
+								</span>
+								<div class="h-px flex-1 bg-gray-300 dark:bg-white/20"></div>
+							</div>
+							<NostrLoginForm onSuccess={onAuthSuccess} />
+						</div>
+					{/if}
+				</div>
+			{/if}
 		{/if}
 		<input
 			disabled={!captchaSecret}

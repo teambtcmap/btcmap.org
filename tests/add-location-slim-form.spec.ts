@@ -165,4 +165,26 @@ test.describe('Add Location — slim form', () => {
 		).toBeVisible();
 		await expect(page.locator('#contact')).not.toHaveAttribute('required');
 	});
+
+	test('signed out, the contact section offers an inline sign-in', async ({
+		page
+	}) => {
+		await stubMapData(page);
+		await stubReverseGeocode(page);
+		await page.goto(PIN);
+		await expect(page.locator('#name')).toBeVisible({
+			timeout: MARKER_LOAD_TIMEOUT
+		});
+
+		// Anonymous contract: email required, plus the quiet sign-in prompt.
+		await expect(page.locator('#contact')).toHaveAttribute('required', '');
+		const prompt = page.getByRole('button', {
+			name: /Have a BTC Map account/
+		});
+		await expect(prompt).toHaveAttribute('aria-expanded', 'false');
+		await prompt.click();
+		// The existing auth forms expand in place — no navigation.
+		await expect(page.locator('#login-username')).toBeVisible();
+		await expect(page).toHaveURL(/\/map\?add=form/);
+	});
 });
