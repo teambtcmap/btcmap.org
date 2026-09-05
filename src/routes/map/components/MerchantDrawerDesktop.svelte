@@ -1,6 +1,5 @@
 <script lang="ts">
-import { onMount, tick } from "svelte";
-import { fly } from "svelte/transition";
+import { tick } from "svelte";
 
 import BoostContent from "$components/BoostContent.svelte";
 import CloseButton from "$components/CloseButton.svelte";
@@ -8,7 +7,6 @@ import Icon from "$components/Icon.svelte";
 import MerchantDetailsContent from "$components/MerchantDetailsContent.svelte";
 import {
 	MAP_PANEL_MARGIN,
-	MERCHANT_DRAWER_WIDTH,
 	MERCHANT_LIST_WIDTH,
 	PANEL_DRAWER_GAP,
 } from "$lib/constants";
@@ -25,37 +23,44 @@ import { merchantList } from "$lib/merchantListStore";
 import { boost, resetBoost } from "$lib/store";
 import { isUpToDate as checkUpToDate } from "$lib/verification";
 
+import MapPanelShell from "./MapPanelShell.svelte";
 import { invalidateAll } from "$app/navigation";
 
 // ?issues worklist (#921): show the merchant's derived-issue row.
-export let showIssues = false;
+type Props = { showIssues?: boolean };
+let { showIssues = false }: Props = $props();
 
-// Derive state from centralized store
-$: isOpen = $merchantDrawer.isOpen;
-$: merchantId = $merchantDrawer.merchantId;
-$: drawerView = $merchantDrawer.drawerView;
-$: merchant = $merchantDrawer.merchant;
-$: fetchingMerchant = $merchantDrawer.isLoading;
-$: listIsOpen = $merchantList.isOpen;
+// Derive state from the centralized store
+const isOpen = $derived($merchantDrawer.isOpen);
+const merchantId = $derived($merchantDrawer.merchantId);
+const drawerView = $derived($merchantDrawer.drawerView);
+const merchant = $derived($merchantDrawer.merchant);
+const fetchingMerchant = $derived($merchantDrawer.isLoading);
+const listIsOpen = $derived($merchantList.isOpen);
 
 // Calculate drawer position based on list panel state
-$: drawerLeft = listIsOpen
-	? MAP_PANEL_MARGIN + MERCHANT_LIST_WIDTH + PANEL_DRAWER_GAP
-	: MAP_PANEL_MARGIN;
+const drawerLeft = $derived(
+	listIsOpen
+		? MAP_PANEL_MARGIN + MERCHANT_LIST_WIDTH + PANEL_DRAWER_GAP
+		: MAP_PANEL_MARGIN,
+);
 
 // Focus management - move focus to drawer when it opens
-let drawerElement: HTMLDivElement;
-$: if (isOpen && drawerElement) {
-	tick().then(() => {
-		const closeBtn = drawerElement.querySelector("button");
-		closeBtn?.focus();
-	});
-}
+let drawerElement = $state<HTMLElement>();
+$effect(() => {
+	if (isOpen && drawerElement) {
+		const el = drawerElement;
+		tick().then(() => {
+			const closeBtn = el.querySelector("button");
+			closeBtn?.focus();
+		});
+	}
+});
 
-$: isUpToDate = checkUpToDate(merchant);
-$: isBoosted = checkBoosted(merchant);
+const isUpToDate = $derived(checkUpToDate(merchant));
+const isBoosted = $derived(checkBoosted(merchant));
 
-let boostLoading = false;
+let boostLoading = $state(false);
 const setBoostLoading = (loading: boolean) => {
 	boostLoading = loading;
 };
@@ -72,10 +77,12 @@ const goBack = () => {
 	merchantDrawer.setView("details");
 };
 
-$: if (drawerView !== "boost" && $boost !== undefined) {
-	clearBoostState();
-	boostLoading = false;
-}
+$effect(() => {
+	if (drawerView !== "boost" && $boost !== undefined) {
+		clearBoostState();
+		boostLoading = false;
+	}
+});
 
 const handleBoost = () => boostMerchant(merchant, merchantId, setBoostLoading);
 const handleBoostComplete = () =>
@@ -94,43 +101,36 @@ function handleKeydown(event: KeyboardEvent) {
 	}
 }
 
-onMount(() => {
-	window.addEventListener("keydown", handleKeydown);
-	return () => {
-		window.removeEventListener("keydown", handleKeydown);
-	};
+$effect(() => {
+	if (drawerView === "boost" && merchant) {
+		ensureBoostData(merchant, $boost);
+	}
 });
-
-$: if (drawerView === "boost" && merchant) {
-	ensureBoostData(merchant, $boost);
-}
 
 export function openDrawer(id: number) {
 	merchantDrawer.open(id, "details");
 }
 </script>
 
+<svelte:window onkeydown={handleKeydown} />
+
 {#if isOpen}
 	<!-- Floating drawer card - no backdrop, keep map interactive -->
-	<!-- Position offset by MERCHANT_LIST_WIDTH when list panel is open -->
-	<div
-		bind:this={drawerElement}
-		in:fly={{ x: -MERCHANT_DRAWER_WIDTH, duration: 300 }}
-		class="absolute top-3 z-[1002] max-h-[calc(100%-0.75rem-max(3rem,env(safe-area-inset-bottom)))] w-full overflow-y-auto rounded-lg bg-white shadow-lg transition-[left] duration-200 dark:bg-dark"
-		style="left: {drawerLeft}px; max-width: {MERCHANT_DRAWER_WIDTH}px"
+	<!-- Position offset by MERCHANT_LIST_WIDTH when list panel is open;
+	     this variant only mounts ≥md, so the shell's mobile face never
+	     shows here. -->
+	<MapPanelShell
+		bind:element={drawerElement}
+		label={$_("mapDrawer.merchantDetails")}
 		role="dialog"
-		aria-label={$_("mapDrawer.merchantDetails")}
+		left={drawerLeft}
+		headerBorder={drawerView !== "details"}
 	>
-		<div
-			class="sticky top-0 z-10 flex items-center justify-between rounded-t-lg bg-white p-2 dark:bg-dark {drawerView !==
-			'details'
-				? 'border-b border-gray-300 dark:border-white/95'
-				: ''}"
-		>
+		{#snippet header()}
 			{#if drawerView !== 'details'}
 				<!-- Back button for nested views -->
 				<button
-					on:click={goBack}
+					onclick={goBack}
 					class="flex items-center space-x-2 text-primary transition-colors hover:text-link dark:text-white dark:hover:text-link"
 				>
 					<Icon w="20" h="20" icon="arrow_back" type="material" />
@@ -144,7 +144,7 @@ export function openDrawer(id: number) {
 				<div></div>
 			{/if}
 			<CloseButton on:click={closeDrawer} ariaLabel={$_("mapDrawer.closeMerchantDetails")} />
-		</div>
+		{/snippet}
 
 		{#if !merchant && fetchingMerchant}
 			<!-- Loading skeleton -->
@@ -184,5 +184,5 @@ export function openDrawer(id: number) {
 				{/if}
 			</div>
 		{/if}
-	</div>
+	</MapPanelShell>
 {/if}
