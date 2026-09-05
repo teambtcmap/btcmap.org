@@ -1513,6 +1513,7 @@ onDestroy(() => {
 		mapReady={styleLoaded}
 		isMobile={isMobileLayout}
 		issuesMode={issuesOnly}
+		suspended={placementActive}
 	/>
 </div>
 
