@@ -386,8 +386,9 @@
 			"confirm": "Add a place here",
 			"zoomIn": "Zoom in to place the pin",
 			"nearbyTitle": "Is it one of these?",
-			"nearbyHint": "These places already exist near your pin — open one to check, or add a new place.",
+			"nearbyHint": "These places already exist near your pin — update one instead of adding a duplicate.",
 			"nearbyUnnamed": "Unnamed place",
+			"nearbyUpdate": "Update",
 			"nearbyBack": "Back",
 			"nearbyContinue": "Add a new place",
 			"backToMap": "Back to the map"

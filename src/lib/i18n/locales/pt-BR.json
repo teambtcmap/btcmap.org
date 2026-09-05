@@ -284,8 +284,9 @@
 			"confirm": "Adicionar um local aqui",
 			"zoomIn": "Aproxime o mapa para posicionar o pino",
 			"nearbyTitle": "É um destes?",
-			"nearbyHint": "Estes locais já existem perto do seu pino — abra um para conferir ou adicione um novo local.",
+			"nearbyHint": "Esses lugares já existem perto do seu pino — atualize um deles em vez de adicionar uma duplicata.",
 			"nearbyUnnamed": "Local sem nome",
+			"nearbyUpdate": "Atualizar",
 			"nearbyBack": "Voltar",
 			"nearbyContinue": "Adicionar um novo local",
 			"backToMap": "Voltar ao mapa"

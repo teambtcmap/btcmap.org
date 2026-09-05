@@ -386,8 +386,9 @@
 			"confirm": "Voeg hier een locatie toe",
 			"zoomIn": "Zoom in om de pin te plaatsen",
 			"nearbyTitle": "Is het een van deze?",
-			"nearbyHint": "Deze locaties bestaan al in de buurt van je pin — open er een om te controleren, of voeg een nieuwe locatie toe.",
+			"nearbyHint": "Deze plekken bestaan al in de buurt van je speld — werk er een bij in plaats van een duplicaat toe te voegen.",
 			"nearbyUnnamed": "Naamloze locatie",
+			"nearbyUpdate": "Bijwerken",
 			"nearbyBack": "Terug",
 			"nearbyContinue": "Nieuwe locatie toevoegen",
 			"backToMap": "Terug naar de kaart"

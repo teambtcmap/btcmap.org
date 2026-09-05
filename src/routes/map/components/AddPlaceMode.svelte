@@ -458,8 +458,11 @@ $effect(() => {
 			<ul class="mt-3 max-h-40 space-y-1 overflow-y-auto">
 				{#each nearby as { place, distanceM } (place.id)}
 					<li>
+						<!-- Routes into the verify/update flow (deck slide 7): the
+						     point of the interrupt is updating the existing place
+						     instead of filing a duplicate. -->
 						<a
-							href="/merchant/{place.id}"
+							href="/verify-location?id={place.id}"
 							onclick={() =>
 								trackEvent("add_place_nearby_candidate_click", {
 									placeId: place.id,
@@ -471,7 +474,10 @@ $effect(() => {
 									(namesLoaded ? $_("map.placement.nearbyUnnamed") : "…")}</span
 							>
 							<span class="shrink-0 text-sm text-body dark:text-offwhite"
-								>{Math.round(distanceM)} m</span
+								>{Math.round(distanceM)} m
+								<span class="ml-1 font-semibold text-link"
+									>{$_("map.placement.nearbyUpdate")}<span aria-hidden="true"> ›</span></span
+								></span
 							>
 						</a>
 					</li>

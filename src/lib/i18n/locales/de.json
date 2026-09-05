@@ -288,8 +288,9 @@
 			"confirm": "Hier einen Ort hinzufügen",
 			"zoomIn": "Zoome näher heran, um den Pin zu platzieren",
 			"nearbyTitle": "Ist es einer von diesen?",
-			"nearbyHint": "Diese Orte existieren bereits in der Nähe deines Pins — öffne einen zum Prüfen oder füge einen neuen Ort hinzu.",
+			"nearbyHint": "Diese Orte gibt es bereits in der Nähe deines Pins — aktualisiere einen, statt ein Duplikat anzulegen.",
 			"nearbyUnnamed": "Unbenannter Ort",
+			"nearbyUpdate": "Aktualisieren",
 			"nearbyBack": "Zurück",
 			"nearbyContinue": "Neuen Ort hinzufügen",
 			"backToMap": "Zurück zur Karte"

@@ -288,8 +288,9 @@
 			"confirm": "Ajouter un lieu ici",
 			"zoomIn": "Zoomez pour placer l'épingle",
 			"nearbyTitle": "Est-ce l'un de ceux-ci ?",
-			"nearbyHint": "Ces lieux existent déjà près de votre épingle — ouvrez-en un pour vérifier, ou ajoutez un nouveau lieu.",
+			"nearbyHint": "Ces lieux existent déjà près de votre épingle — mettez-en un à jour au lieu d'ajouter un doublon.",
 			"nearbyUnnamed": "Lieu sans nom",
+			"nearbyUpdate": "Mettre à jour",
 			"nearbyBack": "Retour",
 			"nearbyContinue": "Ajouter un nouveau lieu",
 			"backToMap": "Retour à la carte"
