@@ -9,15 +9,11 @@ import type { FormSelectOption } from "$components/form/FormSelect.svelte";
 import FormSelect from "$components/form/FormSelect.svelte";
 import OpeningHoursEditor from "$components/form/OpeningHoursEditor.svelte";
 import Icon from "$components/Icon.svelte";
-import PlacementPinIcon from "$components/PlacementPinIcon.svelte";
 import PrimaryButton from "$components/PrimaryButton.svelte";
-import StaticMapPreview from "$components/StaticMapPreview.svelte";
 import { trackEvent } from "$lib/analytics";
 import { CATEGORIES, CATEGORY_GROUPS } from "$lib/categoryMapping";
-import { CLUSTERING_DISABLED_ZOOM } from "$lib/constants";
 import { reverseGeocode } from "$lib/geocoding";
 import { _, locale } from "$lib/i18n";
-import { buildPlacementUrl } from "$lib/placementMode";
 import { theme } from "$lib/theme";
 import { errToast } from "$lib/utils";
 
@@ -29,16 +25,8 @@ import { errToast } from "$lib/utils";
 type Props = {
 	coords: { lat: number; long: number };
 	onsuccess: () => void;
-	// Transitional: the standalone /add-location page still shows a
-	// static minimap with an adjust link; the live-map host hides it —
-	// there the map itself is the preview and the crosshair pin is the
-	// live position. When that page is retired to a redirect (#1134),
-	// this prop and the minimap block go with it.
-	showPinPreview?: boolean;
 };
-let { coords, onsuccess, showPinPreview = true }: Props = $props();
-
-const adjustUrl = $derived(buildPlacementUrl(coords.lat, coords.long));
+let { coords, onsuccess }: Props = $props();
 
 let captchaContent = $state("");
 let isCaptchaLoading = $state(true);
@@ -239,40 +227,6 @@ onMount(() => {
 			bind:this={name}
 		/>
 	</div>
-
-	{#if showPinPreview}
-		<div>
-			<p id="pin-label" class="mb-2 block font-semibold">
-				{$_('addLocation.pinFromMapLabel')}
-			</p>
-		<!-- Static preview. The adjust link is stacked on top of the map
-		     rather than wrapping it, so none of MapLibre's interactive
-		     attribution nests inside the anchor; its corner is raised
-		     above the link so credits stay one tap away, as on the
-		     merchant hero. -->
-		<!-- Composited WebGL canvases escape ancestor rounded clipping:
-		     `isolate` fixes Blink/WebKit, but Firefox's GPU compositor
-		     ignores ancestor overflow AND clip-path for the canvas
-		     layer — only a radius on the canvas itself clips reliably
-		     everywhere. 14px = the container's 1rem minus its 2px
-		     border, so the curves stay concentric. -->
-		<div
-			class="relative isolate mb-2 h-[300px] overflow-hidden rounded-2xl border-2 border-input md:h-[400px] [&_.maplibregl-canvas]:rounded-[14px] [&_.maplibregl-ctrl-bottom-right]:z-20"
-		>
-			<StaticMapPreview lat={coords.lat} long={coords.long} zoom={CLUSTERING_DISABLED_ZOOM} />
-			<a
-				href={adjustUrl}
-				aria-labelledby="pin-label"
-				class="absolute inset-0 z-10 focus:outline-link"
-			></a>
-			<div
-				class="pointer-events-none absolute top-1/2 left-1/2 z-10 -translate-x-1/2 -translate-y-full drop-shadow-lg"
-			>
-				<PlacementPinIcon width={40} />
-			</div>
-		</div>
-		</div>
-	{/if}
 
 	<div>
 		<div class="mb-2">
