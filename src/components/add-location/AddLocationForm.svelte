@@ -9,6 +9,7 @@ import type { FormSelectOption } from "$components/form/FormSelect.svelte";
 import FormSelect from "$components/form/FormSelect.svelte";
 import OpeningHoursEditor from "$components/form/OpeningHoursEditor.svelte";
 import Icon from "$components/Icon.svelte";
+import NostrAvatar from "$components/NostrAvatar.svelte";
 import PrimaryButton from "$components/PrimaryButton.svelte";
 import { trackEvent } from "$lib/analytics";
 import { CATEGORIES, CATEGORY_GROUPS } from "$lib/categoryMapping";
@@ -503,14 +504,29 @@ onMount(() => {
 			     reveals the shared-device escape hatch: detach the account
 			     from this one submission. -->
 			<div class="mb-2 flex flex-wrap items-center gap-2">
+				<!-- Speaks the app's chip dialect: the filter chips' active
+				     pill, the header UserMenu's identity (Nostr avatar or
+				     account icon), and the expand_more rotate-on-open
+				     disclosure. -->
 				<button
 					type="button"
 					aria-expanded={showDetach}
 					onclick={() => (showDetach = !showDetach)}
-					class="inline-flex items-center gap-2 rounded-full border border-input bg-link/5 px-3 py-1.5 text-sm font-semibold text-primary transition-colors hover:bg-link/10 focus:outline-link dark:text-white"
+					class="flex shrink-0 items-center gap-2 rounded-full border border-link bg-link/10 px-3 py-1 text-sm font-semibold whitespace-nowrap text-primary transition-colors focus-visible:ring-2 focus-visible:ring-link focus-visible:ring-offset-1 focus-visible:outline-none dark:border-link dark:text-white dark:focus-visible:ring-offset-dark"
 				>
+					{#if $session.npub}
+						<NostrAvatar npub={$session.npub} size={18} class="h-[18px] w-[18px]" />
+					{:else}
+						<Icon type="material" icon="account_circle_filled" w="18" h="18" />
+					{/if}
 					{$_('addLocation.submittingAs', { values: { username: $session.username } })}
-					<span aria-hidden="true">{showDetach ? '▴' : '▾'}</span>
+					<Icon
+						type="material"
+						icon="expand_more"
+						w="16"
+						h="16"
+						class={showDetach ? 'rotate-180' : ''}
+					/>
 				</button>
 				{#if showDetach}
 					<button
