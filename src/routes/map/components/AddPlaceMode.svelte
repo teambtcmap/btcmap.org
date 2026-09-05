@@ -54,6 +54,11 @@ let confirmButtonEl: HTMLButtonElement | undefined = $state();
 // the form's coords.
 let formOpen = $state(false);
 let formCoords = $state<{ lat: number; long: number } | null>(null);
+// True once openForm pushed the ?add=form entry — only then can Back
+// close the form. A restored deep link / reload has no placement entry
+// beneath it (in a fresh tab Back is a no-op; with a referrer it leaves
+// the map), so those close locally instead.
+let formEntryPushed = false;
 
 // Keep ?add in the URL so placement mode is linkable (?add=form while
 // the form is open — the pin itself lives in the hash). Same raw
@@ -179,18 +184,29 @@ const openForm = (lat: number, long: number) => {
 		"",
 		`${window.location.pathname}?${params.toString()}${window.location.hash}`,
 	);
+	formEntryPushed = true;
 	formOpen = true;
 };
 
+// The non-history close for restored entries: the URL-sync effect
+// rewrites ?add=form to bare ?add once formOpen drops.
+const closeFormLocally = () => {
+	formOpen = false;
+	tick().then(() => confirmButtonEl?.focus());
+};
+
 const closeForm = () => {
-	// The open pushed an entry — going back restores the placement entry
-	// and the popstate listener flips the state (and restores focus).
-	history.back();
+	// When the open pushed an entry, going back restores the placement
+	// entry and the popstate listener flips the state (and restores
+	// focus); otherwise close in place.
+	if (formEntryPushed) history.back();
+	else closeFormLocally();
 };
 
 const addAnother = () => {
 	trackEvent("add_place_enter", { method: "another" });
-	history.back();
+	if (formEntryPushed) history.back();
+	else closeFormLocally();
 };
 
 const exitToMap = () => {

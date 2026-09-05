@@ -69,4 +69,54 @@ test.describe('In-map add form', () => {
 		await expect(page.locator('#name')).toBeVisible();
 		await expect(page).toHaveURL(/\/map\?add=form/);
 	});
+
+	test('closing a deep-linked form falls back to placement without history', async ({
+		page
+	}) => {
+		// A direct ?add=form arrival has no placement entry beneath it, so
+		// Escape/× must close in place instead of relying on history.back().
+		await stubMapData(page, [
+			{ id: 9, lat: 42.3, lon: 42.75, icon: 'cafe', name: 'Far Place' }
+		]);
+		await stubReverseGeocode(page);
+		await page.setViewportSize({ width: 1280, height: 720 });
+		await page.goto('/map?add=form#17/42.2762511/42.7024218', {
+			waitUntil: 'load'
+		});
+		await waitForMarkersToLoad(page, { skipApiWait: true });
+		await expect(page.locator('#name')).toBeVisible();
+
+		await page.keyboard.press('Escape');
+		await expect(page.getByText('Place the pin', { exact: true })).toBeVisible();
+		await expect(page.locator('#name')).toBeHidden();
+		// Still on the map, normalized to the bare placement URL.
+		await expect(page).toHaveURL(/\/map\?add(?!=form)/);
+	});
+
+	test('mobile: the form is a full-screen sheet and closes back to placement', async ({
+		page
+	}) => {
+		await stubMapData(page, [
+			{ id: 9, lat: 42.3, lon: 42.75, icon: 'cafe', name: 'Far Place' }
+		]);
+		await stubReverseGeocode(page);
+		await page.setViewportSize({ width: 375, height: 812 });
+		await page.goto('/map#17/42.2762511/42.7024218', { waitUntil: 'load' });
+		await waitForMarkersToLoad(page, { skipApiWait: true });
+		await page.getByRole('button', { name: /^menu$/i }).click();
+		await page.getByRole('button', { name: 'Add location' }).click();
+		await expect(page.getByText('Place the pin', { exact: true })).toBeVisible();
+		await page.getByRole('button', { name: 'Add a place here' }).click();
+
+		const sheet = page.getByRole('region', { name: 'Add Location' });
+		await expect(sheet).toBeVisible();
+		// Full-screen on mobile: the sheet spans the whole viewport.
+		const box = await sheet.boundingBox();
+		expect(box?.width).toBeCloseTo(375, 0);
+		expect(box?.height).toBeCloseTo(812, 0);
+
+		await page.getByRole('button', { name: 'Cancel' }).click();
+		await expect(page.getByText('Place the pin', { exact: true })).toBeVisible();
+		await expect(page.locator('#name')).toBeHidden();
+	});
 });
