@@ -287,7 +287,8 @@
 			"nearbyHint": "Estes locais já existem perto do seu pino — abra um para conferir ou adicione um novo local.",
 			"nearbyUnnamed": "Local sem nome",
 			"nearbyBack": "Voltar",
-			"nearbyContinue": "Adicionar um novo local"
+			"nearbyContinue": "Adicionar um novo local",
+			"backToMap": "Voltar ao mapa"
 		}
 	},
 	"info": {

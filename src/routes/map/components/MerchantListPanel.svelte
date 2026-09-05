@@ -76,6 +76,11 @@ export let issuesMode = false;
 // Layout decision locked at page init (same pattern as MerchantDrawerHash);
 // shared with the floating search bar so exactly one search surface exists
 export let isMobile = false;
+// True while the panel is hidden-but-mounted (placement mode keeps it
+// alive to preserve search state). Its global key handling must sleep
+// too: Escape would close the list underneath the add flow, and the
+// Tab trap would try to focus display:none elements — killing Tab.
+export let suspended = false;
 
 // On mobile the panel is a bottom sheet mirroring the merchant drawer's
 // snap behavior: peek (grabber + single input) <-> full panel. The store's
@@ -475,7 +480,7 @@ function handleZoomToNearbyLevel() {
 }
 
 function handleWindowKeydown(event: KeyboardEvent) {
-	if (!isOpen) return;
+	if (suspended || !isOpen) return;
 
 	// Focus trap: cycle Tab within the panel to prevent focus escaping to background
 	if (event.key === "Tab" && panelElement) {

@@ -389,7 +389,8 @@
 			"nearbyHint": "Deze locaties bestaan al in de buurt van je pin — open er een om te controleren, of voeg een nieuwe locatie toe.",
 			"nearbyUnnamed": "Naamloze locatie",
 			"nearbyBack": "Terug",
-			"nearbyContinue": "Nieuwe locatie toevoegen"
+			"nearbyContinue": "Nieuwe locatie toevoegen",
+			"backToMap": "Terug naar de kaart"
 		}
 	},
 	"info": {

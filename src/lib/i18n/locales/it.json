@@ -389,7 +389,8 @@
 			"nearbyHint": "Questi luoghi esistono già vicino al tuo segnaposto — aprine uno per controllare, oppure aggiungi un nuovo luogo.",
 			"nearbyUnnamed": "Luogo senza nome",
 			"nearbyBack": "Indietro",
-			"nearbyContinue": "Aggiungi un nuovo luogo"
+			"nearbyContinue": "Aggiungi un nuovo luogo",
+			"backToMap": "Torna alla mappa"
 		}
 	},
 	"info": {

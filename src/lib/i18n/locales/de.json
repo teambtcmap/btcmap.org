@@ -291,7 +291,8 @@
 			"nearbyHint": "Diese Orte existieren bereits in der Nähe deines Pins — öffne einen zum Prüfen oder füge einen neuen Ort hinzu.",
 			"nearbyUnnamed": "Unbenannter Ort",
 			"nearbyBack": "Zurück",
-			"nearbyContinue": "Neuen Ort hinzufügen"
+			"nearbyContinue": "Neuen Ort hinzufügen",
+			"backToMap": "Zurück zur Karte"
 		}
 	},
 	"info": {

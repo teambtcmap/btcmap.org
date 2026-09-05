@@ -291,7 +291,8 @@
 			"nearbyHint": "Ces lieux existent déjà près de votre épingle — ouvrez-en un pour vérifier, ou ajoutez un nouveau lieu.",
 			"nearbyUnnamed": "Lieu sans nom",
 			"nearbyBack": "Retour",
-			"nearbyContinue": "Ajouter un nouveau lieu"
+			"nearbyContinue": "Ajouter un nouveau lieu",
+			"backToMap": "Retour à la carte"
 		}
 	},
 	"info": {

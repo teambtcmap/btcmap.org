@@ -389,7 +389,8 @@
 			"nearbyHint": "These places already exist near your pin — open one to check, or add a new place.",
 			"nearbyUnnamed": "Unnamed place",
 			"nearbyBack": "Back",
-			"nearbyContinue": "Add a new place"
+			"nearbyContinue": "Add a new place",
+			"backToMap": "Back to the map"
 		}
 	},
 	"info": {
