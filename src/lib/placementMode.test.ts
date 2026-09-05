@@ -4,7 +4,7 @@ import type { Place } from "$lib/types";
 
 import {
 	addEntryMethod,
-	buildAddLocationUrl,
+	buildAddFormUrl,
 	buildPlacementUrl,
 	clampDedupeRadiusKm,
 	fetchNearbyPlaceNames,
@@ -13,10 +13,10 @@ import {
 	placementEntryUrl,
 } from "./placementMode";
 
-describe("buildAddLocationUrl", () => {
-	it("builds the add-location URL with 5-decimal coords", () => {
-		expect(buildAddLocationUrl(32.649012345, -16.910299999)).toBe(
-			"/add-location?lat=32.64901&long=-16.91030",
+describe("buildAddFormUrl", () => {
+	it("opens the in-map form at the pin with 5-decimal coords", () => {
+		expect(buildAddFormUrl(32.649012345, -16.910299999)).toBe(
+			"/map?add=form#17/32.64901/-16.91030",
 		);
 	});
 });
