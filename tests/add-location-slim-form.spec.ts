@@ -1,13 +1,15 @@
 import { expect, test } from '@playwright/test';
 
-import { stubReverseGeocode } from './helpers';
+import { MARKER_LOAD_TIMEOUT, stubMapData, stubReverseGeocode } from './helpers';
 
 // Step 2 of the add-location redesign: slim details form (#1134) —
 // category picker and optional fields behind the "Add more details"
-// expander. The page only opens with a map-placed pin (load guard), so
-// every visit carries ?lat&long. The arrival address lookup (#1315) is
-// stubbed to keep these hermetic; the SW block lets page.route see it.
-const PIN = '/add-location?lat=52.52000&long=13.40500';
+// expander. The form lives on the map now (#1134): ?add=form opens it at
+// the hash pin. stubMapData keeps the host hermetic; the arrival address
+// lookup (#1315) is stubbed too, and the SW block lets page.route see it.
+// The pin sits in the shared STUB_PLACES viewport so the map-ready
+// helper (rendered-marker count) has features to see.
+const PIN = '/map?add=form#17/42.2762511/42.7024218';
 
 test.describe('Add Location — slim form', () => {
 	test.use({ serviceWorkers: 'block' });
@@ -15,9 +17,14 @@ test.describe('Add Location — slim form', () => {
 	test('category is a picker and Other reveals a required text input', async ({
 		page
 	}) => {
+		await stubMapData(page);
 		await stubReverseGeocode(page);
+		// The map host boots slowly under parallel workers — wait on the
+		// form itself, the only readiness these specs care about.
 		await page.goto(PIN);
-		await page.waitForLoadState('domcontentloaded');
+		await expect(page.locator('#name')).toBeVisible({
+			timeout: MARKER_LOAD_TIMEOUT
+		});
 
 		const category = page.locator('#category');
 		await expect(category).toBeVisible();
@@ -34,9 +41,14 @@ test.describe('Add Location — slim form', () => {
 	test('optional fields sit behind the expander and stay functional', async ({
 		page
 	}) => {
+		await stubMapData(page);
 		await stubReverseGeocode(page);
+		// The map host boots slowly under parallel workers — wait on the
+		// form itself, the only readiness these specs care about.
 		await page.goto(PIN);
-		await page.waitForLoadState('domcontentloaded');
+		await expect(page.locator('#name')).toBeVisible({
+			timeout: MARKER_LOAD_TIMEOUT
+		});
 
 		const websiteInput = page.locator('input[name="website"]');
 		await expect(websiteInput).toBeHidden();
@@ -57,9 +69,14 @@ test.describe('Add Location — slim form', () => {
 	test('opening hours unfold as a day grid and produce OSM syntax', async ({
 		page
 	}) => {
+		await stubMapData(page);
 		await stubReverseGeocode(page);
+		// The map host boots slowly under parallel workers — wait on the
+		// form itself, the only readiness these specs care about.
 		await page.goto(PIN);
-		await page.waitForLoadState('domcontentloaded');
+		await expect(page.locator('#name')).toBeVisible({
+			timeout: MARKER_LOAD_TIMEOUT
+		});
 
 		// The editor sits behind its own accordion row inside the expander.
 		await page.getByRole('button', { name: /Add more details/ }).click();

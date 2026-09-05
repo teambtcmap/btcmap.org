@@ -1,12 +1,15 @@
 import { expect, test } from '@playwright/test';
 
-import { stubReverseGeocode } from './helpers';
+import { MARKER_LOAD_TIMEOUT, stubMapData, stubReverseGeocode } from './helpers';
 
 // Address suggestion from the pin (#1315): the field is promoted out of
 // the details expander and pre-filled by one reverse-geocode of the pin.
 // A fulfilled suggestion locks the field to required — editable but not
-// blankable; a miss degrades to the old empty optional field.
-const PIN = '/add-location?lat=52.52000&long=13.40500';
+// blankable; a miss degrades to the old empty optional field. The form
+// lives on the map now (#1134) — stubMapData keeps the host hermetic.
+// The pin sits in the shared STUB_PLACES viewport so the map-ready
+// helper (rendered-marker count) has features to see.
+const PIN = '/map?add=form#17/42.2762511/42.7024218';
 
 test.describe('Add Location — address suggestion from the pin', () => {
 	test.use({ serviceWorkers: 'block' });
@@ -14,8 +17,14 @@ test.describe('Add Location — address suggestion from the pin', () => {
 	test('prefills the address from the pin and makes it required', async ({
 		page
 	}) => {
+		await stubMapData(page);
 		await stubReverseGeocode(page);
+		// The map host boots slowly under parallel workers — wait on the
+		// form itself, the only readiness these specs care about.
 		await page.goto(PIN);
+		await expect(page.locator('#name')).toBeVisible({
+			timeout: MARKER_LOAD_TIMEOUT
+		});
 
 		const address = page.locator('#address');
 		await expect(address).toHaveValue('Freiheitsstraße 21, 10115 Berlin');
@@ -35,6 +44,7 @@ test.describe('Add Location — address suggestion from the pin', () => {
 	test('typing before the lookup settles keeps the text and still locks required', async ({
 		page
 	}) => {
+		await stubMapData(page);
 		// Delayed stub: the user gets to the field before the hit lands, so
 		// the suggestion must not overwrite their text — but the field still
 		// flips to required (review finding on #1316).
@@ -56,7 +66,12 @@ test.describe('Add Location — address suggestion from the pin', () => {
 				});
 			}
 		);
+		// The map host boots slowly under parallel workers — wait on the
+		// form itself, the only readiness these specs care about.
 		await page.goto(PIN);
+		await expect(page.locator('#name')).toBeVisible({
+			timeout: MARKER_LOAD_TIMEOUT
+		});
 
 		const address = page.locator('#address');
 		await address.fill('My own address 5');
@@ -67,8 +82,14 @@ test.describe('Add Location — address suggestion from the pin', () => {
 	test('a failed lookup leaves the field empty and optional', async ({
 		page
 	}) => {
+		await stubMapData(page);
 		await stubReverseGeocode(page, null);
+		// The map host boots slowly under parallel workers — wait on the
+		// form itself, the only readiness these specs care about.
 		await page.goto(PIN);
+		await expect(page.locator('#name')).toBeVisible({
+			timeout: MARKER_LOAD_TIMEOUT
+		});
 
 		const address = page.locator('#address');
 		// The placeholder flip marks the lookup as settled.

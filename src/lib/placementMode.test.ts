@@ -4,8 +4,7 @@ import type { Place } from "$lib/types";
 
 import {
 	addEntryMethod,
-	buildAddLocationUrl,
-	buildPlacementUrl,
+	buildAddFormUrl,
 	clampDedupeRadiusKm,
 	fetchNearbyPlaceNames,
 	findNearbyPlaces,
@@ -13,21 +12,10 @@ import {
 	placementEntryUrl,
 } from "./placementMode";
 
-describe("buildAddLocationUrl", () => {
-	it("builds the add-location URL with 5-decimal coords", () => {
-		expect(buildAddLocationUrl(32.649012345, -16.910299999)).toBe(
-			"/add-location?lat=32.64901&long=-16.91030",
-		);
-	});
-});
-
-describe("buildPlacementUrl", () => {
-	it("reopens placement mode on the pin at the point-entry zoom", () => {
-		// ?add=adjust lets the funnel tell form re-entries apart; the hash
-		// centres the map (parseHashCoords: zoom/lat/lng) at the same 5-dp
-		// precision the form displays.
-		expect(buildPlacementUrl(52.52, 13.405)).toBe(
-			"/map?add=adjust#17/52.52000/13.40500",
+describe("buildAddFormUrl", () => {
+	it("opens the in-map form at the pin with 5-decimal coords", () => {
+		expect(buildAddFormUrl(32.649012345, -16.910299999)).toBe(
+			"/map?add=form#17/32.64901/-16.91030",
 		);
 	});
 });

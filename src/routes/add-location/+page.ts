@@ -1,16 +1,20 @@
 import { redirect } from "@sveltejs/kit";
 
-import { parseCoordsParams, placementEntryUrl } from "$lib/placementMode";
+import {
+	buildAddFormUrl,
+	parseCoordsParams,
+	placementEntryUrl,
+} from "$lib/placementMode";
 
 import type { PageLoad } from "./$types";
 
-// One placement UI in the system: the form only ever opens with a pin that
-// was confirmed on the map (and passed the duplicate check there). Anything
-// arriving without valid ?lat&long — nav links, bookmarks, malformed deep
-// links — is sent to placement mode instead. Universal load, so SSR and
-// client-side navigations redirect alike.
+// The standalone page is retired (#1134): the form lives on the map now.
+// This route survives only as a courtesy to old deep links. Valid
+// ?lat&long — years of shared "add a place" URLs — opens the in-map form
+// at that pin; anything else goes to placement mode, as the guard always
+// did. Universal load, so SSR and client-side navigations redirect alike.
 export const load: PageLoad = ({ url }) => {
 	const coords = parseCoordsParams(url.searchParams);
 	if (!coords) redirect(302, placementEntryUrl("redirect"));
-	return { coords };
+	redirect(302, buildAddFormUrl(coords.lat, coords.long));
 };

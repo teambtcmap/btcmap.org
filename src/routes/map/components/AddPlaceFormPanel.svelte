@@ -63,7 +63,7 @@ const onKeydown = (event: KeyboardEvent) => {
 			<p class="mb-4 text-sm text-body dark:text-offwhite">
 				{$_('addLocation.pinConfirmedHint')}
 			</p>
-			<AddLocationForm {coords} showPinPreview={false} onsuccess={() => (submitted = true)} />
+			<AddLocationForm {coords} onsuccess={() => (submitted = true)} />
 		</div>
 	{:else}
 		<div class="flex flex-col items-center gap-4 px-4 py-16 text-center">

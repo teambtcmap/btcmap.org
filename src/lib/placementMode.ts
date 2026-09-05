@@ -6,18 +6,12 @@ import { calculateDistance } from "$lib/utils";
 
 import type { Place as ApiPlace } from "$types/btcmap-api/Place";
 
-// 5 decimal places (~1 m) matches the precision /add-location displays
-// and snaps to in placeMarker().
-export const buildAddLocationUrl = (lat: number, long: number): string =>
-	`/add-location?lat=${lat.toFixed(5)}&long=${long.toFixed(5)}`;
-
-// Inverse handover: the form's minimap links back into placement mode with
-// the crosshair on the pin. The hash is the map's own zoom/lat/lng format
-// (parseHashCoords) at the point-entry zoom; ?add=adjust marks the entry
-// method for the add_place_enter funnel (AddPlaceMode's URL effect
-// normalises it back to a bare ?add= once the map is up).
-export const buildPlacementUrl = (lat: number, long: number): string =>
-	`${placementEntryUrl("adjust")}#${CLUSTERING_DISABLED_ZOOM}/${lat.toFixed(5)}/${long.toFixed(5)}`;
+// The in-map form at a pin: ?add=form opens AddPlaceMode's panel, the
+// hash (map's own zoom/lat/lng format, parseHashCoords) centres the map —
+// and the centre IS the pin. 5 decimal places is ~1 m. Old
+// /add-location?lat&long deep links redirect here.
+export const buildAddFormUrl = (lat: number, long: number): string =>
+	`/map?add=form#${CLUSTERING_DISABLED_ZOOM}/${lat.toFixed(5)}/${long.toFixed(5)}`;
 
 // Delegates to the map's ?lat&long viewport parser so there is a single
 // implementation of the empty-string and ±90/±180 guards. Only a single
