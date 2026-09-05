@@ -11,6 +11,10 @@ export type AddLocationSubmission = {
 	hours: string;
 	notes: string;
 	contact: string;
+	// Verified server-side against /v4/users/me — never client-claimed.
+	// Empty when the submission is anonymous.
+	submittedBy: string;
+	submitterNpub: string;
 };
 
 export type SubmitPlaceParams = {
@@ -40,6 +44,8 @@ export const buildSubmitPlaceParams = (
 		opening_hours: form.hours,
 		notes: form.notes,
 		contact: form.contact,
+		submitted_by: form.submittedBy,
+		submitter_npub: form.submitterNpub,
 		osm_edit_url: `https://www.openstreetmap.org/edit#map=21/${form.lat}/${form.long}`,
 	};
 	const extra_fields = Object.fromEntries(

@@ -9,11 +9,13 @@ import type { FormSelectOption } from "$components/form/FormSelect.svelte";
 import FormSelect from "$components/form/FormSelect.svelte";
 import OpeningHoursEditor from "$components/form/OpeningHoursEditor.svelte";
 import Icon from "$components/Icon.svelte";
+import NostrAvatar from "$components/NostrAvatar.svelte";
 import PrimaryButton from "$components/PrimaryButton.svelte";
 import { trackEvent } from "$lib/analytics";
 import { CATEGORIES, CATEGORY_GROUPS } from "$lib/categoryMapping";
 import { reverseGeocode } from "$lib/geocoding";
 import { _, locale } from "$lib/i18n";
+import { session } from "$lib/session";
 import { theme } from "$lib/theme";
 import { errToast } from "$lib/utils";
 
@@ -140,6 +142,14 @@ let contact = $state<HTMLInputElement>();
 let noMethodSelected = $state(false);
 let submitting = $state(false);
 
+// Per-submission anonymity (#1334): someone on a shared device can
+// detach the signed-in account from THIS submission without logging
+// out. Detached = the plain anonymous contract (required email, no
+// Authorization header).
+let submitAnonymously = $state(false);
+let showDetach = $state(false);
+const identityAttached = $derived(!!$session && !submitAnonymously);
+
 const handleCheckboxClick = () => {
 	noMethodSelected = false;
 };
@@ -168,26 +178,35 @@ const submitForm = (event: SubmitEvent) => {
 		}
 
 		axios
-			.post("/api/submit-place", {
-				captchaSecret,
-				captchaTest: captchaInput?.value,
-				honey: honeyInput?.value,
-				name: name?.value,
-				nameEn: nameEn?.value,
-				address: address?.value,
-				lat: coords.lat,
-				long: coords.long,
-				category:
-					categorySelect === "Other"
-						? (categoryOther ?? "").trim()
-						: (categorySelect ?? ""),
-				methods,
-				website: website?.value,
-				phone: phone?.value,
-				hours: hoursValue,
-				notes: notes?.value,
-				contact: contact?.value,
-			})
+			.post(
+				"/api/submit-place",
+				{
+					captchaSecret,
+					captchaTest: captchaInput?.value,
+					honey: honeyInput?.value,
+					name: name?.value,
+					nameEn: nameEn?.value,
+					address: address?.value,
+					lat: coords.lat,
+					long: coords.long,
+					category:
+						categorySelect === "Other"
+							? (categoryOther ?? "").trim()
+							: (categorySelect ?? ""),
+					methods,
+					website: website?.value,
+					phone: phone?.value,
+					hours: hoursValue,
+					notes: notes?.value,
+					contact: contact?.value,
+				},
+				// The endpoint verifies the token and attaches the account to
+				// the submission (#1334); no session (or a detached one), no
+				// header — anonymous.
+				identityAttached && $session
+					? { headers: { Authorization: `Bearer ${$session.token}` } }
+					: undefined,
+			)
 			.then(() => {
 				onsuccess();
 			})
@@ -473,13 +492,76 @@ onMount(() => {
 	</div>
 
 	<div>
-		<label for="contact" class="mb-2 block font-semibold">{$_('forms.contact')}</label>
-		<p class="mb-2 text-justify text-sm">
-			{$_('addLocation.contactDescription')}
-		</p>
+		<label for="contact" class="mb-2 block font-semibold">
+			{$_('forms.contact')}
+			{#if identityAttached}
+				<span class="font-normal">{$_('forms.optional')}</span>
+			{/if}
+		</label>
+		{#if identityAttached && $session}
+			<!-- The submission carries the account (verified server-side), so
+			     the email is a follow-up channel, not the identity. The chip
+			     reveals the shared-device escape hatch: detach the account
+			     from this one submission. -->
+			<div class="mb-2 flex flex-wrap items-center gap-2">
+				<!-- Speaks the app's chip dialect: the filter chips' active
+				     pill, the header UserMenu's identity (Nostr avatar or
+				     account icon), and the expand_more rotate-on-open
+				     disclosure. -->
+				<button
+					type="button"
+					aria-expanded={showDetach}
+					onclick={() => (showDetach = !showDetach)}
+					class="flex shrink-0 items-center gap-2 rounded-full border border-link bg-link/10 px-3 py-1 text-sm font-semibold whitespace-nowrap text-primary transition-colors focus-visible:ring-2 focus-visible:ring-link focus-visible:ring-offset-1 focus-visible:outline-none dark:border-link dark:text-white dark:focus-visible:ring-offset-dark"
+				>
+					{#if $session.npub}
+						<NostrAvatar npub={$session.npub} size={18} class="h-[18px] w-[18px]" />
+					{:else}
+						<Icon type="material" icon="account_circle_filled" w="18" h="18" />
+					{/if}
+					{$_('addLocation.submittingAs', { values: { username: $session.username } })}
+					<Icon
+						type="material"
+						icon="expand_more"
+						w="16"
+						h="16"
+						class={showDetach ? 'rotate-180' : ''}
+					/>
+				</button>
+				{#if showDetach}
+					<button
+						type="button"
+						onclick={() => {
+							submitAnonymously = true;
+							showDetach = false;
+						}}
+						class="text-sm font-semibold text-link hover:text-hover focus:outline-link"
+					>
+						{$_('addLocation.submitAnonymously')}
+					</button>
+				{/if}
+			</div>
+			<p class="mb-2 text-justify text-sm">
+				{$_('addLocation.contactSignedInHint')}
+			</p>
+		{:else}
+			{#if $session}
+				<!-- Detached: the anonymous contract applies, with an undo. -->
+				<button
+					type="button"
+					onclick={() => (submitAnonymously = false)}
+					class="mb-2 text-sm font-semibold text-link hover:text-hover focus:outline-link"
+				>
+					{$_('addLocation.submitAsAccount', { values: { username: $session.username } })}
+				</button>
+			{/if}
+			<p class="mb-2 text-justify text-sm">
+				{$_('addLocation.contactDescription')}
+			</p>
+		{/if}
 		<input
 			disabled={!captchaSecret}
-			required
+			required={!identityAttached}
 			type="email"
 			name="contact"
 			id="contact"
