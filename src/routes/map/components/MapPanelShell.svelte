@@ -4,6 +4,8 @@ import { fly } from "svelte/transition";
 
 import { MAP_PANEL_MARGIN, MERCHANT_DRAWER_WIDTH } from "$lib/constants";
 
+import { browser } from "$app/environment";
+
 // The map's one panel-card definition: desktop floating card (drawer
 // sizing, max-height leaving the attribution corner uncovered, fly-in,
 // sticky header) — full-screen sheet below md for hosts that render
@@ -33,8 +35,11 @@ let {
 }: Props = $props();
 
 // Mount-time is fine: a mid-session viewport-class change would only
-// soften the entry animation, nothing else.
-const desktop = window.matchMedia("(min-width: 768px)").matches;
+// soften the entry animation, nothing else. Both consumers instantiate
+// the shell client-side only today, but the browser guard keeps a
+// future SSR-rendered consumer from throwing here — transitions don't
+// run on the server anyway.
+const desktop = browser && window.matchMedia("(min-width: 768px)").matches;
 </script>
 
 <section
