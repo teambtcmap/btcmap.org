@@ -500,6 +500,8 @@
 		"hoursToggle": "Öffnungszeiten festlegen",
 		"notesPlaceholder": "Bitte füge hier weitere Details hinzu, wie zusätzliche Händlerdetails, Kontakte, soziale Netzwerke usw.",
 		"contactDescription": "Falls wir Rückfragen haben, werden wir dich kontaktieren, um diesen Standort erfolgreich hinzuzufügen. Um den Prozess zu beschleunigen, überprüfe bitte deinen Spam-Ordner, falls er dort gelandet sein könnte.",
+		"submittingAs": "Eingereicht als {username}",
+		"contactSignedInHint": "Deine Einreichung ist mit deinem Konto verknüpft. Gib eine E-Mail nur an, wenn du Rückfragen per Mail möchtest — sie wird nie öffentlich angezeigt.",
 		"contactPlaceholder": "hello@btcmap.org",
 		"captchaPlaceholder": "Bitte gib den Captcha-Text ein.",
 		"formSuccessType": "Standort",

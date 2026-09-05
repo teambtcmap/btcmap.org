@@ -14,6 +14,7 @@ import { trackEvent } from "$lib/analytics";
 import { CATEGORIES, CATEGORY_GROUPS } from "$lib/categoryMapping";
 import { reverseGeocode } from "$lib/geocoding";
 import { _, locale } from "$lib/i18n";
+import { session } from "$lib/session";
 import { theme } from "$lib/theme";
 import { errToast } from "$lib/utils";
 
@@ -168,26 +169,34 @@ const submitForm = (event: SubmitEvent) => {
 		}
 
 		axios
-			.post("/api/submit-place", {
-				captchaSecret,
-				captchaTest: captchaInput?.value,
-				honey: honeyInput?.value,
-				name: name?.value,
-				nameEn: nameEn?.value,
-				address: address?.value,
-				lat: coords.lat,
-				long: coords.long,
-				category:
-					categorySelect === "Other"
-						? (categoryOther ?? "").trim()
-						: (categorySelect ?? ""),
-				methods,
-				website: website?.value,
-				phone: phone?.value,
-				hours: hoursValue,
-				notes: notes?.value,
-				contact: contact?.value,
-			})
+			.post(
+				"/api/submit-place",
+				{
+					captchaSecret,
+					captchaTest: captchaInput?.value,
+					honey: honeyInput?.value,
+					name: name?.value,
+					nameEn: nameEn?.value,
+					address: address?.value,
+					lat: coords.lat,
+					long: coords.long,
+					category:
+						categorySelect === "Other"
+							? (categoryOther ?? "").trim()
+							: (categorySelect ?? ""),
+					methods,
+					website: website?.value,
+					phone: phone?.value,
+					hours: hoursValue,
+					notes: notes?.value,
+					contact: contact?.value,
+				},
+				// The endpoint verifies the token and attaches the account to
+				// the submission (#1334); no session, no header — anonymous.
+				$session
+					? { headers: { Authorization: `Bearer ${$session.token}` } }
+					: undefined,
+			)
 			.then(() => {
 				onsuccess();
 			})
@@ -473,13 +482,31 @@ onMount(() => {
 	</div>
 
 	<div>
-		<label for="contact" class="mb-2 block font-semibold">{$_('forms.contact')}</label>
-		<p class="mb-2 text-justify text-sm">
-			{$_('addLocation.contactDescription')}
-		</p>
+		<label for="contact" class="mb-2 block font-semibold">
+			{$_('forms.contact')}
+			{#if $session}
+				<span class="font-normal">{$_('forms.optional')}</span>
+			{/if}
+		</label>
+		{#if $session}
+			<!-- The submission carries the account (verified server-side), so
+			     the email is a follow-up channel, not the identity. -->
+			<p
+				class="mb-2 inline-flex items-center gap-2 rounded-full border border-input bg-link/5 px-3 py-1.5 text-sm font-semibold text-primary dark:text-white"
+			>
+				{$_('addLocation.submittingAs', { values: { username: $session.username } })}
+			</p>
+			<p class="mb-2 text-justify text-sm">
+				{$_('addLocation.contactSignedInHint')}
+			</p>
+		{:else}
+			<p class="mb-2 text-justify text-sm">
+				{$_('addLocation.contactDescription')}
+			</p>
+		{/if}
 		<input
 			disabled={!captchaSecret}
-			required
+			required={!$session}
 			type="email"
 			name="contact"
 			id="contact"

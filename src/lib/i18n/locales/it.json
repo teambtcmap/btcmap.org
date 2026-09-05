@@ -601,6 +601,8 @@
 		"hoursToggle": "Imposta gli orari di apertura",
 		"notesPlaceholder": "Aggiungi ulteriori dettagli qui, come dettagli aggiuntivi sul commerciante, contatti, canali social, ecc.",
 		"contactDescription": "In caso di domande di approfondimento, ti contatteremo per aggiungere correttamente questa posizione. Per velocizzare il processo, controlla la cartella spam nel caso in cui la mail finisca lì.",
+		"submittingAs": "Invio come {username}",
+		"contactSignedInHint": "Il tuo invio è collegato al tuo account. Aggiungi un'email solo se desideri domande di follow-up — non viene mai mostrata pubblicamente.",
 		"contactPlaceholder": "hello@btcmap.org",
 		"captchaPlaceholder": "Inserisci il testo del captcha.",
 		"formSuccessType": "Posizione",

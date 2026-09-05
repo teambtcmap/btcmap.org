@@ -40,6 +40,30 @@ export const POST: RequestHandler = async ({ request, fetch }) => {
 		error(503, "Service unavailable");
 	}
 
+	// Optional identity attach (#1334): a signed-in client sends its
+	// Bearer token, which is verified against the API — the submission
+	// carries the VERIFIED username/npub, never a client claim. Anonymous
+	// stays first-class, and a stale token degrades to anonymous rather
+	// than blocking the submission.
+	let submittedBy = "";
+	let submitterNpub = "";
+	const authorization = request.headers.get("authorization");
+	if (authorization) {
+		try {
+			const meResponse = await fetch(`${API_BASE}/v4/users/me`, {
+				headers: { Authorization: authorization },
+				signal: AbortSignal.timeout(8_000),
+			});
+			if (meResponse.ok) {
+				const me = await meResponse.json();
+				if (typeof me?.name === "string") submittedBy = me.name;
+				if (typeof me?.npub === "string") submitterNpub = me.npub;
+			}
+		} catch (e) {
+			console.error("[submit-place] identity verification failed", e);
+		}
+	}
+
 	const name = asString(body.name).trim();
 	const category = asString(body.category).trim();
 	// Strict number check: Number(null) and Number("") are 0, which would
@@ -71,6 +95,8 @@ export const POST: RequestHandler = async ({ request, fetch }) => {
 		hours: asString(body.hours),
 		notes: asString(body.notes),
 		contact: asString(body.contact),
+		submittedBy,
+		submitterNpub,
 	};
 
 	const params = buildSubmitPlaceParams(submission, crypto.randomUUID());

@@ -500,6 +500,8 @@
 		"hoursToggle": "Definir el horario",
 		"notesPlaceholder": "Por favor agrega más detalles aquí como información adicional del comercio, contactos, redes sociales, etc.",
 		"contactDescription": "Si tenemos preguntas de seguimiento te contactaremos para agregar esta ubicación exitosamente. Para acelerar el proceso, revisa tu carpeta de spam por si acaso.",
+		"submittingAs": "Enviando como {username}",
+		"contactSignedInHint": "Tu envío está vinculado a tu cuenta. Añade un correo solo si quieres recibir preguntas de seguimiento — nunca se muestra públicamente.",
 		"contactPlaceholder": "hello@btcmap.org",
 		"captchaPlaceholder": "Por favor ingresa el texto del captcha.",
 		"formSuccessType": "Ubicación",

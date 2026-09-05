@@ -601,6 +601,8 @@
 		"hoursToggle": "Set opening hours",
 		"notesPlaceholder": "Please add further details here like additional merchant details, contacts, socials, etc.",
 		"contactDescription": "If we have any follow-up questions we will contact you in order to add this location successfully. To speed up the process please check your spam folder in case it ends up there.",
+		"submittingAs": "Submitting as {username}",
+		"contactSignedInHint": "Your submission is linked to your account. Add an email only if you'd like follow-up questions by mail — it is never shown publicly.",
 		"contactPlaceholder": "hello@btcmap.org",
 		"captchaPlaceholder": "Please enter the captcha text.",
 		"formSuccessType": "Location",
