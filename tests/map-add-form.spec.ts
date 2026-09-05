@@ -89,8 +89,12 @@ test.describe('In-map add form', () => {
 		await page.keyboard.press('Escape');
 		await expect(page.getByText('Place the pin', { exact: true })).toBeVisible();
 		await expect(page.locator('#name')).toBeHidden();
-		// Still on the map, normalized to the bare placement URL.
-		await expect(page).toHaveURL(/\/map\?add(?!=form)/);
+		// Still on the map, normalized to the bare placement URL, with the
+		// pin's hash intact (precision-agnostic: the map rewrites the hash
+		// with its own formatting on moveend).
+		await expect(page).toHaveURL(
+			/\/map\?add(?!=form).*#\d+(\.\d+)?\/42\.27\d+\/42\.70\d+/
+		);
 	});
 
 	test('mobile: the form is a full-screen sheet and closes back to placement', async ({
