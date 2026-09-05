@@ -95,12 +95,15 @@ export async function waitForMarkersToLoad(
 	// Poll a global hook /map exposes — `window.__mapPlacesCount` is set
 	// (with the rendered feature count) inside syncPlacesToSource each
 	// time the source is refreshed. The hook is a no-op in prod; tests
-	// pin against it.
+	// pin against it. waitForFunction's SECOND parameter is the page-
+	// function arg — the options object goes third, or the timeout
+	// silently falls back to actionTimeout (5s locally).
 	await page.waitForFunction(
 		() =>
 			(window as unknown as { __mapPlacesCount?: number }).__mapPlacesCount !==
 			undefined &&
 			(window as unknown as { __mapPlacesCount: number }).__mapPlacesCount > 0,
+		undefined,
 		{ timeout: MARKER_LOAD_TIMEOUT }
 	);
 }
