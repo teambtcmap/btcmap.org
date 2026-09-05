@@ -476,7 +476,7 @@ $effect(() => {
 							<span class="shrink-0 text-sm text-body dark:text-offwhite"
 								>{Math.round(distanceM)} m
 								<span class="ml-1 font-semibold text-link"
-									>{$_("map.placement.nearbyUpdate")} ›</span
+									>{$_("map.placement.nearbyUpdate")}<span aria-hidden="true"> ›</span></span
 								></span
 							>
 						</a>
