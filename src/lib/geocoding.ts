@@ -72,3 +72,50 @@ export const reverseGeocode = async (
 		return null;
 	}
 };
+
+export type GeocodeResult = {
+	lat: number;
+	lon: number;
+	displayName: string;
+};
+
+type NominatimSearchResult = {
+	lat: string;
+	lon: string;
+	display_name: string;
+};
+
+const NOMINATIM_SEARCH_URL = "https://nominatim.openstreetmap.org/search";
+
+// Forward geocoding for placement mode's "type an address to jump there"
+// (#1134) — explicit-submit only, so request volume is one per search the
+// user asks for, the same footprint the old form's address search had.
+// Failures throw so the caller can tell "lookup failed" from "no match".
+export const searchAddress = async (
+	query: string,
+	locale: string,
+): Promise<GeocodeResult[]> => {
+	const response = await axios.get<NominatimSearchResult[]>(
+		NOMINATIM_SEARCH_URL,
+		{
+			params: {
+				q: query,
+				format: "jsonv2",
+				limit: 5,
+				addressdetails: 0,
+				"accept-language": locale,
+			},
+			timeout: REQUEST_TIMEOUT_MS,
+		},
+	);
+
+	const results: GeocodeResult[] = [];
+	for (const entry of response.data) {
+		const lat = Number(entry.lat);
+		const lon = Number(entry.lon);
+		if (Number.isFinite(lat) && Number.isFinite(lon)) {
+			results.push({ lat, lon, displayName: entry.display_name });
+		}
+	}
+	return results;
+};

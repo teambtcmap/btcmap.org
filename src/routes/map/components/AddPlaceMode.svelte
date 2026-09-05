@@ -24,6 +24,7 @@ import {
 import { places } from "$lib/store";
 
 import AddPlaceFormPanel from "./AddPlaceFormPanel.svelte";
+import PlacementSearchBar from "./PlacementSearchBar.svelte";
 
 type Props = {
 	map: MapLibreMap | undefined;
@@ -161,6 +162,18 @@ const zoomTooLow = $derived(currentZoom < MERCHANT_LIST_MIN_ZOOM);
 const zoomToPlace = () => {
 	if (!map) return;
 	map.easeTo({ zoom: MERCHANT_LIST_MIN_ZOOM, duration: 500 });
+};
+
+// A search jump is a placement: the crosshair stays centered, so easing
+// the map there puts the pin on the result. Zoom in only, never out —
+// same rule as the point-intent entries.
+const jumpToAddress = (lat: number, long: number) => {
+	if (!map) return;
+	map.easeTo({
+		center: [long, lat],
+		zoom: Math.max(map.getZoom(), CLUSTERING_DISABLED_ZOOM),
+		duration: 500,
+	});
 };
 
 const cancel = () => {
@@ -395,6 +408,16 @@ $effect(() => {
 	>
 		<PlacementPinIcon width={40} />
 	</div>
+
+	{#if !formOpen && nearby === null}
+		<!-- Address-first path: search to jump the map — the pin stays
+		     centered, so the jump IS the placement. -->
+		<div
+			class="absolute left-1/2 top-3 z-[1001] w-[min(26rem,calc(100%-1.5rem))] -translate-x-1/2"
+		>
+			<PlacementSearchBar onjump={jumpToAddress} />
+		</div>
+	{/if}
 
 	{#if formOpen && formCoords}
 		<!-- The form host: full-screen sheet on mobile, right panel on

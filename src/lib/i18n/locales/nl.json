@@ -382,6 +382,10 @@
 		"placement": {
 			"title": "Plaats de pin",
 			"hint": "Sleep de kaart tot de pin op de bedrijfsingang staat en bevestig.",
+			"searchPlaceholder": "Typ een adres om ernaartoe te springen",
+			"searchAction": "Zoeken",
+			"searchNoResults": "Niets gevonden voor dat adres.",
+			"searchFailed": "Adres zoeken mislukt — probeer het opnieuw.",
 			"cancel": "Annuleren",
 			"confirm": "Voeg hier een locatie toe",
 			"zoomIn": "Zoom in om de pin te plaatsen",
