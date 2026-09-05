@@ -386,8 +386,9 @@
 			"confirm": "Aggiungi un luogo qui",
 			"zoomIn": "Ingrandisci per posizionare il segnaposto",
 			"nearbyTitle": "È uno di questi?",
-			"nearbyHint": "Questi luoghi esistono già vicino al tuo segnaposto — aprine uno per controllare, oppure aggiungi un nuovo luogo.",
+			"nearbyHint": "Questi luoghi esistono già vicino al tuo pin — aggiornane uno invece di aggiungere un duplicato.",
 			"nearbyUnnamed": "Luogo senza nome",
+			"nearbyUpdate": "Aggiorna",
 			"nearbyBack": "Indietro",
 			"nearbyContinue": "Aggiungi un nuovo luogo",
 			"backToMap": "Torna alla mappa"

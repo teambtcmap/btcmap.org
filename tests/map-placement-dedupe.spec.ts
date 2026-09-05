@@ -49,13 +49,14 @@ test.describe('Placement dedupe interrupt', () => {
 
 		await page.getByRole('button', { name: 'Add a place here' }).click();
 		await expect(page.getByText('Is it one of these?')).toBeVisible();
-		// Only the in-radius candidate is listed, linked to its merchant page.
-		// The name arrives via the radius search stub, not the (name-less) feed.
+		// Only the in-radius candidate is listed, routed into the verify/
+		// update flow (deck slide 7). The name arrives via the radius search
+		// stub, not the (name-less) feed.
 		const candidate = page.getByRole('link', { name: /Stub Cafe/ });
-		await expect(candidate).toHaveAttribute('href', '/merchant/1');
+		await expect(candidate).toHaveAttribute('href', '/verify-location?id=1');
 		// Radius filter: only id 1 (~6 m) sits inside the clamped ~1 km
 		// radius; ids 2–3 are ~2.2 km north — exactly one candidate renders.
-		await expect(page.locator('a[href^="/merchant/"]')).toHaveCount(1);
+		await expect(page.locator('a[href^="/verify-location"]')).toHaveCount(1);
 		// No navigation happened yet.
 		await expect(page).toHaveURL(/\/map/);
 
@@ -107,7 +108,7 @@ test.describe('Placement dedupe interrupt', () => {
 		await expect(page.getByText('Is it one of these?')).toBeVisible();
 		const candidate = page.getByRole('link', { name: /Unnamed place/ });
 		await expect(candidate).toBeVisible();
-		await expect(candidate).toHaveAttribute('href', '/merchant/1');
+		await expect(candidate).toHaveAttribute('href', '/verify-location?id=1');
 	});
 
 	test('low zoom gates confirm behind a zoom-in step', async ({ page }) => {
