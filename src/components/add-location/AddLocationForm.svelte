@@ -18,6 +18,7 @@ import { trackEvent } from "$lib/analytics";
 import { CATEGORIES, CATEGORY_GROUPS } from "$lib/categoryMapping";
 import { reverseGeocode } from "$lib/geocoding";
 import { _, locale } from "$lib/i18n";
+import { fetchProfile } from "$lib/nostrProfile";
 import type {
 	SubmitPlaceRequest,
 	SubmitPlaceResponse,
@@ -165,6 +166,28 @@ let showSignIn = $state(false);
 const identityAttached = $derived(
 	!!$session?.token.trim() && !submitAnonymously,
 );
+
+// For Nostr-linked accounts, show the profile's display name instead of
+// the auto-generated API username — the header's UserMenu idiom.
+// fetchProfile caches, and the npub guard keeps it to one fetch and
+// drops stale results. Rendered as text, so relay-sourced names stay
+// escaped.
+let nostrName = $state<string | null>(null);
+let loadedNpub: string | null = null;
+$effect(() => {
+	const npub = $session?.npub ?? null;
+	if (npub === loadedNpub) return;
+	loadedNpub = npub;
+	nostrName = null;
+	if (npub) {
+		fetchProfile(npub).then((profile) => {
+			if (loadedNpub === npub) {
+				nostrName = profile?.displayName || profile?.name || null;
+			}
+		});
+	}
+});
+const displayName = $derived(nostrName ?? $session?.username ?? "");
 
 const onAuthSuccess = () => {
 	// The forms set the session store themselves — collapse and let the
@@ -542,7 +565,7 @@ onMount(() => {
 						{:else}
 							<Icon type="material" icon="account_circle_filled" w="18" h="18" />
 						{/if}
-						{$_('addLocation.submittingAs', { values: { username: $session.username } })}
+						{$_('addLocation.submittingAs', { values: { username: displayName } })}
 						<Icon
 							type="material"
 							icon="expand_more"
@@ -575,7 +598,7 @@ onMount(() => {
 						onclick={() => (submitAnonymously = false)}
 						class="mb-2 text-sm font-semibold text-link hover:text-hover focus:outline-link"
 					>
-						{$_('addLocation.submitAsAccount', { values: { username: $session.username } })}
+						{$_('addLocation.submitAsAccount', { values: { username: displayName } })}
 					</button>
 				{/if}
 				<p class="mb-2 text-justify text-sm">
