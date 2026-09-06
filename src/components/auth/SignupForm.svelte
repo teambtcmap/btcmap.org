@@ -1,4 +1,5 @@
 <script lang="ts">
+import AuthTextField from "$components/auth/AuthTextField.svelte";
 import PrimaryButton from "$components/PrimaryButton.svelte";
 import { trackEvent } from "$lib/analytics";
 import { _ } from "$lib/i18n";
@@ -46,43 +47,27 @@ async function handleSubmit(event: SubmitEvent) {
 </script>
 
 <form onsubmit={handleSubmit} class="space-y-4">
-	<div>
-		<label
-			for="signup-username"
-			class="mb-1 block text-sm font-semibold text-primary dark:text-white"
-		>
-			{$_("signup.username")}
-		</label>
-		<input
-			id="signup-username"
-			type="text"
-			bind:value={username}
-			autocomplete="username"
-			maxlength="100"
-			class="w-full rounded-lg border border-gray-300 bg-white px-3 py-2 text-primary dark:border-white/20 dark:bg-dark dark:text-white"
-		/>
-	</div>
+	<AuthTextField
+		id="signup-username"
+		label={$_("signup.username")}
+		bind:value={username}
+		autocomplete="username"
+		maxlength="100"
+	/>
 
-	<div>
-		<label
-			for="signup-password"
-			class="mb-1 block text-sm font-semibold text-primary dark:text-white"
-		>
-			{$_("signup.password")}
-		</label>
-		<input
-			id="signup-password"
-			type="password"
-			bind:value={password}
-			autocomplete="new-password"
-			minlength={PASSWORD_MIN_LENGTH}
-			maxlength={PASSWORD_MAX_LENGTH}
-			class="w-full rounded-lg border border-gray-300 bg-white px-3 py-2 text-primary dark:border-white/20 dark:bg-dark dark:text-white"
-		/>
+	<AuthTextField
+		id="signup-password"
+		label={$_("signup.password")}
+		type="password"
+		bind:value={password}
+		autocomplete="new-password"
+		minlength={PASSWORD_MIN_LENGTH}
+		maxlength={PASSWORD_MAX_LENGTH}
+	>
 		<p class="mt-1 text-xs text-body dark:text-white/50">
 			{$_("signup.passwordHint", { values: { min: PASSWORD_MIN_LENGTH } })}
 		</p>
-	</div>
+	</AuthTextField>
 
 	<PrimaryButton
 		type="submit"

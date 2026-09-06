@@ -1,6 +1,7 @@
 <script lang="ts">
 import { get } from "svelte/store";
 
+import AuthTextField from "$components/auth/AuthTextField.svelte";
 import PrimaryButton from "$components/PrimaryButton.svelte";
 import TextLink from "$components/TextLink.svelte";
 import { trackEvent } from "$lib/analytics";
@@ -13,17 +14,20 @@ import { errToast } from "$lib/utils";
 // Caller receives the new session after a successful login. This keeps the
 // form reusable: /login navigates, the save-flow modal completes a pending
 // save, both without baking navigation/save logic into the form.
-export let onSuccess: (session: Session) => void | Promise<void>;
+type Props = {
+	onSuccess: (session: Session) => void | Promise<void>;
+	// When true, render without the "Don't have an account?" link (e.g.
+	// inside a modal that already frames the login choice).
+	compact?: boolean;
+};
+let { onSuccess, compact = false }: Props = $props();
 
-// When true, render without the "Don't have an account?" link (e.g. inside
-// a modal that already frames the login choice).
-export let compact = false;
+let username = $state("");
+let password = $state("");
+let loading = $state(false);
 
-let username = "";
-let password = "";
-let loading = false;
-
-async function handleSubmit() {
+async function handleSubmit(event: SubmitEvent) {
+	event.preventDefault();
 	if (!username.trim() || !password) return;
 	loading = true;
 
@@ -58,40 +62,23 @@ async function handleSubmit() {
 }
 </script>
 
-<form on:submit|preventDefault={handleSubmit} class="space-y-4">
-	<div>
-		<label
-			for="login-username"
-			class="mb-1 block text-sm font-semibold text-primary dark:text-white"
-		>
-			{$_("login.username")}
-		</label>
-		<input
-			id="login-username"
-			type="text"
-			bind:value={username}
-			autocomplete="username"
-			maxlength="100"
-			class="w-full rounded-lg border border-gray-300 bg-white px-3 py-2 text-primary dark:border-white/20 dark:bg-dark dark:text-white"
-		/>
-	</div>
+<form onsubmit={handleSubmit} class="space-y-4">
+	<AuthTextField
+		id="login-username"
+		label={$_("login.username")}
+		bind:value={username}
+		autocomplete="username"
+		maxlength="100"
+	/>
 
-	<div>
-		<label
-			for="login-password"
-			class="mb-1 block text-sm font-semibold text-primary dark:text-white"
-		>
-			{$_("login.password")}
-		</label>
-		<input
-			id="login-password"
-			type="password"
-			bind:value={password}
-			autocomplete="current-password"
-			maxlength="200"
-			class="w-full rounded-lg border border-gray-300 bg-white px-3 py-2 text-primary dark:border-white/20 dark:bg-dark dark:text-white"
-		/>
-	</div>
+	<AuthTextField
+		id="login-password"
+		label={$_("login.password")}
+		type="password"
+		bind:value={password}
+		autocomplete="current-password"
+		maxlength="200"
+	/>
 
 	<PrimaryButton
 		type="submit"
@@ -105,10 +92,7 @@ async function handleSubmit() {
 {#if !compact}
 	<p class="mt-4 text-center text-sm text-body dark:text-white/70">
 		{$_("login.noAccount")}
-		<TextLink
-			link="/signup"
-			on:click={() => trackEvent("login_create_account_click")}
-		>
+		<TextLink link="/signup" onclick={() => trackEvent("login_create_account_click")}>
 			{$_("login.createAccount")}
 		</TextLink>
 	</p>
