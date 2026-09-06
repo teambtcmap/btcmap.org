@@ -1,5 +1,5 @@
 <script lang="ts">
-import AuthTextField from "$components/auth/AuthTextField.svelte";
+import TextField from "$components/form/TextField.svelte";
 import PrimaryButton from "$components/PrimaryButton.svelte";
 import { trackEvent } from "$lib/analytics";
 import { _ } from "$lib/i18n";
@@ -47,7 +47,8 @@ async function handleSubmit(event: SubmitEvent) {
 </script>
 
 <form onsubmit={handleSubmit} class="space-y-4">
-	<AuthTextField
+	<TextField
+		variant="compact"
 		id="signup-username"
 		label={$_("signup.username")}
 		bind:value={username}
@@ -55,7 +56,8 @@ async function handleSubmit(event: SubmitEvent) {
 		maxlength="100"
 	/>
 
-	<AuthTextField
+	<TextField
+		variant="compact"
 		id="signup-password"
 		label={$_("signup.password")}
 		type="password"
@@ -67,7 +69,7 @@ async function handleSubmit(event: SubmitEvent) {
 		<p class="mt-1 text-xs text-body dark:text-white/50">
 			{$_("signup.passwordHint", { values: { min: PASSWORD_MIN_LENGTH } })}
 		</p>
-	</AuthTextField>
+	</TextField>
 
 	<PrimaryButton
 		type="submit"
