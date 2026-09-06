@@ -13,17 +13,20 @@ import { errToast } from "$lib/utils";
 // Caller receives the new session after a successful login. This keeps the
 // form reusable: /login navigates, the save-flow modal completes a pending
 // save, both without baking navigation/save logic into the form.
-export let onSuccess: (session: Session) => void | Promise<void>;
+type Props = {
+	onSuccess: (session: Session) => void | Promise<void>;
+	// When true, render without the "Don't have an account?" link (e.g.
+	// inside a modal that already frames the login choice).
+	compact?: boolean;
+};
+let { onSuccess, compact = false }: Props = $props();
 
-// When true, render without the "Don't have an account?" link (e.g. inside
-// a modal that already frames the login choice).
-export let compact = false;
+let username = $state("");
+let password = $state("");
+let loading = $state(false);
 
-let username = "";
-let password = "";
-let loading = false;
-
-async function handleSubmit() {
+async function handleSubmit(event: SubmitEvent) {
+	event.preventDefault();
 	if (!username.trim() || !password) return;
 	loading = true;
 
@@ -58,7 +61,7 @@ async function handleSubmit() {
 }
 </script>
 
-<form on:submit|preventDefault={handleSubmit} class="space-y-4">
+<form onsubmit={handleSubmit} class="space-y-4">
 	<div>
 		<label
 			for="login-username"
@@ -105,10 +108,7 @@ async function handleSubmit() {
 {#if !compact}
 	<p class="mt-4 text-center text-sm text-body dark:text-white/70">
 		{$_("login.noAccount")}
-		<TextLink
-			link="/signup"
-			on:click={() => trackEvent("login_create_account_click")}
-		>
+		<TextLink link="/signup" onclick={() => trackEvent("login_create_account_click")}>
 			{$_("login.createAccount")}
 		</TextLink>
 	</p>
