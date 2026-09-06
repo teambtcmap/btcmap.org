@@ -73,6 +73,10 @@ export const POST: RequestHandler = async ({ request, fetch }) => {
 				const me: MeResponse = await meResponse.json();
 				if (typeof me?.name === "string") submittedBy = me.name.trim();
 				if (typeof me?.npub === "string") submitterNpub = me.npub.trim();
+				// Attribution is all-or-nothing on submittedBy: without a name
+				// the submission is anonymous everywhere (attributed flag,
+				// contact requirement) — it must not still carry the npub.
+				if (!submittedBy) submitterNpub = "";
 			}
 		} catch (e) {
 			console.error("[submit-place] identity verification failed", e);
