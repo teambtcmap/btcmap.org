@@ -64,7 +64,6 @@ async function handleSubmit(event: SubmitEvent) {
 
 <form onsubmit={handleSubmit} class="space-y-4">
 	<TextField
-		variant="compact"
 		id="login-username"
 		label={$_("login.username")}
 		bind:value={username}
@@ -73,7 +72,6 @@ async function handleSubmit(event: SubmitEvent) {
 	/>
 
 	<TextField
-		variant="compact"
 		id="login-password"
 		label={$_("login.password")}
 		type="password"

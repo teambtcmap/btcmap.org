@@ -132,7 +132,6 @@ async function loginWithNsec(event: SubmitEvent) {
 {#if showNsecInput}
 	<form onsubmit={loginWithNsec} class="space-y-2">
 		<TextField
-		variant="compact"
 			id="nsec"
 			label={$_("login.nsecLabel")}
 			type="password"
