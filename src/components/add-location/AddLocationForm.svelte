@@ -10,6 +10,7 @@ import FormHelperText from "$components/FormHelperText.svelte";
 import type { FormSelectOption } from "$components/form/FormSelect.svelte";
 import FormSelect from "$components/form/FormSelect.svelte";
 import OpeningHoursEditor from "$components/form/OpeningHoursEditor.svelte";
+import TextField from "$components/form/TextField.svelte";
 import Icon from "$components/Icon.svelte";
 import NostrAvatar from "$components/NostrAvatar.svelte";
 import PrimaryButton from "$components/PrimaryButton.svelte";
@@ -17,6 +18,7 @@ import { trackEvent } from "$lib/analytics";
 import { CATEGORIES, CATEGORY_GROUPS } from "$lib/categoryMapping";
 import { reverseGeocode } from "$lib/geocoding";
 import { _, locale } from "$lib/i18n";
+import { fetchProfile } from "$lib/nostrProfile";
 import type {
 	SubmitPlaceRequest,
 	SubmitPlaceResponse,
@@ -165,6 +167,28 @@ const identityAttached = $derived(
 	!!$session?.token.trim() && !submitAnonymously,
 );
 
+// For Nostr-linked accounts, show the profile's display name instead of
+// the auto-generated API username — the header's UserMenu idiom.
+// fetchProfile caches, and the npub guard keeps it to one fetch and
+// drops stale results. Rendered as text, so relay-sourced names stay
+// escaped.
+let nostrName = $state<string | null>(null);
+let loadedNpub: string | null = null;
+$effect(() => {
+	const npub = $session?.npub ?? null;
+	if (npub === loadedNpub) return;
+	loadedNpub = npub;
+	nostrName = null;
+	if (npub) {
+		fetchProfile(npub).then((profile) => {
+			if (loadedNpub === npub) {
+				nostrName = profile?.displayName || profile?.name || null;
+			}
+		});
+	}
+});
+const displayName = $derived(nostrName ?? $session?.username ?? "");
+
 const onAuthSuccess = () => {
 	// The forms set the session store themselves — collapse and let the
 	// chip take over (a fresh login also clears a previous detach).
@@ -262,43 +286,32 @@ onMount(() => {
 </script>
 
 <form onsubmit={submitForm} class="w-full space-y-5 text-primary dark:text-white">
-	<div>
-		<label for="name" class="mb-2 block font-semibold">{$_('addLocation.nameLabel')}</label>
-		<input
-			disabled={!captchaSecret}
-			type="text"
-			name="name"
-			id="name"
-			placeholder={$_('addLocation.merchantNamePlaceholder')}
-			required
-			class="w-full rounded-2xl border-2 border-input p-3 transition-all focus:outline-link disabled:cursor-not-allowed disabled:bg-gray-100 disabled:text-gray-500 dark:bg-white/[0.15] dark:disabled:bg-gray-700 dark:disabled:text-gray-400"
-			bind:this={name}
-		/>
-	</div>
+	<TextField
+		id="name"
+		name="name"
+		label={$_('addLocation.nameLabel')}
+		bind:element={name}
+		disabled={!captchaSecret}
+		placeholder={$_('addLocation.merchantNamePlaceholder')}
+		required
+	/>
 
-	<div>
-		<div class="mb-2">
-			<label for="address" class="block font-semibold">
-				{$_('forms.address')}
-				{#if !addressRequired}
-					<span class="font-normal">{$_('forms.optional')}</span>
-				{/if}
-			</label>
+	<TextField
+		id="address"
+		name="address"
+		label={$_('forms.address')}
+		optional={!addressRequired}
+		bind:element={address}
+		disabled={!captchaSecret}
+		required={addressRequired}
+		placeholder={addressPending
+			? $_('addLocation.addressLookupPending')
+			: $_('addLocation.addressPlaceholder')}
+	>
+		{#snippet hint()}
 			<FormHelperText text={$_('addLocation.addressSuggestedHint')} />
-		</div>
-		<input
-			disabled={!captchaSecret}
-			required={addressRequired}
-			type="text"
-			name="address"
-			id="address"
-			placeholder={addressPending
-				? $_('addLocation.addressLookupPending')
-				: $_('addLocation.addressPlaceholder')}
-			class="w-full rounded-2xl border-2 border-input p-3 transition-all focus:outline-link disabled:cursor-not-allowed disabled:bg-gray-100 disabled:text-gray-500 dark:bg-white/[0.15] dark:disabled:bg-gray-700 dark:disabled:text-gray-400"
-			bind:this={address}
-		/>
-	</div>
+		{/snippet}
+	</TextField>
 
 	<div>
 		<label for="category" class="mb-2 block font-semibold">{$_('forms.category')}</label>
@@ -431,54 +444,41 @@ onMount(() => {
 	</div>
 
 	<div class="space-y-5" class:hidden={!showMoreDetails}>
-		<div>
-			<div>
-				<label for="name-en" class="mb-2 block font-semibold">
-					{$_('addLocation.nameEnLabel')}
-					<span class="font-normal">{$_('forms.optional')}</span>
-				</label>
+		<TextField
+			id="name-en"
+			name="nameEn"
+			label={$_('addLocation.nameEnLabel')}
+			optional
+			bind:element={nameEn}
+			disabled={!captchaSecret}
+			placeholder={$_('addLocation.merchantEnglishNamePlaceholder')}
+		>
+			{#snippet hint()}
 				<FormHelperText text={$_('addLocation.nameEnTooltip')} />
-			</div>
-			<input
-				disabled={!captchaSecret}
-				type="text"
-				name="nameEn"
-				id="name-en"
-				placeholder={$_('addLocation.merchantEnglishNamePlaceholder')}
-				class="w-full rounded-2xl border-2 border-input p-3 transition-all focus:outline-link disabled:cursor-not-allowed disabled:bg-gray-100 disabled:text-gray-500 dark:bg-white/[0.15] dark:disabled:bg-gray-700 dark:disabled:text-gray-400"
-				bind:this={nameEn}
-			/>
-		</div>
+			{/snippet}
+		</TextField>
 
-		<div>
-			<label for="website" class="mb-2 block font-semibold"
-				>{$_('forms.website')} <span class="font-normal">{$_('forms.optional')}</span></label
-			>
-			<input
-				disabled={!captchaSecret}
-				type="url"
-				name="website"
-				id="website"
-				placeholder={$_('addLocation.websitePlaceholder')}
-				class="w-full rounded-2xl border-2 border-input p-3 transition-all focus:outline-link disabled:cursor-not-allowed disabled:bg-gray-100 disabled:text-gray-500 dark:bg-white/[0.15] dark:disabled:bg-gray-700 dark:disabled:text-gray-400"
-				bind:this={website}
-			/>
-		</div>
+		<TextField
+			id="website"
+			name="website"
+			label={$_('forms.website')}
+			optional
+			type="url"
+			bind:element={website}
+			disabled={!captchaSecret}
+			placeholder={$_('addLocation.websitePlaceholder')}
+		/>
 
-		<div>
-			<label for="phone" class="mb-2 block font-semibold"
-				>{$_('forms.phone')} <span class="font-normal">{$_('forms.optional')}</span></label
-			>
-			<input
-				disabled={!captchaSecret}
-				type="tel"
-				name="phone"
-				id="phone"
-				placeholder={$_('addLocation.phonePlaceholder')}
-				class="w-full rounded-2xl border-2 border-input p-3 transition-all focus:outline-link disabled:cursor-not-allowed disabled:bg-gray-100 disabled:text-gray-500 dark:bg-white/[0.15] dark:disabled:bg-gray-700 dark:disabled:text-gray-400"
-				bind:this={phone}
-			/>
-		</div>
+		<TextField
+			id="phone"
+			name="phone"
+			label={$_('forms.phone')}
+			optional
+			type="tel"
+			bind:element={phone}
+			disabled={!captchaSecret}
+			placeholder={$_('addLocation.phonePlaceholder')}
+		/>
 
 		<div>
 			<p class="mb-2 font-semibold">
@@ -532,127 +532,123 @@ onMount(() => {
 		</div>
 	</div>
 
-	<div>
-		<label for="contact" class="mb-2 block font-semibold">
-			{$_('forms.contact')}
-			{#if identityAttached}
-				<span class="font-normal">{$_('forms.optional')}</span>
-			{/if}
-		</label>
-		{#if identityAttached && $session}
-			<!-- The submission carries the account (verified server-side), so
-			     the email is a follow-up channel, not the identity. The chip
-			     reveals the shared-device escape hatch: detach the account
-			     from this one submission. -->
-			<div class="mb-2 flex flex-wrap items-center gap-2">
-				<!-- Speaks the app's chip dialect: the filter chips' active
-				     pill, the header UserMenu's identity (Nostr avatar or
-				     account icon), and the expand_more rotate-on-open
-				     disclosure. -->
-				<button
-					type="button"
-					aria-expanded={showDetach}
-					onclick={() => (showDetach = !showDetach)}
-					class="flex shrink-0 items-center gap-2 rounded-full border border-link bg-link/10 px-3 py-1 text-sm font-semibold whitespace-nowrap text-primary transition-colors focus-visible:ring-2 focus-visible:ring-link focus-visible:ring-offset-1 focus-visible:outline-none dark:border-link dark:text-white dark:focus-visible:ring-offset-dark"
-				>
-					{#if $session.npub}
-						<NostrAvatar npub={$session.npub} size={18} class="h-[18px] w-[18px]" />
-					{:else}
-						<Icon type="material" icon="account_circle_filled" w="18" h="18" />
-					{/if}
-					{$_('addLocation.submittingAs', { values: { username: $session.username } })}
-					<Icon
-						type="material"
-						icon="expand_more"
-						w="16"
-						h="16"
-						class={showDetach ? 'rotate-180' : ''}
-					/>
-				</button>
-				{#if showDetach}
+	<TextField
+		id="contact"
+		name="contact"
+		label={$_('forms.contact')}
+		optional={identityAttached}
+		type="email"
+		bind:element={contact}
+		disabled={!captchaSecret}
+		required={!identityAttached}
+		placeholder={$_('addLocation.contactPlaceholder')}
+	>
+		{#snippet hint()}
+			{#if identityAttached && $session}
+				<!-- The submission carries the account (verified server-side), so
+				     the email is a follow-up channel, not the identity. The chip
+				     reveals the shared-device escape hatch: detach the account
+				     from this one submission. -->
+				<div class="mb-2 flex flex-wrap items-center gap-2">
+					<!-- Speaks the app's chip dialect: the filter chips' active
+					     pill, the header UserMenu's identity (Nostr avatar or
+					     account icon), and the expand_more rotate-on-open
+					     disclosure. -->
 					<button
 						type="button"
-						onclick={() => {
-							submitAnonymously = true;
-							showDetach = false;
-						}}
-						class="text-sm font-semibold text-link hover:text-hover focus:outline-link"
+						aria-expanded={showDetach}
+						onclick={() => (showDetach = !showDetach)}
+						class="flex shrink-0 items-center gap-2 rounded-full border border-link bg-link/10 px-3 py-1 text-sm font-semibold whitespace-nowrap text-primary transition-colors focus-visible:ring-2 focus-visible:ring-link focus-visible:ring-offset-1 focus-visible:outline-none dark:border-link dark:text-white dark:focus-visible:ring-offset-dark"
 					>
-						{$_('addLocation.submitAnonymously')}
-					</button>
-				{/if}
-			</div>
-			<p class="mb-2 text-justify text-sm">
-				{$_('addLocation.contactSignedInHint')}
-			</p>
-		{:else}
-			{#if $session}
-				<!-- Detached: the anonymous contract applies, with an undo. -->
-				<button
-					type="button"
-					onclick={() => (submitAnonymously = false)}
-					class="mb-2 text-sm font-semibold text-link hover:text-hover focus:outline-link"
-				>
-					{$_('addLocation.submitAsAccount', { values: { username: $session.username } })}
-				</button>
-			{/if}
-			<p class="mb-2 text-justify text-sm">
-				{$_('addLocation.contactDescription')}
-			</p>
-			{#if !$session}
-				<!-- The other #1334 touchpoint: sign in without leaving the
-				     form — the auth forms expand in place, typed fields
-				     survive, and the chip takes over on success. -->
-				<div class="mb-2">
-					<button
-						type="button"
-						aria-expanded={showSignIn}
-						onclick={() => (showSignIn = !showSignIn)}
-						class="flex items-center gap-1 text-sm font-semibold text-link hover:text-hover focus:outline-link"
-					>
-						{$_('addLocation.signInPrompt')}
+						{#if $session.npub}
+							<NostrAvatar npub={$session.npub} size={18} class="h-[18px] w-[18px]" />
+						{:else}
+							<Icon type="material" icon="account_circle_filled" w="18" h="18" />
+						{/if}
+						{$_('addLocation.submittingAs', { values: { username: displayName } })}
 						<Icon
 							type="material"
 							icon="expand_more"
 							w="16"
 							h="16"
-							class={showSignIn ? 'rotate-180' : ''}
+							class={showDetach ? 'rotate-180' : ''}
 						/>
 					</button>
-					{#if showSignIn}
-						<!-- The auth forms nest inside the location <form>
-						     (client-rendered only, so no parser flattening) —
-						     their bubbling submit events must not reach
-						     submitForm. -->
-						<div
-							class="mt-3 rounded-2xl border-2 border-input p-4"
-							onsubmit={(e) => e.stopPropagation()}
+					{#if showDetach}
+						<button
+							type="button"
+							onclick={() => {
+								submitAnonymously = true;
+								showDetach = false;
+							}}
+							class="text-sm font-semibold text-link hover:text-hover focus:outline-link"
 						>
-							<LoginForm compact onSuccess={onAuthSuccess} />
-							<div class="my-4 flex items-center gap-3">
-								<div class="h-px flex-1 bg-gray-300 dark:bg-white/20"></div>
-								<span class="text-xs text-body dark:text-white/50">
-									{$_('login.otherMethods')}
-								</span>
-								<div class="h-px flex-1 bg-gray-300 dark:bg-white/20"></div>
-							</div>
-							<NostrLoginForm onSuccess={onAuthSuccess} />
-						</div>
+							{$_('addLocation.submitAnonymously')}
+						</button>
 					{/if}
 				</div>
+				<p class="mb-2 text-justify text-sm">
+					{$_('addLocation.contactSignedInHint')}
+				</p>
+			{:else}
+				{#if $session}
+					<!-- Detached: the anonymous contract applies, with an undo. -->
+					<button
+						type="button"
+						onclick={() => (submitAnonymously = false)}
+						class="mb-2 text-sm font-semibold text-link hover:text-hover focus:outline-link"
+					>
+						{$_('addLocation.submitAsAccount', { values: { username: displayName } })}
+					</button>
+				{/if}
+				<p class="mb-2 text-justify text-sm">
+					{$_('addLocation.contactDescription')}
+				</p>
+				{#if !$session}
+					<!-- The other #1334 touchpoint: sign in without leaving the
+					     form — the auth forms expand in place, typed fields
+					     survive, and the chip takes over on success. -->
+					<div class="mb-2">
+						<button
+							type="button"
+							aria-expanded={showSignIn}
+							onclick={() => (showSignIn = !showSignIn)}
+							class="flex items-center gap-1 text-sm font-semibold text-link hover:text-hover focus:outline-link"
+						>
+							{$_('addLocation.signInPrompt')}
+							<Icon
+								type="material"
+								icon="expand_more"
+								w="16"
+								h="16"
+								class={showSignIn ? 'rotate-180' : ''}
+							/>
+						</button>
+						{#if showSignIn}
+							<!-- The auth forms nest inside the location <form>
+							     (client-rendered only, so no parser flattening) —
+							     their bubbling submit events must not reach
+							     submitForm. -->
+							<div
+								class="mt-3 rounded-2xl border-2 border-input p-4"
+								onsubmit={(e) => e.stopPropagation()}
+							>
+								<LoginForm compact onSuccess={onAuthSuccess} />
+								<div class="my-4 flex items-center gap-3">
+									<div class="h-px flex-1 bg-gray-300 dark:bg-white/20"></div>
+									<span class="text-xs text-body dark:text-white/50">
+										{$_('login.otherMethods')}
+									</span>
+									<div class="h-px flex-1 bg-gray-300 dark:bg-white/20"></div>
+								</div>
+								<NostrLoginForm onSuccess={onAuthSuccess} />
+							</div>
+						{/if}
+					</div>
+				{/if}
 			{/if}
-		{/if}
-		<input
-			disabled={!captchaSecret}
-			required={!identityAttached}
-			type="email"
-			name="contact"
-			id="contact"
-			placeholder={$_('addLocation.contactPlaceholder')}
-			class="w-full rounded-2xl border-2 border-input p-3 transition-all focus:outline-link disabled:cursor-not-allowed disabled:bg-gray-100 disabled:text-gray-500 dark:bg-white/[0.15] dark:disabled:bg-gray-700 dark:disabled:text-gray-400"
-			bind:this={contact}
-		/>
-	</div>
+		{/snippet}
+	</TextField>
 
 	<div>
 		<div class="mb-2 flex items-center space-x-2">
