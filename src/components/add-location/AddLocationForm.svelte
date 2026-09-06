@@ -415,11 +415,17 @@ onMount(() => {
 	<div>
 		<button
 			type="button"
-			class="text-sm font-semibold text-link hover:text-hover focus:outline-link"
+			class="flex items-center gap-1 text-sm font-semibold text-link hover:text-hover focus:outline-link"
 			aria-expanded={showMoreDetails}
 			onclick={() => (showMoreDetails = !showMoreDetails)}
 		>
-			{showMoreDetails ? '▾' : '▸'}
+			<Icon
+				type="material"
+				icon="expand_more"
+				w="16"
+				h="16"
+				class={showMoreDetails ? 'rotate-180' : ''}
+			/>
 			{$_('addLocation.moreDetailsToggle')}
 		</button>
 	</div>
@@ -486,12 +492,18 @@ onMount(() => {
 			     the grid on re-open. -->
 			<button
 				type="button"
-				class="text-sm font-semibold text-link hover:text-hover focus:outline-link"
+				class="flex items-center gap-1 text-sm font-semibold text-link hover:text-hover focus:outline-link"
 				aria-expanded={showHoursEditor}
 				aria-controls="opening-hours-editor"
 				onclick={() => (showHoursEditor = !showHoursEditor)}
 			>
-				{showHoursEditor ? '▾' : '▸'}
+				<Icon
+					type="material"
+					icon="expand_more"
+					w="16"
+					h="16"
+					class={showHoursEditor ? 'rotate-180' : ''}
+				/>
 				{$_('addLocation.hoursToggle')}
 			</button>
 			{#if !showHoursEditor && hoursValue}

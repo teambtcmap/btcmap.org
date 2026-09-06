@@ -6,6 +6,7 @@ import type {
 } from "maplibre-gl";
 import { tick } from "svelte";
 
+import Icon from "$components/Icon.svelte";
 import PlacementPinIcon from "$components/PlacementPinIcon.svelte";
 import { trackEvent } from "$lib/analytics";
 import {
@@ -498,8 +499,13 @@ $effect(() => {
 							>
 							<span class="shrink-0 text-sm text-body dark:text-offwhite"
 								>{Math.round(distanceM)} m
-								<span class="ml-1 font-semibold text-link"
-									>{$_("map.placement.nearbyUpdate")}<span aria-hidden="true"> ›</span></span
+								<span class="ml-1 inline-flex items-center font-semibold text-link"
+									>{$_("map.placement.nearbyUpdate")}<Icon
+										type="material"
+										icon="chevron_right"
+										w="14"
+										h="14"
+									/></span
 								></span
 							>
 						</a>
