@@ -1,3 +1,33 @@
+// The wire contract of POST /api/submit-place. The endpoint still treats
+// the incoming body as untrusted unknowns and re-validates everything —
+// this type exists so the client payload and the server's reads can't
+// drift apart silently. Optionals mirror the form's element refs, which
+// can be undefined.
+export type SubmitPlaceRequest = {
+	captchaSecret?: string;
+	captchaTest?: string;
+	honey?: string;
+	name?: string;
+	nameEn?: string;
+	address?: string;
+	lat: number;
+	long: number;
+	category: string;
+	methods: string[];
+	website?: string;
+	phone?: string;
+	hours?: string;
+	notes?: string;
+	contact?: string;
+};
+
+export type SubmitPlaceResponse = {
+	id: number;
+	// Whether a verified account was attached (#1334) — the authoritative
+	// answer; the client's belief can be stale.
+	attributed: boolean;
+};
+
 export type AddLocationSubmission = {
 	name: string;
 	nameEn: string;

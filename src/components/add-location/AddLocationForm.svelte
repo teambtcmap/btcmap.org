@@ -17,6 +17,10 @@ import { trackEvent } from "$lib/analytics";
 import { CATEGORIES, CATEGORY_GROUPS } from "$lib/categoryMapping";
 import { reverseGeocode } from "$lib/geocoding";
 import { _, locale } from "$lib/i18n";
+import type {
+	SubmitPlaceRequest,
+	SubmitPlaceResponse,
+} from "$lib/placeSubmission";
 import { session } from "$lib/session";
 import { theme } from "$lib/theme";
 import { errToast } from "$lib/utils";
@@ -43,7 +47,7 @@ let honeyInput = $state<HTMLInputElement>();
 const fetchCaptcha = () => {
 	isCaptchaLoading = true;
 	axios
-		.get("/captcha")
+		.get<{ captcha: string; captchaSecret: string }>("/captcha")
 		.then((response) => {
 			captchaSecret = response.data.captchaSecret;
 			captchaContent = DOMPurify.sanitize(response.data.captcha);
@@ -195,29 +199,31 @@ const submitForm = (event: SubmitEvent) => {
 			methods.push("nfc");
 		}
 
+		const payload: SubmitPlaceRequest = {
+			captchaSecret,
+			captchaTest: captchaInput?.value,
+			honey: honeyInput?.value,
+			name: name?.value,
+			nameEn: nameEn?.value,
+			address: address?.value,
+			lat: coords.lat,
+			long: coords.long,
+			category:
+				categorySelect === "Other"
+					? (categoryOther ?? "").trim()
+					: (categorySelect ?? ""),
+			methods,
+			website: website?.value,
+			phone: phone?.value,
+			hours: hoursValue,
+			notes: notes?.value,
+			contact: contact?.value,
+		};
+
 		axios
-			.post(
+			.post<SubmitPlaceResponse>(
 				"/api/submit-place",
-				{
-					captchaSecret,
-					captchaTest: captchaInput?.value,
-					honey: honeyInput?.value,
-					name: name?.value,
-					nameEn: nameEn?.value,
-					address: address?.value,
-					lat: coords.lat,
-					long: coords.long,
-					category:
-						categorySelect === "Other"
-							? (categoryOther ?? "").trim()
-							: (categorySelect ?? ""),
-					methods,
-					website: website?.value,
-					phone: phone?.value,
-					hours: hoursValue,
-					notes: notes?.value,
-					contact: contact?.value,
-				},
+				payload,
 				// The endpoint verifies the token and attaches the account to
 				// the submission (#1334); no session (or a detached one), no
 				// header — anonymous.

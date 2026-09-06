@@ -1,13 +1,23 @@
 import { error, json } from "@sveltejs/kit";
 
 import { API_BASE } from "$lib/api-base";
-import type { AddLocationSubmission } from "$lib/placeSubmission";
+import type {
+	AddLocationSubmission,
+	SubmitPlaceResponse,
+} from "$lib/placeSubmission";
 import { buildSubmitPlaceParams } from "$lib/placeSubmission";
 import { validateCaptcha } from "$lib/server/captcha";
 import { isValidLatitude, isValidLongitude } from "$lib/utils";
 
 import type { RequestHandler } from "./$types";
 import { env } from "$env/dynamic/private";
+import type { MeResponse } from "$types/btcmap-api/MeResponse";
+
+// The RPC envelope of submit_place — only what this endpoint reads.
+type SubmitPlaceRpcBody = {
+	result?: { id: number };
+	error?: unknown;
+};
 
 // Coerces non-strings to "" — for the optional free-text fields only.
 const asString = (value: unknown): string =>
@@ -56,9 +66,11 @@ export const POST: RequestHandler = async ({ request, fetch }) => {
 				signal: AbortSignal.timeout(8_000),
 			});
 			if (meResponse.ok) {
-				const me = await meResponse.json();
-				// Trimmed so a whitespace-only value can't count as attributed
-				// while the serializer drops it from extra_fields.
+				// Typed by the generated binding; the typeof guards stay —
+				// wire data is wire data. Trimmed so a whitespace-only value
+				// can't count as attributed while the serializer drops it
+				// from extra_fields.
+				const me: MeResponse = await meResponse.json();
 				if (typeof me?.name === "string") submittedBy = me.name.trim();
 				if (typeof me?.npub === "string") submitterNpub = me.npub.trim();
 			}
@@ -134,7 +146,7 @@ export const POST: RequestHandler = async ({ request, fetch }) => {
 		error(502, "Could not submit the location, please try again later.");
 	}
 
-	let rpcBody;
+	let rpcBody: SubmitPlaceRpcBody | null;
 	let errorBody = "";
 	if (response.ok) {
 		try {
@@ -160,5 +172,8 @@ export const POST: RequestHandler = async ({ request, fetch }) => {
 	// `attributed` is the authoritative answer — the client's belief can
 	// be stale (expired token, detach mid-request); its success screen
 	// keys off this.
-	return json({ id: rpcBody.result.id, attributed: Boolean(submittedBy) });
+	return json({
+		id: rpcBody.result.id,
+		attributed: Boolean(submittedBy),
+	} satisfies SubmitPlaceResponse);
 };
