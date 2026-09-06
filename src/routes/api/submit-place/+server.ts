@@ -154,5 +154,8 @@ export const POST: RequestHandler = async ({ request, fetch }) => {
 		error(502, "Could not submit the location, please try again later.");
 	}
 
-	return json({ id: rpcBody.result.id });
+	// `attributed` is the authoritative answer — the client's belief can
+	// be stale (expired token, detach mid-request); its success screen
+	// keys off this.
+	return json({ id: rpcBody.result.id, attributed: Boolean(submittedBy) });
 };

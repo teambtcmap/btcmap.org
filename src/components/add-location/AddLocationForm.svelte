@@ -156,7 +156,9 @@ let showDetach = $state(false);
 // The signed-out inline sign-in (#1334): the existing auth forms expand
 // in place, so typed fields survive — no navigation.
 let showSignIn = $state(false);
-const identityAttached = $derived(!!$session?.token && !submitAnonymously);
+const identityAttached = $derived(
+	!!$session?.token.trim() && !submitAnonymously,
+);
 
 const onAuthSuccess = () => {
 	// The forms set the session store themselves — collapse and let the
@@ -219,11 +221,13 @@ const submitForm = (event: SubmitEvent) => {
 				// the submission (#1334); no session (or a detached one), no
 				// header — anonymous.
 				identityAttached && $session
-					? { headers: { Authorization: `Bearer ${$session.token}` } }
+					? { headers: { Authorization: `Bearer ${$session.token.trim()}` } }
 					: undefined,
 			)
-			.then(() => {
-				onsuccess(identityAttached);
+			.then((response) => {
+				// The server's verdict, not the client's belief — a stale
+				// token lands anonymous despite the chip.
+				onsuccess(response.data?.attributed === true);
 			})
 			.catch((error) => {
 				// Our endpoint's 4xx messages are written for users (captcha,
@@ -597,7 +601,14 @@ onMount(() => {
 						/>
 					</button>
 					{#if showSignIn}
-						<div class="mt-3 rounded-2xl border-2 border-input p-4">
+						<!-- The auth forms nest inside the location <form>
+						     (client-rendered only, so no parser flattening) —
+						     their bubbling submit events must not reach
+						     submitForm. -->
+						<div
+							class="mt-3 rounded-2xl border-2 border-input p-4"
+							onsubmit={(e) => e.stopPropagation()}
+						>
 							<LoginForm compact onSuccess={onAuthSuccess} />
 							<div class="my-4 flex items-center gap-3">
 								<div class="h-px flex-1 bg-gray-300 dark:bg-white/20"></div>
