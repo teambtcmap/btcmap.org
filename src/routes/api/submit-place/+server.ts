@@ -43,8 +43,9 @@ export const POST: RequestHandler = async ({ request, fetch }) => {
 	// Optional identity attach (#1334): a signed-in client sends its
 	// Bearer token, which is verified against the API — the submission
 	// carries the VERIFIED username/npub, never a client claim. Anonymous
-	// stays first-class, and a stale token degrades to anonymous rather
-	// than blocking the submission.
+	// stays first-class; a stale token degrades the identity to anonymous
+	// rather than failing here (the anonymous-contact check below still
+	// applies to the degraded submission).
 	let submittedBy = "";
 	let submitterNpub = "";
 	const authorization = request.headers.get("authorization");

@@ -149,8 +149,9 @@ let submitting = $state(false);
 // Per-submission anonymity (#1334): someone on a shared device can
 // detach the signed-in account from THIS submission without logging
 // out. Detached = the plain anonymous contract (required email, no
-// Authorization header). The token check guards against a corrupted
-// stored session (empty token) posing as an attachable identity.
+// Authorization header). The trimmed-token check guards against a
+// corrupted stored session (empty or whitespace-only token) posing as
+// an attachable identity.
 let submitAnonymously = $state(false);
 let showDetach = $state(false);
 // The signed-out inline sign-in (#1334): the existing auth forms expand
