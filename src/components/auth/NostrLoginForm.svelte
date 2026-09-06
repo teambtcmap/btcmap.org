@@ -1,6 +1,7 @@
 <script lang="ts">
 import { get } from "svelte/store";
 
+import AuthTextField from "$components/auth/AuthTextField.svelte";
 import api from "$lib/axios";
 import { _ } from "$lib/i18n";
 import type { SignedAuthEvent } from "$lib/nostr";
@@ -130,14 +131,9 @@ async function loginWithNsec(event: SubmitEvent) {
 
 {#if showNsecInput}
 	<form onsubmit={loginWithNsec} class="space-y-2">
-		<label
-			for="nsec"
-			class="block text-sm font-semibold text-primary dark:text-white"
-		>
-			{$_("login.nsecLabel")}
-		</label>
-		<input
+		<AuthTextField
 			id="nsec"
+			label={$_("login.nsecLabel")}
 			type="password"
 			bind:value={nsec}
 			placeholder="nsec1..."
@@ -145,7 +141,7 @@ async function loginWithNsec(event: SubmitEvent) {
 			autocorrect="off"
 			autocapitalize="off"
 			spellcheck="false"
-			class="w-full rounded-lg border border-gray-300 bg-white px-3 py-2 font-mono text-sm text-primary dark:border-white/20 dark:bg-dark dark:text-white"
+			inputClass="font-mono text-sm"
 		/>
 		<p class="text-xs text-body dark:text-white/50">
 			{$_("login.nsecWarning")}

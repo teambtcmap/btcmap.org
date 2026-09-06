@@ -1,6 +1,7 @@
 <script lang="ts">
 import { get } from "svelte/store";
 
+import AuthTextField from "$components/auth/AuthTextField.svelte";
 import PrimaryButton from "$components/PrimaryButton.svelte";
 import TextLink from "$components/TextLink.svelte";
 import { trackEvent } from "$lib/analytics";
@@ -62,39 +63,22 @@ async function handleSubmit(event: SubmitEvent) {
 </script>
 
 <form onsubmit={handleSubmit} class="space-y-4">
-	<div>
-		<label
-			for="login-username"
-			class="mb-1 block text-sm font-semibold text-primary dark:text-white"
-		>
-			{$_("login.username")}
-		</label>
-		<input
-			id="login-username"
-			type="text"
-			bind:value={username}
-			autocomplete="username"
-			maxlength="100"
-			class="w-full rounded-lg border border-gray-300 bg-white px-3 py-2 text-primary dark:border-white/20 dark:bg-dark dark:text-white"
-		/>
-	</div>
+	<AuthTextField
+		id="login-username"
+		label={$_("login.username")}
+		bind:value={username}
+		autocomplete="username"
+		maxlength="100"
+	/>
 
-	<div>
-		<label
-			for="login-password"
-			class="mb-1 block text-sm font-semibold text-primary dark:text-white"
-		>
-			{$_("login.password")}
-		</label>
-		<input
-			id="login-password"
-			type="password"
-			bind:value={password}
-			autocomplete="current-password"
-			maxlength="200"
-			class="w-full rounded-lg border border-gray-300 bg-white px-3 py-2 text-primary dark:border-white/20 dark:bg-dark dark:text-white"
-		/>
-	</div>
+	<AuthTextField
+		id="login-password"
+		label={$_("login.password")}
+		type="password"
+		bind:value={password}
+		autocomplete="current-password"
+		maxlength="200"
+	/>
 
 	<PrimaryButton
 		type="submit"
