@@ -284,6 +284,10 @@
 		"placement": {
 			"title": "Placez l'épingle",
 			"hint": "Déplacez la carte jusqu'à ce que l'épingle soit sur l'entrée du commerce, puis confirmez.",
+			"searchPlaceholder": "Saisissez une adresse pour y aller",
+			"searchAction": "Rechercher",
+			"searchNoResults": "Rien trouvé pour cette adresse.",
+			"searchFailed": "La recherche d'adresse a échoué — veuillez réessayer.",
 			"cancel": "Annuler",
 			"confirm": "Ajouter un lieu ici",
 			"zoomIn": "Zoomez pour placer l'épingle",

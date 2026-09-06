@@ -280,6 +280,10 @@
 		"placement": {
 			"title": "Posicione o pino",
 			"hint": "Arraste o mapa até o pino ficar sobre a entrada do estabelecimento e depois confirme.",
+			"searchPlaceholder": "Digite um endereço para ir até lá",
+			"searchAction": "Buscar",
+			"searchNoResults": "Nada encontrado para esse endereço.",
+			"searchFailed": "A busca de endereço falhou — tente novamente.",
 			"cancel": "Cancelar",
 			"confirm": "Adicionar um local aqui",
 			"zoomIn": "Aproxime o mapa para posicionar o pino",

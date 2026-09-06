@@ -35,6 +35,11 @@ export default defineConfig({
 		actionTimeout: process.env.CI ? 15000 : 5000,
 		navigationTimeout: process.env.CI ? 60000 : 30000,
 
+		/* Every spec asserts English UI strings, but the app picks its
+		   locale from navigator.language — pin it so runs on non-English
+		   machines stay deterministic. */
+		locale: 'en-US',
+
 		/* Identify E2E test requests to prevent API bans */
 		extraHTTPHeaders: {
 			'User-Agent': 'btcmap-e2e-tests/1.0 (https://github.com/btcmap/btcmap.org)'
