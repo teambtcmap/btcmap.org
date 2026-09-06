@@ -56,8 +56,10 @@ export const POST: RequestHandler = async ({ request, fetch }) => {
 			});
 			if (meResponse.ok) {
 				const me = await meResponse.json();
-				if (typeof me?.name === "string") submittedBy = me.name;
-				if (typeof me?.npub === "string") submitterNpub = me.npub;
+				// Trimmed so a whitespace-only value can't count as attributed
+				// while the serializer drops it from extra_fields.
+				if (typeof me?.name === "string") submittedBy = me.name.trim();
+				if (typeof me?.npub === "string") submitterNpub = me.npub.trim();
 			}
 		} catch (e) {
 			console.error("[submit-place] identity verification failed", e);
