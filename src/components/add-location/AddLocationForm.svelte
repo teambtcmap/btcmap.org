@@ -4,16 +4,24 @@ import DOMPurify from "dompurify";
 import { onMount, tick } from "svelte";
 import { get } from "svelte/store";
 
+import LoginForm from "$components/auth/LoginForm.svelte";
+import NostrLoginForm from "$components/auth/NostrLoginForm.svelte";
 import FormHelperText from "$components/FormHelperText.svelte";
 import type { FormSelectOption } from "$components/form/FormSelect.svelte";
 import FormSelect from "$components/form/FormSelect.svelte";
 import OpeningHoursEditor from "$components/form/OpeningHoursEditor.svelte";
 import Icon from "$components/Icon.svelte";
+import NostrAvatar from "$components/NostrAvatar.svelte";
 import PrimaryButton from "$components/PrimaryButton.svelte";
 import { trackEvent } from "$lib/analytics";
 import { CATEGORIES, CATEGORY_GROUPS } from "$lib/categoryMapping";
 import { reverseGeocode } from "$lib/geocoding";
 import { _, locale } from "$lib/i18n";
+import type {
+	SubmitPlaceRequest,
+	SubmitPlaceResponse,
+} from "$lib/placeSubmission";
+import { session } from "$lib/session";
 import { theme } from "$lib/theme";
 import { errToast } from "$lib/utils";
 
@@ -24,7 +32,9 @@ import { errToast } from "$lib/utils";
 // state; on a completed submission the form calls `onsuccess`.
 type Props = {
 	coords: { lat: number; long: number };
-	onsuccess: () => void;
+	// `attributed` = the submission went out with a verified account
+	// attached — the host's success screen skips the account nudge then.
+	onsuccess: (attributed: boolean) => void;
 };
 let { coords, onsuccess }: Props = $props();
 
@@ -37,7 +47,7 @@ let honeyInput = $state<HTMLInputElement>();
 const fetchCaptcha = () => {
 	isCaptchaLoading = true;
 	axios
-		.get("/captcha")
+		.get<{ captcha: string; captchaSecret: string }>("/captcha")
 		.then((response) => {
 			captchaSecret = response.data.captchaSecret;
 			captchaContent = DOMPurify.sanitize(response.data.captcha);
@@ -140,6 +150,28 @@ let contact = $state<HTMLInputElement>();
 let noMethodSelected = $state(false);
 let submitting = $state(false);
 
+// Per-submission anonymity (#1334): someone on a shared device can
+// detach the signed-in account from THIS submission without logging
+// out. Detached = the plain anonymous contract (required email, no
+// Authorization header). The trimmed-token check guards against a
+// corrupted stored session (empty or whitespace-only token) posing as
+// an attachable identity.
+let submitAnonymously = $state(false);
+let showDetach = $state(false);
+// The signed-out inline sign-in (#1334): the existing auth forms expand
+// in place, so typed fields survive — no navigation.
+let showSignIn = $state(false);
+const identityAttached = $derived(
+	!!$session?.token.trim() && !submitAnonymously,
+);
+
+const onAuthSuccess = () => {
+	// The forms set the session store themselves — collapse and let the
+	// chip take over (a fresh login also clears a previous detach).
+	showSignIn = false;
+	submitAnonymously = false;
+};
+
 const handleCheckboxClick = () => {
 	noMethodSelected = false;
 };
@@ -167,33 +199,49 @@ const submitForm = (event: SubmitEvent) => {
 			methods.push("nfc");
 		}
 
+		const payload: SubmitPlaceRequest = {
+			captchaSecret,
+			captchaTest: captchaInput?.value,
+			honey: honeyInput?.value,
+			name: name?.value,
+			nameEn: nameEn?.value,
+			address: address?.value,
+			lat: coords.lat,
+			long: coords.long,
+			category:
+				categorySelect === "Other"
+					? (categoryOther ?? "").trim()
+					: (categorySelect ?? ""),
+			methods,
+			website: website?.value,
+			phone: phone?.value,
+			hours: hoursValue,
+			notes: notes?.value,
+			contact: contact?.value,
+		};
+
 		axios
-			.post("/api/submit-place", {
-				captchaSecret,
-				captchaTest: captchaInput?.value,
-				honey: honeyInput?.value,
-				name: name?.value,
-				nameEn: nameEn?.value,
-				address: address?.value,
-				lat: coords.lat,
-				long: coords.long,
-				category:
-					categorySelect === "Other"
-						? (categoryOther ?? "").trim()
-						: (categorySelect ?? ""),
-				methods,
-				website: website?.value,
-				phone: phone?.value,
-				hours: hoursValue,
-				notes: notes?.value,
-				contact: contact?.value,
-			})
-			.then(() => {
-				onsuccess();
+			.post<SubmitPlaceResponse>(
+				"/api/submit-place",
+				payload,
+				// The endpoint verifies the token and attaches the account to
+				// the submission (#1334); no session (or a detached one), no
+				// header — anonymous.
+				identityAttached && $session
+					? { headers: { Authorization: `Bearer ${$session.token.trim()}` } }
+					: undefined,
+			)
+			.then((response) => {
+				// The server's verdict, not the client's belief — a stale
+				// token lands anonymous despite the chip.
+				onsuccess(response.data?.attributed === true);
 			})
 			.catch((error) => {
-				if (error.response?.data?.message?.includes("Captcha")) {
-					errToast(error.response.data.message);
+				// Our endpoint's 4xx messages are written for users (captcha,
+				// missing contact on an anonymous fallback, …) — show them.
+				const message = error.response?.data?.message;
+				if (message && error.response.status < 500) {
+					errToast(message);
 				} else {
 					errToast(get(_)("errors.formSubmission"));
 				}
@@ -473,13 +521,118 @@ onMount(() => {
 	</div>
 
 	<div>
-		<label for="contact" class="mb-2 block font-semibold">{$_('forms.contact')}</label>
-		<p class="mb-2 text-justify text-sm">
-			{$_('addLocation.contactDescription')}
-		</p>
+		<label for="contact" class="mb-2 block font-semibold">
+			{$_('forms.contact')}
+			{#if identityAttached}
+				<span class="font-normal">{$_('forms.optional')}</span>
+			{/if}
+		</label>
+		{#if identityAttached && $session}
+			<!-- The submission carries the account (verified server-side), so
+			     the email is a follow-up channel, not the identity. The chip
+			     reveals the shared-device escape hatch: detach the account
+			     from this one submission. -->
+			<div class="mb-2 flex flex-wrap items-center gap-2">
+				<!-- Speaks the app's chip dialect: the filter chips' active
+				     pill, the header UserMenu's identity (Nostr avatar or
+				     account icon), and the expand_more rotate-on-open
+				     disclosure. -->
+				<button
+					type="button"
+					aria-expanded={showDetach}
+					onclick={() => (showDetach = !showDetach)}
+					class="flex shrink-0 items-center gap-2 rounded-full border border-link bg-link/10 px-3 py-1 text-sm font-semibold whitespace-nowrap text-primary transition-colors focus-visible:ring-2 focus-visible:ring-link focus-visible:ring-offset-1 focus-visible:outline-none dark:border-link dark:text-white dark:focus-visible:ring-offset-dark"
+				>
+					{#if $session.npub}
+						<NostrAvatar npub={$session.npub} size={18} class="h-[18px] w-[18px]" />
+					{:else}
+						<Icon type="material" icon="account_circle_filled" w="18" h="18" />
+					{/if}
+					{$_('addLocation.submittingAs', { values: { username: $session.username } })}
+					<Icon
+						type="material"
+						icon="expand_more"
+						w="16"
+						h="16"
+						class={showDetach ? 'rotate-180' : ''}
+					/>
+				</button>
+				{#if showDetach}
+					<button
+						type="button"
+						onclick={() => {
+							submitAnonymously = true;
+							showDetach = false;
+						}}
+						class="text-sm font-semibold text-link hover:text-hover focus:outline-link"
+					>
+						{$_('addLocation.submitAnonymously')}
+					</button>
+				{/if}
+			</div>
+			<p class="mb-2 text-justify text-sm">
+				{$_('addLocation.contactSignedInHint')}
+			</p>
+		{:else}
+			{#if $session}
+				<!-- Detached: the anonymous contract applies, with an undo. -->
+				<button
+					type="button"
+					onclick={() => (submitAnonymously = false)}
+					class="mb-2 text-sm font-semibold text-link hover:text-hover focus:outline-link"
+				>
+					{$_('addLocation.submitAsAccount', { values: { username: $session.username } })}
+				</button>
+			{/if}
+			<p class="mb-2 text-justify text-sm">
+				{$_('addLocation.contactDescription')}
+			</p>
+			{#if !$session}
+				<!-- The other #1334 touchpoint: sign in without leaving the
+				     form — the auth forms expand in place, typed fields
+				     survive, and the chip takes over on success. -->
+				<div class="mb-2">
+					<button
+						type="button"
+						aria-expanded={showSignIn}
+						onclick={() => (showSignIn = !showSignIn)}
+						class="flex items-center gap-1 text-sm font-semibold text-link hover:text-hover focus:outline-link"
+					>
+						{$_('addLocation.signInPrompt')}
+						<Icon
+							type="material"
+							icon="expand_more"
+							w="16"
+							h="16"
+							class={showSignIn ? 'rotate-180' : ''}
+						/>
+					</button>
+					{#if showSignIn}
+						<!-- The auth forms nest inside the location <form>
+						     (client-rendered only, so no parser flattening) —
+						     their bubbling submit events must not reach
+						     submitForm. -->
+						<div
+							class="mt-3 rounded-2xl border-2 border-input p-4"
+							onsubmit={(e) => e.stopPropagation()}
+						>
+							<LoginForm compact onSuccess={onAuthSuccess} />
+							<div class="my-4 flex items-center gap-3">
+								<div class="h-px flex-1 bg-gray-300 dark:bg-white/20"></div>
+								<span class="text-xs text-body dark:text-white/50">
+									{$_('login.otherMethods')}
+								</span>
+								<div class="h-px flex-1 bg-gray-300 dark:bg-white/20"></div>
+							</div>
+							<NostrLoginForm onSuccess={onAuthSuccess} />
+						</div>
+					{/if}
+				</div>
+			{/if}
+		{/if}
 		<input
 			disabled={!captchaSecret}
-			required
+			required={!identityAttached}
 			type="email"
 			name="contact"
 			id="contact"

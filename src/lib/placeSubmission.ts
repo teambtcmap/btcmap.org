@@ -1,3 +1,33 @@
+// The wire contract of POST /api/submit-place. The endpoint still treats
+// the incoming body as untrusted unknowns and re-validates everything —
+// this type exists so the client payload and the server's reads can't
+// drift apart silently. Optionals mirror the form's element refs, which
+// can be undefined.
+export type SubmitPlaceRequest = {
+	captchaSecret?: string;
+	captchaTest?: string;
+	honey?: string;
+	name?: string;
+	nameEn?: string;
+	address?: string;
+	lat: number;
+	long: number;
+	category: string;
+	methods: string[];
+	website?: string;
+	phone?: string;
+	hours?: string;
+	notes?: string;
+	contact?: string;
+};
+
+export type SubmitPlaceResponse = {
+	id: number;
+	// Whether a verified account was attached (#1334) — the authoritative
+	// answer; the client's belief can be stale.
+	attributed: boolean;
+};
+
 export type AddLocationSubmission = {
 	name: string;
 	nameEn: string;
@@ -11,6 +41,10 @@ export type AddLocationSubmission = {
 	hours: string;
 	notes: string;
 	contact: string;
+	// Verified server-side against /v4/users/me — never client-claimed.
+	// Empty when the submission is anonymous.
+	submittedBy: string;
+	submitterNpub: string;
 };
 
 export type SubmitPlaceParams = {
@@ -40,6 +74,8 @@ export const buildSubmitPlaceParams = (
 		opening_hours: form.hours,
 		notes: form.notes,
 		contact: form.contact,
+		submitted_by: form.submittedBy,
+		submitter_npub: form.submitterNpub,
 		osm_edit_url: `https://www.openstreetmap.org/edit#map=21/${form.lat}/${form.long}`,
 	};
 	const extra_fields = Object.fromEntries(

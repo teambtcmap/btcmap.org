@@ -1,6 +1,7 @@
 <script lang="ts">
 import AddLocationForm from "$components/add-location/AddLocationForm.svelte";
 import CloseButton from "$components/CloseButton.svelte";
+import Icon from "$components/Icon.svelte";
 import PrimaryButton from "$components/PrimaryButton.svelte";
 import { _ } from "$lib/i18n";
 
@@ -22,6 +23,9 @@ type Props = {
 let { coords, onclose, onaddanother, onexit }: Props = $props();
 
 let submitted = $state(false);
+// True when the submission went out without a verified account — the
+// success screen then nudges toward creating one (#1334).
+let submittedAnonymously = $state(false);
 
 const onKeydown = (event: KeyboardEvent) => {
 	if (event.key === "Escape") {
@@ -46,7 +50,13 @@ const onKeydown = (event: KeyboardEvent) => {
 			<p class="mb-4 text-sm text-body dark:text-offwhite">
 				{$_('addLocation.pinConfirmedHint')}
 			</p>
-			<AddLocationForm {coords} onsuccess={() => (submitted = true)} />
+			<AddLocationForm
+				{coords}
+				onsuccess={(attributed) => {
+					submitted = true;
+					submittedAnonymously = !attributed;
+				}}
+			/>
 		</div>
 	{:else}
 		<div class="flex flex-col items-center gap-4 px-4 py-16 text-center">
@@ -64,6 +74,27 @@ const onKeydown = (event: KeyboardEvent) => {
 			<p class="text-body dark:text-offwhite">
 				{$_('addLocation.formSuccessText')}
 			</p>
+			{#if submittedAnonymously}
+				<!-- The moment of investment: nudge anonymous submitters
+				     toward an account and a track record (#1334). -->
+				<div
+					class="flex w-full items-start gap-2 rounded-lg border border-gray-300 px-3 py-2.5 text-left dark:border-white/20"
+				>
+					<Icon
+						type="material"
+						icon="info_outline"
+						w="18"
+						h="18"
+						class="mt-0.5 shrink-0 text-body dark:text-white/70"
+					/>
+					<p class="text-sm text-body dark:text-offwhite">
+						{$_('addLocation.successAccountNudge')}
+						<a href="/signup" class="font-semibold text-link hover:text-hover">
+							{$_('addLocation.successAccountCta')}
+						</a>
+					</p>
+				</div>
+			{/if}
 			<PrimaryButton on:click={onaddanother} style="w-full py-3 rounded-xl">
 				{$_('formSuccess.submitAnother', {
 					values: { type: $_('addLocation.formSuccessType') }

@@ -15,6 +15,8 @@ const fullForm = {
 	hours: "Mo-Fr 10:00-18:00",
 	notes: "Ring the bell",
 	contact: "owner@example.com",
+	submittedBy: "satoshi",
+	submitterNpub: "",
 };
 
 describe("buildSubmitPlaceParams", () => {
@@ -39,15 +41,19 @@ describe("buildSubmitPlaceParams", () => {
 			opening_hours: "Mo-Fr 10:00-18:00",
 			notes: "Ring the bell",
 			contact: "owner@example.com",
+			submitted_by: "satoshi",
 			osm_edit_url:
 				"https://www.openstreetmap.org/edit#map=21/52.48841/13.42986",
 		});
-		// nameEn empty in this variant — must not appear
+		// Empty optionals must not appear: nameEn, and the anonymous
+		// submission's identity fields (npub empty in the fixture too).
 		const { extra_fields: sparse } = buildSubmitPlaceParams(
-			{ ...fullForm, nameEn: "" },
+			{ ...fullForm, nameEn: "", submittedBy: "" },
 			"uuid-1",
 		);
 		expect("name:en" in sparse).toBe(false);
+		expect("submitted_by" in sparse).toBe(false);
+		expect("submitter_npub" in extra_fields).toBe(false);
 	});
 
 	it("keeps zero coordinates", () => {
