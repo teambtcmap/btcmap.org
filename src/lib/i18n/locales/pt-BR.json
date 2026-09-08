@@ -749,7 +749,8 @@
 	},
 	"areaEvents": {
 		"empty": "Nenhum evento próximo ou recente encontrado.",
-		"past": "passado"
+		"past": "passado",
+		"noDate": "Data a definir"
 	},
 	"area": {
 		"sections": {

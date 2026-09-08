@@ -867,7 +867,8 @@
 	},
 	"areaEvents": {
 		"empty": "Geen aankomende of recente evenementen gevonden.",
-		"past": "afgelopen"
+		"past": "afgelopen",
+		"noDate": "Datum volgt"
 	},
 	"area": {
 		"sections": {

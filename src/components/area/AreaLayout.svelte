@@ -195,8 +195,9 @@ const taggers = writable<Tagger[]>([]);
 
 // Future-event count for the events tab badge. Uses the same local-time
 // interpretation as AreaEventsSection: drop the timezone suffix and read
-// the components straight from the string. Unparseable starts_at count
-// as future, matching the section component's open-ended convention.
+// the components straight from the string. Unparseable or epoch-sentinel
+// starts_at count as future, matching the section component's
+// open-ended convention.
 $: futureEventCount = (() => {
 	let count = 0;
 	const now = Date.now();
@@ -205,6 +206,18 @@ $: futureEventCount = (() => {
 			/^(\d{4})-(\d{2})-(\d{2})T(\d{2}):(\d{2})/,
 		);
 		if (!m) {
+			count++;
+			continue;
+		}
+		// 1970-01-01T00:00:00Z is the API's "no date" sentinel — see
+		// AreaEventsSection's isEpochSentinel for the full rationale.
+		if (
+			m[1] === "1970" &&
+			m[2] === "01" &&
+			m[3] === "01" &&
+			m[4] === "00" &&
+			m[5] === "00"
+		) {
 			count++;
 			continue;
 		}

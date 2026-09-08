@@ -756,7 +756,8 @@
 	},
 	"areaEvents": {
 		"empty": "Keine bevorstehenden oder kürzlichen Veranstaltungen gefunden.",
-		"past": "vergangen"
+		"past": "vergangen",
+		"noDate": "Datum folgt"
 	},
 	"area": {
 		"sections": {

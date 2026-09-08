@@ -37,10 +37,23 @@ const toDate = (parts: LocalDateTime): Date =>
 
 const pad2 = (n: number): string => String(n).padStart(2, "0");
 
+// The API returns 1970-01-01T00:00:00Z for events without a starts_at
+// (see btcmap-api's `From<Event> for Item`: starts_at defaults to
+// UNIX_EPOCH). Parsing that as a real date and rendering it would dump
+// "Jan 1, 1970, 00:00" into the UI, so we treat the epoch sentinel as
+// "no date" and pin it to the future block.
+const isEpochSentinel = (parts: LocalDateTime): boolean =>
+	parts.year === 1970 &&
+	parts.month === 1 &&
+	parts.day === 1 &&
+	parts.hour === 0 &&
+	parts.minute === 0;
+
 // Sorted server-side via the API window (365d back + all future), but the
 // API doesn't guarantee order — defensive client sort keeps the UI
 // correct even if the upstream contract relaxes later. Future events come
-// first, then past events, each block sorted soonest-first.
+// first (latest-first within the block so the farthest planned event is
+// at the top), then past events (most-recent-first).
 type AnnotatedEvent = { event: AreaEvent; isPast: boolean };
 
 const annotatedEvents: AnnotatedEvent[] = $derived.by(() => {
@@ -49,33 +62,31 @@ const annotatedEvents: AnnotatedEvent[] = $derived.by(() => {
 	const past: AnnotatedEvent[] = [];
 	for (const event of data.events ?? []) {
 		const parts = parseLocalDateTime(event.starts_at);
-		if (!parts) {
-			// Unparseable starts_at → open-ended per the API contract;
-			// group with future so it stays visible at the top.
+		if (!parts || isEpochSentinel(parts)) {
+			// Unparseable or epoch-sentinel starts_at → open-ended;
+			// group with future so it stays visible.
 			future.push({ event, isPast: false });
 			continue;
 		}
 		if (toDate(parts).getTime() >= now) future.push({ event, isPast: false });
 		else past.push({ event, isPast: true });
 	}
-	const byStartAsc = (a: AnnotatedEvent, b: AnnotatedEvent) => {
+	const byStartDesc = (a: AnnotatedEvent, b: AnnotatedEvent) => {
 		const ap = parseLocalDateTime(a.event.starts_at);
 		const bp = parseLocalDateTime(b.event.starts_at);
-		const aTs = ap ? toDate(ap).getTime() : 0;
-		const bTs = bp ? toDate(bp).getTime() : 0;
-		// Place unparseable timestamps at the bottom of their block so the
-		// dated entries stay ordered.
-		if (aTs !== bTs) return aTs - bTs;
+		const aTs = ap && !isEpochSentinel(ap) ? toDate(ap).getTime() : 0;
+		const bTs = bp && !isEpochSentinel(bp) ? toDate(bp).getTime() : 0;
+		if (aTs !== bTs) return bTs - aTs;
 		return a.event.id - b.event.id;
 	};
-	future.sort(byStartAsc);
-	past.sort(byStartAsc);
+	future.sort(byStartDesc);
+	past.sort(byStartDesc);
 	return [...future, ...past];
 });
 
 const formatDateRange = (event: AreaEvent): string => {
 	const start = parseLocalDateTime(event.starts_at);
-	if (!start) return "";
+	if (!start || isEpochSentinel(start)) return $_("areaEvents.noDate");
 	const startDateStr = new Date(
 		start.year,
 		start.month - 1,
@@ -87,7 +98,7 @@ const formatDateRange = (event: AreaEvent): string => {
 	});
 	const startStr = `${startDateStr}, ${pad2(start.hour)}:${pad2(start.minute)}`;
 	const end = event.ends_at ? parseLocalDateTime(event.ends_at) : null;
-	if (!end) return startStr;
+	if (!end || isEpochSentinel(end)) return startStr;
 	const sameDay =
 		start.year === end.year &&
 		start.month === end.month &&
