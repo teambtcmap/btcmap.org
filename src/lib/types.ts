@@ -422,9 +422,10 @@ export type AreaPageProps = {
 	tickets: Tickets;
 	issues: PlaceIssue[];
 	// Bitcoin meetups/conferences whose (lat, lon) lies inside this area's
-	// polygon — last 365 days + all future, sorted soonest-first. Populated
-	// only by the events section's loader; empty array elsewhere so the
-	// non-events sections don't pay the second fetch.
+	// polygon — last 365 days + all future. Fetched on every section so
+	// the events tab badge can read the future-event count regardless of
+	// which tab is active; the events section renders the full list from
+	// this same payload.
 	events: AreaEvent[];
 	// Full v3 tags, polygon included — the client renders from these instead
 	// of re-crawling the world areas feed to recover them (#1174)

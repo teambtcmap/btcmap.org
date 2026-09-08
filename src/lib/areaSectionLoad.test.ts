@@ -271,9 +271,10 @@ describe("loadAreaSection", () => {
 			// Issues feed only the maintain section's table — the other
 			// sections' SSR payloads must not carry them
 			issues: [],
-			// Events feed only the events section's list — the other
-			// sections' SSR payloads must not carry them either
-			events: [],
+			// Events are fetched on every section so the events tab badge
+			// can read the future-event count regardless of which tab is
+			// active.
+			events: EVENTS_OK,
 			description: "An area description",
 			tags: AREA_OK.tags,
 			contacts: {},
@@ -281,8 +282,11 @@ describe("loadAreaSection", () => {
 		});
 		expect(result.tags).toEqual(AREA_OK.tags);
 
-		expect(fetch).toHaveBeenCalledTimes(1);
+		expect(fetch).toHaveBeenCalledTimes(2);
 		expect(fetch.mock.calls[0][0].toString()).toContain("/v3/areas/some-area");
+		expect(fetch.mock.calls[1][0].toString()).toContain(
+			"/v4/areas/some-area/events",
+		);
 	});
 
 	it("fetches issues for the maintain section, paginating past the limit", async () => {
@@ -331,13 +335,13 @@ describe("loadAreaSection", () => {
 		}
 	});
 
-	it("fetches events only for the events section, with a 365-day window", async () => {
+	it("fetches events on every section, with a 365-day window", async () => {
 		const fetch = makeFetch();
 
 		const result = await loadAreaSection(
 			{ params: { area: "some-area" }, fetch },
 			communityConfig,
-			"events",
+			"stats",
 		);
 
 		expect(result.data.events).toEqual(EVENTS_OK);
@@ -348,24 +352,9 @@ describe("loadAreaSection", () => {
 		// The `from` query is now-365d; we don't pin the exact timestamp,
 		// just that the lower-bound window is plumbed through.
 		expect(eventsUrl?.[0].toString()).toMatch(/[?&]from=\d{4}-\d{2}-\d{2}T/);
-		// Two fetches: the v3 area + the v4 events endpoint. No issues fetch.
+		// Two fetches: the v3 area + the v4 events endpoint. No issues fetch
+		// because the section is "stats".
 		expect(fetch).toHaveBeenCalledTimes(2);
-	});
-
-	it("skips the events fetch for non-events sections", async () => {
-		const fetch = makeFetch();
-
-		await loadAreaSection(
-			{ params: { area: "some-area" }, fetch },
-			communityConfig,
-			"stats",
-		);
-
-		expect(
-			fetch.mock.calls.some(([u]) =>
-				u.toString().includes("/v4/areas/some-area/events"),
-			),
-		).toBe(false);
 	});
 
 	it("treats a 404 from the events endpoint as no events rather than a 502", async () => {

@@ -61,11 +61,11 @@ export type AreaSection = (typeof AREA_SECTIONS)[number];
 // so landing on /maintain fetches them then.
 const SECTIONS_WITH_ISSUES = new Set(["maintain"]);
 
-// Bitcoin meetups and conferences inside the area polygon. The /v4 API
-// window is "365 days back + all future" so the page can render a single
-// coherent upcoming + recent-past list; SSR fetches with that window so
-// the initial paint doesn't flash a skeleton.
-const SECTIONS_WITH_EVENTS = new Set(["events"]);
+// Bitcoin meetups and conferences inside the area polygon, fetched on
+// every section because the events tab badge needs the future-event count
+// regardless of which tab is active. The /v4 API window is "365 days back
+// + all future" so the events section can render a coherent list AND the
+// layout can read the future count for its badge from the same payload.
 const EVENTS_WINDOW_DAYS = 365;
 
 const ISSUES_PAGE_LIMIT = 10000;
@@ -201,9 +201,10 @@ export const loadAreaSection = async (
 			? await fetchAllPlaceIssues(fetch, fetchedArea.id)
 			: [];
 
-		const events = SECTIONS_WITH_EVENTS.has(section)
-			? await fetchAreaEvents(fetch, tags.url_alias)
-			: [];
+		// Fetched for every section — the events tab badge reads the
+		// future-event count from `data.events` on every layout, not just
+		// on the events tab itself.
+		const events = await fetchAreaEvents(fetch, tags.url_alias);
 
 		return {
 			data: {
