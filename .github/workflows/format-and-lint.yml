@@ -28,3 +28,12 @@ jobs:
 
       - name: Run Biome lint
         run: pnpm run lint
+
+      # Fail if the committed offline icon bundle is stale — e.g. a new
+      # materialExceptions entry or <Icon> usage landed without regenerating.
+      # Deterministic from the committed vocabulary + pinned icon-set packages;
+      # `icons:refresh` (not this) is what rescans the places feed.
+      - name: Verify the icon bundle is up to date
+        run: |
+          pnpm run icons:generate
+          git diff --exit-code src/lib/icons/generated
