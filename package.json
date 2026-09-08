@@ -17,6 +17,8 @@
 		"dev": "pnpm run sync:rtl-plugin && vite dev --host",
 		"format": "biome check src",
 		"format:fix": "biome format --write src",
+		"icons:generate": "node scripts/generate-icons.mjs",
+		"icons:refresh": "node scripts/generate-icons.mjs --refresh",
 		"lint": "biome check src",
 		"lint:fix": "biome check --write src",
 		"prepare": "husky",
@@ -35,6 +37,7 @@
 		]
 	},
 	"dependencies": {
+		"@iconify/utils": "^3.1.7",
 		"@mapbox/geojson-rewind": "^0.5.2",
 		"@nazka/map-gl-js-spiderfy": "^2.0.0",
 		"@tanstack/match-sorter-utils": "^9.1.2",
@@ -64,6 +67,10 @@
 	},
 	"devDependencies": {
 		"@biomejs/biome": "^2.5.11",
+		"@iconify-json/fa6-brands": "^1.2.6",
+		"@iconify-json/fa6-solid": "^1.2.4",
+		"@iconify-json/ic": "^1.2.4",
+		"@iconify-json/material-symbols": "^1.2.90",
 		"@iconify/svelte": "^5.2.2",
 		"@mapbox/mapbox-gl-rtl-text": "^0.4.0",
 		"@playwright/test": "^1.62.0",
