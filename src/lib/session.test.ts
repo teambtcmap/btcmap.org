@@ -1,6 +1,8 @@
 import { get } from "svelte/store";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 
+import { API_BASE } from "$lib/api-base";
+
 // Mock axios to prevent real API calls
 vi.mock("$lib/axios", () => ({
 	default: {
@@ -213,12 +215,12 @@ describe("session store", () => {
 				password: "correct horse battery",
 			});
 
-			expect(post).toHaveBeenCalledWith("https://api.btcmap.org/v4/users", {
+			expect(post).toHaveBeenCalledWith(`${API_BASE}/v4/users`, {
 				name: "alice",
 				password: "correct horse battery",
 			});
 			expect(post).toHaveBeenCalledWith(
-				"https://api.btcmap.org/v4/users/alice/tokens",
+				`${API_BASE}/v4/users/alice/tokens`,
 				{ label: "BTC Map Web" },
 				{ headers: { Authorization: "Bearer correct horse battery" } },
 			);
@@ -269,7 +271,7 @@ describe("session store", () => {
 				password: "correct horse battery",
 			});
 
-			expect(post).toHaveBeenCalledWith("https://api.btcmap.org/v4/users", {
+			expect(post).toHaveBeenCalledWith(`${API_BASE}/v4/users`, {
 				name: "bob",
 				password: "correct horse battery",
 			});

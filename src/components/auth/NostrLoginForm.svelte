@@ -42,7 +42,9 @@ async function exchangeSignedEvent(signedEvent: SignedAuthEvent) {
 			...new TextEncoder().encode(JSON.stringify(signedEvent)),
 		),
 	);
-	const res = await api.post(`${API_BASE}/v4/auth/nostr`, null, {
+	// undefined (not null) so axios sends no body and no content-type:
+	// a body would require a payload-hash tag in the signed event.
+	const res = await api.post(`${API_BASE}/v4/auth/nostr`, undefined, {
 		headers: { Authorization: `Nostr ${eventB64}` },
 	});
 
