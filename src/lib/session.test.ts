@@ -203,7 +203,9 @@ describe("session store", () => {
 
 		it("sends the chosen username and password to the signup route", async () => {
 			const post = await postMock();
-			post.mockResolvedValue({ data: { username: "alice", token: "tok" } });
+			post
+				.mockResolvedValueOnce({ data: { name: "alice" } })
+				.mockResolvedValueOnce({ data: { token: "tok" } });
 			const session = await createTestSession();
 
 			await session.signUp({
@@ -211,15 +213,22 @@ describe("session store", () => {
 				password: "correct horse battery",
 			});
 
-			expect(post).toHaveBeenCalledWith("/api/session/signup", {
+			expect(post).toHaveBeenCalledWith("https://api.btcmap.org/v4/users", {
 				name: "alice",
 				password: "correct horse battery",
 			});
+			expect(post).toHaveBeenCalledWith(
+				"https://api.btcmap.org/v4/users/alice/tokens",
+				{ label: "BTC Map Web" },
+				{ headers: { Authorization: "Bearer correct horse battery" } },
+			);
 		});
 
 		it("marks a session with chosen credentials as not auto-generated", async () => {
 			const post = await postMock();
-			post.mockResolvedValue({ data: { username: "alice", token: "tok" } });
+			post
+				.mockResolvedValueOnce({ data: { name: "alice" } })
+				.mockResolvedValueOnce({ data: { token: "tok" } });
 			const session = await createTestSession();
 
 			const current = await session.signUp({
@@ -233,7 +242,9 @@ describe("session store", () => {
 
 		it("keeps a chosen password out of the stored session", async () => {
 			const post = await postMock();
-			post.mockResolvedValue({ data: { username: "alice", token: "tok" } });
+			post
+				.mockResolvedValueOnce({ data: { name: "alice" } })
+				.mockResolvedValueOnce({ data: { token: "tok" } });
 			const session = await createTestSession();
 
 			const current = await session.signUp({
@@ -248,7 +259,9 @@ describe("session store", () => {
 
 		it("trims the username before sending it", async () => {
 			const post = await postMock();
-			post.mockResolvedValue({ data: { username: "bob", token: "tok" } });
+			post
+				.mockResolvedValueOnce({ data: { name: "bob" } })
+				.mockResolvedValueOnce({ data: { token: "tok" } });
 			const session = await createTestSession();
 
 			await session.signUp({
@@ -256,7 +269,7 @@ describe("session store", () => {
 				password: "correct horse battery",
 			});
 
-			expect(post).toHaveBeenCalledWith("/api/session/signup", {
+			expect(post).toHaveBeenCalledWith("https://api.btcmap.org/v4/users", {
 				name: "bob",
 				password: "correct horse battery",
 			});

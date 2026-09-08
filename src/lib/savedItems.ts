@@ -1,13 +1,16 @@
+import { API_BASE } from "$lib/api-base";
 import api from "$lib/axios";
 import type { Session } from "$lib/session";
 import { session } from "$lib/session";
 
 export type SavedItemType = "place" | "area";
 
-// SvelteKit server routes that proxy to the btcmap API (avoids CORS preflight).
-const PROXY_ENDPOINTS = {
-	place: "/api/session/saved-places",
-	area: "/api/session/saved-areas",
+// Called straight on the btcmap API with the Bearer token — it answers
+// CORS preflights, so no server proxy is involved (#1348). Exported for
+// the pages that list saved items.
+export const SAVED_ITEM_ENDPOINTS = {
+	place: `${API_BASE}/v4/places/saved`,
+	area: `${API_BASE}/v4/areas/saved`,
 } as const;
 
 export async function addSavedItem(
@@ -15,12 +18,12 @@ export async function addSavedItem(
 	token: string,
 	id: number,
 ): Promise<number[]> {
-	const res = await api.post<number[]>(PROXY_ENDPOINTS[type], id, {
+	const res = await api.post<number[]>(SAVED_ITEM_ENDPOINTS[type], id, {
 		headers: { Authorization: `Bearer ${token}` },
 	});
 	if (!Array.isArray(res.data)) {
 		throw new Error(
-			`POST ${PROXY_ENDPOINTS[type]} returned an unexpected response`,
+			`POST ${SAVED_ITEM_ENDPOINTS[type]} returned an unexpected response`,
 		);
 	}
 	return res.data;
@@ -31,12 +34,15 @@ export async function removeSavedItem(
 	token: string,
 	id: number,
 ): Promise<number[]> {
-	const res = await api.delete<number[]>(`${PROXY_ENDPOINTS[type]}/${id}`, {
-		headers: { Authorization: `Bearer ${token}` },
-	});
+	const res = await api.delete<number[]>(
+		`${SAVED_ITEM_ENDPOINTS[type]}/${id}`,
+		{
+			headers: { Authorization: `Bearer ${token}` },
+		},
+	);
 	if (!Array.isArray(res.data)) {
 		throw new Error(
-			`DELETE ${PROXY_ENDPOINTS[type]}/${id} returned an unexpected response`,
+			`DELETE ${SAVED_ITEM_ENDPOINTS[type]}/${id} returned an unexpected response`,
 		);
 	}
 	return res.data;
@@ -78,8 +84,8 @@ export async function hydrateSavedFromServer(
 ): Promise<HydrateResult> {
 	const headers = { Authorization: `Bearer ${token}` };
 	const [placesRes, areasRes] = await Promise.allSettled([
-		api.get(PROXY_ENDPOINTS.place, { headers }),
-		api.get(PROXY_ENDPOINTS.area, { headers }),
+		api.get(SAVED_ITEM_ENDPOINTS.place, { headers }),
+		api.get(SAVED_ITEM_ENDPOINTS.area, { headers }),
 	]);
 	const placeOk =
 		placesRes.status === "fulfilled" && Array.isArray(placesRes.value.data);

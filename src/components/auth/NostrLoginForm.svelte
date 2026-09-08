@@ -2,6 +2,7 @@
 import { get } from "svelte/store";
 
 import TextField from "$components/form/TextField.svelte";
+import { API_BASE } from "$lib/api-base";
 import api from "$lib/axios";
 import { _ } from "$lib/i18n";
 import type { SignedAuthEvent } from "$lib/nostr";
@@ -32,8 +33,17 @@ let nsecLoading = $state(false);
 const anyLoading = $derived(nostrLoading || nsecLoading);
 
 async function exchangeSignedEvent(signedEvent: SignedAuthEvent) {
-	const res = await api.post("/api/session/nostr", {
-		signed_event: signedEvent,
+	// Straight against the API per NIP-98 (it answers CORS preflights,
+	// #1348): the signed event travels base64-encoded in the header, no
+	// body. btoa needs a byte string, hence the TextEncoder round-trip
+	// for any non-Latin-1 characters in the event.
+	const eventB64 = btoa(
+		String.fromCharCode(
+			...new TextEncoder().encode(JSON.stringify(signedEvent)),
+		),
+	);
+	const res = await api.post(`${API_BASE}/v4/auth/nostr`, null, {
+		headers: { Authorization: `Nostr ${eventB64}` },
 	});
 
 	const { token, username, npub } = parseNostrAuthResponse(res.data);

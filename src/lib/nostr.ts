@@ -90,7 +90,7 @@ export function decodeNsec(nsec: string): Uint8Array {
 	return decoded.data;
 }
 
-// Shape returned by the /api/session/nostr proxy on a successful login.
+// Shape returned by POST /v4/auth/nostr on a successful login.
 export type NostrAuthResult = {
 	token: string;
 	username: string;

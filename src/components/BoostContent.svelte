@@ -6,9 +6,14 @@ import { fade } from "svelte/transition";
 import Icon from "$components/Icon.svelte";
 import InvoicePaymentStage from "$components/InvoicePaymentStage.svelte";
 import PrimaryButton from "$components/PrimaryButton.svelte";
+import { API_BASE } from "$lib/api-base";
 import { _ } from "$lib/i18n";
 import IconSocials from "$lib/icons/IconSocials.svelte";
-import { classifyBoostError } from "$lib/payment";
+import {
+	classifyBoostError,
+	isInvoicePaid,
+	pollInvoiceStatus,
+} from "$lib/payment";
 import { boost, boostHash } from "$lib/store";
 import { updateSinglePlace } from "$lib/sync/places";
 import { errToast, warningToast } from "$lib/utils";
@@ -49,12 +54,14 @@ const handlePaymentSuccess = async () => {
 	$boostHash = invoiceId;
 
 	try {
-		const response = await axios.post("/api/boost/post", {
-			invoice_id: invoiceId,
-		});
+		// Re-verify against the API before celebrating — the poller said
+		// paid, but this is the cheap belt to its braces (#1348).
+		const response = await pollInvoiceStatus(invoiceId);
+		if (!isInvoicePaid(response.data?.status)) {
+			throw new Error("Invoice not paid");
+		}
 
 		stage = 2;
-		console.info(response);
 
 		if (merchantId) {
 			await updateSinglePlace(merchantId);
@@ -106,8 +113,9 @@ const generateInvoice = () => {
 	}
 
 	axios
-		.post("/api/boost/invoice/generate", {
-			place_id: placeId,
+		.post(`${API_BASE}/v4/place-boosts`, {
+			// The API takes the id as a string.
+			place_id: placeId.toString(),
 			days: days,
 		})
 		.then((response) => {

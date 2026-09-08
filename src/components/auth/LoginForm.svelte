@@ -5,6 +5,7 @@ import TextField from "$components/form/TextField.svelte";
 import PrimaryButton from "$components/PrimaryButton.svelte";
 import TextLink from "$components/TextLink.svelte";
 import { trackEvent } from "$lib/analytics";
+import { API_BASE } from "$lib/api-base";
 import api from "$lib/axios";
 import { _ } from "$lib/i18n";
 import type { Session } from "$lib/session";
@@ -32,10 +33,13 @@ async function handleSubmit(event: SubmitEvent) {
 	loading = true;
 
 	try {
-		const res = await api.post("/api/session/login", {
-			username: username.trim(),
-			password,
-		});
+		// Straight against the API (it answers CORS preflights, #1348):
+		// the password authenticates the token mint as a Bearer.
+		const res = await api.post(
+			`${API_BASE}/v4/users/${encodeURIComponent(username.trim())}/tokens`,
+			{ label: "BTC Map Web" },
+			{ headers: { Authorization: `Bearer ${password}` } },
+		);
 
 		const token = res.data?.token;
 		if (typeof token !== "string") {
@@ -54,7 +58,10 @@ async function handleSubmit(event: SubmitEvent) {
 	} catch (err) {
 		const status = (err as { response?: { status?: number } })?.response
 			?.status;
-		errToast(status === 401 ? $_("login.failed") : $_("login.error"));
+		// 401/403 both mean bad credentials at the API.
+		errToast(
+			status === 401 || status === 403 ? $_("login.failed") : $_("login.error"),
+		);
 		console.error("Login failed:", status ?? "unknown");
 	} finally {
 		loading = false;

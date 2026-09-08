@@ -1,5 +1,6 @@
 import { derived, writable } from "svelte/store";
 
+import { API_BASE } from "$lib/api-base";
 import api from "$lib/axios";
 
 // Session is the BTC Map account behind saved places/areas. Accounts are
@@ -104,17 +105,27 @@ function createSessionStore() {
 	const { subscribe, set, update } = writable<Session | null>(null);
 
 	const doSignUp = async (credentials: SignupCredentials): Promise<Session> => {
-		// Calls the SvelteKit server route which proxies to the btcmap API.
-		// This avoids CORS preflight issues (the API returns 404 on OPTIONS).
-		// The server route creates a user + token in two API calls.
-		const res = await api.post("/api/session/signup", {
+		// Straight against the API — it answers CORS preflights, so no
+		// server proxy is involved and the flow works for any client, not
+		// just the website (#1348). Two calls: create the account, then
+		// mint a Bearer token (the password authenticates the mint).
+		const userRes = await api.post(`${API_BASE}/v4/users`, {
 			name: credentials.username,
 			password: credentials.password,
 		});
+		const returnedUsername = userRes.data?.name;
+		if (typeof returnedUsername !== "string" || !returnedUsername) {
+			throw new Error("signup did not return a username");
+		}
 
-		const { username: returnedUsername, token } = res.data;
-		if (typeof returnedUsername !== "string" || typeof token !== "string") {
-			throw new Error("signup did not return username and token");
+		const tokenRes = await api.post(
+			`${API_BASE}/v4/users/${encodeURIComponent(returnedUsername)}/tokens`,
+			{ label: "BTC Map Web" },
+			{ headers: { Authorization: `Bearer ${credentials.password}` } },
+		);
+		const token = tokenRes.data?.token;
+		if (typeof token !== "string" || !token) {
+			throw new Error("signup did not return a token");
 		}
 
 		const session: Session = {
