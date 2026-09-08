@@ -1,6 +1,7 @@
 import type { GeoJSONSource, Map as MapLibreMap } from "maplibre-gl";
 
 import { CLUSTERING_DISABLED_ZOOM, LABEL_VISIBLE_ZOOM } from "$lib/constants";
+import { renderBundledIcon } from "$lib/icons/renderBundledIcon";
 import {
 	routePlacesByBoostAndZoom,
 	shouldClusterBoostedAtZoom,
@@ -100,13 +101,15 @@ const loadClusterHitSprite = async (m: MapLibreMap): Promise<void> => {
 
 const loadSavedBadgeSprite = async (m: MapLibreMap): Promise<void> => {
 	if (hasRealImage(m, "saved-badge")) return;
-	const encodedColor = encodeURIComponent(LINK_COLOR);
-	const url = `https://api.iconify.design/ic/baseline-bookmark-added.svg?color=${encodedColor}&width=10&height=10`;
-	const res = await fetch(url);
-	if (!res.ok) {
-		throw new Error(`saved-badge bookmark fetch failed: ${res.status} ${url}`);
-	}
-	const bookmarkSvg = await res.text();
+	// Bookmark glyph rendered from the offline bundle in LINK_COLOR at 10px —
+	// no api.iconify.design round-trip (see renderBundledIcon).
+	const bookmarkSvg = renderBundledIcon(
+		"ic:baseline-bookmark-added",
+		LINK_COLOR,
+		10,
+	);
+	if (!bookmarkSvg)
+		throw new Error("saved-badge bookmark missing from the icon bundle");
 	const composite = buildSavedBadgeSvg(bookmarkSvg);
 	const img = await loadSvgImage(composite);
 	if (!hasRealImage(m, "saved-badge"))

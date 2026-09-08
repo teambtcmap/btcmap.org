@@ -1,5 +1,6 @@
 import type { ExpressionSpecification, Map as MapLibreMap } from "maplibre-gl";
 
+import { renderBundledIcon } from "$lib/icons/renderBundledIcon";
 import { resolveMaterialIcon } from "$lib/materialIcons";
 import type { DerivedIssueCode } from "$lib/placeIssues";
 import { derivePlaceIssues, dominantIssue } from "$lib/placeIssues";
@@ -104,21 +105,28 @@ export const fetchIconifyByName = async (
 	return await res.text();
 };
 
-// Cascading fallback for icon names whose resolved Iconify name 404s.
-// The known-missing names are in the materialExceptions table now, so
-// this is the safety net for any future tag value that resolves to a
-// nonexistent `ic:outline-*`: try material-symbols next, then fall back
-// to the Bitcoin glyph so every pin has at least a recognizable shape.
+// Cascading fallback for a place's icon, preferring the build-time bundle at
+// each step so a normal map load makes no per-pin api.iconify.design requests
+// (that ~100-glyph burst trips its Cloudflare rate limit — a header-less 429
+// the browser reports as a CORS failure, leaving pins blank). Only names the
+// bundle doesn't cover reach the network: the resolved name, then the
+// material-symbols variant of a missing `ic:outline-*`, then the Bitcoin glyph
+// so every pin has at least a recognizable shape.
 export const fetchIconInnerSvg = async (icon: string): Promise<string> => {
 	const primary = resolveIconifyName(icon);
-	const primarySvg = await fetchIconifyByName(primary);
+	const primarySvg =
+		renderBundledIcon(primary, "white", 20) ??
+		(await fetchIconifyByName(primary));
 	if (primarySvg) return primarySvg;
 	if (primary.startsWith("ic:outline-")) {
-		const stem = primary.slice("ic:outline-".length);
-		const fallback = await fetchIconifyByName(`material-symbols:${stem}`);
+		const ms = `material-symbols:${primary.slice("ic:outline-".length)}`;
+		const fallback =
+			renderBundledIcon(ms, "white", 20) ?? (await fetchIconifyByName(ms));
 		if (fallback) return fallback;
 	}
-	const bitcoin = await fetchIconifyByName("material-symbols:currency-bitcoin");
+	const bitcoin =
+		renderBundledIcon("material-symbols:currency-bitcoin", "white", 20) ??
+		(await fetchIconifyByName("material-symbols:currency-bitcoin"));
 	if (bitcoin) return bitcoin;
 	throw new Error(`No icon found for ${icon}`);
 };
