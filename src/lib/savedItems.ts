@@ -18,9 +18,19 @@ export async function addSavedItem(
 	token: string,
 	id: number,
 ): Promise<number[]> {
-	const res = await api.post<number[]>(SAVED_ITEM_ENDPOINTS[type], id, {
-		headers: { Authorization: `Bearer ${token}` },
-	});
+	// The body is a bare integer: axios won't JSON-encode a primitive (it
+	// would fall back to form-urlencoded), so stringify it and declare the
+	// JSON content type explicitly — actix's Json<i64> accepts nothing else.
+	const res = await api.post<number[]>(
+		SAVED_ITEM_ENDPOINTS[type],
+		JSON.stringify(id),
+		{
+			headers: {
+				Authorization: `Bearer ${token}`,
+				"Content-Type": "application/json",
+			},
+		},
+	);
 	if (!Array.isArray(res.data)) {
 		throw new Error(
 			`POST ${SAVED_ITEM_ENDPOINTS[type]} returned an unexpected response`,

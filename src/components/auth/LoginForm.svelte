@@ -5,11 +5,9 @@ import TextField from "$components/form/TextField.svelte";
 import PrimaryButton from "$components/PrimaryButton.svelte";
 import TextLink from "$components/TextLink.svelte";
 import { trackEvent } from "$lib/analytics";
-import { API_BASE } from "$lib/api-base";
-import api from "$lib/axios";
 import { _ } from "$lib/i18n";
 import type { Session } from "$lib/session";
-import { session } from "$lib/session";
+import { mintToken, session } from "$lib/session";
 import { errToast } from "$lib/utils";
 
 // Caller receives the new session after a successful login. This keeps the
@@ -33,18 +31,9 @@ async function handleSubmit(event: SubmitEvent) {
 	loading = true;
 
 	try {
-		// Straight against the API (it answers CORS preflights, #1348):
-		// the password authenticates the token mint as a Bearer.
-		const res = await api.post(
-			`${API_BASE}/v4/users/${encodeURIComponent(username.trim())}/tokens`,
-			{ label: "BTC Map Web" },
-			{ headers: { Authorization: `Bearer ${password}` } },
-		);
-
-		const token = res.data?.token;
-		if (typeof token !== "string") {
-			throw new Error("Login did not return a token");
-		}
+		// Straight against the API (it answers CORS preflights, #1348) via
+		// the shared token mint.
+		const token = await mintToken(username.trim(), password);
 
 		// Don't store the password — the user already knows their own credentials.
 		session.login(username.trim(), "", token);

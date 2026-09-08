@@ -101,6 +101,24 @@ function normalizeCredentials(
 	return { username, password: credentials.password };
 }
 
+// Mints a Bearer token for a user — the password authenticates the mint
+// (sent as the Bearer on this one endpoint). Shared by login and signup.
+export const mintToken = async (
+	username: string,
+	password: string,
+): Promise<string> => {
+	const res = await api.post(
+		`${API_BASE}/v4/users/${encodeURIComponent(username)}/tokens`,
+		{ label: "BTC Map Web" },
+		{ headers: { Authorization: `Bearer ${password}` } },
+	);
+	const token = res.data?.token;
+	if (typeof token !== "string" || !token) {
+		throw new Error("token mint returned no token");
+	}
+	return token;
+};
+
 function createSessionStore() {
 	const { subscribe, set, update } = writable<Session | null>(null);
 
@@ -118,15 +136,7 @@ function createSessionStore() {
 			throw new Error("signup did not return a username");
 		}
 
-		const tokenRes = await api.post(
-			`${API_BASE}/v4/users/${encodeURIComponent(returnedUsername)}/tokens`,
-			{ label: "BTC Map Web" },
-			{ headers: { Authorization: `Bearer ${credentials.password}` } },
-		);
-		const token = tokenRes.data?.token;
-		if (typeof token !== "string" || !token) {
-			throw new Error("signup did not return a token");
-		}
+		const token = await mintToken(returnedUsername, credentials.password);
 
 		const session: Session = {
 			username: returnedUsername,

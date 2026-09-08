@@ -203,7 +203,7 @@ describe("session store", () => {
 			return post;
 		}
 
-		it("sends the chosen username and password to the signup route", async () => {
+		it("sends the chosen username and password to the API", async () => {
 			const post = await postMock();
 			post
 				.mockResolvedValueOnce({ data: { name: "alice" } })
