@@ -1,9 +1,10 @@
-import { describe, expect, it } from "vitest";
+import { afterEach, describe, expect, it, vi } from "vitest";
 
 import type { Place } from "$lib/types";
 
 import {
 	buildCompositeSvg,
+	fetchIconInnerSvg,
 	PIN_FILL_BOOSTED,
 	PIN_FILL_REGULAR,
 	PIN_FILLS,
@@ -104,4 +105,57 @@ describe("resolveIconifyName", () => {
 			expect(resolveIconifyName(icon)).toMatch(/^material-symbols:/);
 		},
 	);
+});
+
+describe("fetchIconInnerSvg", () => {
+	afterEach(() => {
+		vi.unstubAllGlobals();
+	});
+
+	it("renders a bundled icon without touching the network", async () => {
+		const fetchMock = vi.fn();
+		vi.stubGlobal("fetch", fetchMock);
+
+		const svg = await fetchIconInnerSvg("restaurant");
+
+		expect(svg).toMatch(/^<svg[^>]*>/);
+		expect(fetchMock).not.toHaveBeenCalled();
+	});
+
+	it("falls back to the live API for an unbundled name", async () => {
+		const fetchMock = vi.fn(async (_url: string) => ({
+			ok: true,
+			text: async () => "<svg>fetched</svg>",
+		}));
+		vi.stubGlobal("fetch", fetchMock);
+
+		const svg = await fetchIconInnerSvg("zzz_not_a_real_icon");
+
+		expect(svg).toBe("<svg>fetched</svg>");
+		expect(fetchMock).toHaveBeenCalledTimes(1);
+		expect(String(fetchMock.mock.calls[0]?.[0])).toContain(
+			"ic/outline-zzz-not-a-real-icon",
+		);
+	});
+
+	it("cascades ic:outline → material-symbols → the bundled bitcoin glyph", async () => {
+		// Both network attempts (primary, then material-symbols) 404; the final
+		// bitcoin fallback resolves from the bundle, so no third fetch fires.
+		const fetchMock = vi.fn(async (_url: string) => ({
+			ok: false,
+			text: async () => "",
+		}));
+		vi.stubGlobal("fetch", fetchMock);
+
+		const svg = await fetchIconInnerSvg("zzz_not_a_real_icon");
+
+		expect(svg).toMatch(/^<svg[^>]*>/);
+		expect(fetchMock).toHaveBeenCalledTimes(2);
+		expect(String(fetchMock.mock.calls[0]?.[0])).toContain(
+			"ic/outline-zzz-not-a-real-icon",
+		);
+		expect(String(fetchMock.mock.calls[1]?.[0])).toContain(
+			"material-symbols/zzz-not-a-real-icon",
+		);
+	});
 });
