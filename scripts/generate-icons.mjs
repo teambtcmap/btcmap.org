@@ -59,7 +59,8 @@ const readMaterialExceptions = () => {
 	const block = file.match(/materialExceptions[^{]*{([\s\S]*?)\n};/);
 	if (!block) throw new Error("could not locate materialExceptions in materialIcons.ts");
 	const exceptions = {};
-	for (const [, key, value] of block[1].matchAll(/(\w+):\s*"([^"]+)"/g)) {
+	// Keys may be bare or quoted (`foo:` or `"foo":`); accept both.
+	for (const [, key, value] of block[1].matchAll(/["']?([\w-]+)["']?:\s*"([^"]+)"/g)) {
 		exceptions[key] = value;
 	}
 	return exceptions;
@@ -140,20 +141,30 @@ const walkSvelteAndTs = (dir) => {
 	return files;
 };
 
-// Icon names used by <Icon> components with a static string literal. Dynamic
-// `icon={…}` values can't be resolved here; the pin vocabulary covers the
-// common dynamic case (merchant.icon) and anything else falls back to the live
-// API. `type="fa"` selects Font Awesome, otherwise Material.
+// Icon names used by <Icon> components. Covers a static `icon="foo"` literal
+// and any string literals inside a dynamic `icon={…}` (e.g. a ternary like
+// `icon={cond ? 'a' : 'b'}`). A bound variable (`icon={someVar}`) yields no
+// literal and falls back to the live API — acceptable, since <Icon> uses the
+// batched ic.json endpoint, which is not the rate-limited surface. The pin
+// vocabulary covers the common dynamic case (merchant.icon). `type="fa"`
+// selects Font Awesome, otherwise Material.
 const collectUiIconifyNames = () => {
 	const names = new Set();
+	const add = (icon, isFa) =>
+		names.add(isFa ? resolveFaIcon(icon) : resolveMaterialIcon(icon));
 	for (const file of walkSvelteAndTs(SRC)) {
 		const source = readFileSync(file, "utf8");
 		// Only real <Icon …> tags (not <IconApps>, <IconSocials>, <IconIconify>…).
 		for (const [tag] of source.matchAll(/<Icon(?=[\s/>])[\s\S]*?>/g)) {
-			const iconMatch = tag.match(/\bicon="([^"]+)"/);
-			if (!iconMatch) continue; // dynamic icon={…}
-			const icon = iconMatch[1];
-			names.add(tag.includes('type="fa"') ? resolveFaIcon(icon) : resolveMaterialIcon(icon));
+			const isFa = tag.includes('type="fa"');
+			const literal = tag.match(/\bicon="([^"]+)"/);
+			if (literal) {
+				add(literal[1], isFa);
+				continue;
+			}
+			const expr = tag.match(/\bicon=\{([\s\S]*?)\}/);
+			if (!expr) continue;
+			for (const [, lit] of expr[1].matchAll(/['"]([^'"]+)['"]/g)) add(lit, isFa);
 		}
 	}
 	return names;
