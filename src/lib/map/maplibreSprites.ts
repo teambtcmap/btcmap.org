@@ -85,9 +85,9 @@ export const pinVariantFor = (
 // registered with `pixelRatio: SCALE` so MapLibre displays at native size
 // but draws from the higher-density bitmap — same idea as a @2x asset.
 // Without this, the Material Icon inside the pin looks blurry on retina
-// displays. The Iconify fetch URL keeps width=20 height=20 because the
-// inner SVG is positioned in the outer's USER UNITS, so it scales with
-// the outer's rasterization resolution.
+// displays. The inner glyph is rendered at PIN_ICON_PX (20) because it's
+// positioned in the outer's USER UNITS, so it scales with the outer's
+// rasterization resolution.
 //
 // 3× targets phone-class DPRs (most modern phones report 3, some 4).
 // Higher = sharper on those screens but a larger sprite cache; 3 is a
@@ -95,15 +95,33 @@ export const pinVariantFor = (
 // against the memory cost.
 export const PIN_RENDER_SCALE = 3;
 
+// Pin glyphs are rendered white at 20px (positioned in the pin's user units;
+// see PIN_RENDER_SCALE). The saved badge overrides these (link color, 10px).
+export const PIN_ICON_COLOR = "white";
+export const PIN_ICON_PX = 20;
+
 export const fetchIconifyByName = async (
 	iconifyName: string,
+	color: string = PIN_ICON_COLOR,
+	px: number = PIN_ICON_PX,
 ): Promise<string | null> => {
 	const path = iconifyName.replace(":", "/");
-	const url = `https://api.iconify.design/${path}.svg?color=white&width=20&height=20`;
+	const url = `https://api.iconify.design/${path}.svg?color=${encodeURIComponent(color)}&width=${px}&height=${px}`;
 	const res = await fetch(url);
 	if (!res.ok) return null;
 	return await res.text();
 };
+
+// Inner SVG for one Iconify name at a given color/size: the build-time bundle
+// first, the live Iconify API only as a fallback. Shared by the pin cascade
+// and the saved badge so both stay bundle-first with the same network backstop.
+export const innerSvgForName = async (
+	iconifyName: string,
+	color: string = PIN_ICON_COLOR,
+	px: number = PIN_ICON_PX,
+): Promise<string | null> =>
+	renderBundledIcon(iconifyName, color, px) ??
+	(await fetchIconifyByName(iconifyName, color, px));
 
 // Cascading fallback for a place's icon, preferring the build-time bundle at
 // each step so a normal map load makes no per-pin api.iconify.design requests
@@ -114,19 +132,14 @@ export const fetchIconifyByName = async (
 // so every pin has at least a recognizable shape.
 export const fetchIconInnerSvg = async (icon: string): Promise<string> => {
 	const primary = resolveIconifyName(icon);
-	const primarySvg =
-		renderBundledIcon(primary, "white", 20) ??
-		(await fetchIconifyByName(primary));
+	const primarySvg = await innerSvgForName(primary);
 	if (primarySvg) return primarySvg;
 	if (primary.startsWith("ic:outline-")) {
-		const ms = `material-symbols:${primary.slice("ic:outline-".length)}`;
-		const fallback =
-			renderBundledIcon(ms, "white", 20) ?? (await fetchIconifyByName(ms));
+		const msName = `material-symbols:${primary.slice("ic:outline-".length)}`;
+		const fallback = await innerSvgForName(msName);
 		if (fallback) return fallback;
 	}
-	const bitcoin =
-		renderBundledIcon("material-symbols:currency-bitcoin", "white", 20) ??
-		(await fetchIconifyByName("material-symbols:currency-bitcoin"));
+	const bitcoin = await innerSvgForName("material-symbols:currency-bitcoin");
 	if (bitcoin) return bitcoin;
 	throw new Error(`No icon found for ${icon}`);
 };

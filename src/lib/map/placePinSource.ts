@@ -1,7 +1,6 @@
 import type { GeoJSONSource, Map as MapLibreMap } from "maplibre-gl";
 
 import { CLUSTERING_DISABLED_ZOOM, LABEL_VISIBLE_ZOOM } from "$lib/constants";
-import { renderBundledIcon } from "$lib/icons/renderBundledIcon";
 import {
 	routePlacesByBoostAndZoom,
 	shouldClusterBoostedAtZoom,
@@ -13,6 +12,7 @@ import {
 	ensureCommentBadgeSprite,
 	ensureSpritesForPlaces,
 	hasRealImage,
+	innerSvgForName,
 	loadSvgImage,
 	pinIconImageExpression,
 	pinVariantFor,
@@ -101,15 +101,16 @@ const loadClusterHitSprite = async (m: MapLibreMap): Promise<void> => {
 
 const loadSavedBadgeSprite = async (m: MapLibreMap): Promise<void> => {
 	if (hasRealImage(m, "saved-badge")) return;
-	// Bookmark glyph rendered from the offline bundle in LINK_COLOR at 10px —
-	// no api.iconify.design round-trip (see renderBundledIcon).
-	const bookmarkSvg = renderBundledIcon(
+	// Bookmark glyph from the offline bundle in LINK_COLOR at 10px, falling
+	// back to the live Iconify API if the bundle ever lacks it (see
+	// innerSvgForName) — same bundle-first-with-network-backstop as the pins.
+	const bookmarkSvg = await innerSvgForName(
 		"ic:baseline-bookmark-added",
 		LINK_COLOR,
 		10,
 	);
 	if (!bookmarkSvg)
-		throw new Error("saved-badge bookmark missing from the icon bundle");
+		throw new Error("saved-badge bookmark unavailable (bundle and API)");
 	const composite = buildSavedBadgeSvg(bookmarkSvg);
 	const img = await loadSvgImage(composite);
 	if (!hasRealImage(m, "saved-badge"))
@@ -202,9 +203,9 @@ export const createPlacePinSource = (deps: PlacePinSourceDeps) => {
 		};
 	};
 
-	// Badge + cluster-hit sprites. The saved-badge fetch goes to a
-	// third-party CDN and must NOT block or fail map init — a transient
-	// Iconify outage just degrades the saved-state badge. All loaders are
+	// Badge + cluster-hit sprites. The saved badge renders from the offline
+	// bundle (with a live-Iconify fallback), so it must NOT block or fail map
+	// init — its loader catches and degrades. All loaders are
 	// hasImage-guarded, so re-running after a basemap swap is a cheap no-op
 	// on the normal (style-diff) path.
 	const loadSprites = async (map: MapLibreMap): Promise<void> => {
