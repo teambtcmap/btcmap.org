@@ -1085,8 +1085,8 @@ onMount(async () => {
 		},
 		// Runs on the initial load and again after every basemap swap's
 		// style.load — a swap's incoming style has none of our sprites,
-		// sources, or layers. The saved-badge fetch goes to a third-party CDN
-		// and must NOT block init; the facade-side loaders catch and degrade.
+		// sources, or layers. Sprite loading must NOT block init; the
+		// facade-side loaders catch and degrade.
 		registerOverlays: async (m) => {
 			await pinSource.loadSprites(m);
 			// Component may have been destroyed while sprites were loading

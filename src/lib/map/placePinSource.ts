@@ -12,6 +12,7 @@ import {
 	ensureCommentBadgeSprite,
 	ensureSpritesForPlaces,
 	hasRealImage,
+	innerSvgForName,
 	loadSvgImage,
 	pinIconImageExpression,
 	pinVariantFor,
@@ -100,13 +101,16 @@ const loadClusterHitSprite = async (m: MapLibreMap): Promise<void> => {
 
 const loadSavedBadgeSprite = async (m: MapLibreMap): Promise<void> => {
 	if (hasRealImage(m, "saved-badge")) return;
-	const encodedColor = encodeURIComponent(LINK_COLOR);
-	const url = `https://api.iconify.design/ic/baseline-bookmark-added.svg?color=${encodedColor}&width=10&height=10`;
-	const res = await fetch(url);
-	if (!res.ok) {
-		throw new Error(`saved-badge bookmark fetch failed: ${res.status} ${url}`);
-	}
-	const bookmarkSvg = await res.text();
+	// Bookmark glyph from the offline bundle in LINK_COLOR at 10px, falling
+	// back to the live Iconify API if the bundle ever lacks it (see
+	// innerSvgForName) — same bundle-first-with-network-backstop as the pins.
+	const bookmarkSvg = await innerSvgForName(
+		"ic:baseline-bookmark-added",
+		LINK_COLOR,
+		10,
+	);
+	if (!bookmarkSvg)
+		throw new Error("saved-badge bookmark unavailable (bundle and API)");
 	const composite = buildSavedBadgeSvg(bookmarkSvg);
 	const img = await loadSvgImage(composite);
 	if (!hasRealImage(m, "saved-badge"))
@@ -199,9 +203,9 @@ export const createPlacePinSource = (deps: PlacePinSourceDeps) => {
 		};
 	};
 
-	// Badge + cluster-hit sprites. The saved-badge fetch goes to a
-	// third-party CDN and must NOT block or fail map init — a transient
-	// Iconify outage just degrades the saved-state badge. All loaders are
+	// Badge + cluster-hit sprites. The saved badge renders from the offline
+	// bundle (with a live-Iconify fallback), so it must NOT block or fail map
+	// init — its loader catches and degrades. All loaders are
 	// hasImage-guarded, so re-running after a basemap swap is a cheap no-op
 	// on the normal (style-diff) path.
 	const loadSprites = async (map: MapLibreMap): Promise<void> => {

@@ -19,7 +19,8 @@
 			"!playwright-report",
 			"!src/error.html",
 			"!**/*.svg",
-			"!src/types/btcmap-api"
+			"!src/types/btcmap-api",
+			"!src/lib/icons/generated"
 		]
 	},
 	"assist": {

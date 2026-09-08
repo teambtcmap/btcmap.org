@@ -1,8 +1,8 @@
 // Shared Material Icon name resolution. Used by the Icon component (which
 // renders icons via @iconify/svelte) and by the MapLibre sprite pipeline
-// (which fetches the SVG from the Iconify API to bake into pin sprites).
-// Single source of truth — previously duplicated in Icon.svelte and
-// maplibreSprites.ts.
+// (which renders the SVG from the offline icon bundle to bake into pin
+// sprites, falling back to the Iconify API for unbundled names). Single
+// source of truth — previously duplicated in Icon.svelte and maplibreSprites.ts.
 
 // Maps a place/UI icon name to a fully-qualified Iconify name when the
 // default `ic:outline-<name>` form doesn't exist or isn't the one we want.

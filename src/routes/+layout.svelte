@@ -17,6 +17,7 @@ import { elementsSync } from "$lib/sync/places";
 import { theme } from "$lib/theme";
 
 import { browser, dev } from "$app/environment";
+import "$lib/icons/registerOfflineIcons";
 import "tippy.js/dist/tippy.css";
 import "../app.css";
 
