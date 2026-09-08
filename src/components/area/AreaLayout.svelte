@@ -193,6 +193,33 @@ const filteredPlaces = writable<Place[]>([]);
 
 const taggers = writable<Tagger[]>([]);
 
+// Future-event count for the events tab badge. Uses the same local-time
+// interpretation as AreaEventsSection: drop the timezone suffix and read
+// the components straight from the string. Unparseable starts_at count
+// as future, matching the section component's open-ended convention.
+$: futureEventCount = (() => {
+	let count = 0;
+	const now = Date.now();
+	for (const event of data?.events ?? []) {
+		const m = event.starts_at?.match(
+			/^(\d{4})-(\d{2})-(\d{2})T(\d{2}):(\d{2})/,
+		);
+		if (!m) {
+			count++;
+			continue;
+		}
+		const ts = new Date(
+			Number(m[1]),
+			Number(m[2]) - 1,
+			Number(m[3]),
+			Number(m[4]),
+			Number(m[5]),
+		).getTime();
+		if (ts >= now) count++;
+	}
+	return count;
+})();
+
 setContext(AREA_SECTION_CONTEXT, {
 	filteredPlaces,
 	sweepDone,
@@ -220,7 +247,9 @@ setContext(AREA_SECTION_CONTEXT, {
 					? 'border-link font-bold'
 					: 'border-link/25'}"
 			>
-				{$_(`area.sections.${section}`)}
+				{$_(`area.sections.${section}`)}{section === 'events'
+					? ` (${futureEventCount})`
+					: ''}
 			</button>
 		{/each}
 

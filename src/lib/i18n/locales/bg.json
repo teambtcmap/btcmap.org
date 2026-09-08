@@ -258,9 +258,14 @@
 		"issueInvalidTagValue": "Стойността на тага не е правилно форматирана ({code})",
 		"issueMisspelledTagName": "Правописна грешка в името на тага ({code})"
 	},
+	"areaEvents": {
+		"empty": "Не са намерени предстоящи или скорошни събития.",
+		"past": "минало"
+	},
 	"area": {
 		"sections": {
 			"merchants": "Търговци",
+			"events": "Събития",
 			"stats": "Статистики",
 			"activity": "Активност",
 			"maintain": "Поддръжка"

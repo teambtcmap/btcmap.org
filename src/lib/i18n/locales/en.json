@@ -865,9 +865,14 @@
 		"newPlaces": "New Places",
 		"newComments": "New Comments"
 	},
+	"areaEvents": {
+		"empty": "No upcoming or recent events found.",
+		"past": "past"
+	},
 	"area": {
 		"sections": {
 			"merchants": "Merchants",
+			"events": "Events",
 			"stats": "Stats",
 			"activity": "Activity",
 			"maintain": "Maintain"

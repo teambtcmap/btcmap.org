@@ -2,7 +2,12 @@ import { error, isHttpError } from "@sveltejs/kit";
 
 import { API_BASE } from "$lib/api-base";
 import { extractContacts } from "$lib/area/contacts";
-import type { AreaPageProps, AreaTags, PlaceIssue } from "$lib/types";
+import type {
+	AreaEvent,
+	AreaPageProps,
+	AreaTags,
+	PlaceIssue,
+} from "$lib/types";
 
 // Shared loader for the community/[area]/<section> and country/[area]/<section>
 // literal-section routes (merchants, stats, activity, maintain). Both fetch
@@ -43,6 +48,7 @@ export type AreaSectionResult = {
 // every loader call site.
 export const AREA_SECTIONS = [
 	"merchants",
+	"events",
 	"stats",
 	"activity",
 	"maintain",
@@ -54,6 +60,13 @@ export type AreaSection = (typeof AREA_SECTIONS)[number];
 // rows (the US) they never render. Section navigation re-runs this loader,
 // so landing on /maintain fetches them then.
 const SECTIONS_WITH_ISSUES = new Set(["maintain"]);
+
+// Bitcoin meetups and conferences inside the area polygon. The /v4 API
+// window is "365 days back + all future" so the page can render a single
+// coherent upcoming + recent-past list; SSR fetches with that window so
+// the initial paint doesn't flash a skeleton.
+const SECTIONS_WITH_EVENTS = new Set(["events"]);
+const EVENTS_WINDOW_DAYS = 365;
 
 const ISSUES_PAGE_LIMIT = 10000;
 // Backstop against a runaway loop, far above any real area today. If an
@@ -89,6 +102,34 @@ const fetchAllPlaceIssues = async (
 		`place-issues for area ${areaId} truncated at ${all.length} rows`,
 	);
 	return all;
+};
+
+// Window covers "the last 365 days" plus everything in the future. The
+// API's default `from` is now-UTC, so we lower it by the window size; the
+// `to` defaults to year 2200 which is already past any plausible event,
+// so we leave it alone.
+const fetchAreaEvents = async (
+	fetch: FetchLike,
+	areaAlias: string,
+): Promise<AreaEvent[]> => {
+	const from = new Date(
+		Date.now() - EVENTS_WINDOW_DAYS * 24 * 60 * 60 * 1000,
+	).toISOString();
+	const response = await fetch(
+		`${API_BASE}/v4/areas/${encodeURIComponent(areaAlias)}/events?from=${encodeURIComponent(from)}`,
+	);
+	if (!response.ok) {
+		// 404 from the API means the area itself 404s upstream — fall
+		// through to the section's own 404 handling. Any other failure is
+		// an upstream outage.
+		if (response.status === 404) return [];
+		throw error(502, "Upstream API error");
+	}
+	const body = await response.json();
+	if (!Array.isArray(body)) {
+		throw error(502, "Upstream API error");
+	}
+	return body as AreaEvent[];
 };
 
 // box:* tags are human-authored camera hints, served as numbers despite
@@ -160,6 +201,10 @@ export const loadAreaSection = async (
 			? await fetchAllPlaceIssues(fetch, fetchedArea.id)
 			: [];
 
+		const events = SECTIONS_WITH_EVENTS.has(section)
+			? await fetchAreaEvents(fetch, tags.url_alias)
+			: [];
+
 		return {
 			data: {
 				id: tags.url_alias,
@@ -167,6 +212,7 @@ export const loadAreaSection = async (
 				name: tags.name,
 				tickets: tickets,
 				issues,
+				events,
 				description: tags.description,
 				tags,
 				contacts: extractContacts(tags),
