@@ -5,7 +5,11 @@ import Icon from "$components/Icon.svelte";
 import MultiPlaceMap from "$components/MultiPlaceMap.svelte";
 import api from "$lib/axios";
 import { _ } from "$lib/i18n";
-import { removeSavedItem, setSavedList } from "$lib/savedItems";
+import {
+	removeSavedItem,
+	SAVED_ITEM_ENDPOINTS,
+	setSavedList,
+} from "$lib/savedItems";
 import { session } from "$lib/session";
 import type { SavedPlace } from "$lib/types";
 import { errToast } from "$lib/utils";
@@ -112,8 +116,8 @@ onMount(async () => {
 
 	const headers = { Authorization: `Bearer ${$session.token}` };
 	const [placesRes, areasRes] = await Promise.allSettled([
-		api.get<SavedPlace[]>("/api/session/saved-places", { headers }),
-		api.get<SavedArea[]>("/api/session/saved-areas", { headers }),
+		api.get<SavedPlace[]>(SAVED_ITEM_ENDPOINTS.place, { headers }),
+		api.get<SavedArea[]>(SAVED_ITEM_ENDPOINTS.area, { headers }),
 	]);
 
 	if (placesRes.status === "fulfilled") {

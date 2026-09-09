@@ -7,16 +7,15 @@ import { API_BASE } from "$lib/api-base";
 // URL the API verifies in the NIP-98 event's "u" tag. Must match what the
 // btcmap-api server reconstructs (its BTCMAP_API_BASE_URL + request path),
 // including scheme and no trailing slash. Driven by API_BASE so the signed
-// `u` and the server route's upstream fetch (routes/api/session/nostr) always
-// resolve to the same absolute URL — never split these two apart, or the
-// signature binds to a different URL than the request actually hits.
+// `u` and the client's own POST always resolve to the same absolute URL —
+// never split these two apart, or the signature binds to a different URL
+// than the request actually hits.
 //
 // API_BASE must be ABSOLUTE for the Nostr flow. In prod it defaults to
 // https://api.btcmap.org; for local API dev set VITE_API_BASE_URL to the
 // absolute http://127.0.0.1:8000. The relative Vite dev-proxy form
 // (VITE_API_BASE_URL=/btcmap-api-proxy) is NOT supported here: it would sign a
-// relative `u` that can't match the server's absolute reconstruction (→ 401),
-// and the server-side proxy fetch needs an absolute URL anyway.
+// relative `u` that can't match the server's absolute reconstruction (→ 401).
 export const NOSTR_AUTH_URL = `${API_BASE}/v4/auth/nostr`;
 
 // Both signing paths return something the server can verify. The local
@@ -26,6 +25,15 @@ export const NOSTR_AUTH_URL = `${API_BASE}/v4/auth/nostr`;
 // so the brand is irrelevant — typing both paths as plain Event avoids
 // misleading any future code that might inspect the brand.
 export type SignedAuthEvent = Event;
+
+// NIP-98 requests carry the signed event base64-encoded in the
+// Authorization header, body-less. btoa needs a byte string, hence the
+// TextEncoder round-trip for any non-Latin-1 characters in the event.
+export function encodeNip98Event(event: SignedAuthEvent): string {
+	return btoa(
+		String.fromCharCode(...new TextEncoder().encode(JSON.stringify(event))),
+	);
+}
 
 // NIP-07 extension interface (window.nostr) — minimal subset we use.
 // Extensions like Alby, nos2x inject this on page load.
@@ -90,15 +98,15 @@ export function decodeNsec(nsec: string): Uint8Array {
 	return decoded.data;
 }
 
-// Shape returned by the /api/session/nostr proxy on a successful login.
+// Shape returned by POST /v4/auth/nostr on a successful login.
 export type NostrAuthResult = {
 	token: string;
 	username: string;
 	npub: string | null;
 };
 
-// Validate and narrow the proxy's auth response. Throws when token or username
-// is missing (the proxy guarantees both on success, but the client re-checks
+// Validate and narrow the API's auth response. Throws when token or username
+// is missing (the API returns both on success, but the client re-checks
 // defensively); npub is narrowed to string | null (absent/non-string → null).
 export function parseNostrAuthResponse(data: unknown): NostrAuthResult {
 	const d = (data ?? {}) as {

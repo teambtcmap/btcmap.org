@@ -4,6 +4,7 @@ import { describe, expect, it, vi } from "vitest";
 
 import {
 	decodeNsec,
+	encodeNip98Event,
 	parseNostrAuthResponse,
 	signAuthWithSecretKey,
 } from "./nostr";
@@ -133,5 +134,22 @@ describe("parseNostrAuthResponse", () => {
 	it("throws on null or undefined data", () => {
 		expect(() => parseNostrAuthResponse(null)).toThrow();
 		expect(() => parseNostrAuthResponse(undefined)).toThrow();
+	});
+});
+
+describe("encodeNip98Event", () => {
+	it("base64-encodes the JSON serialization of the event", () => {
+		const event = { id: "abc", content: "" } as never;
+		expect(atob(encodeNip98Event(event))).toBe(JSON.stringify(event));
+	});
+
+	it("survives non-Latin-1 characters via the byte round-trip", () => {
+		// btoa alone throws on code points above 0xFF — the TextEncoder
+		// round-trip must not.
+		const event = { id: "abc", content: "café ⚡" } as never;
+		const decoded = new TextDecoder().decode(
+			Uint8Array.from(atob(encodeNip98Event(event)), (c) => c.charCodeAt(0)),
+		);
+		expect(decoded).toBe(JSON.stringify(event));
 	});
 });

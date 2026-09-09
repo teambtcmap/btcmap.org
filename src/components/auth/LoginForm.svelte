@@ -5,10 +5,9 @@ import TextField from "$components/form/TextField.svelte";
 import PrimaryButton from "$components/PrimaryButton.svelte";
 import TextLink from "$components/TextLink.svelte";
 import { trackEvent } from "$lib/analytics";
-import api from "$lib/axios";
 import { _ } from "$lib/i18n";
 import type { Session } from "$lib/session";
-import { session } from "$lib/session";
+import { mintToken, session } from "$lib/session";
 import { errToast } from "$lib/utils";
 
 // Caller receives the new session after a successful login. This keeps the
@@ -32,15 +31,9 @@ async function handleSubmit(event: SubmitEvent) {
 	loading = true;
 
 	try {
-		const res = await api.post("/api/session/login", {
-			username: username.trim(),
-			password,
-		});
-
-		const token = res.data?.token;
-		if (typeof token !== "string") {
-			throw new Error("Login did not return a token");
-		}
+		// Straight against the API (it answers CORS preflights, #1348) via
+		// the shared token mint.
+		const token = await mintToken(username.trim(), password);
 
 		// Don't store the password — the user already knows their own credentials.
 		session.login(username.trim(), "", token);
@@ -54,7 +47,10 @@ async function handleSubmit(event: SubmitEvent) {
 	} catch (err) {
 		const status = (err as { response?: { status?: number } })?.response
 			?.status;
-		errToast(status === 401 ? $_("login.failed") : $_("login.error"));
+		// 401/403 both mean bad credentials at the API.
+		errToast(
+			status === 401 || status === 403 ? $_("login.failed") : $_("login.error"),
+		);
 		console.error("Login failed:", status ?? "unknown");
 	} finally {
 		loading = false;

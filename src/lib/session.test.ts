@@ -1,6 +1,8 @@
 import { get } from "svelte/store";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 
+import { API_BASE } from "$lib/api-base";
+
 // Mock axios to prevent real API calls
 vi.mock("$lib/axios", () => ({
 	default: {
@@ -201,9 +203,11 @@ describe("session store", () => {
 			return post;
 		}
 
-		it("sends the chosen username and password to the signup route", async () => {
+		it("sends the chosen username and password to the API", async () => {
 			const post = await postMock();
-			post.mockResolvedValue({ data: { username: "alice", token: "tok" } });
+			post
+				.mockResolvedValueOnce({ data: { name: "alice" } })
+				.mockResolvedValueOnce({ data: { token: "tok" } });
 			const session = await createTestSession();
 
 			await session.signUp({
@@ -211,15 +215,22 @@ describe("session store", () => {
 				password: "correct horse battery",
 			});
 
-			expect(post).toHaveBeenCalledWith("/api/session/signup", {
+			expect(post).toHaveBeenCalledWith(`${API_BASE}/v4/users`, {
 				name: "alice",
 				password: "correct horse battery",
 			});
+			expect(post).toHaveBeenCalledWith(
+				`${API_BASE}/v4/users/alice/tokens`,
+				{ label: "BTC Map Web" },
+				{ headers: { Authorization: "Bearer correct horse battery" } },
+			);
 		});
 
 		it("marks a session with chosen credentials as not auto-generated", async () => {
 			const post = await postMock();
-			post.mockResolvedValue({ data: { username: "alice", token: "tok" } });
+			post
+				.mockResolvedValueOnce({ data: { name: "alice" } })
+				.mockResolvedValueOnce({ data: { token: "tok" } });
 			const session = await createTestSession();
 
 			const current = await session.signUp({
@@ -233,7 +244,9 @@ describe("session store", () => {
 
 		it("keeps a chosen password out of the stored session", async () => {
 			const post = await postMock();
-			post.mockResolvedValue({ data: { username: "alice", token: "tok" } });
+			post
+				.mockResolvedValueOnce({ data: { name: "alice" } })
+				.mockResolvedValueOnce({ data: { token: "tok" } });
 			const session = await createTestSession();
 
 			const current = await session.signUp({
@@ -248,7 +261,9 @@ describe("session store", () => {
 
 		it("trims the username before sending it", async () => {
 			const post = await postMock();
-			post.mockResolvedValue({ data: { username: "bob", token: "tok" } });
+			post
+				.mockResolvedValueOnce({ data: { name: "bob" } })
+				.mockResolvedValueOnce({ data: { token: "tok" } });
 			const session = await createTestSession();
 
 			await session.signUp({
@@ -256,7 +271,7 @@ describe("session store", () => {
 				password: "correct horse battery",
 			});
 
-			expect(post).toHaveBeenCalledWith("/api/session/signup", {
+			expect(post).toHaveBeenCalledWith(`${API_BASE}/v4/users`, {
 				name: "bob",
 				password: "correct horse battery",
 			});

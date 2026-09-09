@@ -7,7 +7,9 @@ import { _ } from "$lib/i18n";
 import type { SignedAuthEvent } from "$lib/nostr";
 import {
 	decodeNsec,
+	encodeNip98Event,
 	getNostrExtension,
+	NOSTR_AUTH_URL,
 	parseNostrAuthResponse,
 	signAuthWithExtension,
 	signAuthWithSecretKey,
@@ -32,8 +34,13 @@ let nsecLoading = $state(false);
 const anyLoading = $derived(nostrLoading || nsecLoading);
 
 async function exchangeSignedEvent(signedEvent: SignedAuthEvent) {
-	const res = await api.post("/api/session/nostr", {
-		signed_event: signedEvent,
+	// Straight against the API per NIP-98 (it answers CORS preflights,
+	// #1348). NOSTR_AUTH_URL is the same constant the signed `u` tag is
+	// built from — the signature binds to the URL, so they must never
+	// diverge. undefined (not null) so axios sends no body and no
+	// content-type: a body would require a payload-hash tag in the event.
+	const res = await api.post(NOSTR_AUTH_URL, undefined, {
+		headers: { Authorization: `Nostr ${encodeNip98Event(signedEvent)}` },
 	});
 
 	const { token, username, npub } = parseNostrAuthResponse(res.data);
@@ -70,7 +77,11 @@ async function loginWithExtension() {
 	} catch (err) {
 		const status = (err as { response?: { status?: number } })?.response
 			?.status;
-		errToast(status === 401 ? $_("login.nostrFailed") : $_("login.nostrError"));
+		errToast(
+			status === 401 || status === 403
+				? $_("login.nostrFailed")
+				: $_("login.nostrError"),
+		);
 		console.error("Nostr extension login failed:", status ?? "unknown");
 	} finally {
 		nostrLoading = false;
@@ -102,14 +113,18 @@ async function loginWithNsec(event: SubmitEvent) {
 		return;
 	}
 
-	// Phase 2: network exchange. Reuses the same 401-vs-generic classifier
+	// Phase 2: network exchange. Reuses the same bad-credentials classifier
 	// so transport errors don't get mis-reported as "invalid nsec".
 	try {
 		await exchangeSignedEvent(signed);
 	} catch (err) {
 		const status = (err as { response?: { status?: number } })?.response
 			?.status;
-		errToast(status === 401 ? $_("login.nostrFailed") : $_("login.nostrError"));
+		errToast(
+			status === 401 || status === 403
+				? $_("login.nostrFailed")
+				: $_("login.nostrError"),
+		);
 		console.error("Nsec login failed:", status ?? "unknown");
 	} finally {
 		// Best-effort zeroing. V8 may have copies elsewhere, but this covers

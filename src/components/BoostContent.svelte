@@ -6,18 +6,30 @@ import { fade } from "svelte/transition";
 import Icon from "$components/Icon.svelte";
 import InvoicePaymentStage from "$components/InvoicePaymentStage.svelte";
 import PrimaryButton from "$components/PrimaryButton.svelte";
+import { API_BASE } from "$lib/api-base";
 import { _ } from "$lib/i18n";
 import IconSocials from "$lib/icons/IconSocials.svelte";
-import { classifyBoostError } from "$lib/payment";
+import {
+	classifyBoostError,
+	isInvoicePaid,
+	pollInvoiceStatus,
+} from "$lib/payment";
 import { boost, boostHash } from "$lib/store";
 import { updateSinglePlace } from "$lib/sync/places";
 import { errToast, warningToast } from "$lib/utils";
 
-export let merchantId: number | string;
-export let merchantName: string | undefined = undefined;
-export let onComplete: (() => void) | undefined = undefined;
+type Props = {
+	merchantId: number | string;
+	merchantName?: string;
+	onComplete?: () => void;
+};
+let {
+	merchantId,
+	merchantName = undefined,
+	onComplete = undefined,
+}: Props = $props();
 
-let stage = 0;
+let stage = $state(0);
 
 const values = [
 	{ sats: 5000, time: 1 },
@@ -25,12 +37,12 @@ const values = [
 	{ sats: 30000, time: 12 },
 ];
 
-let tooltip = false;
-let selectedBoost: { sats: number; time: number; expires: Date } | undefined;
-let invoice = "";
-let invoiceId = "";
-let loading = false;
-let boostError: "network" | "service" | null = null;
+let tooltip = $state(false);
+let selectedBoost = $state<{ sats: number; time: number; expires: Date }>();
+let invoice = $state("");
+let invoiceId = $state("");
+let loading = $state(false);
+let boostError = $state<"network" | "service" | null>(null);
 
 onDestroy(() => {
 	stage = 0;
@@ -49,12 +61,14 @@ const handlePaymentSuccess = async () => {
 	$boostHash = invoiceId;
 
 	try {
-		const response = await axios.post("/api/boost/post", {
-			invoice_id: invoiceId,
-		});
+		// Re-verify against the API before celebrating — the poller said
+		// paid, but this is the cheap belt to its braces (#1348).
+		const response = await pollInvoiceStatus(invoiceId);
+		if (!isInvoicePaid(response.data?.status)) {
+			throw new Error("Invoice not paid");
+		}
 
 		stage = 2;
-		console.info(response);
 
 		if (merchantId) {
 			await updateSinglePlace(merchantId);
@@ -64,6 +78,10 @@ const handlePaymentSuccess = async () => {
 			onComplete();
 		}
 	} catch (error) {
+		// Reset the dedup guard so a retry can finalize: the poller re-fires
+		// onSuccess every interval, and a set $boostHash would make each one
+		// return early, wedging stage 1 after a transient re-verify failure.
+		$boostHash = "";
 		warningToast($_("boost.finalizeError"));
 		console.error(error);
 	}
@@ -106,8 +124,9 @@ const generateInvoice = () => {
 	}
 
 	axios
-		.post("/api/boost/invoice/generate", {
-			place_id: placeId,
+		.post(`${API_BASE}/v4/place-boosts`, {
+			// The API takes the id as a string.
+			place_id: placeId.toString(),
 			days: days,
 		})
 		.then((response) => {
@@ -143,7 +162,7 @@ const generateInvoice = () => {
 				{boostError === "network" ? $_("boost.errorNetwork") : $_("boost.errorService")}
 			</p>
 
-			<PrimaryButton style="w-full rounded-xl p-3" disabled={loading} {loading} on:click={retryBoost}>
+			<PrimaryButton style="w-full rounded-xl p-3" disabled={loading} {loading} onclick={retryBoost}>
 				{$_("boost.errorRetry")}
 			</PrimaryButton>
 
@@ -165,8 +184,8 @@ const generateInvoice = () => {
 			</p>
 
 			<button
-				on:mouseenter={() => (tooltip = true)}
-				on:mouseleave={() => (tooltip = false)}
+				onmouseenter={() => (tooltip = true)}
+				onmouseleave={() => (tooltip = false)}
 				class="relative text-sm text-link transition-colors hover:text-hover"
 				>{$_("boost.seeHowItLooks")}
 				{#if tooltip}
@@ -196,7 +215,7 @@ const generateInvoice = () => {
 		<div class="space-y-2 md:flex md:space-y-0 md:space-x-2">
 			{#each values as value, index (index)}
 				<button
-					on:click={() => {
+					onclick={() => {
 						let dateNow = new Date();
 						let currentBoost =
 							$boost && $boost.boost && new Date($boost.boost) > dateNow
@@ -237,7 +256,7 @@ const generateInvoice = () => {
 			style="w-full rounded-xl p-3 {!selectedBoost ? 'opacity-50 hover:bg-link' : ''}"
 			disabled={!selectedBoost || loading}
 			{loading}
-			on:click={generateInvoice}
+			onclick={generateInvoice}
 		>
 			{selectedBoost
 				? selectedBoost.time === 1

@@ -1,10 +1,14 @@
-import { test, expect } from '@playwright/test';
+import { expect, test } from '@playwright/test';
+
 import { mockBoostInvoiceAPI } from './helpers';
 
 const MERCHANT_ID = 23143;
-const API_ENDPOINT = '/api/boost/invoice/generate';
+const API_ENDPOINT = '/v4/place-boosts';
 
 test.describe('Boost Invoice Generation', () => {
+	// The invoice call goes straight to api.btcmap.org (#1348) — blocking
+	// the service worker lets page.route intercept the cross-origin POST.
+	test.use({ serviceWorkers: 'block' });
 	test('generates valid invoice through complete UI flow', async ({ page }) => {
 		// Mock boost invoice API to prevent real invoice creation during test execution
 		await mockBoostInvoiceAPI(page);
@@ -58,8 +62,9 @@ test.describe('Boost Invoice Generation', () => {
 
 		// Verify request payload
 		const requestBody = invoiceRequest.postDataJSON();
+		// The API takes the id as a string (#1348).
 		expect(requestBody).toEqual({
-			place_id: MERCHANT_ID,
+			place_id: String(MERCHANT_ID),
 			days: 30
 		});
 
@@ -77,32 +82,5 @@ test.describe('Boost Invoice Generation', () => {
 		await expect(page.locator('canvas').first()).toBeVisible();
 	});
 
-	test('validates missing required parameters', async ({ page }) => {
-		// Mock boost invoice API to prevent real invoice creation in production
-		await mockBoostInvoiceAPI(page);
 
-		const response = await page.request.post(API_ENDPOINT, {
-			data: { place_id: MERCHANT_ID }
-		});
-
-		expect(response.status()).toBe(400);
-		const body = await response.json();
-		expect(body.message).toContain('Missing required parameters');
-	});
-
-	test('validates invalid days parameter', async ({ page }) => {
-		// Mock boost invoice API to prevent real invoice creation in production
-		await mockBoostInvoiceAPI(page);
-
-		const response = await page.request.post(API_ENDPOINT, {
-			data: {
-				place_id: MERCHANT_ID,
-				days: -1
-			}
-		});
-
-		expect(response.status()).toBe(400);
-		const body = await response.json();
-		expect(body.message).toContain('Invalid days parameter');
-	});
 });

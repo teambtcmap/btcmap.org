@@ -181,7 +181,7 @@ export function checkForConsoleErrors(page: Page) {
  * This should be called at the beginning of any test that triggers invoice generation.
  */
 export async function mockBoostInvoiceAPI(page: Page) {
-	await page.route('**/api/boost/invoice/generate', async (route) => {
+	await page.route('**/v4/place-boosts', async (route) => {
 		const request = route.request();
 		const postData = request.postDataJSON();
 

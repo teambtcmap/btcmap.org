@@ -7,6 +7,7 @@ import CloseButton from "$components/CloseButton.svelte";
 import Icon from "$components/Icon.svelte";
 import InvoicePaymentStage from "$components/InvoicePaymentStage.svelte";
 import PrimaryButton from "$components/PrimaryButton.svelte";
+import { API_BASE } from "$lib/api-base";
 import { _ } from "$lib/i18n";
 import { updateSinglePlace } from "$lib/sync/places";
 import type { MerchantPageData } from "$lib/types.js";
@@ -48,7 +49,7 @@ const generateInvoice = (event: SubmitEvent) => {
 
 	loading = true;
 	axios
-		.post("/comment/invoice/generate", {
+		.post(`${API_BASE}/v4/place-comments`, {
 			place_id: elementId,
 			comment: commentValue.trim(),
 		})

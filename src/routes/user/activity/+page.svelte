@@ -21,6 +21,7 @@ import {
 import { API_BASE } from "$lib/api-base";
 import api from "$lib/axios";
 import { _ } from "$lib/i18n";
+import { SAVED_ITEM_ENDPOINTS } from "$lib/savedItems";
 import { session } from "$lib/session";
 import type { SavedPlace } from "$lib/types";
 
@@ -188,8 +189,8 @@ onMount(async () => {
 	// dot showing while the user is already reading the feed.
 	const headers = { Authorization: `Bearer ${$session.token}` };
 	const namesPromise = Promise.allSettled([
-		api.get<SavedPlace[]>("/api/session/saved-places", { headers }),
-		api.get<SavedArea[]>("/api/session/saved-areas", { headers }),
+		api.get<SavedPlace[]>(SAVED_ITEM_ENDPOINTS.place, { headers }),
+		api.get<SavedArea[]>(SAVED_ITEM_ENDPOINTS.area, { headers }),
 	]);
 
 	await feedPromise;
