@@ -62,14 +62,19 @@ const annotatedEvents: AnnotatedEvent[] = $derived.by(() => {
 	const future: AnnotatedEvent[] = [];
 	const past: AnnotatedEvent[] = [];
 	for (const event of data.events ?? []) {
-		const parts = parseLocalDateTime(event.starts_at);
-		if (!parts || isEpochSentinel(parts)) {
+		const startParts = parseLocalDateTime(event.starts_at);
+		if (!startParts || isEpochSentinel(startParts)) {
 			// Unparseable or epoch-sentinel starts_at → open-ended;
 			// group with future so it stays visible.
 			future.push({ event, isPast: false });
 			continue;
 		}
-		if (toDate(parts).getTime() >= now) future.push({ event, isPast: false });
+		// Only "past" once the event has actually ended — prefer ends_at so a
+		// multi-day or still-in-progress event isn't greyed while it's on.
+		const endParts = event.ends_at ? parseLocalDateTime(event.ends_at) : null;
+		const endsAt =
+			endParts && !isEpochSentinel(endParts) ? endParts : startParts;
+		if (toDate(endsAt).getTime() >= now) future.push({ event, isPast: false });
 		else past.push({ event, isPast: true });
 	}
 	const byStartDesc = (a: AnnotatedEvent, b: AnnotatedEvent) => {
