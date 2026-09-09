@@ -127,24 +127,30 @@ const fetchAreaEvents = async (
 	const from = new Date(
 		Date.now() - EVENTS_WINDOW_DAYS * 24 * 60 * 60 * 1000,
 	).toISOString();
-	const response = await fetch(
-		`${API_BASE}/v4/areas/${encodeURIComponent(areaAlias)}/events?from=${encodeURIComponent(from)}`,
-	);
-	if (!response.ok) {
-		// 404 from the API means the area itself 404s upstream — fall
-		// through to the section's own 404 handling. Any other failure is
-		// an upstream outage: 502 on the events section, silent [] on the
-		// others so the badge just shows (0) until the endpoint recovers.
+	try {
+		const response = await fetch(
+			`${API_BASE}/v4/areas/${encodeURIComponent(areaAlias)}/events?from=${encodeURIComponent(from)}`,
+		);
+		// 404 means the area alias itself is unknown upstream — treat as no
+		// events in both modes; a real area miss is handled by the section's
+		// own 404 path.
 		if (response.status === 404) return [];
+		if (!response.ok)
+			throw new Error(`events endpoint returned ${response.status}`);
+		const body = await response.json();
+		if (!Array.isArray(body)) throw new Error("events payload is not an array");
+		return body as AreaEvent[];
+	} catch (err) {
+		// Any failure — a rejected fetch (transport), a rejected json()
+		// (invalid JSON), an upstream error status or a malformed payload —
+		// degrades to [] off the events section so a hiccup on
+		// /v4/areas/{alias}/events can't 502 merchants/stats/activity/maintain.
+		// The events section itself, which renders the list, still surfaces
+		// the 502.
 		if (!strict) return [];
+		if (isHttpError(err)) throw err;
 		throw error(502, "Upstream API error");
 	}
-	const body = await response.json();
-	if (!Array.isArray(body)) {
-		if (!strict) return [];
-		throw error(502, "Upstream API error");
-	}
-	return body as AreaEvent[];
 };
 
 // box:* tags are human-authored camera hints, served as numbers despite

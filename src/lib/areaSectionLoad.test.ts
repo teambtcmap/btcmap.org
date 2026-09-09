@@ -16,6 +16,8 @@ type ResponseOverrides = {
 	ok?: boolean;
 	status?: number;
 	json?: () => unknown;
+	// Make the fetch itself reject (transport failure) rather than resolve.
+	reject?: boolean;
 };
 
 type FetchResponses = {
@@ -75,6 +77,7 @@ const makeFetch = (responses: FetchResponses = {}) =>
 			return buildResponse({ json: () => ISSUES_OK, ...responses.issues });
 		}
 		if (/\/v4\/areas\/[^/]+\/events/.test(href)) {
+			if (responses.events?.reject) throw new TypeError("network error");
 			return buildResponse({ json: () => EVENTS_OK, ...responses.events });
 		}
 		throw new Error(`unexpected fetch URL: ${href}`);
@@ -433,6 +436,55 @@ describe("loadAreaSection", () => {
 		);
 
 		expect(result.data.events).toEqual([]);
+	});
+
+	it("degrades to [] when the events fetch rejects on non-events sections", async () => {
+		// A transport failure (fetch rejects) must degrade too, not just an
+		// error status — otherwise the outer catch 502s the whole page.
+		const fetch = makeFetch({ events: { reject: true } });
+
+		const result = await loadAreaSection(
+			{ params: { area: "some-area" }, fetch },
+			communityConfig,
+			"stats",
+		);
+
+		expect(result.data.events).toEqual([]);
+	});
+
+	it("degrades to [] when the events payload fails to parse on non-events sections", async () => {
+		const fetch = makeFetch({
+			events: {
+				json: () => {
+					throw new SyntaxError("invalid json");
+				},
+			},
+		});
+
+		const result = await loadAreaSection(
+			{ params: { area: "some-area" }, fetch },
+			communityConfig,
+			"stats",
+		);
+
+		expect(result.data.events).toEqual([]);
+	});
+
+	it("502s when the events fetch rejects on the events section", async () => {
+		const fetch = makeFetch({ events: { reject: true } });
+
+		const err = await captureThrow(() =>
+			loadAreaSection(
+				{ params: { area: "some-area" }, fetch },
+				communityConfig,
+				"events",
+			),
+		);
+
+		expect(isHttpError(err)).toBe(true);
+		if (isHttpError(err)) {
+			expect(err.status).toBe(502);
+		}
 	});
 
 	it("treats a 404 from the events endpoint as no events on every section", async () => {
