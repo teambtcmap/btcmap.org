@@ -2,6 +2,7 @@
 import { _ } from "svelte-i18n";
 
 import Icon from "$components/Icon.svelte";
+import { safeHttpUrl } from "$lib/safeUrl";
 import type { AreaEvent, AreaPageProps } from "$lib/types";
 
 let { data }: { data: AreaPageProps } = $props();
@@ -127,15 +128,16 @@ const formatDateRange = (event: AreaEvent): string => {
 	{:else}
 		<ul class="divide-y divide-gray-200 rounded-3xl border border-gray-300 dark:divide-white/10 dark:border-white/95 dark:bg-white/10">
 			{#each annotatedEvents as { event, isPast } (event.id)}
+				{@const safeUrl = safeHttpUrl(event.website)}
 				<li
 					class="flex flex-col gap-2 p-5 lg:flex-row lg:items-center lg:justify-between lg:gap-5 {isPast
 						? 'text-gray-500 dark:text-white/40'
 						: 'text-primary dark:text-white'}"
 				>
 					<div class="space-y-1">
-						{#if event.website}
+						{#if safeUrl}
 							<a
-								href={event.website}
+								href={safeUrl}
 								target="_blank"
 								rel="noopener noreferrer"
 								class="break-all text-lg font-semibold text-link transition-colors hover:text-hover"
