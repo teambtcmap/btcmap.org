@@ -425,7 +425,10 @@ export type AreaPageProps = {
 	// polygon — last 365 days + all future. Fetched on every section so
 	// the events tab badge can read the future-event count regardless of
 	// which tab is active; the events section renders the full list from
-	// this same payload.
+	// this same payload. On non-events sections an upstream hiccup
+	// degrades to [], so a stale events endpoint can't take the whole
+	// area page down with a 502 — the badge just shows (0) until the
+	// endpoint recovers.
 	events: AreaEvent[];
 	// Full v3 tags, polygon included — the client renders from these instead
 	// of re-crawling the world areas feed to recover them (#1174)

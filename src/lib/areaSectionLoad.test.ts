@@ -405,6 +405,48 @@ describe("loadAreaSection", () => {
 		}
 	});
 
+	it("degrades to [] when the events endpoint fails on non-events sections", async () => {
+		// An events-endpoint hiccup must not 502 the whole area page just
+		// because the badge consumes `data.events` from every layout. On
+		// merchants/stats/activity/maintain the badge then shows (0) until
+		// the endpoint recovers.
+		const fetch = makeFetch({ events: { ok: false, status: 500 } });
+
+		const result = await loadAreaSection(
+			{ params: { area: "some-area" }, fetch },
+			communityConfig,
+			"stats",
+		);
+
+		expect(result.data.events).toEqual([]);
+	});
+
+	it("degrades to [] on a malformed events payload for non-events sections", async () => {
+		const fetch = makeFetch({
+			events: { json: () => ({ totally: "unexpected" }) },
+		});
+
+		const result = await loadAreaSection(
+			{ params: { area: "some-area" }, fetch },
+			countryConfig,
+			"merchants",
+		);
+
+		expect(result.data.events).toEqual([]);
+	});
+
+	it("treats a 404 from the events endpoint as no events on every section", async () => {
+		const fetch = makeFetch({ events: { ok: false, status: 404 } });
+
+		const result = await loadAreaSection(
+			{ params: { area: "some-area" }, fetch },
+			communityConfig,
+			"stats",
+		);
+
+		expect(result.data.events).toEqual([]);
+	});
+
 	it("returns a 404 when url_alias is missing, regardless of config", async () => {
 		const { url_alias, ...tagsWithoutAlias } = AREA_OK.tags;
 		const fetch = makeFetch({

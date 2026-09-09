@@ -66,6 +66,11 @@ const SECTIONS_WITH_ISSUES = new Set(["maintain"]);
 // regardless of which tab is active. The /v4 API window is "365 days back
 // + all future" so the events section can render a coherent list AND the
 // layout can read the future count for its badge from the same payload.
+// On non-events sections an upstream hiccup degrades to [] so an
+// events-endpoint outage can't take down merchants/stats/activity/maintain
+// — the badge then shows (0) until the endpoint recovers. The events
+// section itself still 502s on upstream errors since it's the section
+// that actually needs the payload to render anything.
 const EVENTS_WINDOW_DAYS = 365;
 
 const ISSUES_PAGE_LIMIT = 10000;
@@ -108,9 +113,16 @@ const fetchAllPlaceIssues = async (
 // API's default `from` is now-UTC, so we lower it by the window size; the
 // `to` defaults to year 2200 which is already past any plausible event,
 // so we leave it alone.
+//
+// `strict` controls whether an upstream hiccup throws a 502 (the events
+// section, which actually renders the list) or degrades to an empty
+// array (every other section, which only consumes the count for the
+// events tab badge). 404 still maps to [] in both modes — the API uses
+// it to mean the area alias itself is unknown upstream.
 const fetchAreaEvents = async (
 	fetch: FetchLike,
 	areaAlias: string,
+	strict: boolean,
 ): Promise<AreaEvent[]> => {
 	const from = new Date(
 		Date.now() - EVENTS_WINDOW_DAYS * 24 * 60 * 60 * 1000,
@@ -121,12 +133,15 @@ const fetchAreaEvents = async (
 	if (!response.ok) {
 		// 404 from the API means the area itself 404s upstream — fall
 		// through to the section's own 404 handling. Any other failure is
-		// an upstream outage.
+		// an upstream outage: 502 on the events section, silent [] on the
+		// others so the badge just shows (0) until the endpoint recovers.
 		if (response.status === 404) return [];
+		if (!strict) return [];
 		throw error(502, "Upstream API error");
 	}
 	const body = await response.json();
 	if (!Array.isArray(body)) {
+		if (!strict) return [];
 		throw error(502, "Upstream API error");
 	}
 	return body as AreaEvent[];
@@ -203,8 +218,15 @@ export const loadAreaSection = async (
 
 		// Fetched for every section — the events tab badge reads the
 		// future-event count from `data.events` on every layout, not just
-		// on the events tab itself.
-		const events = await fetchAreaEvents(fetch, tags.url_alias);
+		// on the events tab itself. Only the events section itself 502s on
+		// upstream errors; everywhere else the fetch degrades to [] so a
+		// hiccup on /v4/areas/{alias}/events can't take down merchants,
+		// stats, activity or maintain for the whole area.
+		const events = await fetchAreaEvents(
+			fetch,
+			tags.url_alias,
+			section === "events",
+		);
 
 		return {
 			data: {
