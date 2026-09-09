@@ -39,4 +39,7 @@ jobs:
       - name: Verify the icon bundle is up to date
         run: |
           pnpm run icons:generate
-          git diff --exit-code src/lib/icons/generated
+          if ! git diff --exit-code src/lib/icons/generated; then
+            echo "::error title=Icon bundle out of date::A new <Icon> usage or materialExceptions entry changed the generated icons (diff above). Fix: run 'pnpm icons:generate' locally and commit src/lib/icons/generated/."
+            exit 1
+          fi
