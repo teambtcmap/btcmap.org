@@ -421,6 +421,15 @@ export type AreaPageProps = {
 	name: string;
 	tickets: Tickets;
 	issues: PlaceIssue[];
+	// Bitcoin meetups/conferences whose (lat, lon) lies inside this area's
+	// polygon — last 365 days + all future. Fetched on every section so
+	// the events tab badge can read the future-event count regardless of
+	// which tab is active; the events section renders the full list from
+	// this same payload. On non-events sections an upstream hiccup
+	// degrades to [], so a stale events endpoint can't take the whole
+	// area page down with a 502 — the badge just shows (0) until the
+	// endpoint recovers.
+	events: AreaEvent[];
 	// Full v3 tags, polygon included — the client renders from these instead
 	// of re-crawling the world areas feed to recover them (#1174)
 	tags: AreaTags;
@@ -501,3 +510,20 @@ export interface ProgressUpdate {
 	totalItems?: number;
 	status: "downloading" | "parsing" | "filtering" | "complete";
 }
+
+// Response item of GET /v4/areas/{id_or_alias}/events. Mirrors the Rust
+// `Item` struct in btcmap-api's src/rest/v4/events.rs; that struct has no
+// #[ts(export)] annotation yet, so the type lives here instead of the
+// generated $types/btcmap-api/ bindings. When ts-rs is wired up on the API
+// side, regenerate and import from $types/btcmap-api/Event instead.
+export type AreaEvent = {
+	id: number;
+	area_id: number | null;
+	lat: number;
+	lon: number;
+	name: string;
+	website: string;
+	starts_at: string;
+	ends_at: string | null;
+	cron_schedule: string | null;
+};

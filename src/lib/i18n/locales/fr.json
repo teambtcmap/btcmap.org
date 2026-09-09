@@ -754,9 +754,15 @@
 		"newPlaces": "Nouveaux lieux",
 		"newComments": "Nouveaux commentaires"
 	},
+	"areaEvents": {
+		"empty": "Aucun événement à venir ou récent trouvé.",
+		"past": "passé",
+		"noDate": "Date à confirmer"
+	},
 	"area": {
 		"sections": {
 			"merchants": "Commerces",
+			"events": "Événements",
 			"stats": "Statistiques",
 			"activity": "Activité",
 			"maintain": "Contribuer"

@@ -747,9 +747,15 @@
 		"newPlaces": "Novos Locais",
 		"newComments": "Novos Comentários"
 	},
+	"areaEvents": {
+		"empty": "Nenhum evento próximo ou recente encontrado.",
+		"past": "passado",
+		"noDate": "Data a definir"
+	},
 	"area": {
 		"sections": {
 			"merchants": "Comerciantes",
+			"events": "Eventos",
 			"stats": "Estatísticas",
 			"activity": "Atividade",
 			"maintain": "Manter"

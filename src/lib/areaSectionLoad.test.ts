@@ -16,11 +16,14 @@ type ResponseOverrides = {
 	ok?: boolean;
 	status?: number;
 	json?: () => unknown;
+	// Make the fetch itself reject (transport failure) rather than resolve.
+	reject?: boolean;
 };
 
 type FetchResponses = {
 	areas?: ResponseOverrides;
 	issues?: ResponseOverrides;
+	events?: ResponseOverrides;
 };
 
 // satisfies (not a plain annotation) keeps literal inference, so the tests
@@ -43,6 +46,19 @@ const AREA_OK = {
 } satisfies { id: number; deleted_at: string | null; tags: AreaTags };
 
 const ISSUES_OK = { requested_issues: [{ id: 1 }, { id: 2 }] };
+const EVENTS_OK = [
+	{
+		id: 1,
+		area_id: 42,
+		lat: 7.88,
+		lon: 98.38,
+		name: "Phuket Bitcoin Meetup",
+		website: "https://example.com/meetup",
+		starts_at: "2099-08-29T19:00:00+07:00",
+		ends_at: null,
+		cron_schedule: null,
+	},
+];
 
 const buildResponse = (overrides: ResponseOverrides) =>
 	({
@@ -59,6 +75,10 @@ const makeFetch = (responses: FetchResponses = {}) =>
 		}
 		if (href.includes("/v4/place-issues")) {
 			return buildResponse({ json: () => ISSUES_OK, ...responses.issues });
+		}
+		if (/\/v4\/areas\/[^/]+\/events/.test(href)) {
+			if (responses.events?.reject) throw new TypeError("network error");
+			return buildResponse({ json: () => EVENTS_OK, ...responses.events });
 		}
 		throw new Error(`unexpected fetch URL: ${href}`);
 	});
@@ -254,6 +274,10 @@ describe("loadAreaSection", () => {
 			// Issues feed only the maintain section's table — the other
 			// sections' SSR payloads must not carry them
 			issues: [],
+			// Events are fetched on every section so the events tab badge
+			// can read the future-event count regardless of which tab is
+			// active.
+			events: EVENTS_OK,
 			description: "An area description",
 			tags: AREA_OK.tags,
 			contacts: {},
@@ -261,8 +285,11 @@ describe("loadAreaSection", () => {
 		});
 		expect(result.tags).toEqual(AREA_OK.tags);
 
-		expect(fetch).toHaveBeenCalledTimes(1);
+		expect(fetch).toHaveBeenCalledTimes(2);
 		expect(fetch.mock.calls[0][0].toString()).toContain("/v3/areas/some-area");
+		expect(fetch.mock.calls[1][0].toString()).toContain(
+			"/v4/areas/some-area/events",
+		);
 	});
 
 	it("fetches issues for the maintain section, paginating past the limit", async () => {
@@ -309,6 +336,167 @@ describe("loadAreaSection", () => {
 		if (isHttpError(err)) {
 			expect(err.status).toBe(502);
 		}
+	});
+
+	it("fetches events on every section, with a 365-day window", async () => {
+		const fetch = makeFetch();
+
+		const result = await loadAreaSection(
+			{ params: { area: "some-area" }, fetch },
+			communityConfig,
+			"stats",
+		);
+
+		expect(result.data.events).toEqual(EVENTS_OK);
+		const eventsUrl = fetch.mock.calls.find(([u]) =>
+			u.toString().includes("/v4/areas/some-area/events"),
+		);
+		expect(eventsUrl).toBeDefined();
+		// The `from` query is now-365d; we don't pin the exact timestamp,
+		// just that the lower-bound window is plumbed through.
+		expect(eventsUrl?.[0].toString()).toMatch(/[?&]from=\d{4}-\d{2}-\d{2}T/);
+		// Two fetches: the v3 area + the v4 events endpoint. No issues fetch
+		// because the section is "stats".
+		expect(fetch).toHaveBeenCalledTimes(2);
+	});
+
+	it("treats a 404 from the events endpoint as no events rather than a 502", async () => {
+		const fetch = makeFetch({ events: { ok: false, status: 404 } });
+
+		const result = await loadAreaSection(
+			{ params: { area: "some-area" }, fetch },
+			communityConfig,
+			"events",
+		);
+
+		expect(result.data.events).toEqual([]);
+	});
+
+	it("maps other upstream events errors to a 502", async () => {
+		const fetch = makeFetch({ events: { ok: false, status: 500 } });
+
+		const err = await captureThrow(() =>
+			loadAreaSection(
+				{ params: { area: "some-area" }, fetch },
+				communityConfig,
+				"events",
+			),
+		);
+
+		expect(isHttpError(err)).toBe(true);
+		if (isHttpError(err)) {
+			expect(err.status).toBe(502);
+		}
+	});
+
+	it("maps a malformed events payload to a 502 instead of an empty list", async () => {
+		const fetch = makeFetch({
+			events: { json: () => ({ totally: "unexpected" }) },
+		});
+
+		const err = await captureThrow(() =>
+			loadAreaSection(
+				{ params: { area: "some-area" }, fetch },
+				communityConfig,
+				"events",
+			),
+		);
+
+		expect(isHttpError(err)).toBe(true);
+		if (isHttpError(err)) {
+			expect(err.status).toBe(502);
+		}
+	});
+
+	it("degrades to [] when the events endpoint fails on non-events sections", async () => {
+		// An events-endpoint hiccup must not 502 the whole area page just
+		// because the badge consumes `data.events` from every layout. On
+		// merchants/stats/activity/maintain the badge then shows (0) until
+		// the endpoint recovers.
+		const fetch = makeFetch({ events: { ok: false, status: 500 } });
+
+		const result = await loadAreaSection(
+			{ params: { area: "some-area" }, fetch },
+			communityConfig,
+			"stats",
+		);
+
+		expect(result.data.events).toEqual([]);
+	});
+
+	it("degrades to [] on a malformed events payload for non-events sections", async () => {
+		const fetch = makeFetch({
+			events: { json: () => ({ totally: "unexpected" }) },
+		});
+
+		const result = await loadAreaSection(
+			{ params: { area: "some-area" }, fetch },
+			countryConfig,
+			"merchants",
+		);
+
+		expect(result.data.events).toEqual([]);
+	});
+
+	it("degrades to [] when the events fetch rejects on non-events sections", async () => {
+		// A transport failure (fetch rejects) must degrade too, not just an
+		// error status — otherwise the outer catch 502s the whole page.
+		const fetch = makeFetch({ events: { reject: true } });
+
+		const result = await loadAreaSection(
+			{ params: { area: "some-area" }, fetch },
+			communityConfig,
+			"stats",
+		);
+
+		expect(result.data.events).toEqual([]);
+	});
+
+	it("degrades to [] when the events payload fails to parse on non-events sections", async () => {
+		const fetch = makeFetch({
+			events: {
+				json: () => {
+					throw new SyntaxError("invalid json");
+				},
+			},
+		});
+
+		const result = await loadAreaSection(
+			{ params: { area: "some-area" }, fetch },
+			communityConfig,
+			"stats",
+		);
+
+		expect(result.data.events).toEqual([]);
+	});
+
+	it("502s when the events fetch rejects on the events section", async () => {
+		const fetch = makeFetch({ events: { reject: true } });
+
+		const err = await captureThrow(() =>
+			loadAreaSection(
+				{ params: { area: "some-area" }, fetch },
+				communityConfig,
+				"events",
+			),
+		);
+
+		expect(isHttpError(err)).toBe(true);
+		if (isHttpError(err)) {
+			expect(err.status).toBe(502);
+		}
+	});
+
+	it("treats a 404 from the events endpoint as no events on every section", async () => {
+		const fetch = makeFetch({ events: { ok: false, status: 404 } });
+
+		const result = await loadAreaSection(
+			{ params: { area: "some-area" }, fetch },
+			communityConfig,
+			"stats",
+		);
+
+		expect(result.data.events).toEqual([]);
 	});
 
 	it("returns a 404 when url_alias is missing, regardless of config", async () => {

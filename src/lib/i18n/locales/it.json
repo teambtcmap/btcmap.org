@@ -865,9 +865,15 @@
 		"newPlaces": "Nuovi posti",
 		"newComments": "Nuovi commenti"
 	},
+	"areaEvents": {
+		"empty": "Nessun evento imminente o recente trovato.",
+		"past": "passato",
+		"noDate": "Data da definire"
+	},
 	"area": {
 		"sections": {
 			"merchants": "Commercianti",
+			"events": "Eventi",
 			"stats": "Statistiche",
 			"activity": "Attività",
 			"maintain": "Manutenzione"

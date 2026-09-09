@@ -865,9 +865,15 @@
 		"newPlaces": "Nieuwe locaties",
 		"newComments": "Nieuwe reacties"
 	},
+	"areaEvents": {
+		"empty": "Geen aankomende of recente evenementen gevonden.",
+		"past": "afgelopen",
+		"noDate": "Datum volgt"
+	},
 	"area": {
 		"sections": {
 			"merchants": "Ondernemers",
+			"events": "Evenementen",
 			"stats": "Statistieken",
 			"activity": "Activiteiten",
 			"maintain": "Controleren"
