@@ -95,14 +95,30 @@ let addressRequired = $state(false);
 // user-typed text when the pin moves, and gates a superseded lookup.
 let lastSuggested = "";
 let lookupToken = 0;
+// Coords of the last initiated lookup: a review→edit bounce with an
+// unmoved pin must not re-fire it — a flaky miss on the re-run would
+// blank an already-accepted suggestion, and the prefill funnel event
+// would double-count.
+let lastLookupLat: number | null = null;
+let lastLookupLong: number | null = null;
 
 const suggestAddress = async (lat: number, long: number) => {
+	if (lat === lastLookupLat && long === lastLookupLong) return;
+	lastLookupLat = lat;
+	lastLookupLong = long;
 	const token = ++lookupToken;
 	addressPending = true;
 	const suggestion = await reverseGeocode(lat, long, get(locale) ?? "en");
-	// The pin moved again while this lookup was in flight — drop it. Same
-	// for a review step entered meanwhile (the return trip re-runs it).
-	if (token !== lookupToken || step !== "edit") return;
+	// The pin moved again while this lookup was in flight — drop it.
+	if (token !== lookupToken) return;
+	// Landed mid-review: drop it (mutating the hidden address field could
+	// leave it required-but-empty), but forget the attempt so the return
+	// trip to edit retries these coords.
+	if (step !== "edit") {
+		lastLookupLat = null;
+		lastLookupLong = null;
+		return;
+	}
 	addressPending = false;
 	trackEvent("add_place_address_prefill", {
 		outcome: suggestion ? "hit" : "miss",
@@ -221,7 +237,6 @@ type SubmissionPreview = {
 	nameEn: string;
 	address: string;
 	category: string;
-	categoryLabel: string;
 	methods: ("onchain" | "lightning" | "nfc")[];
 	website: string;
 	phone: string;
@@ -230,6 +245,14 @@ type SubmissionPreview = {
 	contact: string;
 };
 let preview = $state<SubmissionPreview | null>(null);
+// The taxonomy label the picker showed; free-text Other is its own
+// label. Derived from the select, which is frozen (hidden) during
+// review.
+const previewCategoryLabel = $derived(
+	categoryOptions.find((option) => option.value === categorySelect)?.label ??
+		preview?.category ??
+		"",
+);
 
 const collectPreview = (): SubmissionPreview => {
 	const methods: ("onchain" | "lightning" | "nfc")[] = [];
@@ -253,11 +276,6 @@ const collectPreview = (): SubmissionPreview => {
 		nameEn: nameEn?.value ?? "",
 		address: address?.value ?? "",
 		category,
-		// The taxonomy label the picker showed; free-text Other is its own
-		// label.
-		categoryLabel:
-			categoryOptions.find((option) => option.value === categorySelect)
-				?.label ?? category,
 		methods,
 		website: website?.value ?? "",
 		phone: phone?.value ?? "",
@@ -275,6 +293,7 @@ const scrollToTop = () => {
 const backToEdit = () => {
 	step = "edit";
 	onstepchange?.("edit");
+	trackEvent("add_place_review_back");
 	scrollToTop();
 };
 
@@ -308,22 +327,13 @@ const submitForm = (event: SubmitEvent) => {
 
 	if (!preview) return;
 	submitting = true;
+	// The reviewed snapshot goes out verbatim — only the captcha answer
+	// and the honeypot are read live.
 	const payload: SubmitPlaceRequest = {
 		captchaSecret,
 		captchaTest: captchaInput?.value,
 		honey: honeyInput?.value,
-		name: preview.name,
-		nameEn: preview.nameEn,
-		address: preview.address,
-		lat: preview.lat,
-		long: preview.long,
-		category: preview.category,
-		methods: preview.methods,
-		website: preview.website,
-		phone: preview.phone,
-		hours: preview.hours,
-		notes: preview.notes,
-		contact: preview.contact,
+		...preview,
 	};
 
 	axios
@@ -753,7 +763,11 @@ onMount(() => {
 			<dl class="space-y-3 rounded-2xl border-2 border-input p-4">
 				{@render row($_('addLocation.reviewName'), preview.name)}
 				{@render row($_('forms.address'), preview.address)}
-				{@render row($_('forms.category'), preview.categoryLabel)}
+				{@render row(
+					$_('addLocation.reviewPosition'),
+					`${preview.lat.toFixed(5)}, ${preview.long.toFixed(5)}`
+				)}
+				{@render row($_('forms.category'), previewCategoryLabel)}
 				{@render row(
 					$_('addLocation.reviewPayments'),
 					preview.methods.map((m) => $_(`addLocation.${m}Label`)).join(', ')
@@ -776,7 +790,10 @@ onMount(() => {
 						>{$_('forms.captcha')}
 						<span class="font-normal">({$_('forms.captchaCaseSensitive')})</span></label
 					>
-					{#if captchaSecret}
+					<!-- Visible whenever a (re)fetch is possible — a failed first
+					     fetch must leave a retry, or the user is stranded at the
+					     end of the funnel with a disabled submit. -->
+					{#if !isCaptchaLoading}
 						<button type="button" onclick={fetchCaptcha}>
 							<Icon type="fa" icon="arrows-rotate" w="16" h="16" />
 						</button>

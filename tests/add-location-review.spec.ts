@@ -28,7 +28,6 @@ const stubCaptcha = async (page: Page) => {
 const openAndFillForm = async (page: Page) => {
 	await stubMapData(page);
 	await stubReverseGeocode(page);
-	await stubCaptcha(page);
 	await page.goto(PIN);
 	await expect(page.locator('#name')).toBeVisible({
 		timeout: MARKER_LOAD_TIMEOUT
@@ -49,6 +48,10 @@ test.describe('Add Location — review step', () => {
 	test('review shows what will be published and round-trips to edit', async ({
 		page
 	}) => {
+		// The captcha never answers in this test — proving the edit step
+		// (fields, filling, entering review) does not depend on it. Before
+		// #1341 every input sat disabled behind this fetch.
+		await page.route('**/captcha', () => new Promise<void>(() => {}));
 		await openAndFillForm(page);
 
 		await page.getByRole('button', { name: 'Review & submit' }).click();
@@ -60,6 +63,8 @@ test.describe('Add Location — review step', () => {
 		await expect(summary).toContainText('Satoshi Comics');
 		await expect(summary).toContainText('Freiheitsstraße');
 		await expect(summary).toContainText('On-chain');
+		// The frozen pin position is part of what's published (#1341).
+		await expect(summary).toContainText('42.27');
 		await expect(summary).toContainText('owner@example.com');
 		// No account attached — the ticket will say so.
 		await expect(summary).toContainText('Anonymous');
@@ -79,6 +84,7 @@ test.describe('Add Location — review step', () => {
 	test('confirm submits the reviewed data and lands on the honest track', async ({
 		page
 	}) => {
+		await stubCaptcha(page);
 		await openAndFillForm(page);
 
 		await page.route('**/api/submit-place', async (route) => {
@@ -117,6 +123,7 @@ test.describe('Add Location — review step', () => {
 		// The honest three-step status track (#1342) — no notification
 		// promises, and the anonymous submission still gets the account
 		// nudge.
+		await expect(page.getByText('Received just now')).toBeVisible();
 		await expect(page.getByText('Volunteer review')).toBeVisible();
 		await expect(page.getByText('Live on the map')).toBeVisible();
 		await expect(page.getByText(/Planning to add more places/)).toBeVisible();

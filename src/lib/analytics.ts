@@ -55,6 +55,7 @@ export type EventName =
 	| "add_place_address_prefill"
 	| "add_place_address_jump"
 	| "add_place_review_enter"
+	| "add_place_review_back"
 	| "add_place_submit_success";
 
 declare global {
