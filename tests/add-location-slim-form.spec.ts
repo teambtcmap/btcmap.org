@@ -140,14 +140,11 @@ test.describe('Add Location — slim form', () => {
 			timeout: MARKER_LOAD_TIMEOUT
 		});
 
-		// The identity chip replaces the anonymous contact copy, and the
-		// email field is no longer required — the account is the identity.
+		// The identity chip replaces the anonymous contact section entirely
+		// (#1374): the account is the identity, there is no email to collect.
 		const chip = page.getByRole('button', { name: /Submitting as satoshi/ });
 		await expect(chip).toBeVisible();
-		await expect(page.locator('#contact')).not.toHaveAttribute('required');
-		await expect(page.locator('label[for="contact"]')).toContainText(
-			'(optional)'
-		);
+		await expect(page.locator('#contact')).toHaveCount(0);
 
 		// The chip reveals the shared-device escape hatch: detaching flips
 		// the section back to the anonymous contract, with an undo.
@@ -163,7 +160,7 @@ test.describe('Add Location — slim form', () => {
 		await expect(
 			page.getByRole('button', { name: /Submitting as satoshi/ })
 		).toBeVisible();
-		await expect(page.locator('#contact')).not.toHaveAttribute('required');
+		await expect(page.locator('#contact')).toHaveCount(0);
 	});
 
 	test('signed out, the contact section offers an inline sign-in', async ({
