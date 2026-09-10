@@ -3,8 +3,10 @@
 ## Before Every Commit
 1. Run `pnpm run format:fix` (MANDATORY)
 2. Run `pnpm run check`
-3. Run `pnpm run lint`
-4. Use conventional commits: `type(scope): description #issue`
+3. Run `pnpm run typecheck`
+4. Run `pnpm run lint`
+5. Run `pnpm run test --run`
+6. Use conventional commits: `type(scope): description #issue`
 
 ## Conventional Commit Types
 feat, fix, refactor, docs, test, chore, style, perf
@@ -14,9 +16,9 @@ feat, fix, refactor, docs, test, chore, style, perf
 - TypeScript types are documentation
 - Keep code self-documenting with clear names
 
-## Framework Versions (DO NOT UPGRADE)
-- Svelte v4 (not v5)
-- TailwindCSS v3 (not v4)
+## Framework Versions
+- Svelte v5 — write NEW components in runes mode; legacy files convert per the boy-scout rule in AGENTS.md
+- TailwindCSS v4 (Vite plugin) — do not use v3 PostCSS/`theme.extend` patterns
 
 ## Additional Documentation
 For comprehensive guidelines, see:
