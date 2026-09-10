@@ -11,7 +11,6 @@ import { isValidLatitude, isValidLongitude } from "$lib/utils";
 
 import type { RequestHandler } from "./$types";
 import { env } from "$env/dynamic/private";
-import type { MeResponse } from "$types/btcmap-api/MeResponse";
 
 // The RPC envelope of submit_place — only what this endpoint reads.
 type SubmitPlaceRpcBody = {
@@ -50,46 +49,13 @@ export const POST: RequestHandler = async ({ request, fetch }) => {
 		error(503, "Service unavailable");
 	}
 
-	// Optional identity attach (#1334): a signed-in client sends its
-	// Bearer token, which is verified against the API — the submission
-	// carries the VERIFIED username/npub, never a client claim. Anonymous
-	// stays first-class; a stale token degrades the identity to anonymous
-	// rather than failing here (the anonymous-contact check below still
-	// applies to the degraded submission).
-	let submittedBy = "";
-	let submitterNpub = "";
-	const authorization = request.headers.get("authorization");
-	if (authorization) {
-		try {
-			const meResponse = await fetch(`${API_BASE}/v4/users/me`, {
-				headers: { Authorization: authorization },
-				signal: AbortSignal.timeout(8_000),
-			});
-			if (meResponse.ok) {
-				// Typed by the generated binding; the typeof guards stay —
-				// wire data is wire data. Trimmed so a whitespace-only value
-				// can't count as attributed while the serializer drops it
-				// from extra_fields.
-				const me: MeResponse = await meResponse.json();
-				if (typeof me?.name === "string") submittedBy = me.name.trim();
-				if (typeof me?.npub === "string") submitterNpub = me.npub.trim();
-				// Attribution is all-or-nothing on submittedBy: without a name
-				// the submission is anonymous everywhere (attributed flag,
-				// contact requirement) — it must not still carry the npub.
-				if (!submittedBy) submitterNpub = "";
-			}
-		} catch (e) {
-			console.error("[submit-place] identity verification failed", e);
-		}
-	}
-
 	const name = asString(body.name).trim();
 	const category = asString(body.category).trim();
-	// The anonymous contract needs a follow-up channel: without a verified
-	// account, a blank contact would produce a submission nobody can reach
-	// (the client enforces this too, but a stale token flips a submission
-	// anonymous server-side after the client relaxed the field).
-	if (!submittedBy && !asString(body.contact).trim()) {
+	// This proxy only serves the anonymous contract (#1374): signed-in
+	// clients POST /v4/place-submissions themselves with their own token.
+	// Anonymous needs a follow-up channel — a blank contact would produce
+	// a submission nobody can reach.
+	if (!asString(body.contact).trim()) {
 		error(400, "A contact email is required for anonymous submissions");
 	}
 	// Strict number check: Number(null) and Number("") are 0, which would
@@ -121,8 +87,6 @@ export const POST: RequestHandler = async ({ request, fetch }) => {
 		hours: asString(body.hours),
 		notes: asString(body.notes),
 		contact: asString(body.contact),
-		submittedBy,
-		submitterNpub,
 	};
 
 	const params = buildSubmitPlaceParams(submission, crypto.randomUUID());
@@ -173,11 +137,5 @@ export const POST: RequestHandler = async ({ request, fetch }) => {
 		error(502, "Could not submit the location, please try again later.");
 	}
 
-	// `attributed` is the authoritative answer — the client's belief can
-	// be stale (expired token, detach mid-request); its success screen
-	// keys off this.
-	return json({
-		id: rpcBody.result.id,
-		attributed: Boolean(submittedBy),
-	} satisfies SubmitPlaceResponse);
+	return json({ id: rpcBody.result.id } satisfies SubmitPlaceResponse);
 };
