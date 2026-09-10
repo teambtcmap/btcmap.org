@@ -32,6 +32,15 @@ import { errToast } from "$lib/utils";
 // pin always comes from placement mode — hosts guarantee valid coords —
 // so the form is details-first by construction. The host owns the success
 // state; on a completed submission the form calls `onsuccess`.
+//
+// Two steps (#1341): the edit step collects the fields, the review step
+// shows "here's what will be published" and owns the captcha — so the
+// inputs are usable immediately instead of waiting on the captcha fetch,
+// and prefill junk (suggested address, generated hours) gets one explicit
+// look before it reaches the volunteer queue. The edit fields stay
+// mounted and are only CSS-hidden during review: most of them are
+// uncontrolled inputs read through element refs, and unmounting would
+// wipe them.
 type Props = {
 	coords: { lat: number; long: number };
 	// `attributed` = the submission went out with a verified account
@@ -40,8 +49,12 @@ type Props = {
 };
 let { coords, onsuccess }: Props = $props();
 
+let step = $state<"edit" | "review">("edit");
+
+// The captcha is fetched when the review step opens, not on mount — the
+// edit step needs none of it, and abandoners cost no fetches.
 let captchaContent = $state("");
-let isCaptchaLoading = $state(true);
+let isCaptchaLoading = $state(false);
 let captchaSecret = $state<string>();
 let captchaInput = $state<HTMLInputElement>();
 let honeyInput = $state<HTMLInputElement>();
@@ -68,19 +81,6 @@ let nameEn = $state<HTMLInputElement>();
 let address = $state<HTMLInputElement>();
 let showMoreDetails = $state(false);
 
-// One-shot desktop nicety: hand focus to the name field once the inputs
-// unlock (the captcha gates them via `disabled`).
-let nameFocusPending = $state(false);
-$effect(() => {
-	if (nameFocusPending && captchaSecret && name) {
-		nameFocusPending = false;
-		// Wait out the same render that flips the input's `disabled` off —
-		// focusing a still-disabled element is a silent no-op.
-		const el = name;
-		tick().then(() => el?.focus());
-	}
-});
-
 // Address suggestion from the pin (#1315). Re-runs whenever the pin
 // moves — a live-adjust host, or history navigation between two arrivals
 // keeps this instance alive with new coords. A fulfilled suggestion flips
@@ -97,8 +97,9 @@ const suggestAddress = async (lat: number, long: number) => {
 	const token = ++lookupToken;
 	addressPending = true;
 	const suggestion = await reverseGeocode(lat, long, get(locale) ?? "en");
-	// The pin moved again while this lookup was in flight — drop it.
-	if (token !== lookupToken) return;
+	// The pin moved again while this lookup was in flight — drop it. Same
+	// for a review step entered meanwhile (the return trip re-runs it).
+	if (token !== lookupToken || step !== "edit") return;
 	addressPending = false;
 	trackEvent("add_place_address_prefill", {
 		outcome: suggestion ? "hit" : "miss",
@@ -123,8 +124,12 @@ const suggestAddress = async (lat: number, long: number) => {
 };
 
 $effect(() => {
-	// Mount included — coords are the only tracked reads (everything else
-	// sits behind the await).
+	// Mount included — coords and step are the only tracked reads
+	// (everything else sits behind the await). Paused during review: a
+	// lookup landing then could flip the hidden address field to
+	// required-but-empty, which would block the confirm submit invisibly.
+	// Returning to edit re-runs this and refreshes the suggestion.
+	if (step !== "edit") return;
 	suggestAddress(coords.lat, coords.long);
 });
 
@@ -200,488 +205,607 @@ const handleCheckboxClick = () => {
 	noMethodSelected = false;
 };
 
+// The review step's snapshot of the field refs, taken on entry. The
+// hidden edit fields can't change while review is open, so this is also
+// what the confirm submit sends — one collection, no drift between what
+// was shown and what goes out.
+type SubmissionPreview = {
+	name: string;
+	nameEn: string;
+	address: string;
+	category: string;
+	categoryLabel: string;
+	methods: ("onchain" | "lightning" | "nfc")[];
+	website: string;
+	phone: string;
+	hours: string;
+	notes: string;
+	contact: string;
+};
+let preview = $state<SubmissionPreview | null>(null);
+
+const collectPreview = (): SubmissionPreview => {
+	const methods: ("onchain" | "lightning" | "nfc")[] = [];
+	if (onchain?.checked) {
+		methods.push("onchain");
+	}
+	if (lightning?.checked) {
+		methods.push("lightning");
+	}
+	if (nfc?.checked) {
+		methods.push("nfc");
+	}
+	const category =
+		categorySelect === "Other"
+			? (categoryOther ?? "").trim()
+			: (categorySelect ?? "");
+	return {
+		name: name?.value ?? "",
+		nameEn: nameEn?.value ?? "",
+		address: address?.value ?? "",
+		category,
+		// The taxonomy label the picker showed; free-text Other is its own
+		// label.
+		categoryLabel:
+			categoryOptions.find((option) => option.value === categorySelect)
+				?.label ?? category,
+		methods,
+		website: website?.value ?? "",
+		phone: phone?.value ?? "",
+		hours: hoursValue,
+		notes: notes?.value ?? "",
+		contact: contact?.value ?? "",
+	};
+};
+
+let formElement = $state<HTMLFormElement>();
+const scrollToTop = () => {
+	tick().then(() => formElement?.scrollIntoView({ block: "start" }));
+};
+
+const backToEdit = () => {
+	step = "edit";
+	scrollToTop();
+};
+
 const submitForm = (event: SubmitEvent) => {
 	event.preventDefault();
-	if (categorySelect === "Other" && !(categoryOther ?? "").trim()) {
-		errToast(get(_)("addLocation.categoryOtherRequired"));
-		categoryOtherElement?.focus();
+	if (step === "edit") {
+		// Native validation already passed (the Review button is the form's
+		// submit); these are the two rules it can't express.
+		if (categorySelect === "Other" && !(categoryOther ?? "").trim()) {
+			errToast(get(_)("addLocation.categoryOtherRequired"));
+			categoryOtherElement?.focus();
+			return;
+		}
+		if (!onchain?.checked && !lightning?.checked && !nfc?.checked) {
+			noMethodSelected = true;
+			errToast(get(_)("errors.noPaymentMethod"));
+			return;
+		}
+		preview = collectPreview();
+		step = "review";
+		trackEvent("add_place_review_enter");
+		// First entry fetches; bouncing edit↔review keeps the loaded one
+		// (the refresh button covers an expired image).
+		if (!captchaSecret && !isCaptchaLoading) {
+			fetchCaptcha();
+		}
+		scrollToTop();
 		return;
 	}
-	if (!onchain?.checked && !lightning?.checked && !nfc?.checked) {
-		noMethodSelected = true;
-		errToast(get(_)("errors.noPaymentMethod"));
-	} else {
-		submitting = true;
-		const methods: ("onchain" | "lightning" | "nfc")[] = [];
-		if (onchain?.checked) {
-			methods.push("onchain");
-		}
-		if (lightning?.checked) {
-			methods.push("lightning");
-		}
-		if (nfc?.checked) {
-			methods.push("nfc");
-		}
 
-		const payload: SubmitPlaceRequest = {
-			captchaSecret,
-			captchaTest: captchaInput?.value,
-			honey: honeyInput?.value,
-			name: name?.value,
-			nameEn: nameEn?.value,
-			address: address?.value,
-			lat: coords.lat,
-			long: coords.long,
-			category:
-				categorySelect === "Other"
-					? (categoryOther ?? "").trim()
-					: (categorySelect ?? ""),
-			methods,
-			website: website?.value,
-			phone: phone?.value,
-			hours: hoursValue,
-			notes: notes?.value,
-			contact: contact?.value,
-		};
+	if (!preview) return;
+	submitting = true;
+	const payload: SubmitPlaceRequest = {
+		captchaSecret,
+		captchaTest: captchaInput?.value,
+		honey: honeyInput?.value,
+		name: preview.name,
+		nameEn: preview.nameEn,
+		address: preview.address,
+		lat: coords.lat,
+		long: coords.long,
+		category: preview.category,
+		methods: preview.methods,
+		website: preview.website,
+		phone: preview.phone,
+		hours: preview.hours,
+		notes: preview.notes,
+		contact: preview.contact,
+	};
 
-		axios
-			.post<SubmitPlaceResponse>(
-				"/api/submit-place",
-				payload,
-				// The endpoint verifies the token and attaches the account to
-				// the submission (#1334); no session (or a detached one), no
-				// header — anonymous.
-				identityAttached && $session
-					? { headers: { Authorization: `Bearer ${$session.token.trim()}` } }
-					: undefined,
-			)
-			.then((response) => {
-				// The server's verdict, not the client's belief — a stale
-				// token lands anonymous despite the chip.
-				onsuccess(response.data?.attributed === true);
-			})
-			.catch((error) => {
-				// Our endpoint's 4xx messages are written for users (captcha,
-				// missing contact on an anonymous fallback, …) — show them.
-				const message = error.response?.data?.message;
-				if (message && error.response.status < 500) {
-					errToast(message);
-				} else {
-					errToast(get(_)("errors.formSubmission"));
-				}
-				console.error(error);
-				submitting = false;
-			});
-	}
+	axios
+		.post<SubmitPlaceResponse>(
+			"/api/submit-place",
+			payload,
+			// The endpoint verifies the token and attaches the account to
+			// the submission (#1334); no session (or a detached one), no
+			// header — anonymous.
+			identityAttached && $session
+				? { headers: { Authorization: `Bearer ${$session.token.trim()}` } }
+				: undefined,
+		)
+		.then((response) => {
+			trackEvent("add_place_submit_success");
+			// The server's verdict, not the client's belief — a stale
+			// token lands anonymous despite the chip.
+			onsuccess(response.data?.attributed === true);
+		})
+		.catch((error) => {
+			// Our endpoint's 4xx messages are written for users (captcha,
+			// missing contact on an anonymous fallback, …) — show them.
+			const message = error.response?.data?.message;
+			if (message && error.response.status < 500) {
+				errToast(message);
+			} else {
+				errToast(get(_)("errors.formSubmission"));
+			}
+			console.error(error);
+			submitting = false;
+		});
 };
 
 onMount(() => {
-	// fetch and add captcha
-	fetchCaptcha();
-
 	// Keyboard-first on desktop only: popping the on-screen keyboard
 	// on mobile would cover the confirmation the user just landed on.
-	nameFocusPending = window.matchMedia("(pointer: fine)").matches;
+	if (window.matchMedia("(pointer: fine)").matches) {
+		name?.focus();
+	}
 });
 </script>
 
-<form onsubmit={submitForm} class="w-full space-y-5 text-primary dark:text-white">
-	<TextField
-		id="name"
-		name="name"
-		label={$_('addLocation.nameLabel')}
-		bind:element={name}
-		disabled={!captchaSecret}
-		placeholder={$_('addLocation.merchantNamePlaceholder')}
-		required
-	/>
-
-	<TextField
-		id="address"
-		name="address"
-		label={$_('forms.address')}
-		optional={!addressRequired}
-		bind:element={address}
-		disabled={!captchaSecret}
-		required={addressRequired}
-		placeholder={addressPending
-			? $_('addLocation.addressLookupPending')
-			: $_('addLocation.addressPlaceholder')}
-	>
-		{#snippet hint()}
-			<FormHelperText text={$_('addLocation.addressSuggestedHint')} />
-		{/snippet}
-	</TextField>
-
-	<div>
-		<label for="category" class="mb-2 block font-semibold">{$_('forms.category')}</label>
-		<FormSelect
-			id="category"
-			disabled={!captchaSecret}
-			name="category"
-			required
-			options={[
-				{ value: '', label: $_('addLocation.categorySelectPlaceholder') },
-				...categoryOptions,
-				{ value: 'Other', label: $_('addLocation.categoryOtherOption') }
-			]}
-			bind:value={categorySelect}
-			on:change={async () => {
-				if (categorySelect === 'Other') {
-					await tick();
-					categoryOtherElement?.focus();
-				}
-			}}
-		/>
-		{#if categorySelect === 'Other'}
-			<input
-				disabled={!captchaSecret}
-				required
-				type="text"
-				name="category-other"
-				placeholder={$_('addLocation.categoryPlaceholder')}
-				class="mt-2 w-full rounded-2xl border-2 border-input p-3 transition-all focus:outline-link disabled:cursor-not-allowed disabled:bg-gray-100 disabled:text-gray-500 dark:bg-white/[0.15] dark:disabled:bg-gray-700 dark:disabled:text-gray-400"
-				bind:value={categoryOther}
-				bind:this={categoryOtherElement}
-			/>
-		{/if}
-	</div>
-
-	<fieldset>
-		<legend class="mb-2 block font-semibold">{$_('addLocation.paymentMethodsLegend')}</legend>
-		{#if noMethodSelected}
-			<span class="font-semibold text-error">{$_('addLocation.paymentMethodError')}</span>
-		{/if}
-		<div class="space-y-4">
-			<div>
-				<input
-					class="h-4 w-4 accent-link"
-					disabled={!captchaSecret}
-					type="checkbox"
-					name="onchain"
-					id="onchain"
-					bind:this={onchain}
-					onclick={handleCheckboxClick}
-				/>
-				<label for="onchain" class="ml-1 cursor-pointer">
-					{#if typeof window !== 'undefined'}
-						<img
-							src={$theme === 'dark'
-								? '/icons/btc-highlight-dark.svg'
-								: '/icons/btc-primary.svg'}
-							alt=""
-							class="inline"
-						/>
-					{/if}
-					{$_('addLocation.onchainLabel')}
-				</label>
-			</div>
-			<div>
-				<input
-					class="h-4 w-4 accent-link"
-					disabled={!captchaSecret}
-					type="checkbox"
-					name="lightning"
-					id="lightning"
-					bind:this={lightning}
-					onclick={handleCheckboxClick}
-				/>
-				<label for="lightning" class="ml-1 cursor-pointer">
-					{#if typeof window !== 'undefined'}
-						<img
-							src={$theme === 'dark'
-								? '/icons/ln-highlight-dark.svg'
-								: '/icons/ln-primary.svg'}
-							alt=""
-							class="inline"
-						/>
-					{/if}
-					{$_('addLocation.lightningLabel')}
-				</label>
-			</div>
-			<div>
-				<input
-					class="h-4 w-4 accent-link"
-					disabled={!captchaSecret}
-					type="checkbox"
-					name="nfc"
-					id="nfc"
-					bind:this={nfc}
-					onclick={handleCheckboxClick}
-				/>
-				<label for="nfc" class="ml-1 cursor-pointer">
-					{#if typeof window !== 'undefined'}
-						<img
-							src={$theme === 'dark'
-								? '/icons/nfc-highlight-dark.svg'
-								: '/icons/nfc-primary.svg'}
-							alt=""
-							class="inline"
-						/>
-					{/if}
-					{$_('addLocation.nfcLabel')}
-				</label>
-			</div>
-		</div>
-	</fieldset>
-
-	<div>
-		<button
-			type="button"
-			class="flex items-center gap-1 text-sm font-semibold text-link hover:text-hover focus:outline-link"
-			aria-expanded={showMoreDetails}
-			onclick={() => (showMoreDetails = !showMoreDetails)}
-		>
-			<Icon
-				type="material"
-				icon="expand_more"
-				w="16"
-				h="16"
-				class={showMoreDetails ? 'rotate-180' : ''}
-			/>
-			{$_('addLocation.moreDetailsToggle')}
-		</button>
-	</div>
-
-	<div class="space-y-5" class:hidden={!showMoreDetails}>
+<form
+	bind:this={formElement}
+	onsubmit={submitForm}
+	class="w-full space-y-5 text-primary dark:text-white"
+>
+	<!-- Edit step — CSS-hidden during review so the uncontrolled inputs
+	     keep their values (see the header comment). -->
+	<div class="space-y-5" class:hidden={step === 'review'}>
 		<TextField
-			id="name-en"
-			name="nameEn"
-			label={$_('addLocation.nameEnLabel')}
-			optional
-			bind:element={nameEn}
-			disabled={!captchaSecret}
-			placeholder={$_('addLocation.merchantEnglishNamePlaceholder')}
+			id="name"
+			name="name"
+			label={$_('addLocation.nameLabel')}
+			bind:element={name}
+			placeholder={$_('addLocation.merchantNamePlaceholder')}
+			required
+		/>
+
+		<TextField
+			id="address"
+			name="address"
+			label={$_('forms.address')}
+			optional={!addressRequired}
+			bind:element={address}
+			required={addressRequired}
+			placeholder={addressPending
+				? $_('addLocation.addressLookupPending')
+				: $_('addLocation.addressPlaceholder')}
 		>
 			{#snippet hint()}
-				<FormHelperText text={$_('addLocation.nameEnTooltip')} />
+				<FormHelperText text={$_('addLocation.addressSuggestedHint')} />
 			{/snippet}
 		</TextField>
 
-		<TextField
-			id="website"
-			name="website"
-			label={$_('forms.website')}
-			optional
-			type="url"
-			bind:element={website}
-			disabled={!captchaSecret}
-			placeholder={$_('addLocation.websitePlaceholder')}
-		/>
+		<div>
+			<label for="category" class="mb-2 block font-semibold">{$_('forms.category')}</label>
+			<FormSelect
+				id="category"
+				name="category"
+				required
+				options={[
+					{ value: '', label: $_('addLocation.categorySelectPlaceholder') },
+					...categoryOptions,
+					{ value: 'Other', label: $_('addLocation.categoryOtherOption') }
+				]}
+				bind:value={categorySelect}
+				on:change={async () => {
+					if (categorySelect === 'Other') {
+						await tick();
+						categoryOtherElement?.focus();
+					}
+				}}
+			/>
+			{#if categorySelect === 'Other'}
+				<input
+					required
+					type="text"
+					name="category-other"
+					placeholder={$_('addLocation.categoryPlaceholder')}
+					class="mt-2 w-full rounded-2xl border-2 border-input p-3 transition-all focus:outline-link disabled:cursor-not-allowed disabled:bg-gray-100 disabled:text-gray-500 dark:bg-white/[0.15] dark:disabled:bg-gray-700 dark:disabled:text-gray-400"
+					bind:value={categoryOther}
+					bind:this={categoryOtherElement}
+				/>
+			{/if}
+		</div>
 
-		<TextField
-			id="phone"
-			name="phone"
-			label={$_('forms.phone')}
-			optional
-			type="tel"
-			bind:element={phone}
-			disabled={!captchaSecret}
-			placeholder={$_('addLocation.phonePlaceholder')}
-		/>
+		<fieldset>
+			<legend class="mb-2 block font-semibold">{$_('addLocation.paymentMethodsLegend')}</legend>
+			{#if noMethodSelected}
+				<span class="font-semibold text-error">{$_('addLocation.paymentMethodError')}</span>
+			{/if}
+			<div class="space-y-4">
+				<div>
+					<input
+						class="h-4 w-4 accent-link"
+						type="checkbox"
+						name="onchain"
+						id="onchain"
+						bind:this={onchain}
+						onclick={handleCheckboxClick}
+					/>
+					<label for="onchain" class="ml-1 cursor-pointer">
+						{#if typeof window !== 'undefined'}
+							<img
+								src={$theme === 'dark'
+									? '/icons/btc-highlight-dark.svg'
+									: '/icons/btc-primary.svg'}
+								alt=""
+								class="inline"
+							/>
+						{/if}
+						{$_('addLocation.onchainLabel')}
+					</label>
+				</div>
+				<div>
+					<input
+						class="h-4 w-4 accent-link"
+						type="checkbox"
+						name="lightning"
+						id="lightning"
+						bind:this={lightning}
+						onclick={handleCheckboxClick}
+					/>
+					<label for="lightning" class="ml-1 cursor-pointer">
+						{#if typeof window !== 'undefined'}
+							<img
+								src={$theme === 'dark'
+									? '/icons/ln-highlight-dark.svg'
+									: '/icons/ln-primary.svg'}
+								alt=""
+								class="inline"
+							/>
+						{/if}
+						{$_('addLocation.lightningLabel')}
+					</label>
+				</div>
+				<div>
+					<input
+						class="h-4 w-4 accent-link"
+						type="checkbox"
+						name="nfc"
+						id="nfc"
+						bind:this={nfc}
+						onclick={handleCheckboxClick}
+					/>
+					<label for="nfc" class="ml-1 cursor-pointer">
+						{#if typeof window !== 'undefined'}
+							<img
+								src={$theme === 'dark'
+									? '/icons/nfc-highlight-dark.svg'
+									: '/icons/nfc-primary.svg'}
+								alt=""
+								class="inline"
+							/>
+						{/if}
+						{$_('addLocation.nfcLabel')}
+					</label>
+				</div>
+			</div>
+		</fieldset>
 
 		<div>
-			<p class="mb-2 font-semibold">
-				{$_('forms.openingHours')}
-				<span class="font-normal">{$_('forms.optional')}</span>
-			</p>
-			<!-- Nested accordion, same idiom as the details expander: the
-			     seven-day grid only unfolds for people who care about
-			     hours. Collapsing unmounts the editor; the generated
-			     string survives in hoursValue and is parsed back into
-			     the grid on re-open. -->
 			<button
 				type="button"
 				class="flex items-center gap-1 text-sm font-semibold text-link hover:text-hover focus:outline-link"
-				aria-expanded={showHoursEditor}
-				aria-controls="opening-hours-editor"
-				onclick={() => (showHoursEditor = !showHoursEditor)}
+				aria-expanded={showMoreDetails}
+				onclick={() => (showMoreDetails = !showMoreDetails)}
 			>
 				<Icon
 					type="material"
 					icon="expand_more"
 					w="16"
 					h="16"
-					class={showHoursEditor ? 'rotate-180' : ''}
+					class={showMoreDetails ? 'rotate-180' : ''}
 				/>
-				{$_('addLocation.hoursToggle')}
+				{$_('addLocation.moreDetailsToggle')}
 			</button>
-			{#if !showHoursEditor && hoursValue}
-				<code class="ml-2 font-mono text-sm text-body dark:text-offwhite">{hoursValue}</code>
-			{/if}
-			{#if showHoursEditor}
-				<div id="opening-hours-editor" class="mt-3">
-					<OpeningHoursEditor bind:value={hoursValue} disabled={!captchaSecret} />
-				</div>
-			{/if}
 		</div>
 
-		<div>
-			<label for="notes" class="mb-2 block font-semibold"
-				>{$_('forms.notes')} <span class="font-normal">{$_('forms.optional')}</span></label
+		<div class="space-y-5" class:hidden={!showMoreDetails}>
+			<TextField
+				id="name-en"
+				name="nameEn"
+				label={$_('addLocation.nameEnLabel')}
+				optional
+				bind:element={nameEn}
+				placeholder={$_('addLocation.merchantEnglishNamePlaceholder')}
 			>
-			<textarea
-				disabled={!captchaSecret}
-				name="notes"
-				id="notes"
-				placeholder={$_('addLocation.notesPlaceholder')}
-				rows="3"
-				class="w-full rounded-2xl border-2 border-input p-3 transition-all focus:outline-link disabled:cursor-not-allowed disabled:bg-gray-100 disabled:text-gray-500 dark:bg-white/[0.15] dark:disabled:bg-gray-700 dark:disabled:text-gray-400"
-				bind:this={notes}
-			></textarea>
-		</div>
-	</div>
+				{#snippet hint()}
+					<FormHelperText text={$_('addLocation.nameEnTooltip')} />
+				{/snippet}
+			</TextField>
 
-	<TextField
-		id="contact"
-		name="contact"
-		label={$_('forms.contact')}
-		optional={identityAttached}
-		type="email"
-		bind:element={contact}
-		disabled={!captchaSecret}
-		required={!identityAttached}
-		placeholder={$_('addLocation.contactPlaceholder')}
-	>
-		{#snippet hint()}
-			{#if identityAttached && $session}
-				<!-- The submission carries the account (verified server-side), so
-				     the email is a follow-up channel, not the identity. The chip
-				     reveals the shared-device escape hatch: detach the account
-				     from this one submission. -->
-				<div class="mb-2 flex flex-wrap items-center gap-2">
-					<!-- Speaks the app's chip dialect: the filter chips' active
-					     pill, the header UserMenu's identity (Nostr avatar or
-					     account icon), and the expand_more rotate-on-open
-					     disclosure. -->
-					<button
-						type="button"
-						aria-expanded={showDetach}
-						onclick={() => (showDetach = !showDetach)}
-						class="flex shrink-0 items-center gap-2 rounded-full border border-link bg-link/10 px-3 py-1 text-sm font-semibold whitespace-nowrap text-primary transition-colors focus-visible:ring-2 focus-visible:ring-link focus-visible:ring-offset-1 focus-visible:outline-none dark:border-link dark:text-white dark:focus-visible:ring-offset-dark"
-					>
-						{#if $session.npub}
-							<NostrAvatar npub={$session.npub} size={18} class="h-[18px] w-[18px]" />
-						{:else}
-							<Icon type="material" icon="account_circle_filled" w="18" h="18" />
-						{/if}
-						{$_('addLocation.submittingAs', { values: { username: displayName } })}
-						<Icon
-							type="material"
-							icon="expand_more"
-							w="16"
-							h="16"
-							class={showDetach ? 'rotate-180' : ''}
-						/>
-					</button>
-					{#if showDetach}
-						<button
-							type="button"
-							onclick={() => {
-								submitAnonymously = true;
-								showDetach = false;
-							}}
-							class="text-sm font-semibold text-link hover:text-hover focus:outline-link"
-						>
-							{$_('addLocation.submitAnonymously')}
-						</button>
-					{/if}
-				</div>
-				<p class="mb-2 text-justify text-sm">
-					{$_('addLocation.contactSignedInHint')}
+			<TextField
+				id="website"
+				name="website"
+				label={$_('forms.website')}
+				optional
+				type="url"
+				bind:element={website}
+				placeholder={$_('addLocation.websitePlaceholder')}
+			/>
+
+			<TextField
+				id="phone"
+				name="phone"
+				label={$_('forms.phone')}
+				optional
+				type="tel"
+				bind:element={phone}
+				placeholder={$_('addLocation.phonePlaceholder')}
+			/>
+
+			<div>
+				<p class="mb-2 font-semibold">
+					{$_('forms.openingHours')}
+					<span class="font-normal">{$_('forms.optional')}</span>
 				</p>
-			{:else}
-				{#if $session}
-					<!-- Detached: the anonymous contract applies, with an undo. -->
-					<button
-						type="button"
-						onclick={() => (submitAnonymously = false)}
-						class="mb-2 text-sm font-semibold text-link hover:text-hover focus:outline-link"
-					>
-						{$_('addLocation.submitAsAccount', { values: { username: displayName } })}
-					</button>
+				<!-- Nested accordion, same idiom as the details expander: the
+				     seven-day grid only unfolds for people who care about
+				     hours. Collapsing unmounts the editor; the generated
+				     string survives in hoursValue and is parsed back into
+				     the grid on re-open. -->
+				<button
+					type="button"
+					class="flex items-center gap-1 text-sm font-semibold text-link hover:text-hover focus:outline-link"
+					aria-expanded={showHoursEditor}
+					aria-controls="opening-hours-editor"
+					onclick={() => (showHoursEditor = !showHoursEditor)}
+				>
+					<Icon
+						type="material"
+						icon="expand_more"
+						w="16"
+						h="16"
+						class={showHoursEditor ? 'rotate-180' : ''}
+					/>
+					{$_('addLocation.hoursToggle')}
+				</button>
+				{#if !showHoursEditor && hoursValue}
+					<code class="ml-2 font-mono text-sm text-body dark:text-offwhite">{hoursValue}</code>
 				{/if}
-				<p class="mb-2 text-justify text-sm">
-					{$_('addLocation.contactDescription')}
-				</p>
-				{#if !$session}
-					<!-- The other #1334 touchpoint: sign in without leaving the
-					     form — the auth forms expand in place, typed fields
-					     survive, and the chip takes over on success. -->
-					<div class="mb-2">
+				{#if showHoursEditor}
+					<div id="opening-hours-editor" class="mt-3">
+						<OpeningHoursEditor bind:value={hoursValue} />
+					</div>
+				{/if}
+			</div>
+
+			<div>
+				<label for="notes" class="mb-2 block font-semibold"
+					>{$_('forms.notes')} <span class="font-normal">{$_('forms.optional')}</span></label
+				>
+				<textarea
+					name="notes"
+					id="notes"
+					placeholder={$_('addLocation.notesPlaceholder')}
+					rows="3"
+					class="w-full rounded-2xl border-2 border-input p-3 transition-all focus:outline-link disabled:cursor-not-allowed disabled:bg-gray-100 disabled:text-gray-500 dark:bg-white/[0.15] dark:disabled:bg-gray-700 dark:disabled:text-gray-400"
+					bind:this={notes}
+				></textarea>
+			</div>
+		</div>
+
+		<TextField
+			id="contact"
+			name="contact"
+			label={$_('forms.contact')}
+			optional={identityAttached}
+			type="email"
+			bind:element={contact}
+			required={!identityAttached}
+			placeholder={$_('addLocation.contactPlaceholder')}
+		>
+			{#snippet hint()}
+				{#if identityAttached && $session}
+					<!-- The submission carries the account (verified server-side), so
+					     the email is a follow-up channel, not the identity. The chip
+					     reveals the shared-device escape hatch: detach the account
+					     from this one submission. -->
+					<div class="mb-2 flex flex-wrap items-center gap-2">
+						<!-- Speaks the app's chip dialect: the filter chips' active
+						     pill, the header UserMenu's identity (Nostr avatar or
+						     account icon), and the expand_more rotate-on-open
+						     disclosure. -->
 						<button
 							type="button"
-							aria-expanded={showSignIn}
-							onclick={() => (showSignIn = !showSignIn)}
-							class="flex items-center gap-1 text-sm font-semibold text-link hover:text-hover focus:outline-link"
+							aria-expanded={showDetach}
+							onclick={() => (showDetach = !showDetach)}
+							class="flex shrink-0 items-center gap-2 rounded-full border border-link bg-link/10 px-3 py-1 text-sm font-semibold whitespace-nowrap text-primary transition-colors focus-visible:ring-2 focus-visible:ring-link focus-visible:ring-offset-1 focus-visible:outline-none dark:border-link dark:text-white dark:focus-visible:ring-offset-dark"
 						>
-							{$_('addLocation.signInPrompt')}
+							{#if $session.npub}
+								<NostrAvatar npub={$session.npub} size={18} class="h-[18px] w-[18px]" />
+							{:else}
+								<Icon type="material" icon="account_circle_filled" w="18" h="18" />
+							{/if}
+							{$_('addLocation.submittingAs', { values: { username: displayName } })}
 							<Icon
 								type="material"
 								icon="expand_more"
 								w="16"
 								h="16"
-								class={showSignIn ? 'rotate-180' : ''}
+								class={showDetach ? 'rotate-180' : ''}
 							/>
 						</button>
-						{#if showSignIn}
-							<!-- The auth forms nest inside the location <form>
-							     (client-rendered only, so no parser flattening) —
-							     their bubbling submit events must not reach
-							     submitForm. -->
-							<div
-								class="mt-3 rounded-2xl border-2 border-input p-4"
-								onsubmit={(e) => e.stopPropagation()}
+						{#if showDetach}
+							<button
+								type="button"
+								onclick={() => {
+									submitAnonymously = true;
+									showDetach = false;
+								}}
+								class="text-sm font-semibold text-link hover:text-hover focus:outline-link"
 							>
-								<LoginForm compact onSuccess={onAuthSuccess} />
-								<div class="my-4 flex items-center gap-3">
-									<div class="h-px flex-1 bg-gray-300 dark:bg-white/20"></div>
-									<span class="text-xs text-body dark:text-white/50">
-										{$_('login.otherMethods')}
-									</span>
-									<div class="h-px flex-1 bg-gray-300 dark:bg-white/20"></div>
-								</div>
-								<NostrLoginForm onSuccess={onAuthSuccess} />
-							</div>
+								{$_('addLocation.submitAnonymously')}
+							</button>
 						{/if}
 					</div>
+					<p class="mb-2 text-justify text-sm">
+						{$_('addLocation.contactSignedInHint')}
+					</p>
+				{:else}
+					{#if $session}
+						<!-- Detached: the anonymous contract applies, with an undo. -->
+						<button
+							type="button"
+							onclick={() => (submitAnonymously = false)}
+							class="mb-2 text-sm font-semibold text-link hover:text-hover focus:outline-link"
+						>
+							{$_('addLocation.submitAsAccount', { values: { username: displayName } })}
+						</button>
+					{/if}
+					<p class="mb-2 text-justify text-sm">
+						{$_('addLocation.contactDescription')}
+					</p>
+					{#if !$session}
+						<!-- The other #1334 touchpoint: sign in without leaving the
+						     form — the auth forms expand in place, typed fields
+						     survive, and the chip takes over on success. -->
+						<div class="mb-2">
+							<button
+								type="button"
+								aria-expanded={showSignIn}
+								onclick={() => (showSignIn = !showSignIn)}
+								class="flex items-center gap-1 text-sm font-semibold text-link hover:text-hover focus:outline-link"
+							>
+								{$_('addLocation.signInPrompt')}
+								<Icon
+									type="material"
+									icon="expand_more"
+									w="16"
+									h="16"
+									class={showSignIn ? 'rotate-180' : ''}
+								/>
+							</button>
+							{#if showSignIn}
+								<!-- The auth forms nest inside the location <form>
+								     (client-rendered only, so no parser flattening) —
+								     their bubbling submit events must not reach
+								     submitForm. -->
+								<div
+									class="mt-3 rounded-2xl border-2 border-input p-4"
+									onsubmit={(e) => e.stopPropagation()}
+								>
+									<LoginForm compact onSuccess={onAuthSuccess} />
+									<div class="my-4 flex items-center gap-3">
+										<div class="h-px flex-1 bg-gray-300 dark:bg-white/20"></div>
+										<span class="text-xs text-body dark:text-white/50">
+											{$_('login.otherMethods')}
+										</span>
+										<div class="h-px flex-1 bg-gray-300 dark:bg-white/20"></div>
+									</div>
+									<NostrLoginForm onSuccess={onAuthSuccess} />
+								</div>
+							{/if}
+						</div>
+					{/if}
 				{/if}
+			{/snippet}
+		</TextField>
+
+		<PrimaryButton style="w-full py-3 rounded-xl">
+			{$_('addLocation.reviewButton')}
+		</PrimaryButton>
+	</div>
+
+	{#if step === 'review' && preview}
+		{#snippet row(label: string, value: string)}
+			{#if value}
+				<div>
+					<dt class="text-sm font-semibold">{label}</dt>
+					<dd class="break-words whitespace-pre-wrap">{value}</dd>
+				</div>
 			{/if}
 		{/snippet}
-	</TextField>
-
-	<div>
-		<div class="mb-2 flex items-center space-x-2">
-			<label for="captcha" class="font-semibold"
-				>{$_('forms.captcha')}
-				<span class="font-normal">({$_('forms.captchaCaseSensitive')})</span></label
-			>
-			{#if captchaSecret}
-				<button type="button" onclick={fetchCaptcha}>
-					<Icon type="fa" icon="arrows-rotate" w="16" h="16" />
-				</button>
-			{/if}
-		</div>
-		<div class="space-y-2">
-			<div class="flex items-center justify-center rounded-2xl border-2 border-input py-1">
-				{#if isCaptchaLoading}
-					<div class="h-[100px] w-[275px] animate-pulse bg-link/50"></div>
-				{:else}
-					{@html captchaContent}
-				{/if}
+		<div class="space-y-5">
+			<div>
+				<h3 class="text-lg font-semibold">{$_('addLocation.reviewTitle')}</h3>
+				<p class="text-sm text-body dark:text-offwhite">
+					{$_('addLocation.reviewHint')}
+				</p>
 			</div>
-			<input
-				disabled={!captchaSecret}
-				required
-				type="text"
-				name="captcha"
-				id="captcha"
-				placeholder={$_('addLocation.captchaPlaceholder')}
-				class="w-full rounded-2xl border-2 border-input p-3 transition-all focus:outline-link disabled:cursor-not-allowed disabled:bg-gray-100 disabled:text-gray-500 dark:bg-white/[0.15] dark:disabled:bg-gray-700 dark:disabled:text-gray-400"
-				bind:this={captchaInput}
-			/>
+
+			<dl class="space-y-3 rounded-2xl border-2 border-input p-4">
+				{@render row($_('addLocation.reviewName'), preview.name)}
+				{@render row($_('forms.address'), preview.address)}
+				{@render row($_('forms.category'), preview.categoryLabel)}
+				{@render row(
+					$_('addLocation.reviewPayments'),
+					preview.methods.map((m) => $_(`addLocation.${m}Label`)).join(', ')
+				)}
+				{@render row($_('addLocation.reviewNameEn'), preview.nameEn)}
+				{@render row($_('forms.website'), preview.website)}
+				{@render row($_('forms.phone'), preview.phone)}
+				{@render row($_('forms.openingHours'), preview.hours)}
+				{@render row($_('forms.notes'), preview.notes)}
+				{@render row($_('forms.contact'), preview.contact)}
+				{@render row(
+					$_('addLocation.reviewIdentity'),
+					identityAttached ? displayName : $_('addLocation.reviewAnonymous')
+				)}
+			</dl>
+
+			<div>
+				<div class="mb-2 flex items-center space-x-2">
+					<label for="captcha" class="font-semibold"
+						>{$_('forms.captcha')}
+						<span class="font-normal">({$_('forms.captchaCaseSensitive')})</span></label
+					>
+					{#if captchaSecret}
+						<button type="button" onclick={fetchCaptcha}>
+							<Icon type="fa" icon="arrows-rotate" w="16" h="16" />
+						</button>
+					{/if}
+				</div>
+				<div class="space-y-2">
+					<div class="flex items-center justify-center rounded-2xl border-2 border-input py-1">
+						{#if isCaptchaLoading}
+							<div class="h-[100px] w-[275px] animate-pulse bg-link/50"></div>
+						{:else}
+							{@html captchaContent}
+						{/if}
+					</div>
+					<input
+						disabled={!captchaSecret}
+						required
+						type="text"
+						name="captcha"
+						id="captcha"
+						placeholder={$_('addLocation.captchaPlaceholder')}
+						class="w-full rounded-2xl border-2 border-input p-3 transition-all focus:outline-link disabled:cursor-not-allowed disabled:bg-gray-100 disabled:text-gray-500 dark:bg-white/[0.15] dark:disabled:bg-gray-700 dark:disabled:text-gray-400"
+						bind:this={captchaInput}
+					/>
+				</div>
+			</div>
+
+			<PrimaryButton
+				loading={submitting}
+				disabled={submitting || !captchaSecret}
+				style="w-full py-3 rounded-xl"
+			>
+				{$_('forms.submitLocation')}
+			</PrimaryButton>
+			<button
+				type="button"
+				onclick={backToEdit}
+				class="h-12 w-full rounded-xl border border-input font-semibold text-body focus:outline-link dark:text-offwhite"
+			>
+				{$_('addLocation.reviewEditButton')}
+			</button>
 		</div>
-	</div>
+	{/if}
 
 	<input
 		type="text"
@@ -690,12 +814,4 @@ onMount(() => {
 		class="hidden"
 		bind:this={honeyInput}
 	/>
-
-	<PrimaryButton
-		loading={submitting}
-		disabled={submitting || !captchaSecret}
-		style="w-full py-3 rounded-xl"
-	>
-		{$_('forms.submitLocation')}
-	</PrimaryButton>
 </form>
