@@ -71,9 +71,53 @@ const onKeydown = (event: KeyboardEvent) => {
 					values: { type: $_('addLocation.formSuccessType') }
 				})}
 			</h2>
-			<p class="text-body dark:text-offwhite">
-				{$_('addLocation.formSuccessText')}
-			</p>
+			<!-- The honest status track (#1342): what actually happens next,
+			     with no notification promises — nothing emails submitters
+			     when a place goes live today. -->
+			<ol class="w-full space-y-4 text-left">
+				<li class="flex items-start gap-3">
+					<span
+						class="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-green-600 text-white"
+						aria-hidden="true"
+					>
+						✓
+					</span>
+					<div>
+						<p class="font-semibold">{$_('addLocation.trackSubmittedTitle')}</p>
+						<p class="text-sm text-body dark:text-offwhite">
+							{$_('addLocation.trackSubmittedSub')}
+						</p>
+					</div>
+				</li>
+				<li class="flex items-start gap-3">
+					<span
+						class="flex h-8 w-8 shrink-0 items-center justify-center rounded-full border-2 border-input text-body dark:text-offwhite"
+						aria-hidden="true"
+					>
+						<Icon type="material" icon="schedule" w="18" h="18" />
+					</span>
+					<div>
+						<p class="font-semibold">{$_('addLocation.trackReviewTitle')}</p>
+						<p class="text-sm text-body dark:text-offwhite">
+							{$_('addLocation.trackReviewSub')}
+						</p>
+					</div>
+				</li>
+				<li class="flex items-start gap-3">
+					<span
+						class="flex h-8 w-8 shrink-0 items-center justify-center rounded-full border-2 border-input text-body dark:text-offwhite"
+						aria-hidden="true"
+					>
+						<Icon type="material" icon="map" w="18" h="18" />
+					</span>
+					<div>
+						<p class="font-semibold">{$_('addLocation.trackLiveTitle')}</p>
+						<p class="text-sm text-body dark:text-offwhite">
+							{$_('addLocation.trackLiveSub')}
+						</p>
+					</div>
+				</li>
+			</ol>
 			{#if submittedAnonymously}
 				<!-- The moment of investment: nudge anonymous submitters
 				     toward an account and a track record (#1334). -->
