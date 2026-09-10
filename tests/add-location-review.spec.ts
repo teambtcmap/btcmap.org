@@ -110,6 +110,9 @@ test.describe('Add Location — review step', () => {
 			captchaSecret: 'test-captcha-secret',
 			captchaTest: 'abc123'
 		});
+		// The coords frozen at review entry — the hash pin.
+		expect(body.lat).toBeCloseTo(42.276, 2);
+		expect(body.long).toBeCloseTo(42.702, 2);
 
 		// The honest three-step status track (#1342) — no notification
 		// promises, and the anonymous submission still gets the account

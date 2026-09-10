@@ -46,8 +46,11 @@ type Props = {
 	// `attributed` = the submission went out with a verified account
 	// attached — the host's success screen skips the account nudge then.
 	onsuccess: (attributed: boolean) => void;
+	// Fires on edit↔review transitions so the host can adapt its chrome
+	// (the pin hint makes no sense over the review summary).
+	onstepchange?: (step: "edit" | "review") => void;
 };
-let { coords, onsuccess }: Props = $props();
+let { coords, onsuccess, onstepchange }: Props = $props();
 
 let step = $state<"edit" | "review">("edit");
 
@@ -205,11 +208,15 @@ const handleCheckboxClick = () => {
 	noMethodSelected = false;
 };
 
-// The review step's snapshot of the field refs, taken on entry. The
-// hidden edit fields can't change while review is open, so this is also
-// what the confirm submit sends — one collection, no drift between what
-// was shown and what goes out.
+// The review step's snapshot, taken on entry. The hidden edit fields
+// can't change while review is open, and the pin coords are frozen here
+// too — the desktop map stays pannable beside the panel, and a pin moved
+// mid-review must not diverge from what the summary showed. This is
+// exactly what the confirm submit sends; re-positioning means going back
+// to edit (which re-snapshots on the next review).
 type SubmissionPreview = {
+	lat: number;
+	long: number;
 	name: string;
 	nameEn: string;
 	address: string;
@@ -240,6 +247,8 @@ const collectPreview = (): SubmissionPreview => {
 			? (categoryOther ?? "").trim()
 			: (categorySelect ?? "");
 	return {
+		lat: coords.lat,
+		long: coords.long,
 		name: name?.value ?? "",
 		nameEn: nameEn?.value ?? "",
 		address: address?.value ?? "",
@@ -265,6 +274,7 @@ const scrollToTop = () => {
 
 const backToEdit = () => {
 	step = "edit";
+	onstepchange?.("edit");
 	scrollToTop();
 };
 
@@ -285,6 +295,7 @@ const submitForm = (event: SubmitEvent) => {
 		}
 		preview = collectPreview();
 		step = "review";
+		onstepchange?.("review");
 		trackEvent("add_place_review_enter");
 		// First entry fetches; bouncing edit↔review keeps the loaded one
 		// (the refresh button covers an expired image).
@@ -304,8 +315,8 @@ const submitForm = (event: SubmitEvent) => {
 		name: preview.name,
 		nameEn: preview.nameEn,
 		address: preview.address,
-		lat: coords.lat,
-		long: coords.long,
+		lat: preview.lat,
+		long: preview.long,
 		category: preview.category,
 		methods: preview.methods,
 		website: preview.website,
@@ -355,10 +366,12 @@ onMount(() => {
 });
 </script>
 
+<!-- scroll-mt clears the shell's sticky header when the step switch
+     scrolls the form back into view. -->
 <form
 	bind:this={formElement}
 	onsubmit={submitForm}
-	class="w-full space-y-5 text-primary dark:text-white"
+	class="w-full scroll-mt-16 space-y-5 text-primary dark:text-white"
 >
 	<!-- Edit step — CSS-hidden during review so the uncontrolled inputs
 	     keep their values (see the header comment). -->

@@ -26,6 +26,9 @@ let submitted = $state(false);
 // True when the submission went out without a verified account — the
 // success screen then nudges toward creating one (#1334).
 let submittedAnonymously = $state(false);
+// The form's review step (#1341): the pin hint disappears — the summary
+// froze the coords, so "fine-tune the pin" would be a lie there.
+let inReview = $state(false);
 
 const onKeydown = (event: KeyboardEvent) => {
 	if (event.key === "Escape") {
@@ -47,11 +50,16 @@ const onKeydown = (event: KeyboardEvent) => {
 
 	{#if !submitted}
 		<div class="px-4 pb-[calc(env(safe-area-inset-bottom)+1.5rem)] md:pb-4">
-			<p class="mb-4 text-sm text-body dark:text-offwhite">
-				{$_('addLocation.pinConfirmedHint')}
-			</p>
+			{#if !inReview}
+				<p class="mb-4 text-sm text-body dark:text-offwhite">
+					{$_('addLocation.pinConfirmedHint')}
+				</p>
+			{/if}
 			<AddLocationForm
 				{coords}
+				onstepchange={(step) => {
+					inReview = step === 'review';
+				}}
 				onsuccess={(attributed) => {
 					submitted = true;
 					submittedAnonymously = !attributed;
