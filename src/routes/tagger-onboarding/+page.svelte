@@ -8,6 +8,7 @@ import FormSuccess from "$components/FormSuccess.svelte";
 import Icon from "$components/Icon.svelte";
 import HeaderPlaceholder from "$components/layout/HeaderPlaceholder.svelte";
 import PrimaryButton from "$components/PrimaryButton.svelte";
+import { trackEvent } from "$lib/analytics";
 import { _ } from "$lib/i18n";
 import { theme } from "$lib/theme";
 import { errToast } from "$lib/utils";
@@ -116,9 +117,25 @@ onMount(async () => {
 			Become a Tagger
 		</h2>
 
-		<p class="mb-10 w-full text-center text-primary dark:text-white">
+		<p class="mb-4 w-full text-center text-primary dark:text-white">
 			Taggers are volunteers who help keep BTC Map data accurate by verifying locations and adding
 			new merchants. Fill out this form to get started with the onboarding process.
+		</p>
+
+		<!-- Hardcoded English like the surrounding intro copy (only the form
+		     labels on this page are localized). -->
+		<p class="mb-10 w-full text-center text-sm text-body dark:text-offwhite">
+			New to tagging? The
+			<a
+				href="https://join.btcmap.org/"
+				target="_blank"
+				rel="noopener noreferrer"
+				class="font-semibold text-link hover:text-hover"
+				on:click={() => trackEvent('tagger_onboarding_guide_click')}
+			>
+				tagger guide
+			</a>
+			walks you through your first edits.
 		</p>
 
 		<form on:submit={submitForm} class="w-full space-y-5 text-primary dark:text-white">
