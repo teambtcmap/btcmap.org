@@ -607,7 +607,7 @@
 		"notesPlaceholder": "Voeg hier extra informatie toe, zoals je bedrijfsgegevens, contactgegevens of links naar je sociale media.",
 		"contactDescription": "Als we nog vervolgvragen hebben, nemen we contact met je op om deze locatie succesvol toe te voegen. Het e-mailadres is zichtbaar in een oppenbare ticket, dus gebruik er eentje die je niet erg vindt om te delen.",
 		"submittingAs": "Ingediend als {username}",
-		"contactSignedInHint": "Je inzending is gekoppeld aan je account. Voeg alleen een e-mailadres toe als je vervolgvragen wilt ontvangen. Het e-mailadres is zichtbaar in een oppenbare ticket.",
+		"contactSignedInHint": "Je inzending is gekoppeld aan je account — geen contact-e-mail nodig.",
 		"submitAnonymously": "Ben jij dit niet? Anoniem indienen",
 		"submitAsAccount": "Gebruik mijn account ({username})",
 		"signInPrompt": "Heb je een BTC Map-account? Log in om je inzending te koppelen",
