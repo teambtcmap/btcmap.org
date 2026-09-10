@@ -96,6 +96,22 @@ test.describe('Add Location — review step', () => {
 		});
 
 		await page.getByRole('button', { name: 'Review & submit' }).click();
+		await expect(page.getByText("Here's what will be published")).toBeVisible();
+
+		// Pan the map while the summary is up — on desktop it stays live
+		// beside the panel. The submission must keep the coords frozen at
+		// review entry, not the moved pin (a 400px pan at z17 shifts the
+		// longitude ~0.004°, well past the assertion tolerance below).
+		await page.mouse.move(900, 360);
+		await page.mouse.down();
+		await page.mouse.move(500, 360, { steps: 10 });
+		await page.mouse.up();
+		// Let moveend settle so the host refreshes its live coords, and
+		// prove the pan registered (the map rewrites the hash on moveend) —
+		// otherwise the frozen-coords assertion below would be vacuous.
+		await page.waitForTimeout(600);
+		await expect(page).not.toHaveURL(/42\.7024/);
+
 		await page.locator('#captcha').fill('abc123');
 
 		const [submitRequest] = await Promise.all([
@@ -116,9 +132,10 @@ test.describe('Add Location — review step', () => {
 			captchaSecret: 'test-captcha-secret',
 			captchaTest: 'abc123'
 		});
-		// The coords frozen at review entry — the hash pin.
-		expect(body.lat).toBeCloseTo(42.276, 2);
-		expect(body.long).toBeCloseTo(42.702, 2);
+		// The coords frozen at review entry — the hash pin, NOT the panned
+		// map (toBeCloseTo precision 3 = ±0.0005°, the pan moved ~0.004°).
+		expect(body.lat).toBeCloseTo(42.27625, 3);
+		expect(body.long).toBeCloseTo(42.70242, 3);
 
 		// The honest three-step status track (#1342) — no notification
 		// promises, and the anonymous submission still gets the account
