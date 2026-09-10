@@ -50,7 +50,9 @@
 		"trackReviewTitle": "Преглед от доброволци",
 		"trackReviewSub": "Обикновено 1–2 дни, понякога повече",
 		"trackLiveTitle": "На картата",
-		"trackLiveSub": "В BTC Map и OpenStreetMap"
+		"trackLiveSub": "В BTC Map и OpenStreetMap",
+		"successVolunteerPrompt": "Любопитно ви е кой преглежда това?",
+		"successVolunteerCta": "Научете как доброволците поддържат картата"
 	},
 	"formSuccess": {
 		"submittedTitle": "{type} изпратено!",

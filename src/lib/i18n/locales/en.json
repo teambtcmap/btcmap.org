@@ -631,7 +631,9 @@
 		"trackReviewTitle": "Volunteer review",
 		"trackReviewSub": "Typically 1–2 days, sometimes longer",
 		"trackLiveTitle": "Live on the map",
-		"trackLiveSub": "On BTC Map and OpenStreetMap"
+		"trackLiveSub": "On BTC Map and OpenStreetMap",
+		"successVolunteerPrompt": "Curious who reviews this?",
+		"successVolunteerCta": "Learn how volunteers maintain the map"
 	},
 	"formSuccess": {
 		"submittedTitle": "{type} Submitted!",

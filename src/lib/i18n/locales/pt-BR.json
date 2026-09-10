@@ -532,7 +532,9 @@
 		"trackReviewTitle": "Revisão por voluntários",
 		"trackReviewSub": "Costuma levar 1–2 dias, às vezes mais",
 		"trackLiveTitle": "Visível no mapa",
-		"trackLiveSub": "No BTC Map e no OpenStreetMap"
+		"trackLiveSub": "No BTC Map e no OpenStreetMap",
+		"successVolunteerPrompt": "Curioso para saber quem revisa?",
+		"successVolunteerCta": "Veja como os voluntários mantêm o mapa"
 	},
 	"formSuccess": {
 		"submittedTitle": "{type} enviado!",
