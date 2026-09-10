@@ -616,7 +616,21 @@
 		"contactPlaceholder": "hello@btcmap.org",
 		"captchaPlaceholder": "Inserisci il testo del captcha.",
 		"formSuccessType": "Posizione",
-		"formSuccessText": "Esamineremo le tue informazioni e le aggiungeremo il prima possibile."
+		"reviewButton": "Rivedi e invia",
+		"reviewTitle": "Ecco cosa verrà pubblicato",
+		"reviewHint": "È esattamente ciò che vedranno gli editor volontari — dai un ultimo sguardo all'indirizzo suggerito e agli orari.",
+		"reviewEditButton": "Modifica i dati",
+		"reviewName": "Nome",
+		"reviewNameEn": "Nome (in inglese)",
+		"reviewPayments": "Metodi di pagamento",
+		"reviewIdentity": "Inviato da",
+		"reviewAnonymous": "Anonimo",
+		"trackSubmittedTitle": "Inviato",
+		"trackSubmittedSub": "Ricevuto proprio ora",
+		"trackReviewTitle": "Revisione dei volontari",
+		"trackReviewSub": "Di solito 1–2 giorni",
+		"trackLiveTitle": "Visibile sulla mappa",
+		"trackLiveSub": "Su BTC Map e OpenStreetMap"
 	},
 	"formSuccess": {
 		"submittedTitle": "{type} inviato!",
