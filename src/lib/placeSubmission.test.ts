@@ -1,6 +1,9 @@
 import { describe, expect, it } from "vitest";
 
-import { buildSubmitPlaceParams } from "./placeSubmission";
+import {
+	buildPlaceSubmissionArgs,
+	buildSubmitPlaceParams,
+} from "./placeSubmission";
 
 const fullForm = {
 	name: "Satoshi's Comics",
@@ -15,8 +18,6 @@ const fullForm = {
 	hours: "Mo-Fr 10:00-18:00",
 	notes: "Ring the bell",
 	contact: "owner@example.com",
-	submittedBy: "satoshi",
-	submitterNpub: "",
 };
 
 describe("buildSubmitPlaceParams", () => {
@@ -41,19 +42,15 @@ describe("buildSubmitPlaceParams", () => {
 			opening_hours: "Mo-Fr 10:00-18:00",
 			notes: "Ring the bell",
 			contact: "owner@example.com",
-			submitted_by: "satoshi",
 			osm_edit_url:
 				"https://www.openstreetmap.org/edit#map=21/52.48841/13.42986",
 		});
-		// Empty optionals must not appear: nameEn, and the anonymous
-		// submission's identity fields (npub empty in the fixture too).
+		// Empty optionals must not appear.
 		const { extra_fields: sparse } = buildSubmitPlaceParams(
-			{ ...fullForm, nameEn: "", submittedBy: "" },
+			{ ...fullForm, nameEn: "" },
 			"uuid-1",
 		);
 		expect("name:en" in sparse).toBe(false);
-		expect("submitted_by" in sparse).toBe(false);
-		expect("submitter_npub" in extra_fields).toBe(false);
 	});
 
 	it("keeps zero coordinates", () => {
@@ -63,5 +60,48 @@ describe("buildSubmitPlaceParams", () => {
 		);
 		expect(params.lat).toBe(0);
 		expect(params.lon).toBe(0);
+	});
+});
+
+describe("buildPlaceSubmissionArgs", () => {
+	it("maps the authorized-path body without identity or contact", () => {
+		const args = buildPlaceSubmissionArgs(fullForm);
+		expect(args).toEqual({
+			lat: 52.48841,
+			lon: 13.42986,
+			category: "shop",
+			name: "Satoshi's Comics",
+			extra_fields: {
+				"name:en": "Satoshi Comics",
+				address: "Nansenstr. 1, Berlin",
+				payment_methods: "onchain,lightning",
+				website: "https://example.com",
+				phone: "+49 30 123456",
+				opening_hours: "Mo-Fr 10:00-18:00",
+				notes: "Ring the bell",
+				osm_edit_url:
+					"https://www.openstreetmap.org/edit#map=21/52.48841/13.42986",
+			},
+		});
+		// extra_fields are place fields (#1348) — the submitter's contact
+		// email must never ride along, even when the form collected one.
+		expect("contact" in args.extra_fields).toBe(false);
+	});
+
+	it("drops empty optionals", () => {
+		const args = buildPlaceSubmissionArgs({
+			...fullForm,
+			nameEn: "",
+			website: "",
+			phone: "",
+			hours: "",
+			notes: "",
+			methods: [],
+		});
+		expect(args.extra_fields).toEqual({
+			address: "Nansenstr. 1, Berlin",
+			osm_edit_url:
+				"https://www.openstreetmap.org/edit#map=21/52.48841/13.42986",
+		});
 	});
 });
