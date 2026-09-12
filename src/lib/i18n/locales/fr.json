@@ -487,6 +487,8 @@
 		"nameEnLabel": "Nom du lieu en anglais",
 		"nameEnTooltip": "Si l'entreprise a un nom différent en anglais, saisissez-le ici. Il sera enregistré en tant que name:en dans OpenStreetMap.",
 		"pinConfirmedHint": "Ajoutez les informations sur le commerce ci-dessous — vous pouvez encore ajuster l'épingle.",
+		"osmForkPrompt": "Vous connaissez OpenStreetMap ? Vous pouvez y ajouter ce lieu vous-même — votre modification est publiée immédiatement, sous votre nom.",
+		"osmForkCta": "Ouvrir l'éditeur OSM",
 		"addressSuggestedHint": "Suggestion issue d'OpenStreetMap pour votre épingle — vérifiez qu'elle correspond à l'entrée du commerce et corrigez-la si besoin.",
 		"addressLookupPending": "Recherche de l'adresse…",
 		"addressPlaceholder": "2100 Allée de la Liberté...",

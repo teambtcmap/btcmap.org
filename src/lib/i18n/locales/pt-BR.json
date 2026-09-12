@@ -489,6 +489,8 @@
 		"nameEnLabel": "Nome do lugar em inglês",
 		"nameEnTooltip": "Se o negócio tiver um nome diferente em inglês, insira-o aqui. Ele será marcado como name:en no OpenStreetMap.",
 		"pinConfirmedHint": "Adicione os detalhes do estabelecimento abaixo — você ainda pode ajustar o pino.",
+		"osmForkPrompt": "Conhece o OpenStreetMap? Você pode adicionar este local lá mesmo — sua edição entra no ar imediatamente, com sua autoria.",
+		"osmForkCta": "Abrir o editor do OSM",
 		"addressSuggestedHint": "Sugestão do OpenStreetMap para o seu pino — confira se corresponde à entrada do estabelecimento e corrija se necessário.",
 		"addressLookupPending": "Buscando o endereço…",
 		"addressPlaceholder": "Avenida Liberdade, 2100...",

@@ -588,6 +588,8 @@
 		"nameEnLabel": "Name of place in English",
 		"nameEnTooltip": "If the business has a different name in English, enter it here. It will be tagged as name:en in OpenStreetMap.",
 		"pinConfirmedHint": "Add the business details below — you can still fine-tune the pin.",
+		"osmForkPrompt": "Know OpenStreetMap? You can add this place there yourself — your edit goes live immediately, authored by you.",
+		"osmForkCta": "Open the OSM editor",
 		"addressSuggestedHint": "Suggested from OpenStreetMap for your pin — check it matches the business entrance and correct it if needed.",
 		"addressLookupPending": "Looking up the address…",
 		"addressPlaceholder": "2100 Freedom Drive...",

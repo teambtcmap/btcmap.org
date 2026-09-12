@@ -57,6 +57,17 @@ export type SubmitPlaceParams = {
 	extra_fields: Record<string, string>;
 };
 
+// Deep link into OSM's editor on the pin — recorded on every submission
+// for the volunteer, and offered to OSM-capable submitters as the
+// direct edit path (#1344). Deliberately nothing but the map position
+// (maintainer call on the PR): changeset-prefill hash params didn't
+// survive osm.org's routing in the maintainer's live test, and forcing
+// ?editor=id would override the user's chosen editor — both can be
+// revisited in a later optimization pass. Zoom 19 is osm.org's
+// maximum; a higher value sits outside the site's hash-parser range.
+export const osmEditUrl = (lat: number, long: number): string =>
+	`https://www.openstreetmap.org/edit#map=19/${lat}/${long}`;
+
 // Maps the add-location form to btcmap-api's submit_place params: the four
 // first-class fields plus everything else as extra_fields. The API's field
 // is `lon`, the form's is `long`. Empty optionals are dropped so the
@@ -76,7 +87,7 @@ export const buildSubmitPlaceParams = (
 		contact: form.contact,
 		submitted_by: form.submittedBy,
 		submitter_npub: form.submitterNpub,
-		osm_edit_url: `https://www.openstreetmap.org/edit#map=21/${form.lat}/${form.long}`,
+		osm_edit_url: osmEditUrl(form.lat, form.long),
 	};
 	const extra_fields = Object.fromEntries(
 		Object.entries(optional).filter(([, value]) => value.trim() !== ""),
