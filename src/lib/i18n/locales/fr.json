@@ -29,7 +29,7 @@
 		"countryLeaderboard": "Classement des pays",
 		"addLocation": "Ajouter un lieu",
 		"addCommunity": "Ajouter une communauté",
-		"becomeTagger": "Devenir contributeur",
+		"joinUs": "Rejoignez-nous",
 		"openTickets": "Tickets ouverts",
 		"taggingActivity": "Activité de marquage",
 		"taggingIssues": "Problèmes de marquage",
@@ -401,19 +401,6 @@
 		"communityIconTitle": "Icône de communauté",
 		"communityNameTitle": "Nom de la communauté",
 		"communityPageTitle": "Page de la communauté"
-	},
-	"taggerOnboarding": {
-		"nameLabel": "Nom",
-		"emailLabel": "E-mail",
-		"namePlaceholder": "Votre nom",
-		"emailPlaceholder": "votre@email.com",
-		"loadingForm": "Chargement du formulaire...",
-		"refreshCaptcha": "Actualiser le captcha",
-		"submittingApplication": "Envoi de votre candidature...",
-		"submitButton": "Envoyer la candidature",
-		"captchaPlaceholder": "Veuillez saisir le texte du captcha.",
-		"successType": "Candidature",
-		"successMessage": "Merci pour votre intérêt à devenir contributeur ! Nous examinerons votre candidature et un membre de l'équipe vous contactera par e-mail. Écrivez à hello@btcmap.org si vous souhaitez un suivi."
 	},
 	"profileActivity": {
 		"location": "Lieu",

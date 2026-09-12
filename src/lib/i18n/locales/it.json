@@ -29,7 +29,7 @@
 		"countryLeaderboard": "Classifica dei paesi",
 		"addLocation": "Aggiungi posizione",
 		"addCommunity": "Aggiungi community",
-		"becomeTagger": "Diventa un tagger",
+		"joinUs": "Unisciti a noi",
 		"openTickets": "Ticket aperti",
 		"taggingActivity": "Attività di tagging",
 		"taggingIssues": "Problemi di tagging",
@@ -502,19 +502,6 @@
 		"communityIconTitle": "Icona della community",
 		"communityNameTitle": "Nome della community",
 		"communityPageTitle": "Pagina della community"
-	},
-	"taggerOnboarding": {
-		"nameLabel": "Nome",
-		"emailLabel": "Email",
-		"namePlaceholder": "Il tuo nome",
-		"emailPlaceholder": "latua@email.com",
-		"loadingForm": "Caricamento del form...",
-		"refreshCaptcha": "Aggiorna captcha",
-		"submittingApplication": "Invio della candidatura in corso...",
-		"submitButton": "Invia candidatura",
-		"captchaPlaceholder": "Inserisci il testo del captcha.",
-		"successType": "Candidatura",
-		"successMessage": "Grazie per l'interesse a diventare un tagger! Esamineremo la tua candidatura e un membro del team ti contatterà tramite l'email fornita. Contatta hello@btcmap.org se hai bisogno di un riscontro."
 	},
 	"profileActivity": {
 		"location": "Posizione",

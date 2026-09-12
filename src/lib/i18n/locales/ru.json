@@ -29,7 +29,7 @@
 		"countryLeaderboard": "Рейтинг стран",
 		"addLocation": "Добавить место",
 		"addCommunity": "Добавить сообщество",
-		"becomeTagger": "Стать редактором",
+		"joinUs": "Присоединяйтесь",
 		"openTickets": "Открытые заявки",
 		"taggingActivity": "Активность редакторов",
 		"taggingIssues": "Открытые задачи",
@@ -401,19 +401,6 @@
 		"communityIconTitle": "Иконка сообщества",
 		"communityNameTitle": "Название сообщества",
 		"communityPageTitle": "Страница сообщества"
-	},
-	"taggerOnboarding": {
-		"nameLabel": "Имя",
-		"emailLabel": "Email",
-		"namePlaceholder": "Ваше имя",
-		"emailPlaceholder": "ваш@email.com",
-		"loadingForm": "Загрузка формы...",
-		"refreshCaptcha": "Обновить капчу",
-		"submittingApplication": "Отправка заявки...",
-		"submitButton": "Отправить заявку",
-		"captchaPlaceholder": "Пожалуйста, введите текст с капчи.",
-		"successType": "Заявка",
-		"successMessage": "Спасибо за интерес к становлению редактором! Мы рассмотрим вашу заявку, и наша команда свяжется с вами по указанному email. Напишите на hello@btcmap.org, если есть любые вопросы."
 	},
 	"profileActivity": {
 		"location": "Местоположение",

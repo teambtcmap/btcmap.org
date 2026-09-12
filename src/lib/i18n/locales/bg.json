@@ -666,7 +666,7 @@
 		"addLocation": "Добави място",
 		"apps": "Приложения",
 		"areas": "Области",
-		"becomeTagger": "Станете тагър",
+		"joinUs": "Присъединете се",
 		"blog": "Блог",
 		"communities": "Общности",
 		"communityLeaderboard": "Класация на общностите",
@@ -984,27 +984,6 @@
 				"desc": "1"
 			}
 		}
-	},
-	"taggerOnboarding": {
-		"heading": "Помогнете да поддържаме данните за биткойн разпространението.",
-		"formHeading": "Станете тагър",
-		"formDescription": "Маркиращите са доброволци, които поддържат данните на BTC Map точни чрез проверка на места и добавяне на нови търговци. Попълнете този формуляр, за да започнете.",
-		"loadingForm": "Зареждане на формуляра...",
-		"nameLabel": "Име",
-		"namePlaceholder": "Вашето име",
-		"emailLabel": "Имейл",
-		"emailPlaceholder": "your@email.com",
-		"captchaLabel": "Защита от ботове",
-		"captchaCaseSensitive": "(малките и големите букви имат значение)",
-		"captchaPlaceholder": "Моля, въведете текста от captcha.",
-		"submitButton": "Изпрати кандидатура",
-		"refreshCaptcha": "Обнови captcha",
-		"submitting": "Изпращане на кандидатурата...",
-		"submittingApplication": "Изпращане на кандидатурата...",
-		"successType": "Кандидатура",
-		"successMessage": "Благодарим за интереса да станете тагър! Ще прегледаме кандидатурата и някой от екипа ще се свърже с вас на предоставения имейл. Свържете се с hello@btcmap.org при нужда от последване.",
-		"captchaFetchError": "Не може да се зареди captcha, моля опитайте отново или се свържете с BTC Map.",
-		"formSubmitError": "Изпращането на формуляра е неуспешно, моля опитайте отново или се свържете с BTC Map."
 	},
 	"activity": {
 		"heading": "Активност",

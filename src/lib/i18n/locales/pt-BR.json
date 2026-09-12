@@ -29,7 +29,7 @@
 		"countryLeaderboard": "Ranking de Países",
 		"addLocation": "Adicionar Local",
 		"addCommunity": "Adicionar Comunidade",
-		"becomeTagger": "Tornar-se Etiquetador",
+		"joinUs": "Junte-se a nós",
 		"openTickets": "Tickets Abertos",
 		"taggingActivity": "Atividade de Etiquetagem",
 		"taggingIssues": "Problemas de Etiquetagem",
@@ -403,19 +403,6 @@
 		"byContinent": "Comunidades por continente",
 		"totalLocations": "Total de locais",
 		"verifiedLocations": "Locais verificados"
-	},
-	"taggerOnboarding": {
-		"nameLabel": "Nome",
-		"emailLabel": "E-mail",
-		"namePlaceholder": "Seu nome",
-		"emailPlaceholder": "seu@email.com",
-		"loadingForm": "Carregando formulário...",
-		"refreshCaptcha": "Atualizar captcha",
-		"submittingApplication": "Enviando sua candidatura...",
-		"submitButton": "Enviar Candidatura",
-		"captchaPlaceholder": "Por favor, digite o texto do captcha.",
-		"successType": "Candidatura",
-		"successMessage": "Obrigado pelo seu interesse em se tornar um etiquetador! Revisaremos sua candidatura e alguém da equipe entrará em contato pelo e-mail fornecido. Entre em contato em hello@btcmap.org se precisar de acompanhamento."
 	},
 	"profileActivity": {
 		"location": "Local",

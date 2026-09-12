@@ -29,7 +29,7 @@
 		"countryLeaderboard": "Landenranglijst",
 		"addLocation": "Locatie toevoegen",
 		"addCommunity": "Community toevoegen",
-		"becomeTagger": "Word tagger",
+		"joinUs": "Doe mee",
 		"openTickets": "Openstaande tickets",
 		"taggingActivity": "Tagactiviteit",
 		"taggingIssues": "Fouten bij het taggen",
@@ -502,19 +502,6 @@
 		"communityIconTitle": "Community-icoon",
 		"communityNameTitle": "Communitynaam",
 		"communityPageTitle": "Communitypagina"
-	},
-	"taggerOnboarding": {
-		"nameLabel": "Naam",
-		"emailLabel": "E-mail",
-		"namePlaceholder": "Jouw naam",
-		"emailPlaceholder": "jouw@e-mail.com",
-		"loadingForm": "Formulier laden...",
-		"refreshCaptcha": "Captcha vernieuwen",
-		"submittingApplication": "Je aanvraag indienen...",
-		"submitButton": "Aanvraag indienen",
-		"captchaPlaceholder": "Voer de captcha-tekst in.",
-		"successType": "Sollicitatie",
-		"successMessage": "Bedankt voor je interesse om tagger te worden! We zullen je aanmelding bekijken en iemand van het team zal contact met je opnemen via het door jou opgegeven e-mailadres. Neem contact op met hello@btcmap.org als je een follow-up nodig hebt."
 	},
 	"profileActivity": {
 		"location": "Locatie",
