@@ -3,6 +3,7 @@ import AddLocationForm from "$components/add-location/AddLocationForm.svelte";
 import CloseButton from "$components/CloseButton.svelte";
 import Icon from "$components/Icon.svelte";
 import PrimaryButton from "$components/PrimaryButton.svelte";
+import { trackEvent } from "$lib/analytics";
 import { _ } from "$lib/i18n";
 
 import MapPanelShell from "./MapPanelShell.svelte";
@@ -126,6 +127,20 @@ const onKeydown = (event: KeyboardEvent) => {
 					</div>
 				</li>
 			</ol>
+			<!-- The track names the volunteer review — answer the question it
+			     raises and recruit at the moment of investment (#1368). -->
+			<p class="w-full text-left text-sm text-body dark:text-offwhite">
+				{$_('addLocation.successVolunteerPrompt')}
+				<a
+					href="https://join.btcmap.org/"
+					target="_blank"
+					rel="noopener noreferrer"
+					class="font-semibold text-link hover:text-hover"
+					onclick={() => trackEvent('add_place_tagger_guide_click')}
+				>
+					{$_('addLocation.successVolunteerCta')}
+				</a>
+			</p>
 			{#if submittedAnonymously}
 				<!-- The moment of investment: nudge anonymous submitters
 				     toward an account and a track record (#1334). -->

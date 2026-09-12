@@ -530,7 +530,9 @@
 		"trackReviewTitle": "Проверка волонтёрами",
 		"trackReviewSub": "Обычно 1–2 дня, иногда дольше",
 		"trackLiveTitle": "Опубликовано на карте",
-		"trackLiveSub": "На BTC Map и OpenStreetMap"
+		"trackLiveSub": "На BTC Map и OpenStreetMap",
+		"successVolunteerPrompt": "Интересно, кто это проверяет?",
+		"successVolunteerCta": "Узнайте, как волонтёры поддерживают карту"
 	},
 	"formSuccess": {
 		"submittedTitle": "{type} отправлено!",

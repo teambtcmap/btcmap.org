@@ -530,7 +530,9 @@
 		"trackReviewTitle": "Prüfung durch Freiwillige",
 		"trackReviewSub": "In der Regel 1–2 Tage, manchmal länger",
 		"trackLiveTitle": "Live auf der Karte",
-		"trackLiveSub": "Auf BTC Map und OpenStreetMap"
+		"trackLiveSub": "Auf BTC Map und OpenStreetMap",
+		"successVolunteerPrompt": "Neugierig, wer das prüft?",
+		"successVolunteerCta": "Erfahre, wie Freiwillige die Karte pflegen"
 	},
 	"formSuccess": {
 		"submittedTitle": "{type} eingereicht!",

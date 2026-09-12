@@ -631,7 +631,9 @@
 		"trackReviewTitle": "Beoordeling door vrijwilligers",
 		"trackReviewSub": "Meestal 1–2 dagen, soms langer",
 		"trackLiveTitle": "Live op de kaart",
-		"trackLiveSub": "Op BTC Map en OpenStreetMap"
+		"trackLiveSub": "Op BTC Map en OpenStreetMap",
+		"successVolunteerPrompt": "Benieuwd wie dit beoordeelt?",
+		"successVolunteerCta": "Ontdek hoe vrijwilligers de kaart onderhouden"
 	},
 	"formSuccess": {
 		"submittedTitle": "{type} ingediend!",
