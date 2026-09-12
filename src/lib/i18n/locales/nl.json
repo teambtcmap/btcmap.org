@@ -11,6 +11,28 @@
 		"downloadForAria": "Downloaden voor {type}",
 		"mobileExampleAlt": "Voorbeeld van een mobiele app"
 	},
+	"joinUs": {
+		"hero": "Help ons Bitcoin-acceptatie wereldwijd in kaart te brengen.",
+		"intro": "Een korte gids in vijf stappen om in jouw community aan BTC Map bij te dragen — onze grootste uitdaging is de data actueel houden, en elke fix telt.",
+		"openData": "Open data.",
+		"openDataPre": "De data is niet van ons — die is volledig open en leeft op",
+		"openDataPost": "Iedereen met een account kan hem bewerken; BTC Map is slechts een vriendelijke viewer erbovenop.",
+		"step1Title": "Vind je community of land",
+		"browseCountries": "Bekijk landen",
+		"browseCommunities": "Bekijk communities",
+		"step2Title": "Open het tabblad '{tab}'",
+		"step2Body": "Elke land- en communitypagina heeft er een — het toont de zaken met dataproblemen die aandacht nodig hebben.",
+		"step2Example": "Voorbeeld: de onderhoudslijst van Thailand",
+		"step3Title": "Kies lokale problemen die je kunt oplossen",
+		"step3Body": "Scan de lijst. Verouderde openingstijden, ontbrekende coördinaten, verkeerde namen — kleine fixes maken een groot verschil.",
+		"step4Title": "Los ze op via OpenStreetMap",
+		"step4Body": "Maak een gratis OpenStreetMap-account en bewerk de kaart direct. Wijzigingen verschijnen meestal binnen een uur op BTC Map, en de helpknop bij elk probleem toont gerichte uitleg.",
+		"step4Cta": "Maak een OpenStreetMap-account",
+		"step5Title": "Hulp nodig? Kom in de chat",
+		"step5Body": "We zijn een vriendelijke, wereldwijde crew — er is altijd iemand die graag helpt.",
+		"cta": "Vind je land",
+		"credit": "Gemaakt door vrijwilligers. Kaartdata © OpenStreetMap-bijdragers."
+	},
 	"nav": {
 		"maps": "Kaarten",
 		"apps": "Apps",
@@ -29,7 +51,7 @@
 		"countryLeaderboard": "Landenranglijst",
 		"addLocation": "Locatie toevoegen",
 		"addCommunity": "Community toevoegen",
-		"becomeTagger": "Word tagger",
+		"joinUs": "Doe mee",
 		"openTickets": "Openstaande tickets",
 		"taggingActivity": "Tagactiviteit",
 		"taggingIssues": "Fouten bij het taggen",
@@ -502,19 +524,6 @@
 		"communityIconTitle": "Community-icoon",
 		"communityNameTitle": "Communitynaam",
 		"communityPageTitle": "Communitypagina"
-	},
-	"taggerOnboarding": {
-		"nameLabel": "Naam",
-		"emailLabel": "E-mail",
-		"namePlaceholder": "Jouw naam",
-		"emailPlaceholder": "jouw@e-mail.com",
-		"loadingForm": "Formulier laden...",
-		"refreshCaptcha": "Captcha vernieuwen",
-		"submittingApplication": "Je aanvraag indienen...",
-		"submitButton": "Aanvraag indienen",
-		"captchaPlaceholder": "Voer de captcha-tekst in.",
-		"successType": "Sollicitatie",
-		"successMessage": "Bedankt voor je interesse om tagger te worden! We zullen je aanmelding bekijken en iemand van het team zal contact met je opnemen via het door jou opgegeven e-mailadres. Neem contact op met hello@btcmap.org als je een follow-up nodig hebt."
 	},
 	"profileActivity": {
 		"location": "Locatie",

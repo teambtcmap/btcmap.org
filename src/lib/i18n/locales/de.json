@@ -11,6 +11,28 @@
 		"downloadForAria": "Herunterladen für {type}",
 		"mobileExampleAlt": "Beispiel Mobile App"
 	},
+	"joinUs": {
+		"hero": "Hilf uns, Bitcoin-Akzeptanz weltweit zu kartieren.",
+		"intro": "Eine kurze Anleitung in fünf Schritten, um in deiner Community zu BTC Map beizutragen — unsere größte Herausforderung sind aktuelle Daten, und jede Korrektur zählt.",
+		"openData": "Offene Daten.",
+		"openDataPre": "Die Daten gehören uns nicht — sie sind vollständig offen und liegen auf",
+		"openDataPost": "Jeder mit einem Konto kann sie bearbeiten; BTC Map ist nur ein freundlicher Viewer darüber.",
+		"step1Title": "Finde deine Community oder dein Land",
+		"browseCountries": "Länder ansehen",
+		"browseCommunities": "Communities ansehen",
+		"step2Title": "Öffne den Tab „{tab}“",
+		"step2Body": "Jede Länder- und Community-Seite hat ihn — er listet Händler mit Datenproblemen auf, die Aufmerksamkeit brauchen.",
+		"step2Example": "Beispiel: die Wartungsliste für Thailand",
+		"step3Title": "Such dir lokale Probleme aus, die du beheben kannst",
+		"step3Body": "Geh die Liste durch. Veraltete Öffnungszeiten, fehlende Koordinaten, falsche Namen — kleine Korrekturen machen einen großen Unterschied.",
+		"step4Title": "Behebe sie auf OpenStreetMap",
+		"step4Body": "Erstelle ein kostenloses OpenStreetMap-Konto und bearbeite die Karte direkt. Änderungen erscheinen meist innerhalb einer Stunde auf BTC Map, und der Hilfe-Button an jedem Problem zeigt passende Anleitungen.",
+		"step4Cta": "OpenStreetMap-Konto erstellen",
+		"step5Title": "Hilfe nötig? Komm in den Chat",
+		"step5Body": "Wir sind eine freundliche, weltweite Crew — es ist immer jemand da, der gern hilft.",
+		"cta": "Finde dein Land",
+		"credit": "Von Freiwilligen gemacht. Kartendaten © OpenStreetMap-Mitwirkende."
+	},
 	"nav": {
 		"maps": "Karten",
 		"apps": "Apps",
@@ -29,7 +51,7 @@
 		"countryLeaderboard": "Länder-Rangliste",
 		"addLocation": "Ort hinzufügen",
 		"addCommunity": "Community hinzufügen",
-		"becomeTagger": "Werde Tagger",
+		"joinUs": "Mach mit",
 		"openTickets": "Offene Tickets",
 		"taggingActivity": "Tagging-Aktivität",
 		"taggingIssues": "Tagging-Probleme",
@@ -401,19 +423,6 @@
 		"communityIconTitle": "Communitysymbol",
 		"communityNameTitle": "Communityname",
 		"communityPageTitle": "Communityseite"
-	},
-	"taggerOnboarding": {
-		"nameLabel": "Name",
-		"emailLabel": "E-Mail",
-		"namePlaceholder": "Dein Name",
-		"emailPlaceholder": "deine@email.com",
-		"loadingForm": "Formular laden...",
-		"refreshCaptcha": "Captcha aktualisieren",
-		"submittingApplication": "Bewerbung wird übermittelt...",
-		"submitButton": "Bewerbung absenden",
-		"captchaPlaceholder": "Bitte gib den Captcha-Text ein.",
-		"successType": "Bewerbung",
-		"successMessage": "Danke für dein Interesse, Tagger zu werden! Wir werden deine Bewerbung prüfen und einer aus dem Team wird sich über die von dir angegebene E-Mail melden. Kontaktiere hello@btcmap.org, wenn du nachhaken möchtest."
 	},
 	"profileActivity": {
 		"location": "Standort",

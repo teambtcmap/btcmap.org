@@ -110,8 +110,8 @@ $: maintainDropdownLinks = [
 		icon: "communities" as MobileNavIconName,
 	},
 	{
-		title: $_("nav.becomeTagger"),
-		url: "/tagger-onboarding",
+		title: $_("nav.joinUs"),
+		url: "/join-us",
 		icon: "leader" as MobileNavIconName,
 	},
 	{
