@@ -630,6 +630,7 @@
 		"trackSubmittedSub": "Received just now",
 		"trackReviewTitle": "Volunteer review",
 		"trackReviewSub": "Typically 1–2 days, sometimes longer",
+		"trackReviewQueueLink": "Follow the public review queue",
 		"trackLiveTitle": "Live on the map",
 		"trackLiveSub": "On BTC Map and OpenStreetMap"
 	},

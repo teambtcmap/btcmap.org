@@ -529,6 +529,7 @@
 		"trackSubmittedSub": "Reçu à l'instant",
 		"trackReviewTitle": "Vérification par des bénévoles",
 		"trackReviewSub": "Généralement 1 à 2 jours, parfois plus",
+		"trackReviewQueueLink": "Suivre la file de vérification publique",
 		"trackLiveTitle": "Visible sur la carte",
 		"trackLiveSub": "Sur BTC Map et OpenStreetMap"
 	},

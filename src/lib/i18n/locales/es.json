@@ -529,6 +529,7 @@
 		"trackSubmittedSub": "Recibido ahora mismo",
 		"trackReviewTitle": "Revisión por voluntarios",
 		"trackReviewSub": "Suele tardar 1–2 días, a veces más",
+		"trackReviewQueueLink": "Sigue la cola pública de revisión",
 		"trackLiveTitle": "Visible en el mapa",
 		"trackLiveSub": "En BTC Map y OpenStreetMap"
 	},
