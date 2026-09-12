@@ -588,6 +588,8 @@
 		"nameEnLabel": "Naam van de locatie in het Engels",
 		"nameEnTooltip": "Vul hier de Engelse naam van het bedrijf in, als deze afwijkt. Het wordt in OpenStreetMap getagd als name:en.",
 		"pinConfirmedHint": "Vul hieronder de bedrijfsgegevens in. Je kunt de locatie van de pin nog steeds aanpassen.",
+		"osmForkPrompt": "Ken je OpenStreetMap? Je kunt deze locatie daar zelf toevoegen — je bewerking staat direct live, op jouw naam.",
+		"osmForkCta": "OSM-editor openen",
 		"addressSuggestedHint": "Voorgesteld OpenStreetMap-adres voor je pin, bewerk dit indien nodig.",
 		"addressLookupPending": "Adres wordt opgezocht…",
 		"addressPlaceholder": "Vrijheidsdreef 21",

@@ -487,6 +487,8 @@
 		"nameEnLabel": "Name des Ortes auf Englisch",
 		"nameEnTooltip": "Falls der Betrieb einen englischen Namen hat, trag ihn hier ein. Er wird als name:en in OpenStreetMap eingetragen.",
 		"pinConfirmedHint": "Trag unten die Details zum Geschäft ein — du kannst den Pin noch anpassen.",
+		"osmForkPrompt": "Du kennst OpenStreetMap? Du kannst diesen Ort dort selbst eintragen — deine Änderung ist sofort live und erscheint unter deinem Namen.",
+		"osmForkCta": "OSM-Editor öffnen",
 		"addressSuggestedHint": "Vorschlag aus OpenStreetMap für deinen Pin — prüfe, ob er zum Eingang des Geschäfts passt, und korrigiere ihn bei Bedarf.",
 		"addressLookupPending": "Adresse wird gesucht…",
 		"addressPlaceholder": "Freiheitsstraße 21...",
