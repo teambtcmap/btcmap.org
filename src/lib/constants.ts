@@ -7,9 +7,6 @@ export const GITEA_LABELS = {
 		VERIFY_LOCATION: 903,
 		VERIFY_COMMUNITY: 1464,
 	},
-	INFRA: {
-		TAGGER_ONBOARDING: 1410,
-	},
 } as const;
 
 export const POLLING_INTERVAL = 2500;
