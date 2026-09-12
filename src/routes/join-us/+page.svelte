@@ -1,5 +1,4 @@
 <script lang="ts">
-import HeaderPlaceholder from "$components/layout/HeaderPlaceholder.svelte";
 import { trackEvent } from "$lib/analytics";
 import { _ } from "$lib/i18n";
 import { theme } from "$lib/theme";
@@ -93,6 +92,10 @@ const steps: Step[] = $derived([
 	<meta name="twitter:image" content="https://btcmap.org/images/og/home.png" />
 </svelte:head>
 
+<!-- The gradient treatment needs the client-side theme, but the SSR
+     branch still renders a real, localized h1 (plain theme classes)
+     instead of the skeleton — crawlers and no-JS readers get the
+     primary heading; hydration just swaps the classes. -->
 {#if typeof window !== 'undefined'}
 	<h1
 		class="{$theme === 'dark'
@@ -102,7 +105,11 @@ const steps: Step[] = $derived([
 		{$_('joinUs.hero')}
 	</h1>
 {:else}
-	<HeaderPlaceholder />
+	<h1
+		class="mt-10 text-center text-4xl font-semibold text-primary md:text-5xl dark:text-white"
+	>
+		{$_('joinUs.hero')}
+	</h1>
 {/if}
 
 <section id="join-us" class="mx-auto mt-10 w-full pb-20 md:w-[600px] md:pb-32">
