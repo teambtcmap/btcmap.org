@@ -11,6 +11,28 @@
 		"downloadForAria": "Télécharger pour {type}",
 		"mobileExampleAlt": "Exemple d'application mobile"
 	},
+	"joinUs": {
+		"hero": "Aidez-nous à cartographier l'adoption de Bitcoin dans le monde.",
+		"intro": "Un petit guide en cinq étapes pour commencer à contribuer à BTC Map dans votre communauté — notre plus grand défi est de garder les données à jour, et chaque correction compte.",
+		"openData": "Données ouvertes.",
+		"openDataPre": "Les données ne nous appartiennent pas — elles sont entièrement ouvertes et vivent sur",
+		"openDataPost": "Toute personne avec un compte peut les modifier ; BTC Map n'est qu'une visionneuse conviviale par-dessus.",
+		"step1Title": "Trouvez votre communauté ou votre pays",
+		"browseCountries": "Parcourir les pays",
+		"browseCommunities": "Parcourir les communautés",
+		"step2Title": "Ouvrez l'onglet « {tab} »",
+		"step2Body": "Chaque page de pays et de communauté en a un — il liste les commerces dont les données posent problème.",
+		"step2Example": "Exemple : la liste de maintenance de la Thaïlande",
+		"step3Title": "Choisissez des problèmes locaux à corriger",
+		"step3Body": "Parcourez la liste. Horaires obsolètes, coordonnées manquantes, noms erronés — les petites corrections font une grande différence.",
+		"step4Title": "Corrigez-les sur OpenStreetMap",
+		"step4Body": "Créez un compte OpenStreetMap gratuit et modifiez la carte directement. Les changements apparaissent généralement sur BTC Map en moins d'une heure, et le bouton d'aide de chaque problème affiche des instructions dédiées.",
+		"step4Cta": "Créer un compte OpenStreetMap",
+		"step5Title": "Besoin d'aide ? Rejoignez le chat",
+		"step5Body": "Nous sommes une équipe conviviale et mondiale — il y a toujours quelqu'un pour aider.",
+		"cta": "Trouvez votre pays",
+		"credit": "Fait par des bénévoles. Données cartographiques © contributeurs OpenStreetMap."
+	},
 	"nav": {
 		"maps": "Cartes",
 		"apps": "Applications",

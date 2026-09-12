@@ -1,15 +1,16 @@
 <script lang="ts">
 import HeaderPlaceholder from "$components/layout/HeaderPlaceholder.svelte";
 import { trackEvent } from "$lib/analytics";
+import { _ } from "$lib/i18n";
 import { theme } from "$lib/theme";
 
 // The native onboarding guide (#1376): the content of Igor's
-// join.btcmap.org proof of concept, rebuilt in the app's own design and
-// wired to the live pages it describes. It replaces the old
-// /tagger-onboarding application form — the guide IS the onboarding;
-// the form was a gate. English-only for now, like the page it replaces.
-// One analytics event with a target property keeps the funnel readable
-// without five near-identical names.
+// join.btcmap.org proof of concept, rebuilt in the app's own design,
+// fully localized, and wired to the live pages it describes. It
+// replaces the old /tagger-onboarding application form — the guide IS
+// the onboarding; the form was a gate. One analytics event with a
+// target property keeps the funnel readable without seven
+// near-identical names.
 const track = (target: string) => () =>
 	trackEvent("join_us_link_click", { target });
 
@@ -21,49 +22,57 @@ type StepLink = {
 };
 type Step = { title: string; body?: string; links: StepLink[] };
 
-const steps: Step[] = [
+// $derived so a language switch re-renders the guide.
+const steps: Step[] = $derived([
 	{
-		title: "Find your community or country",
+		title: $_("joinUs.step1Title"),
 		links: [
-			{ href: "/countries", label: "Browse countries", target: "countries" },
+			{
+				href: "/countries",
+				label: $_("joinUs.browseCountries"),
+				target: "countries",
+			},
 			{
 				href: "/communities",
-				label: "Browse communities",
+				label: $_("joinUs.browseCommunities"),
 				target: "communities",
 			},
 		],
 	},
 	{
-		title: "Open the Maintenance tab",
-		body: "Every country and community page has one — it lists the merchants with data issues that need attention.",
+		// Named exactly as the area pages label the tab in this language.
+		title: $_("joinUs.step2Title", {
+			values: { tab: $_("area.sections.maintain") },
+		}),
+		body: $_("joinUs.step2Body"),
 		links: [
 			{
 				href: "/country/th/maintain",
-				label: "Example: Thailand's maintenance list",
+				label: $_("joinUs.step2Example"),
 				target: "maintain-example",
 			},
 		],
 	},
 	{
-		title: "Pick local issues you can fix",
-		body: "Scan the list. Outdated opening hours, missing coordinates, wrong names — small fixes make a big difference.",
+		title: $_("joinUs.step3Title"),
+		body: $_("joinUs.step3Body"),
 		links: [],
 	},
 	{
-		title: "Fix them on OpenStreetMap",
-		body: "Create a free OpenStreetMap account and edit the map directly. Changes usually appear on BTC Map within an hour, and the help button on each issue shows issue-specific guidance.",
+		title: $_("joinUs.step4Title"),
+		body: $_("joinUs.step4Body"),
 		links: [
 			{
 				href: "https://www.openstreetmap.org/user/new",
-				label: "Create an OpenStreetMap account",
+				label: $_("joinUs.step4Cta"),
 				target: "osm-signup",
 				external: true,
 			},
 		],
 	},
 	{
-		title: "Need help? Join the chat",
-		body: "We're a friendly, global crew — there's always someone happy to help.",
+		title: $_("joinUs.step5Title"),
+		body: $_("joinUs.step5Body"),
 		links: [
 			{
 				href: "https://matrix.to/#/#btcmap-taggers:matrix.org",
@@ -73,14 +82,14 @@ const steps: Step[] = [
 			},
 		],
 	},
-];
+]);
 </script>
 
 <svelte:head>
-	<title>BTC Map - Join Us</title>
+	<title>BTC Map - {$_('nav.joinUs')}</title>
 	<meta property="og:image" content="https://btcmap.org/images/og/home.png" />
-	<meta property="og:title" content="BTC Map - Join Us" />
-	<meta name="twitter:title" content="BTC Map - Join Us" />
+	<meta property="og:title" content="BTC Map - {$_('nav.joinUs')}" />
+	<meta name="twitter:title" content="BTC Map - {$_('nav.joinUs')}" />
 	<meta name="twitter:image" content="https://btcmap.org/images/og/home.png" />
 </svelte:head>
 
@@ -90,7 +99,7 @@ const steps: Step[] = [
 			? 'text-white'
 			: 'gradient'} mt-10 text-center text-4xl font-semibold md:text-5xl"
 	>
-		Help us map Bitcoin acceptance worldwide.
+		{$_('joinUs.hero')}
 	</h1>
 {:else}
 	<HeaderPlaceholder />
@@ -98,26 +107,26 @@ const steps: Step[] = [
 
 <section id="join-us" class="mx-auto mt-10 w-full pb-20 md:w-[600px] md:pb-32">
 	<p class="mb-6 text-center text-primary dark:text-white">
-		A short, five-step guide to start contributing to BTC Map in your
-		community — our biggest challenge is keeping the data fresh, and every
-		fix counts.
+		{$_('joinUs.intro')}
 	</p>
 
 	<div
 		class="mb-10 rounded-2xl border-2 border-input p-4 text-sm text-body dark:text-offwhite"
 	>
-		<span class="font-semibold">Open data.</span>
-		We don't own the data — it's completely open and lives on
+		<span class="font-semibold">{$_('joinUs.openData')}</span>
+		<!-- The copy is split around the link instead of {@html}-injecting
+		     an anchor: an {@html} block whose SSR (English) and client
+		     (user locale) values differ gets frozen at the server value on
+		     hydration (svelte's hydration_html_changed). Every locale ends
+		     this sentence on the link, so the split reads naturally. -->
+		{$_('joinUs.openDataPre')}
 		<a
 			href="https://www.openstreetmap.org/"
 			target="_blank"
 			rel="noopener noreferrer"
-			class="font-semibold text-link hover:text-hover"
+			class="font-semibold text-link transition-colors hover:text-hover"
 			onclick={track('osm-about')}
-		>
-			OpenStreetMap
-		</a>. Anyone with an account can edit it; BTC Map is a friendly viewer on
-		top.
+		>OpenStreetMap</a>. {$_('joinUs.openDataPost')}
 	</div>
 
 	<ol class="space-y-8">
@@ -164,11 +173,11 @@ const steps: Step[] = [
 			class="rounded-full bg-link px-7 py-3.5 text-lg font-semibold text-white transition-colors hover:bg-hover"
 			onclick={track('cta-countries')}
 		>
-			Find your country
+			{$_('joinUs.cta')}
 		</a>
 	</div>
 
 	<p class="mt-12 text-center text-sm text-body dark:text-offwhite">
-		Made by volunteers. Map data © OpenStreetMap contributors.
+		{$_('joinUs.credit')}
 	</p>
 </section>

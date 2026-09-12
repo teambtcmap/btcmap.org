@@ -11,6 +11,28 @@
 		"downloadForAria": "Download for {type}",
 		"mobileExampleAlt": "Mobile app example"
 	},
+	"joinUs": {
+		"hero": "Help us map Bitcoin acceptance worldwide.",
+		"intro": "A short, five-step guide to start contributing to BTC Map in your community — our biggest challenge is keeping the data fresh, and every fix counts.",
+		"openData": "Open data.",
+		"openDataPre": "We don't own the data — it's completely open and lives on",
+		"openDataPost": "Anyone with an account can edit it; BTC Map is a friendly viewer on top.",
+		"step1Title": "Find your community or country",
+		"browseCountries": "Browse countries",
+		"browseCommunities": "Browse communities",
+		"step2Title": "Open the {tab} tab",
+		"step2Body": "Every country and community page has one — it lists the merchants with data issues that need attention.",
+		"step2Example": "Example: Thailand's maintenance list",
+		"step3Title": "Pick local issues you can fix",
+		"step3Body": "Scan the list. Outdated opening hours, missing coordinates, wrong names — small fixes make a big difference.",
+		"step4Title": "Fix them on OpenStreetMap",
+		"step4Body": "Create a free OpenStreetMap account and edit the map directly. Changes usually appear on BTC Map within an hour, and the help button on each issue shows issue-specific guidance.",
+		"step4Cta": "Create an OpenStreetMap account",
+		"step5Title": "Need help? Join the chat",
+		"step5Body": "We're a friendly, global crew — there's always someone happy to help.",
+		"cta": "Find your country",
+		"credit": "Made by volunteers. Map data © OpenStreetMap contributors."
+	},
 	"nav": {
 		"maps": "Maps",
 		"apps": "Apps",
