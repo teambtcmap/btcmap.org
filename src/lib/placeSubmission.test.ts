@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 
-import { buildSubmitPlaceParams } from "./placeSubmission";
+import { buildSubmitPlaceParams, osmEditUrl } from "./placeSubmission";
 
 const fullForm = {
 	name: "Satoshi's Comics",
@@ -18,6 +18,14 @@ const fullForm = {
 	submittedBy: "satoshi",
 	submitterNpub: "",
 };
+
+describe("osmEditUrl", () => {
+	it("targets the iD editor at osm.org's max zoom on the pin", () => {
+		expect(osmEditUrl(52.48841, 13.42986)).toBe(
+			"https://www.openstreetmap.org/edit#map=19/52.48841/13.42986",
+		);
+	});
+});
 
 describe("buildSubmitPlaceParams", () => {
 	it("maps the core fields and renames long to lon", () => {
@@ -43,7 +51,7 @@ describe("buildSubmitPlaceParams", () => {
 			contact: "owner@example.com",
 			submitted_by: "satoshi",
 			osm_edit_url:
-				"https://www.openstreetmap.org/edit#map=21/52.48841/13.42986",
+				"https://www.openstreetmap.org/edit#map=19/52.48841/13.42986",
 		});
 		// Empty optionals must not appear: nameEn, and the anonymous
 		// submission's identity fields (npub empty in the fixture too).

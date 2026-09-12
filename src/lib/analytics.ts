@@ -57,6 +57,7 @@ export type EventName =
 	| "add_place_review_enter"
 	| "add_place_review_back"
 	| "add_place_submit_success"
+	| "add_place_osm_edit_click"
 	| "join_us_link_click";
 
 declare global {
