@@ -26,6 +26,9 @@ let submitted = $state(false);
 // True when the submission went out without a verified account — the
 // success screen then nudges toward creating one (#1334).
 let submittedAnonymously = $state(false);
+// The form's review step (#1341): the pin hint disappears — the summary
+// froze the coords, so "fine-tune the pin" would be a lie there.
+let inReview = $state(false);
 
 const onKeydown = (event: KeyboardEvent) => {
 	if (event.key === "Escape") {
@@ -47,11 +50,16 @@ const onKeydown = (event: KeyboardEvent) => {
 
 	{#if !submitted}
 		<div class="px-4 pb-[calc(env(safe-area-inset-bottom)+1.5rem)] md:pb-4">
-			<p class="mb-4 text-sm text-body dark:text-offwhite">
-				{$_('addLocation.pinConfirmedHint')}
-			</p>
+			{#if !inReview}
+				<p class="mb-4 text-sm text-body dark:text-offwhite">
+					{$_('addLocation.pinConfirmedHint')}
+				</p>
+			{/if}
 			<AddLocationForm
 				{coords}
+				onstepchange={(step) => {
+					inReview = step === 'review';
+				}}
 				onsuccess={(attributed) => {
 					submitted = true;
 					submittedAnonymously = !attributed;
@@ -71,9 +79,53 @@ const onKeydown = (event: KeyboardEvent) => {
 					values: { type: $_('addLocation.formSuccessType') }
 				})}
 			</h2>
-			<p class="text-body dark:text-offwhite">
-				{$_('addLocation.formSuccessText')}
-			</p>
+			<!-- The honest status track (#1342): what actually happens next,
+			     with no notification promises — nothing emails submitters
+			     when a place goes live today. -->
+			<ol class="w-full space-y-4 text-left">
+				<li class="flex items-start gap-3">
+					<span
+						class="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-green-600 text-white"
+						aria-hidden="true"
+					>
+						✓
+					</span>
+					<div>
+						<p class="font-semibold">{$_('addLocation.trackSubmittedTitle')}</p>
+						<p class="text-sm text-body dark:text-offwhite">
+							{$_('addLocation.trackSubmittedSub')}
+						</p>
+					</div>
+				</li>
+				<li class="flex items-start gap-3">
+					<span
+						class="flex h-8 w-8 shrink-0 items-center justify-center rounded-full border-2 border-input text-body dark:text-offwhite"
+						aria-hidden="true"
+					>
+						<Icon type="material" icon="schedule" w="18" h="18" />
+					</span>
+					<div>
+						<p class="font-semibold">{$_('addLocation.trackReviewTitle')}</p>
+						<p class="text-sm text-body dark:text-offwhite">
+							{$_('addLocation.trackReviewSub')}
+						</p>
+					</div>
+				</li>
+				<li class="flex items-start gap-3">
+					<span
+						class="flex h-8 w-8 shrink-0 items-center justify-center rounded-full border-2 border-input text-body dark:text-offwhite"
+						aria-hidden="true"
+					>
+						<Icon type="material" icon="map" w="18" h="18" />
+					</span>
+					<div>
+						<p class="font-semibold">{$_('addLocation.trackLiveTitle')}</p>
+						<p class="text-sm text-body dark:text-offwhite">
+							{$_('addLocation.trackLiveSub')}
+						</p>
+					</div>
+				</li>
+			</ol>
 			{#if submittedAnonymously}
 				<!-- The moment of investment: nudge anonymous submitters
 				     toward an account and a track record (#1334). -->

@@ -35,7 +35,22 @@
 		"phonePlaceholder": "Номер",
 		"websitePlaceholder": "https://bitcoin.org",
 		"formSuccessType": "Място",
-		"formSuccessText": "Ще прегледаме информацията и ще я добавим възможно най-скоро."
+		"reviewButton": "Преглед и изпращане",
+		"reviewTitle": "Ето какво ще бъде публикувано",
+		"reviewHint": "Точно това ще видят доброволците редактори — хвърлете последен поглед на предложения адрес и работното време.",
+		"reviewEditButton": "Редактиране на данните",
+		"reviewName": "Име",
+		"reviewNameEn": "Име (на английски)",
+		"reviewPosition": "Позиция на картата",
+		"reviewPayments": "Начини на плащане",
+		"reviewIdentity": "Изпратено от",
+		"reviewAnonymous": "Анонимно",
+		"trackSubmittedTitle": "Изпратено",
+		"trackSubmittedSub": "Получено току-що",
+		"trackReviewTitle": "Преглед от доброволци",
+		"trackReviewSub": "Обикновено 1–2 дни, понякога повече",
+		"trackLiveTitle": "На картата",
+		"trackLiveSub": "В BTC Map и OpenStreetMap"
 	},
 	"formSuccess": {
 		"submittedTitle": "{type} изпратено!",

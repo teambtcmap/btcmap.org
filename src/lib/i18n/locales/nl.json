@@ -616,7 +616,22 @@
 		"contactPlaceholder": "jouw@emailadres.nl",
 		"captchaPlaceholder": "Voer de captcha-tekst in",
 		"formSuccessType": "Locatie",
-		"formSuccessText": "We zullen je gegevens beoordelen en deze zo snel mogelijk toevoegen."
+		"reviewButton": "Controleren en versturen",
+		"reviewTitle": "Dit wordt gepubliceerd",
+		"reviewHint": "Dit is precies wat de vrijwillige editors zien — werp nog één blik op het voorgestelde adres en de openingstijden.",
+		"reviewEditButton": "Gegevens bewerken",
+		"reviewName": "Naam",
+		"reviewNameEn": "Naam (Engels)",
+		"reviewPosition": "Positie op de kaart",
+		"reviewPayments": "Betaalmethoden",
+		"reviewIdentity": "Ingediend door",
+		"reviewAnonymous": "Anoniem",
+		"trackSubmittedTitle": "Ingediend",
+		"trackSubmittedSub": "Zojuist ontvangen",
+		"trackReviewTitle": "Beoordeling door vrijwilligers",
+		"trackReviewSub": "Meestal 1–2 dagen, soms langer",
+		"trackLiveTitle": "Live op de kaart",
+		"trackLiveSub": "Op BTC Map en OpenStreetMap"
 	},
 	"formSuccess": {
 		"submittedTitle": "{type} ingediend!",

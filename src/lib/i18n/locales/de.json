@@ -515,7 +515,22 @@
 		"contactPlaceholder": "hello@btcmap.org",
 		"captchaPlaceholder": "Bitte gib den Captcha-Text ein.",
 		"formSuccessType": "Standort",
-		"formSuccessText": "Wir werden deine Informationen prüfen und so bald wie möglich hinzufügen."
+		"reviewButton": "Prüfen & absenden",
+		"reviewTitle": "Das wird veröffentlicht",
+		"reviewHint": "Genau das sehen die freiwilligen Editoren — wirf noch einen letzten Blick auf die vorgeschlagene Adresse und die Öffnungszeiten.",
+		"reviewEditButton": "Angaben bearbeiten",
+		"reviewName": "Name",
+		"reviewNameEn": "Name (Englisch)",
+		"reviewPosition": "Position auf der Karte",
+		"reviewPayments": "Zahlungsmethoden",
+		"reviewIdentity": "Eingereicht von",
+		"reviewAnonymous": "Anonym",
+		"trackSubmittedTitle": "Eingereicht",
+		"trackSubmittedSub": "Gerade eingegangen",
+		"trackReviewTitle": "Prüfung durch Freiwillige",
+		"trackReviewSub": "In der Regel 1–2 Tage, manchmal länger",
+		"trackLiveTitle": "Live auf der Karte",
+		"trackLiveSub": "Auf BTC Map und OpenStreetMap"
 	},
 	"formSuccess": {
 		"submittedTitle": "{type} eingereicht!",
