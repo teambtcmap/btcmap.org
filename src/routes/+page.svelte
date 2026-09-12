@@ -6,6 +6,7 @@ import Footer from "$components/layout/Footer.svelte";
 import Header from "$components/layout/Header.svelte";
 import HeaderPlaceholder from "$components/layout/HeaderPlaceholder.svelte";
 import PrimaryButton from "$components/PrimaryButton.svelte";
+import { trackEvent } from "$lib/analytics";
 import type { AppConfig } from "$lib/apps";
 import { appConfigs } from "$lib/apps";
 import IconApps from "$lib/icons/IconApps.svelte";
@@ -103,6 +104,15 @@ function openAppModal(app: AppConfig) {
 						href={placementEntryUrl('nav')}
 						class="rounded-full bg-link px-7 py-3.5 text-lg font-semibold text-white transition-colors hover:bg-hover"
 						>{$_('home.addLocation')}</a
+					>
+					<!-- The recruiting CTA (#1376): data maintainers are the
+					     project's biggest bottleneck. Label shared with the nav
+					     entry — same destination, same words. -->
+					<a
+						href="/join-us"
+						class="rounded-full bg-link px-7 py-3.5 text-lg font-semibold text-white transition-colors hover:bg-hover"
+						on:click={() => trackEvent('join_us_link_click', { target: 'home-cta' })}
+						>{$_('nav.joinUs')}</a
 					>
 				</div>
 			<div
