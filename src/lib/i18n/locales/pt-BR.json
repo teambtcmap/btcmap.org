@@ -508,7 +508,7 @@
 		"notesPlaceholder": "Por favor adicione mais detalhes aqui como informações adicionais do comerciante, contatos, redes sociais, etc.",
 		"contactDescription": "Se tivermos perguntas de acompanhamento, entraremos em contato para adicionar este local com sucesso. O endereço aparece no ticket público do envio, então use um que você não se importe de compartilhar.",
 		"submittingAs": "Enviando como {username}",
-		"contactSignedInHint": "Seu envio está vinculado à sua conta. Adicione um e-mail apenas se quiser perguntas de acompanhamento — ele aparecerá no ticket público do envio.",
+		"contactSignedInHint": "Seu envio fica vinculado à sua conta — nenhum e-mail de contato é necessário.",
 		"submitAnonymously": "Não é você? Enviar anonimamente",
 		"submitAsAccount": "Usar minha conta ({username})",
 		"signInPrompt": "Tem uma conta no BTC Map? Entre para vincular seus envios",
@@ -531,6 +531,7 @@
 		"trackSubmittedSub": "Recebido agora mesmo",
 		"trackReviewTitle": "Revisão por voluntários",
 		"trackReviewSub": "Costuma levar 1–2 dias, às vezes mais",
+		"trackReviewQueueLink": "Acompanhe a fila pública de revisão",
 		"trackLiveTitle": "Visível no mapa",
 		"trackLiveSub": "No BTC Map e no OpenStreetMap"
 	},

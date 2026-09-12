@@ -1,3 +1,5 @@
+import type { PostPlaceSubmissionArgs } from "$types/btcmap-api/PostPlaceSubmissionArgs";
+
 // The wire contract of POST /api/submit-place. The endpoint still treats
 // the incoming body as untrusted unknowns and re-validates everything —
 // this type exists so the client payload and the server's reads can't
@@ -23,11 +25,11 @@ export type SubmitPlaceRequest = {
 
 export type SubmitPlaceResponse = {
 	id: number;
-	// Whether a verified account was attached (#1334) — the authoritative
-	// answer; the client's belief can be stale.
-	attributed: boolean;
 };
 
+// The anonymous proxy's field set (#1374): signed-in submissions never
+// reach it — they go straight to POST /v4/place-submissions, so no
+// identity fields live here any more.
 export type AddLocationSubmission = {
 	name: string;
 	nameEn: string;
@@ -41,10 +43,6 @@ export type AddLocationSubmission = {
 	hours: string;
 	notes: string;
 	contact: string;
-	// Verified server-side against /v4/users/me — never client-claimed.
-	// Empty when the submission is anonymous.
-	submittedBy: string;
-	submitterNpub: string;
 };
 
 export type SubmitPlaceParams = {
@@ -74,8 +72,6 @@ export const buildSubmitPlaceParams = (
 		opening_hours: form.hours,
 		notes: form.notes,
 		contact: form.contact,
-		submitted_by: form.submittedBy,
-		submitter_npub: form.submitterNpub,
 		osm_edit_url: `https://www.openstreetmap.org/edit#map=21/${form.lat}/${form.long}`,
 	};
 	const extra_fields = Object.fromEntries(
@@ -89,5 +85,33 @@ export const buildSubmitPlaceParams = (
 		category: form.category,
 		name: form.name,
 		extra_fields,
+	};
+};
+
+// The authorized path (#1374): a signed-in client POSTs these to
+// /v4/place-submissions with its own Bearer token — the endpoint the
+// Android form uses. Identity comes from the token and extra_fields are
+// place fields (#1348), so no submitter identity or contact goes here.
+export const buildPlaceSubmissionArgs = (
+	form: Omit<AddLocationSubmission, "contact">,
+): PostPlaceSubmissionArgs => {
+	const optional: Record<string, string> = {
+		"name:en": form.nameEn,
+		address: form.address,
+		payment_methods: form.methods.join(","),
+		website: form.website,
+		phone: form.phone,
+		opening_hours: form.hours,
+		notes: form.notes,
+		osm_edit_url: `https://www.openstreetmap.org/edit#map=21/${form.lat}/${form.long}`,
+	};
+	return {
+		lat: form.lat,
+		lon: form.long,
+		category: form.category,
+		name: form.name,
+		extra_fields: Object.fromEntries(
+			Object.entries(optional).filter(([, value]) => value.trim() !== ""),
+		),
 	};
 };
