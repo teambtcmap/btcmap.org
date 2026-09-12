@@ -537,6 +537,7 @@
 		"trackSubmittedSub": "Только что получено",
 		"trackReviewTitle": "Проверка волонтёрами",
 		"trackReviewSub": "Обычно 1–2 дня, иногда дольше",
+		"trackReviewQueueLink": "Открыть публичную очередь проверки",
 		"trackLiveTitle": "Опубликовано на карте",
 		"trackLiveSub": "На BTC Map и OpenStreetMap",
 		"successVolunteerPrompt": "Интересно, кто это проверяет?",
