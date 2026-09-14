@@ -18,6 +18,7 @@ type StepLink = {
 	label: string;
 	target: string;
 	external?: boolean;
+	button?: boolean;
 };
 type Step = { title: string; body?: string; links: StepLink[] };
 
@@ -30,11 +31,15 @@ const steps: Step[] = $derived([
 				href: "/countries",
 				label: $_("joinUs.browseCountries"),
 				target: "countries",
+				external: true,
+				button: true,
 			},
 			{
 				href: "/communities",
 				label: $_("joinUs.browseCommunities"),
 				target: "communities",
+				external: true,
+				button: true,
 			},
 		],
 	},
@@ -66,6 +71,7 @@ const steps: Step[] = $derived([
 				label: $_("joinUs.step4Cta"),
 				target: "osm-signup",
 				external: true,
+				button: true,
 			},
 		],
 	},
@@ -75,9 +81,10 @@ const steps: Step[] = $derived([
 		links: [
 			{
 				href: "https://matrix.to/#/#btcmap-taggers:matrix.org",
-				label: "#btcmap-taggers:matrix.org",
+				label: $_("joinUs.step5Cta"),
 				target: "matrix",
 				external: true,
+				button: true,
 			},
 		],
 	},
@@ -113,78 +120,67 @@ const steps: Step[] = $derived([
 {/if}
 
 <section id="join-us" class="mx-auto mt-10 w-full pb-20 md:w-[600px] md:pb-32">
-	<p class="mb-6 text-center text-primary dark:text-white">
-		{$_('joinUs.intro')}
+	<p class="mb-6 space-y-7 text-center text-xl font-semibold text-primary dark:text-white">
+		<span class="block">
+			{$_('joinUs.openDataPre')}{' '}
+			<!-- The copy is split around the link instead of {@html}-injecting
+			     an anchor: an {@html} block whose SSR (English) and client
+			     (user locale) values differ gets frozen at the server value on
+			     hydration (svelte's hydration_html_changed). Every locale ends
+			     this sentence on the link, so the split reads naturally. -->
+			<a
+				href="https://www.openstreetmap.org/"
+				target="_blank"
+				rel="noopener noreferrer"
+				class="font-semibold text-link transition-colors hover:text-hover"
+				onclick={track('osm-about')}
+			>OpenStreetMap</a>.
+		</span>
+		<span class="block">{$_('joinUs.intro')}</span>
 	</p>
 
-	<div
-		class="mb-10 rounded-2xl border-2 border-input p-4 text-sm text-body dark:text-offwhite"
-	>
-		<span class="font-semibold">{$_('joinUs.openData')}</span>
-		<!-- The copy is split around the link instead of {@html}-injecting
-		     an anchor: an {@html} block whose SSR (English) and client
-		     (user locale) values differ gets frozen at the server value on
-		     hydration (svelte's hydration_html_changed). Every locale ends
-		     this sentence on the link, so the split reads naturally. -->
-		{$_('joinUs.openDataPre')}
-		<a
-			href="https://www.openstreetmap.org/"
-			target="_blank"
-			rel="noopener noreferrer"
-			class="font-semibold text-link transition-colors hover:text-hover"
-			onclick={track('osm-about')}
-		>OpenStreetMap</a>. {$_('joinUs.openDataPost')}
-	</div>
-
-	<ol class="space-y-8">
+	<ol class="space-y-6">
 		{#each steps as step, index (step.title)}
-			<li class="flex items-start gap-4">
-				<span
-					class="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-link font-semibold text-white"
-					aria-hidden="true"
-				>
-					{index + 1}
-				</span>
-				<div>
-					<h2 class="font-semibold text-primary dark:text-white">
-						{step.title}
-					</h2>
-					{#if step.body}
-						<p class="mt-1 text-sm text-body dark:text-offwhite">
-							{step.body}
-						</p>
-					{/if}
-					{#if step.links.length}
-						<p class="mt-1 space-x-3 text-sm">
-							{#each step.links as link (link.target)}
-								<a
-									href={link.href}
-									target={link.external ? '_blank' : undefined}
-									rel={link.external ? 'noopener noreferrer' : undefined}
-									class="font-semibold text-link hover:text-hover"
-									onclick={track(link.target)}
-								>
-									{link.label}
-								</a>
-							{/each}
-						</p>
-					{/if}
+			<li
+				class="rounded-3xl border border-gray-300 p-4 shadow transition-shadow hover:shadow-2xl dark:border-white/95 dark:bg-white/10"
+			>
+				<div class="flex items-start gap-4">
+					<span
+						class="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-link font-semibold text-white"
+						aria-hidden="true"
+					>
+						{index + 1}
+					</span>
+					<div>
+						<h2 class="font-semibold text-primary dark:text-white">
+							{step.title}
+						</h2>
+						{#if step.body}
+							<p class="mt-1 text-sm text-body dark:text-offwhite">
+								{step.body}
+							</p>
+						{/if}
+						{#if step.links.length}
+							<p class="mt-4 space-x-3 text-sm">
+								{#each step.links as link (link.target)}
+									<a
+										href={link.href}
+										target={link.external ? '_blank' : undefined}
+										rel={link.external ? 'noopener noreferrer' : undefined}
+										class={link.button
+											? 'rounded-full bg-link px-5 py-2 text-sm font-semibold text-white transition-colors hover:bg-hover'
+											: 'font-semibold text-link hover:text-hover'}
+										onclick={track(link.target)}
+									>
+										{link.label}
+									</a>
+								{/each}
+							</p>
+						{/if}
+					</div>
 				</div>
 			</li>
 		{/each}
 	</ol>
 
-	<div class="mt-12 text-center">
-		<a
-			href="/countries"
-			class="rounded-full bg-link px-7 py-3.5 text-lg font-semibold text-white transition-colors hover:bg-hover"
-			onclick={track('cta-countries')}
-		>
-			{$_('joinUs.cta')}
-		</a>
-	</div>
-
-	<p class="mt-12 text-center text-sm text-body dark:text-offwhite">
-		{$_('joinUs.credit')}
-	</p>
-</section>
+	</section>
