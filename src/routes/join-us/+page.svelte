@@ -161,7 +161,7 @@ const steps: Step[] = $derived([
 							</p>
 						{/if}
 						{#if step.links.length}
-							<p class="mt-4 space-x-3 text-sm">
+							<p class="mt-4 flex flex-wrap gap-3 text-sm">
 								{#each step.links as link (link.target)}
 									<a
 										href={link.href}
