@@ -31,11 +31,6 @@ const CONFIG = {
 		labelId: GITEA_LABELS.DATA.VERIFY_COMMUNITY,
 		hasAreaLabels: false,
 	},
-	"tagger-onboarding": {
-		repo: "btcmap-infra",
-		labelId: GITEA_LABELS.INFRA.TAGGER_ONBOARDING,
-		hasAreaLabels: false,
-	},
 } satisfies Record<string, IssueConfig>;
 
 type IssueType = keyof typeof CONFIG;
@@ -105,13 +100,6 @@ Information is accurate: ${data.accurate}
 Updates needed: ${data.updates || "None"}
 How did you verify this?: ${data.verified}
 Created at: ${timestamp}`;
-
-		case "tagger-onboarding":
-			return `Name: ${data.name}
-Email: ${data.email}
-Created at: ${timestamp}
-
-New tagger onboarding request.`;
 
 		default:
 			error(400, "Invalid issue type");

@@ -197,7 +197,7 @@ When editing locale files in `src/lib/i18n/locales/*.json`:
   for f in src/lib/i18n/locales/*.json; do jq -r --arg f "$f" --slurpfile en src/lib/i18n/locales/en.json '([paths(scalars)|join(".")]) as $k | ($en[0]|[paths(scalars)|join(".")]) as $e | (($e - $k)[] | "\($f): missing \(.)"), (($k - $e)[] | "\($f): extra \(.)")' "$f"; done
   ```
 - **Use the file's existing HTML-entity style for diacritics** (`&euml;`, `&ouml;`, `&uuml;`, `&eacute;`, `&mdash;`) rather than mixing literal Unicode and entity forms within the same locale.
-- **Don't translate honeypot fields.** Anti-spam honeypot inputs (the `name="honey"` fields on add-location, verify-location, communities/add, tagger-onboarding, and VerifyCommunityForm) are rendered with `class="hidden"` and never seen by humans, so translating their `placeholder` provides zero UX value while bloating every locale. Inline the placeholder as a hardcoded English string at the call site instead of referencing an i18n key.
+- **Don't translate honeypot fields.** Anti-spam honeypot inputs (the `name="honey"` fields on add-location, verify-location, communities/add, and VerifyCommunityForm) are rendered with `class="hidden"` and never seen by humans, so translating their `placeholder` provides zero UX value while bloating every locale. Inline the placeholder as a hardcoded English string at the call site instead of referencing an i18n key.
 
 ## API Base URL
 
