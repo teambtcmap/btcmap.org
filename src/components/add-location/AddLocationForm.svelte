@@ -15,6 +15,7 @@ import Icon from "$components/Icon.svelte";
 import NostrAvatar from "$components/NostrAvatar.svelte";
 import PrimaryButton from "$components/PrimaryButton.svelte";
 import { trackEvent } from "$lib/analytics";
+import { API_BASE } from "$lib/api-base";
 import { CATEGORIES, CATEGORY_GROUPS } from "$lib/categoryMapping";
 import { reverseGeocode } from "$lib/geocoding";
 import { _, locale } from "$lib/i18n";
@@ -23,9 +24,12 @@ import type {
 	SubmitPlaceRequest,
 	SubmitPlaceResponse,
 } from "$lib/placeSubmission";
+import { buildPlaceSubmissionArgs } from "$lib/placeSubmission";
 import { session } from "$lib/session";
 import { theme } from "$lib/theme";
 import { errToast } from "$lib/utils";
+
+import type { PostPlaceSubmissionResponse } from "$types/btcmap-api/PostPlaceSubmissionResponse";
 
 // The add-location details form, extracted from the /add-location page so
 // the map's placement side-panel can host the same component (#1134). The
@@ -316,9 +320,11 @@ const submitForm = (event: SubmitEvent) => {
 		step = "review";
 		onstepchange?.("review");
 		trackEvent("add_place_review_enter");
-		// First entry fetches; bouncing edit↔review keeps the loaded one
-		// (the refresh button covers an expired image).
-		if (!captchaSecret && !isCaptchaLoading) {
+		// Captcha only guards the anonymous path (#1374) — a signed-in
+		// submission authenticates with the account token instead. First
+		// entry fetches; bouncing edit↔review keeps the loaded one (the
+		// refresh button covers an expired image).
+		if (!identityAttached && !captchaSecret && !isCaptchaLoading) {
 			fetchCaptcha();
 		}
 		scrollToTop();
@@ -327,6 +333,30 @@ const submitForm = (event: SubmitEvent) => {
 
 	if (!preview) return;
 	submitting = true;
+
+	// The authorized fork (#1374, per #1348): signed in goes straight to
+	// the REST API under the user's own token — same endpoint as the
+	// Android form; anonymous keeps the captcha-guarded server proxy
+	// (which holds the import token).
+	if (identityAttached && $session) {
+		axios
+			.post<PostPlaceSubmissionResponse>(
+				`${API_BASE}/v4/place-submissions`,
+				buildPlaceSubmissionArgs(preview),
+				{ headers: { Authorization: `Bearer ${$session.token.trim()}` } },
+			)
+			.then(() => {
+				trackEvent("add_place_submit_success");
+				onsuccess(true);
+			})
+			.catch((error) => {
+				errToast(get(_)("errors.formSubmission"));
+				console.error(error);
+				submitting = false;
+			});
+		return;
+	}
+
 	// The reviewed snapshot goes out verbatim — only the captcha answer
 	// and the honeypot are read live.
 	const payload: SubmitPlaceRequest = {
@@ -337,25 +367,14 @@ const submitForm = (event: SubmitEvent) => {
 	};
 
 	axios
-		.post<SubmitPlaceResponse>(
-			"/api/submit-place",
-			payload,
-			// The endpoint verifies the token and attaches the account to
-			// the submission (#1334); no session (or a detached one), no
-			// header — anonymous.
-			identityAttached && $session
-				? { headers: { Authorization: `Bearer ${$session.token.trim()}` } }
-				: undefined,
-		)
-		.then((response) => {
+		.post<SubmitPlaceResponse>("/api/submit-place", payload)
+		.then(() => {
 			trackEvent("add_place_submit_success");
-			// The server's verdict, not the client's belief — a stale
-			// token lands anonymous despite the chip.
-			onsuccess(response.data?.attributed === true);
+			onsuccess(false);
 		})
 		.catch((error) => {
 			// Our endpoint's 4xx messages are written for users (captcha,
-			// missing contact on an anonymous fallback, …) — show them.
+			// missing contact, …) — show them.
 			const message = error.response?.data?.message;
 			if (message && error.response.status < 500) {
 				errToast(message);
@@ -621,64 +640,68 @@ onMount(() => {
 			</div>
 		</div>
 
-		<TextField
-			id="contact"
-			name="contact"
-			label={$_('forms.contact')}
-			optional={identityAttached}
-			type="email"
-			bind:element={contact}
-			required={!identityAttached}
-			placeholder={$_('addLocation.contactPlaceholder')}
-		>
-			{#snippet hint()}
-				{#if identityAttached && $session}
-					<!-- The submission carries the account (verified server-side), so
-					     the email is a follow-up channel, not the identity. The chip
-					     reveals the shared-device escape hatch: detach the account
-					     from this one submission. -->
-					<div class="mb-2 flex flex-wrap items-center gap-2">
-						<!-- Speaks the app's chip dialect: the filter chips' active
-						     pill, the header UserMenu's identity (Nostr avatar or
-						     account icon), and the expand_more rotate-on-open
-						     disclosure. -->
+		{#if identityAttached && $session}
+			<!-- Signed in (#1374): the submission goes to the API under the
+			     account — no ticket, no contact email to collect. The chip
+			     keeps the shared-device escape hatch: detach the account
+			     from this one submission. -->
+			<div>
+				<div class="mb-2 flex flex-wrap items-center gap-2">
+					<!-- Speaks the app's chip dialect: the filter chips' active
+					     pill, the header UserMenu's identity (Nostr avatar or
+					     account icon), and the expand_more rotate-on-open
+					     disclosure. -->
+					<button
+						type="button"
+						aria-expanded={showDetach}
+						onclick={() => (showDetach = !showDetach)}
+						class="flex shrink-0 items-center gap-2 rounded-full border border-link bg-link/10 px-3 py-1 text-sm font-semibold whitespace-nowrap text-primary transition-colors focus-visible:ring-2 focus-visible:ring-link focus-visible:ring-offset-1 focus-visible:outline-none dark:border-link dark:text-white dark:focus-visible:ring-offset-dark"
+					>
+						{#if $session.npub}
+							<NostrAvatar npub={$session.npub} size={18} class="h-[18px] w-[18px]" />
+						{:else}
+							<Icon type="material" icon="account_circle_filled" w="18" h="18" />
+						{/if}
+						{$_('addLocation.submittingAs', { values: { username: displayName } })}
+						<Icon
+							type="material"
+							icon="expand_more"
+							w="16"
+							h="16"
+							class={showDetach ? 'rotate-180' : ''}
+						/>
+					</button>
+					{#if showDetach}
 						<button
 							type="button"
-							aria-expanded={showDetach}
-							onclick={() => (showDetach = !showDetach)}
-							class="flex shrink-0 items-center gap-2 rounded-full border border-link bg-link/10 px-3 py-1 text-sm font-semibold whitespace-nowrap text-primary transition-colors focus-visible:ring-2 focus-visible:ring-link focus-visible:ring-offset-1 focus-visible:outline-none dark:border-link dark:text-white dark:focus-visible:ring-offset-dark"
+							onclick={() => {
+								submitAnonymously = true;
+								showDetach = false;
+							}}
+							class="text-sm font-semibold text-link hover:text-hover focus:outline-link"
 						>
-							{#if $session.npub}
-								<NostrAvatar npub={$session.npub} size={18} class="h-[18px] w-[18px]" />
-							{:else}
-								<Icon type="material" icon="account_circle_filled" w="18" h="18" />
-							{/if}
-							{$_('addLocation.submittingAs', { values: { username: displayName } })}
-							<Icon
-								type="material"
-								icon="expand_more"
-								w="16"
-								h="16"
-								class={showDetach ? 'rotate-180' : ''}
-							/>
+							{$_('addLocation.submitAnonymously')}
 						</button>
-						{#if showDetach}
-							<button
-								type="button"
-								onclick={() => {
-									submitAnonymously = true;
-									showDetach = false;
-								}}
-								class="text-sm font-semibold text-link hover:text-hover focus:outline-link"
-							>
-								{$_('addLocation.submitAnonymously')}
-							</button>
-						{/if}
-					</div>
-					<p class="mb-2 text-justify text-sm">
-						{$_('addLocation.contactSignedInHint')}
-					</p>
-				{:else}
+					{/if}
+				</div>
+				<p class="text-justify text-sm">
+					{$_('addLocation.contactSignedInHint')}
+				</p>
+			</div>
+		{:else}
+			<!-- The anonymous contract: a required contact email. Detaching
+			     mounts this fresh (the field doesn't exist while attached),
+			     so a previously typed email doesn't survive the toggle. -->
+			<TextField
+				id="contact"
+				name="contact"
+				label={$_('forms.contact')}
+				type="email"
+				bind:element={contact}
+				required
+				placeholder={$_('addLocation.contactPlaceholder')}
+			>
+				{#snippet hint()}
 					{#if $session}
 						<!-- Detached: the anonymous contract applies, with an undo. -->
 						<button
@@ -734,9 +757,9 @@ onMount(() => {
 							{/if}
 						</div>
 					{/if}
-				{/if}
-			{/snippet}
-		</TextField>
+				{/snippet}
+			</TextField>
+		{/if}
 
 		<PrimaryButton style="w-full py-3 rounded-xl">
 			{$_('addLocation.reviewButton')}
@@ -784,45 +807,51 @@ onMount(() => {
 				)}
 			</dl>
 
-			<div>
-				<div class="mb-2 flex items-center space-x-2">
-					<label for="captcha" class="font-semibold"
-						>{$_('forms.captcha')}
-						<span class="font-normal">({$_('forms.captchaCaseSensitive')})</span></label
-					>
-					<!-- Visible whenever a (re)fetch is possible — a failed first
-					     fetch must leave a retry, or the user is stranded at the
-					     end of the funnel with a disabled submit. -->
-					{#if !isCaptchaLoading}
-						<button type="button" onclick={fetchCaptcha}>
-							<Icon type="fa" icon="arrows-rotate" w="16" h="16" />
-						</button>
-					{/if}
-				</div>
-				<div class="space-y-2">
-					<div class="flex items-center justify-center rounded-2xl border-2 border-input py-1">
-						{#if isCaptchaLoading}
-							<div class="h-[100px] w-[275px] animate-pulse bg-link/50"></div>
-						{:else}
-							{@html captchaContent}
+			<!-- The captcha guards the anonymous path only (#1374): a
+			     signed-in submission authenticates with the account token. -->
+			{#if !identityAttached}
+				<div>
+					<div class="mb-2 flex items-center space-x-2">
+						<label for="captcha" class="font-semibold"
+							>{$_('forms.captcha')}
+							<span class="font-normal">({$_('forms.captchaCaseSensitive')})</span></label
+						>
+						<!-- Visible whenever a (re)fetch is possible — a failed first
+						     fetch must leave a retry, or the user is stranded at the
+						     end of the funnel with a disabled submit. -->
+						{#if !isCaptchaLoading}
+							<button type="button" onclick={fetchCaptcha}>
+								<Icon type="fa" icon="arrows-rotate" w="16" h="16" />
+							</button>
 						{/if}
 					</div>
-					<input
-						disabled={!captchaSecret}
-						required
-						type="text"
-						name="captcha"
-						id="captcha"
-						placeholder={$_('addLocation.captchaPlaceholder')}
-						class="w-full rounded-2xl border-2 border-input p-3 transition-all focus:outline-link disabled:cursor-not-allowed disabled:bg-gray-100 disabled:text-gray-500 dark:bg-white/[0.15] dark:disabled:bg-gray-700 dark:disabled:text-gray-400"
-						bind:this={captchaInput}
-					/>
+					<div class="space-y-2">
+						<div
+							class="flex items-center justify-center rounded-2xl border-2 border-input py-1"
+						>
+							{#if isCaptchaLoading}
+								<div class="h-[100px] w-[275px] animate-pulse bg-link/50"></div>
+							{:else}
+								{@html captchaContent}
+							{/if}
+						</div>
+						<input
+							disabled={!captchaSecret}
+							required
+							type="text"
+							name="captcha"
+							id="captcha"
+							placeholder={$_('addLocation.captchaPlaceholder')}
+							class="w-full rounded-2xl border-2 border-input p-3 transition-all focus:outline-link disabled:cursor-not-allowed disabled:bg-gray-100 disabled:text-gray-500 dark:bg-white/[0.15] dark:disabled:bg-gray-700 dark:disabled:text-gray-400"
+							bind:this={captchaInput}
+						/>
+					</div>
 				</div>
-			</div>
+			{/if}
 
 			<PrimaryButton
 				loading={submitting}
-				disabled={submitting || !captchaSecret}
+				disabled={submitting || (!identityAttached && !captchaSecret)}
 				style="w-full py-3 rounded-xl"
 			>
 				{$_('forms.submitLocation')}
