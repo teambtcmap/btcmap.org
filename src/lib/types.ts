@@ -2,6 +2,9 @@ import type { GeoJSON, MultiPolygon, Polygon } from "geojson";
 
 import type { MobileNavIconName } from "$lib/icons/types";
 
+// Aliased: this module also exports its own v2 activity `Event` type.
+import type { Event as ApiEvent } from "$types/btcmap-api/Event";
+
 // nominatim.openstreetmap.org API
 // https://nominatim.org/release-docs/latest/api/Search
 
@@ -511,19 +514,25 @@ export interface ProgressUpdate {
 	status: "downloading" | "parsing" | "filtering" | "complete";
 }
 
-// Response item of GET /v4/areas/{id_or_alias}/events. Mirrors the Rust
-// `Item` struct in btcmap-api's src/rest/v4/events.rs; that struct has no
-// #[ts(export)] annotation yet, so the type lives here instead of the
-// generated $types/btcmap-api/ bindings. When ts-rs is wired up on the API
-// side, regenerate and import from $types/btcmap-api/Event instead.
-export type AreaEvent = {
-	id: number;
+// Response item of GET /v4/areas/{id_or_alias}/events, derived from the
+// generated binding (btcmap-api's `Item` in src/rest/v4/events.rs, exported
+// as `Event`) so the six fields it gets right stay in lockstep with upstream.
+//
+// Three fields are corrected here: upstream marks them `#[ts(optional)]`,
+// which means "key may be absent, never null", but none carries
+// `#[serde(skip_serializing_if)]` — so the API actually sends `null`, as its
+// own docs/rest/v4/events.md documents ("Integer or null", "ISO 8601 datetime
+// or null"). `area_id` is additionally generated as `bigint`, which
+// JSON.parse never produces. Adopting the binding verbatim would make
+// TypeScript vouch for a shape the API never returns.
+//
+// Tracked upstream in teambtcmap/btcmap-api#113 (#1389). Once that ships and
+// `pnpm types:api` is re-run, this collapses to `export type AreaEvent = ApiEvent`.
+export type AreaEvent = Omit<
+	ApiEvent,
+	"area_id" | "ends_at" | "cron_schedule"
+> & {
 	area_id: number | null;
-	lat: number;
-	lon: number;
-	name: string;
-	website: string;
-	starts_at: string;
 	ends_at: string | null;
 	cron_schedule: string | null;
 };
