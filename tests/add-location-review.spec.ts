@@ -170,7 +170,13 @@ test.describe('Add Location — review step', () => {
 				})
 			);
 		});
-		// The authorized path (#1374) goes straight to the REST API.
+		await stubMapData(page);
+		await stubReverseGeocode(page);
+		// The authorized path (#1374) goes straight to the REST API. Registered
+		// AFTER stubMapData on purpose: Playwright matches routes in reverse
+		// registration order and stubMapData's catch-all also covers /v4/, so
+		// registering this first would let the catch-all answer the POST with
+		// [] instead of this body.
 		await page.route('**/v4/place-submissions', async (route) => {
 			await route.fulfill({
 				status: 200,
@@ -178,8 +184,6 @@ test.describe('Add Location — review step', () => {
 				body: JSON.stringify({ id: 55, origin: 'user' })
 			});
 		});
-		await stubMapData(page);
-		await stubReverseGeocode(page);
 		await page.goto(PIN);
 		await expect(page.locator('#name')).toBeVisible({
 			timeout: MARKER_LOAD_TIMEOUT
