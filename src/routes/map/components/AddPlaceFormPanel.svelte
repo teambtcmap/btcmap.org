@@ -3,7 +3,9 @@ import AddLocationForm from "$components/add-location/AddLocationForm.svelte";
 import CloseButton from "$components/CloseButton.svelte";
 import Icon from "$components/Icon.svelte";
 import PrimaryButton from "$components/PrimaryButton.svelte";
+import { trackEvent } from "$lib/analytics";
 import { _ } from "$lib/i18n";
+import { osmEditUrl } from "$lib/placeSubmission";
 
 import MapPanelShell from "./MapPanelShell.svelte";
 
@@ -54,6 +56,35 @@ const onKeydown = (event: KeyboardEvent) => {
 				<p class="mb-4 text-sm text-body dark:text-offwhite">
 					{$_('addLocation.pinConfirmedHint')}
 				</p>
+				<!-- Path fork for OSM-capable users (#1344): a deep link into the
+				     iD editor at the chosen pin, in a new tab so the form state
+				     survives. Hidden with the hint during review (#1341) — the
+				     summary is no place to invite leaving. When OSM OAuth lands
+				     it replaces this card in the same slot. The official OSM
+				     logo is vendored unmodified — the OSMF trademark policy
+				     (§3.3.4) allows it to identify a hyperlink to OSM but
+				     forbids altering it. -->
+				<div
+					class="mb-4 flex items-start gap-2 rounded-lg border border-gray-300 px-3 py-2.5 dark:border-white/20"
+				>
+					<img
+						src="/icons/osm-logo.svg"
+						alt=""
+						class="mt-0.5 h-5 w-5 shrink-0"
+					/>
+					<p class="text-sm text-body dark:text-offwhite">
+						{$_('addLocation.osmForkPrompt')}
+						<a
+							href={osmEditUrl(coords.lat, coords.long)}
+							target="_blank"
+							rel="noopener noreferrer"
+							class="font-semibold whitespace-nowrap text-link hover:text-hover"
+							onclick={() => trackEvent('add_place_osm_edit_click')}
+						>
+							{$_('addLocation.osmForkCta')}
+						</a>
+					</p>
+				</div>
 			{/if}
 			<AddLocationForm
 				{coords}
