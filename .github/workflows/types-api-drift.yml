@@ -22,19 +22,27 @@ concurrency:
   group: types-api-drift
   cancel-in-progress: true
 
-permissions:
-  issues: write
-  contents: read
-
 jobs:
-  drift:
+  # Split in two on purpose (do not merge them back together). GITHUB_TOKEN's
+  # permissions are minted per job, so this one's token physically cannot touch
+  # issues — which matters because this is the job that runs other people's
+  # code: `pnpm install` executes lifecycle scripts for the whole dependency
+  # tree, and `types:api` runs `npx degit`, which downloads and executes a
+  # package to fetch from btcmap-api. Scoping an env var would not achieve this;
+  # only a narrower token does.
+  refresh:
     runs-on: ubuntu-latest
     timeout-minutes: 10
-    env:
-      GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-      LABEL: types-drift
+    permissions:
+      contents: read
+    outputs:
+      drift: ${{ steps.drift.outputs.drift }}
     steps:
       - uses: actions/checkout@v7
+        with:
+          # checkout otherwise leaves a write-capable credential in .git/config
+          # for every later step — including the dependency install below.
+          persist-credentials: false
 
       - uses: ./.github/actions/setup
         with:
@@ -52,6 +60,8 @@ jobs:
         id: drift
         run: |
           set -euo pipefail
+
+          mkdir -p "$RUNNER_TEMP/drift"
 
           # Stage first. types:api rm -rf's the directory and re-fetches it, so
           # types upstream has ADDED arrive as untracked files — which plain
@@ -77,15 +87,44 @@ jobs:
           fi
 
           echo "drift=true" >> "$GITHUB_OUTPUT"
-          git diff --cached --name-status -- src/types/btcmap-api > /tmp/drift-files.txt
-          git diff --cached -- src/types/btcmap-api > /tmp/drift.diff
-          cat /tmp/drift-files.txt
+          git diff --cached --name-status -- src/types/btcmap-api \
+            > "$RUNNER_TEMP/drift/files.txt"
+          git diff --cached -- src/types/btcmap-api \
+            > "$RUNNER_TEMP/drift/diff.patch"
+          cat "$RUNNER_TEMP/drift/files.txt"
+
+      - name: Upload drift details
+        if: steps.drift.outputs.drift == 'true'
+        uses: actions/upload-artifact@v7
+        with:
+          name: types-api-drift
+          path: ${{ runner.temp }}/drift/
+          retention-days: 7
+
+  # Only this job can write issues, and it checks nothing out and installs
+  # nothing — the artifact from `refresh` is all it consumes.
+  report:
+    needs: refresh
+    if: needs.refresh.outputs.drift == 'true'
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    permissions:
+      issues: write
+    env:
+      LABEL: types-drift
+    steps:
+      - uses: actions/download-artifact@v7
+        with:
+          name: types-api-drift
+          path: ${{ runner.temp }}/drift
 
       # One open issue at a time: this runs weekly, so without a dedupe it would
       # refile the same drift every Monday until someone acts on it.
       - name: Look for an existing drift issue
         id: existing
-        if: steps.drift.outputs.drift == 'true'
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          GH_REPO: ${{ github.repository }}
         run: |
           set -euo pipefail
 
@@ -105,9 +144,15 @@ jobs:
           fi
 
       - name: File a drift issue
-        if: steps.drift.outputs.drift == 'true' && steps.existing.outputs.number == ''
+        if: steps.existing.outputs.number == ''
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          GH_REPO: ${{ github.repository }}
         run: |
           set -euo pipefail
+
+          FILES="$RUNNER_TEMP/drift/files.txt"
+          DIFF="$RUNNER_TEMP/drift/diff.patch"
 
           # Issue bodies cap at 65536 characters; stay well under it.
           MAX_DIFF=40000
@@ -126,14 +171,14 @@ jobs:
             echo "### Changed files"
             echo
             echo '```'
-            cat /tmp/drift-files.txt
+            cat "$FILES"
             echo '```'
             echo
             echo "### Diff"
             echo
             echo '```diff'
-            head -c "$MAX_DIFF" /tmp/drift.diff
-            if [ "$(wc -c < /tmp/drift.diff)" -gt "$MAX_DIFF" ]; then
+            head -c "$MAX_DIFF" "$DIFF"
+            if [ "$(wc -c < "$DIFF")" -gt "$MAX_DIFF" ]; then
               echo
               echo "... truncated — run the command above to see the rest."
             fi
@@ -144,9 +189,9 @@ jobs:
             echo "A clean refresh does not mean the new types are correct. ts-rs can describe a nullable field as optional (\`?:\`), which type-checks fine but lies about the wire format — see teambtcmap/btcmap-api#113, where \`ends_at?: string\` is documented and served as \`null\`. Check new or changed optional fields against \`docs/rest/v4/\` before app code starts trusting them."
             echo
             echo "_Filed by \`.github/workflows/types-api-drift.yml\`._"
-          } > /tmp/issue-body.md
+          } > "$RUNNER_TEMP/issue-body.md"
 
           gh issue create \
             --title "btcmap-api bindings are behind upstream" \
             --label "$LABEL" \
-            --body-file /tmp/issue-body.md
+            --body-file "$RUNNER_TEMP/issue-body.md"
