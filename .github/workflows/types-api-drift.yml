@@ -1,0 +1,197 @@
+name: Types API Drift Check
+
+# `pnpm types:api` replaces src/types/btcmap-api wholesale from btcmap-api's
+# committed bindings/ts directory, and it only ever runs when someone happens
+# to need a new type. Nothing else reports that the committed bindings have
+# fallen behind, so upstream changes accumulate and then land, unrelated, in
+# whichever feature branch refreshes next (#1391). This surfaces them on a
+# schedule instead.
+#
+# Deliberately NOT a check on pull_request: unlike the icon bundle, these files
+# are not deterministic from committed inputs — they come from upstream's HEAD,
+# so a gate would redden every open PR here whenever btcmap-api is pushed to.
+
+on:
+  schedule:
+    # Mondays 07:00 UTC, so a drift issue is waiting at the start of the week
+    # rather than mid-flight through someone's branch.
+    - cron: '0 7 * * 1'
+  workflow_dispatch:
+
+concurrency:
+  group: types-api-drift
+  cancel-in-progress: true
+
+jobs:
+  # Split in two on purpose (do not merge them back together). GITHUB_TOKEN's
+  # permissions are minted per job, so this one's token physically cannot touch
+  # issues — which matters because this is the job that runs other people's
+  # code: `pnpm install` executes lifecycle scripts for the whole dependency
+  # tree, and `types:api` runs `npx degit`, which downloads and executes a
+  # package to fetch from btcmap-api. Scoping an env var would not achieve this;
+  # only a narrower token does.
+  refresh:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    permissions:
+      contents: read
+    outputs:
+      drift: ${{ steps.drift.outputs.drift }}
+    steps:
+      - uses: actions/checkout@v7
+        with:
+          # checkout otherwise leaves a write-capable credential in .git/config
+          # for every later step — including the dependency install below.
+          persist-credentials: false
+
+      - uses: ./.github/actions/setup
+        with:
+          needs-env: 'false'
+          needs-sync: 'false'
+
+      - name: Refresh bindings from btcmap-api
+        # npx prompts before installing degit on a cold runner and there is no
+        # TTY here to answer it.
+        env:
+          NPM_CONFIG_YES: 'true'
+        run: pnpm run types:api
+
+      - name: Detect drift
+        id: drift
+        run: |
+          set -euo pipefail
+
+          mkdir -p "$RUNNER_TEMP/drift"
+
+          # Stage first. types:api rm -rf's the directory and re-fetches it, so
+          # types upstream has ADDED arrive as untracked files — which plain
+          # `git diff` does not see at all. Without this, a pure-addition drift
+          # (the common case: a new endpoint's response type) reports clean.
+          git add -A -- src/types/btcmap-api
+
+          # Capture the exact status: git diff --exit-code returns 1 for a real
+          # diff (drift) but other codes (e.g. 128) for a git failure — only the
+          # former should file an issue.
+          status=0
+          git diff --cached --exit-code --quiet -- src/types/btcmap-api || status=$?
+
+          if [ "$status" -eq 0 ]; then
+            echo "drift=false" >> "$GITHUB_OUTPUT"
+            echo "Bindings match btcmap-api master."
+            exit 0
+          fi
+
+          if [ "$status" -ne 1 ]; then
+            echo "::error title=Drift check failed::git diff exited with $status"
+            exit "$status"
+          fi
+
+          echo "drift=true" >> "$GITHUB_OUTPUT"
+          git diff --cached --name-status -- src/types/btcmap-api \
+            > "$RUNNER_TEMP/drift/files.txt"
+          git diff --cached -- src/types/btcmap-api \
+            > "$RUNNER_TEMP/drift/diff.patch"
+          cat "$RUNNER_TEMP/drift/files.txt"
+
+      - name: Upload drift details
+        if: steps.drift.outputs.drift == 'true'
+        uses: actions/upload-artifact@v7
+        with:
+          name: types-api-drift
+          path: ${{ runner.temp }}/drift/
+          retention-days: 7
+
+  # Only this job can write issues, and it checks nothing out and installs
+  # nothing — the artifact from `refresh` is all it consumes.
+  report:
+    needs: refresh
+    if: needs.refresh.outputs.drift == 'true'
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    permissions:
+      issues: write
+    env:
+      LABEL: types-drift
+    steps:
+      - uses: actions/download-artifact@v7
+        with:
+          name: types-api-drift
+          path: ${{ runner.temp }}/drift
+
+      # One open issue at a time: this runs weekly, so without a dedupe it would
+      # refile the same drift every Monday until someone acts on it.
+      - name: Look for an existing drift issue
+        id: existing
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          GH_REPO: ${{ github.repository }}
+        run: |
+          set -euo pipefail
+
+          # Created up front so the lookup below doesn't fail on a repo that has
+          # never seen this label.
+          gh label create "$LABEL" \
+            --color ededed \
+            --description "Generated btcmap-api bindings are behind upstream" \
+            2>/dev/null || true
+
+          NUMBER=$(gh issue list --label "$LABEL" --state open --limit 1 \
+            --json number --jq '.[0].number // empty')
+          echo "number=$NUMBER" >> "$GITHUB_OUTPUT"
+
+          if [ -n "$NUMBER" ]; then
+            echo "Drift is already tracked in #$NUMBER — not filing a duplicate."
+          fi
+
+      - name: File a drift issue
+        if: steps.existing.outputs.number == ''
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          GH_REPO: ${{ github.repository }}
+        run: |
+          set -euo pipefail
+
+          FILES="$RUNNER_TEMP/drift/files.txt"
+          DIFF="$RUNNER_TEMP/drift/diff.patch"
+
+          # Issue bodies cap at 65536 characters; stay well under it.
+          MAX_DIFF=40000
+
+          {
+            echo "\`pnpm types:api\` produces a different \`src/types/btcmap-api/\` than the one committed here, so btcmap-api has published response-type changes this repo has not picked up."
+            echo
+            echo "Refresh them in their own PR:"
+            echo
+            echo '```bash'
+            echo 'pnpm types:api'
+            echo '```'
+            echo
+            echo "Doing it separately keeps the diff reviewable, instead of it riding along in whichever feature branch next needs a new type (#1391)."
+            echo
+            echo "### Changed files"
+            echo
+            echo '```'
+            cat "$FILES"
+            echo '```'
+            echo
+            echo "### Diff"
+            echo
+            echo '```diff'
+            head -c "$MAX_DIFF" "$DIFF"
+            if [ "$(wc -c < "$DIFF")" -gt "$MAX_DIFF" ]; then
+              echo
+              echo "... truncated — run the command above to see the rest."
+            fi
+            echo '```'
+            echo
+            echo "### Before adopting the refreshed types"
+            echo
+            echo "A clean refresh does not mean the new types are correct. ts-rs can describe a nullable field as optional (\`?:\`), which type-checks fine but lies about the wire format — see teambtcmap/btcmap-api#113, where \`ends_at?: string\` is documented and served as \`null\`. Check new or changed optional fields against \`docs/rest/v4/\` before app code starts trusting them."
+            echo
+            echo "_Filed by \`.github/workflows/types-api-drift.yml\`._"
+          } > "$RUNNER_TEMP/issue-body.md"
+
+          gh issue create \
+            --title "btcmap-api bindings are behind upstream" \
+            --label "$LABEL" \
+            --body-file "$RUNNER_TEMP/issue-body.md"
