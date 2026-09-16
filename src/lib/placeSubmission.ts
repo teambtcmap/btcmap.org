@@ -61,8 +61,13 @@ export type SubmitPlaceParams = {
 // (maintainer call on the PR): changeset-prefill hash params didn't
 // survive osm.org's routing in the maintainer's live test, and forcing
 // ?editor=id would override the user's chosen editor — both can be
-// revisited in a later optimization pass. Zoom 19 is osm.org's
-// maximum; a higher value sits outside the site's hash-parser range.
+// revisited in a later optimization pass. Zoom 19 is a deliberate
+// choice, not a ceiling: /edit hands this hash to iD, which clamps only
+// at 24 — the 19 limit belongs to osm.org's standard *tile* layer on the
+// browse map, not to the editor — so a tighter zoom would be honoured.
+// 19 keeps the neighbouring buildings in frame, which is what lets a
+// mapper notice the place already exists as an untagged node or way
+// before adding a duplicate.
 export const osmEditUrl = (lat: number, long: number): string =>
 	`https://www.openstreetmap.org/edit#map=19/${lat}/${long}`;
 
@@ -114,7 +119,7 @@ export const buildPlaceSubmissionArgs = (
 		phone: form.phone,
 		opening_hours: form.hours,
 		notes: form.notes,
-		osm_edit_url: `https://www.openstreetmap.org/edit#map=21/${form.lat}/${form.long}`,
+		osm_edit_url: osmEditUrl(form.lat, form.long),
 	};
 	return {
 		lat: form.lat,

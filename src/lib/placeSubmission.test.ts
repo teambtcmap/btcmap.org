@@ -22,7 +22,7 @@ const fullForm = {
 };
 
 describe("osmEditUrl", () => {
-	it("targets the iD editor at osm.org's max zoom on the pin", () => {
+	it("targets the iD editor on the pin, wide enough to show neighbours", () => {
 		expect(osmEditUrl(52.48841, 13.42986)).toBe(
 			"https://www.openstreetmap.org/edit#map=19/52.48841/13.42986",
 		);
@@ -89,7 +89,7 @@ describe("buildPlaceSubmissionArgs", () => {
 				opening_hours: "Mo-Fr 10:00-18:00",
 				notes: "Ring the bell",
 				osm_edit_url:
-					"https://www.openstreetmap.org/edit#map=21/52.48841/13.42986",
+					"https://www.openstreetmap.org/edit#map=19/52.48841/13.42986",
 			},
 		});
 		// extra_fields are place fields (#1348) — the submitter's contact
@@ -110,7 +110,7 @@ describe("buildPlaceSubmissionArgs", () => {
 		expect(args.extra_fields).toEqual({
 			address: "Nansenstr. 1, Berlin",
 			osm_edit_url:
-				"https://www.openstreetmap.org/edit#map=21/52.48841/13.42986",
+				"https://www.openstreetmap.org/edit#map=19/52.48841/13.42986",
 		});
 	});
 });
