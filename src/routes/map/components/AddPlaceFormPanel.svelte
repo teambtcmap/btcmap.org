@@ -122,7 +122,7 @@ const onKeydown = (event: KeyboardEvent) => {
 						✓
 					</span>
 					<div>
-						<p class="font-semibold">{$_('addLocation.trackSubmittedTitle')}</p>
+						<p class="font-semibold text-primary dark:text-white">{$_('addLocation.trackSubmittedTitle')}</p>
 						<p class="text-sm text-body dark:text-offwhite">
 							{$_('addLocation.trackSubmittedSub')}
 						</p>
@@ -136,10 +136,23 @@ const onKeydown = (event: KeyboardEvent) => {
 						<Icon type="material" icon="schedule" w="18" h="18" />
 					</span>
 					<div>
-						<p class="font-semibold">{$_('addLocation.trackReviewTitle')}</p>
+						<p class="font-semibold text-primary dark:text-white">{$_('addLocation.trackReviewTitle')}</p>
 						<p class="text-sm text-body dark:text-offwhite">
 							{$_('addLocation.trackReviewSub')}
 						</p>
+						<!-- Temporary stand-in (#1374): the per-submission issue id
+						     is created asynchronously by the API now, so link the
+						     public queue instead — replaced by in-app issue links
+						     once those are surfaced (separate PR). -->
+						<a
+							href="https://gitea.btcmap.org/teambtcmap/btcmap-data/issues"
+							target="_blank"
+							rel="noopener noreferrer"
+							class="text-sm font-semibold text-link hover:text-hover"
+							onclick={() => trackEvent('add_place_review_queue_click')}
+						>
+							{$_('addLocation.trackReviewQueueLink')}
+						</a>
 					</div>
 				</li>
 				<li class="flex items-start gap-3">
@@ -150,7 +163,7 @@ const onKeydown = (event: KeyboardEvent) => {
 						<Icon type="material" icon="map" w="18" h="18" />
 					</span>
 					<div>
-						<p class="font-semibold">{$_('addLocation.trackLiveTitle')}</p>
+						<p class="font-semibold text-primary dark:text-white">{$_('addLocation.trackLiveTitle')}</p>
 						<p class="text-sm text-body dark:text-offwhite">
 							{$_('addLocation.trackLiveSub')}
 						</p>

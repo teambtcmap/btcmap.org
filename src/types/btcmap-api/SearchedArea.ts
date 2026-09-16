@@ -4,4 +4,8 @@ export type SearchedArea = { id: number, name: string, alias?: string,
 /**
  * `[west, south, east, north]`. Absent when the area has no bbox of its own.
  */
-bbox?: [number, number, number, number], };
+bbox?: [number, number, number, number], 
+/**
+ * `icon:square` from the area's tags. Absent when the area has no icon.
+ */
+icon?: string, };
