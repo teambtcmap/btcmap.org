@@ -594,7 +594,7 @@
 		"nameEnLabel": "Nome del luogo in inglese",
 		"nameEnTooltip": "Se l'attività ha un nome diverso in inglese, inseriscilo qui. Verrà taggato come name:en in OpenStreetMap.",
 		"pinConfirmedHint": "Aggiungi i dettagli dell'attività qui sotto — puoi ancora regolare il segnaposto.",
-		"osmForkPrompt": "Conosci OpenStreetMap? Puoi aggiungere questo luogo direttamente lì — la tua modifica è subito online, a tuo nome.",
+		"osmForkPrompt": "Conosci OpenStreetMap? Aggiungi questo luogo direttamente lì — la tua modifica è subito online lì, a tuo nome. Compare come per magia su BTC Map alla nostra prossima sincronizzazione!",
 		"osmForkCta": "Apri l'editor OSM",
 		"addressSuggestedHint": "Suggerimento da OpenStreetMap per il tuo segnaposto — verifica che corrisponda all'ingresso dell'attività e correggilo se necessario.",
 		"addressLookupPending": "Ricerca dell'indirizzo…",
