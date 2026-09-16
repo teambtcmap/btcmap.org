@@ -70,7 +70,7 @@
 		"@iconify-json/fa6-brands": "^1.2.6",
 		"@iconify-json/fa6-solid": "^1.2.4",
 		"@iconify-json/ic": "^1.2.4",
-		"@iconify-json/material-symbols": "^1.2.90",
+		"@iconify-json/material-symbols": "^1.2.92",
 		"@iconify/svelte": "^5.2.2",
 		"@mapbox/mapbox-gl-rtl-text": "^0.4.0",
 		"@playwright/test": "^1.63.0",
