@@ -144,5 +144,10 @@ test.describe('Add Location — review step', () => {
 		await expect(page.getByText('Volunteer review')).toBeVisible();
 		await expect(page.getByText('Live on the map')).toBeVisible();
 		await expect(page.getByText(/Planning to add more places/)).toBeVisible();
+		// The tagger-guide recruit line (#1368) answers the question the
+		// track's second step raises.
+		await expect(
+			page.getByRole('link', { name: 'Learn how volunteers maintain the map' })
+		).toHaveAttribute('href', 'https://join.btcmap.org/');
 	});
 });
