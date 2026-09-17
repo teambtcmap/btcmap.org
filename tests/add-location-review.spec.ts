@@ -137,18 +137,44 @@ test.describe('Add Location — review step', () => {
 		expect(body.lat).toBeCloseTo(42.27625, 3);
 		expect(body.long).toBeCloseTo(42.70242, 3);
 
-		// The honest three-step status track (#1342) — no notification
-		// promises, and the anonymous submission still gets the account
-		// nudge.
-		await expect(page.getByText('Received just now')).toBeVisible();
-		await expect(page.getByText('Volunteer review')).toBeVisible();
-		await expect(page.getByText('Live on the map')).toBeVisible();
-		await expect(page.getByText(/Planning to add more places/)).toBeVisible();
-		// The tagger-guide recruit line (#1368) answers the question the
-		// track's second step raises.
+		// The title names the place; the honest three-step track (#1342)
+		// keeps its stages, but only the current one explains itself (#1395).
 		await expect(
-			page.getByRole('link', { name: 'Learn how volunteers maintain the map' })
-		).toHaveAttribute('href', 'https://join.btcmap.org/');
+			page.getByRole('heading', { name: 'Satoshi Comics is submitted' })
+		).toBeVisible();
+		await expect(page.getByText('Waiting for review')).toBeVisible();
+		const track = page.getByRole('list').filter({ hasText: 'Volunteer review' });
+		await expect(track.getByRole('listitem')).toHaveCount(3);
+		const current = track.locator('[aria-current="step"]');
+		await expect(current).toContainText('Volunteer review');
+		await expect(current).toContainText('Typically 1–2 days');
+		await expect(
+			current.getByRole('link', { name: 'Follow the public review queue' })
+		).toBeVisible();
+		// Past and future stages are a label and a dot (one-shot reads —
+		// the screen renders at once).
+		expect(await page.getByText('Received just now').count()).toBe(0);
+		expect(await page.getByText('On BTC Map and OpenStreetMap').count()).toBe(0);
+		// No step counter here: "step N of 2" belongs to the form.
+		expect(await page.getByText(/Step \d of 2/).count()).toBe(0);
+
+		// One ask, chosen by state: anonymous → the account nudge, below
+		// the actions; no tagger line competing with it.
+		const ask = page.getByText('Keep a record of what you add');
+		await expect(ask).toBeVisible();
+		await expect(
+			page.getByRole('link', { name: 'Create an account' })
+		).toHaveAttribute('href', '/signup');
+		expect(
+			await page
+				.getByRole('link', { name: 'Learn how volunteers maintain the map' })
+				.count()
+		).toBe(0);
+		const addAnotherBox = await page
+			.getByRole('button', { name: 'Submit another Location' })
+			.boundingBox();
+		const askBox = await ask.boundingBox();
+		expect(askBox!.y).toBeGreaterThan(addAnotherBox!.y);
 	});
 
 	test('signed in: no captcha, direct API submission, attributed success', async ({
@@ -224,8 +250,12 @@ test.describe('Add Location — review step', () => {
 		expect('contact' in body.extra_fields).toBe(false);
 		expect('submitted_by' in body.extra_fields).toBe(false);
 
-		// Attributed success: the track shows, the account nudge does not.
-		await expect(page.getByText('Volunteer review')).toBeVisible();
-		await expect(page.getByText(/Planning to add more places/)).toBeHidden();
+		// Attributed success: the same slot carries the tagger invitation
+		// (#1368) instead of the account nudge.
+		await expect(page.getByText('Waiting for review')).toBeVisible();
+		await expect(
+			page.getByRole('link', { name: 'Learn how volunteers maintain the map' })
+		).toHaveAttribute('href', 'https://join.btcmap.org/');
+		expect(await page.getByText('Keep a record of what you add').count()).toBe(0);
 	});
 });
