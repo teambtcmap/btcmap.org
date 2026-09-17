@@ -111,7 +111,9 @@ const onKeydown = (event: KeyboardEvent) => {
 				     it replaces this card in the same slot. The official OSM
 				     logo is vendored unmodified — the OSMF trademark policy
 				     (§3.3.4) allows it to identify a hyperlink to OSM but
-				     forbids altering it. -->
+				     forbids altering it. The CTA sits on its own line as an
+				     outlined pill: a visible action, still a step below the
+				     form's filled primary buttons (review on #1397). -->
 				<div
 					class="mb-4 flex items-start gap-2 rounded-lg border border-gray-300 px-3 py-2.5 dark:border-white/20"
 				>
@@ -120,18 +122,20 @@ const onKeydown = (event: KeyboardEvent) => {
 						alt=""
 						class="mt-0.5 h-5 w-5 shrink-0"
 					/>
-					<p class="text-sm text-body dark:text-offwhite">
-						{$_('addLocation.osmForkPrompt')}
+					<div>
+						<p class="text-sm text-body dark:text-offwhite">
+							{$_('addLocation.osmForkPrompt')}
+						</p>
 						<a
 							href={osmEditUrl(coords.lat, coords.long)}
 							target="_blank"
 							rel="noopener noreferrer"
-							class="font-semibold whitespace-nowrap text-link hover:text-hover"
+							class="mt-2 inline-block rounded-full border border-link px-4 py-1.5 text-sm font-semibold text-link transition-colors hover:bg-link hover:text-white focus:outline-link"
 							onclick={() => trackEvent('add_place_osm_edit_click')}
 						>
 							{$_('addLocation.osmForkCta')}
 						</a>
-					</p>
+					</div>
 				</div>
 			{/if}
 			<AddLocationForm
