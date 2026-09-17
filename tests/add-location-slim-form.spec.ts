@@ -200,19 +200,37 @@ test.describe('Add Location — slim form', () => {
 		const group = page.getByRole('group', {
 			name: 'How can people pay with bitcoin?'
 		});
-		await expect(group).toContainText(
-			"Pick at least one — it's what puts the place on the map."
-		);
+		await expect(group).toContainText('Pick at least one.');
 
 		await page.locator('#name').fill('Satoshi Comics');
 		// Let the stubbed lookup settle so native validation is deterministic.
 		await expect(page.locator('#address')).toHaveValue(/Freiheitsstraße/);
 		await page.locator('#category').selectOption('restaurants');
 		await page.locator('#contact').fill('owner@example.com');
+		// Screen readers read the group's aria-describedby when focus lands,
+		// not later text changes — so the error must already be the
+		// description at that moment. Record it from the focus event itself.
+		await page.locator('#onchain').evaluate((el) => {
+			el.addEventListener(
+				'focus',
+				() => {
+					(window as unknown as { __descAtFocus?: string }).__descAtFocus =
+						document
+							.getElementById('payment-methods-requirement')
+							?.textContent?.trim();
+				},
+				{ once: true }
+			);
+		});
 		await page.getByRole('button', { name: 'Review & submit' }).click();
 
 		await expect(group).toContainText('Pick at least one to continue.');
 		await expect(page.locator('#onchain')).toBeFocused();
+		expect(
+			await page.evaluate(
+				() => (window as unknown as { __descAtFocus?: string }).__descAtFocus
+			)
+		).toBe('Pick at least one to continue.');
 		await expect(page.getByText("Here's what will be published")).toBeHidden();
 		// One-shot read: a retrying toHaveCount(0) would wait out an
 		// auto-dismissing toast and pass anyway.
@@ -220,8 +238,6 @@ test.describe('Add Location — slim form', () => {
 
 		// Picking a method restores the plain requirement line.
 		await page.locator('#onchain').check();
-		await expect(group).toContainText(
-			"Pick at least one — it's what puts the place on the map."
-		);
+		await expect(group).toContainText('Pick at least one.');
 	});
 });
