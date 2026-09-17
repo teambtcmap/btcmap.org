@@ -1,7 +1,7 @@
 import { isHttpError, isRedirect } from "@sveltejs/kit";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 
-import type { AreaTags } from "$lib/types";
+import type { AreaEvent, AreaTags } from "$lib/types";
 
 import type { AreaSectionConfig } from "./areaSectionLoad";
 import { loadAreaSection } from "./areaSectionLoad";
@@ -49,16 +49,13 @@ const ISSUES_OK = { requested_issues: [{ id: 1 }, { id: 2 }] };
 const EVENTS_OK = [
 	{
 		id: 1,
-		area_id: 42,
 		lat: 7.88,
 		lon: 98.38,
 		name: "Phuket Bitcoin Meetup",
 		website: "https://example.com/meetup",
 		starts_at: "2099-08-29T19:00:00+07:00",
-		ends_at: null,
-		cron_schedule: null,
 	},
-];
+] satisfies AreaEvent[];
 
 const buildResponse = (overrides: ResponseOverrides) =>
 	({

@@ -2,6 +2,9 @@ import type { GeoJSON, MultiPolygon, Polygon } from "geojson";
 
 import type { MobileNavIconName } from "$lib/icons/types";
 
+// Aliased: this module also exports its own v2 activity `Event` type.
+import type { Event as ApiEvent } from "$types/btcmap-api/Event";
+
 // nominatim.openstreetmap.org API
 // https://nominatim.org/release-docs/latest/api/Search
 
@@ -511,19 +514,7 @@ export interface ProgressUpdate {
 	status: "downloading" | "parsing" | "filtering" | "complete";
 }
 
-// Response item of GET /v4/areas/{id_or_alias}/events. Mirrors the Rust
-// `Item` struct in btcmap-api's src/rest/v4/events.rs; that struct has no
-// #[ts(export)] annotation yet, so the type lives here instead of the
-// generated $types/btcmap-api/ bindings. When ts-rs is wired up on the API
-// side, regenerate and import from $types/btcmap-api/Event instead.
-export type AreaEvent = {
-	id: number;
-	area_id: number | null;
-	lat: number;
-	lon: number;
-	name: string;
-	website: string;
-	starts_at: string;
-	ends_at: string | null;
-	cron_schedule: string | null;
-};
+// Response item of GET /v4/areas/{id_or_alias}/events: btcmap-api's `Item`
+// in src/rest/v4/events.rs, generated as `Event`. `ends_at` is omitted, not
+// null, when an event has no end time.
+export type AreaEvent = ApiEvent;
