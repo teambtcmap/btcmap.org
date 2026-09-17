@@ -201,6 +201,14 @@ test.describe('Add Location — slim form', () => {
 			name: 'How can people pay with bitcoin?'
 		});
 		await expect(group).toContainText('Pick at least one.');
+		// Each checkbox carries the rule as its own accessible description:
+		// a group's aria-describedby isn't inherited by the control that
+		// takes focus, and several screen readers skip it on entry.
+		for (const id of ['#onchain', '#lightning', '#nfc']) {
+			await expect(page.locator(id)).toHaveAccessibleDescription(
+				'Pick at least one.'
+			);
+		}
 
 		await page.locator('#name').fill('Satoshi Comics');
 		// Let the stubbed lookup settle so native validation is deterministic.
@@ -226,6 +234,9 @@ test.describe('Add Location — slim form', () => {
 
 		await expect(group).toContainText('Pick at least one to continue.');
 		await expect(page.locator('#onchain')).toBeFocused();
+		await expect(page.locator('#onchain')).toHaveAccessibleDescription(
+			'Pick at least one to continue.'
+		);
 		expect(
 			await page.evaluate(
 				() => (window as unknown as { __descAtFocus?: string }).__descAtFocus
