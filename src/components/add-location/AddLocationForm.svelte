@@ -312,8 +312,11 @@ const submitForm = (event: SubmitEvent) => {
 			return;
 		}
 		if (!onchain?.checked && !lightning?.checked && !nfc?.checked) {
+			// The group states the rule and carries the error itself — no
+			// toast. Focus pulls the group into view on a long form, and the
+			// group's aria-describedby reads the error out.
 			noMethodSelected = true;
-			errToast(get(_)("errors.noPaymentMethod"));
+			onchain?.focus();
 			return;
 		}
 		preview = collectPreview();
@@ -462,80 +465,101 @@ onMount(() => {
 			{/if}
 		</div>
 
-		<fieldset>
-			<legend class="mb-2 block font-semibold">{$_('addLocation.paymentMethodsLegend')}</legend>
-			{#if noMethodSelected}
-				<span class="font-semibold text-error">{$_('addLocation.paymentMethodError')}</span>
-			{/if}
-			<div class="space-y-4">
-				<div>
+		<!-- The payment rule is stated where the choice is made: a question
+		     as the label, the requirement under it, and a rejected Review
+		     turns the border and that same line to error — no toast. A div
+		     group rather than a fieldset: a bordered fieldset draws its
+		     legend into the border line. -->
+		<div
+			role="group"
+			aria-labelledby="payment-methods-question"
+			aria-describedby="payment-methods-requirement"
+			class="rounded-2xl border-2 p-3.5 {noMethodSelected
+				? 'border-error'
+				: 'border-input'}"
+		>
+			<p id="payment-methods-question" class="font-semibold">
+				{$_('addLocation.paymentMethodsQuestion')}
+			</p>
+			<p
+				id="payment-methods-requirement"
+				class="mt-1 text-sm {noMethodSelected
+					? 'font-semibold text-error'
+					: 'text-body dark:text-offwhite'}"
+			>
+				{noMethodSelected
+					? $_('addLocation.paymentMethodsRequirementError')
+					: $_('addLocation.paymentMethodsRequirement')}
+			</p>
+			<div class="mt-3 space-y-3.5">
+				<div class="flex items-center gap-2">
 					<input
-						class="h-4 w-4 accent-link"
+						class="h-4 w-4 shrink-0 accent-link"
 						type="checkbox"
 						name="onchain"
 						id="onchain"
 						bind:this={onchain}
 						onclick={handleCheckboxClick}
 					/>
-					<label for="onchain" class="ml-1 cursor-pointer">
+					<label for="onchain" class="flex cursor-pointer items-center gap-2">
 						{#if typeof window !== 'undefined'}
 							<img
 								src={$theme === 'dark'
 									? '/icons/btc-highlight-dark.svg'
 									: '/icons/btc-primary.svg'}
 								alt=""
-								class="inline"
+								class="h-[18px] w-[18px]"
 							/>
 						{/if}
 						{$_('addLocation.onchainLabel')}
 					</label>
 				</div>
-				<div>
+				<div class="flex items-center gap-2">
 					<input
-						class="h-4 w-4 accent-link"
+						class="h-4 w-4 shrink-0 accent-link"
 						type="checkbox"
 						name="lightning"
 						id="lightning"
 						bind:this={lightning}
 						onclick={handleCheckboxClick}
 					/>
-					<label for="lightning" class="ml-1 cursor-pointer">
+					<label for="lightning" class="flex cursor-pointer items-center gap-2">
 						{#if typeof window !== 'undefined'}
 							<img
 								src={$theme === 'dark'
 									? '/icons/ln-highlight-dark.svg'
 									: '/icons/ln-primary.svg'}
 								alt=""
-								class="inline"
+								class="h-[18px] w-[18px]"
 							/>
 						{/if}
 						{$_('addLocation.lightningLabel')}
 					</label>
 				</div>
-				<div>
+				<div class="flex items-center gap-2">
 					<input
-						class="h-4 w-4 accent-link"
+						class="h-4 w-4 shrink-0 accent-link"
 						type="checkbox"
 						name="nfc"
 						id="nfc"
 						bind:this={nfc}
 						onclick={handleCheckboxClick}
 					/>
-					<label for="nfc" class="ml-1 cursor-pointer">
+					<label for="nfc" class="flex cursor-pointer items-center gap-2">
 						{#if typeof window !== 'undefined'}
 							<img
 								src={$theme === 'dark'
 									? '/icons/nfc-highlight-dark.svg'
 									: '/icons/nfc-primary.svg'}
 								alt=""
-								class="inline"
+								class="h-[18px] w-[18px]"
 							/>
 						{/if}
 						{$_('addLocation.nfcLabel')}
 					</label>
 				</div>
 			</div>
-		</fieldset>
+		</div>
 
 		<div>
 			<button
