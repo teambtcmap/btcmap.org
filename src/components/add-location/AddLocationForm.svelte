@@ -314,9 +314,11 @@ const submitForm = (event: SubmitEvent) => {
 		if (!onchain?.checked && !lightning?.checked && !nfc?.checked) {
 			// The group states the rule and carries the error itself — no
 			// toast. Focus pulls the group into view on a long form, and the
-			// group's aria-describedby reads the error out.
+			// group's aria-describedby reads the error out — but only once the
+			// DOM shows it: screen readers read the description as focus
+			// lands, so focus after Svelte flushes the new text.
 			noMethodSelected = true;
-			onchain?.focus();
+			tick().then(() => onchain?.focus());
 			return;
 		}
 		preview = collectPreview();
