@@ -503,7 +503,7 @@
 		"moreDetailsToggle": "Añadir más detalles (sitio web, horario…)",
 		"categoryOtherRequired": "Por favor, introduce una categoría.",
 		"paymentMethodsQuestion": "¿Cómo se puede pagar con bitcoin?",
-		"paymentMethodsRequirement": "Elige al menos uno: es lo que pone el lugar en el mapa.",
+		"paymentMethodsRequirement": "Elige al menos uno.",
 		"paymentMethodsRequirementError": "Elige al menos uno para continuar.",
 		"onchainLabel": "On-chain",
 		"lightningLabel": "Lightning",

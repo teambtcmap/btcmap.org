@@ -503,7 +503,7 @@
 		"moreDetailsToggle": "Weitere Details hinzufügen (Website, Öffnungszeiten…)",
 		"categoryOtherRequired": "Bitte gib eine Kategorie ein.",
 		"paymentMethodsQuestion": "Wie kann man hier mit Bitcoin bezahlen?",
-		"paymentMethodsRequirement": "Wähle mindestens eine aus — erst damit kommt der Ort auf die Karte.",
+		"paymentMethodsRequirement": "Wähle mindestens eine aus.",
 		"paymentMethodsRequirementError": "Wähle mindestens eine aus, um fortzufahren.",
 		"onchainLabel": "On-Chain",
 		"lightningLabel": "Lightning",

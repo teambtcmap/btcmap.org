@@ -503,7 +503,7 @@
 		"moreDetailsToggle": "Добавить подробности (сайт, часы работы…)",
 		"categoryOtherRequired": "Пожалуйста, укажите категорию.",
 		"paymentMethodsQuestion": "Как здесь можно заплатить биткоином?",
-		"paymentMethodsRequirement": "Выберите хотя бы один способ — именно так место попадает на карту.",
+		"paymentMethodsRequirement": "Выберите хотя бы один способ.",
 		"paymentMethodsRequirementError": "Выберите хотя бы один способ, чтобы продолжить.",
 		"onchainLabel": "Ончейн",
 		"lightningLabel": "Lightning",

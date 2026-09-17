@@ -604,7 +604,7 @@
 		"moreDetailsToggle": "Voeg extra informatie toe (website, openingstijden…)",
 		"categoryOtherRequired": "Vul een categorie in",
 		"paymentMethodsQuestion": "Hoe kun je hier met bitcoin betalen?",
-		"paymentMethodsRequirement": "Kies er minstens één — daarmee komt de plek op de kaart.",
+		"paymentMethodsRequirement": "Kies er minstens één.",
 		"paymentMethodsRequirementError": "Kies er minstens één om verder te gaan.",
 		"onchainLabel": "On-chain",
 		"lightningLabel": "Lightning",

@@ -33,7 +33,7 @@
 		"notesPlaceholder": "Моля, добавете допълнителни детайли като контакти, социални мрежи и т.н.",
 		"onchainLabel": "On-chain",
 		"paymentMethodsQuestion": "Как може да се плати с биткойн?",
-		"paymentMethodsRequirement": "Изберете поне един — това поставя мястото на картата.",
+		"paymentMethodsRequirement": "Изберете поне един.",
 		"paymentMethodsRequirementError": "Изберете поне един, за да продължите.",
 		"phonePlaceholder": "Номер",
 		"websitePlaceholder": "https://bitcoin.org",
