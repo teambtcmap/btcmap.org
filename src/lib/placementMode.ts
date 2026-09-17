@@ -13,6 +13,11 @@ import type { Place as ApiPlace } from "$types/btcmap-api/Place";
 export const buildAddFormUrl = (lat: number, long: number): string =>
 	`/map?add=form#${CLUSTERING_DISABLED_ZOOM}/${lat.toFixed(5)}/${long.toFixed(5)}`;
 
+// The pin as people read it back (the form's pin chip, the review
+// summary): lat first, the same 5 decimals (~1 m) the form URL carries.
+export const formatPinCoords = (lat: number, long: number): string =>
+	`${lat.toFixed(5)}, ${long.toFixed(5)}`;
+
 // Delegates to the map's ?lat&long viewport parser so there is a single
 // implementation of the empty-string and ±90/±180 guards. Only a single
 // point is a valid placement handover — the legacy bounds form (two
