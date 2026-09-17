@@ -175,6 +175,53 @@ test.describe('In-map add form', () => {
 		await expect.poll(() => lookups).toBe(2);
 	});
 
+	test('confirming Move pin at once hands back the frozen pin, not a mid-flight centre', async ({
+		page
+	}) => {
+		await openForm(page);
+		const chip = page.getByText('Pinned here').locator('..');
+		await expect(chip).toContainText('42.27625, 42.70242');
+		// Pan away so re-centring on the pin has distance to cover.
+		await page.mouse.move(640, 500);
+		await page.mouse.down();
+		await page.mouse.move(900, 440, { steps: 10 });
+		await page.mouse.up();
+		await expect(page).not.toHaveURL(/\/42\.702\d*$/);
+		await page.waitForTimeout(600);
+
+		// No drag in between: a straight confirm must commit the pin the
+		// sheet opened on, never a centre the camera was passing through.
+		await page.getByRole('button', { name: 'Move pin' }).click();
+		await page.getByRole('button', { name: 'Use this position' }).click();
+		await expect(page.locator('#name')).toBeVisible();
+		await expect(chip).toContainText('42.27625, 42.70242');
+	});
+
+	test('below detail zoom, Move pin focuses the visible Zoom in action', async ({
+		page
+	}) => {
+		// Arrive with the form open at z14, under the placement zoom gate.
+		await stubMapData(page, [
+			{ id: 9, lat: 42.3, lon: 42.75, icon: 'cafe', name: 'Far Place' }
+		]);
+		await stubReverseGeocode(page);
+		await page.setViewportSize({ width: 1280, height: 720 });
+		await page.goto('/map?add=form#14/42.2762511/42.7024218', {
+			waitUntil: 'load'
+		});
+		await waitForMarkersToLoad(page, { skipApiWait: true });
+		await expect(page.locator('#name')).toBeVisible();
+
+		await page.getByRole('button', { name: 'Move pin' }).click();
+		const zoomIn = page.getByRole('button', { name: 'Zoom in to place the pin' });
+		await expect(zoomIn).toBeFocused();
+		// Zooming in swaps the action in place — focus follows it.
+		await page.keyboard.press('Enter');
+		await expect(
+			page.getByRole('button', { name: 'Use this position' })
+		).toBeFocused();
+	});
+
 	test('Escape backs out of Move pin without closing the form', async ({
 		page
 	}) => {
