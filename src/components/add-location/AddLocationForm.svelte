@@ -20,6 +20,7 @@ import { CATEGORIES, CATEGORY_GROUPS } from "$lib/categoryMapping";
 import { reverseGeocode } from "$lib/geocoding";
 import { _, locale } from "$lib/i18n";
 import { fetchProfile } from "$lib/nostrProfile";
+import { formatPinCoords } from "$lib/placementMode";
 import type {
 	SubmitPlaceRequest,
 	SubmitPlaceResponse,
@@ -89,7 +90,7 @@ let address = $state<HTMLInputElement>();
 let showMoreDetails = $state(false);
 
 // Address suggestion from the pin (#1315). Re-runs whenever the pin
-// moves — a live-adjust host, or history navigation between two arrivals
+// moves — the host's Move pin, or history navigation between two arrivals
 // keeps this instance alive with new coords. A fulfilled suggestion flips
 // the field to required, so it can be corrected but not blanked out; a
 // miss leaves it optional, exactly the pre-suggestion behavior.
@@ -229,11 +230,10 @@ const handleCheckboxClick = () => {
 };
 
 // The review step's snapshot, taken on entry. The hidden edit fields
-// can't change while review is open, and the pin coords are frozen here
-// too — the desktop map stays pannable beside the panel, and a pin moved
-// mid-review must not diverge from what the summary showed. This is
-// exactly what the confirm submit sends; re-positioning means going back
-// to edit (which re-snapshots on the next review).
+// can't change while review is open, and neither can the pin — the host
+// offers Move pin on the edit step only. This is exactly what the
+// confirm submit sends; re-positioning means going back to edit (which
+// re-snapshots on the next review).
 type SubmissionPreview = {
 	lat: number;
 	long: number;
@@ -788,7 +788,7 @@ onMount(() => {
 				{@render row($_('forms.address'), preview.address)}
 				{@render row(
 					$_('addLocation.reviewPosition'),
-					`${preview.lat.toFixed(5)}, ${preview.long.toFixed(5)}`
+					formatPinCoords(preview.lat, preview.long)
 				)}
 				{@render row($_('forms.category'), previewCategoryLabel)}
 				{@render row(
