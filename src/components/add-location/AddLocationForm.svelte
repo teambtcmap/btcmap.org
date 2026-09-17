@@ -471,11 +471,13 @@ onMount(() => {
 		     as the label, the requirement under it, and a rejected Review
 		     turns the border and that same line to error — no toast. A div
 		     group rather than a fieldset: a bordered fieldset draws its
-		     legend into the border line. -->
+		     legend into the border line. The rule describes each checkbox,
+		     not the group: a group's description isn't inherited by the
+		     control that takes focus, and several screen readers skip it
+		     on entry — and on both, JAWS would read the rule twice. -->
 		<div
 			role="group"
 			aria-labelledby="payment-methods-question"
-			aria-describedby="payment-methods-requirement"
 			class="rounded-2xl border-2 p-3.5 {noMethodSelected
 				? 'border-error'
 				: 'border-input'}"
@@ -497,6 +499,7 @@ onMount(() => {
 				<div class="flex items-center gap-2">
 					<input
 						class="h-4 w-4 shrink-0 accent-link"
+						aria-describedby="payment-methods-requirement"
 						type="checkbox"
 						name="onchain"
 						id="onchain"
@@ -519,6 +522,7 @@ onMount(() => {
 				<div class="flex items-center gap-2">
 					<input
 						class="h-4 w-4 shrink-0 accent-link"
+						aria-describedby="payment-methods-requirement"
 						type="checkbox"
 						name="lightning"
 						id="lightning"
@@ -541,6 +545,7 @@ onMount(() => {
 				<div class="flex items-center gap-2">
 					<input
 						class="h-4 w-4 shrink-0 accent-link"
+						aria-describedby="payment-methods-requirement"
 						type="checkbox"
 						name="nfc"
 						id="nfc"
