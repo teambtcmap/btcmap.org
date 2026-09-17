@@ -396,11 +396,13 @@ onMount(() => {
 </script>
 
 <!-- scroll-mt clears the shell's sticky header when the step switch
-     scrolls the form back into view. -->
+     scrolls the form back into view — sized for the header with its
+     step label and bar (~78px), or the review step's back link lands
+     under it. -->
 <form
 	bind:this={formElement}
 	onsubmit={submitForm}
-	class="w-full scroll-mt-16 space-y-5 text-primary dark:text-white"
+	class="w-full scroll-mt-24 space-y-5 text-primary dark:text-white"
 >
 	<!-- Edit step — CSS-hidden during review so the uncontrolled inputs
 	     keep their values (see the header comment). -->
