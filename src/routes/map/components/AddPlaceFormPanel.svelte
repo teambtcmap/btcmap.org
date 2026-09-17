@@ -44,10 +44,39 @@ const onKeydown = (event: KeyboardEvent) => {
 
 <MapPanelShell label={$_('addLocation.title')}>
 	{#snippet header()}
-		<h2 class="pl-2 text-lg font-semibold text-primary dark:text-white">
-			{$_('addLocation.title')}
-		</h2>
-		<CloseButton on:click={onclose} ariaLabel={$_('map.placement.cancel')} />
+		<div class="w-full">
+			<div class="flex items-center justify-between">
+				<h2 class="pl-2 text-lg font-semibold text-primary dark:text-white">
+					{$_('addLocation.title')}
+				</h2>
+				<CloseButton on:click={onclose} ariaLabel={$_('map.placement.cancel')} />
+			</div>
+			{#if !submitted}
+				<!-- Progress lives in the header: the step label plus a
+				     two-segment bar (link = reached, input = ahead — the
+				     filter chips' active/inactive pair). Announced on change
+				     so the edit↔review swap isn't silent. The success screen
+				     gets no counter: "step N of 2" belongs to the form. -->
+				<p
+					aria-live="polite"
+					class="px-2 pt-0.5 pb-2 text-xs font-bold tracking-[0.6px] text-body uppercase dark:text-offwhite"
+				>
+					{$_('addLocation.stepIndicator', {
+						values: {
+							current: inReview ? 2 : 1,
+							total: 2,
+							name: inReview ? $_('addLocation.stepReview') : $_('addLocation.stepDetails')
+						}
+					})}
+				</p>
+				<div class="flex gap-[5px] px-2 pb-1" aria-hidden="true">
+					<span class="h-1 flex-1 rounded-sm bg-link"></span>
+					<span
+						class="h-1 flex-1 rounded-sm {inReview ? 'bg-link' : 'bg-input dark:bg-white/20'}"
+					></span>
+				</div>
+			{/if}
+		</div>
 	{/snippet}
 
 	{#if !submitted}

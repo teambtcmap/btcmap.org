@@ -776,6 +776,16 @@ onMount(() => {
 			{/if}
 		{/snippet}
 		<div class="space-y-5">
+			<!-- Back sits at the top, under the header's step label, so back
+			     and forward aren't at opposite ends of a long scroll. -->
+			<button
+				type="button"
+				onclick={backToEdit}
+				class="inline-flex items-center gap-1 text-sm font-semibold text-link hover:text-hover focus:outline-link"
+			>
+				<Icon type="material" icon="chevron_left" w="18" h="18" />
+				{$_('addLocation.reviewBackButton')}
+			</button>
 			<div>
 				<h3 class="text-lg font-semibold">{$_('addLocation.reviewTitle')}</h3>
 				<p class="text-sm text-body dark:text-offwhite">
@@ -856,13 +866,6 @@ onMount(() => {
 			>
 				{$_('forms.submitLocation')}
 			</PrimaryButton>
-			<button
-				type="button"
-				onclick={backToEdit}
-				class="h-12 w-full rounded-xl border border-input font-semibold text-body focus:outline-link dark:text-offwhite"
-			>
-				{$_('addLocation.reviewEditButton')}
-			</button>
 		</div>
 	{/if}
 
