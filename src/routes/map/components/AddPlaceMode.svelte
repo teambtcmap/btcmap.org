@@ -126,9 +126,15 @@ $effect(() => {
 // or cancelled. No history entry: Back while re-placing closes the form,
 // as Back on the form always has. Any way the form closes ends it.
 let repositioning = $state(false);
-let movePinConfirmEl: HTMLButtonElement | undefined = $state();
+// The Move pin sheet's primary action — "Zoom in" below detail zoom, else
+// "Use this position". Focus follows whichever is showing: on entry, and
+// when zooming in swaps one for the other under a keyboard user.
+let movePinActionEl: HTMLButtonElement | undefined = $state();
 $effect(() => {
 	if (!formOpen) repositioning = false;
+});
+$effect(() => {
+	if (repositioning) movePinActionEl?.focus();
 });
 
 // The frozen pin is drawn at its map position so it stays findable after
@@ -251,10 +257,11 @@ const addAnother = () => {
 const startMovePin = () => {
 	if (!map || !formCoords) return;
 	trackEvent("add_place_move_pin_click");
-	// Start from the frozen pin, wherever the map was panned since.
-	map.easeTo({ center: [formCoords.long, formCoords.lat], duration: 300 });
+	// Start from the frozen pin, wherever the map was panned since. A jump,
+	// not an ease: confirming reads the map centre, and an animation still
+	// in flight would commit a point the camera was only passing through.
+	map.jumpTo({ center: [formCoords.long, formCoords.lat] });
 	repositioning = true;
-	tick().then(() => movePinConfirmEl?.focus());
 };
 
 const cancelMovePin = () => {
@@ -529,6 +536,7 @@ $effect(() => {
 				</button>
 				{#if zoomTooLow}
 					<button
+						bind:this={movePinActionEl}
 						type="button"
 						onclick={zoomToPlace}
 						class="h-12 flex-1 rounded-xl bg-bitcoin font-semibold text-white hover:bg-bitcoinHover"
@@ -537,7 +545,7 @@ $effect(() => {
 					</button>
 				{:else}
 					<button
-						bind:this={movePinConfirmEl}
+						bind:this={movePinActionEl}
 						type="button"
 						onclick={confirmMovePin}
 						class="h-12 flex-1 rounded-xl bg-bitcoin font-semibold text-white hover:bg-bitcoinHover"
