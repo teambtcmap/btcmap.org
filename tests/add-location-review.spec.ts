@@ -45,6 +45,65 @@ const openAndFillForm = async (page: Page) => {
 test.describe('Add Location — review step', () => {
 	test.use({ serviceWorkers: 'block' });
 
+	test('a failed submit hands the retry a fresh captcha', async ({ page }) => {
+		// The server burns a captcha on its first correct answer, before the
+		// submission itself can fail (#1401) — so a retry must never resend
+		// that secret. Each fetch mints a distinct one to tell them apart.
+		let captchaFetches = 0;
+		await page.route('**/captcha', async (route) => {
+			captchaFetches++;
+			await route.fulfill({
+				status: 200,
+				contentType: 'application/json',
+				body: JSON.stringify({
+					captcha:
+						'<svg xmlns="http://www.w3.org/2000/svg" width="275" height="100"></svg>',
+					captchaSecret: `test-captcha-secret-${captchaFetches}`
+				})
+			});
+		});
+		await openAndFillForm(page);
+
+		const sentSecrets: string[] = [];
+		await page.route('**/api/submit-place', async (route) => {
+			sentSecrets.push(route.request().postDataJSON().captchaSecret);
+			// First attempt: the upstream pipeline fails after the captcha
+			// check; the retry goes through.
+			await route.fulfill(
+				sentSecrets.length === 1
+					? {
+							status: 502,
+							contentType: 'application/json',
+							body: JSON.stringify({
+								message: 'Could not submit the location, please try again later.'
+							})
+						}
+					: {
+							status: 200,
+							contentType: 'application/json',
+							body: JSON.stringify({ id: 321 })
+						}
+			);
+		});
+
+		await page.getByRole('button', { name: 'Review & submit' }).click();
+		await expect(page.getByText("Here's what will be published")).toBeVisible();
+		await page.locator('#captcha').fill('abc123');
+		await page.getByRole('button', { name: 'Submit Location' }).click();
+
+		// The failure replaces the captcha and clears the stale answer.
+		await expect.poll(() => captchaFetches).toBe(2);
+		await expect(page.locator('#captcha')).toHaveValue('');
+
+		await page.locator('#captcha').fill('xyz789');
+		await page.getByRole('button', { name: 'Submit Location' }).click();
+		await expect(page.getByText('Volunteer review')).toBeVisible();
+		expect(sentSecrets).toEqual([
+			'test-captcha-secret-1',
+			'test-captcha-secret-2'
+		]);
+	});
+
 	test('review shows what will be published and round-trips to edit', async ({
 		page
 	}) => {

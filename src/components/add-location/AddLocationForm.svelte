@@ -68,6 +68,10 @@ let honeyInput = $state<HTMLInputElement>();
 
 const fetchCaptcha = () => {
 	isCaptchaLoading = true;
+	// A new image voids the old secret and whatever was typed for it: clear
+	// both, so Submit stays disabled until the replacement arrives.
+	captchaSecret = undefined;
+	if (captchaInput) captchaInput.value = "";
 	axios
 		.get<{ captcha: string; captchaSecret: string }>("/captcha")
 		.then((response) => {
@@ -383,6 +387,10 @@ const submitForm = (event: SubmitEvent) => {
 			}
 			console.error(error);
 			submitting = false;
+			// The server burns a captcha on its first correct answer, before
+			// the submission itself can fail (#1401) — resending it could only
+			// come back "already used". Hand the retry a fresh one.
+			fetchCaptcha();
 		});
 };
 
