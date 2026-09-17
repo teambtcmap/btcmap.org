@@ -184,4 +184,44 @@ test.describe('Add Location — slim form', () => {
 		await expect(page.locator('#login-username')).toBeVisible();
 		await expect(page).toHaveURL(/\/map\?add=form/);
 	});
+
+	test('payment methods state the rule up front and reject in place, without a toast', async ({
+		page
+	}) => {
+		// The rule is readable before anyone tries to move on, and a
+		// rejected Review lands on the group itself — no toast (#1393).
+		await stubMapData(page);
+		await stubReverseGeocode(page);
+		await page.goto(PIN);
+		await expect(page.locator('#name')).toBeVisible({
+			timeout: MARKER_LOAD_TIMEOUT
+		});
+
+		const group = page.getByRole('group', {
+			name: 'How can people pay with bitcoin?'
+		});
+		await expect(group).toContainText(
+			"Pick at least one — it's what puts the place on the map."
+		);
+
+		await page.locator('#name').fill('Satoshi Comics');
+		// Let the stubbed lookup settle so native validation is deterministic.
+		await expect(page.locator('#address')).toHaveValue(/Freiheitsstraße/);
+		await page.locator('#category').selectOption('restaurants');
+		await page.locator('#contact').fill('owner@example.com');
+		await page.getByRole('button', { name: 'Review & submit' }).click();
+
+		await expect(group).toContainText('Pick at least one to continue.');
+		await expect(page.locator('#onchain')).toBeFocused();
+		await expect(page.getByText("Here's what will be published")).toBeHidden();
+		// One-shot read: a retrying toHaveCount(0) would wait out an
+		// auto-dismissing toast and pass anyway.
+		expect(await page.locator('[data-sonner-toast]').count()).toBe(0);
+
+		// Picking a method restores the plain requirement line.
+		await page.locator('#onchain').check();
+		await expect(group).toContainText(
+			"Pick at least one — it's what puts the place on the map."
+		);
+	});
 });
