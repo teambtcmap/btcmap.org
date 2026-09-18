@@ -404,11 +404,13 @@ onMount(() => {
 </script>
 
 <!-- scroll-mt clears the shell's sticky header when the step switch
-     scrolls the form back into view. -->
+     scrolls the form back into view — sized for the header with its
+     step label and bar (~78px), or the review step's back link lands
+     under it. -->
 <form
 	bind:this={formElement}
 	onsubmit={submitForm}
-	class="w-full scroll-mt-16 space-y-5 text-primary dark:text-white"
+	class="w-full scroll-mt-24 space-y-5 text-primary dark:text-white"
 >
 	<!-- Edit step — CSS-hidden during review so the uncontrolled inputs
 	     keep their values (see the header comment). -->
@@ -784,6 +786,16 @@ onMount(() => {
 			{/if}
 		{/snippet}
 		<div class="space-y-5">
+			<!-- Back sits at the top, under the header's step label, so back
+			     and forward aren't at opposite ends of a long scroll. -->
+			<button
+				type="button"
+				onclick={backToEdit}
+				class="inline-flex items-center gap-1 text-sm font-semibold text-link hover:text-hover focus:outline-link"
+			>
+				<Icon type="material" icon="chevron_left" w="18" h="18" />
+				{$_('addLocation.reviewBackButton')}
+			</button>
 			<div>
 				<h3 class="text-lg font-semibold">{$_('addLocation.reviewTitle')}</h3>
 				<p class="text-sm text-body dark:text-offwhite">
@@ -864,13 +876,6 @@ onMount(() => {
 			>
 				{$_('forms.submitLocation')}
 			</PrimaryButton>
-			<button
-				type="button"
-				onclick={backToEdit}
-				class="h-12 w-full rounded-xl border border-input font-semibold text-body focus:outline-link dark:text-offwhite"
-			>
-				{$_('addLocation.reviewEditButton')}
-			</button>
 		</div>
 	{/if}
 

@@ -113,10 +113,26 @@ test.describe('Add Location — review step', () => {
 		await page.route('**/captcha', () => new Promise<void>(() => {}));
 		await openAndFillForm(page);
 
+		// Progress lives in the panel header (#1394).
+		const panel = page.getByRole('region', { name: 'Add Location' });
+		await expect(panel.getByText('Step 1 of 2 · Details')).toBeVisible();
+
 		await page.getByRole('button', { name: 'Review & submit' }).click();
 
 		// The summary replaces the fields; the captcha lives here now.
 		await expect(page.getByText("Here's what will be published")).toBeVisible();
+		await expect(panel.getByText('Step 2 of 2 · Review')).toBeVisible();
+		// Entering review scrolls the form's top clear of the (now taller)
+		// sticky header, so the back link is visible, not tucked under it.
+		const back = page.getByRole('button', { name: 'Back to details' });
+		const header = panel.locator('div.sticky').first();
+		await expect
+			.poll(async () => {
+				const backBox = await back.boundingBox();
+				const headerBox = await header.boundingBox();
+				return backBox!.y - (headerBox!.y + headerBox!.height);
+			})
+			.toBeGreaterThanOrEqual(0);
 		await expect(page.locator('#name')).toBeHidden();
 		const summary = page.locator('dl');
 		await expect(summary).toContainText('Satoshi Comics');
@@ -131,8 +147,18 @@ test.describe('Add Location — review step', () => {
 		await expect(summary).not.toContainText('Website');
 		await expect(page.locator('#captcha')).toBeVisible();
 
+		// Back sits at the top of the review step, above the summary — not
+		// below the captcha — and the old bottom button is gone.
+		const backBox = await back.boundingBox();
+		const summaryBox = await summary.boundingBox();
+		expect(backBox!.y).toBeLessThan(summaryBox!.y);
+		expect(
+			await page.getByRole('button', { name: 'Edit details' }).count()
+		).toBe(0);
+
 		// Back to edit: the hidden-not-unmounted fields kept their values.
-		await page.getByRole('button', { name: 'Edit details' }).click();
+		await back.click();
+		await expect(panel.getByText('Step 1 of 2 · Details')).toBeVisible();
 		await expect(page.locator('#name')).toBeVisible();
 		await expect(page.locator('#name')).toHaveValue('Satoshi Comics');
 		await expect(
