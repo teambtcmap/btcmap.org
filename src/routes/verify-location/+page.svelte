@@ -1,6 +1,4 @@
 <script lang="ts">
-export let data: import("./+page.server").VerifyLocationPageData;
-
 import axios from "axios";
 import DOMPurify from "dompurify";
 import { onMount } from "svelte";
@@ -17,22 +15,24 @@ import { placesError } from "$lib/store";
 import { theme } from "$lib/theme";
 import { errToast } from "$lib/utils";
 
+import type { PageProps } from "./$types";
 import { browser } from "$app/environment";
 
-// Initialize from server data
-let name = data?.name || "";
-let lat = data?.lat;
-let long = data?.long;
-let location = data?.location || "";
-let edit = data?.edit || "";
+let { data }: PageProps = $props();
 
-let captcha: HTMLDivElement;
-let captchaSecret: string;
-let captchaInput: HTMLInputElement;
-let honeyInput: HTMLInputElement;
+// From the server load
+const name = $derived(data?.name || "");
+const lat = $derived(data?.lat);
+const long = $derived(data?.long);
+const location = $derived(data?.location || "");
+const edit = $derived(data?.edit || "");
 
-let captchaContent = "";
-let isCaptchaLoading = true;
+let captchaSecret = $state<string>();
+let captchaInput = $state<HTMLInputElement>();
+let honeyInput = $state<HTMLInputElement>();
+
+let captchaContent = $state("");
+let isCaptchaLoading = $state(true);
 
 const fetchCaptcha = () => {
 	isCaptchaLoading = true;
@@ -52,15 +52,15 @@ const fetchCaptcha = () => {
 		});
 };
 
-let current: boolean;
-let outdated: string;
-let verify: HTMLTextAreaElement;
+let current = $state(false);
+let outdated = $state("");
+let verify = $state<HTMLTextAreaElement>();
 
-let selected = !!data; // Set to true if we have server data
-let submitted = false;
-let submitting = false;
-let submissionIssueNumber: number;
-let merchantId = data?.merchantId || "";
+const selected = $derived(!!data); // Set to true if we have server data
+let submitted = $state(false);
+let submitting = $state(false);
+let submissionIssueNumber = $state<number>();
+const merchantId = $derived(data?.merchantId || "");
 
 const submitForm = (event: SubmitEvent) => {
 	event.preventDefault();
@@ -73,14 +73,14 @@ const submitForm = (event: SubmitEvent) => {
 			.post("/api/gitea/issue", {
 				type: "verify-location",
 				captchaSecret,
-				captchaTest: captchaInput.value,
-				honey: honeyInput.value,
+				captchaTest: captchaInput?.value,
+				honey: honeyInput?.value,
 				name: name,
 				location: location,
 				edit: edit,
 				current: current ? "Yes" : "No",
 				outdated: outdated ? outdated : "",
-				verified: verify.value,
+				verified: verify?.value,
 				merchantId: merchantId,
 				lat: lat,
 				long: long,
@@ -107,7 +107,9 @@ function resetForm() {
 }
 
 // alert for map errors
-$: $placesError && errToast($placesError);
+$effect(() => {
+	if ($placesError) errToast($placesError);
+});
 
 onMount(async () => {
 	if (browser) {
@@ -160,11 +162,11 @@ onMount(async () => {
 			
 			<FormHelperText text={$_('verifyLocation.tooltip')} />
 		</div>
-		<form on:submit={submitForm} class="w-full space-y-5 text-primary dark:text-white">
+		<form onsubmit={submitForm} class="w-full space-y-5 text-primary dark:text-white">
 			<div>
 				<input
 					disabled
-					bind:value={name}
+					value={name}
 					readonly
 					type="text"
 					name="name"
@@ -225,16 +227,13 @@ onMount(async () => {
 						>{$_('forms.captcha')} <span class="font-normal">({$_('forms.captchaCaseSensitive')})</span></label
 					>
 					{#if captchaSecret}
-						<button type="button" on:click={fetchCaptcha}>
+						<button type="button" onclick={fetchCaptcha}>
 							<Icon type="fa" icon="arrows-rotate" w="16" h="16" />
 						</button>
 					{/if}
 				</div>
 				<div class="space-y-2">
-					<div
-						bind:this={captcha}
-						class="flex items-center justify-center rounded-2xl border-2 border-input py-1"
-					>
+					<div class="flex items-center justify-center rounded-2xl border-2 border-input py-1">
 						{#if isCaptchaLoading}
 							<div class="h-[100px] w-[275px] animate-pulse bg-link/50"></div>
 						{:else}
