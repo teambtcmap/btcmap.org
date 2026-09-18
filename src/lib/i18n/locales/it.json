@@ -560,7 +560,8 @@
 		"submitReport": "Invia segnalazione",
 		"searchButton": "Cerca 🔍",
 		"address": "Indirizzo",
-		"captchaPlaceholder": "Inserisci il testo del captcha."
+		"captchaPlaceholder": "Inserisci il testo del captcha.",
+		"captchaRequired": "Inserisci i caratteri dell'immagine."
 	},
 	"openingHours": {
 		"open247": "Aperto 24 ore su 24, 7 giorni su 7",
@@ -612,7 +613,6 @@
 		"websiteInvalid": "Inserisci un indirizzo web, ad esempio bitcoin.org.",
 		"contactRequired": "Inserisci un indirizzo email.",
 		"contactInvalid": "Inserisci un indirizzo email valido.",
-		"captchaRequired": "Inserisci i caratteri dell'immagine.",
 		"paymentMethodsQuestion": "Come si può pagare in bitcoin?",
 		"paymentMethodsRequirement": "Scegline almeno uno.",
 		"paymentMethodsRequirementError": "Scegline almeno uno per continuare.",
@@ -633,7 +633,6 @@
 		"successAccountNudge": "Pensi di aggiungere altri luoghi? Un account costruisce uno storico di cui i volontari possono fidarsi.",
 		"successAccountCta": "Crea un account",
 		"contactPlaceholder": "hello@btcmap.org",
-		"captchaPlaceholder": "Inserisci il testo del captcha.",
 		"formSuccessType": "Posizione",
 		"successTitle": "{name}: invio ricevuto",
 		"successStatus": "In attesa di revisione",

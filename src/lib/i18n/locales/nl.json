@@ -560,7 +560,8 @@
 		"submitReport": "Rapport indienen",
 		"searchButton": "Zoek 🔍",
 		"address": "Adres",
-		"captchaPlaceholder": "Voer de captcha-tekst in."
+		"captchaPlaceholder": "Voer de captcha-tekst in.",
+		"captchaRequired": "Vul de tekens uit de afbeelding in."
 	},
 	"openingHours": {
 		"open247": "24/7 open",
@@ -612,7 +613,6 @@
 		"websiteInvalid": "Vul een webadres in, zoals bitcoin.org.",
 		"contactRequired": "Vul een e-mailadres in.",
 		"contactInvalid": "Vul een geldig e-mailadres in.",
-		"captchaRequired": "Vul de tekens uit de afbeelding in.",
 		"paymentMethodsQuestion": "Hoe kun je hier met bitcoin betalen?",
 		"paymentMethodsRequirement": "Kies er minstens één.",
 		"paymentMethodsRequirementError": "Kies er minstens één om verder te gaan.",
@@ -633,7 +633,6 @@
 		"successAccountNudge": "Van plan om meer locaties toe te voegen? Met een account bouw je een trackrecord op waar vrijwilligers op kunnen vertrouwen.",
 		"successAccountCta": "Account aanmaken",
 		"contactPlaceholder": "jouw@emailadres.nl",
-		"captchaPlaceholder": "Voer de captcha-tekst in",
 		"formSuccessType": "Locatie",
 		"successTitle": "{name} is ingediend",
 		"successStatus": "Wacht op beoordeling",

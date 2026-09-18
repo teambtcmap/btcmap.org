@@ -459,7 +459,8 @@
 		"submitReport": "Отправить отчёт",
 		"searchButton": "Поиск 🔍",
 		"address": "Адрес",
-		"captchaPlaceholder": "Пожалуйста, введите текст с капчи."
+		"captchaPlaceholder": "Пожалуйста, введите текст с капчи.",
+		"captchaRequired": "Введите символы с картинки."
 	},
 	"openingHours": {
 		"open247": "Открыто круглосуточно (24/7)",
@@ -511,7 +512,6 @@
 		"websiteInvalid": "Укажите адрес сайта, например bitcoin.org.",
 		"contactRequired": "Укажите e-mail.",
 		"contactInvalid": "Укажите корректный e-mail.",
-		"captchaRequired": "Введите символы с картинки.",
 		"paymentMethodsQuestion": "Как здесь можно заплатить биткоином?",
 		"paymentMethodsRequirement": "Выберите хотя бы один способ.",
 		"paymentMethodsRequirementError": "Выберите хотя бы один способ, чтобы продолжить.",
@@ -532,7 +532,6 @@
 		"successAccountNudge": "Планируете добавить ещё места? Аккаунт создаёт историю, которой волонтёры могут доверять.",
 		"successAccountCta": "Создать аккаунт",
 		"contactPlaceholder": "hello@btcmap.org",
-		"captchaPlaceholder": "Пожалуйста, введите текст с капчи.",
 		"formSuccessType": "Место",
 		"successTitle": "{name}: заявка отправлена",
 		"successStatus": "Ожидает проверки",

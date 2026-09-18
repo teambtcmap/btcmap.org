@@ -3,7 +3,6 @@
 		"addressSuggestedHint": "Предложение от OpenStreetMap за вашия маркер — проверете дали отговаря на входа на обекта и го коригирайте при нужда.",
 		"addressLookupPending": "Търсене на адреса…",
 		"addressPlaceholder": "ул. Свобода 2100...",
-		"captchaPlaceholder": "Моля, въведете текста от captcha.",
 		"categoryPlaceholder": "Ресторант и т.н.",
 		"categorySelectPlaceholder": "Изберете категория…",
 		"categoryOtherOption": "Друго…",
@@ -15,7 +14,6 @@
 		"websiteInvalid": "Въведете уеб адрес, например bitcoin.org.",
 		"contactRequired": "Въведете имейл адрес.",
 		"contactInvalid": "Въведете валиден имейл адрес.",
-		"captchaRequired": "Въведете символите от изображението.",
 		"contactDescription": "Ако имаме уточняващи въпроси, ще се свържем с вас, за да добавим успешно това място. Адресът се появява в публичния тикет на заявката, затова използвайте такъв, който не възразявате да споделите.",
 		"submittingAs": "Изпращане като {username}",
 		"contactSignedInHint": "Вашето предложение е свързано с акаунта ви — не е необходим имейл за контакт.",
@@ -416,7 +414,8 @@
 		"submitReport": "Изпрати доклад",
 		"success": "Успех!",
 		"website": "Уебсайт",
-		"captchaPlaceholder": "Моля, въведете текста от captcha."
+		"captchaPlaceholder": "Моля, въведете текста от captcha.",
+		"captchaRequired": "Въведете символите от изображението."
 	},
 	"openingHours": {
 		"open247": "Отворено 24/7",

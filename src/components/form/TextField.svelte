@@ -2,6 +2,8 @@
 import type { Snippet } from "svelte";
 import type { HTMLInputAttributes } from "svelte/elements";
 
+import FieldError from "$components/form/FieldError.svelte";
+import { fieldBorderClasses } from "$lib/fieldStyles";
 import { _ } from "$lib/i18n";
 
 // The app's one single-line text field (#1326) — one visual family, the
@@ -16,6 +18,7 @@ import { _ } from "$lib/i18n";
 // `hint` renders between label and input, `children` below. `error` is
 // the form's own validation message (#1404): shown under the label, it
 // turns the border red and becomes the input's accessible description.
+// TextArea is the multi-line sibling with the same contract.
 type Props = {
 	id: string;
 	label: string;
@@ -61,7 +64,7 @@ const describedBy = $derived(
 );
 const invalid = $derived(error ? "true" : ariaInvalid);
 const inputClasses = $derived(
-	`w-full rounded-2xl border-2 ${error ? "border-error focus:outline-error" : "border-input focus:outline-link"} p-3 transition-all disabled:cursor-not-allowed disabled:bg-gray-100 disabled:text-gray-500 dark:bg-white/[0.15] dark:disabled:bg-gray-700 dark:disabled:text-gray-400 ${inputClass}`,
+	`w-full rounded-2xl border-2 ${fieldBorderClasses(!!error)} p-3 transition-all disabled:cursor-not-allowed disabled:bg-gray-100 disabled:text-gray-500 dark:bg-white/[0.15] dark:disabled:bg-gray-700 dark:disabled:text-gray-400 ${inputClass}`,
 );
 </script>
 
@@ -73,7 +76,7 @@ const inputClasses = $derived(
 		{/if}
 	</label>
 	{#if error}
-		<p id={errorId} class="-mt-1 mb-2 text-sm font-semibold text-error">{error}</p>
+		<FieldError id={errorId} message={error} />
 	{/if}
 	{#if hint}
 		{@render hint()}

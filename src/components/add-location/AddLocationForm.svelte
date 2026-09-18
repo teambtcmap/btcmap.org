@@ -1,15 +1,17 @@
 <script lang="ts">
 import axios from "axios";
-import DOMPurify from "dompurify";
 import { onMount, tick, untrack } from "svelte";
 import { get } from "svelte/store";
 
 import LoginForm from "$components/auth/LoginForm.svelte";
 import NostrLoginForm from "$components/auth/NostrLoginForm.svelte";
 import FormHelperText from "$components/FormHelperText.svelte";
+import CaptchaField from "$components/form/CaptchaField.svelte";
+import FieldError from "$components/form/FieldError.svelte";
 import type { FormSelectOption } from "$components/form/FormSelect.svelte";
 import FormSelect from "$components/form/FormSelect.svelte";
 import OpeningHoursEditor from "$components/form/OpeningHoursEditor.svelte";
+import TextArea from "$components/form/TextArea.svelte";
 import TextField from "$components/form/TextField.svelte";
 import Icon from "$components/Icon.svelte";
 import NostrAvatar from "$components/NostrAvatar.svelte";
@@ -28,6 +30,7 @@ import {
 import { trackEvent } from "$lib/analytics";
 import { API_BASE } from "$lib/api-base";
 import { CATEGORIES, CATEGORY_GROUPS } from "$lib/categoryMapping";
+import { fieldBorderClasses } from "$lib/fieldStyles";
 import { reverseGeocode } from "$lib/geocoding";
 import { _, locale } from "$lib/i18n";
 import type { PaymentMethod } from "$lib/map/paymentMethodFilter";
@@ -94,7 +97,7 @@ const fetchCaptcha = () => {
 		.get<{ captcha: string; captchaSecret: string }>("/captcha")
 		.then((response) => {
 			captchaSecret = response.data.captchaSecret;
-			captchaContent = DOMPurify.sanitize(response.data.captcha);
+			captchaContent = response.data.captcha;
 		})
 		.catch((error) => {
 			errToast(get(_)("errors.captchaFetch"));
@@ -538,9 +541,7 @@ onMount(() => {
 				>{$_('forms.category')}</label
 			>
 			{#if categorySelectInvalid}
-				<p id="category-error" class="-mt-1 mb-2 text-sm font-semibold text-error">
-					{$_('addLocation.categoryRequired')}
-				</p>
+				<FieldError id="category-error" message={$_('addLocation.categoryRequired')} />
 			{/if}
 			<FormSelect
 				id="category"
@@ -568,9 +569,11 @@ onMount(() => {
 				     Category label as its name, and its message sits right
 				     above it, below the (valid) select. -->
 				{#if categoryOtherInvalid}
-					<p id="category-other-error" class="mt-2 text-sm font-semibold text-error">
-						{$_('addLocation.categoryOtherRequired')}
-					</p>
+					<FieldError
+						id="category-other-error"
+						message={$_('addLocation.categoryOtherRequired')}
+						class="mt-2"
+					/>
 				{/if}
 				<input
 					required
@@ -581,9 +584,9 @@ onMount(() => {
 					aria-invalid={categoryOtherInvalid ? 'true' : undefined}
 					aria-describedby={categoryOtherInvalid ? 'category-other-error' : undefined}
 					oninput={recheck}
-					class="mt-2 w-full rounded-2xl border-2 {categoryOtherInvalid
-						? 'border-error focus:outline-error'
-						: 'border-input focus:outline-link'} p-3 transition-all disabled:cursor-not-allowed disabled:bg-gray-100 disabled:text-gray-500 dark:bg-white/[0.15] dark:disabled:bg-gray-700 dark:disabled:text-gray-400"
+					class="mt-2 w-full rounded-2xl border-2 {fieldBorderClasses(
+						categoryOtherInvalid
+					)} p-3 transition-all disabled:cursor-not-allowed disabled:bg-gray-100 disabled:text-gray-500 dark:bg-white/[0.15] dark:disabled:bg-gray-700 dark:disabled:text-gray-400"
 					bind:value={categoryOther}
 					bind:this={categoryOtherElement}
 				/>
@@ -784,19 +787,14 @@ onMount(() => {
 				{/if}
 			</div>
 
-			<div>
-				<label for="notes" class="mb-2 block font-semibold"
-					>{$_('forms.notes')} <span class="font-normal">{$_('forms.optional')}</span></label
-				>
-				<textarea
-					name="notes"
-					id="notes"
-					placeholder={$_('addLocation.notesPlaceholder')}
-					rows="3"
-					class="w-full rounded-2xl border-2 border-input p-3 transition-all focus:outline-link disabled:cursor-not-allowed disabled:bg-gray-100 disabled:text-gray-500 dark:bg-white/[0.15] dark:disabled:bg-gray-700 dark:disabled:text-gray-400"
-					bind:this={notes}
-				></textarea>
-			</div>
+			<TextArea
+				id="notes"
+				name="notes"
+				label={$_('forms.notes')}
+				optional
+				bind:element={notes}
+				placeholder={$_('addLocation.notesPlaceholder')}
+			/>
 		</div>
 
 		{#if identityAttached && $session}
@@ -983,55 +981,17 @@ onMount(() => {
 			<!-- The captcha guards the anonymous path only (#1374): a
 			     signed-in submission authenticates with the account token. -->
 			{#if !identityAttached}
-				<div>
-					<div class="mb-2 flex items-center space-x-2">
-						<label for="captcha" class="font-semibold"
-							>{$_('forms.captcha')}
-							<span class="font-normal">({$_('forms.captchaCaseSensitive')})</span></label
-						>
-						<!-- Visible whenever a (re)fetch is possible — a failed first
-						     fetch must leave a retry, or the user is stranded at the
-						     end of the funnel with a disabled submit. -->
-						{#if !isCaptchaLoading}
-							<button type="button" onclick={fetchCaptcha}>
-								<Icon type="fa" icon="arrows-rotate" w="16" h="16" />
-							</button>
-						{/if}
-					</div>
-					{#if captchaError}
-						<p id="captcha-error" class="-mt-1 mb-2 text-sm font-semibold text-error">
-							{$_('addLocation.captchaRequired')}
-						</p>
-					{/if}
-					<div class="space-y-2">
-						<div
-							class="flex items-center justify-center rounded-2xl border-2 border-input py-1"
-						>
-							{#if isCaptchaLoading}
-								<div class="h-[100px] w-[275px] animate-pulse bg-link/50"></div>
-							{:else}
-								{@html captchaContent}
-							{/if}
-						</div>
-						<input
-							disabled={!captchaSecret}
-							required
-							type="text"
-							name="captcha"
-							id="captcha"
-							placeholder={$_('addLocation.captchaPlaceholder')}
-							aria-invalid={captchaError ? 'true' : undefined}
-							aria-describedby={captchaError ? 'captcha-error' : undefined}
-							oninput={() => {
-								if (captchaInput?.value.trim()) captchaError = false;
-							}}
-							class="w-full rounded-2xl border-2 {captchaError
-								? 'border-error focus:outline-error'
-								: 'border-input focus:outline-link'} p-3 transition-all disabled:cursor-not-allowed disabled:bg-gray-100 disabled:text-gray-500 dark:bg-white/[0.15] dark:disabled:bg-gray-700 dark:disabled:text-gray-400"
-							bind:this={captchaInput}
-						/>
-					</div>
-				</div>
+				<CaptchaField
+					content={captchaContent}
+					loading={isCaptchaLoading}
+					onrefresh={fetchCaptcha}
+					disabled={!captchaSecret}
+					invalid={captchaError}
+					bind:element={captchaInput}
+					oninput={() => {
+						if (captchaInput?.value.trim()) captchaError = false;
+					}}
+				/>
 			{/if}
 
 			<PrimaryButton

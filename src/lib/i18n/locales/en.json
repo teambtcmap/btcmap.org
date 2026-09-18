@@ -560,7 +560,8 @@
 		"submitReport": "Submit Report",
 		"searchButton": "Search 🔍",
 		"address": "Address",
-		"captchaPlaceholder": "Please enter the captcha text."
+		"captchaPlaceholder": "Please enter the captcha text.",
+		"captchaRequired": "Enter the characters from the image."
 	},
 	"openingHours": {
 		"open247": "Open 24/7",
@@ -612,7 +613,6 @@
 		"websiteInvalid": "Enter a web address, like bitcoin.org.",
 		"contactRequired": "Enter an email address.",
 		"contactInvalid": "Enter a valid email address.",
-		"captchaRequired": "Enter the characters from the image.",
 		"paymentMethodsQuestion": "How can people pay with bitcoin?",
 		"paymentMethodsRequirement": "Pick at least one.",
 		"paymentMethodsRequirementError": "Pick at least one to continue.",
@@ -633,7 +633,6 @@
 		"successAccountNudge": "Planning to add more places? An account builds a track record volunteers can trust.",
 		"successAccountCta": "Create an account",
 		"contactPlaceholder": "hello@btcmap.org",
-		"captchaPlaceholder": "Please enter the captcha text.",
 		"formSuccessType": "Location",
 		"successTitle": "{name} is submitted",
 		"successStatus": "Waiting for review",
