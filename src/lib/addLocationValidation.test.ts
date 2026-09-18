@@ -127,10 +127,26 @@ describe("firstInvalidField", () => {
 });
 
 describe("recheckFlagged", () => {
-	it("updates a flagged field to its current result", () => {
+	it("keeps a flagged field while the same rule still fails", () => {
+		expect(
+			recheckFlagged({ contact: "invalid" }, { contact: "invalid" }),
+		).toEqual({ contact: "invalid" });
+	});
+
+	it("clears a flagged field once a different rule fails instead", () => {
+		// Typing into an empty email, or emptying an invalid one: the user
+		// is mid-correction, so the new rule waits for the next Review.
 		expect(
 			recheckFlagged({ contact: "required" }, { contact: "invalid" }),
-		).toEqual({ contact: "invalid" });
+		).toEqual({});
+		expect(
+			recheckFlagged({ contact: "invalid" }, { contact: "required" }),
+		).toEqual({});
+		// Picking Other fixes "pick a category"; its empty text field isn't
+		// an error until the next Review.
+		expect(
+			recheckFlagged({ category: "required" }, { category: "otherRequired" }),
+		).toEqual({});
 	});
 
 	it("clears a flagged field once it's valid", () => {

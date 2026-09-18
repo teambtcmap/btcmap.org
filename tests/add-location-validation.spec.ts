@@ -12,6 +12,9 @@ const PIN = '/map?add=form#17/42.2762511/42.7024218';
 
 type FocusProbe = { __descAtFocus?: string };
 
+// The theme's `error` colour (#DF3C3C, tailwind.config.js).
+const ERROR_RED = 'rgb(223, 60, 60)';
+
 const openForm = async (page: Page) => {
 	await stubMapData(page);
 	await stubReverseGeocode(page);
@@ -61,6 +64,10 @@ const expectRejectedAt = async (page: Page, field: Locator, message: string) => 
 	expect(
 		await page.evaluate(() => (window as unknown as FocusProbe).__descAtFocus)
 	).toBe(message);
+	// Red while focused too: the focus ring mustn't paint over the error
+	// border with the link colour.
+	await expect(field).toHaveCSS('border-top-color', ERROR_RED);
+	await expect(field).toHaveCSS('outline-color', ERROR_RED);
 	await expect(page.getByText("Here's what will be published")).toBeHidden();
 	// One-shot read: a retrying toHaveCount(0) would wait out an
 	// auto-dismissing toast and pass anyway.
@@ -99,9 +106,44 @@ test.describe('Add Location — inline validation', () => {
 		await recordDescriptionAtFocus(address);
 		await clickReview(page);
 		await expectRejectedAt(page, address, 'Enter the address.');
+
+		await address.fill('Nansenstr. 1, Berlin');
+		await expect(address).not.toHaveAttribute('aria-invalid', 'true');
+		await expect(page.getByText('Enter the address.')).toBeHidden();
 	});
 
-	test('a missing category is reported on the select', async ({ page }) => {
+	test('a new suggestion after Move pin takes the address error with it', async ({
+		page
+	}) => {
+		await openForm(page);
+		await fillValid(page);
+		const address = page.locator('#address');
+		await address.fill('');
+		await recordDescriptionAtFocus(address);
+		await clickReview(page);
+		await expectRejectedAt(page, address, 'Enter the address.');
+
+		// Re-place the pin: the panel hides and the whole map drags.
+		await page.getByRole('button', { name: 'Move pin' }).click();
+		await expect(page.locator('#name')).toBeHidden();
+		await page.mouse.move(800, 360);
+		await page.mouse.down();
+		await page.mouse.move(600, 360, { steps: 10 });
+		await page.mouse.up();
+		await expect(page).not.toHaveURL(/\/42\.702\d*$/);
+		await page.waitForTimeout(600);
+		await page.getByRole('button', { name: 'Use this position' }).click();
+
+		// The lookup for the new pin fills the emptied field, which is no
+		// longer missing — the message mustn't outlive it.
+		await expect(address).toHaveValue(/Freiheitsstraße/);
+		await expect(address).not.toHaveAttribute('aria-invalid', 'true');
+		await expect(page.getByText('Enter the address.')).toBeHidden();
+	});
+
+	test('a missing category is reported on the select; picking Other raises nothing new', async ({
+		page
+	}) => {
 		await openForm(page);
 		await fillValid(page);
 		const category = page.locator('#category');
@@ -109,6 +151,17 @@ test.describe('Add Location — inline validation', () => {
 		await recordDescriptionAtFocus(category);
 		await clickReview(page);
 		await expectRejectedAt(page, category, 'Pick a category.');
+
+		// Other fixes the missing pick. Its text field arrives empty and
+		// focused — that's the next step, not an error until the next Review.
+		await category.selectOption('Other');
+		const other = page.locator('input[name="category-other"]');
+		await expect(other).toBeFocused();
+		await expect(category).not.toHaveAttribute('aria-invalid', 'true');
+		await expect(page.getByText('Pick a category.')).toBeHidden();
+		// One-shot reads: the field must not arrive flagged at all.
+		expect(await page.getByText('Enter a category.').count()).toBe(0);
+		expect(await other.getAttribute('aria-invalid')).toBeNull();
 	});
 
 	test('an empty Other category is reported inline instead of a toast', async ({
@@ -122,8 +175,15 @@ test.describe('Add Location — inline validation', () => {
 		await recordDescriptionAtFocus(other);
 		await clickReview(page);
 		await expectRejectedAt(page, other, 'Enter a category.');
-		// The select itself is fine — only the free text is missing.
-		await expect(page.locator('#category')).not.toHaveAttribute('aria-invalid', 'true');
+		// The select itself is fine — only the free text is missing, and the
+		// message sits with it: below the select, right above the text field.
+		const select = page.locator('#category');
+		await expect(select).not.toHaveAttribute('aria-invalid', 'true');
+		const selectBox = (await select.boundingBox())!;
+		const messageBox = (await page.getByText('Enter a category.').boundingBox())!;
+		const otherBox = (await other.boundingBox())!;
+		expect(messageBox.y).toBeGreaterThanOrEqual(selectBox.y + selectBox.height);
+		expect(messageBox.y + messageBox.height).toBeLessThanOrEqual(otherBox.y);
 
 		await other.fill('Bike repair');
 		await expect(page.getByText('Enter a category.')).toBeHidden();
@@ -156,7 +216,7 @@ test.describe('Add Location — inline validation', () => {
 		await expect(page.locator('dl')).toContainText('https://bitcoin.org');
 	});
 
-	test('the contact email is required and must be valid; the message follows the fix', async ({
+	test('the contact email is required and must be valid; a correction in progress stays quiet', async ({
 		page
 	}) => {
 		await openForm(page);
@@ -167,13 +227,23 @@ test.describe('Add Location — inline validation', () => {
 		await clickReview(page);
 		await expectRejectedAt(page, contact, 'Enter a valid email address.');
 
-		// A flagged field re-checks as it's corrected: emptied it asks for
-		// an address, completed it clears.
+		// Still failing the same rule: the message stays.
+		await contact.fill('owner');
+		await expect(contact).toHaveAccessibleDescription('Enter a valid email address.');
+
+		// Emptied, a different rule fails. The user is mid-correction, so the
+		// field goes quiet instead of swapping messages under their cursor.
 		await contact.fill('');
-		await expect(contact).toHaveAccessibleDescription('Enter an email address.');
-		await contact.fill('owner@example.com');
 		await expect(contact).not.toHaveAttribute('aria-invalid', 'true');
 		await expect(page.getByText('Enter a valid email address.')).toBeHidden();
+		expect(await page.getByText('Enter an email address.').count()).toBe(0);
+
+		// The next Review reports what's wrong now, and a valid email clears it.
+		await recordDescriptionAtFocus(contact);
+		await clickReview(page);
+		await expectRejectedAt(page, contact, 'Enter an email address.');
+		await contact.fill('owner@example.com');
+		await expect(contact).not.toHaveAttribute('aria-invalid', 'true');
 		await expect(page.getByText('Enter an email address.')).toBeHidden();
 	});
 
@@ -267,6 +337,8 @@ test.describe('Add Location — inline validation', () => {
 		await expect(captcha).toHaveAccessibleDescription(
 			'Enter the characters from the image.'
 		);
+		await expect(captcha).toHaveCSS('border-top-color', ERROR_RED);
+		await expect(captcha).toHaveCSS('outline-color', ERROR_RED);
 		expect(
 			await page.evaluate(() => (window as unknown as FocusProbe).__descAtFocus)
 		).toBe('Enter the characters from the image.');
