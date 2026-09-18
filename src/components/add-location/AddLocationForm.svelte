@@ -459,7 +459,7 @@ onMount(() => {
 					{ value: 'Other', label: $_('addLocation.categoryOtherOption') }
 				]}
 				bind:value={categorySelect}
-				on:change={async () => {
+				onchange={async () => {
 					if (categorySelect === 'Other') {
 						await tick();
 						categoryOtherElement?.focus();

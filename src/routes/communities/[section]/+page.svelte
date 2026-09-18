@@ -356,9 +356,8 @@ onDestroy(() => {
 
 				<FormSelect
 					bind:value={data.section}
-					on:change={(e) => {
-						// @ts-expect-error e.target is the select element
-						const newSection = e.target?.value;
+					onchange={(e) => {
+						const newSection = e.currentTarget.value;
 						if (newSection) {
 							handleSectionChange(newSection);
 						}

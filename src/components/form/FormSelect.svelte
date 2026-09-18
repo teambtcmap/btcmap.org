@@ -1,4 +1,4 @@
-<script context="module" lang="ts">
+<script module lang="ts">
 export type FormSelectOption = {
 	value: string;
 	label: string;
@@ -15,20 +15,39 @@ export type FormSelectOption = {
 </script>
 
 <script lang="ts">
-export let value: string | undefined = undefined;
-export let id: string | undefined = undefined;
-export let name: string | undefined = undefined;
-export let disabled: boolean = false;
-export let required: boolean = false;
-export let ariaLabel: string | undefined = undefined;
-export let style: string = "";
-// When provided, options render automatically — ungrouped first, then
-// groups separated by disabled-option rows. When omitted, falls back to
-// <slot /> so existing consumers that hand-roll their <option> markup
-// keep working.
-export let options: FormSelectOption[] | undefined = undefined;
+import type { Snippet } from "svelte";
+import type { HTMLSelectAttributes } from "svelte/elements";
 
-$: grouped = options ? partition(options) : null;
+type Props = {
+	value?: string;
+	id?: string;
+	name?: string;
+	disabled?: boolean;
+	required?: boolean;
+	ariaLabel?: string;
+	style?: string;
+	// When provided, options render automatically — ungrouped first, then
+	// groups separated by disabled-option rows. When omitted, falls back to
+	// `children` so consumers that hand-roll their <option> markup keep
+	// working.
+	options?: FormSelectOption[];
+	onchange?: HTMLSelectAttributes["onchange"];
+	children?: Snippet;
+};
+let {
+	value = $bindable(),
+	id,
+	name,
+	disabled = false,
+	required = false,
+	ariaLabel,
+	style = "",
+	options,
+	onchange,
+	children,
+}: Props = $props();
+
+const grouped = $derived(options ? partition(options) : null);
 
 function partition(opts: FormSelectOption[]) {
 	const ungrouped: FormSelectOption[] = [];
@@ -53,7 +72,7 @@ function partition(opts: FormSelectOption[]) {
 	{required}
 	aria-label={ariaLabel}
 	bind:value
-	on:change
+	{onchange}
 	class="w-full rounded-2xl border-2 border-input bg-white px-2 py-3 text-primary transition-all focus:outline-link
 		disabled:cursor-not-allowed disabled:bg-gray-100 disabled:text-gray-500
 		dark:bg-white/[0.15] dark:text-white dark:disabled:bg-gray-700 dark:disabled:text-gray-400
@@ -69,8 +88,8 @@ function partition(opts: FormSelectOption[]) {
 				<option value={opt.value}>{opt.label}</option>
 			{/each}
 		{/each}
-	{:else}
-		<slot />
+	{:else if children}
+		{@render children()}
 	{/if}
 </select>
 
