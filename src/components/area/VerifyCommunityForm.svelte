@@ -11,16 +11,18 @@ import { errToast } from "$lib/utils";
 
 import { browser } from "$app/environment";
 
-export let communityName: string;
-export let communityAlias: string;
+type Props = {
+	communityName: string;
+	communityAlias: string;
+};
+let { communityName, communityAlias }: Props = $props();
 
-let captcha: HTMLDivElement;
-let captchaSecret: string;
-let captchaInput: HTMLInputElement;
-let honeyInput: HTMLInputElement;
+let captchaSecret = $state<string>();
+let captchaInput = $state<HTMLInputElement>();
+let honeyInput = $state<HTMLInputElement>();
 
-let captchaContent = "";
-let isCaptchaLoading = true;
+let captchaContent = $state("");
+let isCaptchaLoading = $state(true);
 
 const fetchCaptcha = () => {
 	isCaptchaLoading = true;
@@ -39,13 +41,13 @@ const fetchCaptcha = () => {
 		});
 };
 
-let accurate: boolean = false;
-let updates: string = "";
-let verify: HTMLTextAreaElement;
+let accurate = $state(false);
+let updates = $state("");
+let verify = $state<HTMLTextAreaElement>();
 
-let submitted = false;
-let submitting = false;
-let submissionIssueNumber: number;
+let submitted = $state(false);
+let submitting = $state(false);
+let submissionIssueNumber = $state<number>();
 
 const submitForm = (event: SubmitEvent) => {
 	event.preventDefault();
@@ -57,13 +59,13 @@ const submitForm = (event: SubmitEvent) => {
 		.post("/api/gitea/issue", {
 			type: "verify-community",
 			captchaSecret,
-			captchaTest: captchaInput.value,
-			honey: honeyInput.value,
+			captchaTest: captchaInput?.value,
+			honey: honeyInput?.value,
 			name: communityName,
 			communityUrl: communityUrl,
 			accurate: accurate ? "Yes" : "No",
 			updates: updates ? updates : "",
-			verified: verify.value,
+			verified: verify?.value,
 		})
 		.then((response) => {
 			submissionIssueNumber = response.data.number;
@@ -109,7 +111,7 @@ onMount(async () => {
 			</p>
 		</div>
 
-		<form on:submit={submitForm} class="w-full space-y-5 text-primary dark:text-white">
+		<form onsubmit={submitForm} class="w-full space-y-5 text-primary dark:text-white">
 			<div>
 				<input
 					disabled
@@ -175,16 +177,13 @@ onMount(async () => {
 						>{$_(`verifyCommunity.botProtection`)} <span class="font-normal">{$_(`verifyCommunity.caseSensitive`)}</span></label
 					>
 					{#if captchaSecret}
-						<button type="button" on:click={fetchCaptcha}>
+						<button type="button" onclick={fetchCaptcha}>
 							<Icon type="fa" icon="arrows-rotate" w="16" h="16" />
 						</button>
 					{/if}
 				</div>
 				<div class="space-y-2">
-					<div
-						bind:this={captcha}
-						class="flex items-center justify-center rounded-2xl border-2 border-input py-1"
-					>
+					<div class="flex items-center justify-center rounded-2xl border-2 border-input py-1">
 						{#if isCaptchaLoading}
 							<div class="h-[100px] w-[275px] animate-pulse bg-link/50"></div>
 						{:else}
