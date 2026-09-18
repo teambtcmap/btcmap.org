@@ -1,4 +1,4 @@
-import type { Page } from '@playwright/test';
+import type { Locator, Page } from '@playwright/test';
 
 export const MARKER_LOAD_TIMEOUT = 60000;
 
@@ -133,6 +133,51 @@ export async function stubReverseGeocode(
 				body: JSON.stringify(result ?? { error: 'Unable to geocode' })
 			})
 	);
+}
+
+// Inline form validation (#1404, #1406). The theme's `error` colour
+// (#DF3C3C, tailwind.config.js), for border and focus-outline checks.
+export const ERROR_RED = 'rgb(223, 60, 60)';
+
+type FocusProbe = { __descAtFocus?: string };
+
+// Screen readers read a field's description as focus lands, not later
+// changes — so record it from the focus event itself, then read it back
+// with descriptionAtFocus.
+export async function recordDescriptionAtFocus(field: Locator) {
+	await field.evaluate((el) => {
+		el.addEventListener(
+			'focus',
+			() => {
+				(window as unknown as FocusProbe).__descAtFocus = (
+					el.getAttribute('aria-describedby') ?? ''
+				)
+					.split(/\s+/)
+					.filter(Boolean)
+					.map((id) => document.getElementById(id)?.textContent?.trim() ?? '')
+					.join(' ');
+			},
+			{ once: true }
+		);
+	});
+}
+
+export async function descriptionAtFocus(page: Page) {
+	return page.evaluate(() => (window as unknown as FocusProbe).__descAtFocus);
+}
+
+// A form's captcha, answering with a fixed secret.
+export async function stubCaptcha(page: Page, secret = 'test-captcha-secret') {
+	await page.route('**/captcha', async (route) => {
+		await route.fulfill({
+			status: 200,
+			contentType: 'application/json',
+			body: JSON.stringify({
+				captcha: '<svg xmlns="http://www.w3.org/2000/svg" width="275" height="100"></svg>',
+				captchaSecret: secret
+			})
+		});
+	});
 }
 
 // Setup console error collection for a test. Call this in beforeEach hook.
