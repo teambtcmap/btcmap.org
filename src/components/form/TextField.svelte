@@ -47,7 +47,7 @@ let {
 
 const errorId = $derived(`${id}-error`);
 const inputClasses = $derived(
-	`w-full rounded-2xl border-2 ${error ? "border-error" : "border-input"} p-3 transition-all focus:outline-link disabled:cursor-not-allowed disabled:bg-gray-100 disabled:text-gray-500 dark:bg-white/[0.15] dark:disabled:bg-gray-700 dark:disabled:text-gray-400 ${inputClass}`,
+	`w-full rounded-2xl border-2 ${error ? "border-error focus:outline-error" : "border-input focus:outline-link"} p-3 transition-all disabled:cursor-not-allowed disabled:bg-gray-100 disabled:text-gray-500 dark:bg-white/[0.15] dark:disabled:bg-gray-700 dark:disabled:text-gray-400 ${inputClass}`,
 );
 </script>
 

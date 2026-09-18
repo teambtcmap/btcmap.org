@@ -568,8 +568,8 @@ onMount(() => {
 					aria-describedby={errors.category === 'otherRequired' ? 'category-error' : undefined}
 					oninput={recheck}
 					class="mt-2 w-full rounded-2xl border-2 {errors.category === 'otherRequired'
-						? 'border-error'
-						: 'border-input'} p-3 transition-all focus:outline-link disabled:cursor-not-allowed disabled:bg-gray-100 disabled:text-gray-500 dark:bg-white/[0.15] dark:disabled:bg-gray-700 dark:disabled:text-gray-400"
+						? 'border-error focus:outline-error'
+						: 'border-input focus:outline-link'} p-3 transition-all disabled:cursor-not-allowed disabled:bg-gray-100 disabled:text-gray-500 dark:bg-white/[0.15] dark:disabled:bg-gray-700 dark:disabled:text-gray-400"
 					bind:value={categoryOther}
 					bind:this={categoryOtherElement}
 				/>
@@ -1012,8 +1012,8 @@ onMount(() => {
 								if (captchaInput?.value.trim()) captchaError = false;
 							}}
 							class="w-full rounded-2xl border-2 {captchaError
-								? 'border-error'
-								: 'border-input'} p-3 transition-all focus:outline-link disabled:cursor-not-allowed disabled:bg-gray-100 disabled:text-gray-500 dark:bg-white/[0.15] dark:disabled:bg-gray-700 dark:disabled:text-gray-400"
+								? 'border-error focus:outline-error'
+								: 'border-input focus:outline-link'} p-3 transition-all disabled:cursor-not-allowed disabled:bg-gray-100 disabled:text-gray-500 dark:bg-white/[0.15] dark:disabled:bg-gray-700 dark:disabled:text-gray-400"
 							bind:this={captchaInput}
 						/>
 					</div>
