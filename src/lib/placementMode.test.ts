@@ -8,6 +8,7 @@ import {
 	clampDedupeRadiusKm,
 	fetchNearbyPlaceNames,
 	findNearbyPlaces,
+	formatPinCoords,
 	parseCoordsParams,
 	placementEntryUrl,
 } from "./placementMode";
@@ -17,6 +18,16 @@ describe("buildAddFormUrl", () => {
 		expect(buildAddFormUrl(32.649012345, -16.910299999)).toBe(
 			"/map?add=form#17/32.64901/-16.91030",
 		);
+	});
+});
+
+describe("formatPinCoords", () => {
+	it("reads lat first at the form URL's 5-decimal precision", () => {
+		expect(formatPinCoords(32.650612, -16.908543)).toBe("32.65061, -16.90854");
+	});
+
+	it("pads to a fixed width so the pin chip doesn't jitter", () => {
+		expect(formatPinCoords(42.3, 0)).toBe("42.30000, 0.00000");
 	});
 });
 

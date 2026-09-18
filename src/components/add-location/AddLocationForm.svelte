@@ -20,6 +20,7 @@ import { CATEGORIES, CATEGORY_GROUPS } from "$lib/categoryMapping";
 import { reverseGeocode } from "$lib/geocoding";
 import { _, locale } from "$lib/i18n";
 import { fetchProfile } from "$lib/nostrProfile";
+import { formatPinCoords } from "$lib/placementMode";
 import type {
 	SubmitPlaceRequest,
 	SubmitPlaceResponse,
@@ -47,11 +48,12 @@ import type { PostPlaceSubmissionResponse } from "$types/btcmap-api/PostPlaceSub
 // wipe them.
 type Props = {
 	coords: { lat: number; long: number };
-	// `attributed` = the submission went out with a verified account
-	// attached — the host's success screen skips the account nudge then.
-	onsuccess: (attributed: boolean) => void;
+	// On a completed submission. `attributed` = it went out with a verified
+	// account attached (the host's success screen picks its one ask by
+	// it); `name` titles that screen.
+	onsuccess: (result: { attributed: boolean; name: string }) => void;
 	// Fires on edit↔review transitions so the host can adapt its chrome
-	// (the pin hint makes no sense over the review summary).
+	// (the header's step label, and the edit-only panel content).
 	onstepchange?: (step: "edit" | "review") => void;
 };
 let { coords, onsuccess, onstepchange }: Props = $props();
@@ -68,6 +70,10 @@ let honeyInput = $state<HTMLInputElement>();
 
 const fetchCaptcha = () => {
 	isCaptchaLoading = true;
+	// A new image voids the old secret and whatever was typed for it: clear
+	// both, so Submit stays disabled until the replacement arrives.
+	captchaSecret = undefined;
+	if (captchaInput) captchaInput.value = "";
 	axios
 		.get<{ captcha: string; captchaSecret: string }>("/captcha")
 		.then((response) => {
@@ -89,7 +95,7 @@ let address = $state<HTMLInputElement>();
 let showMoreDetails = $state(false);
 
 // Address suggestion from the pin (#1315). Re-runs whenever the pin
-// moves — a live-adjust host, or history navigation between two arrivals
+// moves — the host's Move pin, or history navigation between two arrivals
 // keeps this instance alive with new coords. A fulfilled suggestion flips
 // the field to required, so it can be corrected but not blanked out; a
 // miss leaves it optional, exactly the pre-suggestion behavior.
@@ -229,11 +235,10 @@ const handleCheckboxClick = () => {
 };
 
 // The review step's snapshot, taken on entry. The hidden edit fields
-// can't change while review is open, and the pin coords are frozen here
-// too — the desktop map stays pannable beside the panel, and a pin moved
-// mid-review must not diverge from what the summary showed. This is
-// exactly what the confirm submit sends; re-positioning means going back
-// to edit (which re-snapshots on the next review).
+// can't change while review is open, and neither can the pin — the host
+// offers Move pin on the edit step only. This is exactly what the
+// confirm submit sends; re-positioning means going back to edit (which
+// re-snapshots on the next review).
 type SubmissionPreview = {
 	lat: number;
 	long: number;
@@ -337,6 +342,7 @@ const submitForm = (event: SubmitEvent) => {
 	}
 
 	if (!preview) return;
+	const { name: submittedName } = preview;
 	submitting = true;
 
 	// The authorized fork (#1374, per #1348): signed in goes straight to
@@ -352,7 +358,7 @@ const submitForm = (event: SubmitEvent) => {
 			)
 			.then(() => {
 				trackEvent("add_place_submit_success");
-				onsuccess(true);
+				onsuccess({ attributed: true, name: submittedName });
 			})
 			.catch((error) => {
 				errToast(get(_)("errors.formSubmission"));
@@ -375,7 +381,7 @@ const submitForm = (event: SubmitEvent) => {
 		.post<SubmitPlaceResponse>("/api/submit-place", payload)
 		.then(() => {
 			trackEvent("add_place_submit_success");
-			onsuccess(false);
+			onsuccess({ attributed: false, name: submittedName });
 		})
 		.catch((error) => {
 			// Our endpoint's 4xx messages are written for users (captcha,
@@ -388,6 +394,10 @@ const submitForm = (event: SubmitEvent) => {
 			}
 			console.error(error);
 			submitting = false;
+			// The server burns a captcha on its first correct answer, before
+			// the submission itself can fail (#1401) — resending it could only
+			// come back "already used". Hand the retry a fresh one.
+			fetchCaptcha();
 		});
 };
 
@@ -401,11 +411,13 @@ onMount(() => {
 </script>
 
 <!-- scroll-mt clears the shell's sticky header when the step switch
-     scrolls the form back into view. -->
+     scrolls the form back into view — sized for the header with its
+     step label and bar (~78px), or the review step's back link lands
+     under it. -->
 <form
 	bind:this={formElement}
 	onsubmit={submitForm}
-	class="w-full scroll-mt-16 space-y-5 text-primary dark:text-white"
+	class="w-full scroll-mt-24 space-y-5 text-primary dark:text-white"
 >
 	<!-- Edit step — CSS-hidden during review so the uncontrolled inputs
 	     keep their values (see the header comment). -->
@@ -807,6 +819,16 @@ onMount(() => {
 			{/if}
 		{/snippet}
 		<div class="space-y-5">
+			<!-- Back sits at the top, under the header's step label, so back
+			     and forward aren't at opposite ends of a long scroll. -->
+			<button
+				type="button"
+				onclick={backToEdit}
+				class="inline-flex items-center gap-1 text-sm font-semibold text-link hover:text-hover focus:outline-link"
+			>
+				<Icon type="material" icon="chevron_left" w="18" h="18" />
+				{$_('addLocation.reviewBackButton')}
+			</button>
 			<div>
 				<h3 class="text-lg font-semibold">{$_('addLocation.reviewTitle')}</h3>
 				<p class="text-sm text-body dark:text-offwhite">
@@ -819,7 +841,7 @@ onMount(() => {
 				{@render row($_('forms.address'), preview.address)}
 				{@render row(
 					$_('addLocation.reviewPosition'),
-					`${preview.lat.toFixed(5)}, ${preview.long.toFixed(5)}`
+					formatPinCoords(preview.lat, preview.long)
 				)}
 				{@render row($_('forms.category'), previewCategoryLabel)}
 				{@render row(
@@ -887,13 +909,6 @@ onMount(() => {
 			>
 				{$_('forms.submitLocation')}
 			</PrimaryButton>
-			<button
-				type="button"
-				onclick={backToEdit}
-				class="h-12 w-full rounded-xl border border-input font-semibold text-body focus:outline-link dark:text-offwhite"
-			>
-				{$_('addLocation.reviewEditButton')}
-			</button>
 		</div>
 	{/if}
 

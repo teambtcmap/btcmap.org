@@ -123,4 +123,124 @@ test.describe('In-map add form', () => {
 		await expect(page.getByText('Place the pin', { exact: true })).toBeVisible();
 		await expect(page.locator('#name')).toBeHidden();
 	});
+
+	test('the pin stays frozen beside the form; Move pin re-places it and keeps the fields', async ({
+		page
+	}) => {
+		// #1396. Every reverse lookup is one trigger of the address
+		// suggestion: panning must not fire one, a confirmed Move pin must.
+		let lookups = 0;
+		page.on('request', (request) => {
+			if (request.url().includes('nominatim.openstreetmap.org')) lookups++;
+		});
+		await openForm(page);
+		const chip = page.getByText('Pinned here').locator('..');
+		await expect(chip).toContainText('42.27625, 42.70242');
+		await expect(page.locator('#address')).toHaveValue(/Freiheitsstraße/);
+		await page.locator('#name').fill('Satoshi Comics');
+
+		// Pan beside the panel (it spans x 12–412 at 1280 wide). The hash
+		// follows the viewport on moveend, which proves the pan registered.
+		await page.mouse.move(900, 360);
+		await page.mouse.down();
+		await page.mouse.move(500, 360, { steps: 10 });
+		await page.mouse.up();
+		await expect(page).not.toHaveURL(/\/42\.702\d*$/);
+		await page.waitForTimeout(600);
+		// Frozen: same pin, no second lookup (one-shot reads after settling).
+		await expect(chip).toContainText('42.27625, 42.70242');
+		expect(lookups).toBe(1);
+
+		await page.getByRole('button', { name: 'Move pin' }).click();
+		await expect(page.getByText('Move the pin', { exact: true })).toBeVisible();
+		await expect(page.locator('#name')).toBeHidden();
+		// Re-placing starts from the frozen pin, not the panned viewport.
+		await expect(page).toHaveURL(/\/42\.27\d*\/42\.702\d*$/);
+
+		// The panel is hidden, so the whole map drags: shift the pin east.
+		await page.mouse.move(800, 360);
+		await page.mouse.down();
+		await page.mouse.move(600, 360, { steps: 10 });
+		await page.mouse.up();
+		await expect(page).not.toHaveURL(/\/42\.702\d*$/);
+		await page.waitForTimeout(600);
+		await page.getByRole('button', { name: 'Use this position' }).click();
+
+		// Back on the same form instance: typed text survived, the chip
+		// states the new pin, and the address suggestion re-ran once.
+		await expect(page.locator('#name')).toBeVisible();
+		await expect(page.locator('#name')).toHaveValue('Satoshi Comics');
+		await expect(chip).not.toContainText('42.70242');
+		await expect(page).toHaveURL(/\/map\?add=form/);
+		await expect.poll(() => lookups).toBe(2);
+	});
+
+	test('confirming Move pin at once hands back the frozen pin, not a mid-flight centre', async ({
+		page
+	}) => {
+		await openForm(page);
+		const chip = page.getByText('Pinned here').locator('..');
+		await expect(chip).toContainText('42.27625, 42.70242');
+		// Pan away so re-centring on the pin has distance to cover.
+		await page.mouse.move(640, 500);
+		await page.mouse.down();
+		await page.mouse.move(900, 440, { steps: 10 });
+		await page.mouse.up();
+		await expect(page).not.toHaveURL(/\/42\.702\d*$/);
+		await page.waitForTimeout(600);
+
+		// Keyboard, back to back: Enter on Move pin hands focus to the
+		// sheet's action, and an immediate second Enter confirms. It must
+		// commit the pin the sheet opened on, never a centre the camera was
+		// still passing through (a pointer click is too slow to catch that).
+		await page.getByRole('button', { name: 'Move pin' }).focus();
+		await page.keyboard.press('Enter');
+		await page.keyboard.press('Enter');
+		await expect(page.locator('#name')).toBeVisible();
+		await expect(chip).toContainText('42.27625, 42.70242');
+	});
+
+	test('below detail zoom, Move pin focuses the visible Zoom in action', async ({
+		page
+	}) => {
+		// Arrive with the form open at z14, under the placement zoom gate.
+		await stubMapData(page, [
+			{ id: 9, lat: 42.3, lon: 42.75, icon: 'cafe', name: 'Far Place' }
+		]);
+		await stubReverseGeocode(page);
+		await page.setViewportSize({ width: 1280, height: 720 });
+		await page.goto('/map?add=form#14/42.2762511/42.7024218', {
+			waitUntil: 'load'
+		});
+		await waitForMarkersToLoad(page, { skipApiWait: true });
+		await expect(page.locator('#name')).toBeVisible();
+
+		await page.getByRole('button', { name: 'Move pin' }).click();
+		const zoomIn = page.getByRole('button', { name: 'Zoom in to place the pin' });
+		await expect(zoomIn).toBeFocused();
+		// Zooming in swaps the action in place — focus follows it.
+		await page.keyboard.press('Enter');
+		await expect(
+			page.getByRole('button', { name: 'Use this position' })
+		).toBeFocused();
+	});
+
+	test('Escape backs out of Move pin without closing the form', async ({
+		page
+	}) => {
+		await openForm(page);
+		await page.locator('#name').fill('Satoshi Comics');
+		await page.getByRole('button', { name: 'Move pin' }).click();
+		await expect(page.getByText('Move the pin', { exact: true })).toBeVisible();
+
+		await page.keyboard.press('Escape');
+		// Back on the form, not the placement sheet, with nothing lost.
+		await expect(page.locator('#name')).toBeVisible();
+		await expect(page.locator('#name')).toHaveValue('Satoshi Comics');
+		await expect(page.getByText('Move the pin', { exact: true })).toBeHidden();
+		await expect(page.getByText('Place the pin', { exact: true })).toBeHidden();
+		await expect(page).toHaveURL(/\/map\?add=form/);
+		// Focus returns to the control that started it.
+		await expect(page.getByRole('button', { name: 'Move pin' })).toBeFocused();
+	});
 });
