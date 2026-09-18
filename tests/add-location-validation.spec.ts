@@ -171,6 +171,9 @@ test.describe('Add Location — inline validation', () => {
 		await fillValid(page);
 		await page.locator('#category').selectOption('Other');
 		const other = page.locator('input[name="category-other"]');
+		// It takes focus on a rejected Review, so it needs a real name —
+		// not its "Restaurant etc." placeholder.
+		await expect(other).toHaveAccessibleName('Category');
 		await other.fill('  ');
 		await recordDescriptionAtFocus(other);
 		await clickReview(page);

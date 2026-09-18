@@ -250,4 +250,20 @@ describe("isValidEmail", () => {
 		expect(isValidEmail("owner@example..com")).toBe(false);
 		expect(isValidEmail("a@b@example.com")).toBe(false);
 	});
+
+	it("rejects URL syntax around an internationalized domain", () => {
+		// The punycode conversion goes through the URL parser, which would
+		// drop a port, path, query or fragment — and decode percent escapes —
+		// before the domain rule ever saw them.
+		for (const email of [
+			"owner@bücher.de:80",
+			"owner@bücher.de/path",
+			"owner@bücher.de?x",
+			"owner@bücher.de#x",
+			"owner@bücher.de\\x",
+			"owner@bü%63her.de",
+		]) {
+			expect(isValidEmail(email), email).toBe(false);
+		}
+	});
 });
