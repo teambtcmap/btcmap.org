@@ -157,15 +157,15 @@ test.describe('Add Location — review step', () => {
 		await page.getByRole('button', { name: 'Review & submit' }).click();
 		await expect(page.getByText("Here's what will be published")).toBeVisible();
 
-		// Pan the map while the summary is up — on desktop it stays live
-		// beside the panel. The submission must keep the coords frozen at
-		// review entry, not the moved pin (a 400px pan at z17 shifts the
-		// longitude ~0.004°, well past the assertion tolerance below).
+		// Pan the map while the summary is up — on desktop it stays
+		// pannable beside the panel. The submission must keep the pin
+		// frozen since the form opened, not the panned centre (a 400px pan
+		// at z17 shifts the longitude ~0.002–0.004°, past the tolerance).
 		await page.mouse.move(900, 360);
 		await page.mouse.down();
 		await page.mouse.move(500, 360, { steps: 10 });
 		await page.mouse.up();
-		// Let moveend settle so the host refreshes its live coords, and
+		// Let moveend settle (a live pin would have moved by now), and
 		// prove the pan registered (the map rewrites the hash on moveend) —
 		// otherwise the frozen-coords assertion below would be vacuous.
 		await page.waitForTimeout(600);

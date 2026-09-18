@@ -51,9 +51,9 @@ let backButtonEl: HTMLButtonElement | undefined = $state();
 let confirmButtonEl: HTMLButtonElement | undefined = $state();
 
 // The in-map form host (#1134): confirming hands the pin to the form
-// panel instead of navigating to /add-location. The pin (crosshair =
-// map center) stays live on desktop, so every settled move refreshes
-// the form's coords.
+// panel instead of navigating to /add-location. From then on the pin is
+// frozen (#1396) — panning beside the desktop panel never re-places it;
+// the form's Move pin is the one way to change it.
 let formOpen = $state(false);
 let formCoords = $state<{ lat: number; long: number } | null>(null);
 // True once openForm pushed the ?add=form entry — only then can Back
@@ -120,19 +120,50 @@ $effect(() => {
 	formOpen = true;
 });
 
-// Desktop live adjust: the map stays interactive beside the panel and
-// the crosshair remains the pin, so each settled move hands the new
-// center to the form (whose address lookup re-runs on coords changes).
+// Re-placing a frozen pin (#1396): Move pin hides the panel — it stays
+// mounted, its inputs are uncontrolled and unmounting would wipe them —
+// and brings the live crosshair back until the new position is confirmed
+// or cancelled. No history entry: Back while re-placing closes the form,
+// as Back on the form always has. Any way the form closes ends it.
+let repositioning = $state(false);
+// The Move pin sheet's primary action — "Zoom in" below detail zoom, else
+// "Use this position". Focus follows whichever is showing: on entry, and
+// when zooming in swaps one for the other under a keyboard user.
+let movePinActionEl: HTMLButtonElement | undefined = $state();
 $effect(() => {
-	if (!map || !formOpen) return;
-	const currentMap = map;
-	const onMoveEnd = () => {
-		const center = currentMap.getCenter();
-		formCoords = { lat: center.lat, long: center.lng };
-	};
-	currentMap.on("moveend", onMoveEnd);
-	return () => currentMap.off("moveend", onMoveEnd);
+	if (!formOpen) repositioning = false;
 });
+$effect(() => {
+	if (repositioning) movePinActionEl?.focus();
+});
+
+// The frozen pin is drawn at its map position so it stays findable after
+// a pan; re-projected on every move and container resize.
+let frozenPinPoint = $state<{ x: number; y: number } | null>(null);
+$effect(() => {
+	if (!map || !formOpen || repositioning || !formCoords) {
+		frozenPinPoint = null;
+		return;
+	}
+	const currentMap = map;
+	const lngLat: [number, number] = [formCoords.long, formCoords.lat];
+	const project = () => {
+		const point = currentMap.project(lngLat);
+		frozenPinPoint = { x: point.x, y: point.y };
+	};
+	project();
+	currentMap.on("move", project);
+	currentMap.on("resize", project);
+	return () => {
+		currentMap.off("move", project);
+		currentMap.off("resize", project);
+	};
+});
+
+// The placement sheet's card, shared by the confirm/interrupt sheet and
+// the Move pin sheet.
+const SHEET_CLASS =
+	"absolute bottom-0 left-0 right-0 z-[1002] rounded-t-2xl bg-white p-4 pb-6 shadow-lg md:bottom-6 md:left-1/2 md:right-auto md:w-full md:max-w-xl md:-translate-x-1/2 md:rounded-2xl md:border md:border-input md:pb-4 dark:bg-dark";
 
 const enter = (method: string) => {
 	active = true;
@@ -221,6 +252,38 @@ const addAnother = () => {
 	trackEvent("add_place_enter", { method: "another" });
 	if (formEntryPushed) history.back();
 	else closeFormLocally();
+};
+
+const startMovePin = () => {
+	if (!map || !formCoords) return;
+	trackEvent("add_place_move_pin_click");
+	// Start from the frozen pin, wherever the map was panned since. A jump,
+	// not an ease: confirming reads the map centre, and an animation still
+	// in flight would commit a point the camera was only passing through.
+	map.jumpTo({ center: [formCoords.long, formCoords.lat] });
+	repositioning = true;
+};
+
+const cancelMovePin = () => {
+	repositioning = false;
+};
+
+const confirmMovePin = () => {
+	if (!map) return;
+	const center = map.getCenter();
+	// The still-mounted form's coords effect re-runs the address suggestion.
+	formCoords = { lat: center.lat, long: center.lng };
+	repositioning = false;
+	trackEvent("add_place_move_pin_success");
+};
+
+// Escape backs out of re-placing. The panel's own Escape (close the form)
+// stands down while it is hidden or once this handler claimed the key.
+const onKeydown = (event: KeyboardEvent) => {
+	if (event.key === "Escape" && repositioning) {
+		event.preventDefault();
+		cancelMovePin();
+	}
 };
 
 const exitToMap = () => {
@@ -401,18 +464,37 @@ $effect(() => {
 });
 </script>
 
-{#if active}
-	<!-- center crosshair pin: tip must sit exactly on the map center,
-	     so shift up by the full pin height -->
-	<div
-		class="pointer-events-none absolute left-1/2 top-1/2 z-[1001] -translate-x-1/2 -translate-y-full drop-shadow-lg"
-	>
-		<PlacementPinIcon width={40} />
-	</div>
+<svelte:window onkeydown={onKeydown} />
 
-	{#if !formOpen && nearby === null}
+{#if active}
+	{#if formOpen && !repositioning}
+		{#if frozenPinPoint}
+			<!-- Frozen pin (#1396): anchored to its map position, dimmed with a
+			     dashed ring so it reads as placed-and-locked rather than
+			     draggable. Tip on the point: shift up by the pin height. -->
+			<div
+				class="pointer-events-none absolute z-[1001] -translate-x-1/2 -translate-y-full"
+				style="left: {frozenPinPoint.x}px; top: {frozenPinPoint.y}px"
+			>
+				<span
+					class="absolute top-[37%] left-1/2 h-[70px] w-[70px] -translate-x-1/2 -translate-y-1/2 rounded-full border-2 border-dashed border-bitcoin opacity-55"
+				></span>
+				<PlacementPinIcon width={40} class="relative opacity-70" />
+			</div>
+		{/if}
+	{:else}
+		<!-- center crosshair pin: tip must sit exactly on the map center,
+		     so shift up by the full pin height -->
+		<div
+			class="pointer-events-none absolute left-1/2 top-1/2 z-[1001] -translate-x-1/2 -translate-y-full drop-shadow-lg"
+		>
+			<PlacementPinIcon width={40} />
+		</div>
+	{/if}
+
+	{#if (!formOpen || repositioning) && nearby === null}
 		<!-- Address-first path: search to jump the map — the pin stays
-		     centered, so the jump IS the placement. -->
+		     centered, so the jump IS the placement (re-placing too). -->
 		<div
 			class="absolute left-1/2 top-3 z-[1001] w-[min(26rem,calc(100%-1.5rem))] -translate-x-1/2"
 		>
@@ -421,26 +503,25 @@ $effect(() => {
 	{/if}
 
 	{#if formOpen && formCoords}
-		<!-- The form host: full-screen sheet on mobile, right panel on
-		     desktop. Replaces the confirm/interrupt sheets; the crosshair
-		     above stays — it is still the live pin. -->
-		<AddPlaceFormPanel
-			coords={formCoords}
-			onclose={closeForm}
-			onaddanother={addAnother}
-			onexit={exitToMap}
-		/>
-	{:else}
-	<!-- Mobile: edge-to-edge bottom sheet (pb-6 clears the home indicator).
-	     Desktop: the sheet would stretch the buttons across the whole
-	     viewport, so float it as a centered card instead — max-w-xl matches
-	     the add-location form column it hands off to. -->
-	<div
-		class="absolute bottom-0 left-0 right-0 z-[1002] rounded-t-2xl bg-white p-4 pb-6 shadow-lg md:bottom-6 md:left-1/2 md:right-auto md:w-full md:max-w-xl md:-translate-x-1/2 md:rounded-2xl md:border md:border-input md:pb-4 dark:bg-dark"
-	>
-		{#if nearby === null}
+		<!-- The form host: full-screen sheet on mobile, left panel on
+		     desktop. Re-placing hides it instead of unmounting it, so the
+		     typed fields survive Move pin. -->
+		<div class={repositioning ? 'hidden' : 'contents'}>
+			<AddPlaceFormPanel
+				coords={formCoords}
+				hidden={repositioning}
+				onclose={closeForm}
+				onmovepin={startMovePin}
+				onaddanother={addAnother}
+				onexit={exitToMap}
+			/>
+		</div>
+	{/if}
+
+	{#if formOpen && formCoords && repositioning}
+		<div class={SHEET_CLASS}>
 			<p class="text-lg font-semibold text-primary dark:text-white">
-				{$_("map.placement.title")}
+				{$_("map.placement.movePinTitle")}
 			</p>
 			<p class="mt-1 text-sm text-body dark:text-offwhite">
 				{$_("map.placement.hint")}
@@ -448,13 +529,14 @@ $effect(() => {
 			<div class="mt-4 flex gap-3">
 				<button
 					type="button"
-					onclick={cancel}
+					onclick={cancelMovePin}
 					class="h-12 rounded-xl border border-input px-5 font-semibold text-body dark:text-offwhite"
 				>
 					{$_("map.placement.cancel")}
 				</button>
 				{#if zoomTooLow}
 					<button
+						bind:this={movePinActionEl}
 						type="button"
 						onclick={zoomToPlace}
 						class="h-12 flex-1 rounded-xl bg-bitcoin font-semibold text-white hover:bg-bitcoinHover"
@@ -463,73 +545,114 @@ $effect(() => {
 					</button>
 				{:else}
 					<button
-						bind:this={confirmButtonEl}
+						bind:this={movePinActionEl}
 						type="button"
-						onclick={confirm}
+						onclick={confirmMovePin}
 						class="h-12 flex-1 rounded-xl bg-bitcoin font-semibold text-white hover:bg-bitcoinHover"
 					>
-						{$_("map.placement.confirm")}
+						{$_("map.placement.movePinConfirm")}
 					</button>
 				{/if}
 			</div>
-		{:else}
-			<p class="text-lg font-semibold text-primary dark:text-white">
-				{$_("map.placement.nearbyTitle")}
-			</p>
-			<p class="mt-1 text-sm text-body dark:text-offwhite">
-				{$_("map.placement.nearbyHint")}
-			</p>
-			<ul class="mt-3 max-h-40 space-y-1 overflow-y-auto">
-				{#each nearby as { place, distanceM } (place.id)}
-					<li>
-						<!-- Routes into the verify/update flow (deck slide 7): the
-						     point of the interrupt is updating the existing place
-						     instead of filing a duplicate. -->
-						<a
-							href="/verify-location?id={place.id}"
-							onclick={() =>
-								trackEvent("add_place_nearby_candidate_click", {
-									placeId: place.id,
-								})}
-							class="flex items-baseline justify-between gap-3 rounded-lg px-2 py-1.5 hover:underline"
+		</div>
+	{:else if !(formOpen && formCoords)}
+		<!-- Mobile: edge-to-edge bottom sheet (pb-6 clears the home indicator).
+		     Desktop: the sheet would stretch the buttons across the whole
+		     viewport, so float it as a centered card instead — max-w-xl matches
+		     the add-location form column it hands off to. -->
+		<div class={SHEET_CLASS}>
+			{#if nearby === null}
+				<p class="text-lg font-semibold text-primary dark:text-white">
+					{$_("map.placement.title")}
+				</p>
+				<p class="mt-1 text-sm text-body dark:text-offwhite">
+					{$_("map.placement.hint")}
+				</p>
+				<div class="mt-4 flex gap-3">
+					<button
+						type="button"
+						onclick={cancel}
+						class="h-12 rounded-xl border border-input px-5 font-semibold text-body dark:text-offwhite"
+					>
+						{$_("map.placement.cancel")}
+					</button>
+					{#if zoomTooLow}
+						<button
+							type="button"
+							onclick={zoomToPlace}
+							class="h-12 flex-1 rounded-xl bg-bitcoin font-semibold text-white hover:bg-bitcoinHover"
 						>
-							<span class="font-semibold text-link"
-								>{place.name ||
-									(namesLoaded ? $_("map.placement.nearbyUnnamed") : "…")}</span
+							{$_("map.placement.zoomIn")}
+						</button>
+					{:else}
+						<button
+							bind:this={confirmButtonEl}
+							type="button"
+							onclick={confirm}
+							class="h-12 flex-1 rounded-xl bg-bitcoin font-semibold text-white hover:bg-bitcoinHover"
+						>
+							{$_("map.placement.confirm")}
+						</button>
+					{/if}
+				</div>
+			{:else}
+				<p class="text-lg font-semibold text-primary dark:text-white">
+					{$_("map.placement.nearbyTitle")}
+				</p>
+				<p class="mt-1 text-sm text-body dark:text-offwhite">
+					{$_("map.placement.nearbyHint")}
+				</p>
+				<ul class="mt-3 max-h-40 space-y-1 overflow-y-auto">
+					{#each nearby as { place, distanceM } (place.id)}
+						<li>
+							<!-- Routes into the verify/update flow (deck slide 7): the
+							     point of the interrupt is updating the existing place
+							     instead of filing a duplicate. -->
+							<a
+								href="/verify-location?id={place.id}"
+								onclick={() =>
+									trackEvent("add_place_nearby_candidate_click", {
+										placeId: place.id,
+									})}
+								class="flex items-baseline justify-between gap-3 rounded-lg px-2 py-1.5 hover:underline"
 							>
-							<span class="shrink-0 text-sm text-body dark:text-offwhite"
-								>{Math.round(distanceM)} m
-								<span class="ml-1 inline-flex items-center font-semibold text-link"
-									>{$_("map.placement.nearbyUpdate")}<Icon
-										type="material"
-										icon="chevron_right"
-										w="14"
-										h="14"
-									/></span
-								></span
-							>
-						</a>
-					</li>
-				{/each}
-			</ul>
-			<div class="mt-4 flex gap-3">
-				<button
-					bind:this={backButtonEl}
-					type="button"
-					onclick={backToConfirm}
-					class="h-12 rounded-xl border border-input px-5 font-semibold text-body dark:text-offwhite"
-				>
-					{$_("map.placement.nearbyBack")}
-				</button>
-				<button
-					type="button"
-					onclick={addAnyway}
-					class="min-h-12 flex-1 rounded-xl bg-bitcoin px-3 py-2 font-semibold text-white hover:bg-bitcoinHover"
-				>
-					{$_("map.placement.nearbyContinue")}
-				</button>
-			</div>
-		{/if}
-	</div>
+								<span class="font-semibold text-link"
+									>{place.name ||
+										(namesLoaded ? $_("map.placement.nearbyUnnamed") : "…")}</span
+								>
+								<span class="shrink-0 text-sm text-body dark:text-offwhite"
+									>{Math.round(distanceM)} m
+									<span class="ml-1 inline-flex items-center font-semibold text-link"
+										>{$_("map.placement.nearbyUpdate")}<Icon
+											type="material"
+											icon="chevron_right"
+											w="14"
+											h="14"
+										/></span
+									></span
+								>
+							</a>
+						</li>
+					{/each}
+				</ul>
+				<div class="mt-4 flex gap-3">
+					<button
+						bind:this={backButtonEl}
+						type="button"
+						onclick={backToConfirm}
+						class="h-12 rounded-xl border border-input px-5 font-semibold text-body dark:text-offwhite"
+					>
+						{$_("map.placement.nearbyBack")}
+					</button>
+					<button
+						type="button"
+						onclick={addAnyway}
+						class="min-h-12 flex-1 rounded-xl bg-bitcoin px-3 py-2 font-semibold text-white hover:bg-bitcoinHover"
+					>
+						{$_("map.placement.nearbyContinue")}
+					</button>
+				</div>
+			{/if}
+		</div>
 	{/if}
 {/if}

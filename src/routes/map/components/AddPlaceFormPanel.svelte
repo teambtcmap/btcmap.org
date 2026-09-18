@@ -2,37 +2,62 @@
 import AddLocationForm from "$components/add-location/AddLocationForm.svelte";
 import CloseButton from "$components/CloseButton.svelte";
 import Icon from "$components/Icon.svelte";
+import PlacementPinIcon from "$components/PlacementPinIcon.svelte";
 import PrimaryButton from "$components/PrimaryButton.svelte";
 import { trackEvent } from "$lib/analytics";
 import { _ } from "$lib/i18n";
+import { formatPinCoords } from "$lib/placementMode";
 import { osmEditUrl } from "$lib/placeSubmission";
 
 import MapPanelShell from "./MapPanelShell.svelte";
 
 // In-map host for the add-location form (#1134), wearing the shared
-// MapPanelShell: left-docked drawer card on desktop — the map and its
-// crosshair pin stay live beside it, and the host refreshes `coords` on
-// every settled move — and a full-screen sheet on mobile, since a long
-// form wants full height and native scroll, not peek-drawer gestures.
+// MapPanelShell: left-docked drawer card on desktop — the map stays
+// pannable beside it while the pin stays frozen (#1396) — and a
+// full-screen sheet on mobile, since a long form wants full height and
+// native scroll, not peek-drawer gestures.
 type Props = {
 	coords: { lat: number; long: number };
+	// True while the host re-places the pin: the panel is hidden, not
+	// unmounted, so the form keeps its fields.
+	hidden?: boolean;
 	// Back to the placement sheet (the close button and Escape).
 	onclose: () => void;
+	// The pin chip's Move pin: hand the pin back to placement mode.
+	onmovepin: () => void;
 	// Success-screen actions: restart placement, or leave add mode.
 	onaddanother: () => void;
 	onexit: () => void;
 };
-let { coords, onclose, onaddanother, onexit }: Props = $props();
+let {
+	coords,
+	hidden = false,
+	onclose,
+	onmovepin,
+	onaddanother,
+	onexit,
+}: Props = $props();
 
 let submitted = $state(false);
 // True when the submission went out without a verified account — the
 // success screen then nudges toward creating one (#1334).
 let submittedAnonymously = $state(false);
-// The form's review step (#1341): the pin hint disappears — the summary
-// froze the coords, so "fine-tune the pin" would be a lie there.
+// The form's review step (#1341): the pin chip and the OSM card are
+// edit-only — the summary froze the coords, so Move pin would diverge
+// from what it shows.
 let inReview = $state(false);
 
+// Returning from Move pin puts focus back on the control that started it.
+let movePinButton = $state<HTMLButtonElement>();
+let wasHidden = false;
+$effect(() => {
+	if (wasHidden && !hidden) movePinButton?.focus();
+	wasHidden = hidden;
+});
+
 const onKeydown = (event: KeyboardEvent) => {
+	// While the host re-places the pin, Escape belongs to its sheet.
+	if (hidden || event.defaultPrevented) return;
 	if (event.key === "Escape") {
 		event.preventDefault();
 		onclose();
@@ -53,9 +78,32 @@ const onKeydown = (event: KeyboardEvent) => {
 	{#if !submitted}
 		<div class="px-4 pb-[calc(env(safe-area-inset-bottom)+1.5rem)] md:pb-4">
 			{#if !inReview}
-				<p class="mb-4 text-sm text-body dark:text-offwhite">
-					{$_('addLocation.pinConfirmedHint')}
-				</p>
+				<!-- The pin as a stated value (#1396): the host froze it when the
+				     form opened, and Move pin is the one way to change it. -->
+				<div
+					class="mb-4 flex flex-wrap items-center gap-x-2.5 gap-y-1 rounded-xl border border-input bg-offwhite px-3 py-2.5 dark:border-white/20 dark:bg-white/5"
+				>
+					<PlacementPinIcon width={16} class="shrink-0" />
+					<div class="min-w-0">
+						<p
+							class="text-xs font-bold tracking-[0.5px] text-body uppercase dark:text-offwhite"
+						>
+							{$_('addLocation.pinChipLabel')}
+						</p>
+						<p class="mt-0.5 text-sm text-primary tabular-nums dark:text-white">
+							{formatPinCoords(coords.lat, coords.long)}
+						</p>
+					</div>
+					<button
+						bind:this={movePinButton}
+						type="button"
+						onclick={onmovepin}
+						class="ml-auto inline-flex items-center gap-1 text-sm font-semibold whitespace-nowrap text-link hover:text-hover focus:outline-link"
+					>
+						<Icon type="material" icon="my_location" w="16" h="16" />
+						{$_('addLocation.movePin')}
+					</button>
+				</div>
 				<!-- Path fork for OSM-capable users (#1344): a deep link into the
 				     iD editor at the chosen pin, in a new tab so the form state
 				     survives. Hidden with the hint during review (#1341) — the
@@ -63,7 +111,9 @@ const onKeydown = (event: KeyboardEvent) => {
 				     it replaces this card in the same slot. The official OSM
 				     logo is vendored unmodified — the OSMF trademark policy
 				     (§3.3.4) allows it to identify a hyperlink to OSM but
-				     forbids altering it. -->
+				     forbids altering it. The CTA sits on its own line as an
+				     outlined pill: a visible action, still a step below the
+				     form's filled primary buttons (review on #1397). -->
 				<div
 					class="mb-4 flex items-start gap-2 rounded-lg border border-gray-300 px-3 py-2.5 dark:border-white/20"
 				>
@@ -72,18 +122,20 @@ const onKeydown = (event: KeyboardEvent) => {
 						alt=""
 						class="mt-0.5 h-5 w-5 shrink-0"
 					/>
-					<p class="text-sm text-body dark:text-offwhite">
-						{$_('addLocation.osmForkPrompt')}
+					<div>
+						<p class="text-sm text-body dark:text-offwhite">
+							{$_('addLocation.osmForkPrompt')}
+						</p>
 						<a
 							href={osmEditUrl(coords.lat, coords.long)}
 							target="_blank"
 							rel="noopener noreferrer"
-							class="font-semibold whitespace-nowrap text-link hover:text-hover"
+							class="mt-2 inline-block rounded-full border border-link px-4 py-1.5 text-sm font-semibold text-link transition-colors hover:bg-link hover:text-white focus:outline-link"
 							onclick={() => trackEvent('add_place_osm_edit_click')}
 						>
 							{$_('addLocation.osmForkCta')}
 						</a>
-					</p>
+					</div>
 				</div>
 			{/if}
 			<AddLocationForm
