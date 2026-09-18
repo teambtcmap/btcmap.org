@@ -24,13 +24,13 @@ import type {
 import {
 	firstInvalidField,
 	normalizeWebsite,
-	recheckFlagged,
 	validateDetails,
 } from "$lib/addLocationValidation";
 import { trackEvent } from "$lib/analytics";
 import { API_BASE } from "$lib/api-base";
 import { CATEGORIES, CATEGORY_GROUPS } from "$lib/categoryMapping";
 import { fieldBorderClasses } from "$lib/fieldStyles";
+import { focusInvalid, recheckFlagged } from "$lib/formValidation";
 import { reverseGeocode } from "$lib/geocoding";
 import { _, locale } from "$lib/i18n";
 import type { PaymentMethod } from "$lib/map/paymentMethodFilter";
@@ -315,16 +315,6 @@ const invalidControl: Record<DetailsField, () => HTMLElement | undefined> = {
 	contact: () => contact,
 };
 
-// Called once Svelte has rendered the message: screen readers read a
-// field's description as focus lands, not later changes. The browser's
-// own focus scroll would stop with the control at the panel's edge —
-// its label and message sit above it, under the sticky header — so
-// focus without it and centre the control instead.
-const focusInvalid = (control: HTMLElement | undefined) => {
-	control?.focus({ preventScroll: true });
-	control?.scrollIntoView({ block: "center" });
-};
-
 // The review step's snapshot, taken on entry. The hidden edit fields
 // can't change while review is open, and neither can the pin — the host
 // offers Move pin on the edit step only. This is exactly what the
@@ -400,7 +390,7 @@ const submitForm = (event: SubmitEvent) => {
 			// A marked website inside the collapsed details would be hidden
 			// (display:none) — and couldn't take focus.
 			if (errors.website) showMoreDetails = true;
-			tick().then(() => focusInvalid(invalidControl[first]()));
+			focusInvalid(invalidControl[first]());
 			return;
 		}
 		preview = collectPreview();
@@ -422,7 +412,7 @@ const submitForm = (event: SubmitEvent) => {
 	// The review step's one field: the anonymous path's captcha answer.
 	if (!identityAttached && !captchaInput?.value.trim()) {
 		captchaError = true;
-		tick().then(() => focusInvalid(captchaInput));
+		focusInvalid(captchaInput);
 		return;
 	}
 	const { name: submittedName } = preview;
