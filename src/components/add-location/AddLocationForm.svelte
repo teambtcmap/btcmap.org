@@ -1,7 +1,7 @@
 <script lang="ts">
 import axios from "axios";
 import DOMPurify from "dompurify";
-import { onMount, tick } from "svelte";
+import { onMount, tick, untrack } from "svelte";
 import { get } from "svelte/store";
 
 import LoginForm from "$components/auth/LoginForm.svelte";
@@ -14,11 +14,23 @@ import TextField from "$components/form/TextField.svelte";
 import Icon from "$components/Icon.svelte";
 import NostrAvatar from "$components/NostrAvatar.svelte";
 import PrimaryButton from "$components/PrimaryButton.svelte";
+import type {
+	DetailsErrors,
+	DetailsField,
+	DetailsInput,
+} from "$lib/addLocationValidation";
+import {
+	firstInvalidField,
+	normalizeWebsite,
+	recheckFlagged,
+	validateDetails,
+} from "$lib/addLocationValidation";
 import { trackEvent } from "$lib/analytics";
 import { API_BASE } from "$lib/api-base";
 import { CATEGORIES, CATEGORY_GROUPS } from "$lib/categoryMapping";
 import { reverseGeocode } from "$lib/geocoding";
 import { _, locale } from "$lib/i18n";
+import type { PaymentMethod } from "$lib/map/paymentMethodFilter";
 import { fetchProfile } from "$lib/nostrProfile";
 import { formatPinCoords } from "$lib/placementMode";
 import type {
@@ -66,6 +78,9 @@ let captchaContent = $state("");
 let isCaptchaLoading = $state(false);
 let captchaSecret = $state<string>();
 let captchaInput = $state<HTMLInputElement>();
+// A Submit with no answer typed (#1404); a wrong answer is the server's
+// call and stays a toast.
+let captchaError = $state(false);
 let honeyInput = $state<HTMLInputElement>();
 
 const fetchCaptcha = () => {
@@ -74,6 +89,7 @@ const fetchCaptcha = () => {
 	// both, so Submit stays disabled until the replacement arrives.
 	captchaSecret = undefined;
 	if (captchaInput) captchaInput.value = "";
+	captchaError = false;
 	axios
 		.get<{ captcha: string; captchaSecret: string }>("/captcha")
 		.then((response) => {
@@ -163,6 +179,7 @@ $effect(() => {
 });
 
 let categorySelect = $state<string>();
+let categorySelectElement = $state<HTMLSelectElement>();
 let categoryOther = $state<string>();
 let categoryOtherElement = $state<HTMLInputElement>();
 
@@ -183,7 +200,10 @@ let hoursValue = $state("");
 let showHoursEditor = $state(false);
 let notes = $state<HTMLTextAreaElement>();
 let contact = $state<HTMLInputElement>();
-let noMethodSelected = $state(false);
+// The edit step's inline errors (#1404): set by a rejected Review, one
+// entry per invalid field. The form runs `novalidate`, so these are the
+// only validation UI — no browser bubbles, no toasts.
+let errors = $state<DetailsErrors>({});
 let submitting = $state(false);
 
 // Per-submission anonymity (#1334): someone on a shared device can
@@ -230,8 +250,69 @@ const onAuthSuccess = () => {
 	submitAnonymously = false;
 };
 
-const handleCheckboxClick = () => {
-	noMethodSelected = false;
+// The contact field mounts fresh whenever the identity flips (sign-in,
+// detach, undo) — it mustn't inherit the previous field's error.
+$effect(() => {
+	void identityAttached;
+	untrack(() => {
+		delete errors.contact;
+	});
+});
+
+const selectedMethods = (): PaymentMethod[] => {
+	const methods: PaymentMethod[] = [];
+	if (onchain?.checked) {
+		methods.push("onchain");
+	}
+	if (lightning?.checked) {
+		methods.push("lightning");
+	}
+	if (nfc?.checked) {
+		methods.push("nfc");
+	}
+	return methods;
+};
+
+const readDetails = (): DetailsInput => ({
+	name: name?.value ?? "",
+	address: address?.value ?? "",
+	addressRequired,
+	category: categorySelect ?? "",
+	categoryOther: categoryOther ?? "",
+	methods: selectedMethods(),
+	website: website?.value ?? "",
+	contact: contact?.value ?? "",
+	contactRequired: !identityAttached,
+});
+
+// Wired to every validated field's input/change: a no-op until a Review
+// has flagged something.
+const recheck = () => {
+	if (!firstInvalidField(errors)) return;
+	errors = recheckFlagged(errors, validateDetails(readDetails()));
+};
+
+// The control that takes focus for each invalid field.
+const invalidControl: Record<DetailsField, () => HTMLElement | undefined> = {
+	name: () => name,
+	address: () => address,
+	category: () =>
+		errors.category === "otherRequired"
+			? categoryOtherElement
+			: categorySelectElement,
+	methods: () => onchain,
+	website: () => website,
+	contact: () => contact,
+};
+
+// Called once Svelte has rendered the message: screen readers read a
+// field's description as focus lands, not later changes. The browser's
+// own focus scroll would stop with the control at the panel's edge —
+// its label and message sit above it, under the sticky header — so
+// focus without it and centre the control instead.
+const focusInvalid = (control: HTMLElement | undefined) => {
+	control?.focus({ preventScroll: true });
+	control?.scrollIntoView({ block: "center" });
 };
 
 // The review step's snapshot, taken on entry. The hidden edit fields
@@ -246,7 +327,7 @@ type SubmissionPreview = {
 	nameEn: string;
 	address: string;
 	category: string;
-	methods: ("onchain" | "lightning" | "nfc")[];
+	methods: PaymentMethod[];
 	website: string;
 	phone: string;
 	hours: string;
@@ -263,17 +344,8 @@ const previewCategoryLabel = $derived(
 		"",
 );
 
+// Runs after validateDetails passed, so the website normalizes.
 const collectPreview = (): SubmissionPreview => {
-	const methods: ("onchain" | "lightning" | "nfc")[] = [];
-	if (onchain?.checked) {
-		methods.push("onchain");
-	}
-	if (lightning?.checked) {
-		methods.push("lightning");
-	}
-	if (nfc?.checked) {
-		methods.push("nfc");
-	}
 	const category =
 		categorySelect === "Other"
 			? (categoryOther ?? "").trim()
@@ -285,8 +357,9 @@ const collectPreview = (): SubmissionPreview => {
 		nameEn: nameEn?.value ?? "",
 		address: address?.value ?? "",
 		category,
-		methods,
-		website: website?.value ?? "",
+		methods: selectedMethods(),
+		// A bare domain is published with https:// in front.
+		website: normalizeWebsite(website?.value ?? "") ?? "",
 		phone: phone?.value ?? "",
 		hours: hoursValue,
 		notes: notes?.value ?? "",
@@ -300,6 +373,7 @@ const scrollToTop = () => {
 };
 
 const backToEdit = () => {
+	captchaError = false;
 	step = "edit";
 	onstepchange?.("edit");
 	trackEvent("add_place_review_back");
@@ -309,21 +383,14 @@ const backToEdit = () => {
 const submitForm = (event: SubmitEvent) => {
 	event.preventDefault();
 	if (step === "edit") {
-		// Native validation already passed (the Review button is the form's
-		// submit); these are the two rules it can't express.
-		if (categorySelect === "Other" && !(categoryOther ?? "").trim()) {
-			errToast(get(_)("addLocation.categoryOtherRequired"));
-			categoryOtherElement?.focus();
-			return;
-		}
-		if (!onchain?.checked && !lightning?.checked && !nfc?.checked) {
-			// The group states the rule and carries the error itself — no
-			// toast. Focus pulls the group into view on a long form, and the
-			// group's aria-describedby reads the error out — but only once the
-			// DOM shows it: screen readers read the description as focus
-			// lands, so focus after Svelte flushes the new text.
-			noMethodSelected = true;
-			tick().then(() => onchain?.focus());
+		// Every invalid field is marked at once; the first takes focus.
+		errors = validateDetails(readDetails());
+		const first = firstInvalidField(errors);
+		if (first) {
+			// A marked website inside the collapsed details would be hidden
+			// (display:none) — and couldn't take focus.
+			if (errors.website) showMoreDetails = true;
+			tick().then(() => focusInvalid(invalidControl[first]()));
 			return;
 		}
 		preview = collectPreview();
@@ -342,6 +409,12 @@ const submitForm = (event: SubmitEvent) => {
 	}
 
 	if (!preview) return;
+	// The review step's one field: the anonymous path's captcha answer.
+	if (!identityAttached && !captchaInput?.value.trim()) {
+		captchaError = true;
+		tick().then(() => focusInvalid(captchaInput));
+		return;
+	}
 	const { name: submittedName } = preview;
 	submitting = true;
 
@@ -413,10 +486,12 @@ onMount(() => {
 <!-- scroll-mt clears the shell's sticky header when the step switch
      scrolls the form back into view — sized for the header with its
      step label and bar (~78px), or the review step's back link lands
-     under it. -->
+     under it. `novalidate`: the form reports its own errors inline
+     (#1404) instead of the browser's bubbles. -->
 <form
 	bind:this={formElement}
 	onsubmit={submitForm}
+	novalidate
 	class="w-full scroll-mt-24 space-y-5 text-primary dark:text-white"
 >
 	<!-- Edit step — CSS-hidden during review so the uncontrolled inputs
@@ -429,6 +504,8 @@ onMount(() => {
 			bind:element={name}
 			placeholder={$_('addLocation.merchantNamePlaceholder')}
 			required
+			error={errors.name && $_('addLocation.nameRequired')}
+			oninput={recheck}
 		/>
 
 		<TextField
@@ -438,6 +515,8 @@ onMount(() => {
 			optional={!addressRequired}
 			bind:element={address}
 			required={addressRequired}
+			error={errors.address && $_('addLocation.addressRequired')}
+			oninput={recheck}
 			placeholder={addressPending
 				? $_('addLocation.addressLookupPending')
 				: $_('addLocation.addressPlaceholder')}
@@ -449,10 +528,22 @@ onMount(() => {
 
 		<div>
 			<label for="category" class="mb-2 block font-semibold">{$_('forms.category')}</label>
+			<!-- One message for the category: "pick one" describes the
+			     select, "enter one" the Other text field below it. -->
+			{#if errors.category}
+				<p id="category-error" class="-mt-1 mb-2 text-sm font-semibold text-error">
+					{errors.category === 'otherRequired'
+						? $_('addLocation.categoryOtherRequired')
+						: $_('addLocation.categoryRequired')}
+				</p>
+			{/if}
 			<FormSelect
 				id="category"
 				name="category"
 				required
+				bind:element={categorySelectElement}
+				invalid={errors.category === 'required'}
+				ariaDescribedby={errors.category === 'required' ? 'category-error' : undefined}
 				options={[
 					{ value: '', label: $_('addLocation.categorySelectPlaceholder') },
 					...categoryOptions,
@@ -460,6 +551,7 @@ onMount(() => {
 				]}
 				bind:value={categorySelect}
 				onchange={async () => {
+					recheck();
 					if (categorySelect === 'Other') {
 						await tick();
 						categoryOtherElement?.focus();
@@ -472,7 +564,12 @@ onMount(() => {
 					type="text"
 					name="category-other"
 					placeholder={$_('addLocation.categoryPlaceholder')}
-					class="mt-2 w-full rounded-2xl border-2 border-input p-3 transition-all focus:outline-link disabled:cursor-not-allowed disabled:bg-gray-100 disabled:text-gray-500 dark:bg-white/[0.15] dark:disabled:bg-gray-700 dark:disabled:text-gray-400"
+					aria-invalid={errors.category === 'otherRequired' ? 'true' : undefined}
+					aria-describedby={errors.category === 'otherRequired' ? 'category-error' : undefined}
+					oninput={recheck}
+					class="mt-2 w-full rounded-2xl border-2 {errors.category === 'otherRequired'
+						? 'border-error'
+						: 'border-input'} p-3 transition-all focus:outline-link disabled:cursor-not-allowed disabled:bg-gray-100 disabled:text-gray-500 dark:bg-white/[0.15] dark:disabled:bg-gray-700 dark:disabled:text-gray-400"
 					bind:value={categoryOther}
 					bind:this={categoryOtherElement}
 				/>
@@ -490,7 +587,7 @@ onMount(() => {
 		<div
 			role="group"
 			aria-labelledby="payment-methods-question"
-			class="rounded-2xl border-2 p-3.5 {noMethodSelected
+			class="rounded-2xl border-2 p-3.5 {errors.methods
 				? 'border-error'
 				: 'border-input'}"
 		>
@@ -499,11 +596,11 @@ onMount(() => {
 			</p>
 			<p
 				id="payment-methods-requirement"
-				class="mt-1 text-sm {noMethodSelected
+				class="mt-1 text-sm {errors.methods
 					? 'font-semibold text-error'
 					: 'text-body dark:text-offwhite'}"
 			>
-				{noMethodSelected
+				{errors.methods
 					? $_('addLocation.paymentMethodsRequirementError')
 					: $_('addLocation.paymentMethodsRequirement')}
 			</p>
@@ -512,11 +609,12 @@ onMount(() => {
 					<input
 						class="h-4 w-4 shrink-0 accent-link"
 						aria-describedby="payment-methods-requirement"
+						aria-invalid={errors.methods ? 'true' : undefined}
 						type="checkbox"
 						name="onchain"
 						id="onchain"
 						bind:this={onchain}
-						onclick={handleCheckboxClick}
+						onclick={recheck}
 					/>
 					<label for="onchain" class="flex cursor-pointer items-center gap-2">
 						{#if typeof window !== 'undefined'}
@@ -535,11 +633,12 @@ onMount(() => {
 					<input
 						class="h-4 w-4 shrink-0 accent-link"
 						aria-describedby="payment-methods-requirement"
+						aria-invalid={errors.methods ? 'true' : undefined}
 						type="checkbox"
 						name="lightning"
 						id="lightning"
 						bind:this={lightning}
-						onclick={handleCheckboxClick}
+						onclick={recheck}
 					/>
 					<label for="lightning" class="flex cursor-pointer items-center gap-2">
 						{#if typeof window !== 'undefined'}
@@ -558,11 +657,12 @@ onMount(() => {
 					<input
 						class="h-4 w-4 shrink-0 accent-link"
 						aria-describedby="payment-methods-requirement"
+						aria-invalid={errors.methods ? 'true' : undefined}
 						type="checkbox"
 						name="nfc"
 						id="nfc"
 						bind:this={nfc}
-						onclick={handleCheckboxClick}
+						onclick={recheck}
 					/>
 					<label for="nfc" class="flex cursor-pointer items-center gap-2">
 						{#if typeof window !== 'undefined'}
@@ -619,6 +719,8 @@ onMount(() => {
 				optional
 				type="url"
 				bind:element={website}
+				error={errors.website && $_('addLocation.websiteInvalid')}
+				oninput={recheck}
 				placeholder={$_('addLocation.websitePlaceholder')}
 			/>
 
@@ -742,6 +844,10 @@ onMount(() => {
 				type="email"
 				bind:element={contact}
 				required
+				error={errors.contact === 'invalid'
+					? $_('addLocation.contactInvalid')
+					: errors.contact && $_('addLocation.contactRequired')}
+				oninput={recheck}
 				placeholder={$_('addLocation.contactPlaceholder')}
 			>
 				{#snippet hint()}
@@ -878,6 +984,11 @@ onMount(() => {
 							</button>
 						{/if}
 					</div>
+					{#if captchaError}
+						<p id="captcha-error" class="-mt-1 mb-2 text-sm font-semibold text-error">
+							{$_('addLocation.captchaRequired')}
+						</p>
+					{/if}
 					<div class="space-y-2">
 						<div
 							class="flex items-center justify-center rounded-2xl border-2 border-input py-1"
@@ -895,7 +1006,14 @@ onMount(() => {
 							name="captcha"
 							id="captcha"
 							placeholder={$_('addLocation.captchaPlaceholder')}
-							class="w-full rounded-2xl border-2 border-input p-3 transition-all focus:outline-link disabled:cursor-not-allowed disabled:bg-gray-100 disabled:text-gray-500 dark:bg-white/[0.15] dark:disabled:bg-gray-700 dark:disabled:text-gray-400"
+							aria-invalid={captchaError ? 'true' : undefined}
+							aria-describedby={captchaError ? 'captcha-error' : undefined}
+							oninput={() => {
+								if (captchaInput?.value.trim()) captchaError = false;
+							}}
+							class="w-full rounded-2xl border-2 {captchaError
+								? 'border-error'
+								: 'border-input'} p-3 transition-all focus:outline-link disabled:cursor-not-allowed disabled:bg-gray-100 disabled:text-gray-500 dark:bg-white/[0.15] dark:disabled:bg-gray-700 dark:disabled:text-gray-400"
 							bind:this={captchaInput}
 						/>
 					</div>

@@ -12,7 +12,9 @@ import { _ } from "$lib/i18n";
 // which also keeps the legacy imperative patterns (the address prefill's
 // direct DOM writes) working unchanged. Rest props flow to the input
 // (required, disabled, placeholder, minlength, autocomplete, …);
-// `hint` renders between label and input, `children` below.
+// `hint` renders between label and input, `children` below. `error` is
+// the form's own validation message (#1404): shown under the label, it
+// turns the border red and becomes the input's accessible description.
 type Props = {
 	id: string;
 	label: string;
@@ -24,6 +26,7 @@ type Props = {
 	// Per-field extras on top of the base input classes (e.g. the nsec
 	// field's mono face).
 	inputClass?: string;
+	error?: string;
 	hint?: Snippet;
 	children?: Snippet;
 	[key: string]: unknown;
@@ -36,13 +39,15 @@ let {
 	element = $bindable(),
 	type = "text",
 	inputClass = "",
+	error,
 	hint,
 	children,
 	...rest
 }: Props = $props();
 
+const errorId = $derived(`${id}-error`);
 const inputClasses = $derived(
-	`w-full rounded-2xl border-2 border-input p-3 transition-all focus:outline-link disabled:cursor-not-allowed disabled:bg-gray-100 disabled:text-gray-500 dark:bg-white/[0.15] dark:disabled:bg-gray-700 dark:disabled:text-gray-400 ${inputClass}`,
+	`w-full rounded-2xl border-2 ${error ? "border-error" : "border-input"} p-3 transition-all focus:outline-link disabled:cursor-not-allowed disabled:bg-gray-100 disabled:text-gray-500 dark:bg-white/[0.15] dark:disabled:bg-gray-700 dark:disabled:text-gray-400 ${inputClass}`,
 );
 </script>
 
@@ -53,6 +58,9 @@ const inputClasses = $derived(
 			<span class="font-normal">{$_('forms.optional')}</span>
 		{/if}
 	</label>
+	{#if error}
+		<p id={errorId} class="-mt-1 mb-2 text-sm font-semibold text-error">{error}</p>
+	{/if}
 	{#if hint}
 		{@render hint()}
 	{/if}
@@ -64,6 +72,8 @@ const inputClasses = $derived(
 			type="password"
 			bind:this={element}
 			bind:value
+			aria-invalid={error ? 'true' : undefined}
+			aria-describedby={error ? errorId : undefined}
 			class={inputClasses}
 			{...rest}
 		/>
@@ -73,11 +83,21 @@ const inputClasses = $derived(
 			type="text"
 			bind:this={element}
 			bind:value
+			aria-invalid={error ? 'true' : undefined}
+			aria-describedby={error ? errorId : undefined}
 			class={inputClasses}
 			{...rest}
 		/>
 	{:else}
-		<input {id} {type} bind:this={element} class={inputClasses} {...rest} />
+		<input
+			{id}
+			{type}
+			bind:this={element}
+			aria-invalid={error ? 'true' : undefined}
+			aria-describedby={error ? errorId : undefined}
+			class={inputClasses}
+			{...rest}
+		/>
 	{/if}
 	{#if children}
 		{@render children()}

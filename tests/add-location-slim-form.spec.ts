@@ -211,7 +211,7 @@ test.describe('Add Location — slim form', () => {
 		}
 
 		await page.locator('#name').fill('Satoshi Comics');
-		// Let the stubbed lookup settle so native validation is deterministic.
+		// Let the stubbed lookup settle so the address rule is deterministic.
 		await expect(page.locator('#address')).toHaveValue(/Freiheitsstraße/);
 		await page.locator('#category').selectOption('restaurants');
 		await page.locator('#contact').fill('owner@example.com');

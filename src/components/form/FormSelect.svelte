@@ -20,11 +20,16 @@ import type { HTMLSelectAttributes } from "svelte/elements";
 
 type Props = {
 	value?: string;
+	element?: HTMLSelectElement;
 	id?: string;
 	name?: string;
 	disabled?: boolean;
 	required?: boolean;
 	ariaLabel?: string;
+	// Error state from the host form's own validation (#1404): a red
+	// border, aria-invalid, and the id of the message that describes it.
+	invalid?: boolean;
+	ariaDescribedby?: string;
 	style?: string;
 	// When provided, options render automatically — ungrouped first, then
 	// groups separated by disabled-option rows. When omitted, falls back to
@@ -36,11 +41,14 @@ type Props = {
 };
 let {
 	value = $bindable(),
+	element = $bindable(),
 	id,
 	name,
 	disabled = false,
 	required = false,
 	ariaLabel,
+	invalid = false,
+	ariaDescribedby,
 	style = "",
 	options,
 	onchange,
@@ -66,14 +74,19 @@ function partition(opts: FormSelectOption[]) {
 </script>
 
 <select
+	bind:this={element}
 	{id}
 	{name}
 	{disabled}
 	{required}
 	aria-label={ariaLabel}
+	aria-invalid={invalid ? 'true' : undefined}
+	aria-describedby={ariaDescribedby}
 	bind:value
 	{onchange}
-	class="w-full rounded-2xl border-2 border-input bg-white px-2 py-3 text-primary transition-all focus:outline-link
+	class="w-full rounded-2xl border-2 {invalid
+		? 'border-error'
+		: 'border-input'} bg-white px-2 py-3 text-primary transition-all focus:outline-link
 		disabled:cursor-not-allowed disabled:bg-gray-100 disabled:text-gray-500
 		dark:bg-white/[0.15] dark:text-white dark:disabled:bg-gray-700 dark:disabled:text-gray-400
 		{style}"
