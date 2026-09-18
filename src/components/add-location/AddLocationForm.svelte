@@ -48,11 +48,12 @@ import type { PostPlaceSubmissionResponse } from "$types/btcmap-api/PostPlaceSub
 // wipe them.
 type Props = {
 	coords: { lat: number; long: number };
-	// `attributed` = the submission went out with a verified account
-	// attached — the host's success screen skips the account nudge then.
-	onsuccess: (attributed: boolean) => void;
+	// On a completed submission. `attributed` = it went out with a verified
+	// account attached (the host's success screen picks its one ask by
+	// it); `name` titles that screen.
+	onsuccess: (result: { attributed: boolean; name: string }) => void;
 	// Fires on edit↔review transitions so the host can adapt its chrome
-	// (the pin hint makes no sense over the review summary).
+	// (the header's step label, and the edit-only panel content).
 	onstepchange?: (step: "edit" | "review") => void;
 };
 let { coords, onsuccess, onstepchange }: Props = $props();
@@ -336,6 +337,7 @@ const submitForm = (event: SubmitEvent) => {
 	}
 
 	if (!preview) return;
+	const { name: submittedName } = preview;
 	submitting = true;
 
 	// The authorized fork (#1374, per #1348): signed in goes straight to
@@ -351,7 +353,7 @@ const submitForm = (event: SubmitEvent) => {
 			)
 			.then(() => {
 				trackEvent("add_place_submit_success");
-				onsuccess(true);
+				onsuccess({ attributed: true, name: submittedName });
 			})
 			.catch((error) => {
 				errToast(get(_)("errors.formSubmission"));
@@ -374,7 +376,7 @@ const submitForm = (event: SubmitEvent) => {
 		.post<SubmitPlaceResponse>("/api/submit-place", payload)
 		.then(() => {
 			trackEvent("add_place_submit_success");
-			onsuccess(false);
+			onsuccess({ attributed: false, name: submittedName });
 		})
 		.catch((error) => {
 			// Our endpoint's 4xx messages are written for users (captcha,
