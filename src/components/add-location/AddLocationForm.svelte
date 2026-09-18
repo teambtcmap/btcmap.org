@@ -166,6 +166,10 @@ const suggestAddress = async (lat: number, long: number) => {
 		}
 		lastSuggested = "";
 	}
+	// These writes bypass the input event: a flagged address (Move pin
+	// after a rejected Review) must still re-check against its new value
+	// and requiredness.
+	recheck();
 };
 
 $effect(() => {
@@ -292,14 +296,17 @@ const recheck = () => {
 	errors = recheckFlagged(errors, validateDetails(readDetails()));
 };
 
+// The category's error belongs to one of two controls: the select for a
+// missing pick, the Other text field for an empty description.
+const categorySelectInvalid = $derived(errors.category === "required");
+const categoryOtherInvalid = $derived(errors.category === "otherRequired");
+
 // The control that takes focus for each invalid field.
 const invalidControl: Record<DetailsField, () => HTMLElement | undefined> = {
 	name: () => name,
 	address: () => address,
 	category: () =>
-		errors.category === "otherRequired"
-			? categoryOtherElement
-			: categorySelectElement,
+		categoryOtherInvalid ? categoryOtherElement : categorySelectElement,
 	methods: () => onchain,
 	website: () => website,
 	contact: () => contact,
@@ -528,13 +535,9 @@ onMount(() => {
 
 		<div>
 			<label for="category" class="mb-2 block font-semibold">{$_('forms.category')}</label>
-			<!-- One message for the category: "pick one" describes the
-			     select, "enter one" the Other text field below it. -->
-			{#if errors.category}
+			{#if categorySelectInvalid}
 				<p id="category-error" class="-mt-1 mb-2 text-sm font-semibold text-error">
-					{errors.category === 'otherRequired'
-						? $_('addLocation.categoryOtherRequired')
-						: $_('addLocation.categoryRequired')}
+					{$_('addLocation.categoryRequired')}
 				</p>
 			{/if}
 			<FormSelect
@@ -542,8 +545,8 @@ onMount(() => {
 				name="category"
 				required
 				bind:element={categorySelectElement}
-				invalid={errors.category === 'required'}
-				ariaDescribedby={errors.category === 'required' ? 'category-error' : undefined}
+				invalid={categorySelectInvalid}
+				ariaDescribedby={categorySelectInvalid ? 'category-error' : undefined}
 				options={[
 					{ value: '', label: $_('addLocation.categorySelectPlaceholder') },
 					...categoryOptions,
@@ -559,15 +562,22 @@ onMount(() => {
 				}}
 			/>
 			{#if categorySelect === 'Other'}
+				<!-- The Other field has no label of its own: its message sits
+				     right above it, below the (valid) select. -->
+				{#if categoryOtherInvalid}
+					<p id="category-other-error" class="mt-2 text-sm font-semibold text-error">
+						{$_('addLocation.categoryOtherRequired')}
+					</p>
+				{/if}
 				<input
 					required
 					type="text"
 					name="category-other"
 					placeholder={$_('addLocation.categoryPlaceholder')}
-					aria-invalid={errors.category === 'otherRequired' ? 'true' : undefined}
-					aria-describedby={errors.category === 'otherRequired' ? 'category-error' : undefined}
+					aria-invalid={categoryOtherInvalid ? 'true' : undefined}
+					aria-describedby={categoryOtherInvalid ? 'category-other-error' : undefined}
 					oninput={recheck}
-					class="mt-2 w-full rounded-2xl border-2 {errors.category === 'otherRequired'
+					class="mt-2 w-full rounded-2xl border-2 {categoryOtherInvalid
 						? 'border-error focus:outline-error'
 						: 'border-input focus:outline-link'} p-3 transition-all disabled:cursor-not-allowed disabled:bg-gray-100 disabled:text-gray-500 dark:bg-white/[0.15] dark:disabled:bg-gray-700 dark:disabled:text-gray-400"
 					bind:value={categoryOther}
