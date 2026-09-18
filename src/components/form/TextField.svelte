@@ -1,5 +1,6 @@
 <script lang="ts">
 import type { Snippet } from "svelte";
+import type { HTMLInputAttributes } from "svelte/elements";
 
 import { _ } from "$lib/i18n";
 
@@ -27,6 +28,10 @@ type Props = {
 	// field's mono face).
 	inputClass?: string;
 	error?: string;
+	// Taken out of the rest props so a caller's values merge with the
+	// error state instead of overriding it.
+	"aria-describedby"?: string;
+	"aria-invalid"?: HTMLInputAttributes["aria-invalid"];
 	hint?: Snippet;
 	children?: Snippet;
 	[key: string]: unknown;
@@ -40,12 +45,21 @@ let {
 	type = "text",
 	inputClass = "",
 	error,
+	"aria-describedby": ariaDescribedby,
+	"aria-invalid": ariaInvalid,
 	hint,
 	children,
 	...rest
 }: Props = $props();
 
 const errorId = $derived(`${id}-error`);
+// The error's message is read first, then any description the caller
+// passed; an error always marks the input invalid.
+const describedBy = $derived(
+	[error ? errorId : undefined, ariaDescribedby].filter(Boolean).join(" ") ||
+		undefined,
+);
+const invalid = $derived(error ? "true" : ariaInvalid);
 const inputClasses = $derived(
 	`w-full rounded-2xl border-2 ${error ? "border-error focus:outline-error" : "border-input focus:outline-link"} p-3 transition-all disabled:cursor-not-allowed disabled:bg-gray-100 disabled:text-gray-500 dark:bg-white/[0.15] dark:disabled:bg-gray-700 dark:disabled:text-gray-400 ${inputClass}`,
 );
@@ -72,8 +86,8 @@ const inputClasses = $derived(
 			type="password"
 			bind:this={element}
 			bind:value
-			aria-invalid={error ? 'true' : undefined}
-			aria-describedby={error ? errorId : undefined}
+			aria-invalid={invalid}
+			aria-describedby={describedBy}
 			class={inputClasses}
 			{...rest}
 		/>
@@ -83,8 +97,8 @@ const inputClasses = $derived(
 			type="text"
 			bind:this={element}
 			bind:value
-			aria-invalid={error ? 'true' : undefined}
-			aria-describedby={error ? errorId : undefined}
+			aria-invalid={invalid}
+			aria-describedby={describedBy}
 			class={inputClasses}
 			{...rest}
 		/>
@@ -93,8 +107,8 @@ const inputClasses = $derived(
 			{id}
 			{type}
 			bind:this={element}
-			aria-invalid={error ? 'true' : undefined}
-			aria-describedby={error ? errorId : undefined}
+			aria-invalid={invalid}
+			aria-describedby={describedBy}
 			class={inputClasses}
 			{...rest}
 		/>

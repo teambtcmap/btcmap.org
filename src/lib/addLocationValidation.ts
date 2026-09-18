@@ -72,8 +72,11 @@ const EMAIL_DOMAIN =
 // Browsers check an internationalized domain in its punycode form; the
 // URL parser does that conversion. ASCII domains skip it, so its other
 // normalizations (percent-decoding, IPv4 rewriting) can't widen the rule.
+// Nor can its URL grammar: a port, path, query or fragment would be cut
+// off, and a percent escape decoded, before the domain rule saw them.
 const asciiDomain = (domain: string): string | null => {
 	if (/^[\x21-\x7e]*$/.test(domain)) return domain;
+	if (/[\s/\\:?#%]/.test(domain)) return null;
 	try {
 		return new URL(`http://${domain}`).hostname;
 	} catch {

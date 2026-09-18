@@ -534,7 +534,9 @@ onMount(() => {
 		</TextField>
 
 		<div>
-			<label for="category" class="mb-2 block font-semibold">{$_('forms.category')}</label>
+			<label id="category-label" for="category" class="mb-2 block font-semibold"
+				>{$_('forms.category')}</label
+			>
 			{#if categorySelectInvalid}
 				<p id="category-error" class="-mt-1 mb-2 text-sm font-semibold text-error">
 					{$_('addLocation.categoryRequired')}
@@ -562,8 +564,9 @@ onMount(() => {
 				}}
 			/>
 			{#if categorySelect === 'Other'}
-				<!-- The Other field has no label of its own: its message sits
-				     right above it, below the (valid) select. -->
+				<!-- The Other field has no label of its own: it borrows the
+				     Category label as its name, and its message sits right
+				     above it, below the (valid) select. -->
 				{#if categoryOtherInvalid}
 					<p id="category-other-error" class="mt-2 text-sm font-semibold text-error">
 						{$_('addLocation.categoryOtherRequired')}
@@ -574,6 +577,7 @@ onMount(() => {
 					type="text"
 					name="category-other"
 					placeholder={$_('addLocation.categoryPlaceholder')}
+					aria-labelledby="category-label"
 					aria-invalid={categoryOtherInvalid ? 'true' : undefined}
 					aria-describedby={categoryOtherInvalid ? 'category-other-error' : undefined}
 					oninput={recheck}
