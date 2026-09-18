@@ -53,6 +53,10 @@ const describedBy = $derived(
 	[error ? errorId : undefined, ariaDescribedby].filter(Boolean).join(" ") ||
 		undefined,
 );
+const invalid = $derived(error ? "true" : ariaInvalid);
+// Red for its own error, and for one whose message lives elsewhere — a
+// rule shared with another control, marked through aria-invalid.
+const showInvalid = $derived(invalid === true || invalid === "true");
 const note = $derived(labelNote ?? (optional ? $_("forms.optional") : ""));
 </script>
 
@@ -74,10 +78,10 @@ const note = $derived(labelNote ?? (optional ? $_("forms.optional") : ""));
 		{rows}
 		bind:this={element}
 		bind:value
-		aria-invalid={error ? 'true' : ariaInvalid}
+		aria-invalid={invalid}
 		aria-describedby={describedBy}
 		class="w-full rounded-2xl border-2 {fieldBorderClasses(
-			!!error,
+			showInvalid,
 		)} p-3 transition-all disabled:cursor-not-allowed disabled:bg-gray-100 disabled:text-gray-500 dark:bg-white/[0.15] dark:disabled:bg-gray-700 dark:disabled:text-gray-400"
 		{...rest}
 	></textarea>

@@ -582,6 +582,8 @@
 		"outdatedPlaceholder": "Indiquez quelles informations sont incorrectes et fournissez les données mises à jour",
 		"verifyLabel": "Comment avez-vous vérifié cela ?",
 		"verifyPlaceholder": "Veuillez fournir des détails supplémentaires",
+		"confirmationRequired": "Cochez la case ou décrivez ce qui est obsolète.",
+		"methodRequired": "Indiquez comment vous l'avez vérifié.",
 		"successType": "Rapport",
 		"successMessage": "Merci d'avoir pris le temps de remplir ce rapport. Nous examinerons vos informations et les mettrons à jour dès que possible.",
 		"submitReport": "Soumettre le rapport"

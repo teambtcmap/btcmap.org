@@ -1,19 +1,30 @@
 <script lang="ts">
 import axios from "axios";
-import DOMPurify from "dompurify";
 import { onMount } from "svelte";
 import { get } from "svelte/store";
 
 import FormHelperText from "$components/FormHelperText.svelte";
 import FormSuccess from "$components/FormSuccess.svelte";
-import Icon from "$components/Icon.svelte";
+import CaptchaField from "$components/form/CaptchaField.svelte";
+import FieldError from "$components/form/FieldError.svelte";
+import TextArea from "$components/form/TextArea.svelte";
 import HeaderPlaceholder from "$components/layout/HeaderPlaceholder.svelte";
 import PrimaryButton from "$components/PrimaryButton.svelte";
 import TextLink from "$components/TextLink.svelte";
+import { focusInvalid, recheckFlagged } from "$lib/formValidation";
 import { _ } from "$lib/i18n";
 import { placesError } from "$lib/store";
 import { theme } from "$lib/theme";
 import { errToast } from "$lib/utils";
+import type {
+	VerifyErrors,
+	VerifyField,
+	VerifyInput,
+} from "$lib/verifyValidation";
+import {
+	firstInvalidVerifyField,
+	validateVerification,
+} from "$lib/verifyValidation";
 
 import type { PageProps } from "./$types";
 import { browser } from "$app/environment";
@@ -41,7 +52,7 @@ const fetchCaptcha = () => {
 		.then((response) => {
 			// handle success
 			captchaSecret = response.data.captchaSecret;
-			captchaContent = DOMPurify.sanitize(response.data.captcha);
+			captchaContent = response.data.captcha;
 		})
 		.catch((error) => {
 			errToast(get(_)("errors.captchaFetch"));
@@ -53,8 +64,36 @@ const fetchCaptcha = () => {
 };
 
 let current = $state(false);
+let currentBox = $state<HTMLInputElement>();
 let outdated = $state("");
 let verify = $state<HTMLTextAreaElement>();
+
+// The report's inline errors (#1407): set by a rejected submit, one entry
+// per invalid field. The form runs `novalidate`, so these are the only
+// validation UI — no browser bubbles.
+let errors = $state<VerifyErrors>({});
+
+const readInput = (): VerifyInput => ({
+	accurate: current,
+	changes: outdated,
+	method: verify?.value ?? "",
+	captcha: captchaInput?.value ?? "",
+});
+
+// Wired to every validated field: a no-op until a submit has flagged
+// something.
+const recheck = () => {
+	if (!firstInvalidVerifyField(errors)) return;
+	errors = recheckFlagged(errors, validateVerification(readInput()));
+};
+
+// The control that takes focus for each invalid field. The box-or-changes
+// rule lands on the box, the first of its two controls.
+const invalidControl: Record<VerifyField, () => HTMLElement | undefined> = {
+	confirmation: () => currentBox,
+	method: () => verify,
+	captcha: () => captchaInput,
+};
 
 const selected = $derived(!!data); // Set to true if we have server data
 let submitted = $state(false);
@@ -67,6 +106,13 @@ const submitForm = (event: SubmitEvent) => {
 	if (!selected) {
 		errToast(get(_)("errors.noLocationSelected"));
 	} else {
+		// Every invalid field is marked at once; the first takes focus.
+		errors = validateVerification(readInput());
+		const first = firstInvalidVerifyField(errors);
+		if (first) {
+			focusInvalid(invalidControl[first]());
+			return;
+		}
 		submitting = true;
 
 		axios
@@ -162,7 +208,9 @@ onMount(async () => {
 			
 			<FormHelperText text={$_('verifyLocation.tooltip')} />
 		</div>
-		<form onsubmit={submitForm} class="w-full space-y-5 text-primary dark:text-white">
+		<!-- `novalidate`: the form reports its own errors inline (#1407)
+		     instead of the browser's bubbles. -->
+		<form onsubmit={submitForm} novalidate class="w-full space-y-5 text-primary dark:text-white">
 			<div>
 				<input
 					disabled
@@ -175,6 +223,10 @@ onMount(async () => {
 				/>
 			</div>
 
+			<!-- One of the two is required: the box, or the changes below it.
+			     The rule's message sits under the box's label and describes
+			     both controls, like the payment group on add-location
+			     (#1397). -->
 			<div>
 				<div class="flex items-center space-x-2">
 					<label for="current" class="{!outdated ? 'cursor-pointer' : ''} font-semibold"
@@ -187,70 +239,58 @@ onMount(async () => {
 						type="checkbox"
 						id="current"
 						name="current"
+						aria-invalid={errors.confirmation ? 'true' : undefined}
+						aria-describedby={errors.confirmation ? 'confirmation-error' : undefined}
+						onchange={recheck}
 						bind:checked={current}
+						bind:this={currentBox}
 					/>
 				</div>
+				{#if errors.confirmation}
+					<FieldError
+						id="confirmation-error"
+						message={$_('verifyLocation.confirmationRequired')}
+						class="mt-1"
+					/>
+				{/if}
 				<p class="text-sm">{$_('verifyLocation.currentInfoDescription')}</p>
 			</div>
 
-			<div>
-				<label for="outdated" class="mb-2 block font-semibold"
-					>{$_('verifyLocation.outdatedLabel')} <span class="font-normal">({$_('verifyLocation.ifApplicable')})</span></label
-				>
-				<textarea
-					disabled={!captchaSecret || !data || current}
-					required={!current}
-					name="outdated"
-					placeholder={$_('verifyLocation.outdatedPlaceholder')}
-					rows="3"
-					class="w-full rounded-2xl border-2 border-input p-3 transition-all focus:outline-link dark:bg-white/[0.15]"
-					bind:value={outdated}
-				></textarea>
-			</div>
+			<TextArea
+				id="outdated"
+				name="outdated"
+				label={$_('verifyLocation.outdatedLabel')}
+				labelNote={$_('verifyLocation.ifApplicable')}
+				disabled={!captchaSecret || !data || current}
+				required={!current}
+				placeholder={$_('verifyLocation.outdatedPlaceholder')}
+				aria-invalid={errors.confirmation ? 'true' : undefined}
+				aria-describedby={errors.confirmation ? 'confirmation-error' : undefined}
+				oninput={recheck}
+				bind:value={outdated}
+			/>
 
-			<div>
-				<label for="verify" class="mb-2 block font-semibold">{$_('verifyLocation.verifyLabel')}</label>
-				<textarea
-					disabled={!captchaSecret || !data}
-					required
-					name="verify"
-					placeholder={$_('verifyLocation.verifyPlaceholder')}
-					rows="3"
-					class="w-full rounded-2xl border-2 border-input p-3 transition-all focus:outline-link dark:bg-white/[0.15]"
-					bind:this={verify}
-				></textarea>
-			</div>
+			<TextArea
+				id="verify"
+				name="verify"
+				label={$_('verifyLocation.verifyLabel')}
+				disabled={!captchaSecret || !data}
+				required
+				placeholder={$_('verifyLocation.verifyPlaceholder')}
+				error={errors.method && $_('verifyLocation.methodRequired')}
+				oninput={recheck}
+				bind:element={verify}
+			/>
 
-			<div>
-				<div class="mb-2 flex items-center space-x-2">
-					<label for="captcha" class="font-semibold"
-						>{$_('forms.captcha')} <span class="font-normal">({$_('forms.captchaCaseSensitive')})</span></label
-					>
-					{#if captchaSecret}
-						<button type="button" onclick={fetchCaptcha}>
-							<Icon type="fa" icon="arrows-rotate" w="16" h="16" />
-						</button>
-					{/if}
-				</div>
-				<div class="space-y-2">
-					<div class="flex items-center justify-center rounded-2xl border-2 border-input py-1">
-						{#if isCaptchaLoading}
-							<div class="h-[100px] w-[275px] animate-pulse bg-link/50"></div>
-						{:else}
-							{@html captchaContent}
-						{/if}
-					</div>
-					<input
-						disabled={!captchaSecret || !data}
-						required
-						type="text"
-						name="captcha"
-						placeholder={$_('forms.captchaPlaceholder')}
-						class="w-full rounded-2xl border-2 border-input p-3 transition-all focus:outline-link dark:bg-white/[0.15]"
-						bind:this={captchaInput}
-					/>
-				</div>
-			</div>
+			<CaptchaField
+				content={captchaContent}
+				loading={isCaptchaLoading}
+				onrefresh={fetchCaptcha}
+				disabled={!captchaSecret || !data}
+				invalid={!!errors.captcha}
+				oninput={recheck}
+				bind:element={captchaInput}
+			/>
 
 			<input
 				type="text"

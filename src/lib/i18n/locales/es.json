@@ -582,6 +582,8 @@
 		"outdatedPlaceholder": "Indica qué información es incorrecta y los datos actualizados de esta ubicación",
 		"verifyLabel": "¿Cómo lo verificaste?",
 		"verifyPlaceholder": "Por favor proporciona información adicional aquí",
+		"confirmationRequired": "Marca la casilla o describe lo que está desactualizado.",
+		"methodRequired": "Cuéntanos cómo lo verificaste.",
 		"successType": "Reporte",
 		"successMessage": "Gracias por tomarte el tiempo de completar este reporte. Revisaremos tu información y la actualizaremos lo antes posible.",
 		"submitReport": "Enviar Reporte"

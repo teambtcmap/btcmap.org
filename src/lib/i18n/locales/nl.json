@@ -679,10 +679,12 @@
 		"currentInfoLabel": "De huidige informatie is juist",
 		"currentInfoDescription": "Vink dit vakje aan als je de gegevens hebt gecontroleerd en ze kloppen.",
 		"outdatedLabel": "Verouderde informatie",
-		"ifApplicable": "indien van toepassing",
+		"ifApplicable": "(indien van toepassing)",
 		"outdatedPlaceholder": "Geef aan welke informatie onjuist is en verstrek de nieuwe gegevens voor deze locatie",
 		"verifyLabel": "Hoe heb je dit gecontroleerd?",
 		"verifyPlaceholder": "Geef hier aanvullende informatie op",
+		"confirmationRequired": "Vink het vakje aan of beschrijf wat verouderd is.",
+		"methodRequired": "Vertel ons hoe je dit hebt gecontroleerd.",
 		"successType": "Rapport",
 		"successMessage": "Bedankt dat je de tijd hebt genomen om dit rapport in te vullen. We gaan je gegevens bekijken en zo snel mogelijk bijwerken.",
 		"submitReport": "Rapport indienen"

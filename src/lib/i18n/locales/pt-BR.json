@@ -605,6 +605,8 @@
 		"outdatedPlaceholder": "Forneça quais informações estão incorretas e as informações atualizadas",
 		"verifyLabel": "Como você verificou isso?",
 		"verifyPlaceholder": "Por favor, forneça informações adicionais aqui",
+		"confirmationRequired": "Marque a caixa ou descreva o que está desatualizado.",
+		"methodRequired": "Conte como você verificou isso.",
 		"successType": "Relatório",
 		"successMessage": "Obrigado por preencher este relatório. Revisaremos suas informações e as atualizaremos o mais rápido possível.",
 		"submitReport": "Enviar Relatório"

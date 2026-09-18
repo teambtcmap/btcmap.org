@@ -683,6 +683,8 @@
 		"outdatedPlaceholder": "Fornisci quali informazioni non sono corrette e le informazioni aggiornate su questa posizione",
 		"verifyLabel": "Come lo hai verificato?",
 		"verifyPlaceholder": "Si prega di fornire ulteriori informazioni qui",
+		"confirmationRequired": "Spunta la casella o descrivi cosa non è aggiornato.",
+		"methodRequired": "Dicci come l'hai verificato.",
 		"successType": "Invia",
 		"successMessage": "Grazie per aver dedicato del tempo a compilare questa segnalazione. Esamineremo le tue informazioni e le aggiorneremo il prima possibile.",
 		"submitReport": "Invia segnalazione"
