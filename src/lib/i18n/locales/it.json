@@ -120,6 +120,7 @@
 		"username": "Nome utente",
 		"password": "Password",
 		"passwordHint": "Usa almeno {min} caratteri.",
+		"passwordTooShort": "Usa almeno {min} caratteri per continuare.",
 		"submit": "Crea account",
 		"creating": "Creazione account...",
 		"error": "Impossibile creare l'account. Il nome utente potrebbe essere già in uso.",

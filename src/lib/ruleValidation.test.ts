@@ -75,6 +75,27 @@ describe("ruleValidation", () => {
 		expect(email.scrollIntoView).toHaveBeenCalledWith({ block: "center" });
 	});
 
+	it("hands the control getter the failed rule, to pick between controls", async () => {
+		const box = document.createElement("input");
+		const text = document.createElement("input");
+		document.body.append(box, text);
+		box.scrollIntoView = vi.fn();
+		text.scrollIntoView = vi.fn();
+		const validation = ruleValidation({
+			order: ["email"],
+			validate: rules,
+			controls: {
+				email: (rule: string) => (rule === "invalid" ? text : box),
+			},
+		});
+		validation.options.validators.onDynamic({
+			value: { name: "Ada", email: "ada" },
+			formApi: submitting,
+		});
+		validation.options.onSubmitInvalid();
+		await vi.waitFor(() => expect(document.activeElement).toBe(text));
+	});
+
 	it("forgets the flagged fields on reset", () => {
 		const { validation, run } = setup();
 		run({ name: "", email: "" }, submitting);

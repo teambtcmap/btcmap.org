@@ -120,6 +120,7 @@
 		"username": "Gebruikersnaam",
 		"password": "Wachtwoord",
 		"passwordHint": "Gebruik minstens {min} tekens.",
+		"passwordTooShort": "Gebruik minstens {min} tekens om verder te gaan.",
 		"submit": "Account aanmaken",
 		"creating": "Account aanmaken...",
 		"error": "Account aanmaken mislukt. De gebruikersnaam bestaat mogelijk al.",
