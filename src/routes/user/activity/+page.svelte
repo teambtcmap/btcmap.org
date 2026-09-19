@@ -236,7 +236,7 @@ onMount(async () => {
 				bind:value={filterValue}
 				disabled={feedLoading}
 				options={filterOptions}
-				on:change={handleFilterChange}
+				onchange={handleFilterChange}
 			/>
 		</div>
 

@@ -1,24 +1,36 @@
 <script lang="ts">
+import type { AnyFieldApi } from "@tanstack/svelte-form";
+import { createForm } from "@tanstack/svelte-form";
 import axios from "axios";
-import DOMPurify from "dompurify";
-import { onMount, tick } from "svelte";
+import { onMount, tick, untrack } from "svelte";
 import { get } from "svelte/store";
 
 import LoginForm from "$components/auth/LoginForm.svelte";
 import NostrLoginForm from "$components/auth/NostrLoginForm.svelte";
 import FormHelperText from "$components/FormHelperText.svelte";
+import CaptchaField from "$components/form/CaptchaField.svelte";
+import FieldError from "$components/form/FieldError.svelte";
 import type { FormSelectOption } from "$components/form/FormSelect.svelte";
 import FormSelect from "$components/form/FormSelect.svelte";
 import OpeningHoursEditor from "$components/form/OpeningHoursEditor.svelte";
+import TextArea from "$components/form/TextArea.svelte";
 import TextField from "$components/form/TextField.svelte";
 import Icon from "$components/Icon.svelte";
 import NostrAvatar from "$components/NostrAvatar.svelte";
 import PrimaryButton from "$components/PrimaryButton.svelte";
+import {
+	DETAILS_FIELDS,
+	normalizeWebsite,
+	validateDetails,
+} from "$lib/addLocationValidation";
 import { trackEvent } from "$lib/analytics";
 import { API_BASE } from "$lib/api-base";
 import { CATEGORIES, CATEGORY_GROUPS } from "$lib/categoryMapping";
+import { fieldBorderClasses } from "$lib/fieldStyles";
 import { reverseGeocode } from "$lib/geocoding";
 import { _, locale } from "$lib/i18n";
+import type { PaymentMethod } from "$lib/map/paymentMethodFilter";
+import { PAYMENT_METHODS } from "$lib/map/paymentMethodFilter";
 import { fetchProfile } from "$lib/nostrProfile";
 import { formatPinCoords } from "$lib/placementMode";
 import type {
@@ -26,6 +38,7 @@ import type {
 	SubmitPlaceResponse,
 } from "$lib/placeSubmission";
 import { buildPlaceSubmissionArgs } from "$lib/placeSubmission";
+import { fieldError, inputProps, ruleValidation } from "$lib/ruleValidation";
 import { session } from "$lib/session";
 import { theme } from "$lib/theme";
 import { errToast } from "$lib/utils";
@@ -42,10 +55,11 @@ import type { PostPlaceSubmissionResponse } from "$types/btcmap-api/PostPlaceSub
 // shows "here's what will be published" and owns the captcha — so the
 // inputs are usable immediately instead of waiting on the captcha fetch,
 // and prefill junk (suggested address, generated hours) gets one explicit
-// look before it reaches the volunteer queue. The edit fields stay
-// mounted and are only CSS-hidden during review: most of them are
-// uncontrolled inputs read through element refs, and unmounting would
-// wipe them.
+// look before it reaches the volunteer queue. Each step is a TanStack
+// form (#1420, with the rules and semantics of #1404 via ruleValidation):
+// the edit step's fields, and the review step's captcha answer. The edit
+// fields stay mounted and are only CSS-hidden during review, so the
+// expanders and the hours editor keep their state across the round trip.
 type Props = {
 	coords: { lat: number; long: number };
 	// On a completed submission. `attributed` = it went out with a verified
@@ -73,12 +87,13 @@ const fetchCaptcha = () => {
 	// A new image voids the old secret and whatever was typed for it: clear
 	// both, so Submit stays disabled until the replacement arrives.
 	captchaSecret = undefined;
-	if (captchaInput) captchaInput.value = "";
+	reviewForm.reset();
+	review.reset();
 	axios
 		.get<{ captcha: string; captchaSecret: string }>("/captcha")
 		.then((response) => {
 			captchaSecret = response.data.captchaSecret;
-			captchaContent = DOMPurify.sanitize(response.data.captcha);
+			captchaContent = response.data.captcha;
 		})
 		.catch((error) => {
 			errToast(get(_)("errors.captchaFetch"));
@@ -89,9 +104,8 @@ const fetchCaptcha = () => {
 		});
 };
 
-let name = $state<HTMLInputElement>();
-let nameEn = $state<HTMLInputElement>();
-let address = $state<HTMLInputElement>();
+let nameInput = $state<HTMLInputElement>();
+let addressInput = $state<HTMLInputElement>();
 let showMoreDetails = $state(false);
 
 // Address suggestion from the pin (#1315). Re-runs whenever the pin
@@ -137,19 +151,23 @@ const suggestAddress = async (lat: number, long: number) => {
 	// right. The value guard only replaces an empty field or the previous
 	// pin's untouched suggestion; text the user typed (or autofill wrote)
 	// stays put.
+	const current = detailsForm.state.values.address;
 	if (suggestion) {
 		addressRequired = true;
-		if (address && (!address.value || address.value === lastSuggested)) {
-			address.value = suggestion;
+		if (!current || current === lastSuggested) {
+			detailsForm.setFieldValue("address", suggestion);
 		}
 		lastSuggested = suggestion;
 	} else {
 		addressRequired = false;
-		if (address && address.value === lastSuggested) {
-			address.value = "";
+		if (current === lastSuggested) {
+			detailsForm.setFieldValue("address", "");
 		}
 		lastSuggested = "";
 	}
+	// Requiredness isn't a field value: a flagged address (Move pin after a
+	// rejected Review) re-checks against it too.
+	detailsForm.validate("change");
 };
 
 $effect(() => {
@@ -162,8 +180,7 @@ $effect(() => {
 	suggestAddress(coords.lat, coords.long);
 });
 
-let categorySelect = $state<string>();
-let categoryOther = $state<string>();
+let categorySelectElement = $state<HTMLSelectElement>();
 let categoryOtherElement = $state<HTMLInputElement>();
 
 // Map taxonomy minus the "all" pseudo-bucket, plus the Other escape
@@ -172,18 +189,13 @@ const categoryOptions: FormSelectOption[] = CATEGORIES.filter(
 	(key) => key !== "all",
 ).map((key) => ({ value: key, label: CATEGORY_GROUPS[key].label }));
 
-let onchain = $state<HTMLInputElement>();
-let lightning = $state<HTMLInputElement>();
-let nfc = $state<HTMLInputElement>();
-let website = $state<HTMLInputElement>();
-let phone = $state<HTMLInputElement>();
-// Structured editor state instead of an element ref: the day-grid editor
-// binds the OSM opening_hours string it generates.
+let onchainBox = $state<HTMLInputElement>();
+let websiteInput = $state<HTMLInputElement>();
+// Outside the form: the day-grid editor binds the OSM opening_hours string
+// it generates, and nothing validates it.
 let hoursValue = $state("");
 let showHoursEditor = $state(false);
-let notes = $state<HTMLTextAreaElement>();
-let contact = $state<HTMLInputElement>();
-let noMethodSelected = $state(false);
+let contactInput = $state<HTMLInputElement>();
 let submitting = $state(false);
 
 // Per-submission anonymity (#1334): someone on a shared device can
@@ -230,9 +242,112 @@ const onAuthSuccess = () => {
 	submitAnonymously = false;
 };
 
-const handleCheckboxClick = () => {
-	noMethodSelected = false;
+// Whether the contact email is required flips with the identity (sign-in,
+// detach, undo), which isn't a field value: re-check a flagged contact
+// against it.
+$effect(() => {
+	void identityAttached;
+	untrack(() => detailsForm.validate("change"));
+});
+
+type DetailsValues = {
+	name: string;
+	nameEn: string;
+	address: string;
+	category: string;
+	categoryOther: string;
+	methods: PaymentMethod[];
+	website: string;
+	phone: string;
+	notes: string;
+	contact: string;
 };
+
+// The edit step's rules (#1404); the category's error belongs to the
+// select for a missing pick, to the Other field for an empty description.
+const details = ruleValidation({
+	order: DETAILS_FIELDS,
+	validate: (value: DetailsValues) =>
+		validateDetails({
+			...value,
+			addressRequired,
+			contactRequired: !identityAttached,
+		}),
+	controls: {
+		name: () => nameInput,
+		address: () => addressInput,
+		category: (rule) =>
+			rule === "otherRequired" ? categoryOtherElement : categorySelectElement,
+		methods: () => onchainBox,
+		website: () => websiteInput,
+		contact: () => contactInput,
+	},
+});
+
+const detailsForm = createForm(() => ({
+	defaultValues: {
+		name: "",
+		nameEn: "",
+		address: "",
+		category: "",
+		categoryOther: "",
+		methods: [],
+		website: "",
+		phone: "",
+		notes: "",
+		contact: "",
+	} as DetailsValues,
+	...details.options,
+	onSubmitInvalid: ({ formApi }) => {
+		// A marked website inside the collapsed details would be hidden
+		// (display:none) — and couldn't take focus.
+		if (formApi.getFieldMeta("website")?.errors.length) {
+			showMoreDetails = true;
+		}
+		details.options.onSubmitInvalid();
+	},
+	onSubmit: ({ value }) => {
+		preview = collectPreview(value);
+		step = "review";
+		onstepchange?.("review");
+		trackEvent("add_place_review_enter");
+		// Captcha only guards the anonymous path (#1374) — a signed-in
+		// submission authenticates with the account token instead. First
+		// entry fetches; bouncing edit↔review keeps the loaded one (the
+		// refresh button covers an expired image).
+		if (!identityAttached && !captchaSecret && !isCaptchaLoading) {
+			fetchCaptcha();
+		}
+		scrollToTop();
+	},
+}));
+const detailsValues = detailsForm.useSelector((state) => state.values);
+
+const toggleMethod = (
+	field: AnyFieldApi,
+	method: PaymentMethod,
+	on: boolean,
+) => {
+	const methods: PaymentMethod[] = field.state.value;
+	field.handleChange(
+		on ? [...methods, method] : methods.filter((m) => m !== method),
+	);
+};
+
+// The review step's one field: the anonymous path's captcha answer. A
+// wrong answer is the server's call and stays a toast.
+const review = ruleValidation({
+	order: ["captcha"],
+	validate: (value: { captcha: string }): { captcha?: "required" } =>
+		identityAttached || value.captcha.trim() ? {} : { captcha: "required" },
+	controls: { captcha: () => captchaInput },
+});
+
+const reviewForm = createForm(() => ({
+	defaultValues: { captcha: "" },
+	...review.options,
+	onSubmit: ({ value }) => submitPreview(value.captcha),
+}));
 
 // The review step's snapshot, taken on entry. The hidden edit fields
 // can't change while review is open, and neither can the pin — the host
@@ -246,7 +361,7 @@ type SubmissionPreview = {
 	nameEn: string;
 	address: string;
 	category: string;
-	methods: ("onchain" | "lightning" | "nfc")[];
+	methods: PaymentMethod[];
 	website: string;
 	phone: string;
 	hours: string;
@@ -258,41 +373,33 @@ let preview = $state<SubmissionPreview | null>(null);
 // label. Derived from the select, which is frozen (hidden) during
 // review.
 const previewCategoryLabel = $derived(
-	categoryOptions.find((option) => option.value === categorySelect)?.label ??
+	categoryOptions.find(
+		(option) => option.value === detailsValues.current.category,
+	)?.label ??
 		preview?.category ??
 		"",
 );
 
-const collectPreview = (): SubmissionPreview => {
-	const methods: ("onchain" | "lightning" | "nfc")[] = [];
-	if (onchain?.checked) {
-		methods.push("onchain");
-	}
-	if (lightning?.checked) {
-		methods.push("lightning");
-	}
-	if (nfc?.checked) {
-		methods.push("nfc");
-	}
-	const category =
-		categorySelect === "Other"
-			? (categoryOther ?? "").trim()
-			: (categorySelect ?? "");
-	return {
-		lat: coords.lat,
-		long: coords.long,
-		name: name?.value ?? "",
-		nameEn: nameEn?.value ?? "",
-		address: address?.value ?? "",
-		category,
-		methods,
-		website: website?.value ?? "",
-		phone: phone?.value ?? "",
-		hours: hoursValue,
-		notes: notes?.value ?? "",
-		contact: contact?.value ?? "",
-	};
-};
+// Runs after validateDetails passed, so the website normalizes.
+const collectPreview = (value: DetailsValues): SubmissionPreview => ({
+	lat: coords.lat,
+	long: coords.long,
+	name: value.name,
+	nameEn: value.nameEn,
+	address: value.address,
+	category:
+		value.category === "Other" ? value.categoryOther.trim() : value.category,
+	// In the map's order, whatever order they were ticked in.
+	methods: PAYMENT_METHODS.filter((method) => value.methods.includes(method)),
+	// A bare domain is published with https:// in front.
+	website: normalizeWebsite(value.website) ?? "",
+	phone: value.phone,
+	hours: hoursValue,
+	notes: value.notes,
+	// A typed email survives an attach/detach round trip in the form, but
+	// an attached submission has no contact to send.
+	contact: identityAttached ? "" : value.contact,
+});
 
 let formElement = $state<HTMLFormElement>();
 const scrollToTop = () => {
@@ -300,42 +407,26 @@ const scrollToTop = () => {
 };
 
 const backToEdit = () => {
+	reviewForm.reset();
+	review.reset();
 	step = "edit";
 	onstepchange?.("edit");
 	trackEvent("add_place_review_back");
 	scrollToTop();
 };
 
+// The form's one submit, for whichever step is showing: Review on the edit
+// step, the confirm on the review step.
 const submitForm = (event: SubmitEvent) => {
 	event.preventDefault();
 	if (step === "edit") {
-		// Native validation already passed (the Review button is the form's
-		// submit); these are the two rules it can't express.
-		if (categorySelect === "Other" && !(categoryOther ?? "").trim()) {
-			errToast(get(_)("addLocation.categoryOtherRequired"));
-			categoryOtherElement?.focus();
-			return;
-		}
-		if (!onchain?.checked && !lightning?.checked && !nfc?.checked) {
-			noMethodSelected = true;
-			errToast(get(_)("errors.noPaymentMethod"));
-			return;
-		}
-		preview = collectPreview();
-		step = "review";
-		onstepchange?.("review");
-		trackEvent("add_place_review_enter");
-		// Captcha only guards the anonymous path (#1374) — a signed-in
-		// submission authenticates with the account token instead. First
-		// entry fetches; bouncing edit↔review keeps the loaded one (the
-		// refresh button covers an expired image).
-		if (!identityAttached && !captchaSecret && !isCaptchaLoading) {
-			fetchCaptcha();
-		}
-		scrollToTop();
-		return;
+		details.submit(detailsForm);
+	} else if (preview) {
+		review.submit(reviewForm);
 	}
+};
 
+const submitPreview = (captchaAnswer: string) => {
 	if (!preview) return;
 	const { name: submittedName } = preview;
 	submitting = true;
@@ -367,7 +458,7 @@ const submitForm = (event: SubmitEvent) => {
 	// and the honeypot are read live.
 	const payload: SubmitPlaceRequest = {
 		captchaSecret,
-		captchaTest: captchaInput?.value,
+		captchaTest: captchaAnswer,
 		honey: honeyInput?.value,
 		...preview,
 	};
@@ -400,7 +491,7 @@ onMount(() => {
 	// Keyboard-first on desktop only: popping the on-screen keyboard
 	// on mobile would cover the confirmation the user just landed on.
 	if (window.matchMedia("(pointer: fine)").matches) {
-		name?.focus();
+		nameInput?.focus();
 	}
 });
 </script>
@@ -408,146 +499,228 @@ onMount(() => {
 <!-- scroll-mt clears the shell's sticky header when the step switch
      scrolls the form back into view — sized for the header with its
      step label and bar (~78px), or the review step's back link lands
-     under it. -->
+     under it. `novalidate`: the form reports its own errors inline
+     (#1404) instead of the browser's bubbles. -->
 <form
 	bind:this={formElement}
 	onsubmit={submitForm}
+	novalidate
 	class="w-full scroll-mt-24 space-y-5 text-primary dark:text-white"
 >
-	<!-- Edit step — CSS-hidden during review so the uncontrolled inputs
-	     keep their values (see the header comment). -->
+	<!-- Edit step — CSS-hidden during review (see the header comment). -->
 	<div class="space-y-5" class:hidden={step === 'review'}>
-		<TextField
-			id="name"
-			name="name"
-			label={$_('addLocation.nameLabel')}
-			bind:element={name}
-			placeholder={$_('addLocation.merchantNamePlaceholder')}
-			required
-		/>
-
-		<TextField
-			id="address"
-			name="address"
-			label={$_('forms.address')}
-			optional={!addressRequired}
-			bind:element={address}
-			required={addressRequired}
-			placeholder={addressPending
-				? $_('addLocation.addressLookupPending')
-				: $_('addLocation.addressPlaceholder')}
-		>
-			{#snippet hint()}
-				<FormHelperText text={$_('addLocation.addressSuggestedHint')} />
-			{/snippet}
-		</TextField>
-
-		<div>
-			<label for="category" class="mb-2 block font-semibold">{$_('forms.category')}</label>
-			<FormSelect
-				id="category"
-				name="category"
-				required
-				options={[
-					{ value: '', label: $_('addLocation.categorySelectPlaceholder') },
-					...categoryOptions,
-					{ value: 'Other', label: $_('addLocation.categoryOtherOption') }
-				]}
-				bind:value={categorySelect}
-				on:change={async () => {
-					if (categorySelect === 'Other') {
-						await tick();
-						categoryOtherElement?.focus();
-					}
-				}}
-			/>
-			{#if categorySelect === 'Other'}
-				<input
+		<detailsForm.Field name="name">
+			{#snippet children(field)}
+				<TextField
+					id="name"
+					name="name"
+					label={$_('addLocation.nameLabel')}
+					placeholder={$_('addLocation.merchantNamePlaceholder')}
 					required
-					type="text"
-					name="category-other"
-					placeholder={$_('addLocation.categoryPlaceholder')}
-					class="mt-2 w-full rounded-2xl border-2 border-input p-3 transition-all focus:outline-link disabled:cursor-not-allowed disabled:bg-gray-100 disabled:text-gray-500 dark:bg-white/[0.15] dark:disabled:bg-gray-700 dark:disabled:text-gray-400"
-					bind:value={categoryOther}
-					bind:this={categoryOtherElement}
+					error={fieldError(field) && $_('addLocation.nameRequired')}
+					{...inputProps(field)}
+					bind:element={nameInput}
 				/>
-			{/if}
-		</div>
+			{/snippet}
+		</detailsForm.Field>
 
-		<fieldset>
-			<legend class="mb-2 block font-semibold">{$_('addLocation.paymentMethodsLegend')}</legend>
-			{#if noMethodSelected}
-				<span class="font-semibold text-error">{$_('addLocation.paymentMethodError')}</span>
-			{/if}
-			<div class="space-y-4">
+		<detailsForm.Field name="address">
+			{#snippet children(field)}
+				<TextField
+					id="address"
+					name="address"
+					label={$_('forms.address')}
+					optional={!addressRequired}
+					required={addressRequired}
+					error={fieldError(field) && $_('addLocation.addressRequired')}
+					placeholder={addressPending
+						? $_('addLocation.addressLookupPending')
+						: $_('addLocation.addressPlaceholder')}
+					{...inputProps(field)}
+					bind:element={addressInput}
+				>
+					{#snippet hint()}
+						<FormHelperText text={$_('addLocation.addressSuggestedHint')} />
+					{/snippet}
+				</TextField>
+			{/snippet}
+		</detailsForm.Field>
+
+		<detailsForm.Field name="category">
+			{#snippet children(field)}
+				{@const code = fieldError(field)}
 				<div>
+					<label id="category-label" for="category" class="mb-2 block font-semibold"
+						>{$_('forms.category')}</label
+					>
+					{#if code === 'required'}
+						<FieldError id="category-error" message={$_('addLocation.categoryRequired')} />
+					{/if}
+					<FormSelect
+						id="category"
+						name="category"
+						required
+						bind:element={categorySelectElement}
+						invalid={code === 'required'}
+						ariaDescribedby={code === 'required' ? 'category-error' : undefined}
+						options={[
+							{ value: '', label: $_('addLocation.categorySelectPlaceholder') },
+							...categoryOptions,
+							{ value: 'Other', label: $_('addLocation.categoryOtherOption') }
+						]}
+						value={field.state.value}
+						onchange={async (e) => {
+							const picked = e.currentTarget.value;
+							field.handleChange(picked);
+							if (picked === 'Other') {
+								await tick();
+								categoryOtherElement?.focus();
+							}
+						}}
+					/>
+					{#if field.state.value === 'Other'}
+						<!-- The Other field has no label of its own: it borrows the
+						     Category label as its name, and its message sits right
+						     above it, below the (valid) select. -->
+						{#if code === 'otherRequired'}
+							<FieldError
+								id="category-other-error"
+								message={$_('addLocation.categoryOtherRequired')}
+								class="mt-2"
+							/>
+						{/if}
+						<detailsForm.Field name="categoryOther">
+							{#snippet children(other)}
+								<input
+									required
+									type="text"
+									name="category-other"
+									placeholder={$_('addLocation.categoryPlaceholder')}
+									aria-labelledby="category-label"
+									aria-invalid={code === 'otherRequired' ? 'true' : undefined}
+									aria-describedby={code === 'otherRequired' ? 'category-other-error' : undefined}
+									class="mt-2 w-full rounded-2xl border-2 {fieldBorderClasses(
+										code === 'otherRequired'
+									)} p-3 transition-all disabled:cursor-not-allowed disabled:bg-gray-100 disabled:text-gray-500 dark:bg-white/[0.15] dark:disabled:bg-gray-700 dark:disabled:text-gray-400"
+									{...inputProps(other)}
+									bind:this={categoryOtherElement}
+								/>
+							{/snippet}
+						</detailsForm.Field>
+					{/if}
+				</div>
+			{/snippet}
+		</detailsForm.Field>
+
+		<!-- The payment rule is stated where the choice is made: a question
+		     as the label, the requirement under it, and a rejected Review
+		     turns the border and that same line to error — no toast. A div
+		     group rather than a fieldset: a bordered fieldset draws its
+		     legend into the border line. The rule describes each checkbox,
+		     not the group: a group's description isn't inherited by the
+		     control that takes focus, and several screen readers skip it
+		     on entry — and on both, JAWS would read the rule twice. -->
+		<detailsForm.Field name="methods">
+			{#snippet children(field)}
+		{@const methodsInvalid = !!fieldError(field)}
+		<div
+			role="group"
+			aria-labelledby="payment-methods-question"
+			class="rounded-2xl border-2 p-3.5 {methodsInvalid
+				? 'border-error'
+				: 'border-input'}"
+		>
+			<p id="payment-methods-question" class="font-semibold">
+				{$_('addLocation.paymentMethodsQuestion')}
+			</p>
+			<p
+				id="payment-methods-requirement"
+				class="mt-1 text-sm {methodsInvalid
+					? 'font-semibold text-error'
+					: 'text-body dark:text-offwhite'}"
+			>
+				{methodsInvalid
+					? $_('addLocation.paymentMethodsRequirementError')
+					: $_('addLocation.paymentMethodsRequirement')}
+			</p>
+			<div class="mt-3 space-y-3.5">
+				<div class="flex items-center gap-2">
 					<input
-						class="h-4 w-4 accent-link"
+						class="h-4 w-4 shrink-0 accent-link"
+						aria-describedby="payment-methods-requirement"
+						aria-invalid={methodsInvalid ? 'true' : undefined}
 						type="checkbox"
 						name="onchain"
 						id="onchain"
-						bind:this={onchain}
-						onclick={handleCheckboxClick}
+						checked={field.state.value.includes('onchain')}
+						onchange={(e) => toggleMethod(field, 'onchain', e.currentTarget.checked)}
+						bind:this={onchainBox}
 					/>
-					<label for="onchain" class="ml-1 cursor-pointer">
+					<label for="onchain" class="flex cursor-pointer items-center gap-2">
 						{#if typeof window !== 'undefined'}
 							<img
 								src={$theme === 'dark'
 									? '/icons/btc-highlight-dark.svg'
 									: '/icons/btc-primary.svg'}
 								alt=""
-								class="inline"
+								class="h-[18px] w-[18px]"
 							/>
 						{/if}
 						{$_('addLocation.onchainLabel')}
 					</label>
 				</div>
-				<div>
+				<div class="flex items-center gap-2">
 					<input
-						class="h-4 w-4 accent-link"
+						class="h-4 w-4 shrink-0 accent-link"
+						aria-describedby="payment-methods-requirement"
+						aria-invalid={methodsInvalid ? 'true' : undefined}
 						type="checkbox"
 						name="lightning"
 						id="lightning"
-						bind:this={lightning}
-						onclick={handleCheckboxClick}
+						checked={field.state.value.includes('lightning')}
+						onchange={(e) => toggleMethod(field, 'lightning', e.currentTarget.checked)}
 					/>
-					<label for="lightning" class="ml-1 cursor-pointer">
+					<label for="lightning" class="flex cursor-pointer items-center gap-2">
 						{#if typeof window !== 'undefined'}
 							<img
 								src={$theme === 'dark'
 									? '/icons/ln-highlight-dark.svg'
 									: '/icons/ln-primary.svg'}
 								alt=""
-								class="inline"
+								class="h-[18px] w-[18px]"
 							/>
 						{/if}
 						{$_('addLocation.lightningLabel')}
 					</label>
 				</div>
-				<div>
+				<div class="flex items-center gap-2">
 					<input
-						class="h-4 w-4 accent-link"
+						class="h-4 w-4 shrink-0 accent-link"
+						aria-describedby="payment-methods-requirement"
+						aria-invalid={methodsInvalid ? 'true' : undefined}
 						type="checkbox"
 						name="nfc"
 						id="nfc"
-						bind:this={nfc}
-						onclick={handleCheckboxClick}
+						checked={field.state.value.includes('nfc')}
+						onchange={(e) => toggleMethod(field, 'nfc', e.currentTarget.checked)}
 					/>
-					<label for="nfc" class="ml-1 cursor-pointer">
+					<label for="nfc" class="flex cursor-pointer items-center gap-2">
 						{#if typeof window !== 'undefined'}
 							<img
 								src={$theme === 'dark'
 									? '/icons/nfc-highlight-dark.svg'
 									: '/icons/nfc-primary.svg'}
 								alt=""
-								class="inline"
+								class="h-[18px] w-[18px]"
 							/>
 						{/if}
 						{$_('addLocation.nfcLabel')}
 					</label>
 				</div>
 			</div>
-		</fieldset>
+		</div>
+			{/snippet}
+		</detailsForm.Field>
 
 		<div>
 			<button
@@ -568,38 +741,52 @@ onMount(() => {
 		</div>
 
 		<div class="space-y-5" class:hidden={!showMoreDetails}>
-			<TextField
-				id="name-en"
-				name="nameEn"
-				label={$_('addLocation.nameEnLabel')}
-				optional
-				bind:element={nameEn}
-				placeholder={$_('addLocation.merchantEnglishNamePlaceholder')}
-			>
-				{#snippet hint()}
-					<FormHelperText text={$_('addLocation.nameEnTooltip')} />
+			<detailsForm.Field name="nameEn">
+				{#snippet children(field)}
+					<TextField
+						id="name-en"
+						name="nameEn"
+						label={$_('addLocation.nameEnLabel')}
+						optional
+						placeholder={$_('addLocation.merchantEnglishNamePlaceholder')}
+						{...inputProps(field)}
+					>
+						{#snippet hint()}
+							<FormHelperText text={$_('addLocation.nameEnTooltip')} />
+						{/snippet}
+					</TextField>
 				{/snippet}
-			</TextField>
+			</detailsForm.Field>
 
-			<TextField
-				id="website"
-				name="website"
-				label={$_('forms.website')}
-				optional
-				type="url"
-				bind:element={website}
-				placeholder={$_('addLocation.websitePlaceholder')}
-			/>
+			<detailsForm.Field name="website">
+				{#snippet children(field)}
+					<TextField
+						id="website"
+						name="website"
+						label={$_('forms.website')}
+						optional
+						type="url"
+						error={fieldError(field) && $_('addLocation.websiteInvalid')}
+						placeholder={$_('addLocation.websitePlaceholder')}
+						{...inputProps(field)}
+						bind:element={websiteInput}
+					/>
+				{/snippet}
+			</detailsForm.Field>
 
-			<TextField
-				id="phone"
-				name="phone"
-				label={$_('forms.phone')}
-				optional
-				type="tel"
-				bind:element={phone}
-				placeholder={$_('addLocation.phonePlaceholder')}
-			/>
+			<detailsForm.Field name="phone">
+				{#snippet children(field)}
+					<TextField
+						id="phone"
+						name="phone"
+						label={$_('forms.phone')}
+						optional
+						type="tel"
+						placeholder={$_('addLocation.phonePlaceholder')}
+						{...inputProps(field)}
+					/>
+				{/snippet}
+			</detailsForm.Field>
 
 			<div>
 				<p class="mb-2 font-semibold">
@@ -637,19 +824,18 @@ onMount(() => {
 				{/if}
 			</div>
 
-			<div>
-				<label for="notes" class="mb-2 block font-semibold"
-					>{$_('forms.notes')} <span class="font-normal">{$_('forms.optional')}</span></label
-				>
-				<textarea
-					name="notes"
-					id="notes"
-					placeholder={$_('addLocation.notesPlaceholder')}
-					rows="3"
-					class="w-full rounded-2xl border-2 border-input p-3 transition-all focus:outline-link disabled:cursor-not-allowed disabled:bg-gray-100 disabled:text-gray-500 dark:bg-white/[0.15] dark:disabled:bg-gray-700 dark:disabled:text-gray-400"
-					bind:this={notes}
-				></textarea>
-			</div>
+			<detailsForm.Field name="notes">
+				{#snippet children(field)}
+					<TextArea
+						id="notes"
+						name="notes"
+						label={$_('forms.notes')}
+						optional
+						placeholder={$_('addLocation.notesPlaceholder')}
+						{...inputProps(field)}
+					/>
+				{/snippet}
+			</detailsForm.Field>
 		</div>
 
 		{#if identityAttached && $session}
@@ -701,17 +887,24 @@ onMount(() => {
 				</p>
 			</div>
 		{:else}
-			<!-- The anonymous contract: a required contact email. Detaching
-			     mounts this fresh (the field doesn't exist while attached),
-			     so a previously typed email doesn't survive the toggle. -->
+			<!-- The anonymous contract: a required contact email. It isn't
+			     rendered while an account is attached, and an attached
+			     submission sends none (collectPreview). -->
+			<detailsForm.Field name="contact">
+			{#snippet children(field)}
+			{@const code = fieldError(field)}
 			<TextField
 				id="contact"
 				name="contact"
 				label={$_('forms.contact')}
 				type="email"
-				bind:element={contact}
 				required
+				error={code === 'invalid'
+					? $_('addLocation.contactInvalid')
+					: code && $_('addLocation.contactRequired')}
 				placeholder={$_('addLocation.contactPlaceholder')}
+				{...inputProps(field)}
+				bind:element={contactInput}
 			>
 				{#snippet hint()}
 					{#if $session}
@@ -771,6 +964,8 @@ onMount(() => {
 					{/if}
 				{/snippet}
 			</TextField>
+			{/snippet}
+			</detailsForm.Field>
 		{/if}
 
 		<PrimaryButton style="w-full py-3 rounded-xl">
@@ -832,43 +1027,19 @@ onMount(() => {
 			<!-- The captcha guards the anonymous path only (#1374): a
 			     signed-in submission authenticates with the account token. -->
 			{#if !identityAttached}
-				<div>
-					<div class="mb-2 flex items-center space-x-2">
-						<label for="captcha" class="font-semibold"
-							>{$_('forms.captcha')}
-							<span class="font-normal">({$_('forms.captchaCaseSensitive')})</span></label
-						>
-						<!-- Visible whenever a (re)fetch is possible — a failed first
-						     fetch must leave a retry, or the user is stranded at the
-						     end of the funnel with a disabled submit. -->
-						{#if !isCaptchaLoading}
-							<button type="button" onclick={fetchCaptcha}>
-								<Icon type="fa" icon="arrows-rotate" w="16" h="16" />
-							</button>
-						{/if}
-					</div>
-					<div class="space-y-2">
-						<div
-							class="flex items-center justify-center rounded-2xl border-2 border-input py-1"
-						>
-							{#if isCaptchaLoading}
-								<div class="h-[100px] w-[275px] animate-pulse bg-link/50"></div>
-							{:else}
-								{@html captchaContent}
-							{/if}
-						</div>
-						<input
+				<reviewForm.Field name="captcha">
+					{#snippet children(field)}
+						<CaptchaField
+							content={captchaContent}
+							loading={isCaptchaLoading}
+							onrefresh={fetchCaptcha}
 							disabled={!captchaSecret}
-							required
-							type="text"
-							name="captcha"
-							id="captcha"
-							placeholder={$_('addLocation.captchaPlaceholder')}
-							class="w-full rounded-2xl border-2 border-input p-3 transition-all focus:outline-link disabled:cursor-not-allowed disabled:bg-gray-100 disabled:text-gray-500 dark:bg-white/[0.15] dark:disabled:bg-gray-700 dark:disabled:text-gray-400"
-							bind:this={captchaInput}
+							invalid={!!fieldError(field)}
+							{...inputProps(field)}
+							bind:element={captchaInput}
 						/>
-					</div>
-				</div>
+					{/snippet}
+				</reviewForm.Field>
 			{/if}
 
 			<PrimaryButton

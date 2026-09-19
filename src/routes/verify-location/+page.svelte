@@ -1,38 +1,43 @@
 <script lang="ts">
-export let data: import("./+page.server").VerifyLocationPageData;
-
+import { createForm } from "@tanstack/svelte-form";
 import axios from "axios";
-import DOMPurify from "dompurify";
 import { onMount } from "svelte";
 import { get } from "svelte/store";
 
 import FormHelperText from "$components/FormHelperText.svelte";
 import FormSuccess from "$components/FormSuccess.svelte";
-import Icon from "$components/Icon.svelte";
+import CaptchaField from "$components/form/CaptchaField.svelte";
+import FieldError from "$components/form/FieldError.svelte";
+import TextArea from "$components/form/TextArea.svelte";
 import HeaderPlaceholder from "$components/layout/HeaderPlaceholder.svelte";
 import PrimaryButton from "$components/PrimaryButton.svelte";
 import TextLink from "$components/TextLink.svelte";
 import { _ } from "$lib/i18n";
+import { fieldError, inputProps, ruleValidation } from "$lib/ruleValidation";
 import { placesError } from "$lib/store";
 import { theme } from "$lib/theme";
 import { errToast } from "$lib/utils";
+import type { VerifyInput } from "$lib/verifyValidation";
+import { validateVerification } from "$lib/verifyValidation";
 
+import type { PageProps } from "./$types";
 import { browser } from "$app/environment";
 
-// Initialize from server data
-let name = data?.name || "";
-let lat = data?.lat;
-let long = data?.long;
-let location = data?.location || "";
-let edit = data?.edit || "";
+let { data }: PageProps = $props();
 
-let captcha: HTMLDivElement;
-let captchaSecret: string;
-let captchaInput: HTMLInputElement;
-let honeyInput: HTMLInputElement;
+// From the server load
+const name = $derived(data?.name || "");
+const lat = $derived(data?.lat);
+const long = $derived(data?.long);
+const location = $derived(data?.location || "");
+const edit = $derived(data?.edit || "");
 
-let captchaContent = "";
-let isCaptchaLoading = true;
+let captchaSecret = $state<string>();
+let captchaInput = $state<HTMLInputElement>();
+let honeyInput = $state<HTMLInputElement>();
+
+let captchaContent = $state("");
+let isCaptchaLoading = $state(true);
 
 const fetchCaptcha = () => {
 	isCaptchaLoading = true;
@@ -41,7 +46,7 @@ const fetchCaptcha = () => {
 		.then((response) => {
 			// handle success
 			captchaSecret = response.data.captchaSecret;
-			captchaContent = DOMPurify.sanitize(response.data.captcha);
+			captchaContent = response.data.captcha;
 		})
 		.catch((error) => {
 			errToast(get(_)("errors.captchaFetch"));
@@ -52,35 +57,54 @@ const fetchCaptcha = () => {
 		});
 };
 
-let current: boolean;
-let outdated: string;
-let verify: HTMLTextAreaElement;
+let currentBox = $state<HTMLInputElement>();
+let methodInput = $state<HTMLTextAreaElement>();
 
-let selected = !!data; // Set to true if we have server data
-let submitted = false;
-let submitting = false;
-let submissionIssueNumber: number;
-let merchantId = data?.merchantId || "";
+const selected = $derived(!!data); // Set to true if we have server data
+let submitted = $state(false);
+let submitting = $state(false);
+let submissionIssueNumber = $state<number>();
+const merchantId = $derived(data?.merchantId || "");
 
-const submitForm = (event: SubmitEvent) => {
-	event.preventDefault();
-	if (!selected) {
-		errToast(get(_)("errors.noLocationSelected"));
-	} else {
+// The report on TanStack Form (#1406) with the shared verification rules
+// (#1407): `novalidate`, every failed field marked inline on submit, the
+// first focused. The box-or-changes rule rides on the box's field (its
+// first control); the changes field shows it too.
+const validation = ruleValidation({
+	order: ["accurate", "method", "captcha"],
+	validate: (value: VerifyInput) => {
+		const { confirmation, ...others } = validateVerification(value);
+		return confirmation ? { ...others, accurate: confirmation } : others;
+	},
+	controls: {
+		accurate: () => currentBox,
+		method: () => methodInput,
+		captcha: () => captchaInput,
+	},
+});
+
+const form = createForm(() => ({
+	defaultValues: {
+		accurate: false,
+		changes: "",
+		method: "",
+		captcha: "",
+	} as VerifyInput,
+	...validation.options,
+	onSubmit: ({ value }) => {
 		submitting = true;
-
 		axios
 			.post("/api/gitea/issue", {
 				type: "verify-location",
 				captchaSecret,
-				captchaTest: captchaInput.value,
-				honey: honeyInput.value,
+				captchaTest: value.captcha,
+				honey: honeyInput?.value,
 				name: name,
 				location: location,
 				edit: edit,
-				current: current ? "Yes" : "No",
-				outdated: outdated ? outdated : "",
-				verified: verify.value,
+				current: value.accurate ? "Yes" : "No",
+				outdated: value.changes,
+				verified: value.method,
 				merchantId: merchantId,
 				lat: lat,
 				long: long,
@@ -99,7 +123,17 @@ const submitForm = (event: SubmitEvent) => {
 				console.error(error);
 				submitting = false;
 			});
+	},
+}));
+const values = form.useSelector((state) => state.values);
+
+const submitForm = (event: SubmitEvent) => {
+	event.preventDefault();
+	if (!selected) {
+		errToast(get(_)("errors.noLocationSelected"));
+		return;
 	}
+	validation.submit(form);
 };
 
 function resetForm() {
@@ -107,7 +141,9 @@ function resetForm() {
 }
 
 // alert for map errors
-$: $placesError && errToast($placesError);
+$effect(() => {
+	if ($placesError) errToast($placesError);
+});
 
 onMount(async () => {
 	if (browser) {
@@ -160,11 +196,13 @@ onMount(async () => {
 			
 			<FormHelperText text={$_('verifyLocation.tooltip')} />
 		</div>
-		<form on:submit={submitForm} class="w-full space-y-5 text-primary dark:text-white">
+		<!-- `novalidate`: the form reports its own errors inline (#1407)
+		     instead of the browser's bubbles. -->
+		<form onsubmit={submitForm} novalidate class="w-full space-y-5 text-primary dark:text-white">
 			<div>
 				<input
 					disabled
-					bind:value={name}
+					value={name}
 					readonly
 					type="text"
 					name="name"
@@ -173,85 +211,94 @@ onMount(async () => {
 				/>
 			</div>
 
-			<div>
-				<div class="flex items-center space-x-2">
-					<label for="current" class="{!outdated ? 'cursor-pointer' : ''} font-semibold"
-						>{$_('verifyLocation.currentInfoLabel')}</label
-					>
-					<input
-						class="h-4 w-4 accent-link"
-						disabled={!captchaSecret || !data || Boolean(outdated)}
-						required={!outdated}
-						type="checkbox"
-						id="current"
-						name="current"
-						bind:checked={current}
-					/>
-				</div>
-				<p class="text-sm">{$_('verifyLocation.currentInfoDescription')}</p>
-			</div>
-
-			<div>
-				<label for="outdated" class="mb-2 block font-semibold"
-					>{$_('verifyLocation.outdatedLabel')} <span class="font-normal">({$_('verifyLocation.ifApplicable')})</span></label
-				>
-				<textarea
-					disabled={!captchaSecret || !data || current}
-					required={!current}
-					name="outdated"
-					placeholder={$_('verifyLocation.outdatedPlaceholder')}
-					rows="3"
-					class="w-full rounded-2xl border-2 border-input p-3 transition-all focus:outline-link dark:bg-white/[0.15]"
-					bind:value={outdated}
-				></textarea>
-			</div>
-
-			<div>
-				<label for="verify" class="mb-2 block font-semibold">{$_('verifyLocation.verifyLabel')}</label>
-				<textarea
-					disabled={!captchaSecret || !data}
-					required
-					name="verify"
-					placeholder={$_('verifyLocation.verifyPlaceholder')}
-					rows="3"
-					class="w-full rounded-2xl border-2 border-input p-3 transition-all focus:outline-link dark:bg-white/[0.15]"
-					bind:this={verify}
-				></textarea>
-			</div>
-
-			<div>
-				<div class="mb-2 flex items-center space-x-2">
-					<label for="captcha" class="font-semibold"
-						>{$_('forms.captcha')} <span class="font-normal">({$_('forms.captchaCaseSensitive')})</span></label
-					>
-					{#if captchaSecret}
-						<button type="button" on:click={fetchCaptcha}>
-							<Icon type="fa" icon="arrows-rotate" w="16" h="16" />
-						</button>
-					{/if}
-				</div>
-				<div class="space-y-2">
-					<div
-						bind:this={captcha}
-						class="flex items-center justify-center rounded-2xl border-2 border-input py-1"
-					>
-						{#if isCaptchaLoading}
-							<div class="h-[100px] w-[275px] animate-pulse bg-link/50"></div>
-						{:else}
-							{@html captchaContent}
+			<!-- One of the two is required: the box, or the changes below it.
+			     The rule's message sits under the box's label and describes
+			     both controls, like the payment group on add-location
+			     (#1397). -->
+			<form.Field name="accurate">
+				{#snippet children(field)}
+					{@const confirmation = fieldError(field)}
+					<div>
+						<div class="flex items-center space-x-2">
+							<label
+								for="current"
+								class="{!values.current.changes ? 'cursor-pointer' : ''} font-semibold"
+								>{$_('verifyLocation.currentInfoLabel')}</label
+							>
+							<input
+								class="h-4 w-4 accent-link"
+								disabled={!captchaSecret || !data || Boolean(values.current.changes)}
+								required={!values.current.changes}
+								type="checkbox"
+								id="current"
+								name="current"
+								aria-invalid={confirmation ? 'true' : undefined}
+								aria-describedby={confirmation ? 'confirmation-error' : undefined}
+								checked={field.state.value}
+								onchange={(e) => field.handleChange(e.currentTarget.checked)}
+								bind:this={currentBox}
+							/>
+						</div>
+						{#if confirmation}
+							<FieldError
+								id="confirmation-error"
+								message={$_('verifyLocation.confirmationRequired')}
+								class="mt-1"
+							/>
 						{/if}
+						<p class="text-sm">{$_('verifyLocation.currentInfoDescription')}</p>
 					</div>
-					<input
+
+					<form.Field name="changes">
+						{#snippet children(changes)}
+							<TextArea
+								id="outdated"
+								name="outdated"
+								label={$_('verifyLocation.outdatedLabel')}
+								labelNote={$_('verifyLocation.ifApplicable')}
+								disabled={!captchaSecret || !data || field.state.value}
+								required={!field.state.value}
+								placeholder={$_('verifyLocation.outdatedPlaceholder')}
+								aria-invalid={confirmation ? 'true' : undefined}
+								aria-describedby={confirmation ? 'confirmation-error' : undefined}
+								{...inputProps(changes)}
+							/>
+						{/snippet}
+					</form.Field>
+				{/snippet}
+			</form.Field>
+
+			<!-- Not id="verify": the page's <section id="verify"> comes first,
+			     and the label would name the section instead. -->
+			<form.Field name="method">
+				{#snippet children(field)}
+					<TextArea
+						id="verify-method"
+						name="verify"
+						label={$_('verifyLocation.verifyLabel')}
 						disabled={!captchaSecret || !data}
 						required
-						type="text"
-						name="captcha"
-						placeholder={$_('forms.captchaPlaceholder')}
-						class="w-full rounded-2xl border-2 border-input p-3 transition-all focus:outline-link dark:bg-white/[0.15]"
-						bind:this={captchaInput}
+						placeholder={$_('verifyLocation.verifyPlaceholder')}
+						error={fieldError(field) && $_('verifyLocation.methodRequired')}
+						{...inputProps(field)}
+						bind:element={methodInput}
 					/>
-				</div>
-			</div>
+				{/snippet}
+			</form.Field>
+
+			<form.Field name="captcha">
+				{#snippet children(field)}
+					<CaptchaField
+						content={captchaContent}
+						loading={isCaptchaLoading}
+						onrefresh={fetchCaptcha}
+						disabled={!captchaSecret || !data}
+						invalid={!!fieldError(field)}
+						{...inputProps(field)}
+						bind:element={captchaInput}
+					/>
+				{/snippet}
+			</form.Field>
 
 			<input
 				type="text"

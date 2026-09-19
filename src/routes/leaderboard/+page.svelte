@@ -333,7 +333,7 @@ const handlePeriodChange = async (event: Event) => {
 								<FormSelect
 									id="period-select"
 									value={selectedPeriod}
-									on:change={handlePeriodChange}
+									onchange={handlePeriodChange}
 									ariaLabel={$_('leaderboard.periodAria')}
 									style="md:w-auto"
 								>

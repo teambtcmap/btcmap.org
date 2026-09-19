@@ -155,7 +155,7 @@ function handleSectionChange(event: Event) {
 					>
 				</h2>
 
-				<FormSelect value={data.section} on:change={handleSectionChange} style="md:w-auto">
+				<FormSelect value={data.section} onchange={handleSectionChange} style="md:w-auto">
 					{#each sections as option (option)}
 						<option value={option}>{$_(continentConfig[option].i18nKey)}</option>
 					{/each}

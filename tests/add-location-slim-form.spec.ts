@@ -184,4 +184,71 @@ test.describe('Add Location — slim form', () => {
 		await expect(page.locator('#login-username')).toBeVisible();
 		await expect(page).toHaveURL(/\/map\?add=form/);
 	});
+
+	test('payment methods state the rule up front and reject in place, without a toast', async ({
+		page
+	}) => {
+		// The rule is readable before anyone tries to move on, and a
+		// rejected Review lands on the group itself — no toast (#1393).
+		await stubMapData(page);
+		await stubReverseGeocode(page);
+		await page.goto(PIN);
+		await expect(page.locator('#name')).toBeVisible({
+			timeout: MARKER_LOAD_TIMEOUT
+		});
+
+		const group = page.getByRole('group', {
+			name: 'How can people pay with bitcoin?'
+		});
+		await expect(group).toContainText('Pick at least one.');
+		// Each checkbox carries the rule as its own accessible description:
+		// a group's aria-describedby isn't inherited by the control that
+		// takes focus, and several screen readers skip it on entry.
+		for (const id of ['#onchain', '#lightning', '#nfc']) {
+			await expect(page.locator(id)).toHaveAccessibleDescription(
+				'Pick at least one.'
+			);
+		}
+
+		await page.locator('#name').fill('Satoshi Comics');
+		// Let the stubbed lookup settle so the address rule is deterministic.
+		await expect(page.locator('#address')).toHaveValue(/Freiheitsstraße/);
+		await page.locator('#category').selectOption('restaurants');
+		await page.locator('#contact').fill('owner@example.com');
+		// Screen readers read the group's aria-describedby when focus lands,
+		// not later text changes — so the error must already be the
+		// description at that moment. Record it from the focus event itself.
+		await page.locator('#onchain').evaluate((el) => {
+			el.addEventListener(
+				'focus',
+				() => {
+					(window as unknown as { __descAtFocus?: string }).__descAtFocus =
+						document
+							.getElementById('payment-methods-requirement')
+							?.textContent?.trim();
+				},
+				{ once: true }
+			);
+		});
+		await page.getByRole('button', { name: 'Review & submit' }).click();
+
+		await expect(group).toContainText('Pick at least one to continue.');
+		await expect(page.locator('#onchain')).toBeFocused();
+		await expect(page.locator('#onchain')).toHaveAccessibleDescription(
+			'Pick at least one to continue.'
+		);
+		expect(
+			await page.evaluate(
+				() => (window as unknown as { __descAtFocus?: string }).__descAtFocus
+			)
+		).toBe('Pick at least one to continue.');
+		await expect(page.getByText("Here's what will be published")).toBeHidden();
+		// One-shot read: a retrying toHaveCount(0) would wait out an
+		// auto-dismissing toast and pass anyway.
+		expect(await page.locator('[data-sonner-toast]').count()).toBe(0);
+
+		// Picking a method restores the plain requirement line.
+		await page.locator('#onchain').check();
+		await expect(group).toContainText('Pick at least one.');
+	});
 });
