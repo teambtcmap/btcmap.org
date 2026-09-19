@@ -35,7 +35,7 @@ export type DetailsField = keyof DetailsErrors;
 
 // Top to bottom as the form renders them: the first invalid field in
 // this order is the one that takes focus.
-const FIELD_ORDER: DetailsField[] = [
+export const DETAILS_FIELDS: DetailsField[] = [
 	"name",
 	"address",
 	"category",
@@ -46,7 +46,7 @@ const FIELD_ORDER: DetailsField[] = [
 
 export const firstInvalidField = (
 	errors: DetailsErrors,
-): DetailsField | undefined => firstInvalid(FIELD_ORDER, errors);
+): DetailsField | undefined => firstInvalid(DETAILS_FIELDS, errors);
 
 // The HTML spec's own "valid email address" rule — what the email input
 // enforced before the form went `novalidate`.
