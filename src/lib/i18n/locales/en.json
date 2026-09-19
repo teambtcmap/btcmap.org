@@ -683,6 +683,8 @@
 		"outdatedPlaceholder": "Provide what info is incorrect and the updated info on this location",
 		"verifyLabel": "How did you verify this?",
 		"verifyPlaceholder": "Please provide additional info here",
+		"confirmationRequired": "Tick the box, or describe what's outdated.",
+		"methodRequired": "Tell us how you verified this.",
 		"successType": "Report",
 		"successMessage": "Thanks for taking the time to fill out this report. We'll review your information and update it ASAP.",
 		"submitReport": "Submit Report"
