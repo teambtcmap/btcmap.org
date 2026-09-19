@@ -262,7 +262,7 @@
 	},
 	"commentAdd": {
 		"title": "Adicionar Comentário",
-		"pleaseEnterComment": "Por favor, digite um comentário",
+		"pleaseEnterComment": "Escreva seu comentário primeiro.",
 		"anonymousNote": "Todos os comentários são atualmente anônimos. Cobramos uma pequena taxa em sats como medida de proteção contra spam.",
 		"currentFee": "Taxa atual: 500 sats",
 		"yourComment": "Seu comentário",
@@ -1203,6 +1203,7 @@
 		"username": "Nome de usuário",
 		"password": "Senha",
 		"passwordHint": "Use pelo menos {min} caracteres.",
+		"passwordTooShort": "Use pelo menos {min} caracteres para continuar.",
 		"submit": "Criar conta",
 		"creating": "Criando conta...",
 		"error": "Não foi possível criar a conta. O nome de usuário pode já estar em uso.",

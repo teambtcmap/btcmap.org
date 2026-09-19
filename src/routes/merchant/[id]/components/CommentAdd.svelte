@@ -1,35 +1,44 @@
 <script lang="ts">
+import { createForm } from "@tanstack/svelte-form";
 import axios from "axios";
 import { fly } from "svelte/transition";
 import { OutClick } from "svelte-outclick";
 
 import CloseButton from "$components/CloseButton.svelte";
+import TextArea from "$components/form/TextArea.svelte";
 import Icon from "$components/Icon.svelte";
 import InvoicePaymentStage from "$components/InvoicePaymentStage.svelte";
 import PrimaryButton from "$components/PrimaryButton.svelte";
 import { API_BASE } from "$lib/api-base";
 import { _ } from "$lib/i18n";
+import { fieldError, inputProps, ruleValidation } from "$lib/ruleValidation";
 import { updateSinglePlace } from "$lib/sync/places";
 import type { MerchantPageData } from "$lib/types.js";
 import { errToast } from "$lib/utils";
 
 import { invalidateAll } from "$app/navigation";
 
-export let open: boolean = false;
-export let onOpenChange: (value: boolean) => void = () => {};
-export let elementId: MerchantPageData["id"] | undefined;
+type Props = {
+	open?: boolean;
+	onOpenChange?: (value: boolean) => void;
+	elementId: MerchantPageData["id"] | undefined;
+};
+let { open = false, onOpenChange = () => {}, elementId }: Props = $props();
 
-let stage = 0;
-let commentValue: string = "";
-let invoice = "";
-let invoiceId = "";
-let loading = false;
-let commentComplete = false;
+let stage = $state(0);
+let commentInput = $state<HTMLTextAreaElement>();
+let invoice = $state("");
+let invoiceId = $state("");
+let loading = $state(false);
+let commentComplete = $state(false);
 const closeModal = () => {
 	if (commentComplete) {
 		invalidateAll();
 	}
 	onOpenChange(false);
+	// The draft stays for the next open; its error doesn't.
+	form.reset(form.state.values);
+	validation.reset();
 	stage = 0;
 	invoice = "";
 	invoiceId = "";
@@ -37,33 +46,48 @@ const closeModal = () => {
 	commentComplete = false;
 };
 
+// The comment on TanStack Form (#1406): an empty or blank one is marked on
+// the field (#1410), not toasted, and typing clears it.
+type CommentValues = { comment: string };
+
+const validation = ruleValidation({
+	order: ["comment"],
+	validate: (value: CommentValues): { comment?: "required" } =>
+		value.comment.trim() ? {} : { comment: "required" },
+	controls: { comment: () => commentInput },
+});
+
+const form = createForm(() => ({
+	defaultValues: { comment: "" } as CommentValues,
+	...validation.options,
+	onSubmit: ({ value }) => {
+		if (!elementId) return;
+		loading = true;
+		axios
+			.post(`${API_BASE}/v4/place-comments`, {
+				place_id: elementId,
+				comment: value.comment.trim(),
+			})
+			.then((response) => {
+				invoice = response.data.invoice;
+				invoiceId = response.data.invoice_id;
+				stage = 1;
+				loading = false;
+			})
+			.catch((error) => {
+				errToast($_("errors.invoiceGenerate"));
+				console.error(error);
+				loading = false;
+			});
+	},
+}));
+
 const handleOutClick = () => {
 	// Never close the modal on outside clicks to prevent accidental loss of progress
 };
 const generateInvoice = (event: SubmitEvent) => {
 	event.preventDefault();
-	if (!elementId || !commentValue.trim()) {
-		errToast($_("commentAdd.pleaseEnterComment"));
-		return;
-	}
-
-	loading = true;
-	axios
-		.post(`${API_BASE}/v4/place-comments`, {
-			place_id: elementId,
-			comment: commentValue.trim(),
-		})
-		.then((response) => {
-			invoice = response.data.invoice;
-			invoiceId = response.data.invoice_id;
-			stage = 1;
-			loading = false;
-		})
-		.catch((error) => {
-			errToast($_("errors.invoiceGenerate"));
-			console.error(error);
-			loading = false;
-		});
+	validation.submit(form);
 };
 
 const handlePaymentSuccess = async () => {
@@ -99,7 +123,13 @@ const handleStatusCheckError = (error: unknown) => {
 			/>
 
 			{#if stage === 0}
-				<form class="space-y-4" on:submit={generateInvoice}>
+				<!-- `novalidate` like the other forms (#1404): errors are shown
+				     inline, never as browser bubbles. -->
+				<form
+					class="space-y-4 text-primary dark:text-white"
+					onsubmit={generateInvoice}
+					novalidate
+				>
 					<legend>
 						<p class="mb-2 text-xl font-bold text-primary dark:text-white">{$_("commentAdd.title")}</p>
 
@@ -109,17 +139,19 @@ const handleStatusCheckError = (error: unknown) => {
 						<p class="text-sm text-body dark:text-white">{$_("commentAdd.currentFee")}</p>
 					</legend>
 
-					<div>
-						<label for="comment" class="mb-2 block font-semibold text-primary dark:text-white"
-							>{$_("commentAdd.yourComment")}</label
-						>
-						<textarea
-							name="comment"
-							rows="3"
-							class="w-full rounded-2xl border-2 border-input p-3 transition-all focus:outline-link dark:bg-white/[0.15]"
-							bind:value={commentValue}
-						></textarea>
-					</div>
+					<form.Field name="comment">
+						{#snippet children(field)}
+							<TextArea
+								id="comment"
+								name="comment"
+								label={$_("commentAdd.yourComment")}
+								required
+								error={fieldError(field) && $_("commentAdd.pleaseEnterComment")}
+								{...inputProps(field)}
+								bind:element={commentInput}
+							/>
+						{/snippet}
+					</form.Field>
 
 					<PrimaryButton style="w-full rounded-xl p-3" disabled={loading} type="submit" {loading}>
 						{$_("commentAdd.submitButton")}

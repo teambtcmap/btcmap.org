@@ -120,6 +120,7 @@
 		"username": "Gebruikersnaam",
 		"password": "Wachtwoord",
 		"passwordHint": "Gebruik minstens {min} tekens.",
+		"passwordTooShort": "Gebruik minstens {min} tekens om verder te gaan.",
 		"submit": "Account aanmaken",
 		"creating": "Account aanmaken...",
 		"error": "Account aanmaken mislukt. De gebruikersnaam bestaat mogelijk al.",
@@ -360,7 +361,7 @@
 	},
 	"commentAdd": {
 		"title": "Reactie plaatsen",
-		"pleaseEnterComment": "Laat een reactie achter",
+		"pleaseEnterComment": "Schrijf eerst je reactie.",
 		"anonymousNote": "Alle reacties zijn momenteel anoniem. We vragen een kleine vergoeding in sats als maatregel tegen spam.",
 		"currentFee": "Huidige vergoeding: 500 sats",
 		"yourComment": "Jouw reactie",

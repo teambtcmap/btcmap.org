@@ -22,8 +22,9 @@ type Options<V, F extends string, E extends RuleErrors> = {
 	// Top to bottom as the form renders them.
 	order: readonly F[];
 	validate: (value: V) => E;
-	// The control each field's error focuses.
-	controls: Record<F, () => HTMLElement | null | undefined>;
+	// The control each field's error focuses; it gets the failed rule, for
+	// a field whose rules belong to different controls.
+	controls: Record<F, (rule: string) => HTMLElement | null | undefined>;
 };
 
 // What submit() needs of a form: any createForm() result fits, whatever
@@ -61,7 +62,9 @@ export const ruleValidation = <V, F extends string, E extends RuleErrors>(
 			},
 			onSubmitInvalid: () => {
 				const first = firstInvalid(options.order, flagged);
-				if (first) focusInvalid(options.controls[first]());
+				if (first) {
+					focusInvalid(options.controls[first](String(flagged[first])));
+				}
 			},
 		},
 		// The form's submit: use instead of form.handleSubmit(). Every submit

@@ -1,0 +1,54 @@
+import { expect, test } from '@playwright/test';
+
+import { descriptionAtFocus, ERROR_RED, recordDescriptionAtFocus } from './helpers';
+
+// The signup password states its length rule up front and a too-short one
+// is marked inline (#1411), like add-location's payment group (#1397):
+// the rule's own line turns into the error. No "Please lengthen this
+// text" bubble. The account endpoint is intercepted, so nothing is
+// created on production.
+const RULE = 'Use at least 8 characters.';
+const ERROR = 'Use at least 8 characters to continue.';
+
+test.describe('Signup — inline validation', () => {
+	test('a too-short password is marked on the field, not by the browser', async ({
+		page
+	}) => {
+		let posts = 0;
+		await page.route('**/v4/users**', async (route) => {
+			posts++;
+			await route.abort();
+		});
+		await page.goto('/signup');
+
+		const password = page.getByLabel('Password');
+		await expect(password).toBeVisible();
+		await expect(page.locator('form:has(#signup-password)')).toHaveAttribute(
+			'novalidate',
+			''
+		);
+		// The rule is the field's description before anyone submits.
+		await expect(password).toHaveAccessibleDescription(RULE);
+
+		await page.getByLabel('Username').fill('satoshi');
+		await password.fill('short');
+		await recordDescriptionAtFocus(password);
+		await page.getByRole('button', { name: 'Create account' }).click();
+
+		await expect(password).toBeFocused();
+		await expect(password).toHaveAttribute('aria-invalid', 'true');
+		await expect(password).toHaveAccessibleDescription(ERROR);
+		expect(await descriptionAtFocus(page)).toBe(ERROR);
+		await expect(password).toHaveCSS('border-top-color', ERROR_RED);
+		await expect(password).toHaveCSS('outline-color', ERROR_RED);
+		expect(posts).toBe(0);
+
+		// Still short: the error stays; long enough: the rule line returns.
+		await password.fill('shorter');
+		await expect(password).toHaveAccessibleDescription(ERROR);
+		await password.fill('long enough');
+		await expect(password).not.toHaveAttribute('aria-invalid', 'true');
+		await expect(password).toHaveAccessibleDescription(RULE);
+		expect(posts).toBe(0);
+	});
+});

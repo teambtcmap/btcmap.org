@@ -120,6 +120,7 @@
 		"username": "Username",
 		"password": "Password",
 		"passwordHint": "Use at least {min} characters.",
+		"passwordTooShort": "Use at least {min} characters to continue.",
 		"submit": "Create account",
 		"creating": "Creating account...",
 		"error": "Could not create account. The username may already be taken.",
@@ -360,7 +361,7 @@
 	},
 	"commentAdd": {
 		"title": "Add Comment",
-		"pleaseEnterComment": "Please enter a comment",
+		"pleaseEnterComment": "Write your comment first.",
 		"anonymousNote": "All comments are currently anonymous. We collect a small fee in sats as a spam protection measure.",
 		"currentFee": "Current fee: 500 sats",
 		"yourComment": "Your comment",
