@@ -1,13 +1,18 @@
 <script lang="ts">
+import { createForm } from "@tanstack/svelte-form";
 import axios from "axios";
-import DOMPurify from "dompurify";
 import { onMount } from "svelte";
 import { _ } from "svelte-i18n";
 
 import FormSuccess from "$components/FormSuccess.svelte";
-import Icon from "$components/Icon.svelte";
+import CaptchaField from "$components/form/CaptchaField.svelte";
+import FieldError from "$components/form/FieldError.svelte";
+import TextArea from "$components/form/TextArea.svelte";
 import PrimaryButton from "$components/PrimaryButton.svelte";
+import { fieldError, inputProps, ruleValidation } from "$lib/ruleValidation";
 import { errToast } from "$lib/utils";
+import type { VerifyInput } from "$lib/verifyValidation";
+import { validateVerification } from "$lib/verifyValidation";
 
 import { browser } from "$app/environment";
 
@@ -30,7 +35,7 @@ const fetchCaptcha = () => {
 		.get("/captcha")
 		.then((response) => {
 			captchaSecret = response.data.captchaSecret;
-			captchaContent = DOMPurify.sanitize(response.data.captcha);
+			captchaContent = response.data.captcha;
 		})
 		.catch((error) => {
 			errToast($_(`errors.captchaFetch`));
@@ -41,55 +46,83 @@ const fetchCaptcha = () => {
 		});
 };
 
-let accurate = $state(false);
-let updates = $state("");
-let verify = $state<HTMLTextAreaElement>();
+let accurateBox = $state<HTMLInputElement>();
+let methodInput = $state<HTMLTextAreaElement>();
 
 let submitted = $state(false);
 let submitting = $state(false);
 let submissionIssueNumber = $state<number>();
 
+// The report on TanStack Form (#1406) with /verify-location's rules
+// (#1407): `novalidate`, every failed field marked inline on submit, the
+// first focused. The box-or-updates rule rides on the box's field; the
+// updates field shows it too.
+const validation = ruleValidation({
+	order: ["accurate", "method", "captcha"],
+	validate: (value: VerifyInput) => {
+		const { confirmation, ...others } = validateVerification(value);
+		return confirmation ? { ...others, accurate: confirmation } : others;
+	},
+	controls: {
+		accurate: () => accurateBox,
+		method: () => methodInput,
+		captcha: () => captchaInput,
+	},
+});
+
+const form = createForm(() => ({
+	defaultValues: {
+		accurate: false,
+		changes: "",
+		method: "",
+		captcha: "",
+	} as VerifyInput,
+	...validation.options,
+	onSubmit: ({ value }) => {
+		submitting = true;
+
+		const communityUrl = `${window.location.origin}/community/${encodeURIComponent(communityAlias)}/merchants`;
+
+		axios
+			.post("/api/gitea/issue", {
+				type: "verify-community",
+				captchaSecret,
+				captchaTest: value.captcha,
+				honey: honeyInput?.value,
+				name: communityName,
+				communityUrl: communityUrl,
+				accurate: value.accurate ? "Yes" : "No",
+				updates: value.changes,
+				verified: value.method,
+			})
+			.then((response) => {
+				submissionIssueNumber = response.data.number;
+				submitted = true;
+			})
+			.catch((error) => {
+				if (error.response?.data?.message?.includes("Captcha")) {
+					errToast(error.response.data.message);
+				} else {
+					errToast($_(`errors.formSubmission`));
+				}
+
+				console.error(error);
+				submitting = false;
+			});
+	},
+}));
+const values = form.useSelector((state) => state.values);
+
 const submitForm = (event: SubmitEvent) => {
 	event.preventDefault();
-	submitting = true;
-
-	const communityUrl = `${window.location.origin}/community/${encodeURIComponent(communityAlias)}/merchants`;
-
-	axios
-		.post("/api/gitea/issue", {
-			type: "verify-community",
-			captchaSecret,
-			captchaTest: captchaInput?.value,
-			honey: honeyInput?.value,
-			name: communityName,
-			communityUrl: communityUrl,
-			accurate: accurate ? "Yes" : "No",
-			updates: updates ? updates : "",
-			verified: verify?.value,
-		})
-		.then((response) => {
-			submissionIssueNumber = response.data.number;
-			submitted = true;
-		})
-		.catch((error) => {
-			if (error.response?.data?.message?.includes("Captcha")) {
-				errToast(error.response.data.message);
-			} else {
-				errToast($_(`errors.formSubmission`));
-			}
-
-			console.error(error);
-			submitting = false;
-		});
+	validation.submit(form);
 };
 
 function resetForm() {
+	form.reset();
+	validation.reset();
 	submitted = false;
 	submitting = false;
-	accurate = false;
-	updates = "";
-	if (verify) verify.value = "";
-	if (captchaInput) captchaInput.value = "";
 	fetchCaptcha();
 }
 
@@ -111,7 +144,9 @@ onMount(async () => {
 			</p>
 		</div>
 
-		<form onsubmit={submitForm} class="w-full space-y-5 text-primary dark:text-white">
+		<!-- `novalidate`: the form reports its own errors inline (#1408)
+		     instead of the browser's bubbles. -->
+		<form onsubmit={submitForm} novalidate class="w-full space-y-5 text-primary dark:text-white">
 			<div>
 				<input
 					disabled
@@ -124,83 +159,92 @@ onMount(async () => {
 				/>
 			</div>
 
-			<div>
-				<div class="flex items-center space-x-2">
-					<label for="accurate" class="{!updates ? 'cursor-pointer' : ''} font-semibold"
-						>{$_(`verifyCommunity.accurateLabel`)}</label
-					>
-					<input
-						class="h-4 w-4 accent-link"
-						disabled={Boolean(updates)}
-						required={!updates}
-						type="checkbox"
-						id="accurate"
-						name="accurate"
-						bind:checked={accurate}
-					/>
-				</div>
-				<p class="text-sm dark:text-white/70">
-					{$_(`verifyCommunity.accurateHint`)}
-				</p>
-			</div>
-
-			<div>
-				<label for="updates" class="mb-2 block font-semibold"
-					>{$_(`verifyCommunity.updatesLabel`)} <span class="font-normal">{$_(`verifyCommunity.ifApplicable`)}</span></label
-				>
-				<textarea
-					disabled={accurate}
-					required={!accurate}
-					name="updates"
-					placeholder={$_(`verifyCommunity.updatesPlaceholder`)}
-					rows="3"
-					class="w-full rounded-2xl border-2 border-input bg-white p-3 placeholder-gray-500 transition-all focus:outline-link disabled:cursor-not-allowed disabled:bg-gray-100 disabled:text-gray-500 dark:bg-white/[0.15] dark:text-white dark:placeholder-gray-400 dark:disabled:bg-gray-700 dark:disabled:text-gray-400"
-					bind:value={updates}
-				></textarea>
-			</div>
-
-			<div>
-				<label for="verify" class="mb-2 block font-semibold">{$_(`verifyCommunity.verifyLabel`)}</label>
-				<textarea
-					required
-					name="verify"
-					placeholder={$_(`verifyCommunity.verifyPlaceholder`)}
-					rows="3"
-					class="w-full rounded-2xl border-2 border-input bg-white p-3 placeholder-gray-500 transition-all focus:outline-link disabled:cursor-not-allowed disabled:bg-gray-100 disabled:text-gray-500 dark:bg-white/[0.15] dark:text-white dark:placeholder-gray-400 dark:disabled:bg-gray-700 dark:disabled:text-gray-400"
-					bind:this={verify}
-				></textarea>
-			</div>
-
-			<div>
-				<div class="mb-2 flex items-center space-x-2">
-					<label for="captcha" class="font-semibold"
-						>{$_(`verifyCommunity.botProtection`)} <span class="font-normal">{$_(`verifyCommunity.caseSensitive`)}</span></label
-					>
-					{#if captchaSecret}
-						<button type="button" onclick={fetchCaptcha}>
-							<Icon type="fa" icon="arrows-rotate" w="16" h="16" />
-						</button>
-					{/if}
-				</div>
-				<div class="space-y-2">
-					<div class="flex items-center justify-center rounded-2xl border-2 border-input py-1">
-						{#if isCaptchaLoading}
-							<div class="h-[100px] w-[275px] animate-pulse bg-link/50"></div>
-						{:else}
-							{@html captchaContent}
+			<!-- One of the two is required: the box, or the updates below it.
+			     The rule's message sits under the box's label and describes
+			     both controls. -->
+			<form.Field name="accurate">
+				{#snippet children(field)}
+					{@const confirmation = fieldError(field)}
+					<div>
+						<div class="flex items-center space-x-2">
+							<label
+								for="accurate"
+								class="{!values.current.changes ? 'cursor-pointer' : ''} font-semibold"
+								>{$_(`verifyCommunity.accurateLabel`)}</label
+							>
+							<input
+								class="h-4 w-4 accent-link"
+								disabled={Boolean(values.current.changes)}
+								required={!values.current.changes}
+								type="checkbox"
+								id="accurate"
+								name="accurate"
+								aria-invalid={confirmation ? 'true' : undefined}
+								aria-describedby={confirmation ? 'confirmation-error' : undefined}
+								checked={field.state.value}
+								onchange={(e) => field.handleChange(e.currentTarget.checked)}
+								bind:this={accurateBox}
+							/>
+						</div>
+						{#if confirmation}
+							<FieldError
+								id="confirmation-error"
+								message={$_(`verifyCommunity.confirmationRequired`)}
+								class="mt-1"
+							/>
 						{/if}
+						<p class="text-sm dark:text-white/70">
+							{$_(`verifyCommunity.accurateHint`)}
+						</p>
 					</div>
-					<input
-						disabled={!captchaSecret}
+
+					<form.Field name="changes">
+						{#snippet children(changes)}
+							<TextArea
+								id="updates"
+								name="updates"
+								label={$_(`verifyCommunity.updatesLabel`)}
+								labelNote={$_(`verifyCommunity.ifApplicable`)}
+								disabled={field.state.value}
+								required={!field.state.value}
+								placeholder={$_(`verifyCommunity.updatesPlaceholder`)}
+								aria-invalid={confirmation ? 'true' : undefined}
+								aria-describedby={confirmation ? 'confirmation-error' : undefined}
+								{...inputProps(changes)}
+							/>
+						{/snippet}
+					</form.Field>
+				{/snippet}
+			</form.Field>
+
+			<form.Field name="method">
+				{#snippet children(field)}
+					<TextArea
+						id="verify"
+						name="verify"
+						label={$_(`verifyCommunity.verifyLabel`)}
 						required
-						type="text"
-						name="captcha"
-						placeholder={$_(`verifyCommunity.captchaPlaceholder`)}
-						class="w-full rounded-2xl border-2 border-input bg-white p-3 placeholder-gray-500 transition-all focus:outline-link disabled:cursor-not-allowed disabled:bg-gray-100 disabled:text-gray-500 dark:bg-white/[0.15] dark:text-white dark:placeholder-gray-400 dark:disabled:bg-gray-700 dark:disabled:text-gray-400"
-						bind:this={captchaInput}
+						placeholder={$_(`verifyCommunity.verifyPlaceholder`)}
+						error={fieldError(field) && $_(`verifyCommunity.methodRequired`)}
+						{...inputProps(field)}
+						bind:element={methodInput}
 					/>
-				</div>
-			</div>
+				{/snippet}
+			</form.Field>
+
+			<form.Field name="captcha">
+				{#snippet children(field)}
+					<CaptchaField
+						content={captchaContent}
+						loading={isCaptchaLoading}
+						onrefresh={fetchCaptcha}
+						disabled={!captchaSecret}
+						invalid={!!fieldError(field)}
+						{...inputProps(field)}
+						bind:element={captchaInput}
+					/>
+				{/snippet}
+			</form.Field>
 
 			<input
 				type="text"
