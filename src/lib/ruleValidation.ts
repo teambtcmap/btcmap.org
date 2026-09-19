@@ -26,10 +26,19 @@ type Options<V, F extends string, E extends RuleErrors> = {
 	controls: Record<F, () => HTMLElement | null | undefined>;
 };
 
+// What submit() needs of a form: any createForm() result fits, whatever
+// its type parameters.
+type SubmittableForm = {
+	validate: (cause: "submit") => unknown;
+	handleSubmit: () => unknown;
+};
+
 export const ruleValidation = <V, F extends string, E extends RuleErrors>(
 	options: Options<V, F, E>,
 ) => {
 	let flagged = {} as E;
+	// Set while submit() runs its own full check (see there).
+	let checkingAll = false;
 	return {
 		// Spread into createForm's options.
 		options: {
@@ -41,9 +50,10 @@ export const ruleValidation = <V, F extends string, E extends RuleErrors>(
 			validators: {
 				onDynamic: ({ value, formApi }: { value: V; formApi: AnyFormApi }) => {
 					const current = options.validate(value);
-					flagged = formApi.state.isSubmitting
-						? current
-						: recheckFlagged(flagged, current);
+					flagged =
+						checkingAll || formApi.state.isSubmitting
+							? current
+							: recheckFlagged(flagged, current);
 					return firstInvalid(options.order, flagged)
 						? { fields: flagged }
 						: undefined;
@@ -53,6 +63,21 @@ export const ruleValidation = <V, F extends string, E extends RuleErrors>(
 				const first = firstInvalid(options.order, flagged);
 				if (first) focusInvalid(options.controls[first]());
 			},
+		},
+		// The form's submit: use instead of form.handleSubmit(). Every submit
+		// checks every rule, but TanStack only re-runs a form-level validator
+		// on submit while no field shows an error — with one still showing,
+		// it stops at the field check, and a field that went quiet
+		// mid-correction would never be flagged again. So run the full check
+		// first, then hand over (onSubmit, or onSubmitInvalid and focus).
+		submit: (form: SubmittableForm) => {
+			checkingAll = true;
+			try {
+				form.validate("submit");
+			} finally {
+				checkingAll = false;
+			}
+			return form.handleSubmit();
 		},
 		// Alongside form.reset(): nothing is flagged anymore.
 		reset: () => {

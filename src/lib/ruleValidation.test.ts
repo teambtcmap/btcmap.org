@@ -1,4 +1,5 @@
 import type { AnyFieldApi, AnyFormApi } from "@tanstack/svelte-form";
+import { FieldApi, FormApi } from "@tanstack/svelte-form";
 import { describe, expect, it, vi } from "vitest";
 
 import { fieldError, inputProps, ruleValidation } from "./ruleValidation";
@@ -79,6 +80,50 @@ describe("ruleValidation", () => {
 		run({ name: "", email: "" }, submitting);
 		validation.reset();
 		expect(run({ name: "", email: "" }, editing)).toBe(undefined);
+	});
+});
+
+describe("ruleValidation on a real form", () => {
+	it("re-checks every rule on each submit, even with errors still showing", async () => {
+		const validation = ruleValidation({
+			order: ["name", "email"],
+			validate: rules,
+			controls: { name: () => null, email: () => null },
+		});
+		const onSubmit = vi.fn();
+		const form = new FormApi({
+			defaultValues: { name: "", email: "" } as Values,
+			...validation.options,
+			onSubmit,
+		});
+		form.mount();
+		for (const name of ["name", "email"] as const) {
+			new FieldApi({ form, name }).mount();
+		}
+		const errorsOf = (name: "name" | "email") =>
+			form.getFieldMeta(name)?.errors ?? [];
+
+		await validation.submit(form);
+		expect(errorsOf("name")).toEqual(["required"]);
+		expect(errorsOf("email")).toEqual(["required"]);
+
+		// Fixed, then broken again mid-correction: quiet until the next submit.
+		form.setFieldValue("name", "Ada");
+		expect(errorsOf("name")).toEqual([]);
+		form.setFieldValue("name", "");
+		expect(errorsOf("name")).toEqual([]);
+
+		// The email still shows its error; TanStack alone would stop at the
+		// field check and never re-run the rules. The next submit flags both.
+		await validation.submit(form);
+		expect(errorsOf("name")).toEqual(["required"]);
+		expect(errorsOf("email")).toEqual(["required"]);
+		expect(onSubmit).not.toHaveBeenCalled();
+
+		form.setFieldValue("name", "Ada");
+		form.setFieldValue("email", "ada@example.com");
+		await validation.submit(form);
+		expect(onSubmit).toHaveBeenCalledOnce();
 	});
 });
 
