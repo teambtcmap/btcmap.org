@@ -15,16 +15,19 @@ import { errToast } from "$lib/utils";
 
 import { invalidateAll } from "$app/navigation";
 
-export let open: boolean = false;
-export let onOpenChange: (value: boolean) => void = () => {};
-export let elementId: MerchantPageData["id"] | undefined;
+type Props = {
+	open?: boolean;
+	onOpenChange?: (value: boolean) => void;
+	elementId: MerchantPageData["id"] | undefined;
+};
+let { open = false, onOpenChange = () => {}, elementId }: Props = $props();
 
-let stage = 0;
-let commentValue: string = "";
-let invoice = "";
-let invoiceId = "";
-let loading = false;
-let commentComplete = false;
+let stage = $state(0);
+let commentValue = $state("");
+let invoice = $state("");
+let invoiceId = $state("");
+let loading = $state(false);
+let commentComplete = $state(false);
 const closeModal = () => {
 	if (commentComplete) {
 		invalidateAll();
@@ -99,7 +102,7 @@ const handleStatusCheckError = (error: unknown) => {
 			/>
 
 			{#if stage === 0}
-				<form class="space-y-4" on:submit={generateInvoice}>
+				<form class="space-y-4" onsubmit={generateInvoice}>
 					<legend>
 						<p class="mb-2 text-xl font-bold text-primary dark:text-white">{$_("commentAdd.title")}</p>
 
