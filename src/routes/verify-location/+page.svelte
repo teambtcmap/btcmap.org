@@ -270,8 +270,10 @@ onMount(async () => {
 				bind:value={outdated}
 			/>
 
+			<!-- Not id="verify": the page's <section id="verify"> comes first,
+			     and the label would name the section instead. -->
 			<TextArea
-				id="verify"
+				id="verify-method"
 				name="verify"
 				label={$_('verifyLocation.verifyLabel')}
 				disabled={!captchaSecret || !data}
