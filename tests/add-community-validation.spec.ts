@@ -82,6 +82,8 @@ test.describe('Add Community — inline validation', () => {
 		// the optional tag reads once, not "((optional))".
 		await expect(page.getByLabel('Public Contact')).toHaveAttribute('name', 'contact');
 		await expect(page.locator('label[for="icon"]')).toHaveText('Icon URL (optional)');
+		// A URL field, for the keyboard and autofill (the form is novalidate).
+		await expect(page.getByLabel('Icon URL')).toHaveAttribute('type', 'url');
 
 		const search = page.getByLabel('Select Location');
 		await recordDescriptionAtFocus(search);

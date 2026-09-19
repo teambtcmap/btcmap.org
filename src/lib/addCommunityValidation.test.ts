@@ -38,7 +38,7 @@ describe("validateCommunity", () => {
 		});
 	});
 
-	it("takes an optional icon only as an http(s) address", () => {
+	it("takes an optional icon only as an https address", () => {
 		expect(
 			validateCommunity({ ...valid, icon: "https://example.com/icon.png" }),
 		).toEqual({});
@@ -46,6 +46,9 @@ describe("validateCommunity", () => {
 			validateCommunity({ ...valid, icon: " https://example.com/icon.png " }),
 		).toEqual({});
 		for (const icon of [
+			// btcmap.org is served over https: a plain-http image is mixed
+			// content, upgraded or blocked by the browser.
+			"http://example.com/icon.png",
 			"icon.png",
 			"ftp://example.com/icon.png",
 			"javascript:alert(1)",

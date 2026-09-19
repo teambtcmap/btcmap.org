@@ -27,8 +27,21 @@ test.describe('Signup — inline validation', () => {
 			'novalidate',
 			''
 		);
-		// The rule is the field's description before anyone submits.
+		// The rule is the field's description before anyone submits, and it
+		// sits where every form's messages sit: under the label, above the
+		// field.
 		await expect(password).toHaveAccessibleDescription(RULE);
+		const label = page.locator('label[for="signup-password"]');
+		const rule = page.locator('#signup-password-rule');
+		const underLabel = async () => {
+			const [l, r, p] = await Promise.all([
+				label.boundingBox(),
+				rule.boundingBox(),
+				password.boundingBox()
+			]);
+			return r!.y >= l!.y + l!.height && r!.y + r!.height <= p!.y;
+		};
+		expect(await underLabel()).toBe(true);
 
 		await page.getByLabel('Username').fill('satoshi');
 		await password.fill('short');
@@ -41,6 +54,9 @@ test.describe('Signup — inline validation', () => {
 		expect(await descriptionAtFocus(page)).toBe(ERROR);
 		await expect(password).toHaveCSS('border-top-color', ERROR_RED);
 		await expect(password).toHaveCSS('outline-color', ERROR_RED);
+		// The error is that same line, still under the label.
+		await expect(rule).toHaveText(ERROR);
+		expect(await underLabel()).toBe(true);
 		expect(posts).toBe(0);
 
 		// Still short: the error stays; long enough: the rule line returns.
