@@ -23,7 +23,7 @@ let passwordInput = $state<HTMLInputElement>();
 let loading = $state(false);
 
 // Signup on TanStack Form (#1406). A too-short password on submit (#1411):
-// the rule's own line under the field turns into the error, like
+// the rule's own line under the label turns into the error, like
 // add-location's payment group (#1397), instead of the browser's minlength
 // bubble. It stays while still short and clears once long enough.
 type SignupValues = { username: string; password: string };
@@ -103,18 +103,21 @@ function handleSubmit(event: SubmitEvent) {
 				{...inputProps(field)}
 				bind:element={passwordInput}
 			>
-				<!-- The rule describes the field from the start; a rejected
+				<!-- The rule describes the field from the start and sits where
+				     every form's messages sit, under the label; a rejected
 				     submit turns the same line into the error. -->
-				<p
-					id="signup-password-rule"
-					class="mt-1 text-xs {tooShort
-						? 'font-semibold text-error'
-						: 'text-body dark:text-white/50'}"
-				>
-					{tooShort
-						? $_("signup.passwordTooShort", { values: { min: PASSWORD_MIN_LENGTH } })
-						: $_("signup.passwordHint", { values: { min: PASSWORD_MIN_LENGTH } })}
-				</p>
+				{#snippet hint()}
+					<p
+						id="signup-password-rule"
+						class="-mt-1 mb-2 text-sm {tooShort
+							? 'font-semibold text-error'
+							: 'text-body dark:text-white/50'}"
+					>
+						{tooShort
+							? $_("signup.passwordTooShort", { values: { min: PASSWORD_MIN_LENGTH } })
+							: $_("signup.passwordHint", { values: { min: PASSWORD_MIN_LENGTH } })}
+					</p>
+				{/snippet}
 			</TextField>
 		{/snippet}
 	</form.Field>

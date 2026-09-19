@@ -355,7 +355,7 @@ onMount(async () => {
 						name="icon"
 						label={$_('addCommunityForm.iconLabel')}
 						optional
-						inputmode="url"
+						type="url"
 						disabled={!captchaSecret}
 						placeholder={$_('addCommunityForm.iconPlaceholder')}
 						error={fieldError(field) && $_('addCommunityForm.iconInvalid')}

@@ -1,5 +1,4 @@
 import { firstInvalid } from "$lib/formValidation";
-import { safeHttpUrl } from "$lib/safeUrl";
 
 // /communities/add's rules (#1409). The page runs `novalidate` and checks
 // these on submit instead, so every field reports its error inline, the
@@ -40,13 +39,24 @@ export const firstInvalidCommunityField = (
 	errors: CommunityErrors,
 ): CommunityField | undefined => firstInvalid(COMMUNITY_FIELDS, errors);
 
+// The icon ends up as an image on btcmap.org, which is served over https:
+// a plain-http image would be mixed content, upgraded or blocked by the
+// browser, so only https is accepted.
+const isHttpsUrl = (value: string): boolean => {
+	try {
+		return new URL(value).protocol === "https:";
+	} catch {
+		return false;
+	}
+};
+
 export const validateCommunity = (input: CommunityInput): CommunityErrors => {
 	const errors: CommunityErrors = {};
 	if (!input.locationSelected) errors.location = "required";
 	if (!input.name.trim()) errors.name = "required";
-	// Optional, but it ends up as an image source: http(s) only.
+	// Optional.
 	const icon = input.icon.trim();
-	if (icon && !safeHttpUrl(icon)) errors.icon = "invalid";
+	if (icon && !isHttpsUrl(icon)) errors.icon = "invalid";
 	if (!input.socials.trim()) errors.socials = "required";
 	if (!input.contact.trim()) errors.contact = "required";
 	if (!input.captcha.trim()) errors.captcha = "required";
