@@ -262,7 +262,7 @@
 	},
 	"commentAdd": {
 		"title": "Ajouter un commentaire",
-		"pleaseEnterComment": "Veuillez saisir un commentaire",
+		"pleaseEnterComment": "Rédigez d'abord votre commentaire.",
 		"anonymousNote": "Tous les commentaires sont actuellement anonymes. Nous percevons une petite somme en sats comme mesure anti-spam.",
 		"currentFee": "Frais actuels : 500 sats",
 		"yourComment": "Votre commentaire",

@@ -262,7 +262,7 @@
 	},
 	"commentAdd": {
 		"title": "Kommentar hinzufügen",
-		"pleaseEnterComment": "Bitte gib einen Kommentar ein",
+		"pleaseEnterComment": "Schreib zuerst deinen Kommentar.",
 		"anonymousNote": "Alle Kommentare sind derzeit anonym. Wir erheben eine kleine Gebühr in Sats als Spam-Schutz.",
 		"currentFee": "Aktuelle Gebühr: 500 Sats",
 		"yourComment": "Dein Kommentar",

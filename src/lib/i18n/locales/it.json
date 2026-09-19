@@ -360,7 +360,7 @@
 	},
 	"commentAdd": {
 		"title": "Aggiungi Commento",
-		"pleaseEnterComment": "Inserisci un commento",
+		"pleaseEnterComment": "Scrivi prima il tuo commento.",
 		"anonymousNote": "Tutti i commenti sono attualmente anonimi. Raccogliamo una piccola commissione in sats come misura di protezione dallo spam.",
 		"currentFee": "Commissione attuale: 500 sats",
 		"yourComment": "Il tuo commento",

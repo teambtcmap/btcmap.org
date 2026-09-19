@@ -262,7 +262,7 @@
 	},
 	"commentAdd": {
 		"title": "Adicionar Comentário",
-		"pleaseEnterComment": "Por favor, digite um comentário",
+		"pleaseEnterComment": "Escreva seu comentário primeiro.",
 		"anonymousNote": "Todos os comentários são atualmente anônimos. Cobramos uma pequena taxa em sats como medida de proteção contra spam.",
 		"currentFee": "Taxa atual: 500 sats",
 		"yourComment": "Seu comentário",

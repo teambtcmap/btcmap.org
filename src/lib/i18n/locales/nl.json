@@ -360,7 +360,7 @@
 	},
 	"commentAdd": {
 		"title": "Reactie plaatsen",
-		"pleaseEnterComment": "Laat een reactie achter",
+		"pleaseEnterComment": "Schrijf eerst je reactie.",
 		"anonymousNote": "Alle reacties zijn momenteel anoniem. We vragen een kleine vergoeding in sats als maatregel tegen spam.",
 		"currentFee": "Huidige vergoeding: 500 sats",
 		"yourComment": "Jouw reactie",
