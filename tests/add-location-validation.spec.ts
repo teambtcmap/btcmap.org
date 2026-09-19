@@ -1,7 +1,15 @@
 import type { Locator, Page } from '@playwright/test';
 import { expect, test } from '@playwright/test';
 
-import { MARKER_LOAD_TIMEOUT, stubMapData, stubReverseGeocode } from './helpers';
+import {
+	descriptionAtFocus,
+	ERROR_RED,
+	MARKER_LOAD_TIMEOUT,
+	recordDescriptionAtFocus,
+	stubCaptcha,
+	stubMapData,
+	stubReverseGeocode
+} from './helpers';
 
 // One validation style for every field (#1404): the form runs
 // `novalidate` and a rejected Review marks each invalid field inline — an
@@ -9,11 +17,6 @@ import { MARKER_LOAD_TIMEOUT, stubMapData, stubReverseGeocode } from './helpers'
 // field's accessible description before focus lands on the first one. No
 // native bubbles, no toasts. Hermetic like the other add-location specs.
 const PIN = '/map?add=form#17/42.2762511/42.7024218';
-
-type FocusProbe = { __descAtFocus?: string };
-
-// The theme's `error` colour (#DF3C3C, tailwind.config.js).
-const ERROR_RED = 'rgb(223, 60, 60)';
 
 const openForm = async (page: Page) => {
 	await stubMapData(page);
@@ -33,26 +36,6 @@ const fillValid = async (page: Page) => {
 	await page.locator('#contact').fill('owner@example.com');
 };
 
-// Screen readers read a field's description as focus lands, not later
-// changes — so record it from the focus event itself.
-const recordDescriptionAtFocus = async (field: Locator) => {
-	await field.evaluate((el) => {
-		el.addEventListener(
-			'focus',
-			() => {
-				(window as unknown as FocusProbe).__descAtFocus = (
-					el.getAttribute('aria-describedby') ?? ''
-				)
-					.split(/\s+/)
-					.filter(Boolean)
-					.map((id) => document.getElementById(id)?.textContent?.trim() ?? '')
-					.join(' ');
-			},
-			{ once: true }
-		);
-	});
-};
-
 const clickReview = (page: Page) =>
 	page.getByRole('button', { name: 'Review & submit' }).click();
 
@@ -61,9 +44,7 @@ const expectRejectedAt = async (page: Page, field: Locator, message: string) => 
 	await expect(field).toBeFocused();
 	await expect(field).toHaveAttribute('aria-invalid', 'true');
 	await expect(field).toHaveAccessibleDescription(message);
-	expect(
-		await page.evaluate(() => (window as unknown as FocusProbe).__descAtFocus)
-	).toBe(message);
+	expect(await descriptionAtFocus(page)).toBe(message);
 	// Red while focused too: the focus ring mustn't paint over the error
 	// border with the link colour.
 	await expect(field).toHaveCSS('border-top-color', ERROR_RED);
@@ -300,17 +281,7 @@ test.describe('Add Location — inline validation', () => {
 	test('a missing captcha answer is reported on the field, and nothing is sent', async ({
 		page
 	}) => {
-		await page.route('**/captcha', async (route) => {
-			await route.fulfill({
-				status: 200,
-				contentType: 'application/json',
-				body: JSON.stringify({
-					captcha:
-						'<svg xmlns="http://www.w3.org/2000/svg" width="275" height="100"></svg>',
-					captchaSecret: 'test-captcha-secret'
-				})
-			});
-		});
+		await stubCaptcha(page);
 		let submits = 0;
 		await page.route('**/api/submit-place', async (route) => {
 			submits++;
@@ -342,9 +313,7 @@ test.describe('Add Location — inline validation', () => {
 		);
 		await expect(captcha).toHaveCSS('border-top-color', ERROR_RED);
 		await expect(captcha).toHaveCSS('outline-color', ERROR_RED);
-		expect(
-			await page.evaluate(() => (window as unknown as FocusProbe).__descAtFocus)
-		).toBe('Enter the characters from the image.');
+		expect(await descriptionAtFocus(page)).toBe('Enter the characters from the image.');
 		expect(await page.locator('[data-sonner-toast]').count()).toBe(0);
 		expect(submits).toBe(0);
 
