@@ -12,8 +12,9 @@ import { _ } from "$lib/i18n";
 // forms wear this field too. Data flow follows the input type: text and
 // password support two-way `bind:value` (auth validation reads the value
 // reactively), every other type is read through the element ref —
-// which also keeps the legacy imperative patterns (the address prefill's
-// direct DOM writes) working unchanged. Rest props flow to the input
+// which also keeps the legacy imperative patterns working unchanged; a
+// form library can still drive them one way through `value` (#1420).
+// Rest props flow to the input
 // (required, disabled, placeholder, minlength, autocomplete, …);
 // `hint` renders between label and input, `children` below. `error` is
 // the form's own validation message (#1404): shown under the label, it
@@ -112,6 +113,7 @@ const inputClasses = $derived(
 		<input
 			{id}
 			{type}
+			{value}
 			bind:this={element}
 			aria-invalid={invalid}
 			aria-describedby={describedBy}
