@@ -27,7 +27,7 @@ export type CommunityErrors = {
 export type CommunityField = keyof CommunityErrors;
 
 // Top to bottom as the page renders them.
-const FIELD_ORDER: CommunityField[] = [
+export const COMMUNITY_FIELDS: CommunityField[] = [
 	"location",
 	"name",
 	"icon",
@@ -38,7 +38,7 @@ const FIELD_ORDER: CommunityField[] = [
 
 export const firstInvalidCommunityField = (
 	errors: CommunityErrors,
-): CommunityField | undefined => firstInvalid(FIELD_ORDER, errors);
+): CommunityField | undefined => firstInvalid(COMMUNITY_FIELDS, errors);
 
 export const validateCommunity = (input: CommunityInput): CommunityErrors => {
 	const errors: CommunityErrors = {};

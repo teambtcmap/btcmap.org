@@ -13,17 +13,12 @@ import TextField from "$components/form/TextField.svelte";
 import HeaderPlaceholder from "$components/layout/HeaderPlaceholder.svelte";
 import PrimaryButton from "$components/PrimaryButton.svelte";
 import TextLink from "$components/TextLink.svelte";
-import type {
-	CommunityErrors,
-	CommunityField,
-	CommunityInput,
-} from "$lib/addCommunityValidation";
 import {
-	firstInvalidCommunityField,
+	COMMUNITY_FIELDS,
 	validateCommunity,
 } from "$lib/addCommunityValidation";
+import { createValidation } from "$lib/createValidation.svelte";
 import { fieldBorderClasses } from "$lib/fieldStyles";
-import { focusInvalid, recheckFlagged } from "$lib/formValidation";
 import { theme } from "$lib/theme";
 import type { NominatimResponse } from "$lib/types";
 import { errToast, successToast, warningToast } from "$lib/utils";
@@ -83,38 +78,28 @@ let socialsInput = $state<HTMLTextAreaElement>();
 let contactInput = $state<HTMLInputElement>();
 let captchaInput = $state<HTMLInputElement>();
 
-// The application's inline errors (#1409): set by a rejected submit, one
-// entry per invalid field. The form runs `novalidate`, so these are the
-// only validation UI — no browser bubbles, and no toast for a missing
-// location.
-let errors = $state<CommunityErrors>({});
-
-const readInput = (): CommunityInput => ({
-	locationSelected: selected,
-	name,
-	icon,
-	socials: socialLinks,
-	contact,
-	captcha: captchaValue,
+// The application's inline errors (#1409).
+const validation = createValidation({
+	order: COMMUNITY_FIELDS,
+	validate: () =>
+		validateCommunity({
+			locationSelected: selected,
+			name,
+			icon,
+			socials: socialLinks,
+			contact,
+			captcha: captchaValue,
+		}),
+	controls: {
+		location: () => searchInput,
+		name: () => nameInput,
+		icon: () => iconInput,
+		socials: () => socialsInput,
+		contact: () => contactInput,
+		captcha: () => captchaInput,
+	},
 });
-
-// Wired to every validated field: a no-op until a submit has flagged
-// something.
-const recheck = () => {
-	if (!firstInvalidCommunityField(errors)) return;
-	errors = recheckFlagged(errors, validateCommunity(readInput()));
-};
-
-// The control that takes focus for each invalid field; a missing location
-// lands on the search.
-const invalidControl: Record<CommunityField, () => HTMLElement | undefined> = {
-	location: () => searchInput,
-	name: () => nameInput,
-	icon: () => iconInput,
-	socials: () => socialsInput,
-	contact: () => contactInput,
-	captcha: () => captchaInput,
-};
+const recheck = validation.recheck;
 
 const searchLocation = () => {
 	searchLoading = true;
@@ -153,12 +138,7 @@ const setLocation = (area: { display_name: string }) => {
 
 const submitForm = (event: SubmitEvent) => {
 	event.preventDefault();
-	// Every invalid field is marked at once; the first takes focus.
-	errors = validateCommunity(readInput());
-	const first = firstInvalidCommunityField(errors);
-	if (first) {
-		focusInvalid(invalidControl[first]());
-	} else {
+	if (validation.check()) {
 		submitting = true;
 
 		axios
@@ -194,7 +174,7 @@ const submitForm = (event: SubmitEvent) => {
 
 const formReset = () => {
 	// Reset state variables
-	errors = {};
+	validation.reset();
 	selected = false;
 	submitted = false;
 	submitting = false;
@@ -271,7 +251,7 @@ onMount(async () => {
 		<form onsubmit={submitForm} novalidate class="w-full space-y-5 text-primary dark:text-white">
 			<div class="space-y-2">
 				<label for="location-picker" class="block font-semibold">{$_('addCommunityForm.locationLabel')}</label>
-				{#if errors.location}
+				{#if validation.errors.location}
 					<FieldError
 						id="location-error"
 						message={$_('addCommunityForm.locationError')}
@@ -300,10 +280,10 @@ onMount(async () => {
 						name="location"
 						placeholder={$_('addCommunityForm.locationPlaceholder')}
 						required
-						aria-invalid={errors.location ? 'true' : undefined}
-						aria-describedby={errors.location ? 'location-error' : undefined}
+						aria-invalid={validation.errors.location ? 'true' : undefined}
+						aria-describedby={validation.errors.location ? 'location-error' : undefined}
 						class="w-full rounded-2xl border-2 {fieldBorderClasses(
-							!!errors.location
+							!!validation.errors.location
 						)} p-3 transition-all disabled:cursor-not-allowed disabled:bg-gray-100 disabled:text-gray-500 dark:bg-white/[0.15] dark:disabled:bg-gray-700 dark:disabled:text-gray-400"
 						bind:value={searchQuery}
 						bind:this={searchInput}
@@ -352,7 +332,7 @@ onMount(async () => {
 				disabled={!captchaSecret}
 				required
 				placeholder={$_('addCommunityForm.namePlaceholder')}
-				error={errors.name && $_('addCommunityForm.nameRequired')}
+				error={validation.errors.name && $_('addCommunityForm.nameRequired')}
 				oninput={recheck}
 				bind:value={name}
 				bind:element={nameInput}
@@ -366,7 +346,7 @@ onMount(async () => {
 				inputmode="url"
 				disabled={!captchaSecret}
 				placeholder={$_('addCommunityForm.iconPlaceholder')}
-				error={errors.icon && $_('addCommunityForm.iconInvalid')}
+				error={validation.errors.icon && $_('addCommunityForm.iconInvalid')}
 				oninput={recheck}
 				bind:value={icon}
 				bind:element={iconInput}
@@ -407,7 +387,7 @@ onMount(async () => {
 				disabled={!captchaSecret}
 				required
 				placeholder={$_('addCommunityForm.socialsPlaceholder')}
-				error={errors.socials && $_('addCommunityForm.socialsRequired')}
+				error={validation.errors.socials && $_('addCommunityForm.socialsRequired')}
 				oninput={recheck}
 				bind:value={socialLinks}
 				bind:element={socialsInput}
@@ -424,7 +404,7 @@ onMount(async () => {
 				disabled={!captchaSecret}
 				required
 				placeholder={$_('addCommunityForm.contactPlaceholder')}
-				error={errors.contact && $_('addCommunityForm.contactRequired')}
+				error={validation.errors.contact && $_('addCommunityForm.contactRequired')}
 				oninput={recheck}
 				bind:value={contact}
 				bind:element={contactInput}
@@ -454,7 +434,7 @@ onMount(async () => {
 				loading={isCaptchaLoading}
 				onrefresh={fetchCaptcha}
 				disabled={!captchaSecret}
-				invalid={!!errors.captcha}
+				invalid={!!validation.errors.captcha}
 				oninput={recheck}
 				bind:value={captchaValue}
 				bind:element={captchaInput}
