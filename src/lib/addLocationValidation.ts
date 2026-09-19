@@ -1,3 +1,4 @@
+import { firstInvalid } from "$lib/formValidation";
 import type { PaymentMethod } from "$lib/map/paymentMethodFilter";
 
 // The add-location form's edit-step rules (#1404). The form runs with
@@ -34,7 +35,7 @@ export type DetailsField = keyof DetailsErrors;
 
 // Top to bottom as the form renders them: the first invalid field in
 // this order is the one that takes focus.
-const FIELD_ORDER: DetailsField[] = [
+export const DETAILS_FIELDS: DetailsField[] = [
 	"name",
 	"address",
 	"category",
@@ -45,23 +46,7 @@ const FIELD_ORDER: DetailsField[] = [
 
 export const firstInvalidField = (
 	errors: DetailsErrors,
-): DetailsField | undefined => FIELD_ORDER.find((field) => errors[field]);
-
-// As the user corrects the form, what the last Review flagged is
-// re-checked: an error stays only while the same rule still fails. It
-// clears once the field is valid — and also when a different rule fails
-// instead (typing into an empty email, picking Other after a missing
-// category): the user is mid-correction, so the new rule waits for the
-// next Review, like fields that weren't flagged.
-export const recheckFlagged = (
-	flagged: DetailsErrors,
-	current: DetailsErrors,
-): DetailsErrors =>
-	Object.fromEntries(
-		FIELD_ORDER.filter(
-			(field) => flagged[field] && current[field] === flagged[field],
-		).map((field) => [field, flagged[field]]),
-	);
+): DetailsField | undefined => firstInvalid(DETAILS_FIELDS, errors);
 
 // The HTML spec's own "valid email address" rule — what the email input
 // enforced before the form went `novalidate`.

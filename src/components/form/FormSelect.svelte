@@ -18,6 +18,8 @@ export type FormSelectOption = {
 import type { Snippet } from "svelte";
 import type { HTMLSelectAttributes } from "svelte/elements";
 
+import { fieldBorderClasses } from "$lib/fieldStyles";
+
 type Props = {
 	value?: string;
 	element?: HTMLSelectElement;
@@ -84,9 +86,7 @@ function partition(opts: FormSelectOption[]) {
 	aria-describedby={ariaDescribedby}
 	bind:value
 	{onchange}
-	class="w-full rounded-2xl border-2 {invalid
-		? 'border-error focus:outline-error'
-		: 'border-input focus:outline-link'} bg-white px-2 py-3 text-primary transition-all
+	class="w-full rounded-2xl border-2 {fieldBorderClasses(invalid)} bg-white px-2 py-3 text-primary transition-all
 		disabled:cursor-not-allowed disabled:bg-gray-100 disabled:text-gray-500
 		dark:bg-white/[0.15] dark:text-white dark:disabled:bg-gray-700 dark:disabled:text-gray-400
 		{style}"
