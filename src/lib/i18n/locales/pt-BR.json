@@ -837,9 +837,8 @@
 		"updatesPlaceholder": "Descreva quais informações precisam ser atualizadas (links de contato, descrição, etc.)",
 		"verifyLabel": "Como você verificou isso?",
 		"verifyPlaceholder": "Visitei o site deles, participei de um meetup, entrei em contato diretamente, etc.",
-		"botProtection": "Proteção contra bots",
-		"caseSensitive": "(diferencia maiúsculas)",
-		"captchaPlaceholder": "Por favor digite o texto do captcha.",
+		"confirmationRequired": "Marque a caixa ou descreva o que precisa ser atualizado.",
+		"methodRequired": "Conte como você verificou isso.",
 		"submitReport": "Enviar Relatório",
 		"successType": "Relatório",
 		"successMessage": "Obrigado por verificar as informações desta comunidade. Analisaremos seu relatório e atualizaremos o mais rápido possível."

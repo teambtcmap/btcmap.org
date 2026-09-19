@@ -955,9 +955,8 @@
 		"updatesPlaceholder": "Geef aan welke informatie moet worden bijgewerkt (contactlinks, omschrijving, enzovoort)",
 		"verifyLabel": "Hoe heb je dit gecontroleerd?",
 		"verifyPlaceholder": "Bijvoorbeeld: hun website bezocht, een meetup bijgewoond of rechtstreeks contact met ze opgenomen",
-		"botProtection": "Botbeveiliging",
-		"caseSensitive": "(hoofdlettergevoelig)",
-		"captchaPlaceholder": "Vul de captchatekens in",
+		"confirmationRequired": "Vink het vakje aan of beschrijf wat er bijgewerkt moet worden.",
+		"methodRequired": "Vertel ons hoe je dit hebt gecontroleerd.",
 		"submitReport": "Rapport indienen",
 		"successType": "Rapporteren",
 		"successMessage": "Bedankt voor het controleren van de gegevens van deze community. We kijken je melding na en werken de informatie zo snel mogelijk bij."

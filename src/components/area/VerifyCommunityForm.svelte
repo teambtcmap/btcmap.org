@@ -1,13 +1,24 @@
 <script lang="ts">
 import axios from "axios";
-import DOMPurify from "dompurify";
 import { onMount } from "svelte";
 import { _ } from "svelte-i18n";
 
 import FormSuccess from "$components/FormSuccess.svelte";
-import Icon from "$components/Icon.svelte";
+import CaptchaField from "$components/form/CaptchaField.svelte";
+import FieldError from "$components/form/FieldError.svelte";
+import TextArea from "$components/form/TextArea.svelte";
 import PrimaryButton from "$components/PrimaryButton.svelte";
+import { focusInvalid, recheckFlagged } from "$lib/formValidation";
 import { errToast } from "$lib/utils";
+import type {
+	VerifyErrors,
+	VerifyField,
+	VerifyInput,
+} from "$lib/verifyValidation";
+import {
+	firstInvalidVerifyField,
+	validateVerification,
+} from "$lib/verifyValidation";
 
 import { browser } from "$app/environment";
 
@@ -30,7 +41,7 @@ const fetchCaptcha = () => {
 		.get("/captcha")
 		.then((response) => {
 			captchaSecret = response.data.captchaSecret;
-			captchaContent = DOMPurify.sanitize(response.data.captcha);
+			captchaContent = response.data.captcha;
 		})
 		.catch((error) => {
 			errToast($_(`errors.captchaFetch`));
@@ -42,8 +53,35 @@ const fetchCaptcha = () => {
 };
 
 let accurate = $state(false);
+let accurateBox = $state<HTMLInputElement>();
 let updates = $state("");
 let verify = $state<HTMLTextAreaElement>();
+
+// The report's inline errors (#1408), with /verify-location's rules
+// (#1407): set by a rejected submit, one entry per invalid field. The
+// form runs `novalidate`, so these are the only validation UI.
+let errors = $state<VerifyErrors>({});
+
+const readInput = (): VerifyInput => ({
+	accurate,
+	changes: updates,
+	method: verify?.value ?? "",
+	captcha: captchaInput?.value ?? "",
+});
+
+// Wired to every validated field: a no-op until a submit has flagged
+// something.
+const recheck = () => {
+	if (!firstInvalidVerifyField(errors)) return;
+	errors = recheckFlagged(errors, validateVerification(readInput()));
+};
+
+// The box-or-changes rule lands on the box, the first of its controls.
+const invalidControl: Record<VerifyField, () => HTMLElement | undefined> = {
+	confirmation: () => accurateBox,
+	method: () => verify,
+	captcha: () => captchaInput,
+};
 
 let submitted = $state(false);
 let submitting = $state(false);
@@ -51,6 +89,13 @@ let submissionIssueNumber = $state<number>();
 
 const submitForm = (event: SubmitEvent) => {
 	event.preventDefault();
+	// Every invalid field is marked at once; the first takes focus.
+	errors = validateVerification(readInput());
+	const first = firstInvalidVerifyField(errors);
+	if (first) {
+		focusInvalid(invalidControl[first]());
+		return;
+	}
 	submitting = true;
 
 	const communityUrl = `${window.location.origin}/community/${encodeURIComponent(communityAlias)}/merchants`;
@@ -84,6 +129,7 @@ const submitForm = (event: SubmitEvent) => {
 };
 
 function resetForm() {
+	errors = {};
 	submitted = false;
 	submitting = false;
 	accurate = false;
@@ -111,7 +157,9 @@ onMount(async () => {
 			</p>
 		</div>
 
-		<form onsubmit={submitForm} class="w-full space-y-5 text-primary dark:text-white">
+		<!-- `novalidate`: the form reports its own errors inline (#1408)
+		     instead of the browser's bubbles. -->
+		<form onsubmit={submitForm} novalidate class="w-full space-y-5 text-primary dark:text-white">
 			<div>
 				<input
 					disabled
@@ -124,6 +172,9 @@ onMount(async () => {
 				/>
 			</div>
 
+			<!-- One of the two is required: the box, or the updates below it.
+			     The rule's message sits under the box's label and describes
+			     both controls. -->
 			<div>
 				<div class="flex items-center space-x-2">
 					<label for="accurate" class="{!updates ? 'cursor-pointer' : ''} font-semibold"
@@ -136,71 +187,59 @@ onMount(async () => {
 						type="checkbox"
 						id="accurate"
 						name="accurate"
+						aria-invalid={errors.confirmation ? 'true' : undefined}
+						aria-describedby={errors.confirmation ? 'confirmation-error' : undefined}
+						onchange={recheck}
 						bind:checked={accurate}
+						bind:this={accurateBox}
 					/>
 				</div>
+				{#if errors.confirmation}
+					<FieldError
+						id="confirmation-error"
+						message={$_(`verifyCommunity.confirmationRequired`)}
+						class="mt-1"
+					/>
+				{/if}
 				<p class="text-sm dark:text-white/70">
 					{$_(`verifyCommunity.accurateHint`)}
 				</p>
 			</div>
 
-			<div>
-				<label for="updates" class="mb-2 block font-semibold"
-					>{$_(`verifyCommunity.updatesLabel`)} <span class="font-normal">{$_(`verifyCommunity.ifApplicable`)}</span></label
-				>
-				<textarea
-					disabled={accurate}
-					required={!accurate}
-					name="updates"
-					placeholder={$_(`verifyCommunity.updatesPlaceholder`)}
-					rows="3"
-					class="w-full rounded-2xl border-2 border-input bg-white p-3 placeholder-gray-500 transition-all focus:outline-link disabled:cursor-not-allowed disabled:bg-gray-100 disabled:text-gray-500 dark:bg-white/[0.15] dark:text-white dark:placeholder-gray-400 dark:disabled:bg-gray-700 dark:disabled:text-gray-400"
-					bind:value={updates}
-				></textarea>
-			</div>
+			<TextArea
+				id="updates"
+				name="updates"
+				label={$_(`verifyCommunity.updatesLabel`)}
+				labelNote={$_(`verifyCommunity.ifApplicable`)}
+				disabled={accurate}
+				required={!accurate}
+				placeholder={$_(`verifyCommunity.updatesPlaceholder`)}
+				aria-invalid={errors.confirmation ? 'true' : undefined}
+				aria-describedby={errors.confirmation ? 'confirmation-error' : undefined}
+				oninput={recheck}
+				bind:value={updates}
+			/>
 
-			<div>
-				<label for="verify" class="mb-2 block font-semibold">{$_(`verifyCommunity.verifyLabel`)}</label>
-				<textarea
-					required
-					name="verify"
-					placeholder={$_(`verifyCommunity.verifyPlaceholder`)}
-					rows="3"
-					class="w-full rounded-2xl border-2 border-input bg-white p-3 placeholder-gray-500 transition-all focus:outline-link disabled:cursor-not-allowed disabled:bg-gray-100 disabled:text-gray-500 dark:bg-white/[0.15] dark:text-white dark:placeholder-gray-400 dark:disabled:bg-gray-700 dark:disabled:text-gray-400"
-					bind:this={verify}
-				></textarea>
-			</div>
+			<TextArea
+				id="verify"
+				name="verify"
+				label={$_(`verifyCommunity.verifyLabel`)}
+				required
+				placeholder={$_(`verifyCommunity.verifyPlaceholder`)}
+				error={errors.method && $_(`verifyCommunity.methodRequired`)}
+				oninput={recheck}
+				bind:element={verify}
+			/>
 
-			<div>
-				<div class="mb-2 flex items-center space-x-2">
-					<label for="captcha" class="font-semibold"
-						>{$_(`verifyCommunity.botProtection`)} <span class="font-normal">{$_(`verifyCommunity.caseSensitive`)}</span></label
-					>
-					{#if captchaSecret}
-						<button type="button" onclick={fetchCaptcha}>
-							<Icon type="fa" icon="arrows-rotate" w="16" h="16" />
-						</button>
-					{/if}
-				</div>
-				<div class="space-y-2">
-					<div class="flex items-center justify-center rounded-2xl border-2 border-input py-1">
-						{#if isCaptchaLoading}
-							<div class="h-[100px] w-[275px] animate-pulse bg-link/50"></div>
-						{:else}
-							{@html captchaContent}
-						{/if}
-					</div>
-					<input
-						disabled={!captchaSecret}
-						required
-						type="text"
-						name="captcha"
-						placeholder={$_(`verifyCommunity.captchaPlaceholder`)}
-						class="w-full rounded-2xl border-2 border-input bg-white p-3 placeholder-gray-500 transition-all focus:outline-link disabled:cursor-not-allowed disabled:bg-gray-100 disabled:text-gray-500 dark:bg-white/[0.15] dark:text-white dark:placeholder-gray-400 dark:disabled:bg-gray-700 dark:disabled:text-gray-400"
-						bind:this={captchaInput}
-					/>
-				</div>
-			</div>
+			<CaptchaField
+				content={captchaContent}
+				loading={isCaptchaLoading}
+				onrefresh={fetchCaptcha}
+				disabled={!captchaSecret}
+				invalid={!!errors.captcha}
+				oninput={recheck}
+				bind:element={captchaInput}
+			/>
 
 			<input
 				type="text"
