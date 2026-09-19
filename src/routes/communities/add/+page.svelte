@@ -17,17 +17,17 @@ import { errToast, successToast, warningToast } from "$lib/utils";
 
 import { browser } from "$app/environment";
 
-$: t = $_;
-$: routes = [
+const t = $derived($_);
+const routes = $derived([
 	{ name: t("addCommunityForm.breadcrumbCommunities"), url: "/communities" },
 	{ name: t("addCommunityForm.breadcrumbAdd"), url: "/communities/add" },
-];
+]);
 
-let captchaContent = "";
-let isCaptchaLoading = true;
-let captchaSecret: string;
-let captchaValue: string = "";
-let honeyInput: HTMLInputElement;
+let captchaContent = $state("");
+let isCaptchaLoading = $state(true);
+let captchaSecret = $state<string>();
+let captchaValue = $state("");
+let honeyInput = $state<HTMLInputElement>();
 
 const fetchCaptcha = () => {
 	isCaptchaLoading = true;
@@ -46,23 +46,23 @@ const fetchCaptcha = () => {
 		});
 };
 
-let location: string | undefined;
-let name: string;
-let icon: string;
-let lightning: string;
-let socialLinks: string;
-let contact: string;
-let notes: string;
+let location = $state<string>();
+let name = $state("");
+let icon = $state("");
+let lightning = $state("");
+let socialLinks = $state("");
+let contact = $state("");
+let notes = $state("");
 
-let selected = false;
-let noLocationSelected = false;
-let submitted = false;
-let submitting = false;
-let submissionIssueNumber: number;
+let selected = $state(false);
+let noLocationSelected = $state(false);
+let submitted = $state(false);
+let submitting = $state(false);
+let submissionIssueNumber = $state<number>();
 
-let searchQuery: string;
-let searchResults: NominatimResponse[] = [];
-let searchLoading = false;
+let searchQuery = $state("");
+let searchResults = $state<NominatimResponse[]>([]);
+let searchLoading = $state(false);
 
 const searchLocation = () => {
 	searchLoading = true;
@@ -111,7 +111,7 @@ const submitForm = (event: SubmitEvent) => {
 				type: "community",
 				captchaSecret,
 				captchaTest: captchaValue,
-				honey: honeyInput.value,
+				honey: honeyInput?.value,
 				location,
 				name,
 				icon: icon ? icon : "",
@@ -211,7 +211,7 @@ onMount(async () => {
 			</ul>
 		</div>
 
-		<form on:submit={submitForm} class="w-full space-y-5 text-primary dark:text-white">
+		<form onsubmit={submitForm} class="w-full space-y-5 text-primary dark:text-white">
 			<div class="space-y-2">
 				<label for="location-picker" class="block font-semibold">{$_('addCommunityForm.locationLabel')}</label>
 				<p class="text-sm">{$_('addCommunityForm.locationHint')}</p>
@@ -224,7 +224,7 @@ onMount(async () => {
 
 				<div class="space-y-2 md:flex md:space-y-0 md:space-x-2">
 					<input
-						on:keydown={(e) => {
+						onkeydown={(e) => {
 							if (e.key === 'Enter') {
 								searchLocation();
 							}
@@ -259,7 +259,7 @@ onMount(async () => {
 						{#if !location}
 							{#each searchResults as area, index (area.display_name)}
 								<button
-									on:click={() => setLocation(area)}
+									onclick={() => setLocation(area)}
 									class="{index !== searchResults.length - 1
 										? 'border-b'
 										: ''} block p-3 whitespace-nowrap hover:bg-link/50">{area.display_name}</button
@@ -384,7 +384,7 @@ onMount(async () => {
 						>{$_('addCommunityForm.captchaLabel')} <span class="font-normal">({$_('addCommunityForm.captchaCaseSensitive')})</span></label
 					>
 					{#if captchaSecret}
-						<button type="button" on:click={fetchCaptcha}>
+						<button type="button" onclick={fetchCaptcha}>
 							<Icon type="fa" icon="arrows-rotate" w="16" h="16" />
 						</button>
 					{/if}
