@@ -1,5 +1,17 @@
 <script lang="ts">
-export let text: string;
+import Icon from "$components/Icon.svelte";
+
+// The forms' one hint paragraph. Locale files write diacritics as HTML
+// entities (&uuml;, &eacute;, …), so every hint decodes them here rather
+// than at each call site. `id` ties the hint to its control through
+// aria-describedby; `icon` fronts it with a material glyph, for a hint
+// that reports an outcome rather than offering a passive note.
+type Props = {
+	text: string;
+	id?: string;
+	icon?: string;
+};
+let { text, id, icon }: Props = $props();
 
 const NAMED_ENTITIES: Record<string, string> = {
 	"&amp;": "&",
@@ -23,10 +35,17 @@ const decodeHtmlEntities = (value: string): string =>
 		)
 		.replace(/&[a-zA-Z]+?;/g, (match) => NAMED_ENTITIES[match] ?? match);
 
-let decodedText = "";
-$: decodedText = decodeHtmlEntities(text);
+const decodedText = $derived(decodeHtmlEntities(text));
 </script>
 
-<p class="mt-1 text-sm text-neutral-500 dark:text-neutral-400">
-	{decodedText}
+<p
+	{id}
+	class="mt-1 text-sm text-neutral-500 dark:text-neutral-400 {icon
+		? 'flex gap-1.5'
+		: ''}"
+>
+	{#if icon}
+		<Icon type="material" {icon} w="16" h="16" class="mt-0.5 shrink-0" />
+	{/if}
+	<span>{decodedText}</span>
 </p>
