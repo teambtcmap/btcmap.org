@@ -88,18 +88,12 @@ export const placePaymentFilterState = (
 	return unknown ? "unknown" : "match";
 };
 
-// The result set stays evidence-based — only a recorded yes matches — so the
-// embed contract keeps its promise. The unknowns it drops are counted by
-// applyPaymentMethodFilter and reported instead of vanishing silently.
-export const placeMatchesPaymentMethods = (
-	place: PaymentTaggedPlace,
-	methods: ReadonlySet<PaymentMethod>,
-): boolean => placePaymentFilterState(place, methods) === "match";
-
-// Filter and count in one pass: the matches, plus how many of the drops were
-// unknowns rather than refusals. Both the selectVisiblePlaces pipeline and
-// the lean count badge go through this, so no surface can report a different
-// number of excluded unknowns than another.
+// Filter and count in one pass. The result set stays evidence-based — only a
+// recorded yes matches, so the embed contract keeps its promise — while the
+// unknowns it drops are counted here rather than vanishing silently. Both the
+// selectVisiblePlaces pipeline and the lean count badge go through this, so no
+// surface can report a different result set — or a different number of
+// excluded unknowns — than another.
 export const applyPaymentMethodFilter = <T extends PaymentTaggedPlace>(
 	places: T[],
 	methods: ReadonlySet<PaymentMethod>,
