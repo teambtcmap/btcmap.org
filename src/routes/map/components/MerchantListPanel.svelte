@@ -734,10 +734,14 @@ onDestroy(() => {
 			     way. Report them rather than letting them vanish: an unknown is
 			     an invitation to verify, unlike a recorded refusal (#1423). -->
 			{#if unknownPaymentCount > 0}
-				<!-- No aria-live: it sits directly under the status line's live
-				     region, which already announces on the same updates, and a
-				     second region would double-announce on every pan. -->
-				<p class="mt-1 text-xs text-body/80 dark:text-white/60">
+				<!-- Its own live region: aria-live does not reach siblings, so
+				     without this the count above is announced on every pan while
+				     the exclusion behind it never is — the one thing this note
+				     exists to say. Two polite regions queue, they don't collide. -->
+				<p
+					class="mt-1 text-xs text-body/80 dark:text-white/60"
+					aria-live="polite"
+				>
 					{$_('search.paymentUnknown', { values: { count: unknownPaymentCount } })}
 				</p>
 			{/if}
