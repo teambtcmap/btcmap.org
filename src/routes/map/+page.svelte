@@ -58,8 +58,8 @@ import {
 	pinVariantFor,
 } from "$lib/map/maplibreSprites";
 import {
+	applyPaymentMethodFilter,
 	parsePaymentMethodsParam,
-	placeMatchesPaymentMethods,
 } from "$lib/map/paymentMethodFilter";
 import { createPlacePinSource } from "$lib/map/placePinSource";
 import { parseLatLongQuery } from "$lib/map/queryViewport";
@@ -518,10 +518,25 @@ const updateMerchantList = (opts?: { force?: boolean }) => {
 			// here too so the chips can never count places the embed filter
 			// hides. Same readiness gate as the pipeline: inert until the
 			// payment-tag enrichment lands.
+			// Narrowing here also leaves the store's own pass nothing to
+			// count, so the excluded unknowns are handed over with the rows
+			// (#1423). Two passes on purpose: the LIST keeps every row in the
+			// viewport (the store re-applies the recency window as it renders
+			// them), while the COUNT is taken inside that window, so the note
+			// describes the same population as the chip counts instead of
+			// places the window had already hidden.
+			let excludedUnknownPayments = 0;
 			if (paymentMethods && get(paymentTagsLoaded)) {
-				listed = listed.filter((p) =>
-					placeMatchesPaymentMethods(p, paymentMethods),
-				);
+				const { verifiedWithinYears } = get(merchantList);
+				const windowed =
+					verifiedWithinYears == null || get(verifiedDatesLoaded)
+						? filterPlacesByRecency(listed, verifiedWithinYears)
+						: listed;
+				excludedUnknownPayments = applyPaymentMethodFilter(
+					windowed,
+					paymentMethods,
+				).unknown;
+				listed = applyPaymentMethodFilter(listed, paymentMethods).matched;
 			}
 			// Same readiness gate as the marker pipeline: before the
 			// verified_at enrichment lands, the list stays unfiltered
@@ -538,7 +553,13 @@ const updateMerchantList = (opts?: { force?: boolean }) => {
 				);
 				listed = listed.filter((p) => placeMatchesIssueCodes(p, issueCodes));
 			}
-			merchantList.setMerchants(listed, center.lat, center.lng);
+			merchantList.setMerchants(
+				listed,
+				center.lat,
+				center.lng,
+				undefined,
+				excludedUnknownPayments,
+			);
 			// E2E test hook, same idea as __mapPlacesCount: the payment-filter
 			// spec needs a DOM-independent way to pin that the list surface
 			// narrows with the pins (the wiring the #398 rewrite silently

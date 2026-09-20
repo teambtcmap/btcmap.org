@@ -402,12 +402,19 @@ function createMerchantListStore() {
 			}));
 		},
 
-		// Set merchants from locally-loaded markers (used at zoom 15-16)
+		// Set merchants from locally-loaded markers (used at zoom 15-16).
+		// `excludedUnknownPayments` is what the CALLER already dropped for lack
+		// of payment evidence before handing the rows over: the map page has to
+		// narrow by payment itself (its ?issues chip tallies are computed on the
+		// narrowed set), which leaves this pipeline nothing to count. Summed, so
+		// the panel's note is right whether the filter ran here, there, or not
+		// at all (#1423).
 		setMerchants(
 			merchants: Place[],
 			centerLat?: number,
 			centerLon?: number,
 			limit: number = MERCHANT_LIST_MAX_ITEMS,
+			excludedUnknownPayments: number = 0,
 		) {
 			const { selectedCategory, verifiedWithinYears, paymentMethods } =
 				get(store);
@@ -447,7 +454,7 @@ function createMerchantListStore() {
 				listError: false,
 				categoryCounts: counts,
 				selectedCategory: effectiveCategory,
-				unknownPaymentCount: unknownPayments,
+				unknownPaymentCount: unknownPayments + excludedUnknownPayments,
 			}));
 		},
 

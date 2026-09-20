@@ -394,6 +394,25 @@ describe("merchantListStore", () => {
 			expect(state.unknownPaymentCount).toBe(1);
 		});
 
+		it("setMerchants adds the unknowns the caller already excluded", () => {
+			// The map page narrows by payment before handing rows over (its
+			// ?issues chip tallies need the narrowed set), which leaves this
+			// pipeline nothing to count — the note would otherwise read 0 on
+			// the zoom-15 local path, the common embed case.
+			merchantList.setPaymentMethods(new Set(["lightning"] as const));
+			paymentTagsLoaded.set(true);
+
+			merchantList.setMerchants(
+				[createMockPlace({ id: 1, "osm:payment:lightning": "yes" })],
+				0,
+				0,
+				undefined,
+				7,
+			);
+
+			expect(get(merchantList).unknownPaymentCount).toBe(7);
+		});
+
 		it("fetchAndReplaceList publishes the excluded-unknown count", async () => {
 			merchantList.setPaymentMethods(new Set(["lightning"] as const));
 			paymentTagsLoaded.set(true);
