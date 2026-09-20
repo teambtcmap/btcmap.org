@@ -290,15 +290,23 @@ test.describe('Add Location — address suggestion from the pin', () => {
 			'placeholder',
 			'Looking up the address…'
 		);
+		// The live region has to be mounted and empty already: one that
+		// appears together with its content is never announced.
+		await expect(page.locator('#address-hint-live')).toBeAttached();
+		await expect(page.locator('#address-hint-live')).toBeEmpty();
 		await expect(
 			page.getByText('From OpenStreetMap for your pin')
 		).toBeHidden();
 		await expect(page.getByText('No address found for this pin')).toBeHidden();
 		await expect(page.getByRole('button', { name: 'Move pin' })).toBeVisible();
 
-		// Settled: the miss is stated.
+		// Settled: the miss is stated, and it lands inside the live region
+		// so a screen reader hears it without moving focus.
 		await expect(page.getByText('No address found for this pin')).toBeVisible({
 			timeout: MARKER_LOAD_TIMEOUT
 		});
+		await expect(page.locator('#address-hint-live')).toContainText(
+			'No address found for this pin'
+		);
 	});
 });

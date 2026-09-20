@@ -581,13 +581,22 @@ onMount(() => {
 					     the field now holds, and the action to fix it follows
 					     the doubt rather than preceding it (#1425). -->
 					{#snippet children()}
-						{#if addressHintKey}
-							<FormHelperText
-								id="address-hint"
-								text={$_(addressHintKey)}
-								icon={addressRequired ? undefined : 'info_outline'}
-							/>
-						{/if}
+						<!-- The outcome arrives after the field is already
+						     reachable, and a description swapped in under a
+						     focused input is not announced. The region is mounted
+						     from the start and stays empty until the lookup lands
+						     — one that appears together with its content has
+						     nothing to announce. Silent during review: the edit
+						     block is display:none, so it leaves the a11y tree. -->
+						<div id="address-hint-live" aria-live="polite" aria-atomic="true">
+							{#if addressHintKey}
+								<FormHelperText
+									id="address-hint"
+									text={$_(addressHintKey)}
+									icon={addressRequired ? undefined : 'info_outline'}
+								/>
+							{/if}
+						</div>
 						<!-- The pin stated next to the one control that changes
 						     it: the coordinates are context for Move pin, not the
 						     anchor the action hangs off. Wraps on narrow screens
