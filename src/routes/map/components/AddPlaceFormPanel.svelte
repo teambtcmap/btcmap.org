@@ -23,7 +23,7 @@ type Props = {
 	hidden?: boolean;
 	// Back to the placement sheet (the close button and Escape).
 	onclose: () => void;
-	// The pin chip's Move pin: hand the pin back to placement mode.
+	// The address field's Move pin: hand the pin back to placement mode.
 	onmovepin: () => void;
 	// Success-screen actions: restart placement, or leave add mode.
 	onaddanother: () => void;
@@ -42,18 +42,10 @@ let submitted = $state(false);
 // True when the submission went out without a verified account — the
 // success screen then nudges toward creating one (#1334).
 let submittedAnonymously = $state(false);
-// The form's review step (#1341): the pin chip and the OSM card are
-// edit-only — the summary froze the coords, so Move pin would diverge
-// from what it shows.
+// The form's review step (#1341): the pin line and the OSM card are
+// edit-only — the summary froze the coords, so restating them beside it
+// would invite the two to disagree.
 let inReview = $state(false);
-
-// Returning from Move pin puts focus back on the control that started it.
-let movePinButton = $state<HTMLButtonElement>();
-let wasHidden = false;
-$effect(() => {
-	if (wasHidden && !hidden) movePinButton?.focus();
-	wasHidden = hidden;
-});
 
 const onKeydown = (event: KeyboardEvent) => {
 	// While the host re-places the pin, Escape belongs to its sheet.
@@ -116,32 +108,19 @@ $effect(() => {
 	{#if !submitted}
 		<div class="px-4 pb-[calc(env(safe-area-inset-bottom)+1.5rem)] md:pb-4">
 			{#if !inReview}
-				<!-- The pin as a stated value (#1396): the host froze it when the
-				     form opened, and Move pin is the one way to change it. -->
-				<div
-					class="mb-4 flex flex-wrap items-center gap-x-2.5 gap-y-1 rounded-xl border border-input bg-offwhite px-3 py-2.5 dark:border-white/20 dark:bg-white/5"
+				<!-- The pin as a stated value (#1396), and nothing more (#1425):
+				     coordinates are a value nobody can verify by reading them,
+				     on a screen where the map is hidden, so the control that
+				     changes them lives down at the address instead — the
+				     readable form of the pin, and where doubt arrives. -->
+				<p
+					class="mb-3.5 flex items-center gap-2 text-sm text-body tabular-nums dark:text-offwhite"
 				>
-					<PlacementPinIcon width={16} class="shrink-0" />
-					<div class="min-w-0">
-						<p
-							class="text-xs font-bold tracking-[0.5px] text-body uppercase dark:text-offwhite"
-						>
-							{$_('addLocation.pinChipLabel')}
-						</p>
-						<p class="mt-0.5 text-sm text-primary tabular-nums dark:text-white">
-							{formatPinCoords(coords.lat, coords.long)}
-						</p>
-					</div>
-					<button
-						bind:this={movePinButton}
-						type="button"
-						onclick={onmovepin}
-						class="ml-auto inline-flex items-center gap-1 text-sm font-semibold whitespace-nowrap text-link hover:text-hover focus:outline-link"
-					>
-						<Icon type="material" icon="my_location" w="16" h="16" />
-						{$_('addLocation.movePin')}
-					</button>
-				</div>
+					<PlacementPinIcon width={14} class="shrink-0" />
+					{$_('addLocation.pinnedAt', {
+						values: { coords: formatPinCoords(coords.lat, coords.long) }
+					})}
+				</p>
 				<!-- Path fork for OSM-capable users (#1344): a deep link into the
 				     iD editor at the chosen pin, in a new tab so the form state
 				     survives. Hidden with the hint during review (#1341) — the
@@ -178,6 +157,8 @@ $effect(() => {
 			{/if}
 			<AddLocationForm
 				{coords}
+				{hidden}
+				{onmovepin}
 				onstepchange={(step) => {
 					inReview = step === 'review';
 				}}
