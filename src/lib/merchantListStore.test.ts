@@ -380,6 +380,49 @@ describe("merchantListStore", () => {
 			expect(url).not.toContain("osm:payment");
 		});
 
+		// The count of places excluded for lack of evidence rides the same
+		// three paths as the filter itself, so the panel's note can never
+		// describe a different set than the rows above it (#1423).
+		it("setMerchants publishes the excluded-unknown count", async () => {
+			merchantList.setPaymentMethods(new Set(["lightning"] as const));
+			paymentTagsLoaded.set(true);
+
+			merchantList.setMerchants(rows(), 0, 0);
+
+			const state = get(merchantList);
+			expect(state.totalCount).toBe(1);
+			expect(state.unknownPaymentCount).toBe(1);
+		});
+
+		it("fetchAndReplaceList publishes the excluded-unknown count", async () => {
+			merchantList.setPaymentMethods(new Set(["lightning"] as const));
+			paymentTagsLoaded.set(true);
+			(api.get as Mock).mockResolvedValueOnce({ data: rows() });
+
+			await merchantList.fetchAndReplaceList({ lat: 0, lon: 0 }, 10);
+
+			expect(get(merchantList).unknownPaymentCount).toBe(1);
+		});
+
+		it("fetchCountOnly publishes the excluded-unknown count", async () => {
+			merchantList.setPaymentMethods(new Set(["lightning"] as const));
+			paymentTagsLoaded.set(true);
+			(api.get as Mock).mockResolvedValueOnce({ data: rows() });
+
+			await merchantList.fetchCountOnly({ lat: 0, lon: 0 }, 10);
+
+			expect(get(merchantList).unknownPaymentCount).toBe(1);
+		});
+
+		it("reports no unknowns while the filter is inert", async () => {
+			merchantList.setPaymentMethods(new Set(["lightning"] as const));
+			(api.get as Mock).mockResolvedValueOnce({ data: rows() });
+
+			await merchantList.fetchCountOnly({ lat: 0, lon: 0 }, 10);
+
+			expect(get(merchantList).unknownPaymentCount).toBe(0);
+		});
+
 		it("fetchCountOnly widens fields and narrows the count once ready", async () => {
 			merchantList.setPaymentMethods(new Set(["lightning"] as const));
 			paymentTagsLoaded.set(true);

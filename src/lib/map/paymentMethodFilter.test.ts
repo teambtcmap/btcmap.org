@@ -6,12 +6,24 @@ import {
 	PAYMENT_METHODS,
 	parsePaymentMethodsParam,
 	placeMatchesPaymentMethods,
+	placePaymentFilterState,
+	readPaymentTag,
 	serializePaymentMethodsParam,
 } from "./paymentMethodFilter";
 
 let nextId = 1;
 const place = (overrides: Partial<Place> = {}): Place =>
 	({ id: nextId++, lat: 0, lon: 0, ...overrides }) as Place;
+
+// The generated types promise "yes", but the wire data is untrusted: OSM
+// carries "no", "only", casing variants and outright junk in these fields.
+const tagged = (lightning: string): Place =>
+	({
+		id: nextId++,
+		lat: 0,
+		lon: 0,
+		"osm:payment:lightning": lightning,
+	}) as unknown as Place;
 
 describe("parsePaymentMethodsParam", () => {
 	it("reads bare presence params (the legacy embed form)", () => {
@@ -89,6 +101,22 @@ describe("placeMatchesPaymentMethods", () => {
 		expect(placeMatchesPaymentMethods(noTag, new Set(["onchain"]))).toBe(false);
 	});
 
+	it("accepts every spelling that normalizes to yes", () => {
+		for (const value of ["yes", "Yes", "YES", " yes ", "only", "Only"]) {
+			expect(
+				placeMatchesPaymentMethods(tagged(value), new Set(["lightning"])),
+			).toBe(true);
+		}
+	});
+
+	it("keeps excluding refusals and unusable values", () => {
+		for (const value of ["no", "No", "y", "yed", "2024-01-01"]) {
+			expect(
+				placeMatchesPaymentMethods(tagged(value), new Set(["lightning"])),
+			).toBe(false);
+		}
+	});
+
 	it("maps nfc onto lightning_contactless only", () => {
 		const contactless = place({ "osm:payment:lightning_contactless": "yes" });
 		expect(placeMatchesPaymentMethods(contactless, new Set(["nfc"]))).toBe(
@@ -97,5 +125,76 @@ describe("placeMatchesPaymentMethods", () => {
 		expect(
 			placeMatchesPaymentMethods(contactless, new Set(["lightning"])),
 		).toBe(false);
+	});
+});
+
+describe("readPaymentTag", () => {
+	it("reads the three states an OSM tag can be in", () => {
+		expect(readPaymentTag("yes")).toBe("yes");
+		expect(readPaymentTag("no")).toBe("no");
+		expect(readPaymentTag(undefined)).toBe("unknown");
+	});
+
+	it("normalizes case and surrounding whitespace", () => {
+		for (const value of ["Yes", "YES", " yes ", "\tyes\n"]) {
+			expect(readPaymentTag(value)).toBe("yes");
+		}
+		expect(readPaymentTag(" No ")).toBe("no");
+	});
+
+	it("reads only as the most emphatic yes", () => {
+		// payment:X=only means "this method and nothing else" — the strongest
+		// yes OSM can express, which a bare === "yes" test reads as a refusal.
+		expect(readPaymentTag("only")).toBe("yes");
+		expect(readPaymentTag("Only")).toBe("yes");
+	});
+
+	it("treats unrecognized values as unknown rather than as no", () => {
+		// All of these sit in live payment fields (2026-09-20). They record
+		// nothing usable, which is not the same as recording a refusal.
+		for (const junk of ["y", "yea", "yed", "yno", "2024-01-01", "a@b.com"]) {
+			expect(readPaymentTag(junk)).toBe("unknown");
+		}
+		expect(readPaymentTag("")).toBe("unknown");
+		expect(readPaymentTag("   ")).toBe("unknown");
+	});
+});
+
+describe("placePaymentFilterState", () => {
+	it("matches only when every selected method is a yes", () => {
+		const both = place({
+			"osm:payment:onchain": "yes",
+			"osm:payment:lightning": "yes",
+		});
+		expect(
+			placePaymentFilterState(both, new Set(["onchain", "lightning"])),
+		).toBe("match");
+		expect(placePaymentFilterState(both, new Set(["nfc"]))).toBe("unknown");
+	});
+
+	it("separates a refusal from a blank", () => {
+		expect(placePaymentFilterState(tagged("no"), new Set(["lightning"]))).toBe(
+			"no",
+		);
+		expect(placePaymentFilterState(place(), new Set(["lightning"]))).toBe(
+			"unknown",
+		);
+		expect(placePaymentFilterState(tagged("yed"), new Set(["lightning"]))).toBe(
+			"unknown",
+		);
+	});
+
+	it("reports a refusal ahead of an unknown across selected methods", () => {
+		// Mixed evidence: one method refused, one never recorded. The refusal
+		// is the stronger statement — this place is not a verification lead.
+		const mixed = {
+			id: 99,
+			lat: 0,
+			lon: 0,
+			"osm:payment:onchain": "no",
+		} as unknown as Place;
+		expect(
+			placePaymentFilterState(mixed, new Set(["onchain", "lightning"])),
+		).toBe("no");
 	});
 });
