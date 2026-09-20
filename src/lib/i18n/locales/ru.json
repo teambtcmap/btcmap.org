@@ -71,6 +71,7 @@
 		"clear": "Очистить поиск",
 		"noVisible": "В текущем окне нет видимых точек",
 		"nearbyCount": "{count} рядом",
+		"paymentUnknown": "{count} скрыто: оплата не подтверждена",
 		"placeholder": "Поиск...",
 		"ariaLabel": "Поиск в рейтинге",
 		"enablePreciseDistances": "Включить точные расстояния",

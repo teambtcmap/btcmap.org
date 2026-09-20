@@ -71,6 +71,7 @@
 		"clear": "Effacer la recherche",
 		"noVisible": "Aucun commerce visible dans la vue actuelle",
 		"nearbyCount": "{count} à proximité",
+		"paymentUnknown": "{count} masqués : paiement non confirmé",
 		"placeholder": "Rechercher...",
 		"ariaLabel": "Rechercher dans le classement",
 		"enablePreciseDistances": "Activer les distances précises",

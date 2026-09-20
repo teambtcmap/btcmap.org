@@ -374,7 +374,7 @@ function handleDismissLocation() {
 // chip counts (selectVisiblePlaces), so the list can never disagree with
 // either again.
 $: paymentMethods = $merchantList.paymentMethods;
-$: filteredSearchResults = selectVisiblePlaces({
+$: searchSelection = selectVisiblePlaces({
 	places: searchResults,
 	mode: "search",
 	category: selectedCategory,
@@ -386,7 +386,16 @@ $: filteredSearchResults = selectVisiblePlaces({
 	// /v4/search rows carry the payment tags natively (LIST_ITEM).
 	paymentMethods,
 	paymentsReady: true,
-}).selection;
+});
+$: filteredSearchResults = searchSelection.selection;
+// Places the payment filter dropped for lack of evidence rather than for a
+// recorded refusal (#1423) — reported instead of vanishing silently. Search
+// reads its own pipeline call, which re-runs here on every recency or
+// category change; the nearby paths write the store as they filter.
+$: unknownPaymentCount =
+	mode === "search"
+		? searchSelection.unknownPayments
+		: $merchantList.unknownPaymentCount;
 
 // Helper function to check if a category has matching merchants
 // Note: counts param required for Svelte reactivity (indirect deps aren't tracked)
@@ -720,6 +729,18 @@ onDestroy(() => {
 					</button>
 				{/if}
 			</div>
+
+			<!-- The payment filter excludes places whose tags say nothing either
+			     way. Report them rather than letting them vanish: an unknown is
+			     an invitation to verify, unlike a recorded refusal (#1423). -->
+			{#if unknownPaymentCount > 0}
+				<!-- No aria-live: it sits directly under the status line's live
+				     region, which already announces on the same updates, and a
+				     second region would double-announce on every pan. -->
+				<p class="mt-1 text-xs text-body/80 dark:text-white/60">
+					{$_('search.paymentUnknown', { values: { count: unknownPaymentCount } })}
+				</p>
+			{/if}
 
 			<!-- Location enable button - nearby mode only -->
 			{#if mode === 'nearby' && !$userLocation.location && !locationRequestDismissed}

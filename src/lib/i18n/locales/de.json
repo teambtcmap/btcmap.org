@@ -71,6 +71,7 @@
 		"clear": "Suche löschen",
 		"noVisible": "Keine Händler in diesem Bereich sichtbar",
 		"nearbyCount": "{count} in der Nähe",
+		"paymentUnknown": "{count} ausgeblendet: Zahlung nicht bestätigt",
 		"placeholder": "Suchen...",
 		"ariaLabel": "Rangliste durchsuchen",
 		"enablePreciseDistances": "Genaue Entfernungen aktivieren",

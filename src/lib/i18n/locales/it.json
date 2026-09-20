@@ -166,6 +166,7 @@
 		"clear": "Cancella ricerca",
 		"noVisible": "Nessun commerciante visibile nella vista attuale",
 		"nearbyCount": "{count} nelle vicinanze",
+		"paymentUnknown": "{count} nascosti: pagamento non confermato",
 		"placeholder": "Cerca...",
 		"ariaLabel": "Cerca nella classifica",
 		"enablePreciseDistances": "Abilita distanze precise",

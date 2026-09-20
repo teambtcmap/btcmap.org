@@ -7,7 +7,7 @@ import {
 } from "$lib/categoryMapping";
 import type { PaymentMethod } from "$lib/map/paymentMethodFilter";
 import {
-	placeMatchesPaymentMethods,
+	applyPaymentMethodFilter,
 	serializePaymentMethodsParam,
 } from "$lib/map/paymentMethodFilter";
 import type { VerifiedFilterYears } from "$lib/map/verifiedFilter";
@@ -76,6 +76,12 @@ export type VisibleSelection = {
 	// The category after the auto-reset rule: a selected chip whose count
 	// dropped to zero (while other places remain) snaps back to "all".
 	effectiveCategory: CategoryKey;
+	// How many places the payment filter dropped for lack of evidence rather
+	// than for a recorded refusal (#1423). Counted on the same population as
+	// `counts` — post-recency, pre-category — so the panel's note describes
+	// exactly the set the filter was applied to. 0 while the filter is off or
+	// inert.
+	unknownPayments: number;
 };
 
 export function selectVisiblePlaces(
@@ -91,11 +97,14 @@ export function selectVisiblePlaces(
 			placeMatchesIssueCodes(p, issueCodes),
 		);
 	}
+	let unknownPayments = 0;
 	if (inputs.paymentMethods && inputs.paymentsReady) {
-		const methods = inputs.paymentMethods;
-		preCategory = preCategory.filter((p) =>
-			placeMatchesPaymentMethods(p, methods),
+		const filtered = applyPaymentMethodFilter(
+			preCategory,
+			inputs.paymentMethods,
 		);
+		preCategory = filtered.matched;
+		unknownPayments = filtered.unknown;
 	}
 	const counts = countMerchantsByCategory(preCategory);
 
@@ -113,7 +122,7 @@ export function selectVisiblePlaces(
 		selection = selection.filter((p) => Boolean(isBoosted(p)));
 	}
 
-	return { selection, preCategory, counts, effectiveCategory };
+	return { selection, preCategory, counts, effectiveCategory, unknownPayments };
 }
 
 // Signature of everything that changes WHICH places are visible. String

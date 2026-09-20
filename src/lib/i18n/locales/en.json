@@ -166,6 +166,7 @@
 		"clear": "Clear search",
 		"noVisible": "No merchants visible in current view",
 		"nearbyCount": "{count} nearby",
+		"paymentUnknown": "{count} hidden: payment not confirmed",
 		"placeholder": "Search...",
 		"ariaLabel": "Search leaderboard",
 		"enablePreciseDistances": "Enable precise distances",

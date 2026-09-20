@@ -166,6 +166,7 @@
 		"clear": "Zoekopdracht wissen",
 		"noVisible": "Er zijn geen ondernemers zichtbaar in deze weergave",
 		"nearbyCount": "{count} in de buurt",
+		"paymentUnknown": "{count} verborgen: betaling niet bevestigd",
 		"placeholder": "Zoeken...",
 		"ariaLabel": "Zoek in ranglijst",
 		"enablePreciseDistances": "Nauwkeurige afstanden activeren",
