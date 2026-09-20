@@ -1,6 +1,33 @@
+import type { Page } from '@playwright/test';
 import { expect, test } from '@playwright/test';
 
 import { MARKER_LOAD_TIMEOUT, stubMapData, stubReverseGeocode } from './helpers';
+
+// Every box in one synchronous DOM pass. `locator.boundingBox()` scrolls
+// its own element into view first, so measuring four elements with four
+// calls yields numbers taken at up to four different scroll offsets —
+// which reads as a layout bug that isn't there.
+const addressGeometry = (page: Page) =>
+	page.evaluate(() => {
+		const box = (el: Element | null | undefined) => {
+			if (!el) throw new Error('missing element');
+			const r = el.getBoundingClientRect();
+			return { x: r.x, y: r.y, width: r.width, height: r.height };
+		};
+		const pill = [...document.querySelectorAll('button')].find(
+			(candidate) => candidate.textContent?.trim() === 'Move pin'
+		);
+		const pinLine = [...document.querySelectorAll('p')].find((candidate) =>
+			candidate.textContent?.includes('Pinned at')
+		);
+		return {
+			input: box(document.querySelector('#address')),
+			hint: box(document.querySelector('#address-hint')),
+			name: box(document.querySelector('#name')),
+			pill: box(pill),
+			pinLine: box(pinLine)
+		};
+	});
 
 // Address suggestion from the pin (#1315): the field is promoted out of
 // the details expander and pre-filled by one reverse-geocode of the pin.
@@ -127,20 +154,47 @@ test.describe('Add Location — address suggestion from the pin', () => {
 			timeout: MARKER_LOAD_TIMEOUT
 		});
 
-		const hint = page.getByText('From OpenStreetMap for your pin');
-		const movePin = page.getByRole('button', { name: 'Move pin' });
-		await expect(hint).toBeVisible();
-		await expect(movePin).toBeVisible();
+		await expect(
+			page.getByText('From OpenStreetMap for your pin')
+		).toBeVisible();
+		await expect(page.getByRole('button', { name: 'Move pin' })).toBeVisible();
 
-		const input = await page.locator('#address').boundingBox();
-		const hintBox = await hint.boundingBox();
-		const pill = await movePin.boundingBox();
-		if (!input || !hintBox || !pill) throw new Error('missing geometry');
+		const { input, hint, pill } = await addressGeometry(page);
 		// Input, then hint, then the action.
-		expect(hintBox.y).toBeGreaterThanOrEqual(input.y + input.height);
-		expect(pill.y).toBeGreaterThanOrEqual(hintBox.y + hintBox.height);
+		expect(hint.y).toBeGreaterThanOrEqual(input.y + input.height);
+		expect(pill.y).toBeGreaterThanOrEqual(hint.y + hint.height);
 		// The old chip carried it above the first field; it must not still.
 		expect(pill.y).toBeGreaterThan(input.y);
+	});
+
+	// Review feedback on #1426: the coordinates read as an orphan at the top
+	// of the panel. They belong beside the control that changes them —
+	// context for Move pin rather than the anchor the action hangs off.
+	test('the pinned coordinates sit beside Move pin, under the address', async ({
+		page
+	}) => {
+		await stubMapData(page);
+		await stubReverseGeocode(page);
+		await page.goto(PIN);
+		await expect(page.locator('#name')).toBeVisible({
+			timeout: MARKER_LOAD_TIMEOUT
+		});
+
+		await expect(page.getByText(/Pinned at/)).toContainText(
+			'42.27625, 42.70242'
+		);
+
+		const { input, pinLine, pill, name } = await addressGeometry(page);
+		// Below the address, and below the first field — the old chip sat
+		// above both.
+		expect(pinLine.y).toBeGreaterThan(input.y);
+		expect(pinLine.y).toBeGreaterThan(name.y);
+		// On one row with the pill: their vertical centres agree.
+		expect(
+			Math.abs(pinLine.y + pinLine.height / 2 - (pill.y + pill.height / 2))
+		).toBeLessThanOrEqual(2);
+		// Coordinates first, action second — statement then control.
+		expect(pinLine.x).toBeLessThan(pill.x);
 	});
 
 	// The hint is the field's description only while there is nothing more

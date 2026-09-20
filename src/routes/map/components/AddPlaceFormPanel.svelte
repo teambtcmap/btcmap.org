@@ -2,11 +2,9 @@
 import AddLocationForm from "$components/add-location/AddLocationForm.svelte";
 import CloseButton from "$components/CloseButton.svelte";
 import Icon from "$components/Icon.svelte";
-import PlacementPinIcon from "$components/PlacementPinIcon.svelte";
 import PrimaryButton from "$components/PrimaryButton.svelte";
 import { trackEvent } from "$lib/analytics";
 import { _ } from "$lib/i18n";
-import { formatPinCoords } from "$lib/placementMode";
 import { osmEditUrl } from "$lib/placeSubmission";
 
 import MapPanelShell from "./MapPanelShell.svelte";
@@ -42,9 +40,9 @@ let submitted = $state(false);
 // True when the submission went out without a verified account — the
 // success screen then nudges toward creating one (#1334).
 let submittedAnonymously = $state(false);
-// The form's review step (#1341): the pin line and the OSM card are
-// edit-only — the summary froze the coords, so restating them beside it
-// would invite the two to disagree.
+// The form's review step (#1341): the OSM card is edit-only — the
+// summary is no place to invite leaving. The pin itself is stated by the
+// form, beside the Move pin button under the address (#1425).
 let inReview = $state(false);
 
 const onKeydown = (event: KeyboardEvent) => {
@@ -108,19 +106,6 @@ $effect(() => {
 	{#if !submitted}
 		<div class="px-4 pb-[calc(env(safe-area-inset-bottom)+1.5rem)] md:pb-4">
 			{#if !inReview}
-				<!-- The pin as a stated value (#1396), and nothing more (#1425):
-				     coordinates are a value nobody can verify by reading them,
-				     on a screen where the map is hidden, so the control that
-				     changes them lives down at the address instead — the
-				     readable form of the pin, and where doubt arrives. -->
-				<p
-					class="mb-3.5 flex items-center gap-2 text-sm text-body tabular-nums dark:text-offwhite"
-				>
-					<PlacementPinIcon width={14} class="shrink-0" />
-					{$_('addLocation.pinnedAt', {
-						values: { coords: formatPinCoords(coords.lat, coords.long) }
-					})}
-				</p>
 				<!-- Path fork for OSM-capable users (#1344): a deep link into the
 				     iD editor at the chosen pin, in a new tab so the form state
 				     survives. Hidden with the hint during review (#1341) — the

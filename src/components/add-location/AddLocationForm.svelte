@@ -17,6 +17,7 @@ import TextArea from "$components/form/TextArea.svelte";
 import TextField from "$components/form/TextField.svelte";
 import Icon from "$components/Icon.svelte";
 import NostrAvatar from "$components/NostrAvatar.svelte";
+import PlacementPinIcon from "$components/PlacementPinIcon.svelte";
 import PrimaryButton from "$components/PrimaryButton.svelte";
 import {
 	DETAILS_FIELDS,
@@ -587,18 +588,32 @@ onMount(() => {
 								icon={addressRequired ? undefined : 'info_outline'}
 							/>
 						{/if}
-						<!-- 34px so it sits under its field instead of competing
-						     with the form's filled primary; the transparent
-						     ::after keeps the tap target at 44px. -->
-						<button
-							bind:this={movePinButton}
-							type="button"
-							onclick={onmovepin}
-							class="relative mt-2.5 inline-flex h-[34px] items-center gap-1.5 rounded-full border border-link px-3 text-[13px] font-semibold whitespace-nowrap text-link transition-colors after:absolute after:inset-x-0 after:top-1/2 after:h-11 after:-translate-y-1/2 after:content-[''] hover:bg-link hover:text-white focus:outline-link"
-						>
-							<Icon type="material" icon="my_location" w="15" h="15" />
-							{$_('addLocation.movePin')}
-						</button>
+						<!-- The pin stated next to the one control that changes
+						     it: the coordinates are context for Move pin, not the
+						     anchor the action hangs off. Wraps on narrow screens
+						     rather than squeezing the pill. -->
+						<div class="mt-2.5 flex flex-wrap items-center gap-x-3 gap-y-2">
+							<p
+								class="flex items-center gap-1.5 text-sm text-body tabular-nums dark:text-offwhite"
+							>
+								<PlacementPinIcon width={14} class="shrink-0" />
+								{$_('addLocation.pinnedAt', {
+									values: { coords: formatPinCoords(coords.lat, coords.long) }
+								})}
+							</p>
+							<!-- 34px so it sits under its field instead of competing
+							     with the form's filled primary; the transparent
+							     ::after keeps the tap target at 44px. -->
+							<button
+								bind:this={movePinButton}
+								type="button"
+								onclick={onmovepin}
+								class="relative inline-flex h-[34px] items-center gap-1.5 rounded-full border border-link px-3 text-[13px] font-semibold whitespace-nowrap text-link transition-colors after:absolute after:inset-x-0 after:top-1/2 after:h-11 after:-translate-y-1/2 after:content-[''] hover:bg-link hover:text-white focus:outline-link"
+							>
+								<Icon type="material" icon="my_location" w="15" h="15" />
+								{$_('addLocation.movePin')}
+							</button>
+						</div>
 					{/snippet}
 				</TextField>
 			{/snippet}
