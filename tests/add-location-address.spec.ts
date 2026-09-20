@@ -143,6 +143,37 @@ test.describe('Add Location — address suggestion from the pin', () => {
 		expect(pill.y).toBeGreaterThan(input.y);
 	});
 
+	// The hint is the field's description only while there is nothing more
+	// urgent to say. Appending it to a validation error buries the thing to
+	// fix under three sentences of advice — the #1404 contract is that a
+	// rejected field describes itself with its error and nothing else.
+	test('the hint describes the field, but never dilutes an error', async ({
+		page
+	}) => {
+		await stubMapData(page);
+		await stubReverseGeocode(page);
+		await page.goto(PIN);
+		await expect(page.locator('#name')).toBeVisible({
+			timeout: MARKER_LOAD_TIMEOUT
+		});
+
+		const address = page.locator('#address');
+		await expect(address).toHaveValue(/Freiheitsstraße/);
+		await expect(address).toHaveAccessibleDescription(
+			"From OpenStreetMap for your pin — check it's the right entrance. Moving the pin keeps your answers."
+		);
+
+		// Blank the required suggestion and get the field rejected.
+		await page.locator('#name').fill('Satoshi Comics');
+		await page.locator('#category').selectOption('restaurants');
+		await page.locator('#onchain').check();
+		await page.locator('#contact').fill('owner@example.com');
+		await address.fill('');
+		await page.getByRole('button', { name: 'Review & submit' }).click();
+
+		await expect(address).toHaveAccessibleDescription('Enter the address.');
+	});
+
 	test('the Move pin pill reads at 34px but still takes a 44px tap', async ({
 		page
 	}) => {

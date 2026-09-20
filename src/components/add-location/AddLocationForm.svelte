@@ -570,7 +570,9 @@ onMount(() => {
 					placeholder={addressPending
 						? $_('addLocation.addressLookupPending')
 						: $_('addLocation.addressPlaceholder')}
-					aria-describedby={addressHintKey ? 'address-hint' : undefined}
+					aria-describedby={!fieldError(field) && addressHintKey
+						? 'address-hint'
+						: undefined}
 					{...inputProps(field)}
 					bind:element={addressInput}
 				>
