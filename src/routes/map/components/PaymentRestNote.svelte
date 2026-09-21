@@ -12,14 +12,10 @@ import { _ } from "$lib/i18n";
 // silently swapped in.
 type Props = {
 	count: number;
-	class?: string;
 };
-let { count, class: className = "" }: Props = $props();
+let { count }: Props = $props();
 </script>
 
-<p
-	role="status"
-	class="text-sm text-body dark:text-white/70 {className}"
->
+<p role="status" class="text-sm text-body dark:text-white/70">
 	{$_('search.noPaymentRecorded', { values: { count } })}
 </p>

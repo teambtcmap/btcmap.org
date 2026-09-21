@@ -90,7 +90,9 @@ export let suspended = false;
 // applying a choice is the page's job, because the payment filter is
 // locked at init and switching is a navigation.
 export let activePaymentMethod: PaymentMethod | null = null;
-export let onSwitchPayment: (method: PaymentMethod | null) => void = () => {};
+// No default: a callback that silently does nothing turns a dropped
+// wiring into a dead button instead of a type error.
+export let onSwitchPayment: (method: PaymentMethod | null) => void;
 
 // On mobile the panel is a bottom sheet mirroring the merchant drawer's
 // snap behavior: peek (grabber + single input) <-> full panel. The store's

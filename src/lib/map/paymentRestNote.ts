@@ -3,10 +3,12 @@ import type { ZoomBehavior } from "$lib/map/viewport";
 import { deriveNearbyListStatus } from "./nearbyListStatus";
 
 // Whether a resting surface should carry the payment empty-state note
-// (#1427). The mobile peek and the desktop floating bar both ask it, and
-// the panel's own list body answers the same question for its expanded
-// state, so the rule lives here instead of being spelled out three times
-// with three chances to drift.
+// (#1427). The mobile peek and the desktop floating bar both ask it, so
+// the rule lives here rather than in two components. The panel's expanded
+// list body still decides for itself with an inline
+// `unknownPaymentCount > 0` — it is already inside the empty branch by
+// then, so it needs no status check, and folding it in here would mean
+// passing it state it does not otherwise have.
 //
 // Exactly the "empty" status and nothing else:
 // - with results on screen it would be the standing tally #1424 rejected —

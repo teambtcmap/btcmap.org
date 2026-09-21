@@ -288,7 +288,7 @@ test.describe('Map payment filter — unknown tags', () => {
 
 		// Exactly one of the three is in the tab order.
 		const tabIndexes = await page.evaluate(() =>
-			[...document.querySelectorAll('[role="radio"]')].map((r) => r.tabIndex)
+			[...document.querySelectorAll<HTMLElement>('[role="radio"]')].map((r) => r.tabIndex)
 		);
 		expect(tabIndexes.filter((t) => t === 0)).toHaveLength(1);
 
