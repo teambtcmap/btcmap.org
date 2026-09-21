@@ -195,6 +195,121 @@ test.describe('Map payment filter — unknown tags', () => {
 		expect(geometry.right.bottom).toBeLessThanOrEqual(geometry.sheet.top);
 	});
 
+	// #1430: the note reports a filter the reader cannot see or change, so
+	// it ships with a single-select switcher. Single-select because
+	// applyPaymentMethodFilter ANDs its methods — appending a second one
+	// narrows the set and the view stays empty.
+	test('the switcher rides the note at rest on the mobile peek', async ({
+		page
+	}) => {
+		await openMap(page, { params: '?lightning', rows: NO_MATCH, viewport: PHONE });
+
+		await expect.poll(() => placesCount(page), { timeout: MARKER_LOAD_TIMEOUT }).toBe(0);
+		await expect(page.getByText(NOT_CHECKED)).toBeVisible();
+
+		const group = page.getByRole('radiogroup');
+		await expect(group).toBeVisible();
+		// Exactly one method is active, and it is the one in the URL.
+		await expect(page.getByRole('radio', { name: 'Lightning' })).toHaveAttribute(
+			'aria-checked',
+			'true'
+		);
+		await expect(page.getByRole('radio', { name: 'On-chain' })).toHaveAttribute(
+			'aria-checked',
+			'false'
+		);
+		expect(await page.getByRole('radio', { checked: true }).count()).toBe(1);
+
+		// The exit is reachable without scrolling: inside the viewport, and
+		// outside the scrolling track so it can never scroll away.
+		const exit = page.getByRole('button', { name: /all places/i });
+		await expect(exit).toBeVisible();
+		const placement = await page.evaluate(() => {
+			const track = document.querySelector('[role="radiogroup"]');
+			const all = [...document.querySelectorAll('button')].find((b) =>
+				/all places/i.test(b.textContent ?? '')
+			);
+			if (!track || !all) throw new Error('missing switcher');
+			const box = all.getBoundingClientRect();
+			return {
+				insideTrack: track.contains(all),
+				withinViewport: box.right <= window.innerWidth && box.left >= 0,
+				// 28px visual, 44px hit area behind it.
+				height: Math.round(box.height),
+				hitsAbove: (() => {
+					const el = document.elementFromPoint(
+						box.x + box.width / 2,
+						box.top - 5
+					);
+					return !!el && (el === all || all.contains(el));
+				})()
+			};
+		});
+		expect(placement.insideTrack).toBe(false);
+		expect(placement.withinViewport).toBe(true);
+		expect(placement.hitsAbove).toBe(true);
+
+		// Still at rest: the sheet was never opened.
+		expect(await page.locator('input[type="search"]').count()).toBe(0);
+	});
+
+	test('tapping a method replaces the param instead of appending', async ({
+		page
+	}) => {
+		await openMap(page, { params: '?lightning', rows: NO_MATCH, viewport: PHONE });
+
+		await expect.poll(() => placesCount(page), { timeout: MARKER_LOAD_TIMEOUT }).toBe(0);
+		await page.getByRole('radio', { name: 'On-chain' }).click();
+
+		// ?onchain alone — never ?lightning&onchain, which would AND the two
+		// and guarantee an empty view.
+		await page.waitForURL(/\?onchain/, { timeout: MARKER_LOAD_TIMEOUT });
+		expect(page.url()).not.toMatch(/lightning/);
+	});
+
+	test('All places clears every payment param', async ({ page }) => {
+		await openMap(page, { params: '?lightning', rows: NO_MATCH, viewport: PHONE });
+
+		await expect.poll(() => placesCount(page), { timeout: MARKER_LOAD_TIMEOUT }).toBe(0);
+		await page.getByRole('button', { name: /all places/i }).click();
+
+		await page.waitForURL((url) => !/lightning|onchain|nfc/.test(url.href), {
+			timeout: MARKER_LOAD_TIMEOUT
+		});
+		// The unfiltered view has places again, so the note and switcher go.
+		await expect.poll(() => placesCount(page), { timeout: MARKER_LOAD_TIMEOUT }).toBe(3);
+		expect(await page.getByRole('radiogroup').count()).toBe(0);
+	});
+
+	test('a hand-written multi-param URL marks no method active', async ({
+		page
+	}) => {
+		await openMap(page, {
+			params: '?lightning&onchain',
+			rows: NO_MATCH,
+			viewport: PHONE
+		});
+
+		await expect.poll(() => placesCount(page), { timeout: MARKER_LOAD_TIMEOUT }).toBe(0);
+		await expect(page.getByRole('radiogroup')).toBeVisible();
+		// No option describes the AND combination, and the URL is left alone.
+		expect(await page.getByRole('radio', { checked: true }).count()).toBe(0);
+		expect(page.url()).toMatch(/lightning&onchain/);
+	});
+
+	test('the desktop bar carries the switcher at rest too', async ({ page }) => {
+		await openMap(page, { params: '?lightning', rows: NO_MATCH });
+
+		await expect.poll(() => placesCount(page), { timeout: MARKER_LOAD_TIMEOUT }).toBe(0);
+		await expect(page.getByText(NOT_CHECKED)).toBeVisible();
+		await expect(page.getByRole('radiogroup')).toBeVisible();
+		await expect(
+			page.getByRole('button', { name: /all places/i })
+		).toBeVisible();
+		// The panel is not mounted at rest on desktop.
+		expect(await page.locator('input[type="search"]').count()).toBe(0);
+	});
+
 	// The guard on #1424's decision: a running tally on every filtered view
 	// was rejected as noise to a visitor looking for somewhere to spend. The
 	// note belongs to the empty state and nowhere else.
@@ -208,5 +323,8 @@ test.describe('Map payment filter — unknown tags', () => {
 		// One-shot count, not toBeHidden(): a retrying assertion would wait
 		// out a note that renders a moment later and call it absent.
 		expect(await page.getByText(NOT_CHECKED).count()).toBe(0);
+		// The switcher shares the note's visibility rule exactly (#1430), so
+		// it must be just as absent here.
+		expect(await page.getByRole('radiogroup').count()).toBe(0);
 	});
 });
