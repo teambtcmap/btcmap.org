@@ -64,6 +64,45 @@ const choose = (method: PaymentMethod) => {
 	onselect(method);
 };
 
+// role="radio" promises the radiogroup keyboard contract, so it has to be
+// kept: one stop in the tab order and arrows moving between the options.
+// Without this the role was a lie — three tab stops and dead arrow keys.
+// (IssueFilterChips sidesteps it with aria-pressed toggles, but these are
+// mutually exclusive, so radio is the right role.)
+//
+// Arrows move focus WITHOUT selecting, and Space/Enter commits. Selection
+// here is a full page navigation, so the usual selection-follows-focus
+// variant would reload the map on every arrow press and throw focus away
+// — ARIA allows this variant precisely when selection is expensive.
+let pills = $state<HTMLButtonElement[]>([]);
+
+// The tab stop starts on the checked option, or the first one when a
+// hand-written multi-param URL leaves none checked — never "no stop at
+// all" — and then follows the arrows so tabbing away and back returns to
+// where the user was.
+let focused = $state<number | null>(null);
+const focusIndex = $derived(
+	focused ?? Math.max(ORDER.indexOf(active as PaymentMethod), 0),
+);
+
+const onKeydown = (event: KeyboardEvent, index: number) => {
+	const step =
+		event.key === "ArrowRight" || event.key === "ArrowDown"
+			? 1
+			: event.key === "ArrowLeft" || event.key === "ArrowUp"
+				? -1
+				: event.key === "Home"
+					? -index
+					: event.key === "End"
+						? ORDER.length - 1 - index
+						: 0;
+	if (step === 0 && event.key !== "Home" && event.key !== "End") return;
+	event.preventDefault();
+	const next = (index + step + ORDER.length) % ORDER.length;
+	focused = next;
+	pills[next]?.focus();
+};
+
 const showAll = () => {
 	trackEvent("payment_show_all");
 	onselect(null);
@@ -84,16 +123,19 @@ const showAll = () => {
 			aria-label={$_('paymentSwitch.label')}
 			class="flex items-center gap-2 overflow-x-auto [scrollbar-width:none] md:flex-wrap md:overflow-visible"
 		>
-			{#each ORDER as method (method)}
+			{#each ORDER as method, index (method)}
 				{@const isActive = method === active}
 				<!-- 28px visual with a transparent 44px hit area behind it, so
 				     the pill matches the existing control without shipping a
 				     28px target into a phone sheet. -->
 				<button
+					bind:this={pills[index]}
 					type="button"
 					role="radio"
 					aria-checked={isActive}
+					tabindex={index === focusIndex ? 0 : -1}
 					onclick={() => choose(method)}
+					onkeydown={(event) => onKeydown(event, index)}
 					class="relative flex shrink-0 items-center gap-2 rounded-full border px-3 py-1 text-sm whitespace-nowrap transition-colors after:absolute after:inset-x-0 after:top-1/2 after:h-11 after:-translate-y-1/2 after:content-[''] focus-visible:ring-2 focus-visible:ring-link focus-visible:ring-offset-1 focus-visible:outline-none dark:focus-visible:ring-offset-dark {isActive
 						? 'border-link bg-link/10 text-primary dark:border-link dark:text-white'
 						: 'border-gray-300 text-body hover:border-link dark:border-white/20 dark:text-white/80 dark:hover:text-white'}"

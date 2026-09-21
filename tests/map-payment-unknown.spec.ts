@@ -275,6 +275,31 @@ test.describe('Map payment filter — unknown tags', () => {
 		expect(srcs.every((s) => s?.endsWith('-highlight-dark.svg'))).toBe(true);
 	});
 
+	// role="radio" promises a keyboard contract: one tab stop, arrows between
+	// the options. Arrows move focus WITHOUT selecting here, because
+	// selecting is a full page navigation.
+	test('the switcher keeps the radiogroup keyboard contract', async ({
+		page
+	}) => {
+		await openMap(page, { params: '?lightning', rows: NO_MATCH, viewport: PHONE });
+
+		await expect.poll(() => placesCount(page), { timeout: MARKER_LOAD_TIMEOUT }).toBe(0);
+		await expect(page.getByRole('radiogroup')).toBeVisible();
+
+		// Exactly one of the three is in the tab order.
+		const tabIndexes = await page.evaluate(() =>
+			[...document.querySelectorAll('[role="radio"]')].map((r) => r.tabIndex)
+		);
+		expect(tabIndexes.filter((t) => t === 0)).toHaveLength(1);
+
+		const before = page.url();
+		await page.getByRole('radio', { name: 'Lightning' }).focus();
+		await page.keyboard.press('ArrowRight');
+		await expect(page.getByRole('radio', { name: 'On-chain' })).toBeFocused();
+		// Moving is not choosing: the filter has not changed.
+		expect(page.url()).toBe(before);
+	});
+
 	test('tapping a method replaces the param instead of appending', async ({
 		page
 	}) => {
