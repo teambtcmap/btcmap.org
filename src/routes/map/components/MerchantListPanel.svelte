@@ -940,9 +940,15 @@ onDestroy(() => {
 			<!-- Peek: input facade — opens the sheet without focusing a real input
 			     (keyboard stays down until the user taps the real input and types).
 			     The whole facade is also a swipe surface like the drawer's peek. -->
+			<!-- Column only while the peek carries the note: stacking it
+			     unconditionally bottom-aligned the bare facade and shifted it
+			     ~10px down in every peek, filtered or not, which #1427 never
+			     asked for. Without the note the facade centres as before. -->
 			<div
 				id="merchant-sheet-content"
-				class="flex flex-1 flex-col justify-end gap-2 px-3 pb-[max(0.75rem,env(safe-area-inset-bottom))]"
+				class="flex flex-1 px-3 pb-[max(0.75rem,env(safe-area-inset-bottom))] {showPaymentRestNote
+					? 'flex-col justify-end gap-2'
+					: 'items-center'}"
 			>
 				{#if showPaymentRestNote}
 					<!-- #1427: the filter emptied the view and the sheet is shut,

@@ -363,6 +363,31 @@ test.describe('Map payment filter — unknown tags', () => {
 		expect(overflow).toBeLessThanOrEqual(1);
 	});
 
+	// The peek carrying a note must not change the peek that carries none.
+	// Stacking the container unconditionally bottom-aligned the bare facade
+	// and moved it ~10px down on every unfiltered map.
+	test('an unfiltered peek keeps the facade centred', async ({ page }) => {
+		await openMap(page, { params: '', rows: ONE_MATCH, viewport: PHONE });
+
+		const geometry = await page.evaluate(() => {
+			const sheet = document.querySelector('section[role="complementary"]');
+			const facade = [...document.querySelectorAll('button')].find((b) =>
+				/search places/i.test(b.textContent ?? '')
+			);
+			if (!sheet || !facade) throw new Error('missing peek');
+			const s = sheet.getBoundingClientRect();
+			const f = facade.getBoundingClientRect();
+			return {
+				gapAbove: f.top - s.top,
+				gapBelow: s.bottom - f.bottom
+			};
+		});
+
+		// Centred within the peek rather than pinned to its bottom edge:
+		// the two gaps stay within a few px of each other.
+		expect(Math.abs(geometry.gapAbove - geometry.gapBelow)).toBeLessThan(14);
+	});
+
 	// The guard on #1424's decision: a running tally on every filtered view
 	// was rejected as noise to a visitor looking for somewhere to spend. The
 	// note belongs to the empty state and nowhere else.
