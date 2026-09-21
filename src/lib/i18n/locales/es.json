@@ -70,7 +70,7 @@
 		"showAll": "Mostrar todos",
 		"clear": "Limpiar búsqueda",
 		"noVisible": "No hay comercios visibles en la vista actual",
-		"noPaymentRecorded": "Aquí no hay lugares con estos pagos registrados. {count} lugares cerca no se han comprobado.",
+		"noPaymentRecorded": "Aquí no hay lugares con estos pagos registrados. {count} lugares no se han comprobado.",
 		"nearbyCount": "{count} cerca",
 		"placeholder": "Buscar...",
 		"ariaLabel": "Buscar en tabla de clasificación",

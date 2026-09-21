@@ -67,10 +67,11 @@ export const readPaymentTag = (value: string | undefined): PaymentTagState => {
 	}
 };
 
-// Why the filter kept or dropped a place. "no" is a recorded refusal;
-// "unknown" is missing evidence, which is actionable — it invites someone to
-// verify — and is the number the panel reports rather than hides.
-export type PaymentFilterState = "match" | "no" | "unknown";
+// Why the filter kept or dropped a place. "refused" is a recorded no — not
+// merely the absence of a match, which is what "unknown" covers: missing
+// evidence, actionable because it invites someone to verify, and the number
+// the panel reports rather than hides.
+export type PaymentFilterState = "match" | "refused" | "unknown";
 
 // AND semantics: a place must accept EVERY selected method.
 export const placePaymentFilterState = (
@@ -82,7 +83,7 @@ export const placePaymentFilterState = (
 		const state = readPaymentTag(place[PAYMENT_METHOD_TAG[method]]);
 		// A refusal on any selected method settles it, whatever the others
 		// say: the place was checked, so it is not a verification lead.
-		if (state === "no") return "no";
+		if (state === "no") return "refused";
 		if (state === "unknown") unknown = true;
 	}
 	return unknown ? "unknown" : "match";

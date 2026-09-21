@@ -30,7 +30,7 @@ test.describe('Map payment filter — unknown tags', () => {
 	];
 	const NO_MATCH = [{ id: 2, 'osm:payment:lightning_contactless': 'no' }];
 
-	const NOT_CHECKED = /nearby places haven't been checked/;
+	const NOT_CHECKED = /places haven't been checked/;
 
 	const openMap = async (
 		page: Page,
@@ -64,9 +64,9 @@ test.describe('Map payment filter — unknown tags', () => {
 			() => (window as unknown as { __mapPlacesCount?: number }).__mapPlacesCount ?? 0
 		);
 
-	// Zoom 17 is the local-marker path (MERCHANT_LIST_MIN_ZOOM is 15), which is
-	// where the page narrows by payment itself — the path whose count the store
-	// cannot derive on its own.
+	// Zoom 17 is the local-marker path (MERCHANT_LIST_MIN_ZOOM is 15): the rows
+	// come from the bulk feed via the page, so this is the path where the count
+	// depends on the page handing the store rows it can still filter.
 	test('an empty filtered view says nobody has checked, not that nothing is here', async ({
 		page
 	}) => {
@@ -79,7 +79,7 @@ test.describe('Map payment filter — unknown tags', () => {
 		// Two of the three fixture places have nothing recorded; the third is a
 		// recorded refusal and must NOT be counted among them.
 		await expect(page.getByText(NOT_CHECKED)).toHaveText(
-			/Nothing here is recorded as accepting these payments\. 2 nearby places haven't been checked\./
+			/Nothing here is recorded as accepting these payments\. 2 places haven't been checked\./
 		);
 		// The misleading line it replaces is gone.
 		expect(await page.getByText('No merchants visible in current view').count()).toBe(0);

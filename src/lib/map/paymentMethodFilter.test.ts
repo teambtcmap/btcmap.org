@@ -104,7 +104,7 @@ describe("placePaymentFilterState", () => {
 		for (const value of ["no", "No", " NO "]) {
 			expect(
 				placePaymentFilterState(tagged(value), new Set(["lightning"])),
-			).toBe("no");
+			).toBe("refused");
 		}
 		for (const value of ["y", "yed", "2024-01-01"]) {
 			expect(
@@ -127,7 +127,7 @@ describe("placePaymentFilterState", () => {
 		} as unknown as Place;
 		expect(
 			placePaymentFilterState(mixed, new Set(["onchain", "lightning"])),
-		).toBe("no");
+		).toBe("refused");
 	});
 
 	it("maps nfc onto lightning_contactless only", () => {

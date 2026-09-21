@@ -512,32 +512,19 @@ const updateMerchantList = (opts?: { force?: boolean }) => {
 					p.lon <= buffered.east,
 			);
 			let listed = boostsOnly ? visible.filter(isBoosted) : visible;
-			// The store's pipeline narrows the list itself (setMerchants
-			// consumes state.paymentMethods), but the ?issues chip tallies
-			// below are computed from THIS page-side snapshot — narrow it
-			// here too so the chips can never count places the embed filter
-			// hides. Same readiness gate as the pipeline: inert until the
+			// The payment filter is NOT applied here. The store's pipeline
+			// applies it and counts the unknowns it drops (#1423), and it can
+			// only count what it receives — narrowing first left it nothing to
+			// count. Both filters are per-place predicates, so the store's
+			// result is identical either way, and its count then lands on the
+			// population selectVisiblePlaces documents: post-recency,
+			// post-issues (applied just below), pre-category.
+			// The ?issues chip tallies are the one thing that still needs a
+			// payment-narrowed snapshot, and it takes one without touching the
+			// list. Same readiness gate as the pipeline: inert until the
 			// payment-tag enrichment lands.
-			// Narrowing here also leaves the store's own pass nothing to
-			// count, so the excluded unknowns are handed over with the rows
-			// (#1423). Two passes on purpose: the LIST keeps every row in the
-			// viewport (the store re-applies the recency window as it renders
-			// them), while the COUNT is taken inside that window, so the note
-			// describes the same population as the chip counts instead of
-			// places the window had already hidden.
-			let excludedUnknownPayments = 0;
-			if (paymentMethods && get(paymentTagsLoaded)) {
-				const { verifiedWithinYears } = get(merchantList);
-				const windowed =
-					verifiedWithinYears == null || get(verifiedDatesLoaded)
-						? filterPlacesByRecency(listed, verifiedWithinYears)
-						: listed;
-				excludedUnknownPayments = applyPaymentMethodFilter(
-					windowed,
-					paymentMethods,
-				).unknown;
-				listed = applyPaymentMethodFilter(listed, paymentMethods).matched;
-			}
+			const activePaymentMethods =
+				paymentMethods && get(paymentTagsLoaded) ? paymentMethods : null;
 			// Same readiness gate as the marker pipeline: before the
 			// verified_at enrichment lands, the list stays unfiltered
 			// rather than flagging every bulk row as not_verified.
@@ -548,18 +535,18 @@ const updateMerchantList = (opts?: { force?: boolean }) => {
 				// AFTER the recency window, matching the pin pipeline
 				// (selectVisiblePlaces applies recency before the issue filter),
 				// so a chip can never promise pins the window excludes.
+				const windowed = filterPlacesByRecency(
+					listed,
+					get(merchantList).verifiedWithinYears,
+				);
 				issueCounts = countIssuesByCode(
-					filterPlacesByRecency(listed, get(merchantList).verifiedWithinYears),
+					activePaymentMethods
+						? applyPaymentMethodFilter(windowed, activePaymentMethods).matched
+						: windowed,
 				);
 				listed = listed.filter((p) => placeMatchesIssueCodes(p, issueCodes));
 			}
-			merchantList.setMerchants(
-				listed,
-				center.lat,
-				center.lng,
-				undefined,
-				excludedUnknownPayments,
-			);
+			merchantList.setMerchants(listed, center.lat, center.lng);
 			// E2E test hook, same idea as __mapPlacesCount: the payment-filter
 			// spec needs a DOM-independent way to pin that the list surface
 			// narrows with the pins (the wiring the #398 rewrite silently
@@ -567,9 +554,12 @@ const updateMerchantList = (opts?: { force?: boolean }) => {
 			// rewrite stops routing filtered sessions through it. No-op
 			// outside tests.
 			if (typeof window !== "undefined") {
+				// Read back what the store published rather than the rows handed
+				// to it: the payment filter runs inside the store now, so the
+				// pre-filter length would no longer describe the list surface.
 				(
 					window as unknown as { __nearbyListCount?: number }
-				).__nearbyListCount = listed.length;
+				).__nearbyListCount = get(merchantList).totalCount;
 			}
 			if (listOpen || currentZoom >= LABEL_VISIBLE_ZOOM) {
 				if (allowHeavyFetch || currentZoom >= LABEL_VISIBLE_ZOOM) {

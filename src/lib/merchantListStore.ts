@@ -75,8 +75,8 @@ export type MerchantListState = {
 	// How many nearby places the payment filter excluded for lack of evidence
 	// rather than for a recorded refusal (#1423). Written by every nearby path
 	// that applies the filter — local markers, radius list, count badge — so
-	// the panel's note always describes the rows it sits above. 0 in search
-	// mode, where the panel recomputes it from its own pipeline call.
+	// the message always describes the rows it sits above. 0 in search mode,
+	// where the panel recomputes it from its own pipeline call.
 	unknownPaymentCount: number;
 };
 
@@ -403,18 +403,14 @@ function createMerchantListStore() {
 		},
 
 		// Set merchants from locally-loaded markers (used at zoom 15-16).
-		// `excludedUnknownPayments` is what the CALLER already dropped for lack
-		// of payment evidence before handing the rows over: the map page has to
-		// narrow by payment itself (its ?issues chip tallies are computed on the
-		// narrowed set), which leaves this pipeline nothing to count. Summed, so
-		// the panel's note is right whether the filter ran here, there, or not
-		// at all (#1423).
+		// Callers hand over rows NOT narrowed by payment: this pipeline applies
+		// that filter and counts the unknowns it drops (#1423), and it can only
+		// count what it is given.
 		setMerchants(
 			merchants: Place[],
 			centerLat?: number,
 			centerLon?: number,
 			limit: number = MERCHANT_LIST_MAX_ITEMS,
-			excludedUnknownPayments: number = 0,
 		) {
 			const { selectedCategory, verifiedWithinYears, paymentMethods } =
 				get(store);
@@ -454,7 +450,7 @@ function createMerchantListStore() {
 				listError: false,
 				categoryCounts: counts,
 				selectedCategory: effectiveCategory,
-				unknownPaymentCount: unknownPayments + excludedUnknownPayments,
+				unknownPaymentCount: unknownPayments,
 			}));
 		},
 
