@@ -134,8 +134,8 @@ test.describe('In-map add form', () => {
 			if (request.url().includes('nominatim.openstreetmap.org')) lookups++;
 		});
 		await openForm(page);
-		const chip = page.getByText('Pinned here').locator('..');
-		await expect(chip).toContainText('42.27625, 42.70242');
+		const pinLine = page.getByText(/Pinned at/);
+		await expect(pinLine).toContainText('42.27625, 42.70242');
 		await expect(page.locator('#address')).toHaveValue(/Freiheitsstraße/);
 		await page.locator('#name').fill('Satoshi Comics');
 
@@ -148,7 +148,7 @@ test.describe('In-map add form', () => {
 		await expect(page).not.toHaveURL(/\/42\.702\d*$/);
 		await page.waitForTimeout(600);
 		// Frozen: same pin, no second lookup (one-shot reads after settling).
-		await expect(chip).toContainText('42.27625, 42.70242');
+		await expect(pinLine).toContainText('42.27625, 42.70242');
 		expect(lookups).toBe(1);
 
 		await page.getByRole('button', { name: 'Move pin' }).click();
@@ -166,11 +166,11 @@ test.describe('In-map add form', () => {
 		await page.waitForTimeout(600);
 		await page.getByRole('button', { name: 'Use this position' }).click();
 
-		// Back on the same form instance: typed text survived, the chip
+		// Back on the same form instance: typed text survived, the pin line
 		// states the new pin, and the address suggestion re-ran once.
 		await expect(page.locator('#name')).toBeVisible();
 		await expect(page.locator('#name')).toHaveValue('Satoshi Comics');
-		await expect(chip).not.toContainText('42.70242');
+		await expect(pinLine).not.toContainText('42.70242');
 		await expect(page).toHaveURL(/\/map\?add=form/);
 		await expect.poll(() => lookups).toBe(2);
 	});
@@ -179,8 +179,8 @@ test.describe('In-map add form', () => {
 		page
 	}) => {
 		await openForm(page);
-		const chip = page.getByText('Pinned here').locator('..');
-		await expect(chip).toContainText('42.27625, 42.70242');
+		const pinLine = page.getByText(/Pinned at/);
+		await expect(pinLine).toContainText('42.27625, 42.70242');
 		// Pan away so re-centring on the pin has distance to cover.
 		await page.mouse.move(640, 500);
 		await page.mouse.down();
@@ -197,7 +197,7 @@ test.describe('In-map add form', () => {
 		await page.keyboard.press('Enter');
 		await page.keyboard.press('Enter');
 		await expect(page.locator('#name')).toBeVisible();
-		await expect(chip).toContainText('42.27625, 42.70242');
+		await expect(pinLine).toContainText('42.27625, 42.70242');
 	});
 
 	test('below detail zoom, Move pin focuses the visible Zoom in action', async ({

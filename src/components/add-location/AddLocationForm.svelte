@@ -17,6 +17,7 @@ import TextArea from "$components/form/TextArea.svelte";
 import TextField from "$components/form/TextField.svelte";
 import Icon from "$components/Icon.svelte";
 import NostrAvatar from "$components/NostrAvatar.svelte";
+import PlacementPinIcon from "$components/PlacementPinIcon.svelte";
 import PrimaryButton from "$components/PrimaryButton.svelte";
 import {
 	DETAILS_FIELDS,
@@ -69,10 +70,31 @@ type Props = {
 	// Fires on edit↔review transitions so the host can adapt its chrome
 	// (the header's step label, and the edit-only panel content).
 	onstepchange?: (step: "edit" | "review") => void;
+	// Hand the pin back to placement mode (#1425). It lives under the
+	// address because that is the pin in readable form: doubt about a
+	// position arrives while reading a street name, not a coordinate.
+	onmovepin: () => void;
+	// True while the host re-places the pin — this form is hidden, not
+	// unmounted, which is what lets the "keeps your answers" clause be
+	// true. Focus returns to Move pin when it clears.
+	hidden?: boolean;
 };
-let { coords, onsuccess, onstepchange }: Props = $props();
+let {
+	coords,
+	onsuccess,
+	onstepchange,
+	onmovepin,
+	hidden = false,
+}: Props = $props();
 
 let step = $state<"edit" | "review">("edit");
+
+let movePinButton = $state<HTMLButtonElement>();
+let wasHidden = false;
+$effect(() => {
+	if (wasHidden && !hidden) movePinButton?.focus();
+	wasHidden = hidden;
+});
 
 // The captcha is fetched when the review step opens, not on mount — the
 // edit step needs none of it, and abandoners cost no fetches.
@@ -125,6 +147,19 @@ let lookupToken = 0;
 // would double-count.
 let lastLookupLat: number | null = null;
 let lastLookupLong: number | null = null;
+
+// What the field is allowed to say about the pin (#1425). While a lookup
+// is in flight it says nothing: naming an outcome before one exists is
+// how the old always-on hint came to claim a suggestion over an empty
+// box. Afterwards `addressRequired` *is* the hit — OSM only locks the
+// field when it knew an address here.
+const addressHintKey = $derived(
+	addressPending
+		? undefined
+		: addressRequired
+			? "addLocation.addressSuggestedHint"
+			: "addLocation.addressNoneFoundHint",
+);
 
 const suggestAddress = async (lat: number, long: number) => {
 	if (lat === lastLookupLat && long === lastLookupLong) return;
@@ -536,11 +571,58 @@ onMount(() => {
 					placeholder={addressPending
 						? $_('addLocation.addressLookupPending')
 						: $_('addLocation.addressPlaceholder')}
+					aria-describedby={!fieldError(field) && addressHintKey
+						? 'address-hint'
+						: undefined}
 					{...inputProps(field)}
 					bind:element={addressInput}
 				>
-					{#snippet hint()}
-						<FormHelperText text={$_('addLocation.addressSuggestedHint')} />
+					<!-- Below the input, not above it: the hint reports on what
+					     the field now holds, and the action to fix it follows
+					     the doubt rather than preceding it (#1425). -->
+					{#snippet children()}
+						<!-- The outcome arrives after the field is already
+						     reachable, and a description swapped in under a
+						     focused input is not announced. The region is mounted
+						     from the start and stays empty until the lookup lands
+						     — one that appears together with its content has
+						     nothing to announce. Silent during review: the edit
+						     block is display:none, so it leaves the a11y tree. -->
+						<div id="address-hint-live" aria-live="polite" aria-atomic="true">
+							{#if addressHintKey}
+								<FormHelperText
+									id="address-hint"
+									text={$_(addressHintKey)}
+									icon={addressRequired ? undefined : 'info_outline'}
+								/>
+							{/if}
+						</div>
+						<!-- The pin stated next to the one control that changes
+						     it: the coordinates are context for Move pin, not the
+						     anchor the action hangs off. Wraps on narrow screens
+						     rather than squeezing the pill. -->
+						<div class="mt-2.5 flex flex-wrap items-center gap-x-3 gap-y-2">
+							<p
+								class="flex items-center gap-1.5 text-sm text-body tabular-nums dark:text-offwhite"
+							>
+								<PlacementPinIcon width={14} class="shrink-0" />
+								{$_('addLocation.pinnedAt', {
+									values: { coords: formatPinCoords(coords.lat, coords.long) }
+								})}
+							</p>
+							<!-- 34px so it sits under its field instead of competing
+							     with the form's filled primary; the transparent
+							     ::after keeps the tap target at 44px. -->
+							<button
+								bind:this={movePinButton}
+								type="button"
+								onclick={onmovepin}
+								class="relative inline-flex h-[34px] items-center gap-1.5 rounded-full border border-link px-3 text-[13px] font-semibold whitespace-nowrap text-link transition-colors after:absolute after:inset-x-0 after:top-1/2 after:h-11 after:-translate-y-1/2 after:content-[''] hover:bg-link hover:text-white focus:outline-link"
+							>
+								<Icon type="material" icon="my_location" w="15" h="15" />
+								{$_('addLocation.movePin')}
+							</button>
+						</div>
 					{/snippet}
 				</TextField>
 			{/snippet}
