@@ -314,6 +314,31 @@ test.describe('Map payment filter — unknown tags', () => {
 		).toBeVisible();
 		// The panel is not mounted at rest on desktop.
 		expect(await page.locator('input[type="search"]').count()).toBe(0);
+
+		// Every option must sit inside the card, which is a fixed w-80. An
+		// earlier version let the track size to its content, so Contactless
+		// spilled 58px out over the map — and a check against the scroll
+		// track rather than the card happily passed while it did.
+		const overflow = await page.evaluate(() => {
+			const group = document.querySelector('[role="radiogroup"]');
+			if (!group) throw new Error('no switcher');
+			let card: HTMLElement | null = group.parentElement as HTMLElement;
+			while (card && !/rounded-lg/.test(card.className ?? '')) {
+				card = card.parentElement as HTMLElement | null;
+			}
+			if (!card) throw new Error('no card');
+			const right = card.getBoundingClientRect().right;
+			const controls = [
+				...document.querySelectorAll('[role="radio"]'),
+				...[...document.querySelectorAll('button')].filter((b) =>
+					/all places/i.test(b.textContent ?? '')
+				)
+			];
+			return Math.max(
+				...controls.map((c) => c.getBoundingClientRect().right - right)
+			);
+		});
+		expect(overflow).toBeLessThanOrEqual(1);
 	});
 
 	// The guard on #1424's decision: a running tally on every filtered view

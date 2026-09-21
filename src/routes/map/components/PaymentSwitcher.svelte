@@ -56,13 +56,15 @@ const showAll = () => {
 };
 </script>
 
-<!-- Wraps instead of scrolling from md up. The desktop card is 320px wide,
-     which does NOT fit three method pills plus the exit on one line — it
-     clipped "On-chain" and put Contactless out of reach behind a fade that
-     is itself hidden at this width. Scrolling is the mobile answer, where
-     the fade and chevron say so; here the card just grows. -->
-<div class="flex items-center gap-2 md:flex-wrap {className}">
-	<div class="relative min-w-0 flex-1 md:flex-none">
+<!-- Wraps instead of scrolling from md up. The desktop card is a fixed
+     320px, which fits neither three method pills nor three plus the exit on
+     one line. Scrolling is the mobile answer, where the fade and chevron
+     say so; on desktop the bar stacks and the card grows instead.
+     The track must stay width-bounded by the card here (w-full, not an
+     auto width): sized to its content it simply spilled the last pill out
+     over the map. -->
+<div class="flex items-center gap-2 md:flex-col md:items-start {className}">
+	<div class="relative min-w-0 flex-1 md:w-full md:flex-none">
 		<div
 			role="radiogroup"
 			aria-label={$_('paymentSwitch.label')}
