@@ -389,9 +389,11 @@ $: searchSelection = selectVisiblePlaces({
 });
 $: filteredSearchResults = searchSelection.selection;
 // Places the payment filter dropped for lack of evidence rather than for a
-// recorded refusal (#1423) — reported instead of vanishing silently. Search
-// reads its own pipeline call, which re-runs here on every recency or
-// category change; the nearby paths write the store as they filter.
+// recorded refusal (#1423). Only the empty state reads this: with results on
+// screen the number is noise to a visitor, but with none it's the difference
+// between "no merchants here" and "nobody has checked here". Search reads its
+// own pipeline call, which re-runs here on every recency or category change;
+// the nearby paths write the store as they filter.
 $: unknownPaymentCount =
 	mode === "search"
 		? searchSelection.unknownPayments
@@ -730,22 +732,6 @@ onDestroy(() => {
 				{/if}
 			</div>
 
-			<!-- The payment filter excludes places whose tags say nothing either
-			     way. Report them rather than letting them vanish: an unknown is
-			     an invitation to verify, unlike a recorded refusal (#1423). -->
-			{#if unknownPaymentCount > 0}
-				<!-- Its own live region: aria-live does not reach siblings, so
-				     without this the count above is announced on every pan while
-				     the exclusion behind it never is — the one thing this note
-				     exists to say. Two polite regions queue, they don't collide. -->
-				<p
-					class="mt-1 text-xs text-body/80 dark:text-white/60"
-					aria-live="polite"
-				>
-					{$_('search.paymentUnknown', { values: { count: unknownPaymentCount } })}
-				</p>
-			{/if}
-
 			<!-- Location enable button - nearby mode only -->
 			{#if mode === 'nearby' && !$userLocation.location && !locationRequestDismissed}
 				<div class="mt-3 flex items-center gap-2 rounded-lg border border-gray-200 p-2 dark:border-white/10">
@@ -871,7 +857,20 @@ onDestroy(() => {
 				</div>
 			{:else if nearbyStatus === 'empty'}
 				<div class="px-3 py-8 text-center text-sm text-body dark:text-white/70">
-					{$_('search.noVisible')}
+					{#if unknownPaymentCount > 0}
+						<!-- "Nothing visible" is a lie of omission while the payment
+						     filter is hiding places whose tags say nothing either
+						     way: an empty view reads as "no merchants here" when the
+						     truth is that nobody has recorded it here (#1423). This
+						     is the one moment the distinction changes what the
+						     visitor should conclude, so it's the only place the
+						     excluded-unknown count is surfaced. -->
+						{$_('search.noPaymentRecorded', {
+							values: { count: unknownPaymentCount }
+						})}
+					{:else}
+						{$_('search.noVisible')}
+					{/if}
 				</div>
 			{:else}
 				<!-- Nearby mode: merchant list ('truncated' and 'ok') -->
