@@ -8,25 +8,35 @@ import PaymentRestNote from "./PaymentRestNote.svelte";
 import PaymentSwitcher from "./PaymentSwitcher.svelte";
 import SearchFacade from "./SearchFacade.svelte";
 
-// Activating the facade is the page's job: it opens the panel, refreshes the
-// list, and moves focus into the panel's real search input.
-export let onActivate: (() => void) | undefined = undefined;
-export let nearbyCount = 0;
-// The payment filter emptied the view (#1427). At rest the panel isn't
-// mounted at all on desktop, so without this the only thing that could
-// report it is a count pill that formatNearbyPillCount blanks at zero.
-export let showPaymentNote = false;
-export let unknownPaymentCount = 0;
-// Payment switcher inside the note's card (#1430) — nothing new floats
-// over the map, and the bar grows with its content, so no height plumbing.
-export let activePaymentMethod: PaymentMethod | null = null;
-export let onSwitchPayment: (method: PaymentMethod | null) => void = () => {};
+type Props = {
+	// Activating the facade is the page's job: it opens the panel, refreshes
+	// the list, and moves focus into the panel's real search input.
+	onActivate?: () => void;
+	nearbyCount?: number;
+	// The payment filter emptied the view (#1427). At rest the panel isn't
+	// mounted at all on desktop, so without this the only thing that could
+	// report it is a count pill that formatNearbyPillCount blanks at zero.
+	showPaymentNote?: boolean;
+	unknownPaymentCount?: number;
+	// Payment switcher inside the note's card (#1430) — nothing new floats
+	// over the map, and the bar grows with its content, so no height
+	// plumbing. Required alongside the note: a no-op default would render
+	// the switcher as a dead control if the wiring were ever dropped.
+	activePaymentMethod: PaymentMethod | null;
+	onSwitchPayment: (method: PaymentMethod | null) => void;
+};
+let {
+	onActivate,
+	nearbyCount = 0,
+	showPaymentNote = false,
+	unknownPaymentCount = 0,
+	activePaymentMethod,
+	onSwitchPayment,
+}: Props = $props();
 
-// Store subscriptions
-$: isOpen = $merchantList.isOpen;
-
+const isOpen = $derived($merchantList.isOpen);
 // Count rides a pill inside the facade while the panel is closed
-$: pillCount = formatNearbyPillCount(nearbyCount);
+const pillCount = $derived(formatNearbyPillCount(nearbyCount));
 
 function handleActivate() {
 	trackEvent("search_bar_tap_expand");
