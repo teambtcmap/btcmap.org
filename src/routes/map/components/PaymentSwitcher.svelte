@@ -3,6 +3,7 @@ import Icon from "$components/Icon.svelte";
 import { trackEvent } from "$lib/analytics";
 import { _ } from "$lib/i18n";
 import type { PaymentMethod } from "$lib/map/paymentMethodFilter";
+import { theme } from "$lib/theme";
 
 // The payment switcher that rides the empty-state note (#1430). The note
 // tells the reader the view is filtered; without this it gives them no way
@@ -26,10 +27,23 @@ type Props = {
 };
 let { active, onselect, class: className = "" }: Props = $props();
 
-const ICONS: Record<PaymentMethod, string> = {
-	lightning: "/icons/ln-highlight.svg",
-	onchain: "/icons/btc-highlight.svg",
-	nfc: "/icons/nfc-highlight.svg",
+// The -highlight glyphs are stroked #1C4347, which is all but invisible on
+// the dark card, so they swap by theme exactly as PaymentMethodPill does.
+// IssueFilterChips, whose markup this borrows, uses theme-independent
+// colour dots and so never needed this.
+const ICONS: Record<PaymentMethod, { light: string; dark: string }> = {
+	lightning: {
+		light: "/icons/ln-highlight.svg",
+		dark: "/icons/ln-highlight-dark.svg",
+	},
+	onchain: {
+		light: "/icons/btc-highlight.svg",
+		dark: "/icons/btc-highlight-dark.svg",
+	},
+	nfc: {
+		light: "/icons/nfc-highlight.svg",
+		dark: "/icons/nfc-highlight-dark.svg",
+	},
 };
 
 // Reuses the add-location form's labels rather than minting parallel
@@ -85,7 +99,7 @@ const showAll = () => {
 						: 'border-gray-300 text-body hover:border-link dark:border-white/20 dark:text-white/80 dark:hover:text-white'}"
 				>
 					<img
-						src={ICONS[method]}
+						src={$theme === "dark" ? ICONS[method].dark : ICONS[method].light}
 						alt=""
 						class="h-4 w-4 shrink-0 {isActive ? '' : 'opacity-40'}"
 					/>

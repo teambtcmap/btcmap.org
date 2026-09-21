@@ -253,6 +253,28 @@ test.describe('Map payment filter — unknown tags', () => {
 		expect(await page.locator('input[type="search"]').count()).toBe(0);
 	});
 
+	// The -highlight glyphs are stroked #1C4347 and sit on a dark card, so
+	// they have to swap with the theme like every other payment icon does.
+	test('the switcher icons follow the theme', async ({ page }) => {
+		await page.emulateMedia({ colorScheme: 'dark' });
+		await page.addInitScript(() => {
+			try {
+				localStorage.theme = 'dark';
+			} catch {}
+		});
+		await openMap(page, { params: '?lightning', rows: NO_MATCH, viewport: PHONE });
+
+		await expect.poll(() => placesCount(page), { timeout: MARKER_LOAD_TIMEOUT }).toBe(0);
+		await expect(page.getByRole('radiogroup')).toBeVisible();
+
+		const srcs = await page.evaluate(() =>
+			[...document.querySelectorAll('[role="radio"] img')].map((i) =>
+				i.getAttribute('src')
+			)
+		);
+		expect(srcs.every((s) => s?.endsWith('-highlight-dark.svg'))).toBe(true);
+	});
+
 	test('tapping a method replaces the param instead of appending', async ({
 		page
 	}) => {
