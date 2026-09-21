@@ -162,6 +162,39 @@ test.describe('Map payment filter — unknown tags', () => {
 		expect(await page.locator('input[type="search"]').count()).toBe(0);
 	});
 
+	// The grown peek has to take the bottom map chrome up with it. The
+	// scale bar, the attribution credit and the tile indicator are lifted by
+	// --search-sheet-peek-height, which was published once at mount from the
+	// 88px constant — so a taller sheet silently sat on top of them, OSM
+	// attribution included.
+	test('the grown peek lifts the bottom map chrome instead of covering it', async ({
+		page
+	}) => {
+		await openMap(page, { params: '?nfc', rows: NO_MATCH, viewport: PHONE });
+
+		await expect.poll(() => placesCount(page), { timeout: MARKER_LOAD_TIMEOUT }).toBe(0);
+		await expect(page.getByText(NOT_CHECKED)).toBeVisible();
+
+		// One synchronous pass: boundingBox() scrolls its own element into
+		// view, so separate calls compare different scroll offsets.
+		const geometry = await page.evaluate(() => {
+			const rect = (selector: string) => {
+				const el = document.querySelector(selector);
+				if (!el) throw new Error(`missing ${selector}`);
+				const r = el.getBoundingClientRect();
+				return { top: r.top, bottom: r.bottom };
+			};
+			return {
+				sheet: rect('section[role="complementary"]'),
+				left: rect('.maplibregl-ctrl-bottom-left'),
+				right: rect('.maplibregl-ctrl-bottom-right')
+			};
+		});
+
+		expect(geometry.left.bottom).toBeLessThanOrEqual(geometry.sheet.top);
+		expect(geometry.right.bottom).toBeLessThanOrEqual(geometry.sheet.top);
+	});
+
 	// The guard on #1424's decision: a running tally on every filtered view
 	// was rejected as noise to a visitor looking for somewhere to spend. The
 	// note belongs to the empty state and nowhere else.

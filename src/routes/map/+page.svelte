@@ -33,7 +33,10 @@ import {
 	NEARBY_RADIUS_MULTIPLIER,
 	PANEL_DRAWER_GAP,
 } from "$lib/constants";
-import { SEARCH_SHEET_PEEK_HEIGHT } from "$lib/drawerConfig";
+import {
+	PAYMENT_NOTE_PEEK_EXTRA,
+	SEARCH_SHEET_PEEK_HEIGHT,
+} from "$lib/drawerConfig";
 import { _, getDisplayLang, locale } from "$lib/i18n";
 import {
 	BASEMAPS,
@@ -488,7 +491,7 @@ $: listBehavior =
 // floating bar is the only surface that can report a view the payment
 // filter emptied. Same predicate the panel's peek uses — the panel owns
 // listBehavior's twin, this side owns the mount.
-$: desktopPaymentNote = shouldShowPaymentRestNote({
+$: paymentRestNote = shouldShowPaymentRestNote({
 	behavior: listBehavior,
 	isLoading: $merchantList.isLoadingList,
 	hasError: $merchantList.listError,
@@ -496,6 +499,21 @@ $: desktopPaymentNote = shouldShowPaymentRestNote({
 	totalCount: $merchantList.totalCount,
 	unknownPaymentCount: $merchantList.unknownPaymentCount,
 });
+
+// The bottom map chrome — scale bar, OSM attribution, tile indicator, and
+// the ?issues bar — clears the sheet by lifting itself with this variable.
+// It used to be published once at mount from the constant, which was true
+// while the peek was a fixed height. Now the note grows the peek, so a
+// stale 88px here means the taller sheet sits on top of the credit.
+$: if (browser) {
+	const peek =
+		SEARCH_SHEET_PEEK_HEIGHT +
+		(isMobileLayout && paymentRestNote ? PAYMENT_NOTE_PEEK_EXTRA : 0);
+	document.documentElement.style.setProperty(
+		"--search-sheet-peek-height",
+		`${peek}px`,
+	);
+}
 
 // Refresh the panel's nearby list based on the current viewport. Mirrors
 // /map's `updateMerchantList` minus the panel-offset bookkeeping (out of
@@ -972,13 +990,9 @@ const applyBasemap = (id: BasemapId) => {
 };
 
 onMount(async () => {
-	// Bridge the JS peek-height const into CSS so the bottom-chrome lift (scale
-	// bar, attribution, tile indicator) stays in sync with the anchored search
-	// sheet's peek without duplicating the literal value.
-	document.documentElement.style.setProperty(
-		"--search-sheet-peek-height",
-		`${SEARCH_SHEET_PEEK_HEIGHT}px`,
-	);
+	// --search-sheet-peek-height is published by the reactive block above:
+	// the peek is no longer a fixed height (#1427), so a one-shot write here
+	// would go stale the moment the payment note grows the sheet.
 
 	// ?issues mode stacks the mode bar above the peek on mobile; lift the
 	// bottom map chrome over it too. 96px = the bar's fixed height (~88px,
@@ -1512,7 +1526,7 @@ onDestroy(() => {
 				merchantListPanel?.focusSearchInput();
 			}}
 			nearbyCount={$merchantList.totalCount}
-			showPaymentNote={desktopPaymentNote}
+			showPaymentNote={paymentRestNote}
 			unknownPaymentCount={$merchantList.unknownPaymentCount}
 		/>
 	</div>
@@ -1590,7 +1604,8 @@ onDestroy(() => {
 	/* Mobile: the search sheet is anchored to the bottom edge, so lift the
 	   bottom map chrome (scale bar + attribution) above its peek so the credit
 	   stays visible above the sheet. --search-sheet-peek-height is set from the
-	   SEARCH_SHEET_PEEK_HEIGHT const in onMount; the fallback matches it. */
+	   SEARCH_SHEET_PEEK_HEIGHT const, and grows with the payment note (#1427);
+	   the fallback matches the bare peek. */
 	@media (max-width: 767px) {
 		.map-container :global(.maplibregl-ctrl-bottom-left),
 		.map-container :global(.maplibregl-ctrl-bottom-right) {
