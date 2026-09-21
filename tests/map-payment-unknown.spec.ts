@@ -32,9 +32,22 @@ test.describe('Map payment filter — unknown tags', () => {
 
 	const NOT_CHECKED = /places haven't been checked/;
 
+	// isMobile is locked at init from window.innerWidth, so the viewport has
+	// to be set before goto or the mobile peek never mounts.
+	const PHONE = { width: 375, height: 667 };
+	const DESKTOP = { width: 1280, height: 720 };
+
 	const openMap = async (
 		page: Page,
-		{ params, rows }: { params: string; rows: unknown[] }
+		{
+			params,
+			rows,
+			viewport = DESKTOP
+		}: {
+			params: string;
+			rows: unknown[];
+			viewport?: { width: number; height: number };
+		}
 	) => {
 		await stubMapData(page, PLACES);
 		// Narrow on purpose: the radius search and the bulk update check also
@@ -54,7 +67,7 @@ test.describe('Map payment filter — unknown tags', () => {
 					body: JSON.stringify(rows)
 				})
 		);
-		await page.setViewportSize({ width: 1280, height: 720 });
+		await page.setViewportSize(viewport);
 		await page.goto(`/map${params}#17/42.2762511/42.7024218`, { waitUntil: 'load' });
 		await waitForMarkersToLoad(page, { skipApiWait: true });
 	};
@@ -106,6 +119,61 @@ test.describe('Map payment filter — unknown tags', () => {
 
 		await page.getByRole('button', { name: /search places/i }).click();
 		await expect(page.getByText('3 nearby')).toBeVisible();
+		expect(await page.getByText(NOT_CHECKED).count()).toBe(0);
+	});
+
+	// #1427. The message above is the one #1424 wrote for someone handed a
+	// filtered embed link — and it lived where that person never looks. At
+	// rest the list is a peek sheet on mobile and unmounted on desktop, so
+	// the whole message was gated behind a tap nobody had a reason to make.
+	// These run at both widths precisely because the desktop-only suite above
+	// is how the gap survived.
+	test('the mobile peek states the empty filtered view without being opened', async ({
+		page
+	}) => {
+		await openMap(page, { params: '?nfc', rows: NO_MATCH, viewport: PHONE });
+
+		await expect.poll(() => placesCount(page), { timeout: MARKER_LOAD_TIMEOUT }).toBe(0);
+
+		// No tap: the message has to be readable at rest.
+		await expect(page.getByText(NOT_CHECKED)).toHaveText(
+			/Nothing here is recorded as accepting these payments\. 2 places haven't been checked\./
+		);
+		// ...and the sheet must still be collapsed. The peek renders the
+		// facade only; the real input belongs to the expanded panel.
+		expect(await page.locator('input[type="search"]').count()).toBe(0);
+		await expect(
+			page.getByRole('button', { name: /search places/i })
+		).toBeVisible();
+	});
+
+	test('the desktop search bar states the empty filtered view at rest', async ({
+		page
+	}) => {
+		await openMap(page, { params: '?nfc', rows: NO_MATCH });
+
+		await expect.poll(() => placesCount(page), { timeout: MARKER_LOAD_TIMEOUT }).toBe(0);
+
+		// The panel is not mounted at all until it is opened, so this has to
+		// come from the floating facade.
+		await expect(page.getByText(NOT_CHECKED)).toHaveText(
+			/Nothing here is recorded as accepting these payments\. 2 places haven't been checked\./
+		);
+		expect(await page.locator('input[type="search"]').count()).toBe(0);
+	});
+
+	// The guard on #1424's decision: a running tally on every filtered view
+	// was rejected as noise to a visitor looking for somewhere to spend. The
+	// note belongs to the empty state and nowhere else.
+	test('the peek stays quiet while the filtered view has results', async ({
+		page
+	}) => {
+		await openMap(page, { params: '?nfc', rows: ONE_MATCH, viewport: PHONE });
+
+		await expect.poll(() => placesCount(page), { timeout: MARKER_LOAD_TIMEOUT }).toBe(1);
+
+		// One-shot count, not toBeHidden(): a retrying assertion would wait
+		// out a note that renders a moment later and call it absent.
 		expect(await page.getByText(NOT_CHECKED).count()).toBe(0);
 	});
 });
