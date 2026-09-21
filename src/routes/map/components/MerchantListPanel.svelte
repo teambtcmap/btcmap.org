@@ -10,10 +10,7 @@ import { trackEvent } from "$lib/analytics";
 import { lockBodyScroll, unlockBodyScroll } from "$lib/bodyScrollLock";
 import type { CategoryCounts, CategoryKey } from "$lib/categoryMapping";
 import { CATEGORY_ENTRIES } from "$lib/categoryMapping";
-import {
-	PAYMENT_NOTE_PEEK_EXTRA,
-	SEARCH_SHEET_PEEK_HEIGHT,
-} from "$lib/drawerConfig";
+import { searchSheetPeekHeight } from "$lib/drawerConfig";
 import { createDrawerGestureController } from "$lib/drawerGestureController";
 import { _ } from "$lib/i18n";
 import { deriveNearbyListStatus } from "$lib/map/nearbyListStatus";
@@ -100,7 +97,7 @@ export let onSwitchPayment: (method: PaymentMethod | null) => void = () => {};
 // isOpen IS the expanded state; peek = closed, so close() keeping
 // merchants/totalCount keeps the count pill populated at rest.
 const sheetGesture = createDrawerGestureController({
-	peekHeight: SEARCH_SHEET_PEEK_HEIGHT,
+	peekHeight: searchSheetPeekHeight(false),
 	canDismiss: false,
 	events: {
 		expand: "search_sheet_swipe_expand",
@@ -465,13 +462,10 @@ $: showPaymentRestNote =
 		totalCount,
 		unknownPaymentCount,
 	});
-// The bare facade fits in SEARCH_SHEET_PEEK_HEIGHT; the note does not.
-// Grow the collapsed sheet only while it carries one.
-$: sheetGesture.setPeekHeight(
-	showPaymentRestNote
-		? SEARCH_SHEET_PEEK_HEIGHT + PAYMENT_NOTE_PEEK_EXTRA
-		: SEARCH_SHEET_PEEK_HEIGHT,
-);
+// The bare facade fits the base peek; the note and its switcher do not.
+// Same helper the page publishes --search-sheet-peek-height from, so the
+// sheet and the chrome that lifts around it cannot disagree.
+$: sheetGesture.setPeekHeight(searchSheetPeekHeight(showPaymentRestNote));
 
 // Body scroll lock on mobile when panel is open
 $: if (browser && isOpen !== undefined) {

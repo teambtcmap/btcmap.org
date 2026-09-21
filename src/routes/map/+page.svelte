@@ -33,10 +33,7 @@ import {
 	NEARBY_RADIUS_MULTIPLIER,
 	PANEL_DRAWER_GAP,
 } from "$lib/constants";
-import {
-	PAYMENT_NOTE_PEEK_EXTRA,
-	SEARCH_SHEET_PEEK_HEIGHT,
-} from "$lib/drawerConfig";
+import { searchSheetPeekHeight } from "$lib/drawerConfig";
 import { _, getDisplayLang, locale } from "$lib/i18n";
 import {
 	BASEMAPS,
@@ -528,10 +525,14 @@ $: paymentRestNote = shouldShowPaymentRestNote({
 // It used to be published once at mount from the constant, which was true
 // while the peek was a fixed height. Now the note grows the peek, so a
 // stale 88px here means the taller sheet sits on top of the credit.
+// The note only occupies the peek while the sheet IS the peek: once it is
+// expanded the panel renders the message in its list body instead, and a
+// variable still claiming 174px lifts the chrome over a peek that is not
+// there — the same staleness, in the other direction.
 $: if (browser) {
-	const peek =
-		SEARCH_SHEET_PEEK_HEIGHT +
-		(isMobileLayout && paymentRestNote ? PAYMENT_NOTE_PEEK_EXTRA : 0);
+	const peek = searchSheetPeekHeight(
+		isMobileLayout && !$merchantList.isOpen && paymentRestNote,
+	);
 	document.documentElement.style.setProperty(
 		"--search-sheet-peek-height",
 		`${peek}px`,

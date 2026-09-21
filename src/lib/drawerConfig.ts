@@ -19,6 +19,15 @@ export const SEARCH_SHEET_PEEK_HEIGHT = 88;
 // of headroom lets a longer future translation grow rather than clip.
 // 174 against the 88px base leaves 86.
 export const PAYMENT_NOTE_PEEK_EXTRA = 86;
+// The collapsed height of the search sheet, which is not a constant any
+// more (#1427, #1430). Two places need it and they must agree: the panel
+// sizes the sheet, and the page publishes --search-sheet-peek-height so the
+// scale bar, the OSM attribution, the tile indicator and the ?issues bar
+// lift clear of it. Spelled out separately they drifted immediately — the
+// page's copy lacked the "only while collapsed" term, so an opened sheet
+// left the variable claiming a 174px peek that wasn't there.
+export const searchSheetPeekHeight = (carriesNote: boolean): number =>
+	SEARCH_SHEET_PEEK_HEIGHT + (carriesNote ? PAYMENT_NOTE_PEEK_EXTRA : 0);
 
 // Gesture thresholds
 export const VELOCITY_THRESHOLD = 0.5; // px/ms - minimum velocity for flick gesture detection
