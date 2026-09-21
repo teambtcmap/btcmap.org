@@ -70,6 +70,7 @@
 		"showAll": "Mostrar todos",
 		"clear": "Limpar pesquisa",
 		"noVisible": "Nenhum comerciante visível na visualização atual",
+		"noPaymentRecorded": "Nenhum lugar aqui tem esses pagamentos registrados. {count} lugares não foram verificados.",
 		"nearbyCount": "{count} por perto",
 		"placeholder": "Pesquisar...",
 		"ariaLabel": "Pesquisar ranking",

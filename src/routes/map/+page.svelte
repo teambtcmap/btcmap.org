@@ -58,8 +58,8 @@ import {
 	pinVariantFor,
 } from "$lib/map/maplibreSprites";
 import {
+	applyPaymentMethodFilter,
 	parsePaymentMethodsParam,
-	placeMatchesPaymentMethods,
 } from "$lib/map/paymentMethodFilter";
 import { createPlacePinSource } from "$lib/map/placePinSource";
 import { parseLatLongQuery } from "$lib/map/queryViewport";
@@ -512,17 +512,19 @@ const updateMerchantList = (opts?: { force?: boolean }) => {
 					p.lon <= buffered.east,
 			);
 			let listed = boostsOnly ? visible.filter(isBoosted) : visible;
-			// The store's pipeline narrows the list itself (setMerchants
-			// consumes state.paymentMethods), but the ?issues chip tallies
-			// below are computed from THIS page-side snapshot — narrow it
-			// here too so the chips can never count places the embed filter
-			// hides. Same readiness gate as the pipeline: inert until the
+			// The payment filter is NOT applied here. The store's pipeline
+			// applies it and counts the unknowns it drops (#1423), and it can
+			// only count what it receives — narrowing first left it nothing to
+			// count. Both filters are per-place predicates, so the store's
+			// result is identical either way, and its count then lands on the
+			// population selectVisiblePlaces documents: post-recency,
+			// post-issues (applied just below), pre-category.
+			// The ?issues chip tallies are the one thing that still needs a
+			// payment-narrowed snapshot, and it takes one without touching the
+			// list. Same readiness gate as the pipeline: inert until the
 			// payment-tag enrichment lands.
-			if (paymentMethods && get(paymentTagsLoaded)) {
-				listed = listed.filter((p) =>
-					placeMatchesPaymentMethods(p, paymentMethods),
-				);
-			}
+			const activePaymentMethods =
+				paymentMethods && get(paymentTagsLoaded) ? paymentMethods : null;
 			// Same readiness gate as the marker pipeline: before the
 			// verified_at enrichment lands, the list stays unfiltered
 			// rather than flagging every bulk row as not_verified.
@@ -533,8 +535,14 @@ const updateMerchantList = (opts?: { force?: boolean }) => {
 				// AFTER the recency window, matching the pin pipeline
 				// (selectVisiblePlaces applies recency before the issue filter),
 				// so a chip can never promise pins the window excludes.
+				const windowed = filterPlacesByRecency(
+					listed,
+					get(merchantList).verifiedWithinYears,
+				);
 				issueCounts = countIssuesByCode(
-					filterPlacesByRecency(listed, get(merchantList).verifiedWithinYears),
+					activePaymentMethods
+						? applyPaymentMethodFilter(windowed, activePaymentMethods).matched
+						: windowed,
 				);
 				listed = listed.filter((p) => placeMatchesIssueCodes(p, issueCodes));
 			}
@@ -546,9 +554,12 @@ const updateMerchantList = (opts?: { force?: boolean }) => {
 			// rewrite stops routing filtered sessions through it. No-op
 			// outside tests.
 			if (typeof window !== "undefined") {
+				// Read back what the store published rather than the rows handed
+				// to it: the payment filter runs inside the store now, so the
+				// pre-filter length would no longer describe the list surface.
 				(
 					window as unknown as { __nearbyListCount?: number }
-				).__nearbyListCount = listed.length;
+				).__nearbyListCount = get(merchantList).totalCount;
 			}
 			if (listOpen || currentZoom >= LABEL_VISIBLE_ZOOM) {
 				if (allowHeavyFetch || currentZoom >= LABEL_VISIBLE_ZOOM) {

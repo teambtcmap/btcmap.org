@@ -239,6 +239,58 @@ describe("selectVisiblePlaces", () => {
 		expect(r.counts.restaurants).toBe(1);
 	});
 
+	it("counts the places the payment filter excluded for lack of evidence", () => {
+		const rows = [
+			place({ "osm:payment:lightning": "yes" }),
+			// Recorded refusal: correctly excluded, and not a verification lead.
+			{ id: 900, lat: 0, lon: 0, "osm:payment:lightning": "no" },
+			// Never recorded, and recorded-but-unusable: both unknown.
+			place(),
+			{ id: 901, lat: 0, lon: 0, "osm:payment:lightning": "yed" },
+		] as Place[];
+		const r = selectVisiblePlaces({
+			...base,
+			places: rows,
+			paymentMethods: new Set(["lightning"] as const),
+		});
+		expect(r.selection.length).toBe(1);
+		expect(r.unknownPayments).toBe(2);
+	});
+
+	it("reports no unknowns while the payment filter is off or inert", () => {
+		const rows = [place(), place({ "osm:payment:lightning": "yes" })];
+		expect(selectVisiblePlaces({ ...base, places: rows }).unknownPayments).toBe(
+			0,
+		);
+		expect(
+			selectVisiblePlaces({
+				...base,
+				places: rows,
+				paymentMethods: new Set(["lightning"] as const),
+				paymentsReady: false,
+			}).unknownPayments,
+		).toBe(0);
+	});
+
+	it("counts unknowns on the same population as the chip counts", () => {
+		// Post-recency, pre-category: the note describes exactly the set the
+		// filter was applied to, so it can never promise places the recency
+		// window already dropped, nor shrink when a chip is selected.
+		const rows = [
+			place({ icon: "restaurant", verified_at: recent() }),
+			place({ icon: "local_cafe", verified_at: recent() }),
+			place({ icon: "restaurant", verified_at: old() }),
+		];
+		const r = selectVisiblePlaces({
+			...base,
+			places: rows,
+			category: "restaurants",
+			recency: 1,
+			paymentMethods: new Set(["lightning"] as const),
+		});
+		expect(r.unknownPayments).toBe(2);
+	});
+
 	it("composes boosts after category (empty intersections are honest)", () => {
 		const r = selectVisiblePlaces({
 			...base,

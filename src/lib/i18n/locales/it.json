@@ -165,6 +165,7 @@
 		"showAll": "Mostra tutto",
 		"clear": "Cancella ricerca",
 		"noVisible": "Nessun commerciante visibile nella vista attuale",
+		"noPaymentRecorded": "Nessun luogo qui ha questi pagamenti registrati. {count} luoghi non sono stati controllati.",
 		"nearbyCount": "{count} nelle vicinanze",
 		"placeholder": "Cerca...",
 		"ariaLabel": "Cerca nella classifica",

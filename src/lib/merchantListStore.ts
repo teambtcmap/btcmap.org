@@ -12,7 +12,7 @@ import type {
 	PaymentMethod,
 	PaymentTaggedPlace,
 } from "$lib/map/paymentMethodFilter";
-import { placeMatchesPaymentMethods } from "$lib/map/paymentMethodFilter";
+import { applyPaymentMethodFilter } from "$lib/map/paymentMethodFilter";
 import type { VerifiedFilterYears } from "$lib/map/verifiedFilter";
 import {
 	getStoredVerifiedFilter,
@@ -72,6 +72,12 @@ export type MerchantListState = {
 	// null = off. Consumed by every selectVisiblePlaces call site in this
 	// store so pins, lists, and counts can't disagree.
 	paymentMethods: ReadonlySet<PaymentMethod> | null;
+	// How many nearby places the payment filter excluded for lack of evidence
+	// rather than for a recorded refusal (#1423). Written by every nearby path
+	// that applies the filter — local markers, radius list, count badge — so
+	// the message always describes the rows it sits above. 0 in search mode,
+	// where the panel recomputes it from its own pipeline call.
+	unknownPaymentCount: number;
 };
 
 const initialState: MerchantListState = {
@@ -91,6 +97,7 @@ const initialState: MerchantListState = {
 	categoryCounts: createEmptyCategoryCounts(),
 	verifiedWithinYears: getStoredVerifiedFilter(),
 	paymentMethods: null,
+	unknownPaymentCount: 0,
 };
 
 // Helper function to reset category state
@@ -243,6 +250,7 @@ function createMerchantListStore() {
 			searchTotal: total,
 			isSearching: false,
 			categoryCounts,
+			unknownPaymentCount: 0,
 		}));
 	}
 
@@ -394,7 +402,10 @@ function createMerchantListStore() {
 			}));
 		},
 
-		// Set merchants from locally-loaded markers (used at zoom 15-16)
+		// Set merchants from locally-loaded markers (used at zoom 15-16).
+		// Callers hand over rows NOT narrowed by payment: this pipeline applies
+		// that filter and counts the unknowns it drops (#1423), and it can only
+		// count what it is given.
 		setMerchants(
 			merchants: Place[],
 			centerLat?: number,
@@ -407,20 +418,21 @@ function createMerchantListStore() {
 			// dates being loaded, matching the markers), computes chip counts on
 			// the pre-category set, and applies the auto-reset rule — one
 			// decision path for list, pins, and counts.
-			const { selection, counts, effectiveCategory } = selectVisiblePlaces({
-				places: merchants,
-				mode: "nearby",
-				category: selectedCategory,
-				recency: verifiedWithinYears,
-				recencyReady: verifiedWithinYears == null || get(verifiedDatesLoaded),
-				boostsOnly: false,
-				issueCodes: null,
-				issuesReady: true,
-				// Bulk-feed rows lack payment tags until the lazy enrichment
-				// lands; inert until then (same gate the markers use).
-				paymentMethods,
-				paymentsReady: paymentMethods == null || get(paymentTagsLoaded),
-			});
+			const { selection, counts, effectiveCategory, unknownPayments } =
+				selectVisiblePlaces({
+					places: merchants,
+					mode: "nearby",
+					category: selectedCategory,
+					recency: verifiedWithinYears,
+					recencyReady: verifiedWithinYears == null || get(verifiedDatesLoaded),
+					boostsOnly: false,
+					issueCodes: null,
+					issuesReady: true,
+					// Bulk-feed rows lack payment tags until the lazy enrichment
+					// lands; inert until then (same gate the markers use).
+					paymentMethods,
+					paymentsReady: paymentMethods == null || get(paymentTagsLoaded),
+				});
 
 			const sorted = sortMerchants(
 				selection,
@@ -438,6 +450,7 @@ function createMerchantListStore() {
 				listError: false,
 				categoryCounts: counts,
 				selectedCategory: effectiveCategory,
+				unknownPaymentCount: unknownPayments,
 			}));
 		},
 
@@ -475,25 +488,30 @@ function createMerchantListStore() {
 				// PRE-category set — a selected chip must not defeat it.
 				const { selectedCategory, verifiedWithinYears, paymentMethods } =
 					get(store);
-				const { selection, preCategory, counts, effectiveCategory } =
-					selectVisiblePlaces({
-						places: validPlaces,
-						mode: "nearby",
-						category: selectedCategory,
-						recency: verifiedWithinYears,
-						recencyReady: true,
-						boostsOnly: false,
-						issueCodes: null,
-						issuesReady: true,
-						// Radius rows carry the payment tags natively (LIST_ITEM),
-						// but the gate mirrors the pins' anyway: while the bulk
-						// markers are still inert (enrichment pending or failed) a
-						// narrowed list would contradict the unfiltered map — the
-						// #1158-#1162 disagreement class this pipeline exists to
-						// prevent.
-						paymentMethods,
-						paymentsReady: paymentMethods == null || get(paymentTagsLoaded),
-					});
+				const {
+					selection,
+					preCategory,
+					counts,
+					effectiveCategory,
+					unknownPayments,
+				} = selectVisiblePlaces({
+					places: validPlaces,
+					mode: "nearby",
+					category: selectedCategory,
+					recency: verifiedWithinYears,
+					recencyReady: true,
+					boostsOnly: false,
+					issueCodes: null,
+					issuesReady: true,
+					// Radius rows carry the payment tags natively (LIST_ITEM),
+					// but the gate mirrors the pins' anyway: while the bulk
+					// markers are still inert (enrichment pending or failed) a
+					// narrowed list would contradict the unfiltered map — the
+					// #1158-#1162 disagreement class this pipeline exists to
+					// prevent.
+					paymentMethods,
+					paymentsReady: paymentMethods == null || get(paymentTagsLoaded),
+				});
 
 				// Check if we should hide results (too many at low zoom)
 				if (
@@ -514,6 +532,7 @@ function createMerchantListStore() {
 						listError: false,
 						categoryCounts: counts,
 						selectedCategory: effectiveCategory,
+						unknownPaymentCount: unknownPayments,
 					}));
 				} else {
 					const sorted = sortMerchants(
@@ -532,6 +551,7 @@ function createMerchantListStore() {
 						listError: false,
 						categoryCounts: counts,
 						selectedCategory: effectiveCategory,
+						unknownPaymentCount: unknownPayments,
 					}));
 				}
 			} catch (error) {
@@ -606,10 +626,16 @@ function createMerchantListStore() {
 					Pick<Place, "id"> & Pick<Place, "verified_at"> & PaymentTaggedPlace
 				>(center, radiusKm, fields, listAbortController.signal);
 				let counted = filterPlacesByRecency(validItems, verifiedWithinYears);
+				// Same pass the pins pipeline runs, so the badge's count and
+				// its excluded-unknown note stay consistent with the list's.
+				let unknownPayments = 0;
 				if (activePaymentMethods) {
-					counted = counted.filter((p) =>
-						placeMatchesPaymentMethods(p, activePaymentMethods),
+					const filtered = applyPaymentMethodFilter(
+						counted,
+						activePaymentMethods,
 					);
+					counted = filtered.matched;
+					unknownPayments = filtered.unknown;
 				}
 
 				// A response that raced a filter change can settle before the
@@ -628,6 +654,7 @@ function createMerchantListStore() {
 					totalCount: counted.length,
 					isLoadingList: false,
 					listError: false,
+					unknownPaymentCount: unknownPayments,
 					// Preserve existing categoryCounts since we don't have actual merchant data to recalculate them
 				}));
 			} catch (error) {

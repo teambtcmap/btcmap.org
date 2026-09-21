@@ -165,6 +165,7 @@
 		"showAll": "Toon alles",
 		"clear": "Zoekopdracht wissen",
 		"noVisible": "Er zijn geen ondernemers zichtbaar in deze weergave",
+		"noPaymentRecorded": "Voor geen enkele plek hier zijn deze betaalmethoden vastgelegd. {count} plekken zijn niet gecontroleerd.",
 		"nearbyCount": "{count} in de buurt",
 		"placeholder": "Zoeken...",
 		"ariaLabel": "Zoek in ranglijst",

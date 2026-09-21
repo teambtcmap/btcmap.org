@@ -70,6 +70,7 @@
 		"showAll": "Alle anzeigen",
 		"clear": "Suche löschen",
 		"noVisible": "Keine Händler in diesem Bereich sichtbar",
+		"noPaymentRecorded": "Für keinen Ort hier sind diese Zahlungsarten hinterlegt. {count} Orte wurden nicht geprüft.",
 		"nearbyCount": "{count} in der Nähe",
 		"placeholder": "Suchen...",
 		"ariaLabel": "Rangliste durchsuchen",

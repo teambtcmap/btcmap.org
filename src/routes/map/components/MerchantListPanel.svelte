@@ -374,7 +374,7 @@ function handleDismissLocation() {
 // chip counts (selectVisiblePlaces), so the list can never disagree with
 // either again.
 $: paymentMethods = $merchantList.paymentMethods;
-$: filteredSearchResults = selectVisiblePlaces({
+$: searchSelection = selectVisiblePlaces({
 	places: searchResults,
 	mode: "search",
 	category: selectedCategory,
@@ -386,7 +386,18 @@ $: filteredSearchResults = selectVisiblePlaces({
 	// /v4/search rows carry the payment tags natively (LIST_ITEM).
 	paymentMethods,
 	paymentsReady: true,
-}).selection;
+});
+$: filteredSearchResults = searchSelection.selection;
+// Places the payment filter dropped for lack of evidence rather than for a
+// recorded refusal (#1423). Only the two emptied-view states read this: with
+// results on screen the number is noise to a visitor, but with none it's the
+// difference between "no merchants here" and "nobody has checked here". Search
+// reads its own pipeline call, which re-runs here on every recency or category
+// change; the nearby paths write the store as they filter.
+$: unknownPaymentCount =
+	mode === "search"
+		? searchSelection.unknownPayments
+		: $merchantList.unknownPaymentCount;
 
 // Helper function to check if a category has matching merchants
 // Note: counts param required for Svelte reactivity (indirect deps aren't tracked)
@@ -793,9 +804,22 @@ onDestroy(() => {
 						</p>
 					</div>
 				{:else if filteredSearchResults.length === 0}
-					<!-- Has results but none match category filter -->
-					<div class="px-3 py-8 text-center text-sm text-body dark:text-white/70">
-						{$_('categories.noMatches')}
+					<!-- Has results, but a client-side filter removed them all -->
+					<div
+						class="px-3 py-8 text-center text-sm text-body dark:text-white/70"
+						role="status"
+					>
+						{#if unknownPaymentCount > 0}
+							<!-- Same lie of omission as the nearby empty state: with a
+							     payment filter active, "no category matches" blames the
+							     wrong filter for results that simply have nothing
+							     recorded (#1423). -->
+							{$_('search.noPaymentRecorded', {
+								values: { count: unknownPaymentCount }
+							})}
+						{:else}
+							{$_('categories.noMatches')}
+						{/if}
 					</div>
 				{:else}
 					<ul class="flex flex-col gap-2 bg-neutral-50 p-2 dark:bg-white/10">
@@ -845,8 +869,28 @@ onDestroy(() => {
 					{$_('errors.loadFailed')}
 				</div>
 			{:else if nearbyStatus === 'empty'}
-				<div class="px-3 py-8 text-center text-sm text-body dark:text-white/70">
-					{$_('search.noVisible')}
+				<!-- role="status": the message replaces itself in place as the
+				     viewport changes, and this container is the only thing that
+				     announces it — the header's live region is blank in the empty
+				     state (nearbyCountLabel is gated on totalCount > 0). -->
+				<div
+					class="px-3 py-8 text-center text-sm text-body dark:text-white/70"
+					role="status"
+				>
+					{#if unknownPaymentCount > 0}
+						<!-- "Nothing visible" is a lie of omission while the payment
+						     filter is hiding places whose tags say nothing either
+						     way: an empty view reads as "no merchants here" when the
+						     truth is that nobody has recorded it here (#1423). An
+						     emptied view is the only state where that distinction
+						     changes what the visitor should conclude, so it is the
+						     only state that reports the count. -->
+						{$_('search.noPaymentRecorded', {
+							values: { count: unknownPaymentCount }
+						})}
+					{:else}
+						{$_('search.noVisible')}
+					{/if}
 				</div>
 			{:else}
 				<!-- Nearby mode: merchant list ('truncated' and 'ok') -->
