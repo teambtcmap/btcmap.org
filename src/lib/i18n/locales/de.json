@@ -80,6 +80,10 @@
 		"locationUnavailable": "Dein Standort konnte nicht ermittelt werden. Bitte versuche es erneut.",
 		"locationEnabled": "Standort aktiviert. Liste nach Entfernung sortiert."
 	},
+	"paymentSwitch": {
+		"label": "Zahlungsart",
+		"showAll": "Alle Orte"
+	},
 	"categories": {
 		"all": "Alle",
 		"restaurants": "Restaurants",

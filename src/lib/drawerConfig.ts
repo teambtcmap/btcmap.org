@@ -12,10 +12,13 @@ export const PEEK_HEIGHT = 110;
 export const SEARCH_SHEET_PEEK_HEIGHT = 88;
 // Added to the search sheet's peek while it carries the payment
 // empty-state note (#1427). The bare facade fills the 88px peek, so the
-// note needs room of its own. Measured at 375px across the nine locales:
-// all wrap to two lines of text-sm, and this leaves headroom for a third
-// so a longer future translation grows rather than clips.
-export const PAYMENT_NOTE_PEEK_EXTRA = 56;
+// note and its switcher need room of their own. Derived, not eyeballed:
+// measured at 375px across the nine locales the peek's content is 138px
+// (note at two lines of text-sm, the switcher row, the facade and their
+// padding) under a 16px grabber, so 154px; one more text-sm line (20px)
+// of headroom lets a longer future translation grow rather than clip.
+// 174 against the 88px base leaves 86.
+export const PAYMENT_NOTE_PEEK_EXTRA = 86;
 
 // Gesture thresholds
 export const VELOCITY_THRESHOLD = 0.5; // px/ms - minimum velocity for flick gesture detection

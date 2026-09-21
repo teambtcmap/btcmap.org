@@ -1,9 +1,11 @@
 <script lang="ts">
 import { trackEvent } from "$lib/analytics";
+import type { PaymentMethod } from "$lib/map/paymentMethodFilter";
 import { merchantList } from "$lib/merchantListStore";
 import { formatNearbyPillCount } from "$lib/utils";
 
 import PaymentRestNote from "./PaymentRestNote.svelte";
+import PaymentSwitcher from "./PaymentSwitcher.svelte";
 import SearchFacade from "./SearchFacade.svelte";
 
 // Activating the facade is the page's job: it opens the panel, refreshes the
@@ -15,6 +17,10 @@ export let nearbyCount = 0;
 // report it is a count pill that formatNearbyPillCount blanks at zero.
 export let showPaymentNote = false;
 export let unknownPaymentCount = 0;
+// Payment switcher inside the note's card (#1430) — nothing new floats
+// over the map, and the bar grows with its content, so no height plumbing.
+export let activePaymentMethod: PaymentMethod | null = null;
+export let onSwitchPayment: (method: PaymentMethod | null) => void = () => {};
 
 // Store subscriptions
 $: isOpen = $merchantList.isOpen;
@@ -39,10 +45,16 @@ function handleActivate() {
 			on:click={handleActivate}
 		/>
 		{#if showPaymentNote}
-			<PaymentRestNote
-				count={unknownPaymentCount}
+			<div
 				class="mt-2 rounded-lg bg-white px-3 py-2 shadow-lg dark:bg-dark dark:shadow-black/30"
-			/>
+			>
+				<PaymentRestNote count={unknownPaymentCount} />
+				<PaymentSwitcher
+					active={activePaymentMethod}
+					onselect={onSwitchPayment}
+					class="mt-2"
+				/>
+			</div>
 		{/if}
 	</div>
 {/if}

@@ -80,6 +80,10 @@
 		"locationUnavailable": "Impossible de déterminer votre position. Veuillez réessayer.",
 		"locationEnabled": "Localisation activée. Liste triée par distance."
 	},
+	"paymentSwitch": {
+		"label": "Moyen de paiement",
+		"showAll": "Tous les lieux"
+	},
 	"categories": {
 		"all": "Tout",
 		"restaurants": "Restaurants",

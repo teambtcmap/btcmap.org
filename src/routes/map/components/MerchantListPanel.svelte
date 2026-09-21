@@ -17,6 +17,7 @@ import {
 import { createDrawerGestureController } from "$lib/drawerGestureController";
 import { _ } from "$lib/i18n";
 import { deriveNearbyListStatus } from "$lib/map/nearbyListStatus";
+import type { PaymentMethod } from "$lib/map/paymentMethodFilter";
 import { shouldShowPaymentRestNote } from "$lib/map/paymentRestNote";
 import type { ZoomBehavior } from "$lib/map/viewport";
 import { selectVisiblePlaces } from "$lib/map/visiblePlaces";
@@ -29,6 +30,7 @@ import { errToast, formatNearbyPillCount } from "$lib/utils";
 import MerchantListItem from "./MerchantListItem.svelte";
 import NearbyCountPill from "./NearbyCountPill.svelte";
 import PaymentRestNote from "./PaymentRestNote.svelte";
+import PaymentSwitcher from "./PaymentSwitcher.svelte";
 import SearchFacade from "./SearchFacade.svelte";
 import { browser } from "$app/environment";
 
@@ -86,6 +88,12 @@ export let isMobile = false;
 // too: Escape would close the list underneath the add flow, and the
 // Tab trap would try to focus display:none elements — killing Tab.
 export let suspended = false;
+// Payment switcher beside the empty-state note (#1430). `active` is the
+// method the URL describes, or null on an unfiltered or multi-param URL;
+// applying a choice is the page's job, because the payment filter is
+// locked at init and switching is a navigation.
+export let activePaymentMethod: PaymentMethod | null = null;
+export let onSwitchPayment: (method: PaymentMethod | null) => void = () => {};
 
 // On mobile the panel is a bottom sheet mirroring the merchant drawer's
 // snap behavior: peek (grabber + single input) <-> full panel. The store's
@@ -948,6 +956,14 @@ onDestroy(() => {
 					     the facade, because the facade is the action and this is
 					     the reason the list behind it is empty. -->
 					<PaymentRestNote count={unknownPaymentCount} />
+					<!-- #1430: the note alone is a dead end — the reader learns
+					     the view is filtered and still cannot act on it. The
+					     switcher shares the note's visibility rule exactly, so
+					     it is inside the same {#if}. -->
+					<PaymentSwitcher
+						active={activePaymentMethod}
+						onselect={onSwitchPayment}
+					/>
 				{/if}
 				<SearchFacade
 					bind:element={facadeElement}

@@ -175,6 +175,10 @@
 		"locationUnavailable": "Could not determine your location. Please try again.",
 		"locationEnabled": "Location enabled. List sorted by distance."
 	},
+	"paymentSwitch": {
+		"label": "Payment method",
+		"showAll": "All places"
+	},
 	"categories": {
 		"all": "All",
 		"restaurants": "Restaurants",

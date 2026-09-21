@@ -175,6 +175,10 @@
 		"locationUnavailable": "Het ophalen van je locatie is mislukt. Probeer het opnieuw.",
 		"locationEnabled": "Locatie ingeschakeld. Lijst gesorteerd op afstand."
 	},
+	"paymentSwitch": {
+		"label": "Betaalmethode",
+		"showAll": "Alle plekken"
+	},
 	"categories": {
 		"all": "Alle",
 		"restaurants": "Restaurants",

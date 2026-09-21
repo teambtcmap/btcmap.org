@@ -60,11 +60,16 @@ import {
 	pinIconImageExpression,
 	pinVariantFor,
 } from "$lib/map/maplibreSprites";
+import type { PaymentMethod } from "$lib/map/paymentMethodFilter";
 import {
 	applyPaymentMethodFilter,
 	parsePaymentMethodsParam,
 } from "$lib/map/paymentMethodFilter";
 import { shouldShowPaymentRestNote } from "$lib/map/paymentRestNote";
+import {
+	activePaymentOption,
+	paymentSwitchUrl,
+} from "$lib/map/paymentSwitcher";
 import { createPlacePinSource } from "$lib/map/placePinSource";
 import { parseLatLongQuery } from "$lib/map/queryViewport";
 import type { VerifiedFilterYears } from "$lib/map/verifiedFilter";
@@ -222,6 +227,24 @@ const toggleIssueCode = (code: DerivedIssueCode) => {
 const CHIPS_DESKTOP_LEFT =
 	MAP_PANEL_MARGIN + MERCHANT_LIST_WIDTH + PANEL_DRAWER_GAP;
 $: chipsHiddenForDrawer = !isMobileLayout && $merchantDrawer.isOpen;
+
+// Payment switcher on the resting surfaces (#1430). Applied by full
+// navigation for the same reason exitIssuesMode below reloads: the payment
+// filter is parsed once at init (`paymentMethods` above is a const), so
+// rewriting the URL in place would move the address bar and leave the pins,
+// the list and the count describing the old filter. Making it reactive is
+// worth doing, but it is a refactor of that invariant with its own risks —
+// tracked separately rather than smuggled into a UI change.
+// Read from the live URL, not from `paymentMethods`: a hand-written
+// ?lightning&onchain is a real AND filter that no single option describes,
+// and activePaymentOption reports null there rather than picking one.
+const activePaymentMethod = browser
+	? activePaymentOption(new URLSearchParams(window.location.search))
+	: null;
+
+const switchPaymentMethod = (method: PaymentMethod | null) => {
+	window.location.href = paymentSwitchUrl(window.location.href, method);
+};
 
 // Exit via full reload on purpose: mode membership (issuesOnly, list
 // behavior, filter wiring) is locked at init, same as entering via URL.
@@ -1528,6 +1551,8 @@ onDestroy(() => {
 			nearbyCount={$merchantList.totalCount}
 			showPaymentNote={paymentRestNote}
 			unknownPaymentCount={$merchantList.unknownPaymentCount}
+			{activePaymentMethod}
+			onSwitchPayment={switchPaymentMethod}
 		/>
 	</div>
 {/if}
@@ -1554,6 +1579,8 @@ onDestroy(() => {
 		mapReady={styleLoaded}
 		isMobile={isMobileLayout}
 		issuesMode={issuesOnly}
+		{activePaymentMethod}
+		onSwitchPayment={switchPaymentMethod}
 		suspended={placementActive}
 	/>
 </div>
