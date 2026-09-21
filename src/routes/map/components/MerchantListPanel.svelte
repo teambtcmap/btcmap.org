@@ -10,10 +10,14 @@ import { trackEvent } from "$lib/analytics";
 import { lockBodyScroll, unlockBodyScroll } from "$lib/bodyScrollLock";
 import type { CategoryCounts, CategoryKey } from "$lib/categoryMapping";
 import { CATEGORY_ENTRIES } from "$lib/categoryMapping";
-import { SEARCH_SHEET_PEEK_HEIGHT } from "$lib/drawerConfig";
+import {
+	PAYMENT_NOTE_PEEK_EXTRA,
+	SEARCH_SHEET_PEEK_HEIGHT,
+} from "$lib/drawerConfig";
 import { createDrawerGestureController } from "$lib/drawerGestureController";
 import { _ } from "$lib/i18n";
 import { deriveNearbyListStatus } from "$lib/map/nearbyListStatus";
+import { shouldShowPaymentRestNote } from "$lib/map/paymentRestNote";
 import type { ZoomBehavior } from "$lib/map/viewport";
 import { selectVisiblePlaces } from "$lib/map/visiblePlaces";
 import { merchantDrawer } from "$lib/merchantDrawerStore";
@@ -24,6 +28,7 @@ import { errToast, formatNearbyPillCount } from "$lib/utils";
 
 import MerchantListItem from "./MerchantListItem.svelte";
 import NearbyCountPill from "./NearbyCountPill.svelte";
+import PaymentRestNote from "./PaymentRestNote.svelte";
 import SearchFacade from "./SearchFacade.svelte";
 import { browser } from "$app/environment";
 
@@ -438,6 +443,27 @@ $: nearbyStatus = deriveNearbyListStatus({
 // status row and the body — name the condition once.
 $: showsZoomPrompt =
 	nearbyStatus === "below-floor" || nearbyStatus === "too-dense";
+
+// #1427: at rest the peek is the whole panel, so the empty-state message
+// has to live there too — the audience for it is precisely the person who
+// never opens the sheet. Same predicate the desktop bar uses.
+$: showPaymentRestNote =
+	!isOpen &&
+	shouldShowPaymentRestNote({
+		behavior,
+		isLoading: isLoadingList,
+		hasError: listError,
+		merchantCount: merchants.length,
+		totalCount,
+		unknownPaymentCount,
+	});
+// The bare facade fits in SEARCH_SHEET_PEEK_HEIGHT; the note does not.
+// Grow the collapsed sheet only while it carries one.
+$: sheetGesture.setPeekHeight(
+	showPaymentRestNote
+		? SEARCH_SHEET_PEEK_HEIGHT + PAYMENT_NOTE_PEEK_EXTRA
+		: SEARCH_SHEET_PEEK_HEIGHT,
+);
 
 // Body scroll lock on mobile when panel is open
 $: if (browser && isOpen !== undefined) {
@@ -914,8 +940,15 @@ onDestroy(() => {
 			     The whole facade is also a swipe surface like the drawer's peek. -->
 			<div
 				id="merchant-sheet-content"
-				class="flex flex-1 items-center px-3 pb-[max(0.75rem,env(safe-area-inset-bottom))]"
+				class="flex flex-1 flex-col justify-end gap-2 px-3 pb-[max(0.75rem,env(safe-area-inset-bottom))]"
 			>
+				{#if showPaymentRestNote}
+					<!-- #1427: the filter emptied the view and the sheet is shut,
+					     so this is the only place the message can be read. Above
+					     the facade, because the facade is the action and this is
+					     the reason the list behind it is empty. -->
+					<PaymentRestNote count={unknownPaymentCount} />
+				{/if}
 				<SearchFacade
 					bind:element={facadeElement}
 					count={pillCount}

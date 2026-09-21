@@ -61,6 +61,7 @@ import {
 	applyPaymentMethodFilter,
 	parsePaymentMethodsParam,
 } from "$lib/map/paymentMethodFilter";
+import { shouldShowPaymentRestNote } from "$lib/map/paymentRestNote";
 import { createPlacePinSource } from "$lib/map/placePinSource";
 import { parseLatLongQuery } from "$lib/map/queryViewport";
 import type { VerifiedFilterYears } from "$lib/map/verifiedFilter";
@@ -482,6 +483,19 @@ const getBufferedBoundsLngLat = (
 // function body, so ordering falls back to source position.
 $: listBehavior =
 	boostsOnly || issuesOnly ? "local-markers" : getZoomBehavior(currentZoom);
+
+// #1427: on desktop the list panel isn't mounted while it's closed, so the
+// floating bar is the only surface that can report a view the payment
+// filter emptied. Same predicate the panel's peek uses — the panel owns
+// listBehavior's twin, this side owns the mount.
+$: desktopPaymentNote = shouldShowPaymentRestNote({
+	behavior: listBehavior,
+	isLoading: $merchantList.isLoadingList,
+	hasError: $merchantList.listError,
+	merchantCount: $merchantList.merchants.length,
+	totalCount: $merchantList.totalCount,
+	unknownPaymentCount: $merchantList.unknownPaymentCount,
+});
 
 // Refresh the panel's nearby list based on the current viewport. Mirrors
 // /map's `updateMerchantList` minus the panel-offset bookkeeping (out of
@@ -1498,6 +1512,8 @@ onDestroy(() => {
 				merchantListPanel?.focusSearchInput();
 			}}
 			nearbyCount={$merchantList.totalCount}
+			showPaymentNote={desktopPaymentNote}
+			unknownPaymentCount={$merchantList.unknownPaymentCount}
 		/>
 	</div>
 {/if}

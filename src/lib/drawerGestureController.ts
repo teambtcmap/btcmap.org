@@ -55,7 +55,7 @@ export function createDrawerGestureController(
 	options: DrawerGestureOptions = {},
 ) {
 	const {
-		peekHeight = PEEK_HEIGHT,
+		peekHeight: initialPeekHeight = PEEK_HEIGHT,
 		canDismiss = true,
 		events = {
 			dismiss: "drawer_swipe_dismiss",
@@ -63,6 +63,13 @@ export function createDrawerGestureController(
 			collapse: "drawer_swipe_collapse",
 		},
 	} = options;
+
+	// Peek is no longer fixed for the controller's life: the search sheet's
+	// collapsed height depends on what the peek carries (#1427 — the payment
+	// empty-state note needs a taller resting sheet than the bare facade).
+	// Every snap, dismiss threshold and collapse reads this, so it is a
+	// mutable local rather than a destructured constant.
+	let peekHeight = initialPeekHeight;
 
 	// Public state (exposed to component)
 	const expanded = writable(false);
@@ -318,6 +325,19 @@ export function createDrawerGestureController(
 		}
 	}
 
+	// Content-driven resize of the collapsed sheet, not a gesture: a hard set
+	// so the new height is in effect immediately rather than springing into
+	// a drag the user may already have started. Skipped while expanded (the
+	// next collapse picks it up) and while dragging, where the pointer owns
+	// the height.
+	function setPeekHeight(height: number) {
+		if (height === peekHeight) return;
+		peekHeight = height;
+		if (!get(expanded) && !get(isDragging)) {
+			drawerHeight.set(height, { hard: true });
+		}
+	}
+
 	function setDismissCallback(callback: (() => void) | null) {
 		onDismiss = callback;
 	}
@@ -357,6 +377,7 @@ export function createDrawerGestureController(
 		toggle,
 		resetToPeek,
 		setExpandedHeight,
+		setPeekHeight,
 		setDismissCallback,
 	};
 }

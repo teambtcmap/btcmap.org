@@ -10,6 +10,12 @@ export const PEEK_HEIGHT = 110;
 // expanded. Tall enough that the input clears the bottom gesture bar / curved
 // corners on bezelled phones (the facade also adds a safe-area bottom inset).
 export const SEARCH_SHEET_PEEK_HEIGHT = 88;
+// Added to the search sheet's peek while it carries the payment
+// empty-state note (#1427). The bare facade fills the 88px peek, so the
+// note needs room of its own. Measured at 375px across the nine locales:
+// all wrap to two lines of text-sm, and this leaves headroom for a third
+// so a longer future translation grows rather than clips.
+export const PAYMENT_NOTE_PEEK_EXTRA = 56;
 
 // Gesture thresholds
 export const VELOCITY_THRESHOLD = 0.5; // px/ms - minimum velocity for flick gesture detection
