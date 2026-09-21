@@ -39,7 +39,17 @@ export const paymentSwitchUrl = (
 		.split("&")
 		.filter(Boolean)
 		.filter((token) => {
-			const key = decodeURIComponent(token.split("=")[0]);
+			const raw = token.split("=")[0];
+			let key: string;
+			try {
+				key = decodeURIComponent(raw);
+			} catch {
+				// A malformed escape (`?lightning&%`) is still a legal URL, and
+				// decodeURIComponent throws on it. It is certainly not one of
+				// our three keys, so keep it verbatim rather than letting an
+				// unrelated token break every tap.
+				key = raw;
+			}
 			return !(PAYMENT_METHODS as readonly string[]).includes(key);
 		});
 	if (method) kept.push(method);

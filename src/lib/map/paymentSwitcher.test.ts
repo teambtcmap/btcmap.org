@@ -87,4 +87,15 @@ describe("paymentSwitchUrl", () => {
 			paymentSwitchUrl("https://btcmap.org/map?lightning&issues", null),
 		).toBe("https://btcmap.org/map?issues");
 	});
+
+	it("survives a malformed percent-escape in an unrelated token", () => {
+		// `?lightning&%` is a legal URL and decodeURIComponent throws on it.
+		// An unrelated broken token must not take the whole switcher down.
+		expect(
+			paymentSwitchUrl("https://btcmap.org/map?lightning&%", "onchain"),
+		).toBe("https://btcmap.org/map?%&onchain");
+		expect(
+			paymentSwitchUrl("https://btcmap.org/map?%E0%A4%A&lightning", null),
+		).toBe("https://btcmap.org/map?%E0%A4%A");
+	});
 });

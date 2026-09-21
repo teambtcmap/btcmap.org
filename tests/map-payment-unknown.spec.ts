@@ -292,9 +292,15 @@ test.describe('Map payment filter — unknown tags', () => {
 
 		await expect.poll(() => placesCount(page), { timeout: MARKER_LOAD_TIMEOUT }).toBe(0);
 		await expect(page.getByRole('radiogroup')).toBeVisible();
-		// No option describes the AND combination, and the URL is left alone.
+		// No option describes the AND combination, and the filter is left
+		// alone — asserted on the params, not the URL's spelling: the app
+		// already normalises a bare ?lightning to ?lightning= on load, which
+		// predates this PR (it happens on the base branch with no switcher
+		// mounted). What matters is that neither method was dropped.
 		expect(await page.getByRole('radio', { checked: true }).count()).toBe(0);
-		expect(page.url()).toMatch(/lightning&onchain/);
+		const params = new URL(page.url()).searchParams;
+		expect(params.has('lightning')).toBe(true);
+		expect(params.has('onchain')).toBe(true);
 	});
 
 	test('the desktop bar carries the switcher at rest too', async ({ page }) => {

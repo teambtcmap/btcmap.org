@@ -3,7 +3,6 @@ import Icon from "$components/Icon.svelte";
 import { trackEvent } from "$lib/analytics";
 import { _ } from "$lib/i18n";
 import type { PaymentMethod } from "$lib/map/paymentMethodFilter";
-import { PAYMENT_METHODS } from "$lib/map/paymentMethodFilter";
 
 // The payment switcher that rides the empty-state note (#1430). The note
 // tells the reader the view is filtered; without this it gives them no way
