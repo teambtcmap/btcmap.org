@@ -597,7 +597,7 @@
 		"nameLabel": "Naam van de locatie in de lokale taal",
 		"nameEnLabel": "Naam van de locatie in het Engels",
 		"nameEnTooltip": "Vul hier de Engelse naam van het bedrijf in als die anders is dan de lokale naam. Deze wordt opgeslagen als name:en in OpenStreetMap.",
-		"pinChipLabel": "Pin geplaatst",
+		"pinnedAt": "Vastgepind op {coords}",
 		"movePin": "Pin verplaatsen",
 		"osmForkPrompt": "Ben je bekend met OpenStreetMap? Je kunt deze locatie daar zelf toevoegen. Je bijdrage staat daar direct live, op jouw naam. Bij onze volgende synchronisatie verschijnt hij als bij toverslag op BTC Map!",
 		"osmForkCta": "OSM-editor openen",
