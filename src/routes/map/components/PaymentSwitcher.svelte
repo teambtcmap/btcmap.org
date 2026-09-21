@@ -57,12 +57,17 @@ const showAll = () => {
 };
 </script>
 
-<div class="flex items-center gap-2 {className}">
-	<div class="relative min-w-0 flex-1">
+<!-- Wraps instead of scrolling from md up. The desktop card is 320px wide,
+     which does NOT fit three method pills plus the exit on one line — it
+     clipped "On-chain" and put Contactless out of reach behind a fade that
+     is itself hidden at this width. Scrolling is the mobile answer, where
+     the fade and chevron say so; here the card just grows. -->
+<div class="flex items-center gap-2 md:flex-wrap {className}">
+	<div class="relative min-w-0 flex-1 md:flex-none">
 		<div
 			role="radiogroup"
 			aria-label={$_('paymentSwitch.label')}
-			class="flex items-center gap-2 overflow-x-auto [scrollbar-width:none]"
+			class="flex items-center gap-2 overflow-x-auto [scrollbar-width:none] md:flex-wrap md:overflow-visible"
 		>
 			{#each ORDER as method (method)}
 				{@const isActive = method === active}
