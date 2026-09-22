@@ -278,10 +278,14 @@ $effect(() => {
 						<p class="text-sm font-semibold text-primary dark:text-white">
 							{$_('addLocation.successVolunteerPrompt')}
 						</p>
+						<!-- The native guide (#1376), not the join.btcmap.org proof of
+						     concept it replaced. Still a new tab so the success panel —
+						     and its "Submit another" — survives the detour; same-origin
+						     now, so the rel goes: noreferrer would hide the hop from our
+						     own analytics. -->
 						<a
-							href="https://join.btcmap.org/"
+							href="/join-us"
 							target="_blank"
-							rel="noopener noreferrer"
 							class="mt-0.5 inline-block text-[13px] leading-[19px] font-semibold text-link hover:text-hover"
 							onclick={() => trackEvent('add_place_tagger_guide_click')}
 						>

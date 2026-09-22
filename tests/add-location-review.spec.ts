@@ -340,7 +340,7 @@ test.describe('Add Location — review step', () => {
 		await expect(page.getByText('Waiting for review')).toBeVisible();
 		await expect(
 			page.getByRole('link', { name: 'Learn how volunteers maintain the map' })
-		).toHaveAttribute('href', 'https://join.btcmap.org/');
+		).toHaveAttribute('href', '/join-us');
 		expect(await page.getByText('Keep a record of what you add').count()).toBe(0);
 	});
 });
