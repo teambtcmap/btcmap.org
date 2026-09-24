@@ -121,6 +121,14 @@ const steps: Step[] = $derived([
 
 <section id="join-us" class="mx-auto mt-10 w-full pb-20 md:w-[600px] md:pb-32">
 	<p class="mb-6 space-y-7 text-center text-xl font-semibold text-primary dark:text-white">
+		<!-- The promise leads, the open-data framing supports it (#1437): the
+		     page's job is to get someone contributing, and the homepage already
+		     makes the "open data on OSM" point twice. Kept rather than cut
+		     because /join-us is a standalone destination — nav entry, homepage
+		     CTA, add-location success CTA — so most arrivals never read the
+		     homepage, and this is the only OSM link before step 4 sends them
+		     there to edit. -->
+		<span class="block">{$_('joinUs.intro')}</span>
 		<span class="block">
 			{$_('joinUs.openDataPre')}{' '}
 			<!-- The copy is split around the link instead of {@html}-injecting
@@ -136,7 +144,6 @@ const steps: Step[] = $derived([
 				onclick={track('osm-about')}
 			>OpenStreetMap</a>.
 		</span>
-		<span class="block">{$_('joinUs.intro')}</span>
 	</p>
 
 	<ol class="space-y-6">
