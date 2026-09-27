@@ -59,8 +59,8 @@ import type { PostPlaceSubmissionResponse } from "$types/btcmap-api/PostPlaceSub
 // look before it reaches the volunteer queue. Each step is a TanStack
 // form (#1420, with the rules and semantics of #1404 via ruleValidation):
 // the edit step's fields, and the review step's captcha answer. The edit
-// fields stay mounted and are only CSS-hidden during review, so the
-// expanders and the hours editor keep their state across the round trip.
+// fields stay mounted and are only CSS-hidden during review, so the hours
+// editor and the sign-in block keep their state across the round trip.
 type Props = {
 	coords: { lat: number; long: number };
 	// On a completed submission. `attributed` = it went out with a verified
@@ -128,7 +128,6 @@ const fetchCaptcha = () => {
 
 let nameInput = $state<HTMLInputElement>();
 let addressInput = $state<HTMLInputElement>();
-let showMoreDetails = $state(false);
 
 // Address suggestion from the pin (#1315). Re-runs whenever the pin
 // moves — the host's Move pin, or history navigation between two arrivals
@@ -333,14 +332,6 @@ const detailsForm = createForm(() => ({
 		contact: "",
 	} as DetailsValues,
 	...details.options,
-	onSubmitInvalid: ({ formApi }) => {
-		// A marked website inside the collapsed details would be hidden
-		// (display:none) — and couldn't take focus.
-		if (formApi.getFieldMeta("website")?.errors.length) {
-			showMoreDetails = true;
-		}
-		details.options.onSubmitInvalid();
-	},
 	onSubmit: ({ value }) => {
 		preview = collectPreview(value);
 		step = "review";
@@ -804,41 +795,18 @@ onMount(() => {
 			{/snippet}
 		</detailsForm.Field>
 
-		<div>
-			<button
-				type="button"
-				class="flex items-center gap-1 text-sm font-semibold text-link hover:text-hover focus:outline-link"
-				aria-expanded={showMoreDetails}
-				onclick={() => (showMoreDetails = !showMoreDetails)}
-			>
-				<Icon
-					type="material"
-					icon="expand_more"
-					w="16"
-					h="16"
-					class={showMoreDetails ? 'rotate-180' : ''}
-				/>
-				{$_('addLocation.moreDetailsToggle')}
-			</button>
-		</div>
-
-		<div class="space-y-5" class:hidden={!showMoreDetails}>
-			<detailsForm.Field name="nameEn">
-				{#snippet children(field)}
-					<TextField
-						id="name-en"
-						name="nameEn"
-						label={$_('addLocation.nameEnLabel')}
-						optional
-						placeholder={$_('addLocation.merchantEnglishNamePlaceholder')}
-						{...inputProps(field)}
-					>
-						{#snippet hint()}
-							<FormHelperText text={$_('addLocation.nameEnTooltip')} />
-						{/snippet}
-					</TextField>
-				{/snippet}
-			</detailsForm.Field>
+		<!-- The optional fields sit in the form, not behind a disclosure
+		     (#1447). The expander #1289 added for panel weight cost exactly
+		     the two fields its own label advertised: volunteer editors read
+		     a website and opening hours to check a submission, and a field
+		     nobody sees is a field nobody fills. A rule and a heading carry
+		     the skim structure the disclosure used to provide — what the
+		     editors act on leads, the note to them closes. -->
+		<div class="space-y-5 border-t border-gray-300 pt-5 dark:border-white/20">
+			<div>
+				<h3 class="font-semibold">{$_('addLocation.detailsHeading')}</h3>
+				<FormHelperText text={$_('addLocation.detailsHint')} />
+			</div>
 
 			<detailsForm.Field name="website">
 				{#snippet children(field)}
@@ -856,30 +824,16 @@ onMount(() => {
 				{/snippet}
 			</detailsForm.Field>
 
-			<detailsForm.Field name="phone">
-				{#snippet children(field)}
-					<TextField
-						id="phone"
-						name="phone"
-						label={$_('forms.phone')}
-						optional
-						type="tel"
-						placeholder={$_('addLocation.phonePlaceholder')}
-						{...inputProps(field)}
-					/>
-				{/snippet}
-			</detailsForm.Field>
-
 			<div>
 				<p class="mb-2 font-semibold">
 					{$_('forms.openingHours')}
 					<span class="font-normal">{$_('forms.optional')}</span>
 				</p>
-				<!-- Nested accordion, same idiom as the details expander: the
-				     seven-day grid only unfolds for people who care about
-				     hours. Collapsing unmounts the editor; the generated
-				     string survives in hoursValue and is parsed back into
-				     the grid on re-open. -->
+				<!-- The field is visible; its editor is an action. Seven days of
+				     time inputs would dominate the panel, so the grid unfolds on
+				     demand and the generated string stands in for it when it's
+				     closed. Collapsing unmounts the editor; the string survives
+				     in hoursValue and is parsed back into the grid on re-open. -->
 				<button
 					type="button"
 					class="flex items-center gap-1 text-sm font-semibold text-link hover:text-hover focus:outline-link"
@@ -905,6 +859,37 @@ onMount(() => {
 					</div>
 				{/if}
 			</div>
+
+			<detailsForm.Field name="phone">
+				{#snippet children(field)}
+					<TextField
+						id="phone"
+						name="phone"
+						label={$_('forms.phone')}
+						optional
+						type="tel"
+						placeholder={$_('addLocation.phonePlaceholder')}
+						{...inputProps(field)}
+					/>
+				{/snippet}
+			</detailsForm.Field>
+
+			<detailsForm.Field name="nameEn">
+				{#snippet children(field)}
+					<TextField
+						id="name-en"
+						name="nameEn"
+						label={$_('addLocation.nameEnLabel')}
+						optional
+						placeholder={$_('addLocation.merchantEnglishNamePlaceholder')}
+						{...inputProps(field)}
+					>
+						{#snippet hint()}
+							<FormHelperText text={$_('addLocation.nameEnTooltip')} />
+						{/snippet}
+					</TextField>
+				{/snippet}
+			</detailsForm.Field>
 
 			<detailsForm.Field name="notes">
 				{#snippet children(field)}
