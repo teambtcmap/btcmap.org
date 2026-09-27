@@ -174,23 +174,19 @@ test.describe('Add Location — inline validation', () => {
 		await expect(other).not.toHaveAttribute('aria-invalid', 'true');
 	});
 
-	test('an invalid website is reported even with the details collapsed', async ({
-		page
-	}) => {
+	test('an invalid website is reported on the field', async ({ page }) => {
 		await openForm(page);
 		await fillValid(page);
-		const toggle = page.getByRole('button', { name: /Add more details/ });
-		await toggle.click();
+		// On screen since #1447, so a rejected Review can focus it. Behind
+		// the old expander the field was display:none: unfocusable, and
+		// Review did nothing at all until onSubmitInvalid forced the section
+		// open first.
 		const website = page.locator('#website');
+		await expect(website).toBeVisible();
 		await website.fill('not a site');
-		// Collapsed, the field is display:none — the browser couldn't focus
-		// it to show its bubble, so Review used to do nothing at all.
-		await toggle.click();
-		await expect(website).toBeHidden();
 
 		await recordDescriptionAtFocus(website);
 		await clickReview(page);
-		await expect(toggle).toHaveAttribute('aria-expanded', 'true');
 		await expectRejectedAt(page, website, 'Enter a web address, like bitcoin.org.');
 
 		// A bare domain is fine: it's published with https:// in front.
