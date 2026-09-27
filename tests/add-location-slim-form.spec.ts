@@ -62,8 +62,9 @@ test.describe('Add Location — slim form', () => {
 			await expect(page.locator(`[name="${name}"]`)).toBeVisible();
 		}
 		// Opening hours: label and editor toggle on screen, the seven-day
-		// grid still an action.
-		await expect(page.getByText('Opening Hours')).toBeVisible();
+		// grid still an action. The label carries its optional tag — bare
+		// "Opening Hours" also matches the toggle below it.
+		await expect(page.getByText('Opening Hours (optional)')).toBeVisible();
 		await expect(
 			page.getByRole('button', { name: /Set opening hours/ })
 		).toBeVisible();
