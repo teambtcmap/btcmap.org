@@ -1,15 +1,27 @@
+import type { Page } from '@playwright/test';
 import { expect, test } from '@playwright/test';
 
 import { MARKER_LOAD_TIMEOUT, stubMapData, stubReverseGeocode } from './helpers';
 
 // Step 2 of the add-location redesign: slim details form (#1134) —
 // category picker, and the optional fields that #1289 put behind an "Add
-// more details" expander and #1447 brought back into the form. The form
-// lives on the map now (#1134): ?add=form opens it at the hash pin. stubMapData keeps the host hermetic; the arrival address
+// more details" expander, #1447 brought back into the form and #1449 gave
+// a step of their own. The form lives on the map now (#1134): ?add=form
+// opens it at the hash pin. stubMapData keeps the host hermetic; the arrival address
 // lookup (#1315) is stubbed too, and the SW block lets page.route see it.
 // The pin sits in the shared STUB_PLACES viewport so the map-ready
 // helper (rendered-marker count) has features to see.
 const PIN = '/map?add=form#17/42.2762511/42.7024218';
+
+// The details step is reached through the place step's own rules (#1449).
+const goToDetails = async (page: Page) => {
+	await page.locator('#name').fill('Satoshi Comics');
+	await page.locator('#category').selectOption('restaurants');
+	await page.locator('#onchain').check();
+	await page.locator('#contact').fill('owner@example.com');
+	await page.getByRole('button', { name: 'Continue' }).click();
+	await expect(page.locator('#website')).toBeVisible();
+};
 
 test.describe('Add Location — slim form', () => {
 	test.use({ serviceWorkers: 'block' });
@@ -38,7 +50,7 @@ test.describe('Add Location — slim form', () => {
 		await expect(other).toHaveAttribute('required', '');
 	});
 
-	test('the optional details are in the form, not behind an expander', async ({
+	test('the optional details have a step of their own, not an expander', async ({
 		page
 	}) => {
 		await stubMapData(page);
@@ -51,7 +63,9 @@ test.describe('Add Location — slim form', () => {
 		});
 
 		// #1447: the expander cost exactly the two fields its own label
-		// advertised, so there is no expander left to click.
+		// advertised, so there is no expander left to click — the fields are
+		// the whole task of step 2 (#1449).
+		await goToDetails(page);
 		await expect(
 			page.getByRole('button', { name: /Add more details/ })
 		).toHaveCount(0);
@@ -87,7 +101,8 @@ test.describe('Add Location — slim form', () => {
 		});
 
 		// The editor sits behind its own accordion row under the visible
-		// Opening Hours label.
+		// Opening Hours label, on the details step.
+		await goToDetails(page);
 		const toggle = page.getByRole('button', { name: /Set opening hours/ });
 		await expect(toggle).toHaveAttribute('aria-expanded', 'false');
 		await toggle.click();
@@ -238,7 +253,8 @@ test.describe('Add Location — slim form', () => {
 				{ once: true }
 			);
 		});
-		await page.getByRole('button', { name: 'Review & submit' }).click();
+		// payment methods are the place step's field (#1449)
+		await page.getByRole('button', { name: 'Continue' }).click();
 
 		await expect(group).toContainText('Pick at least one to continue.');
 		await expect(page.locator('#onchain')).toBeFocused();

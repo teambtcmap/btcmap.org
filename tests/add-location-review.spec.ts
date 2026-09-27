@@ -42,6 +42,13 @@ const openAndFillForm = async (page: Page) => {
 	await page.locator('#contact').fill('owner@example.com');
 };
 
+// Past both editing steps (#1449): Continue leaves the place step, Review
+// & submit the details step.
+const goToReview = async (page: Page) => {
+	await page.getByRole('button', { name: 'Continue' }).click();
+	await page.getByRole('button', { name: 'Review & submit' }).click();
+};
+
 test.describe('Add Location — review step', () => {
 	test.use({ serviceWorkers: 'block' });
 
@@ -86,7 +93,7 @@ test.describe('Add Location — review step', () => {
 			);
 		});
 
-		await page.getByRole('button', { name: 'Review & submit' }).click();
+		await goToReview(page);
 		await expect(page.getByText("Here's what will be published")).toBeVisible();
 		await page.locator('#captcha').fill('abc123');
 		await page.getByRole('button', { name: 'Submit Location' }).click();
@@ -113,15 +120,18 @@ test.describe('Add Location — review step', () => {
 		await page.route('**/captcha', () => new Promise<void>(() => {}));
 		await openAndFillForm(page);
 
-		// Progress lives in the panel header (#1394).
+		// Progress lives in the panel header (#1394), now over three steps
+		// (#1449).
 		const panel = page.getByRole('region', { name: 'Add Location' });
-		await expect(panel.getByText('Step 1 of 2 · Details')).toBeVisible();
+		await expect(panel.getByText('Step 1 of 3 · The place')).toBeVisible();
 
+		await page.getByRole('button', { name: 'Continue' }).click();
+		await expect(panel.getByText('Step 2 of 3 · Details')).toBeVisible();
 		await page.getByRole('button', { name: 'Review & submit' }).click();
 
 		// The summary replaces the fields; the captcha lives here now.
 		await expect(page.getByText("Here's what will be published")).toBeVisible();
-		await expect(panel.getByText('Step 2 of 2 · Review')).toBeVisible();
+		await expect(panel.getByText('Step 3 of 3 · Review')).toBeVisible();
 		// Entering review scrolls the form's top clear of the (now taller)
 		// sticky header, so the back link is visible, not tucked under it.
 		const back = page.getByRole('button', { name: 'Back to details' });
@@ -156,9 +166,13 @@ test.describe('Add Location — review step', () => {
 			await page.getByRole('button', { name: 'Edit details' }).count()
 		).toBe(0);
 
-		// Back to edit: the hidden-not-unmounted fields kept their values.
+		// Back one step at a time; the hidden-not-unmounted fields kept
+		// their values all the way.
 		await back.click();
-		await expect(panel.getByText('Step 1 of 2 · Details')).toBeVisible();
+		await expect(panel.getByText('Step 2 of 3 · Details')).toBeVisible();
+		await expect(page.locator('#website')).toBeVisible();
+		await page.getByRole('button', { name: 'Back to the place' }).click();
+		await expect(panel.getByText('Step 1 of 3 · The place')).toBeVisible();
 		await expect(page.locator('#name')).toBeVisible();
 		await expect(page.locator('#name')).toHaveValue('Satoshi Comics');
 		await expect(
@@ -180,7 +194,7 @@ test.describe('Add Location — review step', () => {
 			});
 		});
 
-		await page.getByRole('button', { name: 'Review & submit' }).click();
+		await goToReview(page);
 		await expect(page.getByText("Here's what will be published")).toBeVisible();
 
 		// Pan the map while the summary is up — on desktop it stays
@@ -306,7 +320,7 @@ test.describe('Add Location — review step', () => {
 		// The account is the identity — no contact field to fill.
 		await expect(page.locator('#contact')).toHaveCount(0);
 
-		await page.getByRole('button', { name: 'Review & submit' }).click();
+		await goToReview(page);
 		await expect(page.getByText("Here's what will be published")).toBeVisible();
 		// No captcha for the authorized path — the token is the bot check.
 		await expect(page.locator('#captcha')).toHaveCount(0);

@@ -12,10 +12,12 @@ import {
 } from './helpers';
 
 // One validation style for every field (#1404): the form runs
-// `novalidate` and a rejected Review marks each invalid field inline — an
-// error border, aria-invalid, and a message under its label that is the
-// field's accessible description before focus lands on the first one. No
-// native bubbles, no toasts. Hermetic like the other add-location specs.
+// `novalidate` and a rejected step button marks each invalid field inline
+// — an error border, aria-invalid, and a message under its label that is
+// the field's accessible description before focus lands on the first one.
+// No native bubbles, no toasts. Each step checks its own fields (#1449):
+// Continue the place step's, Review & submit the details step's. Hermetic
+// like the other add-location specs.
 const PIN = '/map?add=form#17/42.2762511/42.7024218';
 
 const openForm = async (page: Page) => {
@@ -36,10 +38,19 @@ const fillValid = async (page: Page) => {
 	await page.locator('#contact').fill('owner@example.com');
 };
 
+const clickContinue = (page: Page) =>
+	page.getByRole('button', { name: 'Continue' }).click();
+
 const clickReview = (page: Page) =>
 	page.getByRole('button', { name: 'Review & submit' }).click();
 
-// The #1404 contract on the field a rejected Review lands on.
+// Both editing steps, for the tests that need the review summary.
+const goToReview = async (page: Page) => {
+	await clickContinue(page);
+	await clickReview(page);
+};
+
+// The #1404 contract on the field a rejected step button lands on.
 const expectRejectedAt = async (page: Page, field: Locator, message: string) => {
 	await expect(field).toBeFocused();
 	await expect(field).toHaveAttribute('aria-invalid', 'true');
@@ -68,14 +79,14 @@ test.describe('Add Location — inline validation', () => {
 		const name = page.locator('#name');
 		await name.fill('');
 		await recordDescriptionAtFocus(name);
-		await clickReview(page);
+		await clickContinue(page);
 		await expectRejectedAt(page, name, "Enter the place's name.");
 
 		// Whitespace alone passed the browser's `required`, only to be
 		// rejected by the server after the captcha.
 		await name.fill('   ');
 		await recordDescriptionAtFocus(name);
-		await clickReview(page);
+		await clickContinue(page);
 		await expectRejectedAt(page, name, "Enter the place's name.");
 	});
 
@@ -85,7 +96,7 @@ test.describe('Add Location — inline validation', () => {
 		const address = page.locator('#address');
 		await address.fill('');
 		await recordDescriptionAtFocus(address);
-		await clickReview(page);
+		await clickContinue(page);
 		await expectRejectedAt(page, address, 'Enter the address.');
 
 		await address.fill('Nansenstr. 1, Berlin');
@@ -101,7 +112,7 @@ test.describe('Add Location — inline validation', () => {
 		const address = page.locator('#address');
 		await address.fill('');
 		await recordDescriptionAtFocus(address);
-		await clickReview(page);
+		await clickContinue(page);
 		await expectRejectedAt(page, address, 'Enter the address.');
 
 		// Re-place the pin: the panel hides and the whole map drags.
@@ -130,7 +141,7 @@ test.describe('Add Location — inline validation', () => {
 		const category = page.locator('#category');
 		await category.selectOption('');
 		await recordDescriptionAtFocus(category);
-		await clickReview(page);
+		await clickContinue(page);
 		await expectRejectedAt(page, category, 'Pick a category.');
 
 		// Other fixes the missing pick. Its text field arrives empty and
@@ -157,7 +168,7 @@ test.describe('Add Location — inline validation', () => {
 		await expect(other).toHaveAccessibleName('Category');
 		await other.fill('  ');
 		await recordDescriptionAtFocus(other);
-		await clickReview(page);
+		await clickContinue(page);
 		await expectRejectedAt(page, other, 'Enter a category.');
 		// The select itself is fine — only the free text is missing, and the
 		// message sits with it: below the select, right above the text field.
@@ -181,6 +192,9 @@ test.describe('Add Location — inline validation', () => {
 		// the old expander the field was display:none: unfocusable, and
 		// Review did nothing at all until onSubmitInvalid forced the section
 		// open first.
+		// The website is the details step's own field (#1449), so Review &
+		// submit is what checks it.
+		await clickContinue(page);
 		const website = page.locator('#website');
 		await expect(website).toBeVisible();
 		await website.fill('not a site');
@@ -204,7 +218,7 @@ test.describe('Add Location — inline validation', () => {
 		const contact = page.locator('#contact');
 		await contact.fill('owner@');
 		await recordDescriptionAtFocus(contact);
-		await clickReview(page);
+		await clickContinue(page);
 		await expectRejectedAt(page, contact, 'Enter a valid email address.');
 
 		// Still failing the same rule: the message stays.
@@ -220,7 +234,7 @@ test.describe('Add Location — inline validation', () => {
 
 		// The next Review reports what's wrong now, and a valid email clears it.
 		await recordDescriptionAtFocus(contact);
-		await clickReview(page);
+		await clickContinue(page);
 		await expectRejectedAt(page, contact, 'Enter an email address.');
 		await contact.fill('owner@example.com');
 		await expect(contact).not.toHaveAttribute('aria-invalid', 'true');
@@ -233,7 +247,7 @@ test.describe('Add Location — inline validation', () => {
 		await openForm(page);
 		const name = page.locator('#name');
 		await recordDescriptionAtFocus(name);
-		await clickReview(page);
+		await clickContinue(page);
 		await expectRejectedAt(page, name, "Enter the place's name.");
 		for (const message of [
 			'Pick a category.',
@@ -256,9 +270,9 @@ test.describe('Add Location — inline validation', () => {
 		await openForm(page);
 		await fillValid(page);
 		await page.locator('#name').fill('');
-		// Review sits at the bottom of the form; the rejected name is at the
-		// top, so focusing it has to scroll the panel back up.
-		await clickReview(page);
+		// Continue sits at the bottom of the step; the rejected name is at
+		// the top, so focusing it has to scroll the panel back up.
+		await clickContinue(page);
 		await expect(page.locator('#name')).toBeFocused();
 
 		const panel = page.getByRole('region', { name: 'Add Location' });
@@ -289,7 +303,7 @@ test.describe('Add Location — inline validation', () => {
 		});
 		await openForm(page);
 		await fillValid(page);
-		await clickReview(page);
+		await goToReview(page);
 		await expect(page.getByText("Here's what will be published")).toBeVisible();
 
 		// The label reads its hint once: the strings used to carry their own
