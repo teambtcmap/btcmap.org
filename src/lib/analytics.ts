@@ -54,6 +54,8 @@ export type EventName =
 	| "add_place_nearby_candidate_click"
 	| "add_place_address_prefill"
 	| "add_place_address_jump"
+	| "add_place_details_enter"
+	| "add_place_details_back"
 	| "add_place_review_enter"
 	| "add_place_review_back"
 	| "add_place_move_pin_click"
