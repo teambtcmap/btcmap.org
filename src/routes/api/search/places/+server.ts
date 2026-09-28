@@ -48,7 +48,7 @@ export const GET: RequestHandler = async ({ url, fetch }) => {
 	// deliberately tolerates an upstream that omits fields (see tests).
 	const body = (await res.json()) as Partial<SearchResponse>;
 	// Drop the discriminator; `type_filter=place` means every row is a place
-	// at runtime, though the static type stays the area/place union.
+	// at runtime, though the static type stays the area/place/event union.
 	const places = (body.results ?? []).map(({ type: _type, ...place }) => place);
 
 	// The API caps `limit`, so a broad query ("str" matches every addr:street)
