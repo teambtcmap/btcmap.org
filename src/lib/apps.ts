@@ -53,7 +53,7 @@ export const appConfigs: AppConfig[] = [
 			{
 				store: "apk-beta",
 				platform: "android",
-				url: "https://static.btcmap.org/android/apk/beta.apk",
+				url: "https://cdn.static.btcmap.org/android/apk/beta.apk",
 			},
 			{
 				store: "zapstore",
