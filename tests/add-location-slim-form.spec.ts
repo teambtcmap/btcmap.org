@@ -88,6 +88,12 @@ test.describe('Add Location — slim form', () => {
 
 		const websiteInput = page.locator('input[name="website"]');
 		await websiteInput.fill('https://example.com');
+		// Back to the place step and forward again — the details step is
+		// CSS-hidden, not unmounted, so the answer survives the round trip.
+		await page.getByRole('button', { name: 'Back to the place' }).click();
+		await expect(websiteInput).toBeHidden();
+		await page.getByRole('button', { name: 'Continue' }).click();
+		await expect(websiteInput).toBeVisible();
 		await expect(websiteInput).toHaveValue('https://example.com');
 	});
 

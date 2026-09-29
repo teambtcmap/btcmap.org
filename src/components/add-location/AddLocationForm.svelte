@@ -61,9 +61,10 @@ import type { PostPlaceSubmissionResponse } from "$types/btcmap-api/PostPlaceSub
 // look before it reaches the volunteer queue. The two editing steps share
 // one TanStack form whose rules are scoped to the step showing (#1420,
 // with the rules and semantics of #1404 via ruleValidation); the review
-// step's captcha answer is a form of its own. No step is ever unmounted,
-// only CSS-hidden, so every answer — the hours editor and the sign-in
-// block included — survives any number of round trips.
+// step's captcha answer is a form of its own. Neither editing step is
+// ever unmounted, only CSS-hidden, so every answer — the hours editor and
+// the sign-in block included — survives any number of round trips; the
+// review step mounts fresh from the collected preview on each entry.
 type Props = {
 	coords: { lat: number; long: number };
 	// On a completed submission. `attributed` = it went out with a verified
