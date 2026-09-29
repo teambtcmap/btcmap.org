@@ -625,7 +625,6 @@
 		"nfcLabel": "Contactless",
 		"websitePlaceholder": "https://bitcoin.org",
 		"phonePlaceholder": "Number",
-		"hoursToggle": "Set opening hours",
 		"notesPlaceholder": "Please add further details here like additional merchant details, contacts, socials, etc.",
 		"contactDescription": "If we have any follow-up questions we will contact you in order to add this location successfully. The address appears on the public submission ticket, so use one you don't mind sharing.",
 		"submittingAs": "Submitting as {username}",

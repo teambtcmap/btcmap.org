@@ -237,7 +237,6 @@ let websiteInput = $state<HTMLInputElement>();
 // Outside the form: the day-grid editor binds the OSM opening_hours string
 // it generates, and nothing validates it.
 let hoursValue = $state("");
-let showHoursEditor = $state(false);
 let contactInput = $state<HTMLInputElement>();
 let submitting = $state(false);
 
@@ -999,40 +998,18 @@ onMount(() => {
 			{/snippet}
 		</detailsForm.Field>
 
-		<div>
-			<p class="mb-2 font-semibold">
+		<div role="group" aria-labelledby="opening-hours-label">
+			<p id="opening-hours-label" class="mb-2 font-semibold">
 				{$_('forms.openingHours')}
 				<span class="font-normal">{$_('forms.optional')}</span>
 			</p>
-			<!-- The field is visible; its editor is an action. Seven days of
-			     time inputs would dominate the panel, so the grid unfolds on
-			     demand and the generated string stands in for it when it's
-			     closed. Collapsing unmounts the editor; the string survives
-			     in hoursValue and is parsed back into the grid on re-open. -->
-			<button
-				type="button"
-				class="flex items-center gap-1 text-sm font-semibold text-link hover:text-hover focus:outline-link"
-				aria-expanded={showHoursEditor}
-				aria-controls="opening-hours-editor"
-				onclick={() => (showHoursEditor = !showHoursEditor)}
-			>
-				<Icon
-					type="material"
-					icon="expand_more"
-					w="16"
-					h="16"
-					class={showHoursEditor ? 'rotate-180' : ''}
-				/>
-				{$_('addLocation.hoursToggle')}
-			</button>
-			{#if !showHoursEditor && hoursValue}
-				<code class="ml-2 font-mono text-sm text-body dark:text-offwhite">{hoursValue}</code>
-			{/if}
-			{#if showHoursEditor}
-				<div id="opening-hours-editor" class="mt-3">
-					<OpeningHoursEditor bind:value={hoursValue} />
-				</div>
-			{/if}
+			<!-- Unfolded from the start: the details step is a screen of its
+			     own, so the grid no longer crowds the required fields — and a
+			     grid that had to be opened first was still being skipped
+			     (#1447). -->
+			<div id="opening-hours-editor">
+				<OpeningHoursEditor bind:value={hoursValue} />
+			</div>
 		</div>
 
 		<detailsForm.Field name="phone">

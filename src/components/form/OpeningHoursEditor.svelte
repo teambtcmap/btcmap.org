@@ -33,8 +33,7 @@ const emit = () => {
 	value = next;
 };
 
-// Parse an externally-supplied value: initial mount, a re-mount after the
-// hosting accordion collapsed, or a future prefill.
+// Parse an externally-supplied value: initial mount or a future prefill.
 $effect(() => {
 	if (value === lastEmitted) return;
 	const parsed = parseOpeningHours(value);

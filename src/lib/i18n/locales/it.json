@@ -625,7 +625,6 @@
 		"nfcLabel": "Contactless",
 		"websitePlaceholder": "https://bitcoin.org",
 		"phonePlaceholder": "Numero",
-		"hoursToggle": "Imposta gli orari di apertura",
 		"notesPlaceholder": "Aggiungi ulteriori dettagli qui, come dettagli aggiuntivi sul commerciante, contatti, canali social, ecc.",
 		"contactDescription": "Se avremo domande di follow-up, ti contatteremo per aggiungere correttamente questo luogo. L'indirizzo appare sul ticket pubblico dell'invio, quindi usane uno che non ti dispiace condividere.",
 		"submittingAs": "Invio come {username}",

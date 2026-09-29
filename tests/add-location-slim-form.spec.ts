@@ -75,20 +75,23 @@ test.describe('Add Location — slim form', () => {
 		for (const name of ['website', 'phone', 'nameEn', 'notes']) {
 			await expect(page.locator(`[name="${name}"]`)).toBeVisible();
 		}
-		// Opening hours: label and editor toggle on screen, the seven-day
-		// grid still an action. The label carries its optional tag — bare
-		// "Opening Hours" also matches the toggle below it.
+		// Opening hours: the seven-day grid is on screen from the start,
+		// with no toggle to open it first (#1447 follow-up).
 		await expect(page.getByText('Opening Hours (optional)')).toBeVisible();
 		await expect(
-			page.getByRole('button', { name: /Set opening hours/ })
+			page.getByRole('group', { name: /Opening Hours/ })
 		).toBeVisible();
+		await expect(page.getByRole('checkbox', { name: 'Monday' })).toBeVisible();
+		await expect(
+			page.getByRole('button', { name: /Set opening hours/ })
+		).toHaveCount(0);
 
 		const websiteInput = page.locator('input[name="website"]');
 		await websiteInput.fill('https://example.com');
 		await expect(websiteInput).toHaveValue('https://example.com');
 	});
 
-	test('opening hours unfold as a day grid and produce OSM syntax', async ({
+	test('the opening-hours day grid produces OSM syntax', async ({
 		page
 	}) => {
 		await stubMapData(page);
@@ -100,12 +103,9 @@ test.describe('Add Location — slim form', () => {
 			timeout: MARKER_LOAD_TIMEOUT
 		});
 
-		// The editor sits behind its own accordion row under the visible
-		// Opening Hours label, on the details step.
+		// The editor is unfolded under the Opening Hours label on the
+		// details step.
 		await goToDetails(page);
-		const toggle = page.getByRole('button', { name: /Set opening hours/ });
-		await expect(toggle).toHaveAttribute('aria-expanded', 'false');
-		await toggle.click();
 
 		// Open Monday with the default 09:00–17:00 range.
 		await page.getByRole('checkbox', { name: 'Monday' }).check();
@@ -131,10 +131,6 @@ test.describe('Add Location — slim form', () => {
 		// The 24/7 shortcut overrides the grid.
 		await page.getByRole('checkbox', { name: 'Open 24/7' }).check();
 		await expect(page.locator('#opening-hours-editor code')).toHaveText('24/7');
-
-		// Collapsing keeps the generated value visible as a summary.
-		await toggle.click();
-		await expect(page.locator('code', { hasText: '24/7' })).toBeVisible();
 	});
 
 	test('a signed-in session shows the submitting-as chip and relaxes email', async ({

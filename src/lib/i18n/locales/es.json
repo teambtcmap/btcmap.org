@@ -523,7 +523,6 @@
 		"nfcLabel": "Sin contacto",
 		"websitePlaceholder": "https://bitcoin.org",
 		"phonePlaceholder": "Número",
-		"hoursToggle": "Definir el horario",
 		"notesPlaceholder": "Por favor agrega más detalles aquí como información adicional del comercio, contactos, redes sociales, etc.",
 		"contactDescription": "Si tenemos preguntas de seguimiento, te contactaremos para añadir este lugar correctamente. La dirección aparece en el ticket público del envío, así que usa una que no te importe compartir.",
 		"submittingAs": "Enviando como {username}",

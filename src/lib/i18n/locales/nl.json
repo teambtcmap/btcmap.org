@@ -625,7 +625,6 @@
 		"nfcLabel": "Lightning NFC (contactloos)",
 		"websitePlaceholder": "https://websiteadres.nl",
 		"phonePlaceholder": "Telefoonnummer",
-		"hoursToggle": "Openingstijden instellen",
 		"notesPlaceholder": "Voeg hier aanvullende informatie toe, zoals bedrijfsgegevens, contactinformatie of links naar sociale media.",
 		"contactDescription": "Als we nog vragen hebben, nemen we contact met je op om je locatie succesvol toe te voegen. We gebruiken hiervoor het e-mailadres dat je hebt opgegeven. Let op: dit adres wordt openbaar zichtbaar, dus gebruik een adres dat je niet erg vindt om te delen.",
 		"submittingAs": "Ingediend als {username}",

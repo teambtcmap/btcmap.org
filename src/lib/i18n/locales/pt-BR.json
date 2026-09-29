@@ -525,7 +525,6 @@
 		"nfcLabel": "Sem contato",
 		"websitePlaceholder": "https://bitcoin.org",
 		"phonePlaceholder": "Número",
-		"hoursToggle": "Definir o horário de funcionamento",
 		"notesPlaceholder": "Por favor adicione mais detalhes aqui como informações adicionais do comerciante, contatos, redes sociais, etc.",
 		"contactDescription": "Se tivermos perguntas de acompanhamento, entraremos em contato para adicionar este local com sucesso. O endereço aparece no ticket público do envio, então use um que você não se importe de compartilhar.",
 		"submittingAs": "Enviando como {username}",
