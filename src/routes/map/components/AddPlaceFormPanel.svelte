@@ -40,10 +40,19 @@ let submitted = $state(false);
 // True when the submission went out without a verified account — the
 // success screen then nudges toward creating one (#1334).
 let submittedAnonymously = $state(false);
-// The form's review step (#1341): the OSM card is edit-only — the
-// summary is no place to invite leaving. The pin itself is stated by the
-// form, beside the Move pin button under the address (#1425).
-let inReview = $state(false);
+// Which step the form is on (#1341, #1449). The OSM card belongs to the
+// place step — neither the details nor the summary is a place to invite
+// leaving. The pin itself is stated by the form, beside the Move pin
+// button under the address (#1425).
+type FormStep = "place" | "details" | "review";
+let step = $state<FormStep>("place");
+const STEP_NAMES: Record<FormStep, string> = {
+	place: "addLocation.stepPlace",
+	details: "addLocation.stepDetails",
+	review: "addLocation.stepReview",
+};
+const STEP_ORDER: FormStep[] = ["place", "details", "review"];
+const stepNumber = $derived(STEP_ORDER.indexOf(step) + 1);
 
 const onKeydown = (event: KeyboardEvent) => {
 	// While the host re-places the pin, Escape belongs to its sheet.
@@ -56,7 +65,7 @@ const onKeydown = (event: KeyboardEvent) => {
 
 // The success screen's title names the submitted place.
 let submittedName = $state("");
-// The review step can leave the panel scrolled down; the success screen
+// A later step can leave the panel scrolled down; the success screen
 // leads with its title (scroll-mt clears the sticky header).
 let successElement = $state<HTMLElement>();
 $effect(() => {
@@ -77,27 +86,30 @@ $effect(() => {
 			</div>
 			{#if !submitted}
 				<!-- Progress lives in the header: the step label plus a
-				     two-segment bar (link = reached, input = ahead — the
+				     three-segment bar (link = reached, input = ahead — the
 				     filter chips' active/inactive pair). Announced on change
-				     so the edit↔review swap isn't silent. The success screen
-				     gets no counter: "step N of 2" belongs to the form. -->
+				     so a step swap isn't silent. The success screen gets no
+				     counter: "step N of 3" belongs to the form. -->
 				<p
 					aria-live="polite"
 					class="px-2 pt-0.5 pb-2 text-xs font-bold tracking-[0.6px] text-body uppercase dark:text-offwhite"
 				>
 					{$_('addLocation.stepIndicator', {
 						values: {
-							current: inReview ? 2 : 1,
-							total: 2,
-							name: inReview ? $_('addLocation.stepReview') : $_('addLocation.stepDetails')
+							current: stepNumber,
+							total: STEP_ORDER.length,
+							name: $_(STEP_NAMES[step])
 						}
 					})}
 				</p>
 				<div class="flex gap-[5px] px-2 pb-1" aria-hidden="true">
-					<span class="h-1 flex-1 rounded-sm bg-link"></span>
-					<span
-						class="h-1 flex-1 rounded-sm {inReview ? 'bg-link' : 'bg-input dark:bg-white/20'}"
-					></span>
+					{#each STEP_ORDER as name, index (name)}
+						<span
+							class="h-1 flex-1 rounded-sm {index < stepNumber
+								? 'bg-link'
+								: 'bg-input dark:bg-white/20'}"
+						></span>
+					{/each}
 				</div>
 			{/if}
 		</div>
@@ -105,11 +117,11 @@ $effect(() => {
 
 	{#if !submitted}
 		<div class="px-4 pb-[calc(env(safe-area-inset-bottom)+1.5rem)] md:pb-4">
-			{#if !inReview}
+			{#if step === 'place'}
 				<!-- Path fork for OSM-capable users (#1344): a deep link into the
 				     iD editor at the chosen pin, in a new tab so the form state
-				     survives. Hidden with the hint during review (#1341) — the
-				     summary is no place to invite leaving. When OSM OAuth lands
+				     survives. Hidden past the place step (#1341, #1449) — no
+				     later step is a place to invite leaving. When OSM OAuth lands
 				     it replaces this card in the same slot. The official OSM
 				     logo is vendored unmodified — the OSMF trademark policy
 				     (§3.3.4) allows it to identify a hyperlink to OSM but
@@ -144,8 +156,8 @@ $effect(() => {
 				{coords}
 				{hidden}
 				{onmovepin}
-				onstepchange={(step) => {
-					inReview = step === 'review';
+				onstepchange={(next) => {
+					step = next;
 				}}
 				onsuccess={({ attributed, name }) => {
 					submitted = true;

@@ -1,13 +1,23 @@
 import { firstInvalid } from "$lib/formValidation";
 import type { PaymentMethod } from "$lib/map/paymentMethodFilter";
 
-// The add-location form's edit-step rules (#1404). The form runs with
-// `novalidate` and checks these on Review & submit instead, so every
-// field reports its error the same way: inline, under its label. Kept
-// DOM-free so the rules are unit-tested; the form reads its inputs into
-// a DetailsInput and maps each error code to a message.
+// The add-location form's rules for the two editing steps (#1404). The
+// form runs with `novalidate` and checks these when the step's own
+// button is pressed, so every field reports its error the same way:
+// inline, under its label. Kept DOM-free so the rules are unit-tested;
+// the form reads its inputs into a DetailsInput and maps each error code
+// to a message.
+//
+// Each step checks its own fields and no others (#1449): a rule whose
+// field lives on a hidden step would block the step that is showing with
+// a message nobody can see, and could not take focus either.
+
+// The place step collects what makes the submission; the details step
+// the optional extras volunteer editors read.
+export type DetailsStep = "place" | "details";
 
 export type DetailsInput = {
+	step: DetailsStep;
 	name: string;
 	address: string;
 	// A landed address suggestion makes the field required (#1315).
@@ -110,6 +120,10 @@ export const normalizeWebsite = (value: string): string | null => {
 
 export const validateDetails = (input: DetailsInput): DetailsErrors => {
 	const errors: DetailsErrors = {};
+	if (input.step === "details") {
+		if (normalizeWebsite(input.website) === null) errors.website = "invalid";
+		return errors;
+	}
 	if (!input.name.trim()) errors.name = "required";
 	if (input.addressRequired && !input.address.trim()) {
 		errors.address = "required";
@@ -120,7 +134,6 @@ export const validateDetails = (input: DetailsInput): DetailsErrors => {
 		errors.category = "otherRequired";
 	}
 	if (input.methods.length === 0) errors.methods = "required";
-	if (normalizeWebsite(input.website) === null) errors.website = "invalid";
 	if (input.contactRequired) {
 		if (!input.contact.trim()) {
 			errors.contact = "required";

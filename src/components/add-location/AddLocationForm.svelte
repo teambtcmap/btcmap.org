@@ -19,6 +19,7 @@ import Icon from "$components/Icon.svelte";
 import NostrAvatar from "$components/NostrAvatar.svelte";
 import PlacementPinIcon from "$components/PlacementPinIcon.svelte";
 import PrimaryButton from "$components/PrimaryButton.svelte";
+import type { DetailsStep } from "$lib/addLocationValidation";
 import {
 	DETAILS_FIELDS,
 	normalizeWebsite,
@@ -52,24 +53,27 @@ import type { PostPlaceSubmissionResponse } from "$types/btcmap-api/PostPlaceSub
 // so the form is details-first by construction. The host owns the success
 // state; on a completed submission the form calls `onsuccess`.
 //
-// Two steps (#1341): the edit step collects the fields, the review step
-// shows "here's what will be published" and owns the captcha — so the
-// inputs are usable immediately instead of waiting on the captcha fetch,
-// and prefill junk (suggested address, generated hours) gets one explicit
-// look before it reaches the volunteer queue. Each step is a TanStack
-// form (#1420, with the rules and semantics of #1404 via ruleValidation):
-// the edit step's fields, and the review step's captcha answer. The edit
-// fields stay mounted and are only CSS-hidden during review, so the
-// expanders and the hours editor keep their state across the round trip.
+// Three steps (#1341, #1449): place collects what the submission is,
+// details the optional extras volunteer editors read, and review shows
+// "here's what will be published" and owns the captcha — so the inputs
+// are usable immediately instead of waiting on the captcha fetch, and
+// prefill junk (suggested address, generated hours) gets one explicit
+// look before it reaches the volunteer queue. The two editing steps share
+// one TanStack form whose rules are scoped to the step showing (#1420,
+// with the rules and semantics of #1404 via ruleValidation); the review
+// step's captcha answer is a form of its own. Neither editing step is
+// ever unmounted, only CSS-hidden, so every answer — the hours editor and
+// the sign-in block included — survives any number of round trips; the
+// review step mounts fresh from the collected preview on each entry.
 type Props = {
 	coords: { lat: number; long: number };
 	// On a completed submission. `attributed` = it went out with a verified
 	// account attached (the host's success screen picks its one ask by
 	// it); `name` titles that screen.
 	onsuccess: (result: { attributed: boolean; name: string }) => void;
-	// Fires on edit↔review transitions so the host can adapt its chrome
-	// (the header's step label, and the edit-only panel content).
-	onstepchange?: (step: "edit" | "review") => void;
+	// Fires on every step transition so the host can adapt its chrome (the
+	// header's step label and counter, and the place-step-only content).
+	onstepchange?: (step: FormStep) => void;
 	// Hand the pin back to placement mode (#1425). It lives under the
 	// address because that is the pin in readable form: doubt about a
 	// position arrives while reading a street name, not a coordinate.
@@ -87,7 +91,13 @@ let {
 	hidden = false,
 }: Props = $props();
 
-let step = $state<"edit" | "review">("edit");
+type FormStep = "place" | "details" | "review";
+let step = $state<FormStep>("place");
+// Which rules apply: the editing steps check their own fields only, and
+// review re-runs the place rules it was let through with.
+const ruleStep = $derived<DetailsStep>(
+	step === "details" ? "details" : "place",
+);
 
 let movePinButton = $state<HTMLButtonElement>();
 let wasHidden = false;
@@ -128,7 +138,6 @@ const fetchCaptcha = () => {
 
 let nameInput = $state<HTMLInputElement>();
 let addressInput = $state<HTMLInputElement>();
-let showMoreDetails = $state(false);
 
 // Address suggestion from the pin (#1315). Re-runs whenever the pin
 // moves — the host's Move pin, or history navigation between two arrivals
@@ -170,10 +179,10 @@ const suggestAddress = async (lat: number, long: number) => {
 	const suggestion = await reverseGeocode(lat, long, get(locale) ?? "en");
 	// The pin moved again while this lookup was in flight — drop it.
 	if (token !== lookupToken) return;
-	// Landed mid-review: drop it (mutating the hidden address field could
-	// leave it required-but-empty), but forget the attempt so the return
-	// trip to edit retries these coords.
-	if (step !== "edit") {
+	// Landed while another step shows: drop it (mutating the hidden address
+	// field could leave it required-but-empty), but forget the attempt so
+	// the return trip to the place step retries these coords.
+	if (step !== "place") {
 		lastLookupLat = null;
 		lastLookupLong = null;
 		return;
@@ -207,11 +216,11 @@ const suggestAddress = async (lat: number, long: number) => {
 
 $effect(() => {
 	// Mount included — coords and step are the only tracked reads
-	// (everything else sits behind the await). Paused during review: a
-	// lookup landing then could flip the hidden address field to
-	// required-but-empty, which would block the confirm submit invisibly.
-	// Returning to edit re-runs this and refreshes the suggestion.
-	if (step !== "edit") return;
+	// (everything else sits behind the await). Paused off the place step:
+	// a lookup landing then could flip the hidden address field to
+	// required-but-empty, which would block a later step invisibly.
+	// Coming back re-runs this and refreshes the suggestion.
+	if (step !== "place") return;
 	suggestAddress(coords.lat, coords.long);
 });
 
@@ -229,7 +238,6 @@ let websiteInput = $state<HTMLInputElement>();
 // Outside the form: the day-grid editor binds the OSM opening_hours string
 // it generates, and nothing validates it.
 let hoursValue = $state("");
-let showHoursEditor = $state(false);
 let contactInput = $state<HTMLInputElement>();
 let submitting = $state(false);
 
@@ -298,13 +306,16 @@ type DetailsValues = {
 	contact: string;
 };
 
-// The edit step's rules (#1404); the category's error belongs to the
-// select for a missing pick, to the Other field for an empty description.
+// The editing steps' rules (#1404), scoped to the step showing (#1449) —
+// a rule whose field is on a hidden step would block the visible one with
+// a message nobody can see. The category's error belongs to the select
+// for a missing pick, to the Other field for an empty description.
 const details = ruleValidation({
 	order: DETAILS_FIELDS,
 	validate: (value: DetailsValues) =>
 		validateDetails({
 			...value,
+			step: ruleStep,
 			addressRequired,
 			contactRequired: !identityAttached,
 		}),
@@ -333,15 +344,16 @@ const detailsForm = createForm(() => ({
 		contact: "",
 	} as DetailsValues,
 	...details.options,
-	onSubmitInvalid: ({ formApi }) => {
-		// A marked website inside the collapsed details would be hidden
-		// (display:none) — and couldn't take focus.
-		if (formApi.getFieldMeta("website")?.errors.length) {
-			showMoreDetails = true;
-		}
-		details.options.onSubmitInvalid();
-	},
 	onSubmit: ({ value }) => {
+		// The place step's rules passed — hand over to the details step
+		// rather than to review.
+		if (step === "place") {
+			step = "details";
+			onstepchange?.("details");
+			trackEvent("add_place_details_enter");
+			scrollToTop();
+			return;
+		}
 		preview = collectPreview(value);
 		step = "review";
 		onstepchange?.("review");
@@ -441,24 +453,32 @@ const scrollToTop = () => {
 	tick().then(() => formElement?.scrollIntoView({ block: "start" }));
 };
 
-const backToEdit = () => {
+const backToDetails = () => {
 	reviewForm.reset();
 	review.reset();
-	step = "edit";
-	onstepchange?.("edit");
+	step = "details";
+	onstepchange?.("details");
 	trackEvent("add_place_review_back");
 	scrollToTop();
 };
 
-// The form's one submit, for whichever step is showing: Review on the edit
-// step, the confirm on the review step.
+const backToPlace = () => {
+	step = "place";
+	onstepchange?.("place");
+	trackEvent("add_place_details_back");
+	scrollToTop();
+};
+
+// The form's one submit, for whichever step is showing: Continue and
+// Review both run the editing form (its onSubmit picks the destination
+// by step), and the review step runs the confirm.
 const submitForm = (event: SubmitEvent) => {
 	event.preventDefault();
-	if (step === "edit") {
-		details.submit(detailsForm);
-	} else if (preview) {
-		review.submit(reviewForm);
+	if (step === "review") {
+		if (preview) review.submit(reviewForm);
+		return;
 	}
+	details.submit(detailsForm);
 };
 
 const submitPreview = (captchaAnswer: string) => {
@@ -542,8 +562,11 @@ onMount(() => {
 	novalidate
 	class="w-full scroll-mt-24 space-y-5 text-primary dark:text-white"
 >
-	<!-- Edit step — CSS-hidden during review (see the header comment). -->
-	<div class="space-y-5" class:hidden={step === 'review'}>
+	<!-- The place step (#1449) — what the submission is: the required
+	     fields and who is sending them. CSS-hidden while another step
+	     shows, never unmounted, so every answer survives the round trip
+	     (see the header comment). -->
+	<div class="space-y-5" class:hidden={step !== 'place'}>
 		<detailsForm.Field name="name">
 			{#snippet children(field)}
 				<TextField
@@ -804,121 +827,6 @@ onMount(() => {
 			{/snippet}
 		</detailsForm.Field>
 
-		<div>
-			<button
-				type="button"
-				class="flex items-center gap-1 text-sm font-semibold text-link hover:text-hover focus:outline-link"
-				aria-expanded={showMoreDetails}
-				onclick={() => (showMoreDetails = !showMoreDetails)}
-			>
-				<Icon
-					type="material"
-					icon="expand_more"
-					w="16"
-					h="16"
-					class={showMoreDetails ? 'rotate-180' : ''}
-				/>
-				{$_('addLocation.moreDetailsToggle')}
-			</button>
-		</div>
-
-		<div class="space-y-5" class:hidden={!showMoreDetails}>
-			<detailsForm.Field name="nameEn">
-				{#snippet children(field)}
-					<TextField
-						id="name-en"
-						name="nameEn"
-						label={$_('addLocation.nameEnLabel')}
-						optional
-						placeholder={$_('addLocation.merchantEnglishNamePlaceholder')}
-						{...inputProps(field)}
-					>
-						{#snippet hint()}
-							<FormHelperText text={$_('addLocation.nameEnTooltip')} />
-						{/snippet}
-					</TextField>
-				{/snippet}
-			</detailsForm.Field>
-
-			<detailsForm.Field name="website">
-				{#snippet children(field)}
-					<TextField
-						id="website"
-						name="website"
-						label={$_('forms.website')}
-						optional
-						type="url"
-						error={fieldError(field) && $_('addLocation.websiteInvalid')}
-						placeholder={$_('addLocation.websitePlaceholder')}
-						{...inputProps(field)}
-						bind:element={websiteInput}
-					/>
-				{/snippet}
-			</detailsForm.Field>
-
-			<detailsForm.Field name="phone">
-				{#snippet children(field)}
-					<TextField
-						id="phone"
-						name="phone"
-						label={$_('forms.phone')}
-						optional
-						type="tel"
-						placeholder={$_('addLocation.phonePlaceholder')}
-						{...inputProps(field)}
-					/>
-				{/snippet}
-			</detailsForm.Field>
-
-			<div>
-				<p class="mb-2 font-semibold">
-					{$_('forms.openingHours')}
-					<span class="font-normal">{$_('forms.optional')}</span>
-				</p>
-				<!-- Nested accordion, same idiom as the details expander: the
-				     seven-day grid only unfolds for people who care about
-				     hours. Collapsing unmounts the editor; the generated
-				     string survives in hoursValue and is parsed back into
-				     the grid on re-open. -->
-				<button
-					type="button"
-					class="flex items-center gap-1 text-sm font-semibold text-link hover:text-hover focus:outline-link"
-					aria-expanded={showHoursEditor}
-					aria-controls="opening-hours-editor"
-					onclick={() => (showHoursEditor = !showHoursEditor)}
-				>
-					<Icon
-						type="material"
-						icon="expand_more"
-						w="16"
-						h="16"
-						class={showHoursEditor ? 'rotate-180' : ''}
-					/>
-					{$_('addLocation.hoursToggle')}
-				</button>
-				{#if !showHoursEditor && hoursValue}
-					<code class="ml-2 font-mono text-sm text-body dark:text-offwhite">{hoursValue}</code>
-				{/if}
-				{#if showHoursEditor}
-					<div id="opening-hours-editor" class="mt-3">
-						<OpeningHoursEditor bind:value={hoursValue} />
-					</div>
-				{/if}
-			</div>
-
-			<detailsForm.Field name="notes">
-				{#snippet children(field)}
-					<TextArea
-						id="notes"
-						name="notes"
-						label={$_('forms.notes')}
-						optional
-						placeholder={$_('addLocation.notesPlaceholder')}
-						{...inputProps(field)}
-					/>
-				{/snippet}
-			</detailsForm.Field>
-		</div>
 
 		{#if identityAttached && $session}
 			<!-- Signed in (#1374): the submission goes to the API under the
@@ -1051,6 +959,105 @@ onMount(() => {
 		{/if}
 
 		<PrimaryButton style="w-full py-3 rounded-xl">
+			{$_('addLocation.continueButton')}
+		</PrimaryButton>
+	</div>
+
+	<!-- The details step (#1449): the optional extras volunteer editors
+	     read, as the whole task of a screen rather than an aside at the
+	     foot of a long one — which is what the #1289 expander made of
+	     them, and what #1447 reported the cost of. -->
+	<div class="space-y-5" class:hidden={step !== 'details'}>
+		<!-- Back at the top, under the header's step label: the review step
+		     puts its own there, so the two behave alike. -->
+		<button
+			type="button"
+			onclick={backToPlace}
+			class="inline-flex items-center gap-1 text-sm font-semibold text-link hover:text-hover focus:outline-link"
+		>
+			<Icon type="material" icon="chevron_left" w="18" h="18" />
+			{$_('addLocation.detailsBackButton')}
+		</button>
+		<div>
+			<h3 class="font-semibold">{$_('addLocation.detailsHeading')}</h3>
+			<FormHelperText text={$_('addLocation.detailsHint')} />
+		</div>
+
+		<detailsForm.Field name="website">
+			{#snippet children(field)}
+				<TextField
+					id="website"
+					name="website"
+					label={$_('forms.website')}
+					optional
+					type="url"
+					error={fieldError(field) && $_('addLocation.websiteInvalid')}
+					placeholder={$_('addLocation.websitePlaceholder')}
+					{...inputProps(field)}
+					bind:element={websiteInput}
+				/>
+			{/snippet}
+		</detailsForm.Field>
+
+		<div role="group" aria-labelledby="opening-hours-label">
+			<p id="opening-hours-label" class="mb-2 font-semibold">
+				{$_('forms.openingHours')}
+				<span class="font-normal">{$_('forms.optional')}</span>
+			</p>
+			<!-- Unfolded from the start: the details step is a screen of its
+			     own, so the grid no longer crowds the required fields — and a
+			     grid that had to be opened first was still being skipped
+			     (#1447). -->
+			<div id="opening-hours-editor">
+				<OpeningHoursEditor bind:value={hoursValue} />
+			</div>
+		</div>
+
+		<detailsForm.Field name="phone">
+			{#snippet children(field)}
+				<TextField
+					id="phone"
+					name="phone"
+					label={$_('forms.phone')}
+					optional
+					type="tel"
+					placeholder={$_('addLocation.phonePlaceholder')}
+					{...inputProps(field)}
+				/>
+			{/snippet}
+		</detailsForm.Field>
+
+		<detailsForm.Field name="nameEn">
+			{#snippet children(field)}
+				<TextField
+					id="name-en"
+					name="nameEn"
+					label={$_('addLocation.nameEnLabel')}
+					optional
+					placeholder={$_('addLocation.merchantEnglishNamePlaceholder')}
+					{...inputProps(field)}
+				>
+					{#snippet hint()}
+						<FormHelperText text={$_('addLocation.nameEnTooltip')} />
+					{/snippet}
+				</TextField>
+			{/snippet}
+		</detailsForm.Field>
+
+		<detailsForm.Field name="notes">
+			{#snippet children(field)}
+				<TextArea
+					id="notes"
+					name="notes"
+					label={$_('forms.notes')}
+					optional
+					placeholder={$_('addLocation.notesPlaceholder')}
+					{...inputProps(field)}
+				/>
+			{/snippet}
+		</detailsForm.Field>
+
+		<PrimaryButton style="w-full py-3 rounded-xl">
 			{$_('addLocation.reviewButton')}
 		</PrimaryButton>
 	</div>
@@ -1069,7 +1076,7 @@ onMount(() => {
 			     and forward aren't at opposite ends of a long scroll. -->
 			<button
 				type="button"
-				onclick={backToEdit}
+				onclick={backToDetails}
 				class="inline-flex items-center gap-1 text-sm font-semibold text-link hover:text-hover focus:outline-link"
 			>
 				<Icon type="material" icon="chevron_left" w="18" h="18" />

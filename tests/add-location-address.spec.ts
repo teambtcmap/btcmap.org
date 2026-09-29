@@ -223,7 +223,8 @@ test.describe('Add Location — address suggestion from the pin', () => {
 		await page.locator('#onchain').check();
 		await page.locator('#contact').fill('owner@example.com');
 		await address.fill('');
-		await page.getByRole('button', { name: 'Review & submit' }).click();
+		// the address is the place step's field (#1449)
+		await page.getByRole('button', { name: 'Continue' }).click();
 
 		await expect(address).toHaveAccessibleDescription('Enter the address.');
 	});

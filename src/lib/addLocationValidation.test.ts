@@ -9,6 +9,7 @@ import {
 } from "./addLocationValidation";
 
 const valid: DetailsInput = {
+	step: "place",
 	name: "Satoshi Comics",
 	address: "Nansenstr. 1, Berlin",
 	addressRequired: true,
@@ -66,10 +67,32 @@ describe("validateDetails", () => {
 	});
 
 	it("rejects a website it can't turn into an http(s) address", () => {
-		expect(validateDetails({ ...valid, website: "not a site" })).toEqual({
+		const details = { ...valid, step: "details" } as const;
+		expect(validateDetails({ ...details, website: "not a site" })).toEqual({
 			website: "invalid",
 		});
-		expect(validateDetails({ ...valid, website: "bitcoin.org" })).toEqual({});
+		expect(validateDetails({ ...details, website: "bitcoin.org" })).toEqual({});
+	});
+
+	// Each step checks its own fields and no others (#1449). A rule whose
+	// field is on a hidden step would block the step that is showing with
+	// a message nobody can see — the #1404 trap the old expander had.
+	it("leaves the website to the details step", () => {
+		expect(validateDetails({ ...valid, website: "not a site" })).toEqual({});
+	});
+
+	it("leaves the place's own fields to the place step", () => {
+		expect(
+			validateDetails({
+				...valid,
+				step: "details",
+				name: "",
+				category: "",
+				methods: [],
+				contact: "",
+				website: "not a site",
+			}),
+		).toEqual({ website: "invalid" });
 	});
 
 	it("requires a valid contact email on the anonymous path", () => {
@@ -87,21 +110,19 @@ describe("validateDetails", () => {
 		).toEqual({});
 	});
 
-	it("reports every invalid field at once", () => {
+	it("reports every invalid field of the step at once", () => {
 		expect(
 			validateDetails({
 				...valid,
 				name: "",
 				category: "",
 				methods: [],
-				website: "ftp://bitcoin.org",
 				contact: "",
 			}),
 		).toEqual({
 			name: "required",
 			category: "required",
 			methods: "required",
-			website: "invalid",
 			contact: "required",
 		});
 	});

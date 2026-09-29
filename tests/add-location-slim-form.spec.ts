@@ -1,15 +1,27 @@
+import type { Page } from '@playwright/test';
 import { expect, test } from '@playwright/test';
 
 import { MARKER_LOAD_TIMEOUT, stubMapData, stubReverseGeocode } from './helpers';
 
 // Step 2 of the add-location redesign: slim details form (#1134) —
-// category picker and optional fields behind the "Add more details"
-// expander. The form lives on the map now (#1134): ?add=form opens it at
-// the hash pin. stubMapData keeps the host hermetic; the arrival address
+// category picker, and the optional fields that #1289 put behind an "Add
+// more details" expander, #1447 brought back into the form and #1449 gave
+// a step of their own. The form lives on the map now (#1134): ?add=form
+// opens it at the hash pin. stubMapData keeps the host hermetic; the arrival address
 // lookup (#1315) is stubbed too, and the SW block lets page.route see it.
 // The pin sits in the shared STUB_PLACES viewport so the map-ready
 // helper (rendered-marker count) has features to see.
 const PIN = '/map?add=form#17/42.2762511/42.7024218';
+
+// The details step is reached through the place step's own rules (#1449).
+const goToDetails = async (page: Page) => {
+	await page.locator('#name').fill('Satoshi Comics');
+	await page.locator('#category').selectOption('restaurants');
+	await page.locator('#onchain').check();
+	await page.locator('#contact').fill('owner@example.com');
+	await page.getByRole('button', { name: 'Continue' }).click();
+	await expect(page.locator('#website')).toBeVisible();
+};
 
 test.describe('Add Location — slim form', () => {
 	test.use({ serviceWorkers: 'block' });
@@ -38,7 +50,7 @@ test.describe('Add Location — slim form', () => {
 		await expect(other).toHaveAttribute('required', '');
 	});
 
-	test('optional fields sit behind the expander and stay functional', async ({
+	test('the optional details have a step of their own, not an expander', async ({
 		page
 	}) => {
 		await stubMapData(page);
@@ -50,23 +62,42 @@ test.describe('Add Location — slim form', () => {
 			timeout: MARKER_LOAD_TIMEOUT
 		});
 
-		const websiteInput = page.locator('input[name="website"]');
-		await expect(websiteInput).toBeHidden();
+		// #1447: the expander cost exactly the two fields its own label
+		// advertised, so there is no expander left to click — the fields are
+		// the whole task of step 2 (#1449).
+		await goToDetails(page);
+		await expect(
+			page.getByRole('button', { name: /Add more details/ })
+		).toHaveCount(0);
+		await expect(
+			page.getByRole('heading', { name: 'More about this place' })
+		).toBeVisible();
+		for (const name of ['website', 'phone', 'nameEn', 'notes']) {
+			await expect(page.locator(`[name="${name}"]`)).toBeVisible();
+		}
+		// Opening hours: the seven-day grid is on screen from the start,
+		// with no toggle to open it first (#1447 follow-up).
+		await expect(page.getByText('Opening Hours (optional)')).toBeVisible();
+		await expect(
+			page.getByRole('group', { name: /Opening Hours/ })
+		).toBeVisible();
+		await expect(page.getByRole('checkbox', { name: 'Monday' })).toBeVisible();
+		await expect(
+			page.getByRole('button', { name: /Set opening hours/ })
+		).toHaveCount(0);
 
-		const toggle = page.getByRole('button', { name: /Add more details/ });
-		await expect(toggle).toHaveAttribute('aria-expanded', 'false');
-		await toggle.click();
-		await expect(toggle).toHaveAttribute('aria-expanded', 'true');
-		await expect(websiteInput).toBeVisible();
+		const websiteInput = page.locator('input[name="website"]');
 		await websiteInput.fill('https://example.com');
-		// Collapse again — the value survives because the group stays mounted.
-		await toggle.click();
+		// Back to the place step and forward again — the details step is
+		// CSS-hidden, not unmounted, so the answer survives the round trip.
+		await page.getByRole('button', { name: 'Back to the place' }).click();
 		await expect(websiteInput).toBeHidden();
-		await toggle.click();
+		await page.getByRole('button', { name: 'Continue' }).click();
+		await expect(websiteInput).toBeVisible();
 		await expect(websiteInput).toHaveValue('https://example.com');
 	});
 
-	test('opening hours unfold as a day grid and produce OSM syntax', async ({
+	test('the opening-hours day grid produces OSM syntax', async ({
 		page
 	}) => {
 		await stubMapData(page);
@@ -78,11 +109,9 @@ test.describe('Add Location — slim form', () => {
 			timeout: MARKER_LOAD_TIMEOUT
 		});
 
-		// The editor sits behind its own accordion row inside the expander.
-		await page.getByRole('button', { name: /Add more details/ }).click();
-		const toggle = page.getByRole('button', { name: /Set opening hours/ });
-		await expect(toggle).toHaveAttribute('aria-expanded', 'false');
-		await toggle.click();
+		// The editor is unfolded under the Opening Hours label on the
+		// details step.
+		await goToDetails(page);
 
 		// Open Monday with the default 09:00–17:00 range.
 		await page.getByRole('checkbox', { name: 'Monday' }).check();
@@ -108,10 +137,6 @@ test.describe('Add Location — slim form', () => {
 		// The 24/7 shortcut overrides the grid.
 		await page.getByRole('checkbox', { name: 'Open 24/7' }).check();
 		await expect(page.locator('#opening-hours-editor code')).toHaveText('24/7');
-
-		// Collapsing keeps the generated value visible as a summary.
-		await toggle.click();
-		await expect(page.locator('code', { hasText: '24/7' })).toBeVisible();
 	});
 
 	test('a signed-in session shows the submitting-as chip and relaxes email', async ({
@@ -230,7 +255,8 @@ test.describe('Add Location — slim form', () => {
 				{ once: true }
 			);
 		});
-		await page.getByRole('button', { name: 'Review & submit' }).click();
+		// payment methods are the place step's field (#1449)
+		await page.getByRole('button', { name: 'Continue' }).click();
 
 		await expect(group).toContainText('Pick at least one to continue.');
 		await expect(page.locator('#onchain')).toBeFocused();
