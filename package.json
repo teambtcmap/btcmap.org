@@ -55,7 +55,7 @@
 		"js-confetti": "^0.13.1",
 		"localforage": "^1.10.0",
 		"maplibre-gl": "^6.10.0",
-		"marked": "^18.0.13",
+		"marked": "^18.0.14",
 		"nostr-tools": "^2.25.2",
 		"opening_hours": "^3.13.0",
 		"qrcode": "^1.5.4",
