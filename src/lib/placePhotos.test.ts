@@ -8,6 +8,7 @@ import {
 	fitWithin,
 	MAX_PHOTOS_PER_PICK,
 	photoIdFromSearch,
+	photoPagePath,
 	photoShareUrl,
 	placePhotoUrl,
 	splitPick,
@@ -221,6 +222,12 @@ describe("withPhotoParam", () => {
 		expect(
 			withPhotoParam("https://btcmap.org/map?merchant=1&photo=3#z", null),
 		).toBe("/map?merchant=1#z");
+	});
+});
+
+describe("photoPagePath", () => {
+	it("is the merchant page with the photo open", () => {
+		expect(photoPagePath(20423, 12)).toBe("/merchant/20423?photo=12");
 	});
 });
 

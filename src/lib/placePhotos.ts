@@ -188,8 +188,11 @@ export const withPhotoParam = (
 
 // Shared links point at the merchant page: it works without the map and
 // shows the photo in context.
+export const photoPagePath = (placeId: number, imageId: number): string =>
+	`/merchant/${placeId}?photo=${imageId}`;
+
 export const photoShareUrl = (
 	origin: string,
 	placeId: number,
 	imageId: number,
-): string => `${origin}/merchant/${placeId}?photo=${imageId}`;
+): string => `${origin}${photoPagePath(placeId, imageId)}`;
