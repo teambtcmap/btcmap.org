@@ -51,7 +51,9 @@ let closeButton = $state<HTMLButtonElement>();
 let handle: LightboxHandle | undefined;
 let triggerEl: HTMLElement | null = null;
 let destroyed = false;
-const viewed = new Set<number>();
+// place_photo_open already covers the first photo; views count the ones
+// reached by swiping/arrows, once each per open
+const viewed = new Set<number>([untrack(() => startIndex)]);
 
 const trackView = (i: number) => {
 	if (viewed.has(i)) return;
@@ -119,7 +121,6 @@ onMount(() => {
 	triggerEl = document.activeElement as HTMLElement | null;
 	lockBodyScroll();
 	closeButton?.focus();
-	trackView(index);
 
 	if (!stageEl) return;
 	const pointerFine = window.matchMedia("(pointer: fine)").matches;
