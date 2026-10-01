@@ -1,8 +1,45 @@
-import { describe, expect, it } from "vitest";
+import { beforeEach, describe, expect, it, vi } from "vitest";
 
 import { API_BASE } from "$lib/api-base";
 
-import { buildSlides } from "./placePhotoLightbox";
+import { buildSlides, openPlaceLightbox } from "./placePhotoLightbox";
+
+type Listener = (event: unknown) => void;
+
+const pswps = vi.hoisted(() => [] as FakePhotoSwipe[]);
+
+type FakePhotoSwipe = {
+	options: Record<string, unknown>;
+	currIndex: number;
+	listeners: Record<string, Listener[]>;
+	emit: (name: string) => void;
+	close: ReturnType<typeof vi.fn>;
+	destroy: ReturnType<typeof vi.fn>;
+	goTo: ReturnType<typeof vi.fn>;
+};
+
+vi.mock("photoswipe/style.css", () => ({}));
+vi.mock("photoswipe", () => ({
+	default: class {
+		options: Record<string, unknown>;
+		currIndex = 0;
+		listeners: Record<string, Listener[]> = {};
+		close = vi.fn();
+		destroy = vi.fn();
+		goTo = vi.fn();
+		constructor(options: Record<string, unknown>) {
+			this.options = options;
+			pswps.push(this as unknown as FakePhotoSwipe);
+		}
+		on(name: string, listener: Listener) {
+			this.listeners[name] = [...(this.listeners[name] ?? []), listener];
+		}
+		emit(name: string) {
+			for (const listener of this.listeners[name] ?? []) listener({});
+		}
+		init() {}
+	},
+}));
 
 const photo = (id: number, width: number, height: number) => ({
 	id,
@@ -56,5 +93,59 @@ describe("buildSlides", () => {
 		);
 
 		expect(slides.map((s) => s.alt)).toEqual(["Photo 1 of 2", "Photo 2 of 2"]);
+	});
+});
+
+describe("openPlaceLightbox", () => {
+	beforeEach(() => {
+		pswps.length = 0;
+	});
+
+	const open = () =>
+		openPlaceLightbox({
+			slides: [],
+			startIndex: 0,
+			container: document.createElement("div"),
+			sidePadding: 0,
+			reducedMotion: false,
+			onChange: () => {},
+			onDestroy: () => {},
+		});
+
+	// PhotoSwipe ignores close() and destroy() while its opening animation
+	// runs, which leaked the instance when the viewer unmounted early
+	it("defers close until the opening animation has ended", async () => {
+		const handle = await open();
+		const [pswp] = pswps;
+
+		handle.close();
+		expect(pswp.close).not.toHaveBeenCalled();
+
+		pswp.emit("openingAnimationEnd");
+		expect(pswp.close).toHaveBeenCalledOnce();
+	});
+
+	it("defers destroy until the opening animation has ended", async () => {
+		const handle = await open();
+		const [pswp] = pswps;
+
+		handle.destroy();
+		expect(pswp.destroy).not.toHaveBeenCalled();
+
+		pswp.emit("openingAnimationEnd");
+		expect(pswp.destroy).toHaveBeenCalledOnce();
+		expect(pswp.close).not.toHaveBeenCalled();
+	});
+
+	it("closes and destroys right away once open", async () => {
+		const handle = await open();
+		const [pswp] = pswps;
+		pswp.emit("openingAnimationEnd");
+
+		handle.close();
+		expect(pswp.close).toHaveBeenCalledOnce();
+
+		handle.destroy();
+		expect(pswp.destroy).toHaveBeenCalledOnce();
 	});
 });
