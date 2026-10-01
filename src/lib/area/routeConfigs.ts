@@ -35,9 +35,10 @@ export const countryAreaConfig: AreaSectionConfig = {
 		validateContinents(tags.continent),
 };
 
-// The eight literal section loaders differ only in type and section —
-// these two helpers keep them one-liners. Community additionally lifts
-// verifiedDate/iconSquare out of tags (both optional on AreaPageProps).
+// The literal section loaders (one per type × section) differ only in
+// type and section — these two helpers keep them one-liners. Community
+// additionally lifts verifiedDate/iconSquare out of tags (both optional on
+// AreaPageProps).
 export const loadCommunityArea = async (
 	event: AreaSectionEvent,
 	section: AreaSection,

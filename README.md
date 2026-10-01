@@ -47,6 +47,7 @@ _NOTE:_ BTC Map requires Node.js ≥ 22.13 (we use Node 22 LTS). If you have [mi
 
 - [Iconify](https://iconify.design/docs/icon-components/svelte/#iconify-for-svelte): for general material/fontawesome icons via `Icon.svelte`
 - Custom icons (socials, apps, mobile-nav): imported as raw SVGs in `src/lib/icons/` via wrapper components (`IconSocials.svelte`, `IconApps.svelte`, `IconMobileNav.svelte`)
+- Offline icon bundle: Iconify icons are served from the committed `src/lib/icons/generated/iconData.json` rather than fetched at runtime (the live API is only a fallback). After adding an `<Icon icon="…">` usage or bumping an `@iconify-json/*` package, run `pnpm icons:generate` and commit the result: the `format-and-lint` CI job fails on a stale bundle. When the places API gains a new tag or category, run `pnpm icons:refresh` first to update the pin vocabulary (`scripts/pin-icons.json`). Never hand-edit the generated file
 
 ### E2E tests
 
