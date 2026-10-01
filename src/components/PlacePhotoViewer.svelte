@@ -28,10 +28,15 @@ const step = (delta: number) => {
 	index = (index + delta + total) % total;
 };
 
+// Capture phase + stopPropagation: the map drawers close themselves on a
+// bubbling window Escape, which would take the drawer down with the viewer.
 const handleKeydown = (event: KeyboardEvent) => {
 	if (event.key === "Escape") onClose();
 	else if (event.key === "ArrowRight" && total > 1) step(1);
 	else if (event.key === "ArrowLeft" && total > 1) step(-1);
+	else return;
+	event.preventDefault();
+	event.stopPropagation();
 };
 
 // Render at the end of <body>: the map drawer is position-fixed with its
@@ -53,7 +58,7 @@ onDestroy(() => {
 });
 </script>
 
-<svelte:window onkeydown={handleKeydown} />
+<svelte:window onkeydowncapture={handleKeydown} />
 
 <div
 	use:portal
