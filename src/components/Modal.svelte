@@ -41,8 +41,12 @@ onDestroy(() => {
 	if (scrollLocked) unlockBodyScroll();
 });
 
+// Capture phase + stopPropagation: the map drawers close themselves on a
+// bubbling window Escape, which would take the drawer down with the modal.
 function handleKeydown(e: KeyboardEvent) {
-	if (e.key === "Escape" && open) open = false;
+	if (e.key !== "Escape" || !open) return;
+	e.stopPropagation();
+	open = false;
 }
 
 export function setTrigger(el: HTMLElement) {
@@ -50,7 +54,7 @@ export function setTrigger(el: HTMLElement) {
 }
 </script>
 
-<svelte:window on:keydown={handleKeydown} />
+<svelte:window on:keydown|capture={handleKeydown} />
 
 {#if open}
 	<div
