@@ -2,53 +2,18 @@
 import { _ } from "svelte-i18n";
 
 import Icon from "$components/Icon.svelte";
+import {
+	isEpochSentinel,
+	isFutureEvent,
+	parseLocalDateTime,
+	toDate,
+} from "$lib/area/events";
 import { safeHttpUrl } from "$lib/safeUrl";
 import type { AreaEvent, AreaPageProps } from "$lib/types";
 
 let { data }: { data: AreaPageProps } = $props();
 
-// The API serializes timestamps with a timezone designator (e.g. "+07:00"
-// or "Z"). The upstream records the wall-clock time the organizer wrote,
-// not an instant in UTC, so we treat the value as local time and drop the
-// suffix entirely. Reading the components straight from the string keeps
-// the display verbatim ("19:00" stays "19:00") and avoids any tz-based
-// drift in the "is past" check near midnight.
-type LocalDateTime = {
-	year: number;
-	month: number;
-	day: number;
-	hour: number;
-	minute: number;
-};
-
-const parseLocalDateTime = (isoString: string): LocalDateTime | null => {
-	const m = isoString.match(/^(\d{4})-(\d{2})-(\d{2})T(\d{2}):(\d{2})/);
-	if (!m) return null;
-	return {
-		year: Number(m[1]),
-		month: Number(m[2]),
-		day: Number(m[3]),
-		hour: Number(m[4]),
-		minute: Number(m[5]),
-	};
-};
-
-const toDate = (parts: LocalDateTime): Date =>
-	new Date(parts.year, parts.month - 1, parts.day, parts.hour, parts.minute);
-
 const pad2 = (n: number): string => String(n).padStart(2, "0");
-
-// The API returns 1970-01-01T00:00:00Z for events without a starts_at
-// (see btcmap-api's `From<Event> for Item`: starts_at defaults to
-// UNIX_EPOCH). Parsing that as a real date and rendering it would dump
-// "Jan 1, 1970, 00:00" into the UI, so we treat the epoch sentinel as
-// "no date" and pin it to the future block.
-const isEpochSentinel = (parts: LocalDateTime): boolean =>
-	parts.year === 1970 &&
-	parts.month === 1 &&
-	parts.day === 1 &&
-	parts.hour === 0 &&
-	parts.minute === 0;
 
 // Sorted server-side via the API window (365d back + all future), but the
 // API doesn't guarantee order — defensive client sort keeps the UI
@@ -62,19 +27,7 @@ const annotatedEvents: AnnotatedEvent[] = $derived.by(() => {
 	const future: AnnotatedEvent[] = [];
 	const past: AnnotatedEvent[] = [];
 	for (const event of data.events ?? []) {
-		const startParts = parseLocalDateTime(event.starts_at);
-		if (!startParts || isEpochSentinel(startParts)) {
-			// Unparseable or epoch-sentinel starts_at → open-ended;
-			// group with future so it stays visible.
-			future.push({ event, isPast: false });
-			continue;
-		}
-		// Only "past" once the event has actually ended — prefer ends_at so a
-		// multi-day or still-in-progress event isn't greyed while it's on.
-		const endParts = event.ends_at ? parseLocalDateTime(event.ends_at) : null;
-		const endsAt =
-			endParts && !isEpochSentinel(endParts) ? endParts : startParts;
-		if (toDate(endsAt).getTime() >= now) future.push({ event, isPast: false });
+		if (isFutureEvent(event, now)) future.push({ event, isPast: false });
 		else past.push({ event, isPast: true });
 	}
 	const byStartDesc = (a: AnnotatedEvent, b: AnnotatedEvent) => {

@@ -13,6 +13,7 @@ import { get, toStore, writable } from "svelte/store";
 import AreaHeader from "$components/area/AreaHeader.svelte";
 import Icon from "$components/Icon.svelte";
 import { API_BASE } from "$lib/api-base";
+import { countFutureEvents } from "$lib/area/events";
 import { placesInAreaChunked } from "$lib/area/placesInArea";
 import type { AreaSectionContext } from "$lib/area/sectionContext";
 import { AREA_SECTION_CONTEXT } from "$lib/area/sectionContext";
@@ -193,45 +194,9 @@ const filteredPlaces = writable<Place[]>([]);
 
 const taggers = writable<Tagger[]>([]);
 
-// Future-event count for the events tab badge. Uses the same local-time
-// interpretation as AreaEventsSection: drop the timezone suffix and read
-// the components straight from the string. Unparseable or epoch-sentinel
-// starts_at count as future, matching the section component's
-// open-ended convention.
-$: futureEventCount = (() => {
-	let count = 0;
-	const now = Date.now();
-	for (const event of data?.events ?? []) {
-		const m = event.starts_at?.match(
-			/^(\d{4})-(\d{2})-(\d{2})T(\d{2}):(\d{2})/,
-		);
-		if (!m) {
-			count++;
-			continue;
-		}
-		// 1970-01-01T00:00:00Z is the API's "no date" sentinel — see
-		// AreaEventsSection's isEpochSentinel for the full rationale.
-		if (
-			m[1] === "1970" &&
-			m[2] === "01" &&
-			m[3] === "01" &&
-			m[4] === "00" &&
-			m[5] === "00"
-		) {
-			count++;
-			continue;
-		}
-		const ts = new Date(
-			Number(m[1]),
-			Number(m[2]) - 1,
-			Number(m[3]),
-			Number(m[4]),
-			Number(m[5]),
-		).getTime();
-		if (ts >= now) count++;
-	}
-	return count;
-})();
+// Future-event count for the events tab badge — same rule as the events
+// section's future block, so an ongoing event is counted while it's on.
+$: futureEventCount = countFutureEvents(data?.events ?? [], Date.now());
 
 setContext(AREA_SECTION_CONTEXT, {
 	filteredPlaces,
