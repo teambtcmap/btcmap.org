@@ -28,7 +28,7 @@ export const placePhotoUrl = (
 	return `${API_BASE}/v4/places/${placeId}/images/${imageId}${query ? `?${query}` : ""}`;
 };
 
-const isPlacePhoto = (value: unknown): value is PlaceImage => {
+const isPlaceImage = (value: unknown): value is PlaceImage => {
 	if (typeof value !== "object" || value === null) return false;
 	const candidate = value as Record<string, unknown>;
 	return (
@@ -49,7 +49,7 @@ export const fetchPlacePhotos = async (
 		`${API_BASE}/v4/places/${placeId}/images?type=user`,
 	);
 	if (!Array.isArray(res.data)) return [];
-	return res.data.filter(isPlacePhoto);
+	return res.data.filter(isPlaceImage);
 };
 
 export const uploadPlacePhoto = async (
@@ -62,7 +62,7 @@ export const uploadPlacePhoto = async (
 		{ data_base64: dataBase64 },
 		{ headers: { Authorization: `Bearer ${token}` } },
 	);
-	if (!isPlacePhoto(res.data)) {
+	if (!isPlaceImage(res.data)) {
 		throw new Error("place image upload returned an unexpected response");
 	}
 	return res.data;
