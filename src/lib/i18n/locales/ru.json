@@ -1252,7 +1252,11 @@
 		"emptyTitle": "Добавьте первое фото",
 		"emptyHint": "Витрина, вывеска или наклейка или QR-код для биткоина",
 		"morePhotos": "Ещё фото",
-		"communityPhoto": "Фото от сообщества"
+		"communityPhoto": "Фото от сообщества",
+		"copyLink": "Скопировать ссылку на фото",
+		"linkCopied": "Ссылка скопирована",
+		"copyLinkFailed": "Не удалось скопировать ссылку",
+		"moreActions": "Ещё действия"
 	},
 	"authPrompt": {
 		"createAccount": "Создать аккаунт",
