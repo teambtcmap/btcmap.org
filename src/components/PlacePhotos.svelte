@@ -195,6 +195,10 @@ const handleFiles = async (event: Event) => {
 					<Icon w="24" h="24" icon="add_a_photo" type="material" />
 					{photos.length ? $_('placePhotos.add') : $_('placePhotos.addFirst')}
 				</button>
+				<!-- An explicit list, not image/*: iOS then hands over HEIC photos
+				     converted to JPEG, while image/* can pass HEIC through, which
+				     createImageBitmap can't decode in Chrome/Firefox. Mobile
+				     browsers still offer the camera with this list. -->
 				<input
 					bind:this={fileInput}
 					type="file"
