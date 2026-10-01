@@ -85,6 +85,11 @@ const goTo = (i: number) => {
 	handle?.goTo(i);
 };
 
+const toggleMenu = () => {
+	menuOpen = !menuOpen;
+	if (menuOpen) trackEvent("place_photo_menu_open", { source });
+};
+
 const copyLink = async () => {
 	menuOpen = false;
 	try {
@@ -207,7 +212,7 @@ onDestroy(() => {
 			<div class="relative">
 				<button
 					type="button"
-					onclick={() => (menuOpen = !menuOpen)}
+					onclick={toggleMenu}
 					class="flex h-10 w-10 shrink-0 items-center justify-center rounded-full hover:bg-white/10 focus-visible:ring-2 focus-visible:ring-white {menuOpen ? 'bg-white/12' : ''}"
 					aria-label={$_('placePhotos.moreActions')}
 					aria-haspopup="menu"
