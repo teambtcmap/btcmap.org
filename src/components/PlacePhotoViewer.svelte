@@ -4,12 +4,13 @@ import { onDestroy, onMount, untrack } from "svelte";
 import Icon from "$components/Icon.svelte";
 import { lockBodyScroll, unlockBodyScroll } from "$lib/bodyScrollLock";
 import { _ } from "$lib/i18n";
-import type { PlacePhoto } from "$lib/placePhotos";
 import { placePhotoUrl } from "$lib/placePhotos";
+
+import type { PlaceImage } from "$types/btcmap-api/PlaceImage";
 
 type Props = {
 	placeId: number;
-	photos: PlacePhoto[];
+	photos: PlaceImage[];
 	startIndex: number;
 	onClose: () => void;
 };
