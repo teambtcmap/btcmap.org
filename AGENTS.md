@@ -186,6 +186,12 @@ Use the appropriate tool attribution based on which tool generated the commit:
 7. Stage and commit with conventional format
 8. Include the issue number (e.g., `#276`). No issue yet? Create one first (CONTRIBUTING.md asks for an issue per feature) with `gh issue create` along the templates in `.github/ISSUE_TEMPLATE/`, then reference it in every commit and in the PR title so a squash-merge keeps it
 9. Write the PR body along `.github/pull_request_template.md` and verify every claim in it against the diff before posting: which locales, which entry points, which events fire. Reviewers read the body as the spec
+10. **UI changes need before/after screenshots in the PR body — no exceptions.** Any diff that changes what a user sees (markup, styles, copy, icons, layout, empty/error/loading states) gets one matched pair per affected view in the template's `Before | After` table. Rules:
+    - Before = `main` (or btcmap.org), after = the branch (or its Netlify deploy preview); same route, viewport, theme, locale and app state, so the only difference is the change. Run the same script/steps twice rather than shooting by hand
+    - Mobile (390px wide) and desktop if the change reaches both; light and dark if it touches colors
+    - Compare the pair yourself before posting: anything that changed but isn't part of the PR (a vanished scale bar, a shifted button) is a regression to fix, not to ship
+    - Upload with `gh pr create|edit --attach './path/x.png#alt'`; the body must reference the exact same path (`![alt](./path/x.png)`), otherwise gh appends the images in a separate block and the table stays broken
+    - No visual change (refactor, tests, CI, deps)? Write `N/A, no UI change` under **Screenshots** with a one-line reason. Don't leave the section empty
 
 ## i18n / Translations
 
