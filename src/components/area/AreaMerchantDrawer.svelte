@@ -135,6 +135,7 @@ function handleKeydown(event: KeyboardEvent) {
 				<div class="px-5 pb-4">
 					<MerchantDetailsContent
 						{merchant}
+						photoSource="area_drawer"
 						{isUpToDate}
 						{isBoosted}
 						{boostLoading}

@@ -30,6 +30,9 @@ export let isBoosted: boolean;
 export let boostLoading: boolean;
 export let onBoostClick: () => void;
 export let isLoading: boolean = false;
+// Analytics source for the photo strip: this content renders in the /map
+// drawer and in the area-page drawer
+export let photoSource: "map_drawer" | "area_drawer" = "map_drawer";
 // ?issues worklist (#921): surface the place's derived issues as a
 // collapsed row. Off by default — only the map drawers opt in, and only
 // while the worklist mode is active.
@@ -294,7 +297,7 @@ async function fetchComments(placeId: number) {
 	</div>
 
 	<div class="pt-3">
-		<PlacePhotos placeId={merchant.id} tileHeight={88} canAdd={!merchant.deleted_at} source="map_drawer" />
+		<PlacePhotos placeId={merchant.id} tileHeight={88} canAdd={!merchant.deleted_at} source={photoSource} />
 	</div>
 
 	<div class="divide-y divide-gray-200 dark:divide-white/10">
