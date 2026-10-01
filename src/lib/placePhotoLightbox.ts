@@ -64,6 +64,7 @@ export const openPlaceLightbox = async (opts: {
 	const [{ default: PhotoSwipe }] = await Promise.all([
 		import("photoswipe"),
 		import("photoswipe/style.css"),
+		import("./placePhotoLightbox.css"),
 	]);
 
 	const pswp = new PhotoSwipe({

@@ -1,0 +1,10 @@
+/* Loaded with photoswipe/style.css by placePhotoLightbox.ts. Two classes
+   outrank PhotoSwipe's own .pswp rules whatever order the files load in. */
+.pswp.pswp--btcmap {
+	/* Mount inside the viewer's stage instead of covering the window */
+	position: absolute;
+	/* Let the viewer's own bg-dark show through: one source for the colour */
+	--pswp-bg: transparent;
+	/* Stay under the viewer's arrow zones */
+	--pswp-root-z-index: 0;
+}
