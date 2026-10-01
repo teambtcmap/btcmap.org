@@ -1245,7 +1245,6 @@
 		"title": "Fotos",
 		"add": "Foto hinzufügen",
 		"addFirst": "Erstes Foto hinzufügen",
-		"loginToAdd": "Anmelden, um Fotos hinzuzufügen",
 		"uploading": "Foto wird hochgeladen…",
 		"uploaded": "{count, plural, one {Danke! Dein Foto ist online.} other {Danke! Deine # Fotos sind online.}}",
 		"uploadFailed": "{count, plural, one {Ein Foto konnte nicht hochgeladen werden. Bitte versuche es erneut.} other {# Fotos konnten nicht hochgeladen werden. Bitte versuche es erneut.}}",
@@ -1253,6 +1252,8 @@
 		"previous": "Vorheriges Foto",
 		"next": "Nächstes Foto",
 		"close": "Schließen",
-		"addedOn": "Hinzugefügt am {date}"
+		"addedOn": "Hinzugefügt am {date}",
+		"promptTitle": "Foto hinzufügen",
+		"promptDescription": "Melde dich mit deinem bestehenden Konto an oder erstelle ein neues, um Fotos dieses Ortes hinzuzufügen."
 	}
 }
