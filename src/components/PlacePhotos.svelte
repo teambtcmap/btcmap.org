@@ -12,6 +12,7 @@ import {
 	deepLinkTarget,
 	fetchPlacePhotos,
 	MAX_PHOTOS_PER_PICK,
+	photoPagePath,
 	placePhotoUrl,
 	prepareUpload,
 	splitPick,
@@ -56,7 +57,7 @@ let uploading = $state(0);
 let viewerIndex = $state<number | null>(null);
 let fileInput = $state<HTMLInputElement>();
 let strip = $state<HTMLDivElement>();
-const tileEls: HTMLButtonElement[] = $state([]);
+const tileEls: HTMLAnchorElement[] = $state([]);
 let canScrollMore = $state(false);
 let showAuthPrompt = $state(false);
 let addButton = $state<HTMLButtonElement>();
@@ -132,6 +133,15 @@ const openViewer = (index: number, via: "tile" | "deeplink" = "tile") => {
 
 // Focus the tile of the photo that was on screen: works for deep-link
 // opens too, and on macOS Safari, where a click doesn't focus the button
+// Plain left clicks open the viewer in place; modified clicks (new tab or
+// window) stay with the browser. Capture phase, on the element itself, so
+// preventDefault lands before SvelteKit's link router sees the click.
+const handleTileClick = (event: MouseEvent, index: number) => {
+	if (event.metaKey || event.ctrlKey || event.shiftKey || event.altKey) return;
+	event.preventDefault();
+	openViewer(index);
+};
+
 const closeViewer = async (index: number) => {
 	// Already reset by a place switch in the reused drawer: the old viewer's
 	// late close must not pull focus to the new place's tiles
@@ -273,10 +283,13 @@ const handleFiles = async (event: Event) => {
 				<ul role="list" class="flex gap-2">
 					{#each photos as photo, i (photo.id)}
 						<li class="shrink-0 snap-start">
-							<button
-								type="button"
+							<!-- A link: the tile has a real URL (the merchant page with this
+							     photo open), so new-tab clicks and "Copy link" just work;
+							     plain clicks open the viewer in place -->
+							<a
+								href={photoPagePath(placeId, photo.id)}
 								bind:this={tileEls[i]}
-								onclick={() => openViewer(i)}
+								onclickcapture={(event) => handleTileClick(event, i)}
 								class="relative block h-(--tile) overflow-hidden rounded-xl bg-gray-200 focus-visible:ring-2 focus-visible:ring-link dark:bg-white/10 {loadedIds.has(photo.id) ? '' : 'animate-pulse'}"
 								style:width="{tileWidth(photo)}px"
 								aria-haspopup="dialog"
@@ -293,7 +306,7 @@ const handleFiles = async (event: Event) => {
 									onerror={() => loadedIds.add(photo.id)}
 									class="h-full w-full object-cover transition-opacity duration-300 {loadedIds.has(photo.id) ? 'opacity-100' : 'opacity-0'}"
 								/>
-							</button>
+							</a>
 						</li>
 					{/each}
 				</ul>
