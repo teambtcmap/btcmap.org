@@ -1235,5 +1235,19 @@
 		"error": "Impossible de créer le compte. Le nom d'utilisateur est peut-être déjà pris.",
 		"haveAccount": "Vous avez déjà un compte ?",
 		"signIn": "Se connecter avec un mot de passe ou Nostr"
+	},
+	"placePhotos": {
+		"title": "Photos",
+		"add": "Ajouter une photo",
+		"addFirst": "Ajouter la première photo",
+		"loginToAdd": "Connectez-vous pour ajouter des photos",
+		"uploading": "Envoi de la photo…",
+		"uploaded": "{count, plural, one {Merci ! Votre photo est en ligne.} other {Merci ! Vos # photos sont en ligne.}}",
+		"uploadFailed": "{count, plural, one {Une photo n'a pas pu être envoyée. Veuillez réessayer.} other {# photos n'ont pas pu être envoyées. Veuillez réessayer.}}",
+		"photoAlt": "Photo {n} sur {total}",
+		"previous": "Photo précédente",
+		"next": "Photo suivante",
+		"close": "Fermer",
+		"addedOn": "Ajoutée le {date}"
 	}
 }
