@@ -9,9 +9,9 @@ import { trackEvent } from "$lib/analytics";
 import { _ } from "$lib/i18n";
 import type { PlacePhotoSource } from "$lib/placePhotos";
 import {
+	deepLinkTarget,
 	fetchPlacePhotos,
 	MAX_PHOTOS_PER_PICK,
-	photoIdFromSearch,
 	placePhotoUrl,
 	prepareUpload,
 	splitPick,
@@ -145,11 +145,10 @@ const closeViewer = async (index: number) => {
 // ?photo=<id> opens the viewer once the photos are in. An id that isn't
 // one of this place's public photos is ignored and dropped from the URL.
 const openFromDeepLink = (list: PlaceImage[]) => {
-	const imageId = photoIdFromSearch(window.location.search);
-	if (imageId === null) return;
-	const index = list.findIndex((p) => p.id === imageId);
-	if (index === -1) syncPhotoParam(null);
-	else openViewer(index, "deeplink");
+	const target = deepLinkTarget(list, window.location.search);
+	if (!target) return;
+	if ("stale" in target) syncPhotoParam(null);
+	else openViewer(target.index, "deeplink");
 };
 
 // Signed-out users sign in right here instead of leaving for /login, so
