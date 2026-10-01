@@ -1254,7 +1254,8 @@
 		"close": "Fermer",
 		"addedOn": "Ajoutée le {date}",
 		"promptTitle": "Ajouter une photo",
-		"promptDescription": "Connectez-vous à votre compte ou créez-en un nouveau pour ajouter des photos de ce lieu."
+		"promptDescription": "Connectez-vous à votre compte ou créez-en un nouveau pour ajouter des photos de ce lieu.",
+		"tooMany": "Vous pouvez ajouter jusqu'à {max} photos à la fois. Envoi des {max} premières."
 	},
 	"authPrompt": {
 		"createAccount": "Créer un compte",
