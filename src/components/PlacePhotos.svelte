@@ -232,15 +232,18 @@ const handleFiles = async (event: Event) => {
 								onclick={() => openViewer(i)}
 								class="relative block h-(--tile) overflow-hidden rounded-xl bg-gray-200 focus-visible:ring-2 focus-visible:ring-link dark:bg-white/10 {loadedIds.has(photo.id) ? '' : 'animate-pulse'}"
 								style:width="{tileWidth(photo)}px"
-								aria-label={$_('placePhotos.photoAlt', { values: { n: i + 1, total: photos.length } })}
+								aria-haspopup="dialog"
 							>
+								<!-- The alt names the button: it survives translation tools and
+								     shows if the image fails -->
 								<img
 									src={placePhotoUrl(placeId, photo.id, { h: tileHeight * 2 })}
-									alt=""
+									alt={$_('placePhotos.photoAlt', { values: { n: i + 1, total: photos.length } })}
 									loading="lazy"
 									decoding="async"
 									referrerpolicy="no-referrer"
 									onload={() => loadedIds.add(photo.id)}
+									onerror={() => loadedIds.add(photo.id)}
 									class="h-full w-full object-cover transition-opacity duration-300 {loadedIds.has(photo.id) ? 'opacity-100' : 'opacity-0'}"
 								/>
 							</button>
