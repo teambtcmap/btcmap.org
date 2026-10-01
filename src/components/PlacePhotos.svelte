@@ -50,6 +50,8 @@ let canScrollMore = $state(false);
 let showAuthPrompt = $state(false);
 let addButton = $state<HTMLButtonElement>();
 let highlightAdd = $state(false);
+// Briefly marks whichever add control is on screen after sign-in
+const HIGHLIGHT_ADD_CLASS = "animate-pulse bg-link/10 ring-2 ring-link";
 const loadedIds = new SvelteSet<number>();
 
 // The map drawer reuses this component across merchants, so refetch on
@@ -194,7 +196,7 @@ const handleFiles = async (event: Event) => {
 					bind:this={addButton}
 					type="button"
 					onclick={() => handleAddClick('header')}
-					class="-mx-2 -my-1.5 flex items-center gap-1.5 rounded-lg px-2 py-1.5 text-sm font-semibold text-link transition-colors hover:bg-link/10 {highlightAdd ? 'animate-pulse bg-link/10 ring-2 ring-link' : ''}"
+					class="-mx-2 -my-1.5 flex items-center gap-1.5 rounded-lg px-2 py-1.5 text-sm font-semibold text-link transition-colors hover:bg-link/10 {highlightAdd ? HIGHLIGHT_ADD_CLASS : ''}"
 				>
 					<Icon w="20" h="20" icon="add_a_photo" type="material" />
 					{$_('placePhotos.add')}
@@ -210,7 +212,7 @@ const handleFiles = async (event: Event) => {
 				style:--tile="{tileHeight}px"
 			>
 				<!-- Uploads in progress sit first, where the new photos will land -->
-				{#each { length: uploading } as _u, i (i)}
+				{#each { length: uploading } as _placeholder, i (i)}
 					<div
 						class="flex size-(--tile) shrink-0 items-center justify-center rounded-xl bg-gray-100 dark:bg-white/5"
 						role="status"
@@ -261,7 +263,7 @@ const handleFiles = async (event: Event) => {
 		bind:this={addButton}
 		type="button"
 		onclick={() => handleAddClick('empty')}
-		class="flex w-full items-center gap-3 rounded-2xl border border-dashed border-gray-300 px-3.5 py-3 text-left transition-colors hover:border-link hover:bg-link/5 dark:border-white/20 {highlightAdd ? 'animate-pulse bg-link/10 ring-2 ring-link' : ''}"
+		class="flex w-full items-center gap-3 rounded-2xl border border-dashed border-gray-300 px-3.5 py-3 text-left transition-colors hover:border-link hover:bg-link/5 dark:border-white/20 {highlightAdd ? HIGHLIGHT_ADD_CLASS : ''}"
 	>
 		<span class="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-white text-link dark:bg-white/10">
 			<Icon w="20" h="20" icon="add_a_photo" type="material" />
