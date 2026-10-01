@@ -1252,7 +1252,11 @@
 		"emptyTitle": "Soyez le premier à ajouter une photo",
 		"emptyHint": "Devanture, enseigne, ou l'autocollant ou le QR bitcoin",
 		"morePhotos": "Plus de photos",
-		"communityPhoto": "Photo de la communauté"
+		"communityPhoto": "Photo de la communauté",
+		"copyLink": "Copier le lien de la photo",
+		"linkCopied": "Lien copié",
+		"copyLinkFailed": "Impossible de copier le lien",
+		"moreActions": "Plus d'actions"
 	},
 	"authPrompt": {
 		"createAccount": "Créer un compte",

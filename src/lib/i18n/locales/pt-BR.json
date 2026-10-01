@@ -1226,7 +1226,11 @@
 		"emptyTitle": "Seja o primeiro a adicionar uma foto",
 		"emptyHint": "Fachada, placa, ou o adesivo ou QR de bitcoin",
 		"morePhotos": "Mais fotos",
-		"communityPhoto": "Foto da comunidade"
+		"communityPhoto": "Foto da comunidade",
+		"copyLink": "Copiar link da foto",
+		"linkCopied": "Link copiado",
+		"copyLinkFailed": "Não foi possível copiar o link",
+		"moreActions": "Mais ações"
 	},
 	"authPrompt": {
 		"createAccount": "Criar conta",

@@ -1,5 +1,6 @@
 <script lang="ts">
 import { onDestroy, onMount, untrack } from "svelte";
+import { OutClick } from "svelte-outclick";
 import type { Locales } from "svelte-time";
 import Time from "svelte-time";
 
@@ -12,7 +13,8 @@ import { _, locale } from "$lib/i18n";
 import type { LightboxHandle } from "$lib/placePhotoLightbox";
 import { buildSlides, openPlaceLightbox } from "$lib/placePhotoLightbox";
 import type { PlacePhotoSource } from "$lib/placePhotos";
-import { placePhotoUrl } from "$lib/placePhotos";
+import { photoShareUrl, placePhotoUrl } from "$lib/placePhotos";
+import { errToast, successToast } from "$lib/utils";
 
 import type { PlaceImage } from "$types/btcmap-api/PlaceImage";
 
@@ -28,6 +30,8 @@ type Props = {
 	// Strip tile height, so the filmstrip reuses the already cached thumbnails
 	thumbHeight: number;
 	source: PlacePhotoSource;
+	// Keeps ?photo=<id> in the URL in step with the shown photo
+	onIndexChange: (index: number) => void;
 	// Gets the index on screen at close, so the strip can focus that tile
 	onClose: (index: number) => void;
 };
@@ -39,6 +43,7 @@ let {
 	startIndex,
 	thumbHeight,
 	source,
+	onIndexChange,
 	onClose,
 }: Props = $props();
 
@@ -62,6 +67,7 @@ const total = $derived(photos.length);
 let rootEl = $state<HTMLDivElement>();
 let stageEl = $state<HTMLDivElement>();
 let closeButton = $state<HTMLButtonElement>();
+let menuOpen = $state(false);
 let handle: LightboxHandle | undefined;
 let destroyed = false;
 // place_photo_open already covers the first photo; views count the ones
@@ -79,6 +85,20 @@ const goTo = (i: number) => {
 	handle?.goTo(i);
 };
 
+const copyLink = async () => {
+	menuOpen = false;
+	try {
+		await navigator.clipboard.writeText(
+			photoShareUrl(window.location.origin, placeId, photo.id),
+		);
+		successToast($_("placePhotos.linkCopied"));
+		trackEvent("place_photo_link_copy", { source });
+	} catch (error) {
+		console.error("place photos: copy link failed", error);
+		errToast($_("placePhotos.copyLinkFailed"));
+	}
+};
+
 // Animate out through PhotoSwipe; its destroy event then calls onClose
 const close = () => {
 	if (handle) handle.close();
@@ -92,7 +112,9 @@ const handleKeydown = (event: KeyboardEvent) => {
 	event.stopPropagation();
 	if (event.key === "Escape") {
 		event.preventDefault();
-		close();
+		// The open menu closes first, the viewer on the next Escape
+		if (menuOpen) menuOpen = false;
+		else close();
 	} else if (event.key === "ArrowRight") {
 		event.preventDefault();
 		goTo(index + 1);
@@ -128,7 +150,9 @@ onMount(() => {
 			.matches,
 		onChange: (i) => {
 			index = i;
+			menuOpen = false;
 			trackView(i);
+			onIndexChange(i);
 		},
 		onDestroy: () => {
 			handle = undefined;
@@ -179,6 +203,36 @@ onDestroy(() => {
 		>
 			{index + 1} / {total}
 		</span>
+		<OutClick onOutClick={() => (menuOpen = false)}>
+			<div class="relative">
+				<button
+					type="button"
+					onclick={() => (menuOpen = !menuOpen)}
+					class="flex h-10 w-10 shrink-0 items-center justify-center rounded-full hover:bg-white/10 focus-visible:ring-2 focus-visible:ring-white {menuOpen ? 'bg-white/12' : ''}"
+					aria-label={$_('placePhotos.moreActions')}
+					aria-haspopup="menu"
+					aria-expanded={menuOpen}
+				>
+					<Icon w="24" h="24" icon="more_vert" type="material" />
+				</button>
+				{#if menuOpen}
+					<div
+						role="menu"
+						class="absolute top-11 right-0 z-20 min-w-[200px] rounded-xl bg-white p-1.5 text-primary shadow-[0_10px_30px_rgba(0,0,0,0.35)] dark:bg-dark dark:text-white dark:ring-1 dark:ring-white/15"
+					>
+						<button
+							type="button"
+							role="menuitem"
+							onclick={copyLink}
+							class="flex w-full items-center gap-2.5 rounded-lg px-2.5 py-2 text-left text-sm hover:bg-gray-100 dark:hover:bg-white/10"
+						>
+							<Icon w="20" h="20" icon="link" type="material" class="text-body dark:text-white/70" />
+							{$_('placePhotos.copyLink')}
+						</button>
+					</div>
+				{/if}
+			</div>
+		</OutClick>
 		<button
 			bind:this={closeButton}
 			type="button"

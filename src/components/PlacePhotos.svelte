@@ -11,11 +11,13 @@ import type { PlacePhotoSource } from "$lib/placePhotos";
 import {
 	fetchPlacePhotos,
 	MAX_PHOTOS_PER_PICK,
+	photoIdFromSearch,
 	placePhotoUrl,
 	prepareUpload,
 	splitPick,
 	uploadPlacePhoto,
 	uploadPlacePhotos,
+	withPhotoParam,
 } from "$lib/placePhotos";
 import { session } from "$lib/session";
 import { errToast, successToast, warningToast } from "$lib/utils";
@@ -71,7 +73,9 @@ $effect(() => {
 	viewerIndex = null;
 	fetchPlacePhotos(id)
 		.then((list) => {
-			if (id === placeId) photos = list;
+			if (id !== placeId) return;
+			photos = list;
+			openFromDeepLink(list);
 		})
 		.catch((error) => {
 			console.error("place photos: failed to load", error);
@@ -109,6 +113,23 @@ const scrollMore = () => {
 	strip?.scrollBy({ left: strip.clientWidth * 0.8, behavior: "smooth" });
 };
 
+// Mirror the shown photo in ?photo=<id> without a navigation. Plain
+// history.replaceState like the map's own hash writer ($lib/map/mapHash),
+// so SvelteKit's page store doesn't re-run the drawer's URL logic.
+const syncPhotoParam = (imageId: number | null) => {
+	history.replaceState(
+		history.state,
+		"",
+		withPhotoParam(window.location.href, imageId),
+	);
+};
+
+const openViewer = (index: number, via: "tile" | "deeplink" = "tile") => {
+	viewerIndex = index;
+	trackEvent("place_photo_open", { source, index, via });
+	if (photos?.[index]) syncPhotoParam(photos[index].id);
+};
+
 // Focus the tile of the photo that was on screen: works for deep-link
 // opens too, and on macOS Safari, where a click doesn't focus the button
 const closeViewer = async (index: number) => {
@@ -116,13 +137,19 @@ const closeViewer = async (index: number) => {
 	// late close must not pull focus to the new place's tiles
 	if (viewerIndex === null) return;
 	viewerIndex = null;
+	syncPhotoParam(null);
 	await tick();
 	tileEls[index]?.focus();
 };
 
-const openViewer = (index: number) => {
-	viewerIndex = index;
-	trackEvent("place_photo_open", { source, index, via: "tile" });
+// ?photo=<id> opens the viewer once the photos are in. An id that isn't
+// one of this place's public photos is ignored and dropped from the URL.
+const openFromDeepLink = (list: PlaceImage[]) => {
+	const imageId = photoIdFromSearch(window.location.search);
+	if (imageId === null) return;
+	const index = list.findIndex((p) => p.id === imageId);
+	if (index === -1) syncPhotoParam(null);
+	else openViewer(index, "deeplink");
 };
 
 // Signed-out users sign in right here instead of leaving for /login, so
@@ -328,6 +355,7 @@ const handleFiles = async (event: Event) => {
 		startIndex={viewerIndex}
 		thumbHeight={tileHeight}
 		{source}
+		onIndexChange={(i) => syncPhotoParam(photos?.[i]?.id ?? null)}
 		onClose={closeViewer}
 	/>
 {/if}

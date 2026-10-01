@@ -151,3 +151,33 @@ export const prepareUpload = async (file: File): Promise<string> => {
 	// Strip the `data:image/jpeg;base64,` prefix
 	return dataUrl.slice(dataUrl.indexOf(",") + 1);
 };
+
+// Deep links: ?photo=<image_id> opens the viewer at that photo, on the
+// merchant page and in the map drawer.
+export const photoIdFromSearch = (search: string): number | null => {
+	const raw = new URLSearchParams(search).get("photo");
+	if (!raw || !/^\d+$/.test(raw)) return null;
+	const id = Number(raw);
+	return id > 0 ? id : null;
+};
+
+// Path + query + hash for history.replaceState. Keeps the map's literal
+// commas (?issues=a,b) like withLiteralCommas in $lib/merchantDrawerHash,
+// which can't be imported here: it pulls in $app/environment.
+export const withPhotoParam = (
+	href: string,
+	imageId: number | null,
+): string => {
+	const url = new URL(href);
+	if (imageId === null) url.searchParams.delete("photo");
+	else url.searchParams.set("photo", String(imageId));
+	return `${url.pathname}${url.search}${url.hash}`.replace(/%2C/g, ",");
+};
+
+// Shared links point at the merchant page: it works without the map and
+// shows the photo in context.
+export const photoShareUrl = (
+	origin: string,
+	placeId: number,
+	imageId: number,
+): string => `${origin}/merchant/${placeId}?photo=${imageId}`;

@@ -1327,7 +1327,11 @@
 		"emptyTitle": "Be the first to add a photo",
 		"emptyHint": "Storefront, sign, or the bitcoin sticker or QR",
 		"morePhotos": "More photos",
-		"communityPhoto": "Community photo"
+		"communityPhoto": "Community photo",
+		"copyLink": "Copy link to photo",
+		"linkCopied": "Link copied",
+		"copyLinkFailed": "Couldn't copy the link",
+		"moreActions": "More actions"
 	},
 	"authPrompt": {
 		"createAccount": "Create account",
