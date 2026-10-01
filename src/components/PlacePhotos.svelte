@@ -27,7 +27,7 @@ type Props = {
 	// Deleted places keep their photos but take no new ones
 	canAdd?: boolean;
 	// Where the photo/add analytics events came from
-	source: "merchant_page" | "map_drawer";
+	source: "merchant_page" | "map_drawer" | "area_drawer";
 };
 
 let { placeId, tileHeight = 112, canAdd = true, source }: Props = $props();
