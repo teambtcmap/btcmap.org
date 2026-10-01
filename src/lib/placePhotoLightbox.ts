@@ -109,11 +109,29 @@ export const openPlaceLightbox = async (opts: {
 	});
 	pswp.on("change", () => opts.onChange(pswp.currIndex));
 	pswp.on("destroy", opts.onDestroy);
+
+	// PhotoSwipe ignores close() and destroy() while its opening animation
+	// runs (~333ms, or one frame without animation). Queue them for its end:
+	// a dropped destroy leaks the instance with its window listeners.
+	let opened = false;
+	let pending: "close" | "destroy" | null = null;
+	pswp.on("openingAnimationEnd", () => {
+		opened = true;
+		if (pending === "destroy") pswp.destroy();
+		else if (pending === "close") pswp.close();
+		pending = null;
+	});
 	pswp.init();
 
 	return {
 		goTo: (index) => pswp.goTo(index),
-		close: () => pswp.close(),
-		destroy: () => pswp.destroy(),
+		close: () => {
+			if (opened) pswp.close();
+			else if (pending !== "destroy") pending = "close";
+		},
+		destroy: () => {
+			if (opened) pswp.destroy();
+			else pending = "destroy";
+		},
 	};
 };
