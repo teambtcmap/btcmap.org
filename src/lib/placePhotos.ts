@@ -1,5 +1,6 @@
 import { API_BASE } from "$lib/api-base";
 import api from "$lib/axios";
+import { withLiteralCommas } from "$lib/literalCommas";
 
 import type { PlaceImage } from "$types/btcmap-api/PlaceImage";
 
@@ -162,8 +163,7 @@ export const photoIdFromSearch = (search: string): number | null => {
 };
 
 // Path + query + hash for history.replaceState. Keeps the map's literal
-// commas (?issues=a,b) like withLiteralCommas in $lib/merchantDrawerHash,
-// which can't be imported here: it pulls in $app/environment.
+// commas (?issues=a,b) like every other query-string writer.
 export const withPhotoParam = (
 	href: string,
 	imageId: number | null,
@@ -171,7 +171,7 @@ export const withPhotoParam = (
 	const url = new URL(href);
 	if (imageId === null) url.searchParams.delete("photo");
 	else url.searchParams.set("photo", String(imageId));
-	return `${url.pathname}${url.search}${url.hash}`.replace(/%2C/g, ",");
+	return withLiteralCommas(`${url.pathname}${url.search}${url.hash}`);
 };
 
 // Shared links point at the merchant page: it works without the map and
