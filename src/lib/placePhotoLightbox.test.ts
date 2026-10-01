@@ -19,6 +19,7 @@ type FakePhotoSwipe = {
 };
 
 vi.mock("photoswipe/style.css", () => ({}));
+vi.mock("./placePhotoLightbox.css", () => ({}));
 vi.mock("photoswipe", () => ({
 	default: class {
 		options: Record<string, unknown>;

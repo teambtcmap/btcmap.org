@@ -253,12 +253,3 @@ onDestroy(() => {
 		{/if}
 	{/if}
 </div>
-
-<style>
-	/* PhotoSwipe mounts inside our stage instead of covering the window */
-	:global(.pswp.pswp--btcmap) {
-		position: absolute;
-		--pswp-bg: #06171c;
-		--pswp-root-z-index: 0;
-	}
-</style>
