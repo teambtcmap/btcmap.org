@@ -54,6 +54,27 @@ describe("trapTab", () => {
 		outside.remove();
 	});
 
+	it("leaves Tab to another open dialog that holds focus", () => {
+		const dialog = document.createElement("div");
+		dialog.setAttribute("aria-modal", "true");
+		dialog.innerHTML = '<button id="in-dialog">x</button>';
+		document.body.append(dialog);
+		const inDialog = dialog.querySelector("#in-dialog") as HTMLButtonElement;
+		inDialog.focus();
+
+		const event = tab();
+		trapTab(event, root);
+		expect(document.activeElement).toBe(inDialog);
+		expect(event.defaultPrevented).toBe(false);
+
+		// Also when that dialog is rendered inside the trapped root
+		root.append(dialog);
+		inDialog.focus();
+		trapTab(tab(), root);
+		expect(document.activeElement).toBe(inDialog);
+		dialog.remove();
+	});
+
 	it("leaves Tab between inner elements to the browser", () => {
 		first.focus();
 		const event = tab();

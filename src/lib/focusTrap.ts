@@ -19,12 +19,17 @@ const focusableIn = (root: HTMLElement): HTMLElement[] =>
 
 export const trapTab = (event: KeyboardEvent, root: HTMLElement): void => {
 	if (event.key !== "Tab") return;
+	// Another open dialog holds focus (e.g. a Save prompt over the list
+	// panel, wherever it sits in the DOM): Tab is that dialog's business
+	const active = document.activeElement;
+	const dialog = active?.closest('[aria-modal="true"]');
+	if (dialog && dialog !== root) return;
+
 	const items = focusableIn(root);
 	if (!items.length) return;
 
 	const first = items[0];
 	const last = items[items.length - 1];
-	const active = document.activeElement;
 	const inside = active instanceof Node && root.contains(active);
 
 	if (!inside) {
