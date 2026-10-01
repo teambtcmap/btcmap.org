@@ -110,10 +110,6 @@ jobs:
         if: steps.commits.outputs.skip != 'true'
         run: |
           set -euo pipefail
-          MAX_CONTEXT=120000
-          # At 20000 the period's most-changed file was skipped from context
-          # (#1253); the budget below is the binding constraint in practice.
-          MAX_FILE=32000
 
           # Files changed in the diff (extract b/ path so renames resolve to the new name)
           grep '^diff --git' /tmp/raw-diff.txt \
@@ -156,28 +152,9 @@ jobs:
           grep '\.svelte$' /tmp/context-files-unsorted.txt >> /tmp/context-files.txt || true
           grep -vE '\.(ts|svelte)$' /tmp/context-files-unsorted.txt >> /tmp/context-files.txt || true
 
-          TOTAL=0
-          > /tmp/file-contents.txt
-          while IFS= read -r filepath; do
-            if [[ -f "$filepath" ]]; then
-              SIZE=$(wc -c < "$filepath")
-              if (( SIZE > MAX_FILE )); then
-                echo "[SKIPPED: $filepath ($SIZE bytes, over per-file limit)]" >> /tmp/file-contents.txt
-                continue
-              fi
-              if (( TOTAL + SIZE > MAX_CONTEXT )); then
-                echo "[SKIPPED: $filepath ($SIZE bytes, context budget exhausted)]" >> /tmp/file-contents.txt
-                continue
-              fi
-              printf '=== %s ===\n' "$filepath" >> /tmp/file-contents.txt
-              cat "$filepath" >> /tmp/file-contents.txt
-              printf '\n\n' >> /tmp/file-contents.txt
-              TOTAL=$((TOTAL + SIZE))
-            fi
-          done < /tmp/context-files.txt
-
-          echo "Full context: ${TOTAL} bytes across $(wc -l < /tmp/context-files.txt) files"
-          echo "file contents: ${TOTAL} bytes shown of $(wc -l < /tmp/context-files.txt) candidate files (per-file cap ${MAX_FILE}, total budget ${MAX_CONTEXT}; skipped files are marked inline)" >> /tmp/pipeline-stats.txt
+          # Budgets, hotspot-first order and head/tail windows for oversized
+          # hotspots live in the script (unit-tested beside it).
+          python3 .github/scripts/collect_contents.py
 
       - name: AI review
         if: steps.commits.outputs.skip != 'true'
