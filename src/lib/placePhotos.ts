@@ -162,6 +162,18 @@ export const photoIdFromSearch = (search: string): number | null => {
 	return id > 0 ? id : null;
 };
 
+// What a ?photo= deep link points at among a place's loaded photos: an
+// index to open, or stale (not one of its public photos, so drop it)
+export const deepLinkTarget = (
+	photos: PlaceImage[],
+	search: string,
+): { index: number } | { stale: true } | null => {
+	const imageId = photoIdFromSearch(search);
+	if (imageId === null) return null;
+	const index = photos.findIndex((p) => p.id === imageId);
+	return index === -1 ? { stale: true } : { index };
+};
+
 // Path + query + hash for history.replaceState. Keeps the map's literal
 // commas (?issues=a,b) like every other query-string writer.
 export const withPhotoParam = (
