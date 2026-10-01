@@ -5,6 +5,7 @@ import Time from "svelte-time";
 import Icon from "$components/Icon.svelte";
 import { trackEvent } from "$lib/analytics";
 import { lockBodyScroll, unlockBodyScroll } from "$lib/bodyScrollLock";
+import { trapTab } from "$lib/focusTrap";
 import { _ } from "$lib/i18n";
 import type { LightboxHandle } from "$lib/placePhotoLightbox";
 import { buildSlides, openPlaceLightbox } from "$lib/placePhotoLightbox";
@@ -72,13 +73,6 @@ const close = () => {
 	else onClose();
 };
 
-const focusables = () =>
-	Array.from(
-		rootEl?.querySelectorAll<HTMLElement>(
-			'button:not([disabled]), a[href], [tabindex]:not([tabindex="-1"])',
-		) ?? [],
-	).filter((el) => el.offsetParent !== null);
-
 // Capture phase + stopPropagation for every key while open: the map drawers
 // react to bubbling window keydowns (Escape closes, ↑ ↓ Enter resize the
 // mobile sheet), and PhotoSwipe's own key handling is off.
@@ -93,20 +87,8 @@ const handleKeydown = (event: KeyboardEvent) => {
 	} else if (event.key === "ArrowLeft") {
 		event.preventDefault();
 		goTo(index - 1);
-	} else if (event.key === "Tab") {
-		// Keep focus inside the viewer
-		const items = focusables();
-		if (!items.length) return;
-		const first = items[0];
-		const last = items[items.length - 1];
-		const active = document.activeElement;
-		if (event.shiftKey && (active === first || !rootEl?.contains(active))) {
-			event.preventDefault();
-			last.focus();
-		} else if (!event.shiftKey && active === last) {
-			event.preventDefault();
-			first.focus();
-		}
+	} else if (rootEl) {
+		trapTab(event, rootEl);
 	}
 };
 
