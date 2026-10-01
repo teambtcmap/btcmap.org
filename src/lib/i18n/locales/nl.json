@@ -1323,7 +1323,6 @@
 		"title": "Foto's",
 		"add": "Foto toevoegen",
 		"addFirst": "Voeg de eerste foto toe",
-		"loginToAdd": "Log in om foto's toe te voegen",
 		"uploading": "Foto uploaden…",
 		"uploaded": "{count, plural, one {Bedankt! Je foto staat online.} other {Bedankt! Je # foto's staan online.}}",
 		"uploadFailed": "{count, plural, one {Een foto kon niet worden geüpload. Probeer het opnieuw.} other {# foto's konden niet worden geüpload. Probeer het opnieuw.}}",
@@ -1331,6 +1330,8 @@
 		"previous": "Vorige foto",
 		"next": "Volgende foto",
 		"close": "Sluiten",
-		"addedOn": "Toegevoegd op {date}"
+		"addedOn": "Toegevoegd op {date}",
+		"promptTitle": "Foto toevoegen",
+		"promptDescription": "Log in met je bestaande account of maak een nieuw account aan om foto's van deze plek toe te voegen."
 	}
 }

@@ -1245,7 +1245,6 @@
 		"title": "Photos",
 		"add": "Ajouter une photo",
 		"addFirst": "Ajouter la première photo",
-		"loginToAdd": "Connectez-vous pour ajouter des photos",
 		"uploading": "Envoi de la photo…",
 		"uploaded": "{count, plural, one {Merci ! Votre photo est en ligne.} other {Merci ! Vos # photos sont en ligne.}}",
 		"uploadFailed": "{count, plural, one {Une photo n'a pas pu être envoyée. Veuillez réessayer.} other {# photos n'ont pas pu être envoyées. Veuillez réessayer.}}",
@@ -1253,6 +1252,8 @@
 		"previous": "Photo précédente",
 		"next": "Photo suivante",
 		"close": "Fermer",
-		"addedOn": "Ajoutée le {date}"
+		"addedOn": "Ajoutée le {date}",
+		"promptTitle": "Ajouter une photo",
+		"promptDescription": "Connectez-vous à votre compte ou créez-en un nouveau pour ajouter des photos de ce lieu."
 	}
 }

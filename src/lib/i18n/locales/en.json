@@ -1323,7 +1323,6 @@
 		"title": "Photos",
 		"add": "Add photo",
 		"addFirst": "Add the first photo",
-		"loginToAdd": "Log in to add photos",
 		"uploading": "Uploading photo…",
 		"uploaded": "{count, plural, one {Thanks! Your photo is live.} other {Thanks! Your # photos are live.}}",
 		"uploadFailed": "{count, plural, one {A photo couldn't be uploaded. Please try again.} other {# photos couldn't be uploaded. Please try again.}}",
@@ -1331,6 +1330,8 @@
 		"previous": "Previous photo",
 		"next": "Next photo",
 		"close": "Close",
-		"addedOn": "Added {date}"
+		"addedOn": "Added {date}",
+		"promptTitle": "Add a photo",
+		"promptDescription": "Log in to your existing account, or create a new one to add photos of this place."
 	}
 }
