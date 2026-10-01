@@ -30,9 +30,15 @@ export const firstInvalidVerifyField = (
 	errors: VerifyErrors,
 ): VerifyField | undefined => firstInvalid(FIELD_ORDER, errors);
 
+// Whitespace describes nothing. The forms also gate the box's
+// disabled/required state on this, so the UI can't lock the box while the
+// rule still asks for it.
+export const describesChanges = (changes: string): boolean =>
+	changes.trim() !== "";
+
 export const validateVerification = (input: VerifyInput): VerifyErrors => {
 	const errors: VerifyErrors = {};
-	if (!input.accurate && !input.changes.trim()) {
+	if (!input.accurate && !describesChanges(input.changes)) {
 		errors.confirmation = "required";
 	}
 	if (!input.method.trim()) errors.method = "required";

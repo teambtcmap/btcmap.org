@@ -18,7 +18,7 @@ import { placesError } from "$lib/store";
 import { theme } from "$lib/theme";
 import { errToast } from "$lib/utils";
 import type { VerifyInput } from "$lib/verifyValidation";
-import { validateVerification } from "$lib/verifyValidation";
+import { describesChanges, validateVerification } from "$lib/verifyValidation";
 
 import type { PageProps } from "./$types";
 import { browser } from "$app/environment";
@@ -222,13 +222,13 @@ onMount(async () => {
 						<div class="flex items-center space-x-2">
 							<label
 								for="current"
-								class="{!values.current.changes ? 'cursor-pointer' : ''} font-semibold"
+								class="{!describesChanges(values.current.changes) ? 'cursor-pointer' : ''} font-semibold"
 								>{$_('verifyLocation.currentInfoLabel')}</label
 							>
 							<input
 								class="h-4 w-4 accent-link"
-								disabled={!captchaSecret || !data || Boolean(values.current.changes)}
-								required={!values.current.changes}
+								disabled={!captchaSecret || !data || describesChanges(values.current.changes)}
+								required={!describesChanges(values.current.changes)}
 								type="checkbox"
 								id="current"
 								name="current"
