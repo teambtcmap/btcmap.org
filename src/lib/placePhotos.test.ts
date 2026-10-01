@@ -3,6 +3,7 @@ import { beforeEach, describe, expect, it, vi } from "vitest";
 import { API_BASE } from "$lib/api-base";
 
 import {
+	deepLinkTarget,
 	fetchPlacePhotos,
 	fitWithin,
 	MAX_PHOTOS_PER_PICK,
@@ -228,5 +229,25 @@ describe("photoShareUrl", () => {
 		expect(photoShareUrl("https://btcmap.org", 20423, 12)).toBe(
 			"https://btcmap.org/merchant/20423?photo=12",
 		);
+	});
+});
+
+describe("deepLinkTarget", () => {
+	const list = [
+		{ ...photo, id: 12 },
+		{ ...photo, id: 8 },
+	];
+
+	it("finds the index of the linked photo", () => {
+		expect(deepLinkTarget(list, "?merchant=1&photo=8")).toEqual({ index: 1 });
+	});
+
+	it("flags a photo id that isn't among this place's photos as stale", () => {
+		expect(deepLinkTarget(list, "?photo=99")).toEqual({ stale: true });
+	});
+
+	it("does nothing without a usable photo param", () => {
+		expect(deepLinkTarget(list, "?merchant=1")).toBeNull();
+		expect(deepLinkTarget(list, "?photo=abc")).toBeNull();
 	});
 });
