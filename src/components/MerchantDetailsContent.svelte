@@ -10,6 +10,7 @@ import MerchantComment from "$components/MerchantComment.svelte";
 import MerchantIssuesRow from "$components/MerchantIssuesRow.svelte";
 import OpenStatusPill from "$components/OpenStatusPill.svelte";
 import PaymentMethodPills from "$components/PaymentMethodPills.svelte";
+import PlacePhotos from "$components/PlacePhotos.svelte";
 import SaveButton from "$components/SaveButton.svelte";
 import { trackEvent } from "$lib/analytics";
 import { API_BASE } from "$lib/api-base";
@@ -290,6 +291,10 @@ async function fetchComments(placeId: number) {
 			</span>
 			<span class="text-[11px]">{$_('merchant.comments')}</span>
 		</a>
+	</div>
+
+	<div class="pt-3">
+		<PlacePhotos placeId={merchant.id} tileHeight={88} canAdd={!merchant.deleted_at} source="map_drawer" />
 	</div>
 
 	<div class="divide-y divide-gray-200 dark:divide-white/10">
