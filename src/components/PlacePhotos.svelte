@@ -7,7 +7,6 @@ import Icon from "$components/Icon.svelte";
 import PlacePhotoViewer from "$components/PlacePhotoViewer.svelte";
 import { trackEvent } from "$lib/analytics";
 import { _ } from "$lib/i18n";
-import type { PlacePhoto } from "$lib/placePhotos";
 import {
 	fetchPlacePhotos,
 	placePhotoUrl,
@@ -16,6 +15,8 @@ import {
 } from "$lib/placePhotos";
 import { session } from "$lib/session";
 import { errToast, successToast, warningToast } from "$lib/utils";
+
+import type { PlaceImage } from "$types/btcmap-api/PlaceImage";
 
 // Community photo strip for a place: exact-ratio boxes from the metadata,
 // thumbnails fetched in parallel at tile size, a full-screen viewer, and an
@@ -35,7 +36,7 @@ let { placeId, tileHeight = 112, canAdd = true, source }: Props = $props();
 const MAX_FILES_PER_PICK = 5;
 
 // undefined = loading, [] = none
-let photos = $state<PlacePhoto[] | undefined>(undefined);
+let photos = $state<PlaceImage[] | undefined>(undefined);
 let uploading = $state(0);
 let viewerIndex = $state<number | null>(null);
 let fileInput = $state<HTMLInputElement>();
@@ -61,7 +62,7 @@ $effect(() => {
 });
 
 // Keep odd panoramas and tall shots from blowing up the strip
-const tileWidth = (photo: PlacePhoto) =>
+const tileWidth = (photo: PlaceImage) =>
 	Math.round(
 		tileHeight * Math.min(1.8, Math.max(0.6, photo.width / photo.height)),
 	);
@@ -137,24 +138,25 @@ const handleFiles = async (event: Event) => {
 </script>
 
 {#if photos === undefined}
-	<div class="flex gap-2 overflow-hidden" aria-hidden="true">
+	<div
+		class="flex gap-2 overflow-hidden"
+		style:--tile="{tileHeight}px"
+		aria-hidden="true"
+	>
 		{#each [0, 1, 2] as i (i)}
 			<div
-				class="shrink-0 animate-pulse rounded-xl bg-gray-200 dark:bg-white/10"
-				style:height="{tileHeight}px"
-				style:width="{tileHeight}px"
+				class="size-(--tile) shrink-0 animate-pulse rounded-xl bg-gray-200 dark:bg-white/10"
 			></div>
 		{/each}
 	</div>
 {:else if photos.length || canAdd}
 	<section aria-label={$_('placePhotos.title')}>
-		<div class="flex snap-x gap-2 overflow-x-auto pb-1">
+		<div class="flex snap-x gap-2 overflow-x-auto pb-1" style:--tile="{tileHeight}px">
 			{#each photos as photo, i (photo.id)}
 				<button
 					type="button"
 					onclick={() => openViewer(i)}
-					class="relative shrink-0 snap-start overflow-hidden rounded-xl bg-gray-200 focus-visible:ring-2 focus-visible:ring-link dark:bg-white/10 {loadedIds.has(photo.id) ? '' : 'animate-pulse'}"
-					style:height="{tileHeight}px"
+					class="relative h-(--tile) shrink-0 snap-start overflow-hidden rounded-xl bg-gray-200 focus-visible:ring-2 focus-visible:ring-link dark:bg-white/10 {loadedIds.has(photo.id) ? '' : 'animate-pulse'}"
 					style:width="{tileWidth(photo)}px"
 					aria-label={$_('placePhotos.photoAlt', { values: { n: i + 1, total: photos.length } })}
 				>
@@ -172,9 +174,7 @@ const handleFiles = async (event: Event) => {
 
 			{#each { length: uploading } as _u, i (i)}
 				<div
-					class="flex shrink-0 items-center justify-center rounded-xl bg-gray-100 dark:bg-white/5"
-					style:height="{tileHeight}px"
-					style:width="{tileHeight}px"
+					class="flex size-(--tile) shrink-0 items-center justify-center rounded-xl bg-gray-100 dark:bg-white/5"
 					role="status"
 					aria-label={$_('placePhotos.uploading')}
 				>
@@ -187,10 +187,7 @@ const handleFiles = async (event: Event) => {
 					bind:this={addButton}
 					type="button"
 					onclick={handleAddClick}
-					class="flex shrink-0 snap-start flex-col items-center justify-center gap-1 rounded-xl border border-dashed border-gray-300 px-3 text-center text-xs font-semibold text-link transition-colors hover:bg-link/5 dark:border-white/20 {highlightAdd ? 'animate-pulse bg-link/10 ring-2 ring-link' : ''}"
-					style:height="{tileHeight}px"
-					style:min-width="{tileHeight}px"
-					style:max-width="{tileHeight * 1.4}px"
+					class="flex h-(--tile) max-w-[calc(var(--tile)*1.4)] min-w-(--tile) shrink-0 snap-start flex-col items-center justify-center gap-1 rounded-xl border border-dashed border-gray-300 px-3 text-center text-xs font-semibold text-link transition-colors hover:bg-link/5 dark:border-white/20 {highlightAdd ? 'animate-pulse bg-link/10 ring-2 ring-link' : ''}"
 				>
 					<Icon w="24" h="24" icon="add_a_photo" type="material" />
 					{photos.length ? $_('placePhotos.add') : $_('placePhotos.addFirst')}
