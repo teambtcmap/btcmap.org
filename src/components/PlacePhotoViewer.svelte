@@ -26,7 +26,8 @@ type Props = {
 	// Strip tile height, so the filmstrip reuses the already cached thumbnails
 	thumbHeight: number;
 	source: PlacePhotoSource;
-	onClose: () => void;
+	// Gets the index on screen at close, so the strip can focus that tile
+	onClose: (index: number) => void;
 };
 
 let {
@@ -50,7 +51,6 @@ let rootEl = $state<HTMLDivElement>();
 let stageEl = $state<HTMLDivElement>();
 let closeButton = $state<HTMLButtonElement>();
 let handle: LightboxHandle | undefined;
-let triggerEl: HTMLElement | null = null;
 let destroyed = false;
 // place_photo_open already covers the first photo; views count the ones
 // reached by swiping/arrows, once each per open
@@ -70,7 +70,7 @@ const goTo = (i: number) => {
 // Animate out through PhotoSwipe; its destroy event then calls onClose
 const close = () => {
 	if (handle) handle.close();
-	else onClose();
+	else onClose(index);
 };
 
 // Capture phase + stopPropagation for every key while open: the map drawers
@@ -100,7 +100,6 @@ const portal = (node: HTMLElement) => {
 };
 
 onMount(() => {
-	triggerEl = document.activeElement as HTMLElement | null;
 	lockBodyScroll();
 	closeButton?.focus();
 
@@ -121,7 +120,7 @@ onMount(() => {
 		},
 		onDestroy: () => {
 			handle = undefined;
-			onClose();
+			onClose(index);
 		},
 	})
 		.then((h) => {
@@ -131,7 +130,7 @@ onMount(() => {
 		})
 		.catch((error) => {
 			console.error("place photos: viewer failed to load", error);
-			onClose();
+			onClose(index);
 		});
 });
 
@@ -140,7 +139,6 @@ onDestroy(() => {
 	// Parent unmounted us directly (e.g. the drawer switched place)
 	handle?.destroy();
 	unlockBodyScroll();
-	triggerEl?.focus();
 });
 </script>
 
