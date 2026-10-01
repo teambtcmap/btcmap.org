@@ -94,6 +94,7 @@ $effect(() => {
 });
 
 const scrollMore = () => {
+	trackEvent("place_photo_strip_scroll", { source });
 	strip?.scrollBy({ left: strip.clientWidth * 0.8, behavior: "smooth" });
 };
 
