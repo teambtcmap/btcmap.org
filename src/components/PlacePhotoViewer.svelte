@@ -8,6 +8,7 @@ import { lockBodyScroll, unlockBodyScroll } from "$lib/bodyScrollLock";
 import { _ } from "$lib/i18n";
 import type { LightboxHandle } from "$lib/placePhotoLightbox";
 import { buildSlides, openPlaceLightbox } from "$lib/placePhotoLightbox";
+import type { PlacePhotoSource } from "$lib/placePhotos";
 import { placePhotoUrl } from "$lib/placePhotos";
 
 import type { PlaceImage } from "$types/btcmap-api/PlaceImage";
@@ -23,7 +24,7 @@ type Props = {
 	startIndex: number;
 	// Strip tile height, so the filmstrip reuses the already cached thumbnails
 	thumbHeight: number;
-	source: "merchant_page" | "map_drawer" | "area_drawer";
+	source: PlacePhotoSource;
 	onClose: () => void;
 };
 
