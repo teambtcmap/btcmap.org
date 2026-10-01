@@ -15,7 +15,7 @@ import {
 	uploadPlacePhoto,
 } from "$lib/placePhotos";
 import { session } from "$lib/session";
-import { errToast, successToast } from "$lib/utils";
+import { errToast, successToast, warningToast } from "$lib/utils";
 
 // Community photo strip for a place: exact-ratio boxes from the metadata,
 // thumbnails fetched in parallel at tile size, a full-screen viewer, and an
@@ -86,8 +86,14 @@ const handleAuthenticated = async () => {
 
 const handleFiles = async (event: Event) => {
 	const input = event.currentTarget as HTMLInputElement;
-	const files = Array.from(input.files ?? []).slice(0, MAX_FILES_PER_PICK);
+	const picked = Array.from(input.files ?? []);
 	input.value = "";
+	if (picked.length > MAX_FILES_PER_PICK) {
+		warningToast(
+			$_("placePhotos.tooMany", { values: { max: MAX_FILES_PER_PICK } }),
+		);
+	}
+	const files = picked.slice(0, MAX_FILES_PER_PICK);
 	const token = $session?.token;
 	if (!files.length || !token) return;
 

@@ -1324,7 +1324,8 @@
 		"close": "Sluiten",
 		"addedOn": "Toegevoegd op {date}",
 		"promptTitle": "Foto toevoegen",
-		"promptDescription": "Log in met je bestaande account of maak een nieuw account aan om foto's van deze plek toe te voegen."
+		"promptDescription": "Log in met je bestaande account of maak een nieuw account aan om foto's van deze plek toe te voegen.",
+		"tooMany": "Je kunt maximaal {max} foto's tegelijk toevoegen. De eerste {max} worden geüpload."
 	},
 	"authPrompt": {
 		"createAccount": "Account aanmaken",

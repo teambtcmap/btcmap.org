@@ -1324,7 +1324,8 @@
 		"close": "Close",
 		"addedOn": "Added {date}",
 		"promptTitle": "Add a photo",
-		"promptDescription": "Log in to your existing account, or create a new one to add photos of this place."
+		"promptDescription": "Log in to your existing account, or create a new one to add photos of this place.",
+		"tooMany": "You can add up to {max} photos at a time. Uploading the first {max}."
 	},
 	"authPrompt": {
 		"createAccount": "Create account",
