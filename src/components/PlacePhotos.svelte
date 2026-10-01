@@ -21,26 +21,31 @@ import { errToast, successToast, warningToast } from "$lib/utils";
 
 import type { PlaceImage } from "$types/btcmap-api/PlaceImage";
 
-// Community photo strip for a place: exact-ratio boxes from the metadata,
-// thumbnails fetched in parallel at tile size, a full-screen viewer, and an
-// "Add photo" tile (#1469).
+// Community photo strip for a place: a "Photos N · Add photo" header,
+// exact-ratio thumbnails fetched in parallel at tile size, a full-screen
+// viewer, and a one-row invitation when there are no photos yet (#1469).
 type Props = {
 	placeId: number;
-	// Tile height in CSS px; thumbnails are requested at 2x for HiDPI
-	tileHeight?: number;
+	// page: 112px tiles at the photo's ratio, full-bleed on mobile.
+	// drawer: square 88px tiles, plus a scroll chevron on pointer devices.
+	layout?: "page" | "drawer";
 	// Deleted places keep their photos but take no new ones
 	canAdd?: boolean;
 	// Where the photo/add analytics events came from
 	source: "merchant_page" | "map_drawer" | "area_drawer";
 };
 
-let { placeId, tileHeight = 112, canAdd = true, source }: Props = $props();
+let { placeId, layout = "page", canAdd = true, source }: Props = $props();
+
+const tileHeight = $derived(layout === "drawer" ? 88 : 112);
 
 // undefined = loading, [] = none
 let photos = $state<PlaceImage[] | undefined>(undefined);
 let uploading = $state(0);
 let viewerIndex = $state<number | null>(null);
 let fileInput = $state<HTMLInputElement>();
+let strip = $state<HTMLDivElement>();
+let canScrollMore = $state(false);
 let showAuthPrompt = $state(false);
 let addButton = $state<HTMLButtonElement>();
 let highlightAdd = $state(false);
@@ -62,11 +67,34 @@ $effect(() => {
 		});
 });
 
-// Keep odd panoramas and tall shots from blowing up the strip
+// Keep odd panoramas and tall shots from blowing up the strip; the drawer
+// uses square tiles for an even rhythm in its narrow column
 const tileWidth = (photo: PlaceImage) =>
-	Math.round(
-		tileHeight * Math.min(1.8, Math.max(0.6, photo.width / photo.height)),
-	);
+	layout === "drawer"
+		? tileHeight
+		: Math.round(
+				tileHeight * Math.min(1.8, Math.max(0.6, photo.width / photo.height)),
+			);
+
+const updateCanScrollMore = () => {
+	if (!strip) return;
+	canScrollMore = strip.scrollLeft + strip.clientWidth < strip.scrollWidth - 1;
+};
+
+// Re-measure when the tiles change or the strip resizes
+$effect(() => {
+	void photos?.length;
+	void uploading;
+	if (!strip) return;
+	updateCanScrollMore();
+	const observer = new ResizeObserver(updateCanScrollMore);
+	observer.observe(strip);
+	return () => observer.disconnect();
+});
+
+const scrollMore = () => {
+	strip?.scrollBy({ left: strip.clientWidth * 0.8, behavior: "smooth" });
+};
 
 const openViewer = (index: number) => {
 	viewerIndex = index;
@@ -75,14 +103,18 @@ const openViewer = (index: number) => {
 
 // Signed-out users sign in right here instead of leaving for /login, so
 // they stay on the place they wanted to photograph.
-const handleAddClick = () => {
-	trackEvent("place_photo_add_click", { source, signedIn: !!$session });
+const handleAddClick = (entry: "header" | "empty") => {
+	trackEvent("place_photo_add_click", {
+		source,
+		entry,
+		signedIn: !!$session,
+	});
 	if ($session) fileInput?.click();
 	else showAuthPrompt = true;
 };
 
 // Browsers may refuse the picker here since the click's user activation
-// can expire during login. Undetectable, so also bring the Add tile into
+// can expire during login. Undetectable, so also bring the Add button into
 // view, focus it and highlight it briefly: then it's one obvious tap away.
 const handleAuthenticated = async () => {
 	await tick();
@@ -145,64 +177,113 @@ const handleFiles = async (event: Event) => {
 			></div>
 		{/each}
 	</div>
-{:else if photos.length || canAdd}
-	<section aria-label={$_('placePhotos.title')}>
-		<div class="flex snap-x gap-2 overflow-x-auto pb-1" style:--tile="{tileHeight}px">
-			{#each photos as photo, i (photo.id)}
-				<button
-					type="button"
-					onclick={() => openViewer(i)}
-					class="relative h-(--tile) shrink-0 snap-start overflow-hidden rounded-xl bg-gray-200 focus-visible:ring-2 focus-visible:ring-link dark:bg-white/10 {loadedIds.has(photo.id) ? '' : 'animate-pulse'}"
-					style:width="{tileWidth(photo)}px"
-					aria-label={$_('placePhotos.photoAlt', { values: { n: i + 1, total: photos.length } })}
-				>
-					<img
-						src={placePhotoUrl(placeId, photo.id, { h: tileHeight * 2 })}
-						alt=""
-						loading="lazy"
-						decoding="async"
-						referrerpolicy="no-referrer"
-						onload={() => loadedIds.add(photo.id)}
-						class="h-full w-full object-cover transition-opacity duration-300 {loadedIds.has(photo.id) ? 'opacity-100' : 'opacity-0'}"
-					/>
-				</button>
-			{/each}
-
-			{#each { length: uploading } as _u, i (i)}
-				<div
-					class="flex size-(--tile) shrink-0 items-center justify-center rounded-xl bg-gray-100 dark:bg-white/5"
-					role="status"
-					aria-label={$_('placePhotos.uploading')}
-				>
-					<span class="h-6 w-6 animate-spin rounded-full border-2 border-link border-t-transparent"></span>
-				</div>
-			{/each}
-
+{:else if photos.length || uploading}
+	<section aria-labelledby="place-photos-{placeId}-{layout}">
+		<div class="mb-2 flex items-center justify-between gap-3">
+			<span
+				id="place-photos-{placeId}-{layout}"
+				class="flex items-baseline gap-1.5 text-xs text-mapLabel dark:text-white/70"
+			>
+				{$_('placePhotos.title')}
+				<span class="tabular-nums">{photos.length}</span>
+			</span>
 			{#if canAdd}
 				<button
 					bind:this={addButton}
 					type="button"
-					onclick={handleAddClick}
-					class="flex h-(--tile) max-w-[calc(var(--tile)*1.4)] min-w-(--tile) shrink-0 snap-start flex-col items-center justify-center gap-1 rounded-xl border border-dashed border-gray-300 px-3 text-center text-xs font-semibold text-link transition-colors hover:bg-link/5 dark:border-white/20 {highlightAdd ? 'animate-pulse bg-link/10 ring-2 ring-link' : ''}"
+					onclick={() => handleAddClick('header')}
+					class="-mx-2 -my-1.5 flex items-center gap-1.5 rounded-lg px-2 py-1.5 text-sm font-semibold text-link transition-colors hover:bg-link/10 {highlightAdd ? 'animate-pulse bg-link/10 ring-2 ring-link' : ''}"
 				>
-					<Icon w="24" h="24" icon="add_a_photo" type="material" />
-					{photos.length ? $_('placePhotos.add') : $_('placePhotos.addFirst')}
+					<Icon w="20" h="20" icon="add_a_photo" type="material" />
+					{$_('placePhotos.add')}
 				</button>
-				<!-- An explicit list, not image/*: iOS then hands over HEIC photos
-				     converted to JPEG, while image/* can pass HEIC through, which
-				     createImageBitmap can't decode in Chrome/Firefox. Mobile
-				     browsers still offer the camera with this list. -->
-				<input
-					bind:this={fileInput}
-					type="file"
-					accept="image/jpeg,image/png,image/webp"
-					multiple
-					class="hidden"
-					onchange={handleFiles}
-				/>
+			{/if}
+		</div>
+
+		<div class="relative">
+			<div
+				bind:this={strip}
+				onscroll={updateCanScrollMore}
+				class="flex snap-x gap-2 overflow-x-auto pb-1 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden {layout === 'page' ? '-mx-4 scroll-px-4 px-4 lg:mx-0 lg:scroll-px-0 lg:px-0' : ''}"
+				style:--tile="{tileHeight}px"
+			>
+				<!-- Uploads in progress sit first, where the new photos will land -->
+				{#each { length: uploading } as _u, i (i)}
+					<div
+						class="flex size-(--tile) shrink-0 items-center justify-center rounded-xl bg-gray-100 dark:bg-white/5"
+						role="status"
+						aria-label={$_('placePhotos.uploading')}
+					>
+						<span class="h-6 w-6 animate-spin rounded-full border-2 border-link border-t-transparent"></span>
+					</div>
+				{/each}
+
+				{#each photos as photo, i (photo.id)}
+					<button
+						type="button"
+						onclick={() => openViewer(i)}
+						class="relative h-(--tile) shrink-0 snap-start overflow-hidden rounded-xl bg-gray-200 focus-visible:ring-2 focus-visible:ring-link dark:bg-white/10 {loadedIds.has(photo.id) ? '' : 'animate-pulse'}"
+						style:width="{tileWidth(photo)}px"
+						aria-label={$_('placePhotos.photoAlt', { values: { n: i + 1, total: photos.length } })}
+					>
+						<img
+							src={placePhotoUrl(placeId, photo.id, { h: tileHeight * 2 })}
+							alt=""
+							loading="lazy"
+							decoding="async"
+							referrerpolicy="no-referrer"
+							onload={() => loadedIds.add(photo.id)}
+							class="h-full w-full object-cover transition-opacity duration-300 {loadedIds.has(photo.id) ? 'opacity-100' : 'opacity-0'}"
+						/>
+					</button>
+				{/each}
+			</div>
+
+			{#if layout === 'drawer' && canScrollMore}
+				<!-- Pointer devices only: touch users swipe, and a fade over a
+				     swipeable strip would just hide part of a photo -->
+				<div class="pointer-events-none absolute inset-y-0 right-0 hidden w-12 bg-gradient-to-r from-transparent to-white pointer-fine:block dark:to-dark"></div>
+				<button
+					type="button"
+					onclick={scrollMore}
+					class="absolute top-1/2 right-1 hidden h-8 w-8 -translate-y-1/2 items-center justify-center rounded-full border border-gray-300 bg-white text-primary shadow-md pointer-fine:flex dark:border-white/20 dark:bg-dark dark:text-white"
+					aria-label={$_('placePhotos.morePhotos')}
+				>
+					<Icon w="20" h="20" icon="chevron_right" type="material" />
+				</button>
 			{/if}
 		</div>
 	</section>
+{:else if canAdd}
+	<button
+		bind:this={addButton}
+		type="button"
+		onclick={() => handleAddClick('empty')}
+		class="flex w-full items-center gap-3 rounded-2xl border border-dashed border-gray-300 px-3.5 py-3 text-left transition-colors hover:border-link hover:bg-link/5 dark:border-white/20 {highlightAdd ? 'animate-pulse bg-link/10 ring-2 ring-link' : ''}"
+	>
+		<span class="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-white text-link dark:bg-white/10">
+			<Icon w="20" h="20" icon="add_a_photo" type="material" />
+		</span>
+		<span class="min-w-0">
+			<span class="block text-[15px] leading-5 font-semibold text-link">{$_('placePhotos.emptyTitle')}</span>
+			<span class="block text-[13px] leading-[18px] text-body dark:text-white/70">{$_('placePhotos.emptyHint')}</span>
+		</span>
+	</button>
+{/if}
+
+{#if canAdd}
+	<!-- An explicit list, not image/*: iOS then hands over HEIC photos
+	     converted to JPEG, while image/* can pass HEIC through, which
+	     createImageBitmap can't decode in Chrome/Firefox. Mobile
+	     browsers still offer the camera with this list. -->
+	<input
+		bind:this={fileInput}
+		type="file"
+		accept="image/jpeg,image/png,image/webp"
+		multiple
+		class="hidden"
+		onchange={handleFiles}
+	/>
 {/if}
 
 {#if photos?.length && viewerIndex !== null}
