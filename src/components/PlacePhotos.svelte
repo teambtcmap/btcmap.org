@@ -7,6 +7,7 @@ import Icon from "$components/Icon.svelte";
 import PlacePhotoViewer from "$components/PlacePhotoViewer.svelte";
 import { trackEvent } from "$lib/analytics";
 import { _ } from "$lib/i18n";
+import type { PlacePhotoSource } from "$lib/placePhotos";
 import {
 	fetchPlacePhotos,
 	MAX_PHOTOS_PER_PICK,
@@ -32,7 +33,7 @@ type Props = {
 	// Deleted places keep their photos but take no new ones
 	canAdd?: boolean;
 	// Where the photo/add analytics events came from
-	source: "merchant_page" | "map_drawer" | "area_drawer";
+	source: PlacePhotoSource;
 };
 
 let { placeId, layout = "page", canAdd = true, source }: Props = $props();

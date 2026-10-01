@@ -7,6 +7,9 @@ import type { PlaceImage } from "$types/btcmap-api/PlaceImage";
 // call returns metadata only, so the UI can lay out exact-ratio boxes and
 // fetch each image's bytes in parallel at the size it needs.
 
+// Where the strip and viewer are shown, for analytics
+export type PlacePhotoSource = "merchant_page" | "map_drawer" | "area_drawer";
+
 // Longest side we upload. Phone photos are 4–8 MB at 12 MP; the API caps
 // uploads at 10 MB decoded, and nothing we render needs more than this.
 const UPLOAD_MAX_SIDE = 2048;
