@@ -1331,7 +1331,11 @@
 		"emptyTitle": "Добави първата снимка",
 		"emptyHint": "Витрина, табела или стикерът или QR кодът за биткойн",
 		"morePhotos": "Още снимки",
-		"communityPhoto": "Снимка от общността"
+		"communityPhoto": "Снимка от общността",
+		"copyLink": "Копирай връзка към снимката",
+		"linkCopied": "Връзката е копирана",
+		"copyLinkFailed": "Връзката не можа да бъде копирана",
+		"moreActions": "Още действия"
 	},
 	"authPrompt": {
 		"createAccount": "Създай акаунт",

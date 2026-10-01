@@ -6,10 +6,13 @@ import {
 	fetchPlacePhotos,
 	fitWithin,
 	MAX_PHOTOS_PER_PICK,
+	photoIdFromSearch,
+	photoShareUrl,
 	placePhotoUrl,
 	splitPick,
 	uploadPlacePhoto,
 	uploadPlacePhotos,
+	withPhotoParam,
 } from "./placePhotos";
 
 vi.mock("$lib/axios", () => ({
@@ -174,5 +177,56 @@ describe("uploadPlacePhotos", () => {
 
 		expect(result.stored.map((p) => p.id)).toEqual([3]);
 		expect(result.failed).toEqual([error]);
+	});
+});
+
+describe("photoIdFromSearch", () => {
+	it("reads a positive integer photo id", () => {
+		expect(photoIdFromSearch("?merchant=5&photo=12")).toBe(12);
+	});
+
+	it("ignores missing, junk and non-positive values", () => {
+		expect(photoIdFromSearch("?merchant=5")).toBeNull();
+		expect(photoIdFromSearch("?photo=abc")).toBeNull();
+		expect(photoIdFromSearch("?photo=1.5")).toBeNull();
+		expect(photoIdFromSearch("?photo=0")).toBeNull();
+		expect(photoIdFromSearch("?photo=-3")).toBeNull();
+	});
+});
+
+describe("withPhotoParam", () => {
+	it("sets the photo param and keeps the rest of the URL, hash included", () => {
+		expect(
+			withPhotoParam("https://btcmap.org/map?merchant=20423#18/7.88/98.38", 12),
+		).toBe("/map?merchant=20423&photo=12#18/7.88/98.38");
+	});
+
+	it("keeps the map's literal commas (?issues=a,b) instead of %2C", () => {
+		expect(
+			withPhotoParam("https://btcmap.org/map?issues=hours,payment", 7),
+		).toBe("/map?issues=hours,payment&photo=7");
+	});
+
+	it("replaces an existing photo param", () => {
+		expect(withPhotoParam("https://btcmap.org/merchant/1?photo=3", 4)).toBe(
+			"/merchant/1?photo=4",
+		);
+	});
+
+	it("removes the param on null, leaving no dangling ?", () => {
+		expect(withPhotoParam("https://btcmap.org/merchant/1?photo=3", null)).toBe(
+			"/merchant/1",
+		);
+		expect(
+			withPhotoParam("https://btcmap.org/map?merchant=1&photo=3#z", null),
+		).toBe("/map?merchant=1#z");
+	});
+});
+
+describe("photoShareUrl", () => {
+	it("links the merchant page, which works without the map", () => {
+		expect(photoShareUrl("https://btcmap.org", 20423, 12)).toBe(
+			"https://btcmap.org/merchant/20423?photo=12",
+		);
 	});
 });
