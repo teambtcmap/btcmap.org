@@ -1319,7 +1319,6 @@
 	"placePhotos": {
 		"title": "Photos",
 		"add": "Add photo",
-		"addFirst": "Add the first photo",
 		"uploading": "Uploading photo…",
 		"uploaded": "{count, plural, one {Thanks! Your photo is live.} other {Thanks! Your # photos are live.}}",
 		"uploadFailed": "{count, plural, one {A photo couldn't be uploaded. Please try again.} other {# photos couldn't be uploaded. Please try again.}}",
@@ -1330,7 +1329,10 @@
 		"addedOn": "Added {date}",
 		"promptTitle": "Add a photo",
 		"promptDescription": "Log in to your existing account, or create a new one to add photos of this place.",
-		"tooMany": "You can add up to {max} photos at a time. Uploading the first {max}."
+		"tooMany": "You can add up to {max} photos at a time. Uploading the first {max}.",
+		"emptyTitle": "Be the first to add a photo",
+		"emptyHint": "Storefront, sign, or the bitcoin sticker or QR",
+		"morePhotos": "More photos"
 	},
 	"authPrompt": {
 		"createAccount": "Create account",
