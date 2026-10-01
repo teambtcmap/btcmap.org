@@ -54,6 +54,7 @@ let uploading = $state(0);
 let viewerIndex = $state<number | null>(null);
 let fileInput = $state<HTMLInputElement>();
 let strip = $state<HTMLDivElement>();
+const tileEls: HTMLButtonElement[] = $state([]);
 let canScrollMore = $state(false);
 let showAuthPrompt = $state(false);
 let addButton = $state<HTMLButtonElement>();
@@ -106,6 +107,17 @@ $effect(() => {
 const scrollMore = () => {
 	trackEvent("place_photo_strip_scroll", { source });
 	strip?.scrollBy({ left: strip.clientWidth * 0.8, behavior: "smooth" });
+};
+
+// Focus the tile of the photo that was on screen: works for deep-link
+// opens too, and on macOS Safari, where a click doesn't focus the button
+const closeViewer = async (index: number) => {
+	// Already reset by a place switch in the reused drawer: the old viewer's
+	// late close must not pull focus to the new place's tiles
+	if (viewerIndex === null) return;
+	viewerIndex = null;
+	await tick();
+	tileEls[index]?.focus();
 };
 
 const openViewer = (index: number) => {
@@ -237,6 +249,7 @@ const handleFiles = async (event: Event) => {
 						<li class="shrink-0 snap-start">
 							<button
 								type="button"
+								bind:this={tileEls[i]}
 								onclick={() => openViewer(i)}
 								class="relative block h-(--tile) overflow-hidden rounded-xl bg-gray-200 focus-visible:ring-2 focus-visible:ring-link dark:bg-white/10 {loadedIds.has(photo.id) ? '' : 'animate-pulse'}"
 								style:width="{tileWidth(photo)}px"
@@ -315,7 +328,7 @@ const handleFiles = async (event: Event) => {
 		startIndex={viewerIndex}
 		thumbHeight={tileHeight}
 		{source}
-		onClose={() => (viewerIndex = null)}
+		onClose={closeViewer}
 	/>
 {/if}
 
