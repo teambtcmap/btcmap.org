@@ -1223,7 +1223,8 @@
 		"close": "Fechar",
 		"addedOn": "Adicionada em {date}",
 		"promptTitle": "Adicionar uma foto",
-		"promptDescription": "Entre na sua conta ou crie uma nova para adicionar fotos deste lugar."
+		"promptDescription": "Entre na sua conta ou crie uma nova para adicionar fotos deste lugar.",
+		"tooMany": "Você pode adicionar até {max} fotos por vez. Enviando as primeiras {max}."
 	},
 	"authPrompt": {
 		"createAccount": "Criar conta",
