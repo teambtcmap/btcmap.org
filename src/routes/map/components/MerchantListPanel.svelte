@@ -12,6 +12,7 @@ import type { CategoryCounts, CategoryKey } from "$lib/categoryMapping";
 import { CATEGORY_ENTRIES } from "$lib/categoryMapping";
 import { SEARCH_SHEET_PEEK_HEIGHT } from "$lib/drawerConfig";
 import { createDrawerGestureController } from "$lib/drawerGestureController";
+import { trapTab } from "$lib/focusTrap";
 import { _ } from "$lib/i18n";
 import { deriveNearbyListStatus } from "$lib/map/nearbyListStatus";
 import type { ZoomBehavior } from "$lib/map/viewport";
@@ -493,22 +494,9 @@ function handleZoomToNearbyLevel() {
 function handleWindowKeydown(event: KeyboardEvent) {
 	if (suspended || !isOpen) return;
 
-	// Focus trap: cycle Tab within the panel to prevent focus escaping to background
-	if (event.key === "Tab" && panelElement) {
-		const focusable = panelElement.querySelectorAll<HTMLElement>(
-			'button, [href], input, select, textarea, [tabindex]:not([tabindex="-1"])',
-		);
-		const first = focusable[0];
-		const last = focusable[focusable.length - 1];
-
-		if (event.shiftKey && document.activeElement === first) {
-			event.preventDefault();
-			last?.focus();
-		} else if (!event.shiftKey && document.activeElement === last) {
-			event.preventDefault();
-			first?.focus();
-		}
-	}
+	// Focus trap: cycle Tab within the panel to prevent focus escaping to
+	// background (skips hidden/disabled controls, pulls stray focus back in)
+	if (panelElement) trapTab(event, panelElement);
 
 	if (event.key === "Escape") {
 		event.preventDefault();
