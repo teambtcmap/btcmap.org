@@ -1257,7 +1257,11 @@
 		"emptyTitle": "Füge das erste Foto hinzu",
 		"emptyHint": "Ladenfront, Schild oder der Bitcoin-Aufkleber bzw. QR-Code",
 		"morePhotos": "Weitere Fotos",
-		"communityPhoto": "Community-Foto"
+		"communityPhoto": "Community-Foto",
+		"copyLink": "Link zum Foto kopieren",
+		"linkCopied": "Link kopiert",
+		"copyLinkFailed": "Link konnte nicht kopiert werden",
+		"moreActions": "Weitere Aktionen"
 	},
 	"authPrompt": {
 		"createAccount": "Konto erstellen",

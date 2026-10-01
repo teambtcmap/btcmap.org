@@ -1332,7 +1332,11 @@
 		"emptyTitle": "Voeg als eerste een foto toe",
 		"emptyHint": "Gevel, uithangbord, of de bitcoin-sticker of QR-code",
 		"morePhotos": "Meer foto's",
-		"communityPhoto": "Communityfoto"
+		"communityPhoto": "Communityfoto",
+		"copyLink": "Link naar foto kopiëren",
+		"linkCopied": "Link gekopieerd",
+		"copyLinkFailed": "Kan de link niet kopiëren",
+		"moreActions": "Meer acties"
 	},
 	"authPrompt": {
 		"createAccount": "Account aanmaken",

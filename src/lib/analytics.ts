@@ -71,7 +71,8 @@ export type EventName =
 	| "place_photo_prompt_create_account_click"
 	| "place_photo_prompt_login_click"
 	| "place_photo_strip_scroll"
-	| "place_photo_view";
+	| "place_photo_view"
+	| "place_photo_link_copy";
 
 declare global {
 	interface Window {
