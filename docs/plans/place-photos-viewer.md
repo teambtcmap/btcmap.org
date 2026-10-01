@@ -31,20 +31,20 @@ Risk: no npm release since May 2024, although fixes land in the repo until Nov 2
 - "Report photo" waits for the moderation decision (open question 2).
 - The credit shows "Community photo" only. v4 has no public user-by-id endpoint, so `created_by` can't be resolved. Ask the API maintainers for one.
 - No RTL work: none of the 9 locales is RTL.
-- The deep link is read inside `PlacePhotos`. `merchant/[id]/+page.svelte` is a #1208 hotspot and stays untouched.
+- The deep link is read inside `PlacePhotos`. `merchant/[id]/+page.svelte` is a #1208 hotspot: it only gets one-line prop passes (`placeName`), no logic.
 
 ## Steps
 
 ### 1. Section header and empty state (`PlacePhotos.svelte`, no new dependency)
 
-- Header: "Photos N" with the same label style as "Accepts", plus an "Add photo" text button with the `add_a_photo` icon. The button fires `place_photo_add_click`.
+- Header: "Photos N" with the same label style as "Accepts" (reusing the `placePhotos.title` key), plus an "Add photo" text button with the `add_a_photo` icon. The button fires `place_photo_add_click`.
 - The trailing add tile goes away. Upload spinner tiles move to the start of the strip.
 - Empty state (`photos.length === 0 && canAdd`): a dashed 64px row reading "Be the first to add a photo", with the photo guideline as the subline. No header. Deleted places render nothing.
 - Merchant page on mobile: the strip runs edge to edge (`-mx-4 px-4 scroll-px-4`).
 - Drawer: square 88px tiles.
-- Drawer on pointer devices (`@media (hover:hover)`): an edge fade plus a chevron that calls `scrollBy(clientWidth * 0.8)`. Hide the chevron at the end of the strip.
+- Drawer on pointer devices (Tailwind `pointer-fine`): an edge fade plus a chevron that calls `scrollBy(clientWidth * 0.8)` and fires `place_photo_strip_scroll`. Hide the chevron at the end of the strip.
 - Skeleton: a single row at tile height.
-- New i18n keys in all 9 locales: `placePhotos.header`, `emptyTitle`, `emptyHint`, `morePhotos`.
+- New i18n keys in all 9 locales: `placePhotos.emptyTitle`, `emptyHint`, `morePhotos`.
 
 ### 2. PhotoSwipe wrapper (`src/lib/placePhotoLightbox.ts`)
 
@@ -79,14 +79,15 @@ Risk: no npm release since May 2024, although fixes land in the repo until Nov 2
   - ← / → go to the previous or next photo.
   - Esc closes the viewer.
   - Every key stops propagating while the viewer is open. The mobile drawer also reacts to ↑ ↓ Enter.
-- Focus and scroll: our own focus trap, focus returns to the tile that opened the viewer, and our scroll lock stays.
+- Focus and scroll: a shared `$lib/focusTrap` helper keeps Tab inside the viewer; on close, focus goes to the strip tile of the photo that was showing (works for deep-link opens and on macOS Safari, where clicks don't focus buttons); our scroll lock stays.
+- Close and destroy wait for PhotoSwipe's opening animation to end: PhotoSwipe ignores both while it runs.
 - i18n: drop `placePhotos.addedOn`, add `placePhotos.communityPhoto`.
 
 ### 4. Deep link and copy link
 
 - On open and on every change, `replaceState` to `?photo=<id>`, keeping the other params. Close removes it.
-- `PlacePhotos` opens the viewer at the matching index when the page loads or when the drawer resolves `?merchant=`. Unknown ids are ignored.
-- The ⋯ menu (`svelte-outclick`) has "Copy link to photo": it copies `origin/merchant/{id}?photo={imageId}` and shows a toast.
+- `PlacePhotos` opens the viewer at the matching index when the page loads or when the drawer resolves `?merchant=`. Unknown ids are ignored. On mobile, the map sheet opens expanded when the URL has `?photo=`, since the strip only mounts in the expanded sheet.
+- The ⋯ menu (`svelte-outclick`) has "Copy link to photo": it copies `origin/merchant/{id}?photo={imageId}` and shows a toast. Opening the menu fires `place_photo_menu_open`.
 - New i18n keys: `copyLink`, `linkCopied`.
 
 ### 5. Analytics
@@ -96,7 +97,9 @@ Risk: no npm release since May 2024, although fixes land in the repo until Nov 2
 | `place_photo_open` | viewer opens (existing) | `source`, `index`, `via: tile \| deeplink` |
 | `place_photo_view` | slide change (new), once per photo per open | `source`, `index` |
 | `place_photo_link_copy` | copy link (new) | `source` |
-| `place_photo_add_click` | header button or empty row (existing) | `source`, `entry: header \| empty` |
+| `place_photo_add_click` | header button or empty row (existing) | `source`, `entry: header \| empty`, `signedIn` |
+| `place_photo_strip_scroll` | drawer chevron (new) | `source` |
+| `place_photo_menu_open` | viewer ⋯ menu (new) | `source` |
 
 ### 6. QA
 
