@@ -1254,7 +1254,8 @@
 		"close": "Schließen",
 		"addedOn": "Hinzugefügt am {date}",
 		"promptTitle": "Foto hinzufügen",
-		"promptDescription": "Melde dich mit deinem bestehenden Konto an oder erstelle ein neues, um Fotos dieses Ortes hinzuzufügen."
+		"promptDescription": "Melde dich mit deinem bestehenden Konto an oder erstelle ein neues, um Fotos dieses Ortes hinzuzufügen.",
+		"tooMany": "Du kannst bis zu {max} Fotos auf einmal hinzufügen. Die ersten {max} werden hochgeladen."
 	},
 	"authPrompt": {
 		"createAccount": "Konto erstellen",
