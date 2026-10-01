@@ -145,10 +145,7 @@
 			"titlePlace": "Sla deze locatie op",
 			"titleArea": "Sla dit gebied op",
 			"descriptionPlace": "Meld je aan met je huidige account of maak een nieuw account aan, zodat je opgeslagen locaties bewaard blijven.",
-			"descriptionArea": "Meld je aan met je huidige account of maak een nieuw account aan, zodat je opgeslagen gebieden bewaard blijven.",
-			"createAccount": "Account aanmaken",
-			"login": "Aanmelden",
-			"back": "Terug"
+			"descriptionArea": "Meld je aan met je huidige account of maak een nieuw account aan, zodat je opgeslagen gebieden bewaard blijven."
 		}
 	},
 	"search": {
@@ -1328,5 +1325,10 @@
 		"addedOn": "Toegevoegd op {date}",
 		"promptTitle": "Foto toevoegen",
 		"promptDescription": "Log in met je bestaande account of maak een nieuw account aan om foto's van deze plek toe te voegen."
+	},
+	"authPrompt": {
+		"createAccount": "Account aanmaken",
+		"login": "Aanmelden",
+		"back": "Terug"
 	}
 }
