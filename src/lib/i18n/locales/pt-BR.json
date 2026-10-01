@@ -1220,13 +1220,13 @@
 		"previous": "Foto anterior",
 		"next": "Próxima foto",
 		"close": "Fechar",
-		"addedOn": "Adicionada em {date}",
 		"promptTitle": "Adicionar uma foto",
 		"promptDescription": "Entre na sua conta ou crie uma nova para adicionar fotos deste lugar.",
 		"tooMany": "Você pode adicionar até {max} fotos por vez. Enviando as primeiras {max}.",
 		"emptyTitle": "Seja o primeiro a adicionar uma foto",
 		"emptyHint": "Fachada, placa, ou o adesivo ou QR de bitcoin",
-		"morePhotos": "Mais fotos"
+		"morePhotos": "Mais fotos",
+		"communityPhoto": "Foto da comunidade"
 	},
 	"authPrompt": {
 		"createAccount": "Criar conta",

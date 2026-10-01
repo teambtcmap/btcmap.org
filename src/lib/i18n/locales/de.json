@@ -1246,13 +1246,13 @@
 		"previous": "Vorheriges Foto",
 		"next": "Nächstes Foto",
 		"close": "Schließen",
-		"addedOn": "Hinzugefügt am {date}",
 		"promptTitle": "Foto hinzufügen",
 		"promptDescription": "Melde dich mit deinem bestehenden Konto an oder erstelle ein neues, um Fotos dieses Ortes hinzuzufügen.",
 		"tooMany": "Du kannst bis zu {max} Fotos auf einmal hinzufügen. Die ersten {max} werden hochgeladen.",
 		"emptyTitle": "Füge das erste Foto hinzu",
 		"emptyHint": "Ladenfront, Schild oder der Bitcoin-Aufkleber bzw. QR-Code",
-		"morePhotos": "Weitere Fotos"
+		"morePhotos": "Weitere Fotos",
+		"communityPhoto": "Community-Foto"
 	},
 	"authPrompt": {
 		"createAccount": "Konto erstellen",

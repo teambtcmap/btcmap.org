@@ -174,7 +174,7 @@ const ogImage = `https://api.btcmap.org/og/element/${data.id}`;
 				deleted={!!deletedAt}
 			/>
 
-			<PlacePhotos placeId={Number(data.id)} canAdd={!deletedAt} source="merchant_page" />
+			<PlacePhotos placeId={Number(data.id)} placeName={displayName} canAdd={!deletedAt} source="merchant_page" />
 
 			{#if hasPaymentPill || companionAppUrl}
 				<div class="rounded-2xl border border-gray-300 p-4 dark:border-white/20 dark:bg-white/5">
