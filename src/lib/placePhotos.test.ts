@@ -5,8 +5,11 @@ import { API_BASE } from "$lib/api-base";
 import {
 	fetchPlacePhotos,
 	fitWithin,
+	MAX_PHOTOS_PER_PICK,
 	placePhotoUrl,
+	splitPick,
 	uploadPlacePhoto,
+	uploadPlacePhotos,
 } from "./placePhotos";
 
 vi.mock("$lib/axios", () => ({
@@ -120,5 +123,56 @@ describe("fitWithin", () => {
 	it("scales the longer side down to the limit, keeping the aspect ratio", () => {
 		expect(fitWithin(4032, 3024, 2048)).toEqual({ width: 2048, height: 1536 });
 		expect(fitWithin(3024, 4032, 2048)).toEqual({ width: 1536, height: 2048 });
+	});
+});
+
+describe("splitPick", () => {
+	it("keeps up to MAX_PHOTOS_PER_PICK files and counts the rest", () => {
+		const files = Array.from({ length: MAX_PHOTOS_PER_PICK + 2 }, (_, i) => i);
+
+		expect(splitPick(files)).toEqual({
+			batch: files.slice(0, MAX_PHOTOS_PER_PICK),
+			dropped: 2,
+		});
+		expect(splitPick([1, 2])).toEqual({ batch: [1, 2], dropped: 0 });
+	});
+});
+
+describe("uploadPlacePhotos", () => {
+	const stored = (id: number, created_at: string) => ({
+		...photo,
+		id,
+		created_at,
+	});
+
+	it("uploads in parallel and returns the stored photos newest first", async () => {
+		const settled: string[] = [];
+		const result = await uploadPlacePhotos(
+			["a", "b"],
+			async (file) =>
+				file === "a"
+					? stored(1, "2026-10-01T10:00:00Z")
+					: stored(2, "2026-10-01T10:00:05Z"),
+			() => settled.push("x"),
+		);
+
+		expect(result.stored.map((p) => p.id)).toEqual([2, 1]);
+		expect(result.failed).toEqual([]);
+		expect(settled).toHaveLength(2);
+	});
+
+	it("keeps going when one upload fails and reports the failures", async () => {
+		const error = new Error("413");
+		const result = await uploadPlacePhotos(
+			["ok", "bad"],
+			async (file) => {
+				if (file === "bad") throw error;
+				return stored(3, "2026-10-01T10:00:00Z");
+			},
+			() => {},
+		);
+
+		expect(result.stored.map((p) => p.id)).toEqual([3]);
+		expect(result.failed).toEqual([error]);
 	});
 });

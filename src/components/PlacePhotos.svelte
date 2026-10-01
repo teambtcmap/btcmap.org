@@ -9,9 +9,12 @@ import { trackEvent } from "$lib/analytics";
 import { _ } from "$lib/i18n";
 import {
 	fetchPlacePhotos,
+	MAX_PHOTOS_PER_PICK,
 	placePhotoUrl,
 	prepareUpload,
+	splitPick,
 	uploadPlacePhoto,
+	uploadPlacePhotos,
 } from "$lib/placePhotos";
 import { session } from "$lib/session";
 import { errToast, successToast, warningToast } from "$lib/utils";
@@ -32,8 +35,6 @@ type Props = {
 };
 
 let { placeId, tileHeight = 112, canAdd = true, source }: Props = $props();
-
-const MAX_FILES_PER_PICK = 5;
 
 // undefined = loading, [] = none
 let photos = $state<PlaceImage[] | undefined>(undefined);
@@ -96,43 +97,38 @@ const handleAuthenticated = async () => {
 
 const handleFiles = async (event: Event) => {
 	const input = event.currentTarget as HTMLInputElement;
-	const picked = Array.from(input.files ?? []);
+	const { batch, dropped } = splitPick(Array.from(input.files ?? []));
 	input.value = "";
-	if (picked.length > MAX_FILES_PER_PICK) {
+	if (dropped) {
 		warningToast(
-			$_("placePhotos.tooMany", { values: { max: MAX_FILES_PER_PICK } }),
+			$_("placePhotos.tooMany", { values: { max: MAX_PHOTOS_PER_PICK } }),
 		);
 	}
-	const files = picked.slice(0, MAX_FILES_PER_PICK);
 	const token = $session?.token;
-	if (!files.length || !token) return;
+	if (!batch.length || !token) return;
 
 	const id = placeId;
-	uploading += files.length;
-	const results = await Promise.allSettled(
-		files.map(async (file) => {
-			try {
-				return await uploadPlacePhoto(id, token, await prepareUpload(file));
-			} finally {
-				uploading -= 1;
-			}
-		}),
+	uploading += batch.length;
+	const { stored, failed } = await uploadPlacePhotos(
+		batch,
+		async (file) => uploadPlacePhoto(id, token, await prepareUpload(file)),
+		() => {
+			uploading -= 1;
+		},
 	);
 
-	const stored = results.flatMap((r) =>
-		r.status === "fulfilled" ? [r.value] : [],
-	);
-	const failed = results.length - stored.length;
 	if (stored.length) {
-		if (id === placeId) photos = [...stored.reverse(), ...(photos ?? [])];
+		if (id === placeId) photos = [...stored, ...(photos ?? [])];
 		successToast(
 			$_("placePhotos.uploaded", { values: { count: stored.length } }),
 		);
 		trackEvent("place_photo_add_success", { source, count: stored.length });
 	}
-	if (failed) {
-		console.error("place photos: upload failed", results);
-		errToast($_("placePhotos.uploadFailed", { values: { count: failed } }));
+	if (failed.length) {
+		console.error("place photos: upload failed", failed);
+		errToast(
+			$_("placePhotos.uploadFailed", { values: { count: failed.length } }),
+		);
 	}
 };
 </script>
