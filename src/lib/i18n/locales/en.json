@@ -1326,13 +1326,13 @@
 		"previous": "Previous photo",
 		"next": "Next photo",
 		"close": "Close",
-		"addedOn": "Added {date}",
 		"promptTitle": "Add a photo",
 		"promptDescription": "Log in to your existing account, or create a new one to add photos of this place.",
 		"tooMany": "You can add up to {max} photos at a time. Uploading the first {max}.",
 		"emptyTitle": "Be the first to add a photo",
 		"emptyHint": "Storefront, sign, or the bitcoin sticker or QR",
-		"morePhotos": "More photos"
+		"morePhotos": "More photos",
+		"communityPhoto": "Community photo"
 	},
 	"authPrompt": {
 		"createAccount": "Create account",

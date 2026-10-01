@@ -27,6 +27,8 @@ import type { PlaceImage } from "$types/btcmap-api/PlaceImage";
 // viewer, and a one-row invitation when there are no photos yet (#1469).
 type Props = {
 	placeId: number;
+	// Shown in the viewer's caption, so a shared photo says where it is
+	placeName: string;
 	// page: 112px tiles at the photo's ratio, full-bleed on mobile.
 	// drawer: square 88px tiles, plus a scroll chevron on pointer devices.
 	layout?: "page" | "drawer";
@@ -36,7 +38,13 @@ type Props = {
 	source: PlacePhotoSource;
 };
 
-let { placeId, layout = "page", canAdd = true, source }: Props = $props();
+let {
+	placeId,
+	placeName,
+	layout = "page",
+	canAdd = true,
+	source,
+}: Props = $props();
 
 const tileHeight = $derived(layout === "drawer" ? 88 : 112);
 
@@ -102,7 +110,7 @@ const scrollMore = () => {
 
 const openViewer = (index: number) => {
 	viewerIndex = index;
-	trackEvent("place_photo_open", { source });
+	trackEvent("place_photo_open", { source, index, via: "tile" });
 };
 
 // Signed-out users sign in right here instead of leaving for /login, so
@@ -302,8 +310,11 @@ const handleFiles = async (event: Event) => {
 {#if photos?.length && viewerIndex !== null}
 	<PlacePhotoViewer
 		{placeId}
+		{placeName}
 		{photos}
 		startIndex={viewerIndex}
+		thumbHeight={tileHeight}
+		{source}
 		onClose={() => (viewerIndex = null)}
 	/>
 {/if}
