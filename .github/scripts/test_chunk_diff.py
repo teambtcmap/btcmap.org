@@ -19,9 +19,11 @@ def file_diff(path: str, size: int) -> str:
     return header + line * max(1, (size - len(header)) // len(line))
 
 
-def run(chunks: list[str]) -> tuple[str, str]:
+def run(chunks: list[str], hotspots: str | None = None) -> tuple[str, str]:
     tmp = tempfile.mkdtemp()
     (Path(tmp) / "raw-diff.txt").write_text("".join(chunks), encoding="utf-8")
+    if hotspots is not None:
+        (Path(tmp) / "hotspots.txt").write_text(hotspots, encoding="utf-8")
     subprocess.run(
         [sys.executable, str(SCRIPT)],
         cwd=REPO,
@@ -130,6 +132,40 @@ class OverBudget(unittest.TestCase):
             self.stats,
             r"omitted entirely \(app 0, \.github 0, tests \d+\)",
         )
+
+
+# More app source than the budget holds, with the period's busiest files
+# sorting last in git order — the 2026-10-01 shape that omitted
+# AddPlaceFormPanel.svelte (hotspot #4) while quieter files were shown.
+CROWDED_APP = [f"src/components/c{i:02d}.svelte" for i in range(30)]
+HOT = ["src/routes/map/components/Zeta.svelte", "src/routes/map/components/Zulu.svelte"]
+# `uniq -c` output as the workflow writes it, busiest first; a path that is
+# not in the diff (deleted, or a locale file the diff excludes) is ignored.
+HOTSPOTS = (
+    "     15 src/routes/map/components/Zulu.svelte\n"
+    "     12 src/lib/i18n/locales/en.json\n"
+    "      9 src/routes/map/components/Zeta.svelte\n"
+)
+
+
+class HotspotsFirst(unittest.TestCase):
+    def setUp(self):
+        self.chunks = [file_diff(p, 20_000) for p in sorted(CROWDED_APP + HOT)]
+
+    def test_without_hotspots_late_files_are_omitted(self):
+        diff, _ = run(self.chunks)
+        for p in HOT:
+            self.assertIn(p, omitted_paths(diff))
+
+    def test_hotspots_go_first_in_hotspot_rank_order(self):
+        diff, _ = run(self.chunks, HOTSPOTS)
+        self.assertEqual(shown_paths(diff)[:2], [HOT[1], HOT[0]])
+        self.assertTrue(omitted_paths(diff), "fixture must exceed the budget")
+
+    def test_hotspots_do_not_outrank_their_tier(self):
+        chunks = self.chunks + [file_diff("src/lib/a.test.ts", 20_000)]
+        diff, _ = run(chunks, "     30 src/lib/a.test.ts\n" + HOTSPOTS)
+        self.assertNotEqual(shown_paths(diff)[0], "src/lib/a.test.ts")
 
 
 class WithinBudget(unittest.TestCase):

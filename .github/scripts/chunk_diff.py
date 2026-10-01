@@ -5,10 +5,13 @@
 # (capped per file), and files that still don't fit are listed in a coverage
 # manifest the model can see.
 #
-# Reads {TMP}/raw-diff.txt; writes {TMP}/diff.txt and {TMP}/pipeline-stats.txt.
+# Reads {TMP}/raw-diff.txt (and {TMP}/hotspots.txt when present); writes
+# {TMP}/diff.txt and {TMP}/pipeline-stats.txt.
 # TMP defaults to /tmp; override with HEALTH_REVIEW_TMP for testing.
 import os
 import re
+
+from hotspots import hotspot_rank
 
 TMP = os.environ.get("HEALTH_REVIEW_TMP", "/tmp")
 # 150KB covered ~55% of a 394KB biweekly period even with tiering (39 app
@@ -59,9 +62,16 @@ files = [(path_of(c), c) for c in chunks]
 
 # A period that fits is shown whole, in git order, with no per-file cap —
 # truncating a 20KB file while 100KB of budget goes unused helps nobody.
+#
+# Inside a tier the period's most-changed files go first, busiest first:
+# git order alone omitted AddPlaceFormPanel.svelte (hotspot #4) on
+# 2026-10-01 while quieter files sorting before it were shown.
 over_budget = len(raw) > MAX_TOTAL
 if over_budget:
-    files.sort(key=lambda pc: TIER_ORDER.index(tier(pc[0])))
+    rank = hotspot_rank(TMP)
+    files.sort(
+        key=lambda pc: (TIER_ORDER.index(tier(pc[0])), rank.get(pc[0], len(rank)))
+    )
 
 # Adaptive cap: a period of a few huge files should not be cut to 15KB each
 # while most of the budget goes unused. Every file gets an equal share of

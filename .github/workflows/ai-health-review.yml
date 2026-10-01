@@ -78,9 +78,13 @@ jobs:
           OLDEST_HASH=$(set +o pipefail; git log --since="$SINCE_DATE" --no-merges --format='%H' --reverse | head -1)
           echo "oldest_hash=$OLDEST_HASH" >> "$GITHUB_OUTPUT"
 
-          # Hotspot files
+          # Hotspot files. Same exclusions as the diff below: on 2026-10-01
+          # the lockfile and nine locale files took 11 of the 15 slots, and
+          # both budgets now spend on hotspots first.
           git log --since="$SINCE_DATE" --no-merges --name-only --pretty=format: \
-            | { grep -v '^$' || true; } | sort | uniq -c | sort -rn | head -15 > /tmp/hotspots.txt || true
+            | { grep -v '^$' || true; } \
+            | { grep -vE '^(pnpm-lock\.yaml|package-lock\.json)$|^src/lib/i18n/locales/|\.(snap|lock)$|^static/(images|icons)/' || true; } \
+            | sort | uniq -c | sort -rn | head -15 > /tmp/hotspots.txt || true
 
       - name: Generate diff
         if: steps.commits.outputs.skip != 'true'
