@@ -1,16 +1,17 @@
 <script lang="ts">
+import type { Locale } from "date-fns";
 import { onDestroy, onMount, untrack } from "svelte";
-import Time from "svelte-time";
 
 import Icon from "$components/Icon.svelte";
 import { trackEvent } from "$lib/analytics";
 import { lockBodyScroll, unlockBodyScroll } from "$lib/bodyScrollLock";
 import { trapTab } from "$lib/focusTrap";
-import { _ } from "$lib/i18n";
+import { _, locale } from "$lib/i18n";
 import type { LightboxHandle } from "$lib/placePhotoLightbox";
 import { buildSlides, openPlaceLightbox } from "$lib/placePhotoLightbox";
 import type { PlacePhotoSource } from "$lib/placePhotos";
 import { placePhotoUrl } from "$lib/placePhotos";
+import { formatRelativeDate, loadDateLocale } from "$lib/relativeDate";
 
 import type { PlaceImage } from "$types/btcmap-api/PlaceImage";
 
@@ -45,6 +46,15 @@ const MAX_DOTS = 8;
 
 let index = $state(untrack(() => startIndex));
 const photo = $derived(photos[index]);
+
+// Relative date in the app's language; English until the locale loads
+let dateLocale = $state<Locale>();
+$effect(() => {
+	const code = $locale;
+	loadDateLocale(code).then((loaded) => {
+		if ($locale === code) dateLocale = loaded;
+	});
+});
 const total = $derived(photos.length);
 
 let rootEl = $state<HTMLDivElement>();
@@ -158,9 +168,9 @@ onDestroy(() => {
 			<p class="mt-0.5 flex flex-wrap items-center gap-1.5 text-[13px] leading-[18px] text-white/80">
 				<span>{$_('placePhotos.communityPhoto')}</span>
 				<span aria-hidden="true">·</span>
-				{#key photo.id}
-					<Time timestamp={photo.created_at} relative />
-				{/key}
+				<time datetime={photo.created_at}>
+					{formatRelativeDate(photo.created_at, dateLocale)}
+				</time>
 			</p>
 		</div>
 		<span
