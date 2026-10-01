@@ -12,7 +12,7 @@ import PrimaryButton from "$components/PrimaryButton.svelte";
 import { fieldError, inputProps, ruleValidation } from "$lib/ruleValidation";
 import { errToast } from "$lib/utils";
 import type { VerifyInput } from "$lib/verifyValidation";
-import { validateVerification } from "$lib/verifyValidation";
+import { describesChanges, validateVerification } from "$lib/verifyValidation";
 
 import { browser } from "$app/environment";
 
@@ -169,13 +169,13 @@ onMount(async () => {
 						<div class="flex items-center space-x-2">
 							<label
 								for="accurate"
-								class="{!values.current.changes ? 'cursor-pointer' : ''} font-semibold"
+								class="{!describesChanges(values.current.changes) ? 'cursor-pointer' : ''} font-semibold"
 								>{$_(`verifyCommunity.accurateLabel`)}</label
 							>
 							<input
 								class="h-4 w-4 accent-link"
-								disabled={Boolean(values.current.changes)}
-								required={!values.current.changes}
+								disabled={describesChanges(values.current.changes)}
+								required={!describesChanges(values.current.changes)}
 								type="checkbox"
 								id="accurate"
 								name="accurate"

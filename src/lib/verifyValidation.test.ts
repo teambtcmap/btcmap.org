@@ -2,6 +2,7 @@ import { describe, expect, it } from "vitest";
 
 import type { VerifyInput } from "./verifyValidation";
 import {
+	describesChanges,
 	firstInvalidVerifyField,
 	validateVerification,
 } from "./verifyValidation";
@@ -77,5 +78,18 @@ describe("firstInvalidVerifyField", () => {
 				confirmation: "required",
 			}),
 		).toBe("confirmation");
+	});
+});
+
+describe("describesChanges", () => {
+	// The forms disable the box on this, so it must agree with the rule:
+	// whitespace that fails validation must not lock the box either.
+	it("is false for empty or whitespace-only text", () => {
+		expect(describesChanges("")).toBe(false);
+		expect(describesChanges("  \n")).toBe(false);
+	});
+
+	it("is true once there is real text", () => {
+		expect(describesChanges(" Closed on Mondays ")).toBe(true);
 	});
 });
