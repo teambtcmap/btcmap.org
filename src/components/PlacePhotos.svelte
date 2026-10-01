@@ -40,6 +40,8 @@ let uploading = $state(0);
 let viewerIndex = $state<number | null>(null);
 let fileInput = $state<HTMLInputElement>();
 let showAuthPrompt = $state(false);
+let addButton = $state<HTMLButtonElement>();
+let highlightAdd = $state(false);
 const loadedIds = new SvelteSet<number>();
 
 // The map drawer reuses this component across merchants, so refetch on
@@ -78,9 +80,16 @@ const handleAddClick = () => {
 };
 
 // Browsers may refuse the picker here since the click's user activation
-// can expire during login; the tile is then one tap away.
+// can expire during login. Undetectable, so also bring the Add tile into
+// view, focus it and highlight it briefly: then it's one obvious tap away.
 const handleAuthenticated = async () => {
 	await tick();
+	addButton?.scrollIntoView({ block: "nearest", inline: "nearest" });
+	addButton?.focus({ preventScroll: true });
+	highlightAdd = true;
+	setTimeout(() => {
+		highlightAdd = false;
+	}, 4000);
 	fileInput?.click();
 };
 
@@ -175,9 +184,10 @@ const handleFiles = async (event: Event) => {
 
 			{#if canAdd}
 				<button
+					bind:this={addButton}
 					type="button"
 					onclick={handleAddClick}
-					class="flex shrink-0 snap-start flex-col items-center justify-center gap-1 rounded-xl border border-dashed border-gray-300 px-3 text-center text-xs font-semibold text-link transition-colors hover:bg-link/5 dark:border-white/20"
+					class="flex shrink-0 snap-start flex-col items-center justify-center gap-1 rounded-xl border border-dashed border-gray-300 px-3 text-center text-xs font-semibold text-link transition-colors hover:bg-link/5 dark:border-white/20 {highlightAdd ? 'animate-pulse bg-link/10 ring-2 ring-link' : ''}"
 					style:height="{tileHeight}px"
 					style:min-width="{tileHeight}px"
 					style:max-width="{tileHeight * 1.4}px"
