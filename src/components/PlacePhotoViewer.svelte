@@ -1,43 +1,110 @@
 <script lang="ts">
 import { onDestroy, onMount, untrack } from "svelte";
+import Time from "svelte-time";
 
 import Icon from "$components/Icon.svelte";
+import { trackEvent } from "$lib/analytics";
 import { lockBodyScroll, unlockBodyScroll } from "$lib/bodyScrollLock";
 import { _ } from "$lib/i18n";
+import type { LightboxHandle } from "$lib/placePhotoLightbox";
+import { buildSlides, openPlaceLightbox } from "$lib/placePhotoLightbox";
 import { placePhotoUrl } from "$lib/placePhotos";
 
 import type { PlaceImage } from "$types/btcmap-api/PlaceImage";
 
+// Full-screen photo viewer (#1469). PhotoSwipe renders the image stage
+// (swipe, pinch/zoom, swipe-down to close) through $lib/placePhotoLightbox;
+// this component owns the chrome: caption bar, arrows, filmstrip/dots,
+// keyboard and focus.
 type Props = {
 	placeId: number;
+	placeName: string;
 	photos: PlaceImage[];
 	startIndex: number;
+	// Strip tile height, so the filmstrip reuses the already cached thumbnails
+	thumbHeight: number;
+	source: "merchant_page" | "map_drawer" | "area_drawer";
 	onClose: () => void;
 };
 
-let { placeId, photos, startIndex, onClose }: Props = $props();
+let {
+	placeId,
+	placeName,
+	photos,
+	startIndex,
+	thumbHeight,
+	source,
+	onClose,
+}: Props = $props();
+
+// Dots replace the counter on mobile up to this many photos
+const MAX_DOTS = 8;
 
 let index = $state(untrack(() => startIndex));
-
 const photo = $derived(photos[index]);
 const total = $derived(photos.length);
 
-let dialogEl = $state<HTMLDivElement>();
+let rootEl = $state<HTMLDivElement>();
+let stageEl = $state<HTMLDivElement>();
+let closeButton = $state<HTMLButtonElement>();
+let handle: LightboxHandle | undefined;
 let triggerEl: HTMLElement | null = null;
+let destroyed = false;
+const viewed = new Set<number>();
 
-const step = (delta: number) => {
-	index = (index + delta + total) % total;
+const trackView = (i: number) => {
+	if (viewed.has(i)) return;
+	viewed.add(i);
+	trackEvent("place_photo_view", { source, index: i });
 };
 
-// Capture phase + stopPropagation: the map drawers close themselves on a
-// bubbling window Escape, which would take the drawer down with the viewer.
+const goTo = (i: number) => {
+	if (i < 0 || i >= total || i === index) return;
+	handle?.goTo(i);
+};
+
+// Animate out through PhotoSwipe; its destroy event then calls onClose
+const close = () => {
+	if (handle) handle.close();
+	else onClose();
+};
+
+const focusables = () =>
+	Array.from(
+		rootEl?.querySelectorAll<HTMLElement>(
+			'button:not([disabled]), a[href], [tabindex]:not([tabindex="-1"])',
+		) ?? [],
+	).filter((el) => el.offsetParent !== null);
+
+// Capture phase + stopPropagation for every key while open: the map drawers
+// react to bubbling window keydowns (Escape closes, ↑ ↓ Enter resize the
+// mobile sheet), and PhotoSwipe's own key handling is off.
 const handleKeydown = (event: KeyboardEvent) => {
-	if (event.key === "Escape") onClose();
-	else if (event.key === "ArrowRight" && total > 1) step(1);
-	else if (event.key === "ArrowLeft" && total > 1) step(-1);
-	else return;
-	event.preventDefault();
 	event.stopPropagation();
+	if (event.key === "Escape") {
+		event.preventDefault();
+		close();
+	} else if (event.key === "ArrowRight") {
+		event.preventDefault();
+		goTo(index + 1);
+	} else if (event.key === "ArrowLeft") {
+		event.preventDefault();
+		goTo(index - 1);
+	} else if (event.key === "Tab") {
+		// Keep focus inside the viewer
+		const items = focusables();
+		if (!items.length) return;
+		const first = items[0];
+		const last = items[items.length - 1];
+		const active = document.activeElement;
+		if (event.shiftKey && (active === first || !rootEl?.contains(active))) {
+			event.preventDefault();
+			last.focus();
+		} else if (!event.shiftKey && active === last) {
+			event.preventDefault();
+			first.focus();
+		}
+	}
 };
 
 // Render at the end of <body>: the map drawer is position-fixed with its
@@ -50,10 +117,44 @@ const portal = (node: HTMLElement) => {
 onMount(() => {
 	triggerEl = document.activeElement as HTMLElement | null;
 	lockBodyScroll();
-	dialogEl?.focus();
+	closeButton?.focus();
+	trackView(index);
+
+	if (!stageEl) return;
+	const pointerFine = window.matchMedia("(pointer: fine)").matches;
+	openPlaceLightbox({
+		slides: buildSlides(placeId, photos, (i, n) =>
+			$_("placePhotos.photoAlt", { values: { n: i + 1, total: n } }),
+		),
+		startIndex: index,
+		container: stageEl,
+		sidePadding: pointerFine ? 72 : 0,
+		reducedMotion: window.matchMedia("(prefers-reduced-motion: reduce)")
+			.matches,
+		onChange: (i) => {
+			index = i;
+			trackView(i);
+		},
+		onDestroy: () => {
+			handle = undefined;
+			onClose();
+		},
+	})
+		.then((h) => {
+			// Closed before the library finished loading
+			if (destroyed) h.destroy();
+			else handle = h;
+		})
+		.catch((error) => {
+			console.error("place photos: viewer failed to load", error);
+			onClose();
+		});
 });
 
 onDestroy(() => {
+	destroyed = true;
+	// Parent unmounted us directly (e.g. the drawer switched place)
+	handle?.destroy();
 	unlockBodyScroll();
 	triggerEl?.focus();
 });
@@ -63,60 +164,109 @@ onDestroy(() => {
 
 <div
 	use:portal
-	bind:this={dialogEl}
+	bind:this={rootEl}
 	role="dialog"
 	aria-modal="true"
 	aria-label={$_('placePhotos.title')}
-	tabindex="-1"
-	class="fixed inset-0 z-[3000] flex flex-col bg-black/95 text-white outline-none"
+	class="fixed inset-0 z-[3000] flex flex-col bg-dark text-white"
 >
-	<div class="flex items-center justify-between px-4 pt-[max(0.75rem,env(safe-area-inset-top))] pb-2">
-		<span class="text-sm tabular-nums text-white/80">{index + 1} / {total}</span>
+	<div class="flex items-start gap-3 pt-[max(0.875rem,env(safe-area-inset-top))] pr-3.5 pb-2.5 pl-4 md:pl-5">
+		<div class="min-w-0 flex-1">
+			<p class="truncate text-[15px] leading-5 font-bold">{placeName}</p>
+			<p class="mt-0.5 flex flex-wrap items-center gap-1.5 text-[13px] leading-[18px] text-white/80">
+				<span>{$_('placePhotos.communityPhoto')}</span>
+				<span aria-hidden="true">·</span>
+				{#key photo.id}
+					<Time timestamp={photo.created_at} relative />
+				{/key}
+			</p>
+		</div>
+		<span
+			class="text-[13px] leading-10 whitespace-nowrap text-white/80 tabular-nums {total <= MAX_DOTS ? 'hidden md:inline' : ''}"
+		>
+			{index + 1} / {total}
+		</span>
 		<button
+			bind:this={closeButton}
 			type="button"
-			onclick={onClose}
-			class="flex h-10 w-10 items-center justify-center rounded-full hover:bg-white/10"
+			onclick={close}
+			class="flex h-10 w-10 shrink-0 items-center justify-center rounded-full hover:bg-white/10 focus-visible:ring-2 focus-visible:ring-white"
 			aria-label={$_('placePhotos.close')}
 		>
 			<Icon w="24" h="24" icon="close" type="material" />
 		</button>
 	</div>
 
-	<div class="relative flex min-h-0 flex-1 items-center justify-center px-2">
-		{#key photo.id}
-			<img
-				src={placePhotoUrl(placeId, photo.id, { w: 1600, h: 1600 })}
-				alt={$_('placePhotos.photoAlt', { values: { n: index + 1, total } })}
-				width={photo.width}
-				height={photo.height}
-				class="max-h-full max-w-full object-contain"
-				referrerpolicy="no-referrer"
-			/>
-		{/key}
+	<div class="relative min-h-0 flex-1">
+		<div bind:this={stageEl} class="absolute inset-0"></div>
 
 		{#if total > 1}
+			<!-- Pointer devices only: touch users swipe -->
 			<button
 				type="button"
-				onclick={() => step(-1)}
-				class="absolute top-1/2 left-2 flex h-11 w-11 -translate-y-1/2 items-center justify-center rounded-full bg-black/50 hover:bg-black/70"
+				onclick={() => goTo(index - 1)}
+				disabled={index === 0}
+				class="group absolute inset-y-0 left-0 z-10 hidden w-[72px] items-center justify-center disabled:cursor-default disabled:opacity-25 pointer-fine:flex"
 				aria-label={$_('placePhotos.previous')}
 			>
-				<Icon w="28" h="28" icon="chevron_left" type="material" />
+				<span class="flex h-11 w-11 items-center justify-center rounded-full bg-white/12 group-enabled:group-hover:bg-white/20">
+					<Icon w="28" h="28" icon="chevron_left" type="material" />
+				</span>
 			</button>
 			<button
 				type="button"
-				onclick={() => step(1)}
-				class="absolute top-1/2 right-2 flex h-11 w-11 -translate-y-1/2 items-center justify-center rounded-full bg-black/50 hover:bg-black/70"
+				onclick={() => goTo(index + 1)}
+				disabled={index === total - 1}
+				class="group absolute inset-y-0 right-0 z-10 hidden w-[72px] items-center justify-center disabled:cursor-default disabled:opacity-25 pointer-fine:flex"
 				aria-label={$_('placePhotos.next')}
 			>
-				<Icon w="28" h="28" icon="chevron_right" type="material" />
+				<span class="flex h-11 w-11 items-center justify-center rounded-full bg-white/12 group-enabled:group-hover:bg-white/20">
+					<Icon w="28" h="28" icon="chevron_right" type="material" />
+				</span>
 			</button>
 		{/if}
 	</div>
 
-	<p class="px-4 pt-2 pb-[max(1rem,env(safe-area-inset-bottom))] text-center text-xs text-white/70">
-		{$_('placePhotos.addedOn', {
-			values: { date: new Date(photo.created_at).toLocaleDateString() },
-		})}
-	</p>
+	{#if total > 1}
+		<!-- Desktop: filmstrip from the strip's cached thumbnails -->
+		<div class="hidden justify-center gap-1.5 overflow-x-auto p-3.5 md:flex">
+			{#each photos as thumb, i (thumb.id)}
+				<button
+					type="button"
+					onclick={() => goTo(i)}
+					class="h-13 w-13 shrink-0 overflow-hidden rounded-lg bg-white/10 transition-opacity {i === index ? 'opacity-100 outline-2 outline-offset-2 outline-white' : 'opacity-50 hover:opacity-80'}"
+					aria-label={$_('placePhotos.photoAlt', { values: { n: i + 1, total } })}
+					aria-current={i === index ? 'true' : undefined}
+				>
+					<img
+						src={placePhotoUrl(placeId, thumb.id, { h: thumbHeight * 2 })}
+						alt=""
+						referrerpolicy="no-referrer"
+						class="h-full w-full object-cover"
+					/>
+				</button>
+			{/each}
+		</div>
+
+		<!-- Mobile: dots up to MAX_DOTS photos, otherwise the header counter -->
+		{#if total <= MAX_DOTS}
+			<div
+				class="flex justify-center gap-1.5 pt-4 pb-[max(1.75rem,env(safe-area-inset-bottom))] md:hidden"
+				aria-hidden="true"
+			>
+				{#each photos as dot, i (dot.id)}
+					<span class="h-1.5 w-1.5 rounded-full {i === index ? 'bg-white' : 'bg-white/35'}"></span>
+				{/each}
+			</div>
+		{/if}
+	{/if}
 </div>
+
+<style>
+	/* PhotoSwipe mounts inside our stage instead of covering the window */
+	:global(.pswp.pswp--btcmap) {
+		position: absolute;
+		--pswp-bg: #06171c;
+		--pswp-root-z-index: 0;
+	}
+</style>
