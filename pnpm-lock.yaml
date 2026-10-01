@@ -41,6 +41,9 @@ importers:
       date-fns:
         specifier: ^4.3.0
         version: 4.4.0
+      dayjs:
+        specifier: ^1.11.23
+        version: 1.11.23
       dompurify:
         specifier: ^3.4.16
         version: 3.4.16

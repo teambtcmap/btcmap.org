@@ -1,11 +1,12 @@
 <script lang="ts">
 import { onDestroy, onMount, untrack } from "svelte";
-// Deep import: svelte-time 2.3.1 ships no intl/index.d.ts for "svelte-time/intl"
-import Time from "svelte-time/intl/Time.svelte";
+import type { Locales } from "svelte-time";
+import Time from "svelte-time";
 
 import Icon from "$components/Icon.svelte";
 import { trackEvent } from "$lib/analytics";
 import { lockBodyScroll, unlockBodyScroll } from "$lib/bodyScrollLock";
+import { loadDayjsLocale } from "$lib/dayjsLocale";
 import { trapTab } from "$lib/focusTrap";
 import { _, locale } from "$lib/i18n";
 import type { LightboxHandle } from "$lib/placePhotoLightbox";
@@ -46,6 +47,15 @@ const MAX_DOTS = 8;
 
 let index = $state(untrack(() => startIndex));
 const photo = $derived(photos[index]);
+
+// Relative date in the app's language; English until its dayjs locale loads
+let timeLocale = $state<Locales>("en");
+$effect(() => {
+	const code = $locale;
+	loadDayjsLocale(code).then((key) => {
+		if ($locale === code) timeLocale = key;
+	});
+});
 
 const total = $derived(photos.length);
 
@@ -160,9 +170,8 @@ onDestroy(() => {
 			<p class="mt-0.5 flex flex-wrap items-center gap-1.5 text-[13px] leading-[18px] text-white/80">
 				<span>{$_('placePhotos.communityPhoto')}</span>
 				<span aria-hidden="true">·</span>
-				<!-- Native Intl.RelativeTimeFormat in the app's language: no locale
-				     files to ship; live keeps "2 minutes ago" current -->
-				<Time timestamp={photo.created_at} relative live locale={$locale ?? 'en'} />
+				<!-- live keeps "a few seconds ago" current while the viewer is open -->
+				<Time timestamp={photo.created_at} relative live locale={timeLocale} />
 			</p>
 		</div>
 		<span
