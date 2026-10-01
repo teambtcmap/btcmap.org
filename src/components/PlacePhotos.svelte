@@ -222,25 +222,31 @@ const handleFiles = async (event: Event) => {
 					</div>
 				{/each}
 
-				{#each photos as photo, i (photo.id)}
-					<button
-						type="button"
-						onclick={() => openViewer(i)}
-						class="relative h-(--tile) shrink-0 snap-start overflow-hidden rounded-xl bg-gray-200 focus-visible:ring-2 focus-visible:ring-link dark:bg-white/10 {loadedIds.has(photo.id) ? '' : 'animate-pulse'}"
-						style:width="{tileWidth(photo)}px"
-						aria-label={$_('placePhotos.photoAlt', { values: { n: i + 1, total: photos.length } })}
-					>
-						<img
-							src={placePhotoUrl(placeId, photo.id, { h: tileHeight * 2 })}
-							alt=""
-							loading="lazy"
-							decoding="async"
-							referrerpolicy="no-referrer"
-							onload={() => loadedIds.add(photo.id)}
-							class="h-full w-full object-cover transition-opacity duration-300 {loadedIds.has(photo.id) ? 'opacity-100' : 'opacity-0'}"
-						/>
-					</button>
-				{/each}
+				<!-- role="list": Tailwind's list-style: none makes Safari/VoiceOver drop
+				     the implicit list role, and with it "list, 6 items" -->
+				<ul role="list" class="flex gap-2">
+					{#each photos as photo, i (photo.id)}
+						<li class="shrink-0 snap-start">
+							<button
+								type="button"
+								onclick={() => openViewer(i)}
+								class="relative block h-(--tile) overflow-hidden rounded-xl bg-gray-200 focus-visible:ring-2 focus-visible:ring-link dark:bg-white/10 {loadedIds.has(photo.id) ? '' : 'animate-pulse'}"
+								style:width="{tileWidth(photo)}px"
+								aria-label={$_('placePhotos.photoAlt', { values: { n: i + 1, total: photos.length } })}
+							>
+								<img
+									src={placePhotoUrl(placeId, photo.id, { h: tileHeight * 2 })}
+									alt=""
+									loading="lazy"
+									decoding="async"
+									referrerpolicy="no-referrer"
+									onload={() => loadedIds.add(photo.id)}
+									class="h-full w-full object-cover transition-opacity duration-300 {loadedIds.has(photo.id) ? 'opacity-100' : 'opacity-0'}"
+								/>
+							</button>
+						</li>
+					{/each}
+				</ul>
 			</div>
 
 			{#if layout === 'drawer' && canScrollMore}
