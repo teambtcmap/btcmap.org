@@ -7,11 +7,9 @@ import type { PlaceImage } from "$types/btcmap-api/PlaceImage";
 // call returns metadata only, so the UI can lay out exact-ratio boxes and
 // fetch each image's bytes in parallel at the size it needs.
 
-export type PlacePhoto = PlaceImage;
-
 // Longest side we upload. Phone photos are 4–8 MB at 12 MP; the API caps
 // uploads at 10 MB decoded, and nothing we render needs more than this.
-export const UPLOAD_MAX_SIDE = 2048;
+const UPLOAD_MAX_SIDE = 2048;
 const UPLOAD_JPEG_QUALITY = 0.85;
 
 export const placePhotoUrl = (
@@ -27,15 +25,15 @@ export const placePhotoUrl = (
 	return `${API_BASE}/v4/places/${placeId}/images/${imageId}${query ? `?${query}` : ""}`;
 };
 
-const isPlacePhoto = (value: unknown): value is PlacePhoto => {
+const isPlacePhoto = (value: unknown): value is PlaceImage => {
 	if (typeof value !== "object" || value === null) return false;
-	const it = value as Record<string, unknown>;
+	const candidate = value as Record<string, unknown>;
 	return (
-		typeof it.id === "number" &&
-		typeof it.width === "number" &&
-		typeof it.height === "number" &&
-		it.width > 0 &&
-		it.height > 0
+		typeof candidate.id === "number" &&
+		typeof candidate.width === "number" &&
+		typeof candidate.height === "number" &&
+		candidate.width > 0 &&
+		candidate.height > 0
 	);
 };
 
@@ -43,7 +41,7 @@ const isPlacePhoto = (value: unknown): value is PlacePhoto => {
 // reviewers and can show the reporter (e.g. a selfie at the storefront).
 export const fetchPlacePhotos = async (
 	placeId: number,
-): Promise<PlacePhoto[]> => {
+): Promise<PlaceImage[]> => {
 	const res = await api.get<unknown>(
 		`${API_BASE}/v4/places/${placeId}/images?type=user`,
 	);
@@ -55,7 +53,7 @@ export const uploadPlacePhoto = async (
 	placeId: number,
 	token: string,
 	dataBase64: string,
-): Promise<PlacePhoto> => {
+): Promise<PlaceImage> => {
 	const res = await api.post<unknown>(
 		`${API_BASE}/v4/places/${placeId}/images`,
 		{ data_base64: dataBase64 },
