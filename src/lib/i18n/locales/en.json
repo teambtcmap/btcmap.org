@@ -1318,5 +1318,19 @@
 			"netlifyDocsAnalytics": "Netlify Docs - Analytics",
 			"netlifyDocsHowAnalytics": "Netlify Docs - How Analytics Works"
 		}
+	},
+	"placePhotos": {
+		"title": "Photos",
+		"add": "Add photo",
+		"addFirst": "Add the first photo",
+		"loginToAdd": "Log in to add photos",
+		"uploading": "Uploading photo…",
+		"uploaded": "{count, plural, one {Thanks! Your photo is live.} other {Thanks! Your # photos are live.}}",
+		"uploadFailed": "{count, plural, one {A photo couldn't be uploaded. Please try again.} other {# photos couldn't be uploaded. Please try again.}}",
+		"photoAlt": "Photo {n} of {total}",
+		"previous": "Previous photo",
+		"next": "Next photo",
+		"close": "Close",
+		"addedOn": "Added {date}"
 	}
 }

@@ -1240,5 +1240,19 @@
 		"error": "No se pudo crear la cuenta. Es posible que el nombre de usuario ya esté en uso.",
 		"haveAccount": "¿Ya tienes una cuenta?",
 		"signIn": "Iniciar sesión con contraseña o Nostr"
+	},
+	"placePhotos": {
+		"title": "Fotos",
+		"add": "Añadir foto",
+		"addFirst": "Añade la primera foto",
+		"loginToAdd": "Inicia sesión para añadir fotos",
+		"uploading": "Subiendo foto…",
+		"uploaded": "{count, plural, one {¡Gracias! Tu foto ya está publicada.} other {¡Gracias! Tus # fotos ya están publicadas.}}",
+		"uploadFailed": "{count, plural, one {No se pudo subir una foto. Inténtalo de nuevo.} other {No se pudieron subir # fotos. Inténtalo de nuevo.}}",
+		"photoAlt": "Foto {n} de {total}",
+		"previous": "Foto anterior",
+		"next": "Foto siguiente",
+		"close": "Cerrar",
+		"addedOn": "Añadida el {date}"
 	}
 }

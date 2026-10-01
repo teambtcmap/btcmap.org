@@ -1214,5 +1214,19 @@
 		"error": "Não foi possível criar a conta. O nome de usuário pode já estar em uso.",
 		"haveAccount": "Já tem uma conta?",
 		"signIn": "Entrar com senha ou Nostr"
+	},
+	"placePhotos": {
+		"title": "Fotos",
+		"add": "Adicionar foto",
+		"addFirst": "Adicione a primeira foto",
+		"loginToAdd": "Entre para adicionar fotos",
+		"uploading": "Enviando foto…",
+		"uploaded": "{count, plural, one {Obrigado! Sua foto já está publicada.} other {Obrigado! Suas # fotos já estão publicadas.}}",
+		"uploadFailed": "{count, plural, one {Não foi possível enviar uma foto. Tente novamente.} other {Não foi possível enviar # fotos. Tente novamente.}}",
+		"photoAlt": "Foto {n} de {total}",
+		"previous": "Foto anterior",
+		"next": "Próxima foto",
+		"close": "Fechar",
+		"addedOn": "Adicionada em {date}"
 	}
 }

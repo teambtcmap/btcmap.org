@@ -1318,5 +1318,19 @@
 			"netlifyDocsAnalytics": "Netlify Documentatie - Analytics",
 			"netlifyDocsHowAnalytics": "Netlify Documentatie - Hoe Analytics werkt"
 		}
+	},
+	"placePhotos": {
+		"title": "Foto's",
+		"add": "Foto toevoegen",
+		"addFirst": "Voeg de eerste foto toe",
+		"loginToAdd": "Log in om foto's toe te voegen",
+		"uploading": "Foto uploaden…",
+		"uploaded": "{count, plural, one {Bedankt! Je foto staat online.} other {Bedankt! Je # foto's staan online.}}",
+		"uploadFailed": "{count, plural, one {Een foto kon niet worden geüpload. Probeer het opnieuw.} other {# foto's konden niet worden geüpload. Probeer het opnieuw.}}",
+		"photoAlt": "Foto {n} van {total}",
+		"previous": "Vorige foto",
+		"next": "Volgende foto",
+		"close": "Sluiten",
+		"addedOn": "Toegevoegd op {date}"
 	}
 }
