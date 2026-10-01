@@ -1,6 +1,8 @@
 <script lang="ts">
+import { tick } from "svelte";
 import { SvelteSet } from "svelte/reactivity";
 
+import PhotoAuthPrompt from "$components/auth/PhotoAuthPrompt.svelte";
 import Icon from "$components/Icon.svelte";
 import PlacePhotoViewer from "$components/PlacePhotoViewer.svelte";
 import { trackEvent } from "$lib/analytics";
@@ -15,11 +17,9 @@ import {
 import { session } from "$lib/session";
 import { errToast, successToast } from "$lib/utils";
 
-import { resolve } from "$app/paths";
-
 // Community photo strip for a place: exact-ratio boxes from the metadata,
 // thumbnails fetched in parallel at tile size, a full-screen viewer, and an
-// "Add photo" tile for signed-in users (#1469).
+// "Add photo" tile (#1469).
 type Props = {
 	placeId: number;
 	// Tile height in CSS px; thumbnails are requested at 2x for HiDPI
@@ -39,6 +39,7 @@ let photos = $state<PlacePhoto[] | undefined>(undefined);
 let uploading = $state(0);
 let viewerIndex = $state<number | null>(null);
 let fileInput = $state<HTMLInputElement>();
+let showAuthPrompt = $state(false);
 const loadedIds = new SvelteSet<number>();
 
 // The map drawer reuses this component across merchants, so refetch on
@@ -68,8 +69,18 @@ const openViewer = (index: number) => {
 	trackEvent("place_photo_open", { source });
 };
 
-const pickFiles = () => {
-	trackEvent("place_photo_add_click", { source });
+// Signed-out users sign in right here instead of leaving for /login, so
+// they stay on the place they wanted to photograph.
+const handleAddClick = () => {
+	trackEvent("place_photo_add_click", { source, signedIn: !!$session });
+	if ($session) fileInput?.click();
+	else showAuthPrompt = true;
+};
+
+// Browsers may refuse the picker here since the click's user activation
+// can expire during login; the tile is then one tap away.
+const handleAuthenticated = async () => {
+	await tick();
 	fileInput?.click();
 };
 
@@ -157,39 +168,25 @@ const handleFiles = async (event: Event) => {
 			{/each}
 
 			{#if canAdd}
-				{@const addLabel = photos.length ? $_('placePhotos.add') : $_('placePhotos.addFirst')}
-				{#if $session}
-					<button
-						type="button"
-						onclick={pickFiles}
-						class="flex shrink-0 snap-start flex-col items-center justify-center gap-1 rounded-xl border border-dashed border-gray-300 px-3 text-center text-xs font-semibold text-link transition-colors hover:bg-link/5 dark:border-white/20"
-						style:height="{tileHeight}px"
-						style:min-width="{tileHeight}px"
-					>
-						<Icon w="24" h="24" icon="add_a_photo" type="material" />
-						{addLabel}
-					</button>
-					<input
-						bind:this={fileInput}
-						type="file"
-						accept="image/jpeg,image/png,image/webp"
-						multiple
-						class="hidden"
-						onchange={handleFiles}
-					/>
-				{:else}
-					<a
-						href={resolve('/login')}
-						onclick={() => trackEvent("place_photo_add_click", { source, signedIn: false })}
-						class="flex shrink-0 snap-start flex-col items-center justify-center gap-1 rounded-xl border border-dashed border-gray-300 px-3 text-center text-xs font-semibold text-link transition-colors hover:bg-link/5 dark:border-white/20"
-						style:height="{tileHeight}px"
-						style:min-width="{tileHeight}px"
-						style:max-width="{tileHeight * 1.4}px"
-					>
-						<Icon w="24" h="24" icon="add_a_photo" type="material" />
-						{photos.length ? $_('placePhotos.loginToAdd') : addLabel}
-					</a>
-				{/if}
+				<button
+					type="button"
+					onclick={handleAddClick}
+					class="flex shrink-0 snap-start flex-col items-center justify-center gap-1 rounded-xl border border-dashed border-gray-300 px-3 text-center text-xs font-semibold text-link transition-colors hover:bg-link/5 dark:border-white/20"
+					style:height="{tileHeight}px"
+					style:min-width="{tileHeight}px"
+					style:max-width="{tileHeight * 1.4}px"
+				>
+					<Icon w="24" h="24" icon="add_a_photo" type="material" />
+					{photos.length ? $_('placePhotos.add') : $_('placePhotos.addFirst')}
+				</button>
+				<input
+					bind:this={fileInput}
+					type="file"
+					accept="image/jpeg,image/png,image/webp"
+					multiple
+					class="hidden"
+					onchange={handleFiles}
+				/>
 			{/if}
 		</div>
 	</section>
@@ -202,4 +199,8 @@ const handleFiles = async (event: Event) => {
 		startIndex={viewerIndex}
 		onClose={() => (viewerIndex = null)}
 	/>
+{/if}
+
+{#if canAdd}
+	<PhotoAuthPrompt bind:open={showAuthPrompt} onAuthenticated={handleAuthenticated} />
 {/if}
