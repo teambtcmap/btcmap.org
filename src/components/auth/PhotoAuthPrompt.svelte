@@ -5,6 +5,7 @@ import SignupForm from "$components/auth/SignupForm.svelte";
 import Modal from "$components/Modal.svelte";
 import PrimaryButton from "$components/PrimaryButton.svelte";
 import TextLink from "$components/TextLink.svelte";
+import { trackEvent } from "$lib/analytics";
 import { _ } from "$lib/i18n";
 import { hydrateSavedFromServer } from "$lib/savedItems";
 import type { Session } from "$lib/session";
@@ -57,14 +58,20 @@ async function handleLoginSuccess(current: Session) {
 		<div class="space-y-3">
 			<PrimaryButton
 				type="button"
-				onclick={() => (view = "signup")}
+				onclick={() => {
+					trackEvent("place_photo_prompt_create_account_click");
+					view = "signup";
+				}}
 				style="w-full rounded-lg px-4 py-2"
 			>
 				{$_("save.prompt.createAccount")}
 			</PrimaryButton>
 			<button
 				type="button"
-				onclick={() => (view = "login")}
+				onclick={() => {
+					trackEvent("place_photo_prompt_login_click");
+					view = "login";
+				}}
 				class="w-full rounded-lg border border-link px-4 py-2 font-semibold text-link transition-colors hover:bg-link/10"
 			>
 				{$_("save.prompt.login")}
