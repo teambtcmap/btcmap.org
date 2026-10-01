@@ -65,6 +65,43 @@ export const uploadPlacePhoto = async (
 	return res.data;
 };
 
+// One pick uploads at most this many photos; the rest are dropped with a
+// warning rather than queued
+export const MAX_PHOTOS_PER_PICK = 5;
+
+export const splitPick = <T>(files: T[]): { batch: T[]; dropped: number } => ({
+	batch: files.slice(0, MAX_PHOTOS_PER_PICK),
+	dropped: Math.max(0, files.length - MAX_PHOTOS_PER_PICK),
+});
+
+// Each photo is its own POST, all in parallel; one failure doesn't stop the
+// rest. Stored photos come back newest first, the order the list API uses.
+export const uploadPlacePhotos = async <T>(
+	files: T[],
+	upload: (file: T) => Promise<PlaceImage>,
+	onSettled: () => void,
+): Promise<{ stored: PlaceImage[]; failed: unknown[] }> => {
+	const results = await Promise.allSettled(
+		files.map(async (file) => {
+			try {
+				return await upload(file);
+			} finally {
+				onSettled();
+			}
+		}),
+	);
+	const stored: PlaceImage[] = [];
+	const failed: unknown[] = [];
+	for (const result of results) {
+		if (result.status === "fulfilled") stored.push(result.value);
+		else failed.push(result.reason);
+	}
+	stored.sort(
+		(a, b) => b.created_at.localeCompare(a.created_at) || b.id - a.id,
+	);
+	return { stored, failed };
+};
+
 export const fitWithin = (
 	width: number,
 	height: number,
