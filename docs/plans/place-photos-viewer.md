@@ -69,7 +69,7 @@ Risk: no npm release since May 2024, although fixes land in the repo until Nov 2
 - Props: today's props plus `placeName` and `source`.
 - Overlay: portaled to `<body>`, full-screen, `--dark` background.
 - Top bar: place name, then "Community photo", the relative date and "3 / 6", then the ⋯ and ✕ buttons.
-  - The date uses date-fns in the app locale.
+  - The date uses `svelte-time/intl` (native `Intl.RelativeTimeFormat`) in the app locale: no locale files, live updates. The rest of the app follows in #1482.
   - The counter uses `tabular-nums`.
 - Desktop: 44px arrows in 72px side zones, disabled at the ends and hidden on touch devices.
 - Footer:
