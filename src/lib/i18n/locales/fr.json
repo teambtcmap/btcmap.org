@@ -1239,7 +1239,6 @@
 	"placePhotos": {
 		"title": "Photos",
 		"add": "Ajouter une photo",
-		"addFirst": "Ajouter la première photo",
 		"uploading": "Envoi de la photo…",
 		"uploaded": "{count, plural, one {Merci ! Votre photo est en ligne.} other {Merci ! Vos # photos sont en ligne.}}",
 		"uploadFailed": "{count, plural, one {Une photo n'a pas pu être envoyée. Veuillez réessayer.} other {# photos n'ont pas pu être envoyées. Veuillez réessayer.}}",
@@ -1250,7 +1249,10 @@
 		"addedOn": "Ajoutée le {date}",
 		"promptTitle": "Ajouter une photo",
 		"promptDescription": "Connectez-vous à votre compte ou créez-en un nouveau pour ajouter des photos de ce lieu.",
-		"tooMany": "Vous pouvez ajouter jusqu'à {max} photos à la fois. Envoi des {max} premières."
+		"tooMany": "Vous pouvez ajouter jusqu'à {max} photos à la fois. Envoi des {max} premières.",
+		"emptyTitle": "Soyez le premier à ajouter une photo",
+		"emptyHint": "Devanture, enseigne, ou l'autocollant ou le QR bitcoin",
+		"morePhotos": "Plus de photos"
 	},
 	"authPrompt": {
 		"createAccount": "Créer un compte",

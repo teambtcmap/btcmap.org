@@ -1314,7 +1314,6 @@
 	"placePhotos": {
 		"title": "Foto",
 		"add": "Aggiungi foto",
-		"addFirst": "Aggiungi la prima foto",
 		"uploading": "Caricamento foto…",
 		"uploaded": "{count, plural, one {Grazie! La tua foto è online.} other {Grazie! Le tue # foto sono online.}}",
 		"uploadFailed": "{count, plural, one {Impossibile caricare una foto. Riprova.} other {Impossibile caricare # foto. Riprova.}}",
@@ -1325,7 +1324,10 @@
 		"addedOn": "Aggiunta il {date}",
 		"promptTitle": "Aggiungi una foto",
 		"promptDescription": "Accedi al tuo account esistente o creane uno nuovo per aggiungere foto di questo luogo.",
-		"tooMany": "Puoi aggiungere fino a {max} foto alla volta. Verranno caricate le prime {max}."
+		"tooMany": "Puoi aggiungere fino a {max} foto alla volta. Verranno caricate le prime {max}.",
+		"emptyTitle": "Aggiungi tu la prima foto",
+		"emptyHint": "Vetrina, insegna o l'adesivo o il QR bitcoin",
+		"morePhotos": "Altre foto"
 	},
 	"authPrompt": {
 		"createAccount": "Crea account",
