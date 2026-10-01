@@ -145,10 +145,7 @@
 			"titlePlace": "Salva questo posto",
 			"titleArea": "Salva questa area",
 			"descriptionPlace": "Accedi al tuo account esistente, o creane uno nuovo per mantenere i tuoi posti salvati.",
-			"descriptionArea": "Accedi al tuo account esistente, o creane uno nuovo per mantenere le tue aree salvate.",
-			"createAccount": "Crea account",
-			"login": "Accedi",
-			"back": "Indietro"
+			"descriptionArea": "Accedi al tuo account esistente, o creane uno nuovo per mantenere le tue aree salvate."
 		}
 	},
 	"search": {
@@ -1328,5 +1325,10 @@
 		"addedOn": "Aggiunta il {date}",
 		"promptTitle": "Aggiungi una foto",
 		"promptDescription": "Accedi al tuo account esistente o creane uno nuovo per aggiungere foto di questo luogo."
+	},
+	"authPrompt": {
+		"createAccount": "Crea account",
+		"login": "Accedi",
+		"back": "Indietro"
 	}
 }

@@ -1250,5 +1250,10 @@
 		"addedOn": "Hinzugefügt am {date}",
 		"promptTitle": "Foto hinzufügen",
 		"promptDescription": "Melde dich mit deinem bestehenden Konto an oder erstelle ein neues, um Fotos dieses Ortes hinzuzufügen."
+	},
+	"authPrompt": {
+		"createAccount": "Konto erstellen",
+		"login": "Anmelden",
+		"back": "Zurück"
 	}
 }

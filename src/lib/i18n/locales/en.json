@@ -145,10 +145,7 @@
 			"titlePlace": "Save this place",
 			"titleArea": "Save this area",
 			"descriptionPlace": "Log in to your existing account, or create a new one to keep your saved places.",
-			"descriptionArea": "Log in to your existing account, or create a new one to keep your saved areas.",
-			"createAccount": "Create account",
-			"login": "Log in",
-			"back": "Back"
+			"descriptionArea": "Log in to your existing account, or create a new one to keep your saved areas."
 		}
 	},
 	"search": {
@@ -1328,5 +1325,10 @@
 		"addedOn": "Added {date}",
 		"promptTitle": "Add a photo",
 		"promptDescription": "Log in to your existing account, or create a new one to add photos of this place."
+	},
+	"authPrompt": {
+		"createAccount": "Create account",
+		"login": "Log in",
+		"back": "Back"
 	}
 }
