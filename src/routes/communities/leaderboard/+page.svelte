@@ -1,24 +1,15 @@
 <script lang="ts">
-import { onMount } from "svelte";
-
 import Breadcrumbs from "$components/Breadcrumbs.svelte";
 import HeaderPlaceholder from "$components/layout/HeaderPlaceholder.svelte";
 import AreaLeaderboard from "$components/leaderboard/AreaLeaderboard.svelte";
 import PrimaryButton from "$components/PrimaryButton.svelte";
 import { _ } from "$lib/i18n";
-import { areasSync } from "$lib/sync/areas";
-import { batchSync } from "$lib/sync/batchSync";
-import { reportsSync } from "$lib/sync/reports";
 import { theme } from "$lib/theme";
 
 $: routes = [
 	{ name: $_("nav.communities"), url: "/communities" },
 	{ name: $_("communities.leaderboard"), url: "/communities/leaderboard" },
 ];
-
-onMount(() => {
-	batchSync([areasSync, reportsSync]);
-});
 </script>
 
 <svelte:head>
