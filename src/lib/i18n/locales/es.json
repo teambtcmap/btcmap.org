@@ -1244,7 +1244,6 @@
 	"placePhotos": {
 		"title": "Fotos",
 		"add": "Añadir foto",
-		"addFirst": "Añade la primera foto",
 		"uploading": "Subiendo foto…",
 		"uploaded": "{count, plural, one {¡Gracias! Tu foto ya está publicada.} other {¡Gracias! Tus # fotos ya están publicadas.}}",
 		"uploadFailed": "{count, plural, one {No se pudo subir una foto. Inténtalo de nuevo.} other {No se pudieron subir # fotos. Inténtalo de nuevo.}}",
@@ -1255,7 +1254,10 @@
 		"addedOn": "Añadida el {date}",
 		"promptTitle": "Añadir una foto",
 		"promptDescription": "Inicia sesión con tu cuenta o crea una nueva para añadir fotos de este lugar.",
-		"tooMany": "Puedes añadir hasta {max} fotos a la vez. Se subirán las primeras {max}."
+		"tooMany": "Puedes añadir hasta {max} fotos a la vez. Se subirán las primeras {max}.",
+		"emptyTitle": "Sé el primero en añadir una foto",
+		"emptyHint": "Fachada, letrero o la pegatina o el QR de bitcoin",
+		"morePhotos": "Más fotos"
 	},
 	"authPrompt": {
 		"createAccount": "Crear cuenta",

@@ -297,7 +297,7 @@ async function fetchComments(placeId: number) {
 	</div>
 
 	<div class="pt-3">
-		<PlacePhotos placeId={merchant.id} tileHeight={88} canAdd={!merchant.deleted_at} source={photoSource} />
+		<PlacePhotos placeId={merchant.id} layout="drawer" canAdd={!merchant.deleted_at} source={photoSource} />
 	</div>
 
 	<div class="divide-y divide-gray-200 dark:divide-white/10">
