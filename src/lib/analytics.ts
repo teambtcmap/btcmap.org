@@ -66,7 +66,10 @@ export type EventName =
 	| "add_place_tagger_guide_click"
 	| "add_place_review_queue_click"
 	| "comment_add_click"
-	| "comment_add_success";
+	| "comment_add_success"
+	| "place_photo_open"
+	| "place_photo_add_click"
+	| "place_photo_add_success";
 
 // Where the comment flow was opened from (funnel breakdown).
 export type CommentSource = "map_drawer" | "area_drawer" | "merchant_page";

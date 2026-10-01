@@ -16,6 +16,7 @@ import CommentAddButton from "$components/comments/CommentAddButton.svelte";
 import Icon from "$components/Icon.svelte";
 import OpenStatusPill from "$components/OpenStatusPill.svelte";
 import PaymentMethodPills from "$components/PaymentMethodPills.svelte";
+import PlacePhotos from "$components/PlacePhotos.svelte";
 import ShowTags from "$components/ShowTags.svelte";
 import TaggingIssues from "$components/TaggingIssues.svelte";
 
@@ -172,6 +173,8 @@ const ogImage = `https://api.btcmap.org/og/element/${data.id}`;
 				boosted={!!boosted}
 				deleted={!!deletedAt}
 			/>
+
+			<PlacePhotos placeId={Number(data.id)} canAdd={!deletedAt} source="merchant_page" />
 
 			{#if hasPaymentPill || companionAppUrl}
 				<div class="rounded-2xl border border-gray-300 p-4 dark:border-white/20 dark:bg-white/5">
