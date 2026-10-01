@@ -214,6 +214,7 @@ jobs:
           - ONLY report issues you can directly verify from the provided diff, full file contents, or (for changed pipeline code) the <review-pipeline> block. If you need a file that is not provided, do NOT report the finding.
           - For each finding, you must be able to point to specific lines in the diff or file contents that prove the issue exists. If you cannot, drop it.
           - NEVER assume what a module contains based on its name. Read the provided file contents. If a module is not included, do not make claims about its internals.
+          - A <file-contents> entry headed "(head and tail of N bytes, middle omitted)" is partial: a marker line names the omitted line range. Make no claims about code in that range.
           - Before flagging a pattern in new code, check whether existing files in the full file contents use the same pattern. If they do, it is an established project convention — do not flag it.
           - Do NOT include unverified or speculative findings. If you cannot directly point to specific lines in the provided diff or file contents that prove the issue exists, drop the finding entirely. There is no quota for "[UNVERIFIED]" or low-confidence items — omit them.
           - Every finding MUST include a **Quote:** block containing 1-3 lines copied from the provided diff or file contents. Post-processing greps these quotes against the actual inputs after collapsing whitespace, so leading-tab depth and line-wrap differences are tolerated — but the tokens (identifiers, operators, punctuation, string contents) must match exactly. Do not paraphrase, summarize, or reconstruct from memory; findings whose quote cannot be located will be dropped automatically.
@@ -222,7 +223,7 @@ jobs:
           # Biweekly Codebase Health Review
 
           ## Summary
-          [2-3 sentences: what changed, overall assessment]
+          [2-3 sentences: what changed, overall assessment. Then, if any <hotspots> file was not fully reviewed — its diff omitted or truncated AND its contents not shown in full in <file-contents> — name those files in one sentence, so the assessment is not read as covering them.]
 
           ## Findings
 
