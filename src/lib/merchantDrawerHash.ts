@@ -1,3 +1,5 @@
+import { withLiteralCommas } from "$lib/literalCommas";
+
 import { browser } from "$app/environment";
 
 export type DrawerView = "details" | "boost";
@@ -10,12 +12,8 @@ export interface MerchantHashState {
 
 export const MERCHANT_URL_CHANGE_EVENT = "merchant-url-change";
 
-// Keep ?issues csv commas literal in written URLs: URL serialization
-// %2C-encodes them, and worklist links (#921) are meant to be pasted into
-// chats as-is. Commas are valid query characters, so this is
-// parse-equivalent. Shared by every site that writes the query string.
-export const withLiteralCommas = (url: string): string =>
-	url.replace(/%2C/g, ",");
+// Re-exported for existing callers (the /map page)
+export { withLiteralCommas };
 
 export function parseMerchantHash(): MerchantHashState {
 	if (!browser) {
