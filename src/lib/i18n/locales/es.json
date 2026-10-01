@@ -1255,5 +1255,10 @@
 		"addedOn": "Añadida el {date}",
 		"promptTitle": "Añadir una foto",
 		"promptDescription": "Inicia sesión con tu cuenta o crea una nueva para añadir fotos de este lugar."
+	},
+	"authPrompt": {
+		"createAccount": "Crear cuenta",
+		"login": "Iniciar sesión",
+		"back": "Volver"
 	}
 }
