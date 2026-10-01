@@ -19,6 +19,7 @@ import CollapseButton from "$components/CollapseButton.svelte";
 import Icon from "$components/Icon.svelte";
 import MerchantDetailsContent from "$components/MerchantDetailsContent.svelte";
 import MerchantDetailsSkeleton from "$components/MerchantDetailsSkeleton.svelte";
+import { photoIdFromSearch } from "#lib/placePhotos.js";
 
 import MerchantPeekContentMobile from "./MerchantPeekContentMobile.svelte";
 import { browser } from "$app/env";
@@ -52,7 +53,13 @@ $: if (isOpen && merchantId !== previousMerchantId) {
 	// Track previous merchant to prevent re-triggering
 
 	previousMerchantId = merchantId;
-	drawerGesture.resetToPeek();
+	// A ?photo= deep link opens the sheet expanded: the photo strip (which
+	// opens the viewer) only mounts in the expanded sheet
+	if (browser && photoIdFromSearch(window.location.search) !== null) {
+		drawerGesture.expand();
+	} else {
+		drawerGesture.resetToPeek();
+	}
 }
 
 // Focus management: save/restore focus when expanding/collapsing
