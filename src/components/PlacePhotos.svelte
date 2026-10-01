@@ -122,7 +122,7 @@ const handleFiles = async (event: Event) => {
 	</div>
 {:else if photos.length || canAdd}
 	<section aria-label={$_('placePhotos.title')}>
-		<div class="-mx-1 flex snap-x gap-2 overflow-x-auto px-1 pb-1">
+		<div class="flex snap-x gap-2 overflow-x-auto pb-1">
 			{#each photos as photo, i (photo.id)}
 				<button
 					type="button"
