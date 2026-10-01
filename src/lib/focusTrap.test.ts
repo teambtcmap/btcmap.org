@@ -1,0 +1,74 @@
+import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
+
+import { trapTab } from "./focusTrap";
+
+const tab = (shiftKey = false) =>
+	new KeyboardEvent("keydown", { key: "Tab", shiftKey, cancelable: true });
+
+describe("trapTab", () => {
+	let root: HTMLElement;
+	let first: HTMLButtonElement;
+	let last: HTMLButtonElement;
+
+	beforeEach(() => {
+		// jsdom lays nothing out; treat every element as rendered
+		vi.spyOn(HTMLElement.prototype, "getClientRects").mockReturnValue({
+			length: 1,
+		} as DOMRectList);
+		root = document.createElement("div");
+		root.innerHTML = `
+			<button id="first">a</button>
+			<button disabled>skip</button>
+			<a href="#">link</a>
+			<button id="last">b</button>`;
+		document.body.append(root);
+		first = root.querySelector("#first") as HTMLButtonElement;
+		last = root.querySelector("#last") as HTMLButtonElement;
+	});
+
+	afterEach(() => {
+		root.remove();
+		vi.restoreAllMocks();
+	});
+
+	it("wraps Tab from the last element to the first", () => {
+		last.focus();
+		const event = tab();
+		trapTab(event, root);
+		expect(document.activeElement).toBe(first);
+		expect(event.defaultPrevented).toBe(true);
+	});
+
+	it("wraps Shift+Tab from the first element to the last", () => {
+		first.focus();
+		trapTab(tab(true), root);
+		expect(document.activeElement).toBe(last);
+	});
+
+	it("pulls focus back in when it sits outside the root", () => {
+		const outside = document.createElement("button");
+		document.body.append(outside);
+		outside.focus();
+		trapTab(tab(), root);
+		expect(document.activeElement).toBe(first);
+		outside.remove();
+	});
+
+	it("leaves Tab between inner elements to the browser", () => {
+		first.focus();
+		const event = tab();
+		trapTab(event, root);
+		expect(event.defaultPrevented).toBe(false);
+	});
+
+	it("ignores other keys", () => {
+		last.focus();
+		const event = new KeyboardEvent("keydown", {
+			key: "Enter",
+			cancelable: true,
+		});
+		trapTab(event, root);
+		expect(document.activeElement).toBe(last);
+		expect(event.defaultPrevented).toBe(false);
+	});
+});
