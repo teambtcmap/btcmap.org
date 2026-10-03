@@ -3,7 +3,7 @@ import Skeleton from "$components/Skeleton.svelte";
 </script>
 
 <div
-	class="rounded-3xl border border-link/50 shadow transition-shadow hover:shadow-2xl"
+	class="rounded-3xl border border-link/50 shadow transition-shadow hover:shadow-2xl dark:border-white/10"
 >
 	<div class="my-4 space-y-2 p-4">
 		<!-- avatar placeholder -->

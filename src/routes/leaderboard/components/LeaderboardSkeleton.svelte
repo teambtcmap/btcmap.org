@@ -3,7 +3,7 @@ import Skeleton from "$components/Skeleton.svelte";
 </script>
 
 <div
-	class="grid-cols-6 space-y-5 border-t border-b border-link/50 py-5 text-center lg:grid lg:space-y-0 lg:border-none lg:py-0"
+	class="grid-cols-6 space-y-5 border-t border-b border-link/50 py-5 text-center lg:grid lg:space-y-0 lg:border-none lg:py-0 dark:border-white/10"
 >
 	<!-- position placeholder -->
 	<Skeleton as="span" class="mx-auto my-auto block h-5 w-5 rounded-full lg:inline" />
