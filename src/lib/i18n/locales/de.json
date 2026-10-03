@@ -1262,7 +1262,14 @@
 		"linkCopied": "Link kopiert",
 		"copyLinkFailed": "Link konnte nicht kopiert werden",
 		"moreActions": "Weitere Aktionen",
-		"credit": "Foto von {name}"
+		"credit": "Foto von {name}",
+		"deletePhoto": "Foto löschen",
+		"deleteConfirm": "Dieses Foto löschen? Das kann nicht rückgängig gemacht werden.",
+		"deleteConfirmAction": "Löschen",
+		"cancel": "Abbrechen",
+		"deleted": "Foto gelöscht",
+		"deleteFailed": "Das Foto konnte nicht gelöscht werden. Bitte versuche es erneut.",
+		"deleteForbidden": "Du kannst nur deine eigenen Fotos löschen."
 	},
 	"authPrompt": {
 		"createAccount": "Konto erstellen",

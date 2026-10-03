@@ -1337,7 +1337,14 @@
 		"linkCopied": "Link copiato",
 		"copyLinkFailed": "Impossibile copiare il link",
 		"moreActions": "Altre azioni",
-		"credit": "Foto di {name}"
+		"credit": "Foto di {name}",
+		"deletePhoto": "Elimina foto",
+		"deleteConfirm": "Eliminare questa foto? L'operazione non può essere annullata.",
+		"deleteConfirmAction": "Elimina",
+		"cancel": "Annulla",
+		"deleted": "Foto eliminata",
+		"deleteFailed": "Impossibile eliminare la foto. Riprova.",
+		"deleteForbidden": "Puoi eliminare solo le tue foto."
 	},
 	"authPrompt": {
 		"createAccount": "Crea account",

@@ -152,6 +152,16 @@ const closeViewer = async (index: number) => {
 	tileEls[index]?.focus();
 };
 
+// A photo deleted from the viewer: drop it, close the viewer, and focus the
+// tile that took its place (or the new last one)
+const handlePhotoDeleted = async (imageId: number, index: number) => {
+	photos = (photos ?? []).filter((p) => p.id !== imageId);
+	viewerIndex = null;
+	syncPhotoParam(null);
+	await tick();
+	tileEls[Math.min(index, (photos?.length ?? 1) - 1)]?.focus();
+};
+
 // ?photo=<id> opens the viewer once the photos are in. An id that isn't
 // one of this place's public photos is ignored and dropped from the URL.
 const openFromDeepLink = (list: PlaceImage[]) => {
@@ -369,6 +379,7 @@ const handleFiles = async (event: Event) => {
 		{source}
 		onIndexChange={(i) => syncPhotoParam(photos?.[i]?.id ?? null)}
 		onClose={closeViewer}
+		onDeleted={handlePhotoDeleted}
 	/>
 {/if}
 

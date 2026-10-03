@@ -1,4 +1,5 @@
 <script lang="ts">
+import { isAxiosError } from "axios";
 import { onDestroy, onMount, untrack } from "svelte";
 import { OutClick } from "svelte-outclick";
 import type { Locales } from "svelte-time";
@@ -7,6 +8,8 @@ import Time from "svelte-time";
 import Icon from "$components/Icon.svelte";
 import { trackEvent } from "$lib/analytics";
 import { lockBodyScroll, unlockBodyScroll } from "$lib/bodyScrollLock";
+import type { CurrentUser } from "$lib/currentUser";
+import { fetchCurrentUser } from "$lib/currentUser";
 import { loadDayjsLocale } from "$lib/dayjsLocale";
 import { trapTab } from "$lib/focusTrap";
 import { _, locale } from "$lib/i18n";
@@ -14,10 +17,13 @@ import type { LightboxHandle } from "$lib/placePhotoLightbox";
 import { buildSlides, openPlaceLightbox } from "$lib/placePhotoLightbox";
 import type { PlacePhotoSource } from "$lib/placePhotos";
 import {
+	canDeletePhoto,
+	deletePlacePhoto,
 	photoAuthorName,
 	photoShareUrl,
 	placePhotoUrl,
 } from "$lib/placePhotos";
+import { session } from "$lib/session";
 import { errToast, successToast } from "$lib/utils";
 
 import type { PlaceImage } from "$types/btcmap-api/PlaceImage";
@@ -38,6 +44,8 @@ type Props = {
 	onIndexChange: (index: number) => void;
 	// Gets the index on screen at close, so the strip can focus that tile
 	onClose: (index: number) => void;
+	// The photo at index was deleted; the strip drops it and closes the viewer
+	onDeleted: (imageId: number, index: number) => void;
 };
 
 let {
@@ -49,6 +57,7 @@ let {
 	source,
 	onIndexChange,
 	onClose,
+	onDeleted,
 }: Props = $props();
 
 // Dots replace the counter on mobile up to this many photos
@@ -73,6 +82,11 @@ let rootEl = $state<HTMLDivElement>();
 let stageEl = $state<HTMLDivElement>();
 let closeButton = $state<HTMLButtonElement>();
 let menuOpen = $state(false);
+let confirmingDelete = $state(false);
+let deleting = $state(false);
+// Owner/role check for "Delete photo"; null while signed out or loading
+let currentUser = $state<CurrentUser | null>(null);
+const canDelete = $derived(canDeletePhoto(photo, currentUser));
 let handle: LightboxHandle | undefined;
 let destroyed = false;
 // place_photo_open already covers the first photo; views count the ones
@@ -90,13 +104,48 @@ const goTo = (i: number) => {
 	handle?.goTo(i);
 };
 
+const closeMenu = () => {
+	menuOpen = false;
+	confirmingDelete = false;
+};
+
 const toggleMenu = () => {
-	menuOpen = !menuOpen;
-	if (menuOpen) trackEvent("place_photo_menu_open", { source });
+	if (menuOpen) return closeMenu();
+	menuOpen = true;
+	trackEvent("place_photo_menu_open", { source });
+};
+
+const askDelete = () => {
+	confirmingDelete = true;
+	trackEvent("place_photo_delete_click", { source });
+};
+
+const confirmDelete = async () => {
+	const token = $session?.token;
+	if (!token || deleting) return;
+	deleting = true;
+	const target = { id: photo.id, index };
+	try {
+		await deletePlacePhoto(placeId, target.id, token);
+		trackEvent("place_photo_delete_success", { source });
+		successToast($_("placePhotos.deleted"));
+		closeMenu();
+		onDeleted(target.id, target.index);
+	} catch (error) {
+		console.error("place photos: delete failed", error);
+		errToast(
+			isAxiosError(error) && error.response?.status === 403
+				? $_("placePhotos.deleteForbidden")
+				: $_("placePhotos.deleteFailed"),
+		);
+		closeMenu();
+	} finally {
+		deleting = false;
+	}
 };
 
 const copyLink = async () => {
-	menuOpen = false;
+	closeMenu();
 	try {
 		await navigator.clipboard.writeText(
 			photoShareUrl(window.location.origin, placeId, photo.id),
@@ -123,7 +172,7 @@ const handleKeydown = (event: KeyboardEvent) => {
 	if (event.key === "Escape") {
 		event.preventDefault();
 		// The open menu closes first, the viewer on the next Escape
-		if (menuOpen) menuOpen = false;
+		if (menuOpen) closeMenu();
 		else close();
 	} else if (event.key === "ArrowRight") {
 		event.preventDefault();
@@ -146,6 +195,11 @@ const portal = (node: HTMLElement) => {
 onMount(() => {
 	lockBodyScroll();
 	closeButton?.focus();
+	if ($session) {
+		fetchCurrentUser($session.token).then((user) => {
+			currentUser = user;
+		});
+	}
 
 	if (!stageEl) return;
 	const pointerFine = window.matchMedia("(pointer: fine)").matches;
@@ -160,7 +214,7 @@ onMount(() => {
 			.matches,
 		onChange: (i) => {
 			index = i;
-			menuOpen = false;
+			closeMenu();
 			trackView(i);
 			onIndexChange(i);
 		},
@@ -217,7 +271,7 @@ onDestroy(() => {
 		>
 			{index + 1} / {total}
 		</span>
-		<OutClick onOutClick={() => (menuOpen = false)}>
+		<OutClick onOutClick={closeMenu}>
 			<div class="relative">
 				<button
 					type="button"
@@ -234,15 +288,51 @@ onDestroy(() => {
 						role="menu"
 						class="absolute top-11 right-0 z-20 min-w-[200px] rounded-xl bg-white p-1.5 text-primary shadow-[0_10px_30px_rgba(0,0,0,0.35)] dark:bg-dark dark:text-white dark:ring-1 dark:ring-white/15"
 					>
-						<button
-							type="button"
-							role="menuitem"
-							onclick={copyLink}
-							class="flex w-full items-center gap-2.5 rounded-lg px-2.5 py-2 text-left text-sm hover:bg-gray-100 dark:hover:bg-white/10"
-						>
-							<Icon w="20" h="20" icon="link" type="material" class="text-body dark:text-white/70" />
-							{$_('placePhotos.copyLink')}
-						</button>
+						{#if confirmingDelete}
+							<div class="max-w-[240px] p-2.5">
+								<p class="text-sm">{$_('placePhotos.deleteConfirm')}</p>
+								<div class="mt-3 flex justify-end gap-2">
+									<button
+										type="button"
+										onclick={() => (confirmingDelete = false)}
+										class="rounded-lg px-3 py-1.5 text-sm font-semibold hover:bg-gray-100 dark:hover:bg-white/10"
+									>
+										{$_('placePhotos.cancel')}
+									</button>
+									<button
+										type="button"
+										onclick={confirmDelete}
+										disabled={deleting}
+										class="rounded-lg bg-red-600 px-3 py-1.5 text-sm font-semibold text-white hover:bg-red-700 disabled:opacity-60"
+									>
+										{$_('placePhotos.deleteConfirmAction')}
+									</button>
+								</div>
+							</div>
+						{:else}
+							<button
+								type="button"
+								role="menuitem"
+								onclick={copyLink}
+								class="flex w-full items-center gap-2.5 rounded-lg px-2.5 py-2 text-left text-sm hover:bg-gray-100 dark:hover:bg-white/10"
+							>
+								<Icon w="20" h="20" icon="link" type="material" class="text-body dark:text-white/70" />
+								{$_('placePhotos.copyLink')}
+							</button>
+							<!-- Uploader, or admin/root as in-site moderation; the API
+							     enforces the same rule -->
+							{#if canDelete}
+								<button
+									type="button"
+									role="menuitem"
+									onclick={askDelete}
+									class="flex w-full items-center gap-2.5 rounded-lg px-2.5 py-2 text-left text-sm text-red-600 hover:bg-gray-100 dark:text-red-400 dark:hover:bg-white/10"
+								>
+									<Icon w="20" h="20" icon="delete" type="material" />
+									{$_('placePhotos.deletePhoto')}
+								</button>
+							{/if}
+						{/if}
 					</div>
 				{/if}
 			</div>

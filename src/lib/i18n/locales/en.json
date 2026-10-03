@@ -1337,7 +1337,14 @@
 		"linkCopied": "Link copied",
 		"copyLinkFailed": "Couldn't copy the link",
 		"moreActions": "More actions",
-		"credit": "Photo by {name}"
+		"credit": "Photo by {name}",
+		"deletePhoto": "Delete photo",
+		"deleteConfirm": "Delete this photo? This can't be undone.",
+		"deleteConfirmAction": "Delete",
+		"cancel": "Cancel",
+		"deleted": "Photo deleted",
+		"deleteFailed": "Couldn't delete the photo. Please try again.",
+		"deleteForbidden": "You can only delete your own photos."
 	},
 	"authPrompt": {
 		"createAccount": "Create account",

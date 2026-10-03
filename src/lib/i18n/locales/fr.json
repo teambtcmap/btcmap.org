@@ -1262,7 +1262,14 @@
 		"linkCopied": "Lien copié",
 		"copyLinkFailed": "Impossible de copier le lien",
 		"moreActions": "Plus d'actions",
-		"credit": "Photo de {name}"
+		"credit": "Photo de {name}",
+		"deletePhoto": "Supprimer la photo",
+		"deleteConfirm": "Supprimer cette photo ? Cette action est irréversible.",
+		"deleteConfirmAction": "Supprimer",
+		"cancel": "Annuler",
+		"deleted": "Photo supprimée",
+		"deleteFailed": "Impossible de supprimer la photo. Veuillez réessayer.",
+		"deleteForbidden": "Vous ne pouvez supprimer que vos propres photos."
 	},
 	"authPrompt": {
 		"createAccount": "Créer un compte",

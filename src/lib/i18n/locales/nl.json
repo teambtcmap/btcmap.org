@@ -1337,7 +1337,14 @@
 		"linkCopied": "Link gekopieerd",
 		"copyLinkFailed": "Kan de link niet kopiëren",
 		"moreActions": "Meer acties",
-		"credit": "Foto door {name}"
+		"credit": "Foto door {name}",
+		"deletePhoto": "Foto verwijderen",
+		"deleteConfirm": "Deze foto verwijderen? Dit kan niet ongedaan worden gemaakt.",
+		"deleteConfirmAction": "Verwijderen",
+		"cancel": "Annuleren",
+		"deleted": "Foto verwijderd",
+		"deleteFailed": "Kan de foto niet verwijderen. Probeer het opnieuw.",
+		"deleteForbidden": "Je kunt alleen je eigen foto's verwijderen."
 	},
 	"authPrompt": {
 		"createAccount": "Account aanmaken",

@@ -1262,7 +1262,14 @@
 		"linkCopied": "Ссылка скопирована",
 		"copyLinkFailed": "Не удалось скопировать ссылку",
 		"moreActions": "Ещё действия",
-		"credit": "Фото: {name}"
+		"credit": "Фото: {name}",
+		"deletePhoto": "Удалить фото",
+		"deleteConfirm": "Удалить это фото? Это действие нельзя отменить.",
+		"deleteConfirmAction": "Удалить",
+		"cancel": "Отмена",
+		"deleted": "Фото удалено",
+		"deleteFailed": "Не удалось удалить фото. Попробуйте ещё раз.",
+		"deleteForbidden": "Вы можете удалять только свои фото."
 	},
 	"authPrompt": {
 		"createAccount": "Создать аккаунт",

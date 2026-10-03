@@ -1336,7 +1336,14 @@
 		"linkCopied": "Връзката е копирана",
 		"copyLinkFailed": "Връзката не можа да бъде копирана",
 		"moreActions": "Още действия",
-		"credit": "Снимка от {name}"
+		"credit": "Снимка от {name}",
+		"deletePhoto": "Изтрий снимката",
+		"deleteConfirm": "Да се изтрие ли тази снимка? Действието е необратимо.",
+		"deleteConfirmAction": "Изтрий",
+		"cancel": "Отказ",
+		"deleted": "Снимката е изтрита",
+		"deleteFailed": "Снимката не можа да бъде изтрита. Опитай отново.",
+		"deleteForbidden": "Можеш да изтриваш само свои снимки."
 	},
 	"authPrompt": {
 		"createAccount": "Създай акаунт",
