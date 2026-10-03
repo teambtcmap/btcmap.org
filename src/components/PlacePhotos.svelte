@@ -206,6 +206,12 @@ const handleAuthenticated = async () => {
 // "Undo" on the upload toast: an accidental upload is one tap from gone
 const undoUpload = async (id: number, stored: PlaceImage[], token: string) => {
 	trackEvent("place_photo_upload_undo", { source, count: stored.length });
+	// The toast sits above the viewer: close it first so its photo list
+	// can't change underneath it
+	if (id === placeId && viewerIndex !== null) {
+		viewerIndex = null;
+		syncPhotoParam(null);
+	}
 	const removed = await undoUploads(
 		id,
 		stored.map((p) => p.id),
