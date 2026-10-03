@@ -2,7 +2,7 @@ import { isAxiosError } from "axios";
 
 import { API_BASE } from "$lib/api-base";
 import api from "$lib/axios";
-import type { CurrentUser } from "$lib/currentUser";
+import type { CurrentUser, Role } from "$lib/currentUser";
 import { withLiteralCommas } from "$lib/literalCommas";
 
 import type { PlaceImage } from "$types/btcmap-api/PlaceImage";
@@ -68,7 +68,7 @@ export const fetchPlacePhotos = async (
 // Mirrors the API rule: the uploader may delete their own photo, admin and
 // root any photo. The API still enforces it (403); this only decides
 // whether to offer the action.
-const MODERATOR_ROLES = ["admin", "root"];
+const MODERATOR_ROLES: readonly Role[] = ["admin", "root"];
 
 export const canDeletePhoto = (
 	photo: PlaceImage,
