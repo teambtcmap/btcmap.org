@@ -163,7 +163,9 @@ const handlePhotoDeleted = async (imageId: number, index: number) => {
 	viewerIndex = null;
 	syncPhotoParam(null);
 	await tick();
-	tileEls[Math.min(index, (photos?.length ?? 1) - 1)]?.focus();
+	// No photos left: the empty-state add button takes the focus
+	if (photos.length) tileEls[Math.min(index, photos.length - 1)]?.focus();
+	else addButton?.focus();
 };
 
 // ?photo=<id> opens the viewer once the photos are in. An id that isn't
