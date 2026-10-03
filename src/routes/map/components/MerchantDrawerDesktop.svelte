@@ -5,7 +5,7 @@ import BoostContent from "$components/BoostContent.svelte";
 import CloseButton from "$components/CloseButton.svelte";
 import Icon from "$components/Icon.svelte";
 import MerchantDetailsContent from "$components/MerchantDetailsContent.svelte";
-import Skeleton from "$components/Skeleton.svelte";
+import MerchantDetailsSkeleton from "$components/MerchantDetailsSkeleton.svelte";
 import {
 	MAP_PANEL_MARGIN,
 	MERCHANT_LIST_WIDTH,
@@ -148,26 +148,7 @@ export function openDrawer(id: number) {
 		{/snippet}
 
 		{#if !merchant && fetchingMerchant}
-			<!-- Loading skeleton -->
-			<div class="space-y-4 px-6 pt-3 pb-6">
-				<!-- Title skeleton -->
-				<Skeleton class="h-7 w-3/4 rounded-lg" />
-				<!-- Address skeleton -->
-				<Skeleton class="h-5 w-1/2 rounded" />
-				<!-- Payment methods skeleton -->
-				<div class="flex space-x-2">
-					<Skeleton class="h-8 w-16 rounded" />
-					<Skeleton class="h-8 w-16 rounded" />
-					<Skeleton class="h-8 w-16 rounded" />
-				</div>
-				<!-- Stats grid skeleton -->
-				<div class="grid grid-cols-2 gap-2">
-					<Skeleton class="h-20 rounded-lg" />
-					<Skeleton class="h-20 rounded-lg" />
-				</div>
-				<!-- Large content skeleton -->
-				<Skeleton class="h-32 rounded-lg" />
-			</div>
+			<MerchantDetailsSkeleton class="px-6 pt-3 pb-6" />
 		{:else if merchant}
 			<div class="px-6 pt-3 pb-6">
 				{#if drawerView === 'boost'}

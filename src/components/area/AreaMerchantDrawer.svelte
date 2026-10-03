@@ -3,7 +3,7 @@ import { fly } from "svelte/transition";
 
 import CloseButton from "$components/CloseButton.svelte";
 import MerchantDetailsContent from "$components/MerchantDetailsContent.svelte";
-import Skeleton from "$components/Skeleton.svelte";
+import MerchantDetailsSkeleton from "$components/MerchantDetailsSkeleton.svelte";
 import {
 	handleBoost as boostMerchant,
 	isBoosted as checkBoosted,
@@ -119,19 +119,7 @@ function handleKeydown(event: KeyboardEvent) {
 
 		<div class="min-h-0 flex-1 overflow-x-visible overflow-y-auto">
 			{#if !merchant && isLoading}
-				<!-- Loading skeleton -->
-				<div class="space-y-4 px-5 pb-4">
-					<Skeleton class="h-6 w-3/4 rounded-lg" />
-					<Skeleton class="h-4 w-1/2 rounded" />
-					<div class="flex space-x-2">
-						<Skeleton class="h-8 w-14 rounded" />
-						<Skeleton class="h-8 w-14 rounded" />
-					</div>
-					<div class="grid grid-cols-2 gap-2">
-						<Skeleton class="h-16 rounded-lg" />
-						<Skeleton class="h-16 rounded-lg" />
-					</div>
-				</div>
+				<MerchantDetailsSkeleton class="px-5 pb-4" />
 			{:else if merchant}
 				<div class="px-5 pb-4">
 					<MerchantDetailsContent

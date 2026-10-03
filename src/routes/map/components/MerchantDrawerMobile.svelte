@@ -5,7 +5,7 @@ import BoostContent from "$components/BoostContent.svelte";
 import CollapseButton from "$components/CollapseButton.svelte";
 import Icon from "$components/Icon.svelte";
 import MerchantDetailsContent from "$components/MerchantDetailsContent.svelte";
-import Skeleton from "$components/Skeleton.svelte";
+import MerchantDetailsSkeleton from "$components/MerchantDetailsSkeleton.svelte";
 import { trackEvent } from "$lib/analytics";
 import { drawerGesture } from "$lib/drawerGestureController";
 import { _ } from "$lib/i18n";
@@ -291,14 +291,7 @@ export function openDrawer(id: number) {
 			on:touchcancel={drawerGesture.handleContentTouchEnd}
 		>
 			{#if !merchant && fetchingMerchant}
-				<div class="space-y-4 px-4 pt-2 pb-4">
-					<Skeleton class="h-6 w-3/4 rounded-lg" />
-					<Skeleton class="h-4 w-1/2 rounded" />
-					<div class="flex space-x-2">
-						<Skeleton class="h-8 w-16 rounded" />
-						<Skeleton class="h-8 w-16 rounded" />
-					</div>
-				</div>
+				<MerchantDetailsSkeleton class="px-4 pt-2 pb-4" />
 			{:else if merchant}
 				{#if !$expanded}
 					<!-- Peek content wrapper with swipe handlers - allows swiping from anywhere when collapsed -->
