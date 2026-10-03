@@ -85,7 +85,7 @@ function handleClick() {
 				<div class="flex items-center justify-between gap-1">
 					<div class="flex items-center gap-1 min-w-0">
 						{#if showSkeleton}
-							<Skeleton class="h-4 w-32 rounded" />
+							<Skeleton as="span" class="block h-4 w-32 rounded" />
 						{:else if displayData.name}
 							<span
 								class="truncate text-sm font-medium {isBoosted
@@ -119,7 +119,7 @@ function handleClick() {
 						{enrichedData.address}
 					</p>
 				{:else if showSkeleton}
-					<Skeleton class="mt-0.5 h-3 w-24 rounded" />
+					<Skeleton as="span" class="mt-0.5 block h-3 w-24 rounded" />
 				{/if}
 
 				<!-- Status badges -->
@@ -134,7 +134,7 @@ function handleClick() {
 						</span>
 					</div>
 				{:else if showSkeleton}
-					<Skeleton class="mt-1.5 h-4 w-20 rounded" />
+					<Skeleton as="span" class="mt-1.5 block h-4 w-20 rounded" />
 				{/if}
 			</div>
 
