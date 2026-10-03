@@ -1,11 +1,10 @@
 <script lang="ts">
 import { onMount } from "svelte";
-import type { Locales } from "svelte-time";
 import Time from "svelte-time";
 
 import Icon from "$components/Icon.svelte";
 import { trackEvent } from "$lib/analytics";
-import { loadDayjsLocale } from "$lib/dayjsLocale";
+import { createTimeLocale } from "$lib/dayjsLocale";
 import { _, locale } from "$lib/i18n";
 import type { PlacePhotoSource } from "$lib/placePhotos";
 import {
@@ -35,13 +34,7 @@ let loadError = $state(false);
 let confirmingId = $state<number | null>(null);
 let deletingId = $state<number | null>(null);
 
-let timeLocale = $state<Locales>("en");
-$effect(() => {
-	const code = $locale;
-	loadDayjsLocale(code).then((key) => {
-		if ($locale === code) timeLocale = key;
-	});
-});
+const timeLocale = createTimeLocale(locale);
 
 // Places come from the app-wide sync; a place that's gone (or not synced
 // yet) still gets a readable label
@@ -129,7 +122,7 @@ onMount(async () => {
 							{placeName(photo.place_id)}
 						</a>
 						<p class="text-xs text-body dark:text-white/70">
-							<Time timestamp={photo.created_at} relative locale={timeLocale} />
+							<Time timestamp={photo.created_at} relative locale={$timeLocale} />
 						</p>
 						{#if confirmingId === photo.id}
 							<div class="flex items-center gap-2">
