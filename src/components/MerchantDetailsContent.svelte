@@ -11,6 +11,7 @@ import MerchantIssuesRow from "$components/MerchantIssuesRow.svelte";
 import OpenStatusPill from "$components/OpenStatusPill.svelte";
 import PaymentMethodPills from "$components/PaymentMethodPills.svelte";
 import SaveButton from "$components/SaveButton.svelte";
+import Skeleton from "$components/Skeleton.svelte";
 import { trackEvent } from "$lib/analytics";
 import { API_BASE } from "$lib/api-base";
 import {
@@ -156,7 +157,7 @@ async function fetchComments(placeId: number) {
 					{displayName}
 				</a>
 			{:else if isLoading}
-				<div class="h-7 w-3/4 animate-pulse rounded-lg bg-link/50"></div>
+				<Skeleton class="h-7 w-3/4 rounded-lg" />
 			{/if}
 
 			{#if merchant.address}
@@ -174,7 +175,7 @@ async function fetchComments(placeId: number) {
 					/>
 				</p>
 			{:else if isLoading}
-				<div class="mt-1 h-5 w-1/2 animate-pulse rounded bg-link/50"></div>
+				<Skeleton class="mt-1 h-5 w-1/2 rounded" />
 			{/if}
 
 			{#if merchant.opening_hours}
@@ -306,8 +307,8 @@ async function fetchComments(placeId: number) {
 			</div>
 		{:else if isLoading}
 			<div class="flex gap-2 py-2.5">
-				<div class="h-7 w-20 animate-pulse rounded-full bg-link/50"></div>
-				<div class="h-7 w-20 animate-pulse rounded-full bg-link/50"></div>
+				<Skeleton class="h-7 w-20 rounded-full" />
+				<Skeleton class="h-7 w-20 rounded-full" />
 			</div>
 		{/if}
 
@@ -324,7 +325,7 @@ async function fetchComments(placeId: number) {
 					{formatVerifiedHuman(merchant.verified_at)}
 				</span>
 			{:else if isLoading}
-				<div class="h-5 w-32 animate-pulse rounded bg-link/50"></div>
+				<Skeleton class="h-5 w-32 rounded" />
 			{:else}
 				<Icon
 					w="16"
@@ -365,10 +366,10 @@ async function fetchComments(placeId: number) {
 	<!-- Comments Section -->
 	{#if commentsLoading}
 		<div class="space-y-2">
-			<div class="h-4 w-24 animate-pulse rounded bg-link/50"></div>
+			<Skeleton class="h-4 w-24 rounded" />
 			<div class="space-y-2">
-				<div class="h-12 w-full animate-pulse rounded bg-link/50"></div>
-				<div class="h-12 w-full animate-pulse rounded bg-link/50"></div>
+				<Skeleton class="h-12 w-full rounded" />
+				<Skeleton class="h-12 w-full rounded" />
 			</div>
 		</div>
 	{:else if commentsError}

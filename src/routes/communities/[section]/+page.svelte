@@ -6,6 +6,7 @@ import { _ } from "svelte-i18n";
 import FormSelect from "$components/form/FormSelect.svelte";
 import HeaderPlaceholder from "$components/layout/HeaderPlaceholder.svelte";
 import PrimaryButton from "$components/PrimaryButton.svelte";
+import Skeleton from "$components/Skeleton.svelte";
 import { getOrganizationDisplayName } from "$lib/organizationDisplayNames";
 import { areaError, areas, reportError, syncStatus } from "$lib/store";
 import { areasSync } from "$lib/sync/areas";
@@ -332,12 +333,12 @@ onDestroy(() => {
 			<div class="absolute top-0 left-0 flex h-full w-full flex-col justify-between">
 				<div class="flex flex-wrap justify-center">
 					{#each Array(6) as _, i (i)}
-						<div class="m-2 w-[94px] animate-pulse rounded-sm bg-link/50 py-2"></div>
+						<Skeleton class="m-2 w-[94px] rounded-sm py-2" />
 					{/each}
 				</div>
-				<div
-					class="mx-auto h-[225px] w-[225px] animate-pulse rounded-full bg-link/50 md:h-[300px] md:w-[300px]"
-				></div>
+				<Skeleton
+					class="mx-auto h-[225px] w-[225px] rounded-full md:h-[300px] md:w-[300px]"
+				/>
 			</div>
 		{/if}
 		<canvas bind:this={continentChartCanvas} width="100%" height="350"></canvas>

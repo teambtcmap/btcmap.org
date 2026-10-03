@@ -1,5 +1,6 @@
 <script lang="ts">
 import LoadingSpinner from "$components/LoadingSpinner.svelte";
+import Skeleton from "$components/Skeleton.svelte";
 
 export let title: string;
 export let stat: number | undefined;
@@ -41,7 +42,7 @@ export let loading: boolean;
 			{/if}
 		{:else}
 			<!-- loading skeleton -->
-			<span class="h-[48px] w-[150px] animate-pulse rounded-xl bg-link/50"></span>
+			<Skeleton as="span" class="h-[48px] w-[150px] rounded-xl" />
 		{/if}
 	</div>
 </div>
