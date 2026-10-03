@@ -1,5 +1,4 @@
 <script lang="ts">
-import { isAxiosError } from "axios";
 import { onMount } from "svelte";
 import type { Locales } from "svelte-time";
 import Time from "svelte-time";
@@ -10,6 +9,7 @@ import { loadDayjsLocale } from "$lib/dayjsLocale";
 import { _, locale } from "$lib/i18n";
 import type { PlacePhotoSource } from "$lib/placePhotos";
 import {
+	deleteErrorKey,
 	deletePlacePhoto,
 	fetchMyPlacePhotos,
 	photoPagePath,
@@ -65,11 +65,7 @@ const confirmDelete = async (photo: PlaceImage) => {
 		successToast($_("placePhotos.deleted"));
 	} catch (error) {
 		console.error("my photos: delete failed", error);
-		errToast(
-			isAxiosError(error) && error.response?.status === 403
-				? $_("placePhotos.deleteForbidden")
-				: $_("placePhotos.deleteFailed"),
-		);
+		errToast($_(deleteErrorKey(error)));
 	} finally {
 		deletingId = null;
 		confirmingId = null;
@@ -150,7 +146,7 @@ onMount(async () => {
 									onclick={() => (confirmingId = null)}
 									class="rounded-lg px-3 py-1.5 text-xs font-semibold text-primary hover:bg-gray-100 dark:text-white dark:hover:bg-white/10"
 								>
-									{$_("placePhotos.cancel")}
+									{$_("forms.cancel")}
 								</button>
 							</div>
 						{:else}
