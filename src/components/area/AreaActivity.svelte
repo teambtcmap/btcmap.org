@@ -3,6 +3,7 @@ import { _ } from "svelte-i18n";
 
 import AreaFeed from "$components/area/AreaFeed.svelte";
 import Icon from "$components/Icon.svelte";
+import Skeleton from "$components/Skeleton.svelte";
 import type { Tagger } from "$lib/types.js";
 
 import { resolve } from "$app/paths";
@@ -61,8 +62,8 @@ let taggerDiv: HTMLDivElement;
 				<div class="flex flex-wrap items-center justify-center">
 					{#each Array(5) as _, index (index)}
 						<div class="m-4 space-y-1 transition-transform hover:scale-110">
-							<p class="mx-auto h-20 w-20 animate-pulse rounded-full bg-link/50"></p>
-							<p class="mx-auto h-5 w-28 animate-pulse rounded bg-link/50"></p>
+							<Skeleton class="mx-auto h-20 w-20 rounded-full" />
+							<Skeleton class="mx-auto h-5 w-28 rounded" />
 						</div>
 					{/each}
 				</div>

@@ -1,6 +1,7 @@
 <script lang="ts">
 import BoostBadge from "$components/BoostBadge.svelte";
 import Icon from "$components/Icon.svelte";
+import Skeleton from "$components/Skeleton.svelte";
 import {
 	CATEGORY_COLOR_CLASSES,
 	getIconColorWithFallback,
@@ -84,7 +85,7 @@ function handleClick() {
 				<div class="flex items-center justify-between gap-1">
 					<div class="flex items-center gap-1 min-w-0">
 						{#if showSkeleton}
-							<div class="h-4 w-32 animate-pulse rounded bg-link/50"></div>
+							<Skeleton class="h-4 w-32 rounded" />
 						{:else if displayData.name}
 							<span
 								class="truncate text-sm font-medium {isBoosted
@@ -118,7 +119,7 @@ function handleClick() {
 						{enrichedData.address}
 					</p>
 				{:else if showSkeleton}
-					<div class="mt-0.5 h-3 w-24 animate-pulse rounded bg-link/50"></div>
+					<Skeleton class="mt-0.5 h-3 w-24 rounded" />
 				{/if}
 
 				<!-- Status badges -->
@@ -133,7 +134,7 @@ function handleClick() {
 						</span>
 					</div>
 				{:else if showSkeleton}
-					<div class="mt-1.5 h-4 w-20 animate-pulse rounded bg-link/50"></div>
+					<Skeleton class="mt-1.5 h-4 w-20 rounded" />
 				{/if}
 			</div>
 

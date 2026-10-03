@@ -2,6 +2,7 @@
 import BoostBadge from "$components/BoostBadge.svelte";
 import Icon from "$components/Icon.svelte";
 import PaymentMethodPill from "$components/PaymentMethodPill.svelte";
+import Skeleton from "$components/Skeleton.svelte";
 import { _ } from "$lib/i18n";
 import type { Place } from "$lib/types";
 
@@ -27,7 +28,7 @@ $: hasVerification = merchant.verified_at !== undefined;
 					{merchant.name}
 				</h3>
 			{:else if isLoading}
-				<div class="h-6 w-3/4 animate-pulse rounded bg-link/50"></div>
+				<Skeleton class="h-6 w-3/4 rounded" />
 			{/if}
 		</div>
 
@@ -52,8 +53,8 @@ $: hasVerification = merchant.verified_at !== undefined;
 				{/if}
 			{:else if isLoading}
 				<div class="flex gap-1.5">
-					<div class="h-6 w-16 animate-pulse rounded-full bg-link/50"></div>
-					<div class="h-6 w-16 animate-pulse rounded-full bg-link/50"></div>
+					<Skeleton class="h-6 w-16 rounded-full" />
+					<Skeleton class="h-6 w-16 rounded-full" />
 				</div>
 			{/if}
 		</div>
@@ -73,7 +74,7 @@ $: hasVerification = merchant.verified_at !== undefined;
 					</div>
 				{/if}
 			{:else if isLoading}
-				<div class="h-4 w-16 animate-pulse rounded bg-link/50"></div>
+				<Skeleton class="h-4 w-16 rounded" />
 			{/if}
 		</div>
 	</div>

@@ -4,6 +4,7 @@ import type { HTMLInputAttributes } from "svelte/elements";
 
 import FieldError from "$components/form/FieldError.svelte";
 import Icon from "$components/Icon.svelte";
+import Skeleton from "$components/Skeleton.svelte";
 import { fieldBorderClasses } from "$lib/fieldStyles";
 import { _ } from "$lib/i18n";
 
@@ -63,7 +64,7 @@ const errorId = $derived(`${id}-error`);
 	<div class="space-y-2">
 		<div class="flex items-center justify-center rounded-2xl border-2 border-input py-1">
 			{#if loading}
-				<div class="h-[100px] w-[275px] animate-pulse bg-link/50"></div>
+				<Skeleton class="h-[100px] w-[275px]" />
 			{:else}
 				{@html DOMPurify.sanitize(content)}
 			{/if}

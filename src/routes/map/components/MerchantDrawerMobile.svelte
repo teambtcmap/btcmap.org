@@ -5,6 +5,7 @@ import BoostContent from "$components/BoostContent.svelte";
 import CollapseButton from "$components/CollapseButton.svelte";
 import Icon from "$components/Icon.svelte";
 import MerchantDetailsContent from "$components/MerchantDetailsContent.svelte";
+import Skeleton from "$components/Skeleton.svelte";
 import { trackEvent } from "$lib/analytics";
 import { drawerGesture } from "$lib/drawerGestureController";
 import { _ } from "$lib/i18n";
@@ -291,11 +292,11 @@ export function openDrawer(id: number) {
 		>
 			{#if !merchant && fetchingMerchant}
 				<div class="space-y-4 px-4 pt-2 pb-4">
-					<div class="h-6 w-3/4 animate-pulse rounded-lg bg-link/50"></div>
-					<div class="h-4 w-1/2 animate-pulse rounded bg-link/50"></div>
+					<Skeleton class="h-6 w-3/4 rounded-lg" />
+					<Skeleton class="h-4 w-1/2 rounded" />
 					<div class="flex space-x-2">
-						<div class="h-8 w-16 animate-pulse rounded bg-link/50"></div>
-						<div class="h-8 w-16 animate-pulse rounded bg-link/50"></div>
+						<Skeleton class="h-8 w-16 rounded" />
+						<Skeleton class="h-8 w-16 rounded" />
 					</div>
 				</div>
 			{:else if merchant}

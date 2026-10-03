@@ -2,6 +2,7 @@
 import tippy from "tippy.js";
 
 import Icon from "$components/Icon.svelte";
+import Skeleton from "$components/Skeleton.svelte";
 
 export let title: string;
 export let stat: number | undefined;
@@ -36,7 +37,7 @@ $: tooltipElement &&
 			{/if}
 		{:else}
 			<!-- loading skeleton -->
-			<span class="h-[48px] w-[150px] animate-pulse rounded-xl bg-link/50"></span>
+			<Skeleton as="span" class="h-[48px] w-[150px] rounded-xl" />
 		{/if}
 	</div>
 </div>

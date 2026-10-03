@@ -5,6 +5,7 @@ import BoostContent from "$components/BoostContent.svelte";
 import CloseButton from "$components/CloseButton.svelte";
 import Icon from "$components/Icon.svelte";
 import MerchantDetailsContent from "$components/MerchantDetailsContent.svelte";
+import Skeleton from "$components/Skeleton.svelte";
 import {
 	MAP_PANEL_MARGIN,
 	MERCHANT_LIST_WIDTH,
@@ -150,22 +151,22 @@ export function openDrawer(id: number) {
 			<!-- Loading skeleton -->
 			<div class="space-y-4 px-6 pt-3 pb-6">
 				<!-- Title skeleton -->
-				<div class="h-7 w-3/4 animate-pulse rounded-lg bg-link/50"></div>
+				<Skeleton class="h-7 w-3/4 rounded-lg" />
 				<!-- Address skeleton -->
-				<div class="h-5 w-1/2 animate-pulse rounded bg-link/50"></div>
+				<Skeleton class="h-5 w-1/2 rounded" />
 				<!-- Payment methods skeleton -->
 				<div class="flex space-x-2">
-					<div class="h-8 w-16 animate-pulse rounded bg-link/50"></div>
-					<div class="h-8 w-16 animate-pulse rounded bg-link/50"></div>
-					<div class="h-8 w-16 animate-pulse rounded bg-link/50"></div>
+					<Skeleton class="h-8 w-16 rounded" />
+					<Skeleton class="h-8 w-16 rounded" />
+					<Skeleton class="h-8 w-16 rounded" />
 				</div>
 				<!-- Stats grid skeleton -->
 				<div class="grid grid-cols-2 gap-2">
-					<div class="h-20 animate-pulse rounded-lg bg-link/50"></div>
-					<div class="h-20 animate-pulse rounded-lg bg-link/50"></div>
+					<Skeleton class="h-20 rounded-lg" />
+					<Skeleton class="h-20 rounded-lg" />
 				</div>
 				<!-- Large content skeleton -->
-				<div class="h-32 animate-pulse rounded-lg bg-link/50"></div>
+				<Skeleton class="h-32 rounded-lg" />
 			</div>
 		{:else if merchant}
 			<div class="px-6 pt-3 pb-6">

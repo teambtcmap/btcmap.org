@@ -1,5 +1,6 @@
 <script lang="ts">
 import MerchantCard from "$components/area/MerchantCard.svelte";
+import Skeleton from "$components/Skeleton.svelte";
 import TextLink from "$components/TextLink.svelte";
 import { _ } from "$lib/i18n";
 import { placementEntryUrl } from "$lib/placementMode";
@@ -36,7 +37,7 @@ $: latest = filteredPlaces?.toSorted((a, b) => b.id - a.id).slice(0, 6);
 			{#if !dataInitialized}
 				<div class="grid w-full grid-cols-1 gap-6 lg:grid-cols-2 xl:grid-cols-3">
 					{#each Array(3) as _, index (index)}
-						<div class="h-56 animate-pulse rounded-2xl bg-link/50"></div>
+						<Skeleton class="h-56 rounded-2xl" />
 					{/each}
 				</div>
 			{:else if boosts.length}
@@ -68,7 +69,7 @@ $: latest = filteredPlaces?.toSorted((a, b) => b.id - a.id).slice(0, 6);
 			{#if !dataInitialized}
 				<div class="grid w-full grid-cols-1 gap-6 lg:grid-cols-2 xl:grid-cols-3">
 					{#each Array(3) as _, index (index)}
-						<div class="h-56 animate-pulse rounded-2xl bg-link/50"></div>
+						<Skeleton class="h-56 rounded-2xl" />
 					{/each}
 				</div>
 			{:else if latest.length}

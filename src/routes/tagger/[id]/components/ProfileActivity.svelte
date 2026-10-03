@@ -7,6 +7,7 @@ import { untrack } from "svelte";
 import LeaderboardPagination from "$components/leaderboard/LeaderboardPagination.svelte";
 import LeaderboardSearch from "$components/leaderboard/LeaderboardSearch.svelte";
 import SortableHeaderCell from "$components/leaderboard/SortableHeaderCell.svelte";
+import Skeleton from "$components/Skeleton.svelte";
 import { _ } from "$lib/i18n";
 import type { BtcmapTableFeatures } from "$lib/tableFeatures";
 import { btcmapTableFeatures, resolveAriaSort } from "$lib/tableFeatures";
@@ -143,13 +144,13 @@ const searchDebounce = debounce((e) => handleKeyUp(e));
 							{#each Array(pagination.pageSize) as _, i (i)}
 								<tr class="border-b border-gray-300/50 dark:border-white/50">
 									<td class="w-2/3 px-5 py-3">
-										<div class="h-6 animate-pulse rounded bg-link/20"></div>
+										<Skeleton tone="subtle" class="h-6 rounded" />
 									</td>
 									<td class="w-1/6 px-5 py-3">
-										<div class="h-6 animate-pulse rounded bg-link/20"></div>
+										<Skeleton tone="subtle" class="h-6 rounded" />
 									</td>
 									<td class="w-1/6 px-5 py-3">
-										<div class="h-6 animate-pulse rounded bg-link/20"></div>
+										<Skeleton tone="subtle" class="h-6 rounded" />
 									</td>
 								</tr>
 							{/each}
@@ -200,11 +201,11 @@ const searchDebounce = debounce((e) => handleKeyUp(e));
 	{:else}
 		<div class="p-5">
 			{#each Array(10) as _, i (i)}
-				<div class="mb-3 animate-pulse">
+				<div class="mb-3">
 					<div class="flex space-x-4">
-						<div class="h-4 w-2/3 rounded bg-link/20"></div>
-						<div class="h-4 w-1/6 rounded bg-link/20"></div>
-						<div class="h-4 w-1/6 rounded bg-link/20"></div>
+						<Skeleton tone="subtle" class="h-4 w-2/3 rounded" />
+						<Skeleton tone="subtle" class="h-4 w-1/6 rounded" />
+						<Skeleton tone="subtle" class="h-4 w-1/6 rounded" />
 					</div>
 				</div>
 			{/each}
