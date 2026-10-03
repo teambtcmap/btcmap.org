@@ -61,7 +61,8 @@
 		"login": "Aanmelden",
 		"signup": "Registreren",
 		"logout": "Afmelden",
-		"backupAccount": "Back-up account"
+		"backupAccount": "Back-up account",
+		"myPhotos": "Mijn foto's"
 	},
 	"saved": {
 		"title": "Mijn opgeslagen items",
@@ -145,10 +146,7 @@
 			"titlePlace": "Sla deze locatie op",
 			"titleArea": "Sla dit gebied op",
 			"descriptionPlace": "Meld je aan met je huidige account of maak een nieuw account aan, zodat je opgeslagen locaties bewaard blijven.",
-			"descriptionArea": "Meld je aan met je huidige account of maak een nieuw account aan, zodat je opgeslagen gebieden bewaard blijven.",
-			"createAccount": "Account aanmaken",
-			"login": "Aanmelden",
-			"back": "Terug"
+			"descriptionArea": "Meld je aan met je huidige account of maak een nieuw account aan, zodat je opgeslagen gebieden bewaard blijven."
 		}
 	},
 	"search": {
@@ -563,7 +561,8 @@
 		"searchButton": "Zoek 🔍",
 		"address": "Adres",
 		"captchaPlaceholder": "Typ de tekst van de captcha over.",
-		"captchaRequired": "Typ de tekens over die in de afbeelding staan."
+		"captchaRequired": "Typ de tekens over die in de afbeelding staan.",
+		"cancel": "Annuleren"
 	},
 	"openingHours": {
 		"open247": "24/7 open",
@@ -1318,5 +1317,47 @@
 			"netlifyDocsAnalytics": "Netlify Documentatie - Analytics",
 			"netlifyDocsHowAnalytics": "Netlify Documentatie - Hoe Analytics werkt"
 		}
+	},
+	"placePhotos": {
+		"title": "Foto's",
+		"add": "Foto toevoegen",
+		"uploading": "Foto uploaden…",
+		"uploaded": "{count, plural, one {Bedankt! Je foto staat online.} other {Bedankt! Je # foto's staan online.}}",
+		"uploadFailed": "{count, plural, one {Een foto kon niet worden geüpload. Probeer het opnieuw.} other {# foto's konden niet worden geüpload. Probeer het opnieuw.}}",
+		"photoAlt": "Foto {n} van {total}",
+		"previous": "Vorige foto",
+		"next": "Volgende foto",
+		"close": "Sluiten",
+		"promptTitle": "Foto toevoegen",
+		"promptDescription": "Log in met je bestaande account of maak een nieuw account aan om foto's van deze plek toe te voegen.",
+		"tooMany": "Je kunt maximaal {max} foto's tegelijk toevoegen. De eerste {max} worden geüpload.",
+		"emptyTitle": "Voeg als eerste een foto toe",
+		"emptyHint": "Gevel, uithangbord, of de bitcoin-sticker of QR-code",
+		"morePhotos": "Meer foto's",
+		"communityPhoto": "Communityfoto",
+		"copyLink": "Link naar foto kopiëren",
+		"linkCopied": "Link gekopieerd",
+		"copyLinkFailed": "Kan de link niet kopiëren",
+		"moreActions": "Meer acties",
+		"credit": "Foto door {name}",
+		"deletePhoto": "Foto verwijderen",
+		"deleteConfirm": "Deze foto verwijderen? Dit kan niet ongedaan worden gemaakt.",
+		"deleteConfirmAction": "Verwijderen",
+		"deleted": "Foto verwijderd",
+		"deleteFailed": "Kan de foto niet verwijderen. Probeer het opnieuw.",
+		"deleteForbidden": "Je kunt alleen je eigen foto's verwijderen.",
+		"undo": "Ongedaan maken",
+		"undone": "{count, plural, one {Foto verwijderd} other {# foto's verwijderd}}"
+	},
+	"authPrompt": {
+		"createAccount": "Account aanmaken",
+		"login": "Aanmelden",
+		"back": "Terug"
+	},
+	"myPhotos": {
+		"title": "Mijn foto's",
+		"empty": "Je hebt nog geen foto's toegevoegd. Open een plek en tik op 'Foto toevoegen'.",
+		"loadError": "Kan je foto's niet laden. Probeer het opnieuw.",
+		"unknownPlace": "Plek #{id}"
 	}
 }

@@ -61,7 +61,8 @@
 		"login": "Accedi",
 		"signup": "Registrati",
 		"logout": "Esci",
-		"backupAccount": "Backup dell'account"
+		"backupAccount": "Backup dell'account",
+		"myPhotos": "Le mie foto"
 	},
 	"saved": {
 		"title": "I miei salvati",
@@ -145,10 +146,7 @@
 			"titlePlace": "Salva questo posto",
 			"titleArea": "Salva questa area",
 			"descriptionPlace": "Accedi al tuo account esistente, o creane uno nuovo per mantenere i tuoi posti salvati.",
-			"descriptionArea": "Accedi al tuo account esistente, o creane uno nuovo per mantenere le tue aree salvate.",
-			"createAccount": "Crea account",
-			"login": "Accedi",
-			"back": "Indietro"
+			"descriptionArea": "Accedi al tuo account esistente, o creane uno nuovo per mantenere le tue aree salvate."
 		}
 	},
 	"search": {
@@ -563,7 +561,8 @@
 		"searchButton": "Cerca 🔍",
 		"address": "Indirizzo",
 		"captchaPlaceholder": "Inserisci il testo del captcha.",
-		"captchaRequired": "Inserisci i caratteri dell'immagine."
+		"captchaRequired": "Inserisci i caratteri dell'immagine.",
+		"cancel": "Annulla"
 	},
 	"openingHours": {
 		"open247": "Aperto 24 ore su 24, 7 giorni su 7",
@@ -1318,5 +1317,47 @@
 			"netlifyDocsAnalytics": "Netlify Docs - Analytics",
 			"netlifyDocsHowAnalytics": "Netlify Docs - Come funzionano le Analytics"
 		}
+	},
+	"placePhotos": {
+		"title": "Foto",
+		"add": "Aggiungi foto",
+		"uploading": "Caricamento foto…",
+		"uploaded": "{count, plural, one {Grazie! La tua foto è online.} other {Grazie! Le tue # foto sono online.}}",
+		"uploadFailed": "{count, plural, one {Impossibile caricare una foto. Riprova.} other {Impossibile caricare # foto. Riprova.}}",
+		"photoAlt": "Foto {n} di {total}",
+		"previous": "Foto precedente",
+		"next": "Foto successiva",
+		"close": "Chiudi",
+		"promptTitle": "Aggiungi una foto",
+		"promptDescription": "Accedi al tuo account esistente o creane uno nuovo per aggiungere foto di questo luogo.",
+		"tooMany": "Puoi aggiungere fino a {max} foto alla volta. Verranno caricate le prime {max}.",
+		"emptyTitle": "Aggiungi tu la prima foto",
+		"emptyHint": "Vetrina, insegna o l'adesivo o il QR bitcoin",
+		"morePhotos": "Altre foto",
+		"communityPhoto": "Foto della community",
+		"copyLink": "Copia link alla foto",
+		"linkCopied": "Link copiato",
+		"copyLinkFailed": "Impossibile copiare il link",
+		"moreActions": "Altre azioni",
+		"credit": "Foto di {name}",
+		"deletePhoto": "Elimina foto",
+		"deleteConfirm": "Eliminare questa foto? L'operazione non può essere annullata.",
+		"deleteConfirmAction": "Elimina",
+		"deleted": "Foto eliminata",
+		"deleteFailed": "Impossibile eliminare la foto. Riprova.",
+		"deleteForbidden": "Puoi eliminare solo le tue foto.",
+		"undo": "Annulla",
+		"undone": "{count, plural, one {Foto rimossa} other {# foto rimosse}}"
+	},
+	"authPrompt": {
+		"createAccount": "Crea account",
+		"login": "Accedi",
+		"back": "Indietro"
+	},
+	"myPhotos": {
+		"title": "Le mie foto",
+		"empty": "Non hai ancora aggiunto foto. Apri un luogo e tocca «Aggiungi foto».",
+		"loadError": "Impossibile caricare le tue foto. Riprova.",
+		"unknownPlace": "Luogo #{id}"
 	}
 }

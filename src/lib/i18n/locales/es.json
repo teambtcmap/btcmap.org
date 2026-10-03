@@ -54,7 +54,8 @@
 		"taggingIssues": "Problemas de Etiquetado",
 		"communities": "Comunidades",
 		"countries": "Países",
-		"signup": "Registrarse"
+		"signup": "Registrarse",
+		"myPhotos": "Mis fotos"
 	},
 	"search": {
 		"placeholderPlaces": "Buscar lugares...",
@@ -461,7 +462,8 @@
 		"searchButton": "Buscar 🔍",
 		"address": "Dirección",
 		"captchaPlaceholder": "Por favor ingresa el texto del captcha.",
-		"captchaRequired": "Introduce los caracteres de la imagen."
+		"captchaRequired": "Introduce los caracteres de la imagen.",
+		"cancel": "Cancelar"
 	},
 	"openingHours": {
 		"open247": "Abierto 24/7",
@@ -1240,5 +1242,47 @@
 		"error": "No se pudo crear la cuenta. Es posible que el nombre de usuario ya esté en uso.",
 		"haveAccount": "¿Ya tienes una cuenta?",
 		"signIn": "Iniciar sesión con contraseña o Nostr"
+	},
+	"placePhotos": {
+		"title": "Fotos",
+		"add": "Añadir foto",
+		"uploading": "Subiendo foto…",
+		"uploaded": "{count, plural, one {¡Gracias! Tu foto ya está publicada.} other {¡Gracias! Tus # fotos ya están publicadas.}}",
+		"uploadFailed": "{count, plural, one {No se pudo subir una foto. Inténtalo de nuevo.} other {No se pudieron subir # fotos. Inténtalo de nuevo.}}",
+		"photoAlt": "Foto {n} de {total}",
+		"previous": "Foto anterior",
+		"next": "Foto siguiente",
+		"close": "Cerrar",
+		"promptTitle": "Añadir una foto",
+		"promptDescription": "Inicia sesión con tu cuenta o crea una nueva para añadir fotos de este lugar.",
+		"tooMany": "Puedes añadir hasta {max} fotos a la vez. Se subirán las primeras {max}.",
+		"emptyTitle": "Sé el primero en añadir una foto",
+		"emptyHint": "Fachada, letrero o la pegatina o el QR de bitcoin",
+		"morePhotos": "Más fotos",
+		"communityPhoto": "Foto de la comunidad",
+		"copyLink": "Copiar enlace a la foto",
+		"linkCopied": "Enlace copiado",
+		"copyLinkFailed": "No se pudo copiar el enlace",
+		"moreActions": "Más acciones",
+		"credit": "Foto de {name}",
+		"deletePhoto": "Eliminar foto",
+		"deleteConfirm": "¿Eliminar esta foto? No se puede deshacer.",
+		"deleteConfirmAction": "Eliminar",
+		"deleted": "Foto eliminada",
+		"deleteFailed": "No se pudo eliminar la foto. Inténtalo de nuevo.",
+		"deleteForbidden": "Solo puedes eliminar tus propias fotos.",
+		"undo": "Deshacer",
+		"undone": "{count, plural, one {Foto eliminada} other {# fotos eliminadas}}"
+	},
+	"authPrompt": {
+		"createAccount": "Crear cuenta",
+		"login": "Iniciar sesión",
+		"back": "Volver"
+	},
+	"myPhotos": {
+		"title": "Mis fotos",
+		"empty": "Aún no has añadido fotos. Abre un lugar y toca «Añadir foto».",
+		"loadError": "No se pudieron cargar tus fotos. Inténtalo de nuevo.",
+		"unknownPlace": "Lugar #{id}"
 	}
 }

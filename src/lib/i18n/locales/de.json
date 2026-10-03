@@ -54,7 +54,8 @@
 		"taggingIssues": "Tagging-Probleme",
 		"communities": "Communities",
 		"countries": "Länder",
-		"signup": "Registrieren"
+		"signup": "Registrieren",
+		"myPhotos": "Meine Fotos"
 	},
 	"search": {
 		"placeholderPlaces": "Orte suchen...",
@@ -461,7 +462,8 @@
 		"searchButton": "Suchen 🔍",
 		"address": "Adresse",
 		"captchaPlaceholder": "Bitte gib den Captcha-Text ein.",
-		"captchaRequired": "Gib die Zeichen aus dem Bild ein."
+		"captchaRequired": "Gib die Zeichen aus dem Bild ein.",
+		"cancel": "Abbrechen"
 	},
 	"openingHours": {
 		"open247": "Durchgehend geöffnet (24/7)",
@@ -1240,5 +1242,47 @@
 		"error": "Konto konnte nicht erstellt werden. Der Benutzername ist möglicherweise bereits vergeben.",
 		"haveAccount": "Du hast bereits ein Konto?",
 		"signIn": "Mit Passwort oder Nostr anmelden"
+	},
+	"placePhotos": {
+		"title": "Fotos",
+		"add": "Foto hinzufügen",
+		"uploading": "Foto wird hochgeladen…",
+		"uploaded": "{count, plural, one {Danke! Dein Foto ist online.} other {Danke! Deine # Fotos sind online.}}",
+		"uploadFailed": "{count, plural, one {Ein Foto konnte nicht hochgeladen werden. Bitte versuche es erneut.} other {# Fotos konnten nicht hochgeladen werden. Bitte versuche es erneut.}}",
+		"photoAlt": "Foto {n} von {total}",
+		"previous": "Vorheriges Foto",
+		"next": "Nächstes Foto",
+		"close": "Schließen",
+		"promptTitle": "Foto hinzufügen",
+		"promptDescription": "Melde dich mit deinem bestehenden Konto an oder erstelle ein neues, um Fotos dieses Ortes hinzuzufügen.",
+		"tooMany": "Du kannst bis zu {max} Fotos auf einmal hinzufügen. Die ersten {max} werden hochgeladen.",
+		"emptyTitle": "Füge das erste Foto hinzu",
+		"emptyHint": "Ladenfront, Schild oder der Bitcoin-Aufkleber bzw. QR-Code",
+		"morePhotos": "Weitere Fotos",
+		"communityPhoto": "Community-Foto",
+		"copyLink": "Link zum Foto kopieren",
+		"linkCopied": "Link kopiert",
+		"copyLinkFailed": "Link konnte nicht kopiert werden",
+		"moreActions": "Weitere Aktionen",
+		"credit": "Foto von {name}",
+		"deletePhoto": "Foto löschen",
+		"deleteConfirm": "Dieses Foto löschen? Das kann nicht rückgängig gemacht werden.",
+		"deleteConfirmAction": "Löschen",
+		"deleted": "Foto gelöscht",
+		"deleteFailed": "Das Foto konnte nicht gelöscht werden. Bitte versuche es erneut.",
+		"deleteForbidden": "Du kannst nur deine eigenen Fotos löschen.",
+		"undo": "Rückgängig",
+		"undone": "{count, plural, one {Foto entfernt} other {# Fotos entfernt}}"
+	},
+	"authPrompt": {
+		"createAccount": "Konto erstellen",
+		"login": "Anmelden",
+		"back": "Zurück"
+	},
+	"myPhotos": {
+		"title": "Meine Fotos",
+		"empty": "Du hast noch keine Fotos hinzugefügt. Öffne einen Ort und tippe auf „Foto hinzufügen“.",
+		"loadError": "Deine Fotos konnten nicht geladen werden. Bitte versuche es erneut.",
+		"unknownPlace": "Ort #{id}"
 	}
 }

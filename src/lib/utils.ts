@@ -95,8 +95,12 @@ export const warningToast = (m: string) => {
 	toast.warning(m, { duration: 10000 });
 };
 
-export const successToast = (m: string) => {
-	toast.success(m);
+// A button on a toast, e.g. "Undo"
+export type ToastAction = { label: string; onClick: () => void };
+
+// An action keeps the toast up long enough to reach it
+export const successToast = (m: string, action?: ToastAction) => {
+	toast.success(m, action ? { action, duration: 8000 } : undefined);
 };
 
 export function getRandomColor() {

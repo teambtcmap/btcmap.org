@@ -61,7 +61,8 @@
 		"login": "Log in",
 		"signup": "Sign up",
 		"logout": "Log out",
-		"backupAccount": "Back up account"
+		"backupAccount": "Back up account",
+		"myPhotos": "My photos"
 	},
 	"saved": {
 		"title": "My Saved",
@@ -145,10 +146,7 @@
 			"titlePlace": "Save this place",
 			"titleArea": "Save this area",
 			"descriptionPlace": "Log in to your existing account, or create a new one to keep your saved places.",
-			"descriptionArea": "Log in to your existing account, or create a new one to keep your saved areas.",
-			"createAccount": "Create account",
-			"login": "Log in",
-			"back": "Back"
+			"descriptionArea": "Log in to your existing account, or create a new one to keep your saved areas."
 		}
 	},
 	"search": {
@@ -563,7 +561,8 @@
 		"searchButton": "Search 🔍",
 		"address": "Address",
 		"captchaPlaceholder": "Please enter the captcha text.",
-		"captchaRequired": "Enter the characters from the image."
+		"captchaRequired": "Enter the characters from the image.",
+		"cancel": "Cancel"
 	},
 	"openingHours": {
 		"open247": "Open 24/7",
@@ -1318,5 +1317,47 @@
 			"netlifyDocsAnalytics": "Netlify Docs - Analytics",
 			"netlifyDocsHowAnalytics": "Netlify Docs - How Analytics Works"
 		}
+	},
+	"placePhotos": {
+		"title": "Photos",
+		"add": "Add photo",
+		"uploading": "Uploading photo…",
+		"uploaded": "{count, plural, one {Thanks! Your photo is live.} other {Thanks! Your # photos are live.}}",
+		"uploadFailed": "{count, plural, one {A photo couldn't be uploaded. Please try again.} other {# photos couldn't be uploaded. Please try again.}}",
+		"photoAlt": "Photo {n} of {total}",
+		"previous": "Previous photo",
+		"next": "Next photo",
+		"close": "Close",
+		"promptTitle": "Add a photo",
+		"promptDescription": "Log in to your existing account, or create a new one to add photos of this place.",
+		"tooMany": "You can add up to {max} photos at a time. Uploading the first {max}.",
+		"emptyTitle": "Be the first to add a photo",
+		"emptyHint": "Storefront, sign, or the bitcoin sticker or QR",
+		"morePhotos": "More photos",
+		"communityPhoto": "Community photo",
+		"copyLink": "Copy link to photo",
+		"linkCopied": "Link copied",
+		"copyLinkFailed": "Couldn't copy the link",
+		"moreActions": "More actions",
+		"credit": "Photo by {name}",
+		"deletePhoto": "Delete photo",
+		"deleteConfirm": "Delete this photo? This can't be undone.",
+		"deleteConfirmAction": "Delete",
+		"deleted": "Photo deleted",
+		"deleteFailed": "Couldn't delete the photo. Please try again.",
+		"deleteForbidden": "You can only delete your own photos.",
+		"undo": "Undo",
+		"undone": "{count, plural, one {Photo removed} other {# photos removed}}"
+	},
+	"authPrompt": {
+		"createAccount": "Create account",
+		"login": "Log in",
+		"back": "Back"
+	},
+	"myPhotos": {
+		"title": "My photos",
+		"empty": "You haven't added any photos yet. Open a place and tap \"Add photo\".",
+		"loadError": "Couldn't load your photos. Please try again.",
+		"unknownPlace": "Place #{id}"
 	}
 }
