@@ -33,6 +33,7 @@ import {
 import { SEARCH_SHEET_PEEK_HEIGHT } from "#lib/drawerConfig.js";
 import { _, getDisplayLang, locale } from "#lib/i18n/index.js";
 import type { BasemapId } from "#lib/map/basemaps.js";
+import { withLiteralCommas } from "#lib/literalCommas.js";
 import {
 	BASEMAPS,
 	defaultBasemap,
