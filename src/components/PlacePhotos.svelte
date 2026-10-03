@@ -299,7 +299,7 @@ const handleFiles = async (event: Event) => {
 	>
 		{#each [0, 1, 2] as i (i)}
 			<div
-				class="size-(--tile) shrink-0 animate-pulse rounded-xl bg-gray-200 dark:bg-white/10"
+				class="size-(--tile) shrink-0 animate-pulse rounded-xl bg-link/20 dark:bg-white/10"
 			></div>
 		{/each}
 	</div>
@@ -356,7 +356,7 @@ const handleFiles = async (event: Event) => {
 								href={photoPagePath(placeId, photo.id)}
 								bind:this={tileEls[i]}
 								onclickcapture={(event) => handleTileClick(event, i)}
-								class="relative block h-(--tile) overflow-hidden rounded-xl bg-gray-200 focus-visible:ring-2 focus-visible:ring-link dark:bg-white/10 {loadedIds.has(photo.id) ? '' : 'animate-pulse'}"
+								class="relative block h-(--tile) overflow-hidden rounded-xl bg-link/20 focus-visible:ring-2 focus-visible:ring-link dark:bg-white/10 {loadedIds.has(photo.id) ? '' : 'animate-pulse'}"
 								style:width="{tileWidth(photo)}px"
 								aria-haspopup="dialog"
 							>
