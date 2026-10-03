@@ -16,6 +16,7 @@ import {
 	placePhotoUrl,
 	prepareUpload,
 	splitPick,
+	undoUploads,
 	uploadPlacePhoto,
 	uploadPlacePhotos,
 	withPhotoParam,
@@ -152,6 +153,21 @@ const closeViewer = async (index: number) => {
 	tileEls[index]?.focus();
 };
 
+// A photo deleted from the viewer: drop it, close the viewer, and focus the
+// tile that took its place (or the new last one)
+const handlePhotoDeleted = async (imageId: number, index: number) => {
+	// Stale: the drawer switched place while the delete was in flight. The
+	// old viewer's callback must not touch the new place's URL or focus.
+	if (viewerIndex === null || !photos?.some((p) => p.id === imageId)) return;
+	photos = photos.filter((p) => p.id !== imageId);
+	viewerIndex = null;
+	syncPhotoParam(null);
+	await tick();
+	// No photos left: the empty-state add button takes the focus
+	if (photos.length) tileEls[Math.min(index, photos.length - 1)]?.focus();
+	else addButton?.focus();
+};
+
 // ?photo=<id> opens the viewer once the photos are in. An id that isn't
 // one of this place's public photos is ignored and dropped from the URL.
 const openFromDeepLink = (list: PlaceImage[]) => {
@@ -187,6 +203,36 @@ const handleAuthenticated = async () => {
 	fileInput?.click();
 };
 
+// "Undo" on the upload toast: an accidental upload is one tap from gone
+const undoUpload = async (id: number, stored: PlaceImage[], token: string) => {
+	trackEvent("place_photo_upload_undo_click", { source, count: stored.length });
+	// The toast sits above the viewer: close it first so its photo list
+	// can't change underneath it
+	if (id === placeId && viewerIndex !== null) {
+		viewerIndex = null;
+		syncPhotoParam(null);
+	}
+	const { removed, complete } = await undoUploads(
+		id,
+		stored.map((p) => p.id),
+		token,
+	);
+	if (id === placeId) {
+		photos = (photos ?? []).filter((p) => !removed.includes(p.id));
+	}
+	if (complete) {
+		trackEvent("place_photo_upload_undo_success", {
+			source,
+			count: removed.length,
+		});
+		successToast(
+			$_("placePhotos.undone", { values: { count: removed.length } }),
+		);
+	} else {
+		errToast($_("placePhotos.deleteFailed"));
+	}
+};
+
 const handleFiles = async (event: Event) => {
 	const input = event.currentTarget as HTMLInputElement;
 	const { batch, dropped } = splitPick(Array.from(input.files ?? []));
@@ -213,6 +259,10 @@ const handleFiles = async (event: Event) => {
 		if (id === placeId) photos = [...stored, ...(photos ?? [])];
 		successToast(
 			$_("placePhotos.uploaded", { values: { count: stored.length } }),
+			{
+				label: $_("placePhotos.undo"),
+				onClick: () => undoUpload(id, stored, token),
+			},
 		);
 		trackEvent("place_photo_add_success", { source, count: stored.length });
 	}
@@ -369,6 +419,7 @@ const handleFiles = async (event: Event) => {
 		{source}
 		onIndexChange={(i) => syncPhotoParam(photos?.[i]?.id ?? null)}
 		onClose={closeViewer}
+		onDeleted={handlePhotoDeleted}
 	/>
 {/if}
 

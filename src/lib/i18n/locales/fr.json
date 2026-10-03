@@ -461,7 +461,8 @@
 		"searchButton": "Rechercher 🔍",
 		"address": "Adresse",
 		"captchaPlaceholder": "Veuillez saisir le texte du captcha.",
-		"captchaRequired": "Saisissez les caractères de l'image."
+		"captchaRequired": "Saisissez les caractères de l'image.",
+		"cancel": "Annuler"
 	},
 	"openingHours": {
 		"open247": "Ouvert 24h/24, 7j/7",
@@ -1262,7 +1263,15 @@
 		"linkCopied": "Lien copié",
 		"copyLinkFailed": "Impossible de copier le lien",
 		"moreActions": "Plus d'actions",
-		"credit": "Photo de {name}"
+		"credit": "Photo de {name}",
+		"deletePhoto": "Supprimer la photo",
+		"deleteConfirm": "Supprimer cette photo ? Cette action est irréversible.",
+		"deleteConfirmAction": "Supprimer",
+		"deleted": "Photo supprimée",
+		"deleteFailed": "Impossible de supprimer la photo. Veuillez réessayer.",
+		"deleteForbidden": "Vous ne pouvez supprimer que vos propres photos.",
+		"undo": "Annuler",
+		"undone": "{count, plural, one {Photo retirée} other {# photos retirées}}"
 	},
 	"authPrompt": {
 		"createAccount": "Créer un compte",

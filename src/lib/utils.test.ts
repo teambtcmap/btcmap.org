@@ -1,4 +1,5 @@
-import { describe, expect, it } from "vitest";
+import { toast } from "svelte-sonner";
+import { describe, expect, it, vi } from "vitest";
 
 import { MERCHANT_LIST_MAX_ITEMS } from "$lib/constants";
 import type { Area } from "$lib/types";
@@ -16,7 +17,12 @@ import {
 	isValidLongitude,
 	sanitizeUrl,
 	stripLightningScheme,
+	successToast,
 } from "./utils";
+
+vi.mock("svelte-sonner", () => ({
+	toast: { success: vi.fn(), error: vi.fn(), warning: vi.fn() },
+}));
 
 describe("sanitizeUrl", () => {
 	describe("undefined/empty input", () => {
@@ -800,5 +806,21 @@ describe("getGrade", () => {
 		expect(getGrade(25)).toBe(2);
 		expect(getGrade(24)).toBe(1);
 		expect(getGrade(0)).toBe(1);
+	});
+});
+
+describe("successToast", () => {
+	it("shows a plain success toast", () => {
+		successToast("Saved");
+		expect(toast.success).toHaveBeenCalledWith("Saved", undefined);
+	});
+
+	it("adds an action button and keeps the toast up longer", () => {
+		const onClick = () => {};
+		successToast("Uploaded", { label: "Undo", onClick });
+		expect(toast.success).toHaveBeenCalledWith("Uploaded", {
+			action: { label: "Undo", onClick },
+			duration: 8000,
+		});
 	});
 });

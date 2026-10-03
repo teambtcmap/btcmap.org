@@ -461,7 +461,8 @@
 		"searchButton": "Suchen 🔍",
 		"address": "Adresse",
 		"captchaPlaceholder": "Bitte gib den Captcha-Text ein.",
-		"captchaRequired": "Gib die Zeichen aus dem Bild ein."
+		"captchaRequired": "Gib die Zeichen aus dem Bild ein.",
+		"cancel": "Abbrechen"
 	},
 	"openingHours": {
 		"open247": "Durchgehend geöffnet (24/7)",
@@ -1262,7 +1263,15 @@
 		"linkCopied": "Link kopiert",
 		"copyLinkFailed": "Link konnte nicht kopiert werden",
 		"moreActions": "Weitere Aktionen",
-		"credit": "Foto von {name}"
+		"credit": "Foto von {name}",
+		"deletePhoto": "Foto löschen",
+		"deleteConfirm": "Dieses Foto löschen? Das kann nicht rückgängig gemacht werden.",
+		"deleteConfirmAction": "Löschen",
+		"deleted": "Foto gelöscht",
+		"deleteFailed": "Das Foto konnte nicht gelöscht werden. Bitte versuche es erneut.",
+		"deleteForbidden": "Du kannst nur deine eigenen Fotos löschen.",
+		"undo": "Rückgängig",
+		"undone": "{count, plural, one {Foto entfernt} other {# Fotos entfernt}}"
 	},
 	"authPrompt": {
 		"createAccount": "Konto erstellen",

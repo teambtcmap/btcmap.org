@@ -461,7 +461,8 @@
 		"searchButton": "Поиск 🔍",
 		"address": "Адрес",
 		"captchaPlaceholder": "Пожалуйста, введите текст с капчи.",
-		"captchaRequired": "Введите символы с картинки."
+		"captchaRequired": "Введите символы с картинки.",
+		"cancel": "Отмена"
 	},
 	"openingHours": {
 		"open247": "Открыто круглосуточно (24/7)",
@@ -1262,7 +1263,15 @@
 		"linkCopied": "Ссылка скопирована",
 		"copyLinkFailed": "Не удалось скопировать ссылку",
 		"moreActions": "Ещё действия",
-		"credit": "Фото: {name}"
+		"credit": "Фото: {name}",
+		"deletePhoto": "Удалить фото",
+		"deleteConfirm": "Удалить это фото? Это действие нельзя отменить.",
+		"deleteConfirmAction": "Удалить",
+		"deleted": "Фото удалено",
+		"deleteFailed": "Не удалось удалить фото. Попробуйте ещё раз.",
+		"deleteForbidden": "Вы можете удалять только свои фото.",
+		"undo": "Отменить",
+		"undone": "{count, plural, one {# фото удалено} few {# фото удалены} many {# фото удалены} other {# фото удалены}}"
 	},
 	"authPrompt": {
 		"createAccount": "Создать аккаунт",
