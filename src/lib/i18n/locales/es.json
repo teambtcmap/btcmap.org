@@ -1261,7 +1261,8 @@
 		"copyLink": "Copiar enlace a la foto",
 		"linkCopied": "Enlace copiado",
 		"copyLinkFailed": "No se pudo copiar el enlace",
-		"moreActions": "Más acciones"
+		"moreActions": "Más acciones",
+		"credit": "Foto de {name}"
 	},
 	"authPrompt": {
 		"createAccount": "Crear cuenta",
