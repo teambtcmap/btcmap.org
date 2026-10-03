@@ -1,10 +1,9 @@
 <script lang="ts">
-import { _ } from "svelte-i18n";
-
 import Breadcrumbs from "$components/Breadcrumbs.svelte";
 import HeaderPlaceholder from "$components/layout/HeaderPlaceholder.svelte";
 import AreaLeaderboard from "$components/leaderboard/AreaLeaderboard.svelte";
 import PrimaryButton from "$components/PrimaryButton.svelte";
+import { _ } from "$lib/i18n";
 import { theme } from "$lib/theme";
 
 $: routes = [
