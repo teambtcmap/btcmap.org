@@ -45,7 +45,7 @@ const errorId = $derived(`${id}-error`);
 
 <div>
 	<div class="mb-2 flex items-center space-x-2">
-		<label for={id} class="font-semibold"
+		<label for={id} class="font-semibold text-primary dark:text-white"
 			>{$_('forms.captcha')}
 			<span class="font-normal">({$_('forms.captchaCaseSensitive')})</span></label
 		>
@@ -81,7 +81,7 @@ const errorId = $derived(`${id}-error`);
 			{oninput}
 			class="w-full rounded-2xl border-2 {fieldBorderClasses(
 				invalid,
-			)} p-3 transition-all disabled:cursor-not-allowed disabled:bg-gray-100 disabled:text-gray-500 dark:bg-white/[0.15] dark:disabled:bg-gray-700 dark:disabled:text-gray-400"
+			)} p-3 text-primary transition-all disabled:cursor-not-allowed disabled:bg-gray-100 disabled:text-gray-500 dark:bg-white/[0.15] dark:text-white dark:disabled:bg-gray-700 dark:disabled:text-gray-400"
 			bind:this={element}
 			bind:value
 		/>

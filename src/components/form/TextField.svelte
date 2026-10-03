@@ -68,12 +68,12 @@ const invalid = $derived(error ? "true" : ariaInvalid);
 // rule shared with another control, marked through aria-invalid.
 const showInvalid = $derived(invalid === true || invalid === "true");
 const inputClasses = $derived(
-	`w-full rounded-2xl border-2 ${fieldBorderClasses(showInvalid)} p-3 transition-all disabled:cursor-not-allowed disabled:bg-gray-100 disabled:text-gray-500 dark:bg-white/[0.15] dark:disabled:bg-gray-700 dark:disabled:text-gray-400 ${inputClass}`,
+	`w-full rounded-2xl border-2 ${fieldBorderClasses(showInvalid)} p-3 text-primary transition-all disabled:cursor-not-allowed disabled:bg-gray-100 disabled:text-gray-500 dark:bg-white/[0.15] dark:text-white dark:disabled:bg-gray-700 dark:disabled:text-gray-400 ${inputClass}`,
 );
 </script>
 
 <div>
-	<label for={id} class="mb-2 block font-semibold">
+	<label for={id} class="mb-2 block font-semibold text-primary dark:text-white">
 		{label}
 		{#if optional}
 			<span class="font-normal">{$_('forms.optional')}</span>
