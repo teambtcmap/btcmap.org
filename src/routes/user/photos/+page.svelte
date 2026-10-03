@@ -47,6 +47,11 @@ const askDelete = (imageId: number) => {
 	trackEvent("place_photo_delete_click", { source: SOURCE });
 };
 
+const cancelDelete = () => {
+	confirmingId = null;
+	trackEvent("place_photo_delete_cancel", { source: SOURCE });
+};
+
 const confirmDelete = async (photo: PlaceImage) => {
 	const token = $session?.token;
 	if (!token || deletingId !== null) return;
@@ -104,7 +109,11 @@ onMount(async () => {
 		<ul role="list" class="grid grid-cols-2 gap-4 sm:grid-cols-3 lg:grid-cols-4">
 			{#each photos as photo (photo.id)}
 				<li class="overflow-hidden rounded-2xl border border-gray-300 dark:border-white/20 dark:bg-white/5">
-					<a href={photoPagePath(photo.place_id, photo.id)} class="block bg-gray-200 dark:bg-white/10">
+					<a
+						href={photoPagePath(photo.place_id, photo.id)}
+						onclick={() => trackEvent("my_photos_tile_click", { link: "photo" })}
+						class="block bg-gray-200 dark:bg-white/10"
+					>
 						<img
 							src={placePhotoUrl(photo.place_id, photo.id, { h: TILE_HEIGHT * 2 })}
 							alt={placeName(photo.place_id)}
@@ -117,6 +126,7 @@ onMount(async () => {
 					<div class="space-y-2 p-3">
 						<a
 							href={photoPagePath(photo.place_id, photo.id)}
+							onclick={() => trackEvent("my_photos_tile_click", { link: "place" })}
 							class="block truncate text-sm font-semibold text-primary hover:text-link dark:text-white"
 						>
 							{placeName(photo.place_id)}
@@ -136,7 +146,7 @@ onMount(async () => {
 								</button>
 								<button
 									type="button"
-									onclick={() => (confirmingId = null)}
+									onclick={cancelDelete}
 									class="rounded-lg px-3 py-1.5 text-xs font-semibold text-primary hover:bg-gray-100 dark:text-white dark:hover:bg-white/10"
 								>
 									{$_("forms.cancel")}
