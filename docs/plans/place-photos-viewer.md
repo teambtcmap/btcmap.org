@@ -69,7 +69,7 @@ Risk: no npm release since May 2024, although fixes land in the repo until Nov 2
 - Props: today's props plus `placeName` and `source`.
 - Overlay: portaled to `<body>`, full-screen, `--dark` background.
 - Top bar: place name, then the credit ("Photo by …" or "Community photo"), the relative date and "3 / 6", then the ⋯ and ✕ buttons.
-  - The date uses `svelte-time/intl` (native `Intl.RelativeTimeFormat`) in the app locale: no locale files, live updates. The rest of the app follows in #1482.
+  - The date uses svelte-time's `<Time relative live>` with the app's dayjs locale, loaded on demand by `$lib/dayjsLocale` (`createTimeLocale`); English shows until it arrives. `dayjs` is a direct dependency for those locale imports. `svelte-time/intl` was dropped: it broke the production build (rolldown parse error) and ships no types. The rest of the app follows in #1482.
   - The counter uses `tabular-nums`.
 - Desktop: 44px arrows in 72px side zones, disabled at the ends and hidden on touch devices.
 - Footer:
@@ -100,6 +100,12 @@ Risk: no npm release since May 2024, although fixes land in the repo until Nov 2
 | `place_photo_add_click` | header button or empty row (existing) | `source`, `entry: header \| empty`, `signedIn` |
 | `place_photo_strip_scroll` | drawer chevron (new) | `source` |
 | `place_photo_menu_open` | viewer ⋯ menu (new) | `source` |
+| `place_photo_add_success` | upload stored | `source`, `count` |
+| `place_photo_delete_click` / `_cancel` / `_success` | ⋯ menu or My photos delete | `source` |
+| `place_photo_upload_undo_click` / `_success` | Undo on the upload toast | `source`, `count` |
+| `place_photo_prompt_create_account_click` / `_login_click` | signed-out sign-in modal | none |
+| `my_photos_click` | user menu link | none |
+| `my_photos_tile_click` | My photos card | `link: photo \| place` |
 
 ### 6. QA
 
@@ -114,8 +120,12 @@ Risk: no npm release since May 2024, although fixes land in the repo until Nov 2
 - Update the PR body.
 - Test on a real iPhone (Safari): pinch and pan inside a non-viewport container.
 
-### 7. Later
+### 7. Shipped on top (#1483–#1485, merged into #1470)
+
+- Credit: "Photo by <name>" from the API's `author`, falling back to "Community photo".
+- Delete: "Delete photo" in the viewer's ⋯ menu for the uploader and for admin/root (`DELETE /v4/places/{id}/images/{image_id}`; id and roles from `GET /v4/users/me` via `$lib/currentUser`), with a confirm step; a 403 gets its own message. Plus an Undo action on the upload toast.
+- "My photos" page at `/user/photos` from `GET /v4/users/me/place-images` (`type=user` only), linked from the user menu, with delete. The ask/cancel/confirm flow is shared with the viewer (`$lib/placePhotoDelete`, `PhotoDeleteConfirm`).
+
+### 8. Later
 
 - Report photo: `POST /v4/place-reports` with `type: "photo_report"` and the image id, after the moderation decision. Events `place_photo_report_click` / `_success`. Signed-out users get `PhotoAuthPrompt`.
-- Delete: "Delete photo" in the viewer's ⋯ menu for the uploader and for admin/root (`DELETE /v4/places/{id}/images/{image_id}`), plus an Undo action on the upload toast.
-- "My photos" page at `/user/photos` from `GET /v4/users/me/place-images`, with delete.
