@@ -461,7 +461,8 @@
 		"searchButton": "Rechercher 🔍",
 		"address": "Adresse",
 		"captchaPlaceholder": "Veuillez saisir le texte du captcha.",
-		"captchaRequired": "Saisissez les caractères de l'image."
+		"captchaRequired": "Saisissez les caractères de l'image.",
+		"cancel": "Annuler"
 	},
 	"openingHours": {
 		"open247": "Ouvert 24h/24, 7j/7",
@@ -1266,7 +1267,6 @@
 		"deletePhoto": "Supprimer la photo",
 		"deleteConfirm": "Supprimer cette photo ? Cette action est irréversible.",
 		"deleteConfirmAction": "Supprimer",
-		"cancel": "Annuler",
 		"deleted": "Photo supprimée",
 		"deleteFailed": "Impossible de supprimer la photo. Veuillez réessayer.",
 		"deleteForbidden": "Vous ne pouvez supprimer que vos propres photos.",

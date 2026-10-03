@@ -461,7 +461,8 @@
 		"searchButton": "Suchen 🔍",
 		"address": "Adresse",
 		"captchaPlaceholder": "Bitte gib den Captcha-Text ein.",
-		"captchaRequired": "Gib die Zeichen aus dem Bild ein."
+		"captchaRequired": "Gib die Zeichen aus dem Bild ein.",
+		"cancel": "Abbrechen"
 	},
 	"openingHours": {
 		"open247": "Durchgehend geöffnet (24/7)",
@@ -1266,7 +1267,6 @@
 		"deletePhoto": "Foto löschen",
 		"deleteConfirm": "Dieses Foto löschen? Das kann nicht rückgängig gemacht werden.",
 		"deleteConfirmAction": "Löschen",
-		"cancel": "Abbrechen",
 		"deleted": "Foto gelöscht",
 		"deleteFailed": "Das Foto konnte nicht gelöscht werden. Bitte versuche es erneut.",
 		"deleteForbidden": "Du kannst nur deine eigenen Fotos löschen.",

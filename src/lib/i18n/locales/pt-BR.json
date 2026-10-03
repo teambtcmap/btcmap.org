@@ -463,7 +463,8 @@
 		"searchButton": "Pesquisar 🔍",
 		"address": "Endereço",
 		"captchaPlaceholder": "Por favor insira o texto do captcha.",
-		"captchaRequired": "Digite os caracteres da imagem."
+		"captchaRequired": "Digite os caracteres da imagem.",
+		"cancel": "Cancelar"
 	},
 	"openingHours": {
 		"open247": "Aberto 24/7",
@@ -1240,7 +1241,6 @@
 		"deletePhoto": "Excluir foto",
 		"deleteConfirm": "Excluir esta foto? Isso não pode ser desfeito.",
 		"deleteConfirmAction": "Excluir",
-		"cancel": "Cancelar",
 		"deleted": "Foto excluída",
 		"deleteFailed": "Não foi possível excluir a foto. Tente novamente.",
 		"deleteForbidden": "Você só pode excluir suas próprias fotos.",

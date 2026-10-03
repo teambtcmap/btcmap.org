@@ -297,7 +297,7 @@ onDestroy(() => {
 										onclick={() => (confirmingDelete = false)}
 										class="rounded-lg px-3 py-1.5 text-sm font-semibold hover:bg-gray-100 dark:hover:bg-white/10"
 									>
-										{$_('placePhotos.cancel')}
+										{$_('forms.cancel')}
 									</button>
 									<button
 										type="button"

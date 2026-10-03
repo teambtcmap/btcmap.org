@@ -560,7 +560,8 @@
 		"searchButton": "Search 🔍",
 		"address": "Address",
 		"captchaPlaceholder": "Please enter the captcha text.",
-		"captchaRequired": "Enter the characters from the image."
+		"captchaRequired": "Enter the characters from the image.",
+		"cancel": "Cancel"
 	},
 	"openingHours": {
 		"open247": "Open 24/7",
@@ -1341,7 +1342,6 @@
 		"deletePhoto": "Delete photo",
 		"deleteConfirm": "Delete this photo? This can't be undone.",
 		"deleteConfirmAction": "Delete",
-		"cancel": "Cancel",
 		"deleted": "Photo deleted",
 		"deleteFailed": "Couldn't delete the photo. Please try again.",
 		"deleteForbidden": "You can only delete your own photos.",

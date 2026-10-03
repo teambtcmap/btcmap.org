@@ -419,7 +419,8 @@
 		"success": "Успех!",
 		"website": "Уебсайт",
 		"captchaPlaceholder": "Моля, въведете текста от captcha.",
-		"captchaRequired": "Въведете символите от изображението."
+		"captchaRequired": "Въведете символите от изображението.",
+		"cancel": "Отказ"
 	},
 	"openingHours": {
 		"open247": "Отворено 24/7",
@@ -1340,7 +1341,6 @@
 		"deletePhoto": "Изтрий снимката",
 		"deleteConfirm": "Да се изтрие ли тази снимка? Действието е необратимо.",
 		"deleteConfirmAction": "Изтрий",
-		"cancel": "Отказ",
 		"deleted": "Снимката е изтрита",
 		"deleteFailed": "Снимката не можа да бъде изтрита. Опитай отново.",
 		"deleteForbidden": "Можеш да изтриваш само свои снимки.",

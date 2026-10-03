@@ -560,7 +560,8 @@
 		"searchButton": "Zoek 🔍",
 		"address": "Adres",
 		"captchaPlaceholder": "Typ de tekst van de captcha over.",
-		"captchaRequired": "Typ de tekens over die in de afbeelding staan."
+		"captchaRequired": "Typ de tekens over die in de afbeelding staan.",
+		"cancel": "Annuleren"
 	},
 	"openingHours": {
 		"open247": "24/7 open",
@@ -1341,7 +1342,6 @@
 		"deletePhoto": "Foto verwijderen",
 		"deleteConfirm": "Deze foto verwijderen? Dit kan niet ongedaan worden gemaakt.",
 		"deleteConfirmAction": "Verwijderen",
-		"cancel": "Annuleren",
 		"deleted": "Foto verwijderd",
 		"deleteFailed": "Kan de foto niet verwijderen. Probeer het opnieuw.",
 		"deleteForbidden": "Je kunt alleen je eigen foto's verwijderen.",
