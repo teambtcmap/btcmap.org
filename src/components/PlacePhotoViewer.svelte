@@ -1,7 +1,6 @@
 <script lang="ts">
 import { onDestroy, onMount, untrack } from "svelte";
 import { OutClick } from "svelte-outclick";
-import type { Locales } from "svelte-time";
 import Time from "svelte-time";
 
 import Icon from "$components/Icon.svelte";
@@ -9,7 +8,7 @@ import { trackEvent } from "$lib/analytics";
 import { lockBodyScroll, unlockBodyScroll } from "$lib/bodyScrollLock";
 import type { CurrentUser } from "$lib/currentUser";
 import { fetchCurrentUser } from "$lib/currentUser";
-import { loadDayjsLocale } from "$lib/dayjsLocale";
+import { createTimeLocale } from "$lib/dayjsLocale";
 import { trapTab } from "$lib/focusTrap";
 import { _, locale } from "$lib/i18n";
 import type { LightboxHandle } from "$lib/placePhotoLightbox";
@@ -68,13 +67,7 @@ const photo = $derived(photos[index]);
 const authorName = $derived(photoAuthorName(photo));
 
 // Relative date in the app's language; English until its dayjs locale loads
-let timeLocale = $state<Locales>("en");
-$effect(() => {
-	const code = $locale;
-	loadDayjsLocale(code).then((key) => {
-		if ($locale === code) timeLocale = key;
-	});
-});
+const timeLocale = createTimeLocale(locale);
 
 const total = $derived(photos.length);
 
@@ -259,7 +252,7 @@ onDestroy(() => {
 				</span>
 				<span aria-hidden="true">·</span>
 				<!-- live keeps "a few seconds ago" current while the viewer is open -->
-				<Time timestamp={photo.created_at} relative live locale={timeLocale} />
+				<Time timestamp={photo.created_at} relative live locale={$timeLocale} />
 			</p>
 		</div>
 		<span
