@@ -136,8 +136,6 @@ const openViewer = (index: number, via: "tile" | "deeplink" = "tile") => {
 	if (photos?.[index]) syncPhotoParam(photos[index].id);
 };
 
-// Focus the tile of the photo that was on screen: works for deep-link
-// opens too, and on macOS Safari, where a click doesn't focus the button
 // Plain left clicks open the viewer in place; modified clicks (new tab or
 // window) stay with the browser. Capture phase, on the element itself, so
 // preventDefault lands before SvelteKit's link router sees the click.
@@ -147,6 +145,8 @@ const handleTileClick = (event: MouseEvent, index: number) => {
 	openViewer(index);
 };
 
+// Focus the tile of the photo that was on screen: works for deep-link
+// opens too, and on macOS Safari, where a click doesn't focus the link
 const closeViewer = async (index: number) => {
 	// Already reset by a place switch in the reused drawer: the old viewer's
 	// late close must not pull focus to the new place's tiles
