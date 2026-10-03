@@ -1,3 +1,5 @@
+import { isAxiosError } from "axios";
+
 import { API_BASE } from "$lib/api-base";
 import api from "$lib/axios";
 import type { CurrentUser } from "$lib/currentUser";
@@ -94,7 +96,14 @@ export const undoUploads = async (
 	const results = await Promise.allSettled(
 		imageIds.map((id) => deletePlacePhoto(placeId, id, token)),
 	);
-	return imageIds.filter((_, i) => results[i].status === "fulfilled");
+	// 404: already gone (e.g. deleted from the viewer before Undo)
+	return imageIds.filter((_, i) => {
+		const result = results[i];
+		return (
+			result.status === "fulfilled" ||
+			(isAxiosError(result.reason) && result.reason.response?.status === 404)
+		);
+	});
 };
 
 export const uploadPlacePhoto = async (

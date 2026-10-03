@@ -1,3 +1,5 @@
+import type { AxiosResponse } from "axios";
+import { AxiosError } from "axios";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 
 import { API_BASE } from "$lib/api-base";
@@ -334,5 +336,21 @@ describe("undoUploads", () => {
 
 		expect(api.delete).toHaveBeenCalledTimes(2);
 		expect(removed).toEqual([12]);
+	});
+
+	it("counts a photo that's already gone (404) as removed", async () => {
+		const { default: api } = await import("$lib/axios");
+		const notFound = new AxiosError(
+			"404",
+			"ERR_BAD_REQUEST",
+			undefined,
+			undefined,
+			{
+				status: 404,
+			} as AxiosResponse,
+		);
+		vi.mocked(api.delete).mockRejectedValueOnce(notFound);
+
+		expect(await undoUploads(20423, [12], "tok")).toEqual([12]);
 	});
 });
