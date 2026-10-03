@@ -560,7 +560,8 @@
 		"searchButton": "Zoek 🔍",
 		"address": "Adres",
 		"captchaPlaceholder": "Typ de tekst van de captcha over.",
-		"captchaRequired": "Typ de tekens over die in de afbeelding staan."
+		"captchaRequired": "Typ de tekens over die in de afbeelding staan.",
+		"cancel": "Annuleren"
 	},
 	"openingHours": {
 		"open247": "24/7 open",
@@ -1332,7 +1333,15 @@
 		"linkCopied": "Link gekopieerd",
 		"copyLinkFailed": "Kan de link niet kopiëren",
 		"moreActions": "Meer acties",
-		"credit": "Foto door {name}"
+		"credit": "Foto door {name}",
+		"deletePhoto": "Foto verwijderen",
+		"deleteConfirm": "Deze foto verwijderen? Dit kan niet ongedaan worden gemaakt.",
+		"deleteConfirmAction": "Verwijderen",
+		"deleted": "Foto verwijderd",
+		"deleteFailed": "Kan de foto niet verwijderen. Probeer het opnieuw.",
+		"deleteForbidden": "Je kunt alleen je eigen foto's verwijderen.",
+		"undo": "Ongedaan maken",
+		"undone": "{count, plural, one {Foto verwijderd} other {# foto's verwijderd}}"
 	},
 	"authPrompt": {
 		"createAccount": "Account aanmaken",

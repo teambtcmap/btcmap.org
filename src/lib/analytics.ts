@@ -75,7 +75,12 @@ export type EventName =
 	| "place_photo_strip_scroll"
 	| "place_photo_view"
 	| "place_photo_link_copy"
-	| "place_photo_menu_open";
+	| "place_photo_menu_open"
+	| "place_photo_delete_click"
+	| "place_photo_delete_success"
+	| "place_photo_upload_undo_click"
+	| "place_photo_upload_undo_success"
+	| "place_photo_delete_cancel";
 
 // Where the comment flow was opened from (funnel breakdown).
 export type CommentSource = "map_drawer" | "area_drawer" | "merchant_page";

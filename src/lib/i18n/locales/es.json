@@ -461,7 +461,8 @@
 		"searchButton": "Buscar 🔍",
 		"address": "Dirección",
 		"captchaPlaceholder": "Por favor ingresa el texto del captcha.",
-		"captchaRequired": "Introduce los caracteres de la imagen."
+		"captchaRequired": "Introduce los caracteres de la imagen.",
+		"cancel": "Cancelar"
 	},
 	"openingHours": {
 		"open247": "Abierto 24/7",
@@ -1257,7 +1258,15 @@
 		"linkCopied": "Enlace copiado",
 		"copyLinkFailed": "No se pudo copiar el enlace",
 		"moreActions": "Más acciones",
-		"credit": "Foto de {name}"
+		"credit": "Foto de {name}",
+		"deletePhoto": "Eliminar foto",
+		"deleteConfirm": "¿Eliminar esta foto? No se puede deshacer.",
+		"deleteConfirmAction": "Eliminar",
+		"deleted": "Foto eliminada",
+		"deleteFailed": "No se pudo eliminar la foto. Inténtalo de nuevo.",
+		"deleteForbidden": "Solo puedes eliminar tus propias fotos.",
+		"undo": "Deshacer",
+		"undone": "{count, plural, one {Foto eliminada} other {# fotos eliminadas}}"
 	},
 	"authPrompt": {
 		"createAccount": "Crear cuenta",
