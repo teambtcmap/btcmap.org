@@ -86,6 +86,15 @@ export const deletePlacePhoto = async (
 	});
 };
 
+// i18n key for a failed delete: 403 means the photo isn't the caller's
+// (and they're not admin/root)
+export const deleteErrorKey = (
+	error: unknown,
+): "placePhotos.deleteForbidden" | "placePhotos.deleteFailed" =>
+	isAxiosError(error) && error.response?.status === 403
+		? "placePhotos.deleteForbidden"
+		: "placePhotos.deleteFailed";
+
 // "Undo" on the upload toast: delete the photos just stored, in parallel.
 // removed lists the ids that are gone, so the strip drops only those;
 // complete says whether every one went (success vs error toast).

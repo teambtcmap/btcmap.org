@@ -7,6 +7,7 @@ import { API_BASE } from "$lib/api-base";
 import {
 	canDeletePhoto,
 	deepLinkTarget,
+	deleteErrorKey,
 	deletePlacePhoto,
 	fetchPlacePhotos,
 	fitWithin,
@@ -355,5 +356,23 @@ describe("undoUploads", () => {
 			removed: [12],
 			complete: true,
 		});
+	});
+});
+
+describe("deleteErrorKey", () => {
+	const httpError = (status: number) =>
+		new AxiosError("x", "ERR_BAD_REQUEST", undefined, undefined, {
+			status,
+		} as AxiosResponse);
+
+	it("explains a 403 as not your photo", () => {
+		expect(deleteErrorKey(httpError(403))).toBe("placePhotos.deleteForbidden");
+	});
+
+	it("is the generic failure for anything else", () => {
+		expect(deleteErrorKey(httpError(500))).toBe("placePhotos.deleteFailed");
+		expect(deleteErrorKey(new Error("offline"))).toBe(
+			"placePhotos.deleteFailed",
+		);
 	});
 });

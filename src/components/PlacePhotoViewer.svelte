@@ -1,5 +1,4 @@
 <script lang="ts">
-import { isAxiosError } from "axios";
 import { onDestroy, onMount, untrack } from "svelte";
 import { OutClick } from "svelte-outclick";
 import type { Locales } from "svelte-time";
@@ -18,6 +17,7 @@ import { buildSlides, openPlaceLightbox } from "$lib/placePhotoLightbox";
 import type { PlacePhotoSource } from "$lib/placePhotos";
 import {
 	canDeletePhoto,
+	deleteErrorKey,
 	deletePlacePhoto,
 	photoAuthorName,
 	photoShareUrl,
@@ -133,11 +133,7 @@ const confirmDelete = async () => {
 		onDeleted(target.id, target.index);
 	} catch (error) {
 		console.error("place photos: delete failed", error);
-		errToast(
-			isAxiosError(error) && error.response?.status === 403
-				? $_("placePhotos.deleteForbidden")
-				: $_("placePhotos.deleteFailed"),
-		);
+		errToast($_(deleteErrorKey(error)));
 		closeMenu();
 	} finally {
 		deleting = false;
