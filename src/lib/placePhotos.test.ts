@@ -390,6 +390,15 @@ describe("fetchMyPlacePhotos", () => {
 		);
 	});
 
+	it("leaves out report evidence: only the user's public uploads", async () => {
+		const { default: api } = await import("$lib/axios");
+		vi.mocked(api.get).mockResolvedValue({
+			data: [photo, { ...photo, id: 7, type: "report" }],
+		});
+
+		expect((await fetchMyPlacePhotos("tok")).map((p) => p.id)).toEqual([12]);
+	});
+
 	it("throws on a non-array response so the page can show its error state", async () => {
 		const { default: api } = await import("$lib/axios");
 		vi.mocked(api.get).mockResolvedValue({ data: "<html>" });

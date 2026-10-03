@@ -122,7 +122,9 @@ export const undoUploads = async (
 };
 
 // The signed-in user's uploads across all places, newest first ("My photos").
-// Throws on an unexpected response so the page can show its error state.
+// The endpoint also returns their report evidence (type "report"): leave it
+// out, it isn't public, its deep link wouldn't open, and reviewers rely on
+// it. Throws on an unexpected response so the page can show its error state.
 export const fetchMyPlacePhotos = async (
 	token: string,
 ): Promise<PlaceImage[]> => {
@@ -132,7 +134,7 @@ export const fetchMyPlacePhotos = async (
 	if (!Array.isArray(res.data)) {
 		throw new Error("my place images returned an unexpected response");
 	}
-	return res.data.filter(isPlaceImage);
+	return res.data.filter(isPlaceImage).filter((p) => p.type === "user");
 };
 
 export const uploadPlacePhoto = async (
