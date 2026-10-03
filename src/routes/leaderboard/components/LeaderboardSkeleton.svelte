@@ -24,18 +24,12 @@ import Skeleton from "$components/Skeleton.svelte";
 	</div>
 
 	<!-- stats placeholders -->
-	<Skeleton
-		as="span"
-		class="mx-5 inline-block h-3 w-3 rounded-full lg:mx-auto lg:!my-auto lg:h-5 lg:w-5"
-	/>
-	<Skeleton
-		as="span"
-		class="mx-5 inline-block h-3 w-3 rounded-full lg:mx-auto lg:!my-auto lg:h-5 lg:w-5"
-	/>
-	<Skeleton
-		as="span"
-		class="mx-5 inline-block h-3 w-3 rounded-full lg:mx-auto lg:!my-auto lg:h-5 lg:w-5"
-	/>
+	{#each Array(3) as _, index (index)}
+		<Skeleton
+			as="span"
+			class="mx-5 inline-block h-3 w-3 rounded-full lg:mx-auto lg:!my-auto lg:h-5 lg:w-5"
+		/>
+	{/each}
 
 	<!-- tip button placeholder -->
 	<Skeleton

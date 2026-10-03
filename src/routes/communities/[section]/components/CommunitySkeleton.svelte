@@ -17,8 +17,8 @@ import Skeleton from "$components/Skeleton.svelte";
 	<div
 		class="flex w-full items-center justify-center space-x-2 border-t border-t-link/50 p-4"
 	>
-		<Skeleton class="h-[40px] w-[40px] rounded-full" />
-		<Skeleton class="h-[40px] w-[40px] rounded-full" />
-		<Skeleton class="h-[40px] w-[40px] rounded-full" />
+		{#each Array(3) as _, index (index)}
+			<Skeleton class="h-[40px] w-[40px] rounded-full" />
+		{/each}
 	</div>
 </div>
