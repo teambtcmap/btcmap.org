@@ -13,11 +13,13 @@ const FOCUSABLE = [
 
 // Tab skips negative tabindex and disabled controls, including ones
 // disabled through a <fieldset> (only :disabled catches those). Hidden
-// breakpoint variants (display: none) have no client rects.
+// breakpoint variants (display: none) have no client rects; visibility:
+// hidden keeps the boxes, so check the computed (inherited) value too.
 const isTabStop = (el: HTMLElement): boolean =>
 	el.tabIndex >= 0 &&
 	!el.matches(":disabled") &&
-	el.getClientRects().length > 0;
+	el.getClientRects().length > 0 &&
+	getComputedStyle(el).visibility !== "hidden";
 
 const focusableIn = (root: HTMLElement): HTMLElement[] =>
 	Array.from(root.querySelectorAll<HTMLElement>(FOCUSABLE)).filter(isTabStop);

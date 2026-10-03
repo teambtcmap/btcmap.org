@@ -103,6 +103,17 @@ describe("trapTab", () => {
 		expect(document.activeElement).toBe(last);
 	});
 
+	it("ignores controls hidden with visibility, also when inherited", () => {
+		root.insertAdjacentHTML(
+			"beforeend",
+			'<button style="visibility: hidden">own</button><div style="visibility: hidden"><button>inherited</button></div>',
+		);
+
+		last.focus();
+		trapTab(tab(), root);
+		expect(document.activeElement).toBe(first);
+	});
+
 	it("ignores other keys", () => {
 		last.focus();
 		const event = new KeyboardEvent("keydown", {
