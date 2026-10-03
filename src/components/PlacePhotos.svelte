@@ -212,7 +212,7 @@ const undoUpload = async (id: number, stored: PlaceImage[], token: string) => {
 		viewerIndex = null;
 		syncPhotoParam(null);
 	}
-	const removed = await undoUploads(
+	const { removed, complete } = await undoUploads(
 		id,
 		stored.map((p) => p.id),
 		token,
@@ -220,7 +220,7 @@ const undoUpload = async (id: number, stored: PlaceImage[], token: string) => {
 	if (id === placeId) {
 		photos = (photos ?? []).filter((p) => !removed.includes(p.id));
 	}
-	if (removed.length === stored.length) {
+	if (complete) {
 		successToast(
 			$_("placePhotos.undone", { values: { count: removed.length } }),
 		);

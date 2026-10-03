@@ -332,10 +332,10 @@ describe("undoUploads", () => {
 			.mockResolvedValueOnce({ data: {} })
 			.mockRejectedValueOnce(new Error("500"));
 
-		const removed = await undoUploads(20423, [12, 13], "tok");
+		const result = await undoUploads(20423, [12, 13], "tok");
 
 		expect(api.delete).toHaveBeenCalledTimes(2);
-		expect(removed).toEqual([12]);
+		expect(result).toEqual({ removed: [12], complete: false });
 	});
 
 	it("counts a photo that's already gone (404) as removed", async () => {
@@ -351,6 +351,9 @@ describe("undoUploads", () => {
 		);
 		vi.mocked(api.delete).mockRejectedValueOnce(notFound);
 
-		expect(await undoUploads(20423, [12], "tok")).toEqual([12]);
+		expect(await undoUploads(20423, [12], "tok")).toEqual({
+			removed: [12],
+			complete: true,
+		});
 	});
 });

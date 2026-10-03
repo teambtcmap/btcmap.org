@@ -87,23 +87,25 @@ export const deletePlacePhoto = async (
 };
 
 // "Undo" on the upload toast: delete the photos just stored, in parallel.
-// Returns the ids that are gone, so the strip drops only those.
+// removed lists the ids that are gone, so the strip drops only those;
+// complete says whether every one went (success vs error toast).
 export const undoUploads = async (
 	placeId: number,
 	imageIds: number[],
 	token: string,
-): Promise<number[]> => {
+): Promise<{ removed: number[]; complete: boolean }> => {
 	const results = await Promise.allSettled(
 		imageIds.map((id) => deletePlacePhoto(placeId, id, token)),
 	);
 	// 404: already gone (e.g. deleted from the viewer before Undo)
-	return imageIds.filter((_, i) => {
+	const removed = imageIds.filter((_, i) => {
 		const result = results[i];
 		return (
 			result.status === "fulfilled" ||
 			(isAxiosError(result.reason) && result.reason.response?.status === 404)
 		);
 	});
+	return { removed, complete: removed.length === imageIds.length };
 };
 
 export const uploadPlacePhoto = async (
