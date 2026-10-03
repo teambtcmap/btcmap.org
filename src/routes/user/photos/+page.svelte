@@ -19,10 +19,12 @@ import { placesById } from "$lib/store";
 import { errToast, successToast } from "$lib/utils";
 
 import { goto } from "$app/navigation";
+import { resolve } from "$app/paths";
 import type { PlaceImage } from "$types/btcmap-api/PlaceImage";
 
 // "My photos": every photo the signed-in user uploaded, across places,
-// newest first, each with a link to its place and a delete action (#1469).
+// newest first: the photo opens on its merchant page, the place name links
+// to the place, and each has a delete action (#1469).
 
 const TILE_HEIGHT = 160;
 const SOURCE: PlacePhotoSource = "my_photos";
@@ -125,7 +127,7 @@ onMount(async () => {
 					</a>
 					<div class="space-y-2 p-3">
 						<a
-							href={photoPagePath(photo.place_id, photo.id)}
+							href={resolve(`/merchant/${photo.place_id}`)}
 							onclick={() => trackEvent("my_photos_tile_click", { link: "place" })}
 							class="block truncate text-sm font-semibold text-primary hover:text-link dark:text-white"
 						>
