@@ -1,5 +1,6 @@
 import { API_BASE } from "$lib/api-base";
 import api from "$lib/axios";
+import type { CurrentUser } from "$lib/currentUser";
 import { withLiteralCommas } from "$lib/literalCommas";
 
 import type { PlaceImage } from "$types/btcmap-api/PlaceImage";
@@ -56,6 +57,31 @@ export const fetchPlacePhotos = async (
 	);
 	if (!Array.isArray(res.data)) return [];
 	return res.data.filter(isPlaceImage);
+};
+
+// Mirrors the API rule: the uploader may delete their own photo, admin and
+// root any photo. The API still enforces it (403); this only decides
+// whether to offer the action.
+const MODERATOR_ROLES = ["admin", "root"];
+
+export const canDeletePhoto = (
+	photo: PlaceImage,
+	user: CurrentUser | null,
+): boolean => {
+	if (!user) return false;
+	if (user.roles.some((role) => MODERATOR_ROLES.includes(role))) return true;
+	const uploaderId = photo.author?.id ?? photo.created_by;
+	return uploaderId !== undefined && uploaderId === user.id;
+};
+
+export const deletePlacePhoto = async (
+	placeId: number,
+	imageId: number,
+	token: string,
+): Promise<void> => {
+	await api.delete(`${API_BASE}/v4/places/${placeId}/images/${imageId}`, {
+		headers: { Authorization: `Bearer ${token}` },
+	});
 };
 
 export const uploadPlacePhoto = async (
