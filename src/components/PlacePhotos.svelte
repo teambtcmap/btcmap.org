@@ -233,6 +233,14 @@ const undoUpload = async (id: number, stored: PlaceImage[], token: string) => {
 	}
 };
 
+// New tiles land at the start of the strip, but scroll snapping re-snaps to
+// the tile that was already snapped and pushes them out of view: bring the
+// start back so the spinner, and then the new photo, are seen
+const showStripStart = async () => {
+	await tick();
+	strip?.scrollTo({ left: 0 });
+};
+
 const handleFiles = async (event: Event) => {
 	const input = event.currentTarget as HTMLInputElement;
 	const { batch, dropped } = splitPick(Array.from(input.files ?? []));
@@ -247,6 +255,7 @@ const handleFiles = async (event: Event) => {
 
 	const id = placeId;
 	uploading += batch.length;
+	showStripStart();
 	const { stored, failed } = await uploadPlacePhotos(
 		batch,
 		async (file) => uploadPlacePhoto(id, token, await prepareUpload(file)),
@@ -256,7 +265,10 @@ const handleFiles = async (event: Event) => {
 	);
 
 	if (stored.length) {
-		if (id === placeId) photos = [...stored, ...(photos ?? [])];
+		if (id === placeId) {
+			photos = [...stored, ...(photos ?? [])];
+			showStripStart();
+		}
 		successToast(
 			$_("placePhotos.uploaded", { values: { count: stored.length } }),
 			{
@@ -320,7 +332,7 @@ const handleFiles = async (event: Event) => {
 				<!-- Uploads in progress sit first, where the new photos will land -->
 				{#each { length: uploading } as _placeholder, i (i)}
 					<div
-						class="flex size-(--tile) shrink-0 items-center justify-center rounded-xl bg-gray-100 dark:bg-white/5"
+						class="flex size-(--tile) shrink-0 snap-start items-center justify-center rounded-xl bg-gray-100 dark:bg-white/5"
 						role="status"
 						aria-label={$_('placePhotos.uploading')}
 					>
