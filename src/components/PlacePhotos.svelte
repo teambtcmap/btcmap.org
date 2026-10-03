@@ -205,7 +205,7 @@ const handleAuthenticated = async () => {
 
 // "Undo" on the upload toast: an accidental upload is one tap from gone
 const undoUpload = async (id: number, stored: PlaceImage[], token: string) => {
-	trackEvent("place_photo_upload_undo", { source, count: stored.length });
+	trackEvent("place_photo_upload_undo_click", { source, count: stored.length });
 	// The toast sits above the viewer: close it first so its photo list
 	// can't change underneath it
 	if (id === placeId && viewerIndex !== null) {
@@ -221,6 +221,10 @@ const undoUpload = async (id: number, stored: PlaceImage[], token: string) => {
 		photos = (photos ?? []).filter((p) => !removed.includes(p.id));
 	}
 	if (complete) {
+		trackEvent("place_photo_upload_undo_success", {
+			source,
+			count: removed.length,
+		});
 		successToast(
 			$_("placePhotos.undone", { values: { count: removed.length } }),
 		);

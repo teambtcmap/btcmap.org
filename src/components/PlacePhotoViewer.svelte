@@ -113,6 +113,11 @@ const askDelete = () => {
 	trackEvent("place_photo_delete_click", { source });
 };
 
+const cancelDelete = () => {
+	confirmingDelete = false;
+	trackEvent("place_photo_delete_cancel", { source });
+};
+
 const confirmDelete = async () => {
 	const token = $session?.token;
 	if (!token || deleting) return;
@@ -283,7 +288,7 @@ onDestroy(() => {
 								<div class="mt-3 flex justify-end gap-2">
 									<button
 										type="button"
-										onclick={() => (confirmingDelete = false)}
+										onclick={cancelDelete}
 										class="rounded-lg px-3 py-1.5 text-sm font-semibold hover:bg-gray-100 dark:hover:bg-white/10"
 									>
 										{$_('forms.cancel')}
