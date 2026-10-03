@@ -69,8 +69,12 @@ const loadedIds = new SvelteSet<number>();
 
 // The map drawer reuses this component across merchants, so refetch on
 // every placeId change and drop answers for a place we already left.
+// Through a $derived: a legacy parent's prop getter (placeId={merchant.id})
+// makes every refresh of its merchant object a dependency, and re-running
+// on the same id would close an open viewer (e.g. a ?photo= deep link).
+const currentPlaceId = $derived(placeId);
 $effect(() => {
-	const id = placeId;
+	const id = currentPlaceId;
 	photos = undefined;
 	viewerIndex = null;
 	fetchPlacePhotos(id)
