@@ -65,11 +65,26 @@ describe("fetchCurrentUser", () => {
 		expect(api.get).toHaveBeenCalledTimes(2);
 	});
 
-	it("drops non-string roles", async () => {
+	it("drops non-string and unknown roles", async () => {
 		const { default: api } = await import("$lib/axios");
 		vi.mocked(api.get).mockResolvedValue({
-			data: { id: 1, roles: ["admin", 5, null] },
+			data: { id: 1, roles: ["admin", 5, null, "Admin", "superuser"] },
 		});
 		expect(await fetchCurrentUser("tok")).toEqual({ id: 1, roles: ["admin"] });
+	});
+
+	it("keeps every role the API defines", async () => {
+		const { default: api } = await import("$lib/axios");
+		const all = [
+			"user",
+			"admin",
+			"root",
+			"places_source",
+			"event_manager",
+			"area_manager",
+			"dashboard",
+		];
+		vi.mocked(api.get).mockResolvedValue({ data: { id: 1, roles: all } });
+		expect(await fetchCurrentUser("tok")).toEqual({ id: 1, roles: all });
 	});
 });
