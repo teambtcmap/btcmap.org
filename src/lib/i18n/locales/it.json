@@ -61,7 +61,8 @@
 		"login": "Accedi",
 		"signup": "Registrati",
 		"logout": "Esci",
-		"backupAccount": "Backup dell'account"
+		"backupAccount": "Backup dell'account",
+		"myPhotos": "Le mie foto"
 	},
 	"saved": {
 		"title": "I miei salvati",
@@ -1347,5 +1348,11 @@
 		"createAccount": "Crea account",
 		"login": "Accedi",
 		"back": "Indietro"
+	},
+	"myPhotos": {
+		"title": "Le mie foto",
+		"empty": "Non hai ancora aggiunto foto. Apri un luogo e tocca «Aggiungi foto».",
+		"loadError": "Impossibile caricare le tue foto. Riprova.",
+		"unknownPlace": "Luogo #{id}"
 	}
 }
