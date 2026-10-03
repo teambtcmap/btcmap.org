@@ -30,6 +30,8 @@ import type { PlaceImage } from "$types/btcmap-api/PlaceImage";
 // to the place, and each has a delete action (#1469).
 
 const TILE_HEIGHT = 160;
+// One row on desktop (4 columns), two on phones
+const SKELETON_CARDS = 4;
 const SOURCE: PlacePhotoSource = "my_photos";
 
 let photos = $state<PlaceImage[]>([]);
@@ -101,8 +103,20 @@ onMount(async () => {
 	</h1>
 
 	{#if loading}
-		<div class="flex justify-center">
-			<div class="h-8 w-8 animate-spin rounded-full border-4 border-link border-t-transparent"></div>
+		<!-- Skeleton cards shaped like the real ones, so the grid doesn't jump -->
+		<div role="status" aria-label={$_("aria.loading")}>
+			<ul aria-hidden="true" class="grid grid-cols-2 gap-4 sm:grid-cols-3 lg:grid-cols-4">
+				{#each { length: SKELETON_CARDS } as _card, i (i)}
+					<li class="overflow-hidden rounded-2xl border border-gray-300 dark:border-white/20 dark:bg-white/5">
+						<div class="h-40 animate-pulse bg-link/20 dark:bg-white/10"></div>
+						<div class="space-y-2 p-3">
+							<div class="h-4 w-3/4 animate-pulse rounded bg-link/20 dark:bg-white/10"></div>
+							<div class="h-3 w-1/3 animate-pulse rounded bg-link/20 dark:bg-white/10"></div>
+							<div class="h-4 w-24 animate-pulse rounded bg-link/20 dark:bg-white/10"></div>
+						</div>
+					</li>
+				{/each}
+			</ul>
 		</div>
 	{:else if loadError}
 		<p class="text-center text-body dark:text-white/70">{$_("myPhotos.loadError")}</p>
@@ -115,7 +129,7 @@ onMount(async () => {
 					<a
 						href={photoPagePath(photo.place_id, photo.id)}
 						onclick={() => trackEvent("my_photos_tile_click", { link: "photo" })}
-						class="block bg-gray-200 dark:bg-white/10"
+						class="block bg-link/20 dark:bg-white/10"
 					>
 						<img
 							src={placePhotoUrl(photo.place_id, photo.id, { h: TILE_HEIGHT * 2 })}
