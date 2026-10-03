@@ -61,7 +61,8 @@
 		"login": "Log in",
 		"signup": "Sign up",
 		"logout": "Log out",
-		"backupAccount": "Back up account"
+		"backupAccount": "Back up account",
+		"myPhotos": "My photos"
 	},
 	"saved": {
 		"title": "My Saved",

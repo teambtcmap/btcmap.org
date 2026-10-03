@@ -724,7 +724,8 @@
 		"taggingActivity": "Активност по тагване",
 		"taggingIssues": "Проблеми с тагването",
 		"wiki": "Уики",
-		"signup": "Регистрация"
+		"signup": "Регистрация",
+		"myPhotos": "Моите снимки"
 	},
 	"verificationFilter": {
 		"any": "Всички",

@@ -61,7 +61,8 @@
 		"login": "Aanmelden",
 		"signup": "Registreren",
 		"logout": "Afmelden",
-		"backupAccount": "Back-up account"
+		"backupAccount": "Back-up account",
+		"myPhotos": "Mijn foto's"
 	},
 	"saved": {
 		"title": "Mijn opgeslagen items",

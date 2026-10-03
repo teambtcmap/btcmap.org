@@ -54,7 +54,8 @@
 		"taggingIssues": "Открытые задачи",
 		"communities": "Сообщества",
 		"countries": "Страны",
-		"signup": "Регистрация"
+		"signup": "Регистрация",
+		"myPhotos": "Мои фото"
 	},
 	"search": {
 		"placeholderPlaces": "Поиск мест...",
