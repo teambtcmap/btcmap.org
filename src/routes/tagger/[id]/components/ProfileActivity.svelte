@@ -144,13 +144,13 @@ const searchDebounce = debounce((e) => handleKeyUp(e));
 							{#each Array(pagination.pageSize) as _, i (i)}
 								<tr class="border-b border-gray-300/50 dark:border-white/50">
 									<td class="w-2/3 px-5 py-3">
-										<Skeleton tone="subtle" class="h-6 rounded" />
+										<Skeleton class="h-6 rounded" />
 									</td>
 									<td class="w-1/6 px-5 py-3">
-										<Skeleton tone="subtle" class="h-6 rounded" />
+										<Skeleton class="h-6 rounded" />
 									</td>
 									<td class="w-1/6 px-5 py-3">
-										<Skeleton tone="subtle" class="h-6 rounded" />
+										<Skeleton class="h-6 rounded" />
 									</td>
 								</tr>
 							{/each}
@@ -203,9 +203,9 @@ const searchDebounce = debounce((e) => handleKeyUp(e));
 			{#each Array(10) as _, i (i)}
 				<div class="mb-3">
 					<div class="flex space-x-4">
-						<Skeleton tone="subtle" class="h-4 w-2/3 rounded" />
-						<Skeleton tone="subtle" class="h-4 w-1/6 rounded" />
-						<Skeleton tone="subtle" class="h-4 w-1/6 rounded" />
+						<Skeleton class="h-4 w-2/3 rounded" />
+						<Skeleton class="h-4 w-1/6 rounded" />
+						<Skeleton class="h-4 w-1/6 rounded" />
 					</div>
 				</div>
 			{/each}

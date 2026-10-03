@@ -13,9 +13,10 @@ import Skeleton from "$components/Skeleton.svelte";
 			<Skeleton as="span" class="mr-1 inline-block h-6 w-32 rounded" />
 
 			<span class="block items-center md:inline-flex">
-				<span
-					class="mr-1 mb-1 inline-block h-7 w-20 animate-pulse rounded-full border border-link bg-link/25 p-1"
-				></span>
+				<Skeleton
+					as="span"
+					class="mr-1 mb-1 inline-block h-7 w-20 rounded-full border border-link p-1"
+				/>
 			</span>
 
 			<Skeleton as="span" class="mx-auto block h-12 w-40 rounded md:mx-0 md:h-5" />
