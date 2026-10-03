@@ -214,7 +214,9 @@ onMount(() => {
 		},
 		onDestroy: () => {
 			handle = undefined;
-			onClose(index);
+			// Unmounted by the parent: its late destroy must not close the
+			// viewer the parent may have opened since
+			if (!destroyed) onClose(index);
 		},
 	})
 		.then((h) => {
@@ -224,7 +226,7 @@ onMount(() => {
 		})
 		.catch((error) => {
 			console.error("place photos: viewer failed to load", error);
-			onClose(index);
+			if (!destroyed) onClose(index);
 		});
 });
 
