@@ -1,3 +1,5 @@
+import type { Readable } from "svelte/store";
+import { derived } from "svelte/store";
 import type { Locales } from "svelte-time";
 
 // svelte-time formats with dayjs, which only knows English until a locale
@@ -25,4 +27,23 @@ export const loadDayjsLocale = async (
 	if (!entry) return "en";
 	await entry.load();
 	return entry.key;
+};
+
+// The dayjs key for the app's current language, for <Time locale>. Starts
+// as "en" and switches once the locale file has loaded; a slower, older
+// load can't overwrite a newer one.
+export const createTimeLocale = (
+	appLocale: Readable<string | null | undefined>,
+): Readable<Locales> => {
+	let latest = 0;
+	return derived<typeof appLocale, Locales>(
+		appLocale,
+		(code, set) => {
+			const request = ++latest;
+			loadDayjsLocale(code).then((key) => {
+				if (request === latest) set(key);
+			});
+		},
+		"en",
+	);
 };

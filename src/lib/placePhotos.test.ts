@@ -1,9 +1,14 @@
+import type { AxiosResponse } from "axios";
+import { AxiosError } from "axios";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 
 import { API_BASE } from "$lib/api-base";
 
 import {
+	canDeletePhoto,
 	deepLinkTarget,
+	deleteErrorKey,
+	deletePlacePhoto,
 	fetchPlacePhotos,
 	fitWithin,
 	MAX_PHOTOS_PER_PICK,
@@ -13,6 +18,7 @@ import {
 	photoShareUrl,
 	placePhotoUrl,
 	splitPick,
+	undoUploads,
 	uploadPlacePhoto,
 	uploadPlacePhotos,
 	withPhotoParam,
@@ -22,6 +28,7 @@ vi.mock("$lib/axios", () => ({
 	default: {
 		get: vi.fn(),
 		post: vi.fn(),
+		delete: vi.fn(),
 	},
 }));
 
@@ -272,5 +279,100 @@ describe("photoAuthorName", () => {
 		expect(
 			photoAuthorName({ ...photo, author: { id: 1, name: "  " } }),
 		).toBeNull();
+	});
+});
+
+describe("canDeletePhoto", () => {
+	const mine = { ...photo, author: { id: 668, name: "me" } };
+
+	it("lets the uploader delete their photo", () => {
+		expect(canDeletePhoto(mine, { id: 668, roles: ["user"] })).toBe(true);
+	});
+
+	it("falls back to created_by when there's no author object", () => {
+		expect(canDeletePhoto(photo, { id: 668, roles: [] })).toBe(true);
+	});
+
+	it("lets admin and root delete anyone's photo", () => {
+		expect(canDeletePhoto(mine, { id: 1, roles: ["user", "admin"] })).toBe(
+			true,
+		);
+		expect(canDeletePhoto(mine, { id: 1, roles: ["root"] })).toBe(true);
+	});
+
+	it("refuses other users and signed-out visitors", () => {
+		expect(canDeletePhoto(mine, { id: 1, roles: ["user"] })).toBe(false);
+		expect(canDeletePhoto(mine, null)).toBe(false);
+		expect(
+			canDeletePhoto(
+				{ ...photo, created_by: undefined },
+				{ id: 668, roles: [] },
+			),
+		).toBe(false);
+	});
+});
+
+describe("deletePlacePhoto", () => {
+	it("DELETEs the image with the Bearer token", async () => {
+		const { default: api } = await import("$lib/axios");
+		vi.mocked(api.delete).mockResolvedValue({ data: photo });
+
+		await deletePlacePhoto(20423, 12, "tok");
+
+		expect(api.delete).toHaveBeenCalledWith(
+			`${API_BASE}/v4/places/20423/images/12`,
+			{ headers: { Authorization: "Bearer tok" } },
+		);
+	});
+});
+
+describe("undoUploads", () => {
+	it("deletes every just-uploaded photo and reports which ones went", async () => {
+		const { default: api } = await import("$lib/axios");
+		vi.mocked(api.delete)
+			.mockResolvedValueOnce({ data: {} })
+			.mockRejectedValueOnce(new Error("500"));
+
+		const result = await undoUploads(20423, [12, 13], "tok");
+
+		expect(api.delete).toHaveBeenCalledTimes(2);
+		expect(result).toEqual({ removed: [12], complete: false });
+	});
+
+	it("counts a photo that's already gone (404) as removed", async () => {
+		const { default: api } = await import("$lib/axios");
+		const notFound = new AxiosError(
+			"404",
+			"ERR_BAD_REQUEST",
+			undefined,
+			undefined,
+			{
+				status: 404,
+			} as AxiosResponse,
+		);
+		vi.mocked(api.delete).mockRejectedValueOnce(notFound);
+
+		expect(await undoUploads(20423, [12], "tok")).toEqual({
+			removed: [12],
+			complete: true,
+		});
+	});
+});
+
+describe("deleteErrorKey", () => {
+	const httpError = (status: number) =>
+		new AxiosError("x", "ERR_BAD_REQUEST", undefined, undefined, {
+			status,
+		} as AxiosResponse);
+
+	it("explains a 403 as not your photo", () => {
+		expect(deleteErrorKey(httpError(403))).toBe("placePhotos.deleteForbidden");
+	});
+
+	it("is the generic failure for anything else", () => {
+		expect(deleteErrorKey(httpError(500))).toBe("placePhotos.deleteFailed");
+		expect(deleteErrorKey(new Error("offline"))).toBe(
+			"placePhotos.deleteFailed",
+		);
 	});
 });

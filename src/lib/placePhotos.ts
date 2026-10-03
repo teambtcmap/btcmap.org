@@ -1,5 +1,8 @@
+import { isAxiosError } from "axios";
+
 import { API_BASE } from "$lib/api-base";
 import api from "$lib/axios";
+import type { CurrentUser } from "$lib/currentUser";
 import { withLiteralCommas } from "$lib/literalCommas";
 
 import type { PlaceImage } from "$types/btcmap-api/PlaceImage";
@@ -56,6 +59,62 @@ export const fetchPlacePhotos = async (
 	);
 	if (!Array.isArray(res.data)) return [];
 	return res.data.filter(isPlaceImage);
+};
+
+// Mirrors the API rule: the uploader may delete their own photo, admin and
+// root any photo. The API still enforces it (403); this only decides
+// whether to offer the action.
+const MODERATOR_ROLES = ["admin", "root"];
+
+export const canDeletePhoto = (
+	photo: PlaceImage,
+	user: CurrentUser | null,
+): boolean => {
+	if (!user) return false;
+	if (user.roles.some((role) => MODERATOR_ROLES.includes(role))) return true;
+	const uploaderId = photo.author?.id ?? photo.created_by;
+	return uploaderId !== undefined && uploaderId === user.id;
+};
+
+export const deletePlacePhoto = async (
+	placeId: number,
+	imageId: number,
+	token: string,
+): Promise<void> => {
+	await api.delete(`${API_BASE}/v4/places/${placeId}/images/${imageId}`, {
+		headers: { Authorization: `Bearer ${token}` },
+	});
+};
+
+// i18n key for a failed delete: 403 means the photo isn't the caller's
+// (and they're not admin/root)
+export const deleteErrorKey = (
+	error: unknown,
+): "placePhotos.deleteForbidden" | "placePhotos.deleteFailed" =>
+	isAxiosError(error) && error.response?.status === 403
+		? "placePhotos.deleteForbidden"
+		: "placePhotos.deleteFailed";
+
+// "Undo" on the upload toast: delete the photos just stored, in parallel.
+// removed lists the ids that are gone, so the strip drops only those;
+// complete says whether every one went (success vs error toast).
+export const undoUploads = async (
+	placeId: number,
+	imageIds: number[],
+	token: string,
+): Promise<{ removed: number[]; complete: boolean }> => {
+	const results = await Promise.allSettled(
+		imageIds.map((id) => deletePlacePhoto(placeId, id, token)),
+	);
+	// 404: already gone (e.g. deleted from the viewer before Undo)
+	const removed = imageIds.filter((_, i) => {
+		const result = results[i];
+		return (
+			result.status === "fulfilled" ||
+			(isAxiosError(result.reason) && result.reason.response?.status === 404)
+		);
+	});
+	return { removed, complete: removed.length === imageIds.length };
 };
 
 export const uploadPlacePhoto = async (
