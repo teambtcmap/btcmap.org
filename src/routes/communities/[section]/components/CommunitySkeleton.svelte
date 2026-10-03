@@ -3,7 +3,7 @@ import Skeleton from "$components/Skeleton.svelte";
 </script>
 
 <div
-	class="animate-pulse rounded-3xl border border-link/50 shadow transition-shadow hover:shadow-2xl"
+	class="rounded-3xl border border-link/50 shadow transition-shadow hover:shadow-2xl"
 >
 	<div class="my-4 space-y-2 p-4">
 		<!-- avatar placeholder -->
@@ -15,7 +15,7 @@ import Skeleton from "$components/Skeleton.svelte";
 
 	<!-- socials placeholder -->
 	<div
-		class="flex w-full animate-pulse items-center justify-center space-x-2 border-t border-t-link/50 p-4"
+		class="flex w-full items-center justify-center space-x-2 border-t border-t-link/50 p-4"
 	>
 		<Skeleton class="h-[40px] w-[40px] rounded-full" />
 		<Skeleton class="h-[40px] w-[40px] rounded-full" />
