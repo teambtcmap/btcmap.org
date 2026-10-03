@@ -156,7 +156,10 @@ const closeViewer = async (index: number) => {
 // A photo deleted from the viewer: drop it, close the viewer, and focus the
 // tile that took its place (or the new last one)
 const handlePhotoDeleted = async (imageId: number, index: number) => {
-	photos = (photos ?? []).filter((p) => p.id !== imageId);
+	// Stale: the drawer switched place while the delete was in flight. The
+	// old viewer's callback must not touch the new place's URL or focus.
+	if (viewerIndex === null || !photos?.some((p) => p.id === imageId)) return;
+	photos = photos.filter((p) => p.id !== imageId);
 	viewerIndex = null;
 	syncPhotoParam(null);
 	await tick();
