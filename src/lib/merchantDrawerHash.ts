@@ -12,9 +12,6 @@ export interface MerchantHashState {
 
 export const MERCHANT_URL_CHANGE_EVENT = "merchant-url-change";
 
-// Re-exported for existing callers (the /map page)
-export { withLiteralCommas };
-
 export function parseMerchantHash(): MerchantHashState {
 	if (!browser) {
 		return { merchantId: null, drawerView: "details", isOpen: false };

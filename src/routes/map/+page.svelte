@@ -35,6 +35,7 @@ import {
 } from "$lib/constants";
 import { SEARCH_SHEET_PEEK_HEIGHT } from "$lib/drawerConfig";
 import { _, getDisplayLang, locale } from "$lib/i18n";
+import { withLiteralCommas } from "$lib/literalCommas";
 import {
 	BASEMAPS,
 	type BasemapId,
@@ -77,7 +78,6 @@ import {
 import {
 	MERCHANT_URL_CHANGE_EVENT,
 	parseMerchantHash,
-	withLiteralCommas,
 } from "$lib/merchantDrawerHash";
 import { merchantDrawer } from "$lib/merchantDrawerStore";
 import { merchantList } from "$lib/merchantListStore";
