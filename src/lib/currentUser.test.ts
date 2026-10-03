@@ -39,6 +39,22 @@ describe("fetchCurrentUser", () => {
 		expect(api.get).toHaveBeenCalledTimes(2);
 	});
 
+	it("asks again after the cache expires, so role changes apply without a reload", async () => {
+		vi.useFakeTimers();
+		const { default: api } = await import("$lib/axios");
+		vi.mocked(api.get).mockResolvedValue({ data: { id: 17, roles: [] } });
+
+		await fetchCurrentUser("tok");
+		vi.advanceTimersByTime(4 * 60_000);
+		await fetchCurrentUser("tok");
+		expect(api.get).toHaveBeenCalledOnce();
+
+		vi.advanceTimersByTime(2 * 60_000);
+		await fetchCurrentUser("tok");
+		expect(api.get).toHaveBeenCalledTimes(2);
+		vi.useRealTimers();
+	});
+
 	it("is null for an unexpected response or a failed request, and retries later", async () => {
 		const { default: api } = await import("$lib/axios");
 		vi.mocked(api.get).mockResolvedValueOnce({ data: "<html>" });

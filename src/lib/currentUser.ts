@@ -6,8 +6,14 @@ import api from "$lib/axios";
 // the numeric id that the API attributes content to.
 export type CurrentUser = { id: number; roles: string[] };
 
-// One request per token; failures aren't cached, so a later call retries
-const cache = new Map<string, Promise<CurrentUser | null>>();
+// One request per token for a few minutes, so a role change (e.g. a new
+// admin, or a revoked one) applies without a reload; failures aren't
+// cached, so a later call retries
+const CACHE_MS = 5 * 60_000;
+const cache = new Map<
+	string,
+	{ at: number; request: Promise<CurrentUser | null> }
+>();
 
 export const resetCurrentUserCache = () => cache.clear();
 
@@ -27,7 +33,7 @@ export const fetchCurrentUser = (
 	token: string,
 ): Promise<CurrentUser | null> => {
 	const cached = cache.get(token);
-	if (cached) return cached;
+	if (cached && Date.now() - cached.at < CACHE_MS) return cached.request;
 	const request = api
 		.get<unknown>(`${API_BASE}/v4/users/me`, {
 			headers: { Authorization: `Bearer ${token}` },
@@ -41,6 +47,6 @@ export const fetchCurrentUser = (
 			if (!user) cache.delete(token);
 			return user;
 		});
-	cache.set(token, request);
+	cache.set(token, { at: Date.now(), request });
 	return request;
 };
