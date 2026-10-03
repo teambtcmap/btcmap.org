@@ -6,6 +6,8 @@
 // aria-hidden: an empty block has nothing to say, the loading area does.
 type Props = {
 	class?: string;
+	// "span" where a div isn't valid HTML: inside a <span>, <button> or <a>.
+	// Layout comes from `class` (block, inline-block) either way.
 	as?: "div" | "span";
 };
 
