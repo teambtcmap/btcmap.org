@@ -21,8 +21,30 @@ const isTabStop = (el: HTMLElement): boolean =>
 	el.getClientRects().length > 0 &&
 	getComputedStyle(el).visibility !== "hidden";
 
-const focusableIn = (root: HTMLElement): HTMLElement[] =>
-	Array.from(root.querySelectorAll<HTMLElement>(FOCUSABLE)).filter(isTabStop);
+// A named radio group is a single Tab stop: its checked radio, or its first
+// one when none is checked. The other radios would otherwise pose as
+// boundaries (e.g. the basemap picker that ends the map tools modal).
+const isRadio = (el: HTMLElement): el is HTMLInputElement =>
+	el instanceof HTMLInputElement && el.type === "radio" && el.name !== "";
+
+const radioGroupStop = (
+	radio: HTMLInputElement,
+	candidates: HTMLElement[],
+): HTMLInputElement => {
+	const group = candidates.filter(
+		(el): el is HTMLInputElement => isRadio(el) && el.name === radio.name,
+	);
+	return group.find((el) => el.checked) ?? group[0];
+};
+
+const focusableIn = (root: HTMLElement): HTMLElement[] => {
+	const candidates = Array.from(
+		root.querySelectorAll<HTMLElement>(FOCUSABLE),
+	).filter(isTabStop);
+	return candidates.filter(
+		(el) => !isRadio(el) || radioGroupStop(el, candidates) === el,
+	);
+};
 
 export const trapTab = (event: KeyboardEvent, root: HTMLElement): void => {
 	if (event.key !== "Tab") return;

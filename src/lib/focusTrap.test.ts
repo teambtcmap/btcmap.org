@@ -114,6 +114,35 @@ describe("trapTab", () => {
 		expect(document.activeElement).toBe(first);
 	});
 
+	it("treats a radio group as one Tab stop: the checked radio", () => {
+		// Like the basemap picker that ends MapToolsModal
+		root.insertAdjacentHTML(
+			"beforeend",
+			'<input type="radio" name="basemap" id="liberty" checked><input type="radio" name="basemap" id="osm">',
+		);
+		const liberty = root.querySelector("#liberty") as HTMLInputElement;
+
+		liberty.focus();
+		trapTab(tab(), root);
+		expect(document.activeElement).toBe(first);
+
+		first.focus();
+		trapTab(tab(true), root);
+		expect(document.activeElement).toBe(liberty);
+	});
+
+	it("uses a group's first radio when none is checked", () => {
+		root.insertAdjacentHTML(
+			"beforeend",
+			'<input type="radio" name="size" id="small"><input type="radio" name="size" id="large">',
+		);
+		const small = root.querySelector("#small") as HTMLInputElement;
+
+		small.focus();
+		trapTab(tab(), root);
+		expect(document.activeElement).toBe(first);
+	});
+
 	it("ignores other keys", () => {
 		last.focus();
 		const event = new KeyboardEvent("keydown", {
