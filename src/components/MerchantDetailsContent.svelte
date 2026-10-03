@@ -34,8 +34,10 @@ export let onBoostClick: () => void;
 export let isLoading: boolean = false;
 // Analytics source for the photo strip: this content renders in the /map
 // drawer and in the area-page drawer
-export let photoSource: Exclude<PlacePhotoSource, "merchant_page"> =
-	"map_drawer";
+export let photoSource: Extract<
+	PlacePhotoSource,
+	"map_drawer" | "area_drawer"
+> = "map_drawer";
 // ?issues worklist (#921): surface the place's derived issues as a
 // collapsed row. Off by default — only the map drawers opt in, and only
 // while the worklist mode is active.
