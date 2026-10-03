@@ -61,7 +61,8 @@
 		"login": "Aanmelden",
 		"signup": "Registreren",
 		"logout": "Afmelden",
-		"backupAccount": "Back-up account"
+		"backupAccount": "Back-up account",
+		"myPhotos": "Mijn foto's"
 	},
 	"saved": {
 		"title": "Mijn opgeslagen items",
@@ -1352,5 +1353,11 @@
 		"createAccount": "Account aanmaken",
 		"login": "Aanmelden",
 		"back": "Terug"
+	},
+	"myPhotos": {
+		"title": "Mijn foto's",
+		"empty": "Je hebt nog geen foto's toegevoegd. Open een plek en tik op 'Foto toevoegen'.",
+		"loadError": "Kan je foto's niet laden. Probeer het opnieuw.",
+		"unknownPlace": "Plek #{id}"
 	}
 }

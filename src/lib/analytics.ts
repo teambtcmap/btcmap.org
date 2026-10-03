@@ -78,7 +78,9 @@ export type EventName =
 	| "place_photo_delete_success"
 	| "place_photo_upload_undo_click"
 	| "place_photo_upload_undo_success"
-	| "place_photo_delete_cancel";
+	| "place_photo_delete_cancel"
+	| "my_photos_click"
+	| "my_photos_tile_click";
 
 declare global {
 	interface Window {

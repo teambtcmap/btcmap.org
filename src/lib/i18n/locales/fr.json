@@ -54,7 +54,8 @@
 		"taggingIssues": "Problèmes de marquage",
 		"communities": "Communautés",
 		"countries": "Pays",
-		"signup": "S'inscrire"
+		"signup": "S'inscrire",
+		"myPhotos": "Mes photos"
 	},
 	"search": {
 		"placeholderPlaces": "Rechercher des lieux...",
@@ -1277,5 +1278,11 @@
 		"createAccount": "Créer un compte",
 		"login": "Se connecter",
 		"back": "Retour"
+	},
+	"myPhotos": {
+		"title": "Mes photos",
+		"empty": "Vous n'avez encore ajouté aucune photo. Ouvrez un lieu et touchez « Ajouter une photo ».",
+		"loadError": "Impossible de charger vos photos. Veuillez réessayer.",
+		"unknownPlace": "Lieu #{id}"
 	}
 }

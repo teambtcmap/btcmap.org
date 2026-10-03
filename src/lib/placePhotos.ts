@@ -12,7 +12,11 @@ import type { PlaceImage } from "$types/btcmap-api/PlaceImage";
 // fetch each image's bytes in parallel at the size it needs.
 
 // Where the strip and viewer are shown, for analytics
-export type PlacePhotoSource = "merchant_page" | "map_drawer" | "area_drawer";
+export type PlacePhotoSource =
+	| "merchant_page"
+	| "map_drawer"
+	| "area_drawer"
+	| "my_photos";
 
 // Longest side we upload. Phone photos are 4–8 MB at 12 MP; the API caps
 // uploads at 10 MB decoded, and nothing we render needs more than this.
@@ -115,6 +119,22 @@ export const undoUploads = async (
 		);
 	});
 	return { removed, complete: removed.length === imageIds.length };
+};
+
+// The signed-in user's uploads across all places, newest first ("My photos").
+// The endpoint also returns their report evidence (type "report"): leave it
+// out, it isn't public, its deep link wouldn't open, and reviewers rely on
+// it. Throws on an unexpected response so the page can show its error state.
+export const fetchMyPlacePhotos = async (
+	token: string,
+): Promise<PlaceImage[]> => {
+	const res = await api.get<unknown>(`${API_BASE}/v4/users/me/place-images`, {
+		headers: { Authorization: `Bearer ${token}` },
+	});
+	if (!Array.isArray(res.data)) {
+		throw new Error("my place images returned an unexpected response");
+	}
+	return res.data.filter(isPlaceImage).filter((p) => p.type === "user");
 };
 
 export const uploadPlacePhoto = async (

@@ -9,6 +9,7 @@ import {
 	deepLinkTarget,
 	deleteErrorKey,
 	deletePlacePhoto,
+	fetchMyPlacePhotos,
 	fetchPlacePhotos,
 	fitWithin,
 	MAX_PHOTOS_PER_PICK,
@@ -374,5 +375,34 @@ describe("deleteErrorKey", () => {
 		expect(deleteErrorKey(new Error("offline"))).toBe(
 			"placePhotos.deleteFailed",
 		);
+	});
+});
+
+describe("fetchMyPlacePhotos", () => {
+	it("lists the caller's uploads with the Bearer token", async () => {
+		const { default: api } = await import("$lib/axios");
+		vi.mocked(api.get).mockResolvedValue({ data: [photo, { id: "x" }] });
+
+		expect(await fetchMyPlacePhotos("tok")).toEqual([photo]);
+		expect(api.get).toHaveBeenCalledWith(
+			`${API_BASE}/v4/users/me/place-images`,
+			{ headers: { Authorization: "Bearer tok" } },
+		);
+	});
+
+	it("leaves out report evidence: only the user's public uploads", async () => {
+		const { default: api } = await import("$lib/axios");
+		vi.mocked(api.get).mockResolvedValue({
+			data: [photo, { ...photo, id: 7, type: "report" }],
+		});
+
+		expect((await fetchMyPlacePhotos("tok")).map((p) => p.id)).toEqual([12]);
+	});
+
+	it("throws on a non-array response so the page can show its error state", async () => {
+		const { default: api } = await import("$lib/axios");
+		vi.mocked(api.get).mockResolvedValue({ data: "<html>" });
+
+		await expect(fetchMyPlacePhotos("tok")).rejects.toThrow();
 	});
 });
