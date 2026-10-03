@@ -3,20 +3,23 @@ import { onMount } from "svelte";
 import Time from "svelte-time";
 
 import Icon from "$components/Icon.svelte";
+import PhotoDeleteConfirm from "$components/PhotoDeleteConfirm.svelte";
 import { trackEvent } from "$lib/analytics";
 import { createTimeLocale } from "$lib/dayjsLocale";
 import { _, locale } from "$lib/i18n";
+import {
+	askPhotoDelete,
+	cancelPhotoDelete,
+	confirmPhotoDelete,
+} from "$lib/placePhotoDelete";
 import type { PlacePhotoSource } from "$lib/placePhotos";
 import {
-	deleteErrorKey,
-	deletePlacePhoto,
 	fetchMyPlacePhotos,
 	photoPagePath,
 	placePhotoUrl,
 } from "$lib/placePhotos";
 import { session } from "$lib/session";
 import { placesById } from "$lib/store";
-import { errToast, successToast } from "$lib/utils";
 
 import { goto } from "$app/navigation";
 import { resolve } from "$app/paths";
@@ -46,30 +49,28 @@ const placeName = (placeId: number) =>
 
 const askDelete = (imageId: number) => {
 	confirmingId = imageId;
-	trackEvent("place_photo_delete_click", { source: SOURCE });
+	askPhotoDelete(SOURCE);
 };
 
 const cancelDelete = () => {
 	confirmingId = null;
-	trackEvent("place_photo_delete_cancel", { source: SOURCE });
+	cancelPhotoDelete(SOURCE);
 };
 
 const confirmDelete = async (photo: PlaceImage) => {
 	const token = $session?.token;
 	if (!token || deletingId !== null) return;
 	deletingId = photo.id;
-	try {
-		await deletePlacePhoto(photo.place_id, photo.id, token);
-		photos = photos.filter((p) => p.id !== photo.id);
-		trackEvent("place_photo_delete_success", { source: SOURCE });
-		successToast($_("placePhotos.deleted"));
-	} catch (error) {
-		console.error("my photos: delete failed", error);
-		errToast($_(deleteErrorKey(error)));
-	} finally {
-		deletingId = null;
-		confirmingId = null;
-	}
+	const deleted = await confirmPhotoDelete({
+		placeId: photo.place_id,
+		imageId: photo.id,
+		token,
+		source: SOURCE,
+		t: $_,
+	});
+	if (deleted) photos = photos.filter((p) => p.id !== photo.id);
+	deletingId = null;
+	confirmingId = null;
 };
 
 onMount(async () => {
@@ -138,21 +139,12 @@ onMount(async () => {
 						</p>
 						{#if confirmingId === photo.id}
 							<div class="flex items-center gap-2">
-								<button
-									type="button"
-									onclick={() => confirmDelete(photo)}
-									disabled={deletingId === photo.id}
-									class="rounded-lg bg-red-600 px-3 py-1.5 text-xs font-semibold text-white hover:bg-red-700 disabled:opacity-60"
-								>
-									{$_("placePhotos.deleteConfirmAction")}
-								</button>
-								<button
-									type="button"
-									onclick={cancelDelete}
-									class="rounded-lg px-3 py-1.5 text-xs font-semibold text-primary hover:bg-gray-100 dark:text-white dark:hover:bg-white/10"
-								>
-									{$_("forms.cancel")}
-								</button>
+								<PhotoDeleteConfirm
+									size="xs"
+									deleting={deletingId === photo.id}
+									onCancel={cancelDelete}
+									onConfirm={() => confirmDelete(photo)}
+								/>
 							</div>
 						{:else}
 							<button
