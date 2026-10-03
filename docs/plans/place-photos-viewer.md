@@ -28,8 +28,8 @@ Risk: no npm release since May 2024, although fixes land in the repo until Nov 2
 ## Decisions
 
 - Work continues on #1470, one commit per step.
-- "Report photo" waits for the moderation decision (open question 2).
-- The credit shows "Community photo" only. v4 has no public user-by-id endpoint, so `created_by` can't be resolved. Ask the API maintainers for one.
+- "Report photo" waits for a report endpoint. Since btcmap-api@7a6450d, owners can delete their own photos and admin/root can delete any (a first moderation tool).
+- The credit shows "Photo by <author.name>" (btcmap-api@7a6450d returns `author { id, name }`), falling back to "Community photo". Plain text: btcmap accounts have no public profile page to link to.
 - No RTL work: none of the 9 locales is RTL.
 - The deep link is read inside `PlacePhotos`. `merchant/[id]/+page.svelte` is a #1208 hotspot: it only gets one-line prop passes (`placeName`), no logic.
 
@@ -68,7 +68,7 @@ Risk: no npm release since May 2024, although fixes land in the repo until Nov 2
 
 - Props: today's props plus `placeName` and `source`.
 - Overlay: portaled to `<body>`, full-screen, `--dark` background.
-- Top bar: place name, then "Community photo", the relative date and "3 / 6", then the ⋯ and ✕ buttons.
+- Top bar: place name, then the credit ("Photo by …" or "Community photo"), the relative date and "3 / 6", then the ⋯ and ✕ buttons.
   - The date uses `svelte-time/intl` (native `Intl.RelativeTimeFormat`) in the app locale: no locale files, live updates. The rest of the app follows in #1482.
   - The counter uses `tabular-nums`.
 - Desktop: 44px arrows in 72px side zones, disabled at the ends and hidden on touch devices.
@@ -117,4 +117,5 @@ Risk: no npm release since May 2024, although fixes land in the repo until Nov 2
 ### 7. Later
 
 - Report photo: `POST /v4/place-reports` with `type: "photo_report"` and the image id, after the moderation decision. Events `place_photo_report_click` / `_success`. Signed-out users get `PhotoAuthPrompt`.
-- Credit resolution, once the API has a public user lookup by id.
+- Delete: "Delete photo" in the viewer's ⋯ menu for the uploader and for admin/root (`DELETE /v4/places/{id}/images/{image_id}`), plus an Undo action on the upload toast.
+- "My photos" page at `/user/photos` from `GET /v4/users/me/place-images`, with delete.

@@ -1256,7 +1256,8 @@
 		"copyLink": "Скопировать ссылку на фото",
 		"linkCopied": "Ссылка скопирована",
 		"copyLinkFailed": "Не удалось скопировать ссылку",
-		"moreActions": "Ещё действия"
+		"moreActions": "Ещё действия",
+		"credit": "Фото: {name}"
 	},
 	"authPrompt": {
 		"createAccount": "Создать аккаунт",
