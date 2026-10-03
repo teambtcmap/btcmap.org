@@ -4,6 +4,7 @@ import { OutClick } from "svelte-outclick";
 import Time from "svelte-time";
 
 import Icon from "$components/Icon.svelte";
+import PhotoDeleteConfirm from "$components/PhotoDeleteConfirm.svelte";
 import { trackEvent } from "$lib/analytics";
 import { lockBodyScroll, unlockBodyScroll } from "$lib/bodyScrollLock";
 import type { CurrentUser } from "$lib/currentUser";
@@ -11,13 +12,16 @@ import { fetchCurrentUser } from "$lib/currentUser";
 import { createTimeLocale } from "$lib/dayjsLocale";
 import { trapTab } from "$lib/focusTrap";
 import { _, locale } from "$lib/i18n";
+import {
+	askPhotoDelete,
+	cancelPhotoDelete,
+	confirmPhotoDelete,
+} from "$lib/placePhotoDelete";
 import type { LightboxHandle } from "$lib/placePhotoLightbox";
 import { buildSlides, openPlaceLightbox } from "$lib/placePhotoLightbox";
 import type { PlacePhotoSource } from "$lib/placePhotos";
 import {
 	canDeletePhoto,
-	deleteErrorKey,
-	deletePlacePhoto,
 	photoAuthorName,
 	photoShareUrl,
 	placePhotoUrl,
@@ -110,12 +114,12 @@ const toggleMenu = () => {
 
 const askDelete = () => {
 	confirmingDelete = true;
-	trackEvent("place_photo_delete_click", { source });
+	askPhotoDelete(source);
 };
 
 const cancelDelete = () => {
 	confirmingDelete = false;
-	trackEvent("place_photo_delete_cancel", { source });
+	cancelPhotoDelete(source);
 };
 
 const confirmDelete = async () => {
@@ -123,19 +127,16 @@ const confirmDelete = async () => {
 	if (!token || deleting) return;
 	deleting = true;
 	const target = { id: photo.id, index };
-	try {
-		await deletePlacePhoto(placeId, target.id, token);
-		trackEvent("place_photo_delete_success", { source });
-		successToast($_("placePhotos.deleted"));
-		closeMenu();
-		onDeleted(target.id, target.index);
-	} catch (error) {
-		console.error("place photos: delete failed", error);
-		errToast($_(deleteErrorKey(error)));
-		closeMenu();
-	} finally {
-		deleting = false;
-	}
+	const deleted = await confirmPhotoDelete({
+		placeId,
+		imageId: target.id,
+		token,
+		source,
+		t: $_,
+	});
+	deleting = false;
+	closeMenu();
+	if (deleted) onDeleted(target.id, target.index);
 };
 
 const copyLink = async () => {
@@ -288,21 +289,7 @@ onDestroy(() => {
 							<div class="max-w-[240px] p-2.5">
 								<p class="text-sm">{$_('placePhotos.deleteConfirm')}</p>
 								<div class="mt-3 flex justify-end gap-2">
-									<button
-										type="button"
-										onclick={cancelDelete}
-										class="rounded-lg px-3 py-1.5 text-sm font-semibold hover:bg-gray-100 dark:hover:bg-white/10"
-									>
-										{$_('forms.cancel')}
-									</button>
-									<button
-										type="button"
-										onclick={confirmDelete}
-										disabled={deleting}
-										class="rounded-lg bg-red-600 px-3 py-1.5 text-sm font-semibold text-white hover:bg-red-700 disabled:opacity-60"
-									>
-										{$_('placePhotos.deleteConfirmAction')}
-									</button>
+									<PhotoDeleteConfirm {deleting} onCancel={cancelDelete} onConfirm={confirmDelete} />
 								</div>
 							</div>
 						{:else}
