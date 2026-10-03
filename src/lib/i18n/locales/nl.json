@@ -1344,7 +1344,9 @@
 		"cancel": "Annuleren",
 		"deleted": "Foto verwijderd",
 		"deleteFailed": "Kan de foto niet verwijderen. Probeer het opnieuw.",
-		"deleteForbidden": "Je kunt alleen je eigen foto's verwijderen."
+		"deleteForbidden": "Je kunt alleen je eigen foto's verwijderen.",
+		"undo": "Ongedaan maken",
+		"undone": "{count, plural, one {Foto verwijderd} other {# foto's verwijderd}}"
 	},
 	"authPrompt": {
 		"createAccount": "Account aanmaken",

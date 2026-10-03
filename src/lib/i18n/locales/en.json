@@ -1344,7 +1344,9 @@
 		"cancel": "Cancel",
 		"deleted": "Photo deleted",
 		"deleteFailed": "Couldn't delete the photo. Please try again.",
-		"deleteForbidden": "You can only delete your own photos."
+		"deleteForbidden": "You can only delete your own photos.",
+		"undo": "Undo",
+		"undone": "{count, plural, one {Photo removed} other {# photos removed}}"
 	},
 	"authPrompt": {
 		"createAccount": "Create account",

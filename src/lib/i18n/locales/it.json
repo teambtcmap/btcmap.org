@@ -1344,7 +1344,9 @@
 		"cancel": "Annulla",
 		"deleted": "Foto eliminata",
 		"deleteFailed": "Impossibile eliminare la foto. Riprova.",
-		"deleteForbidden": "Puoi eliminare solo le tue foto."
+		"deleteForbidden": "Puoi eliminare solo le tue foto.",
+		"undo": "Annulla",
+		"undone": "{count, plural, one {Foto rimossa} other {# foto rimosse}}"
 	},
 	"authPrompt": {
 		"createAccount": "Crea account",

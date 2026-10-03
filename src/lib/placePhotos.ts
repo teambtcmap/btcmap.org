@@ -84,6 +84,19 @@ export const deletePlacePhoto = async (
 	});
 };
 
+// "Undo" on the upload toast: delete the photos just stored, in parallel.
+// Returns the ids that are gone, so the strip drops only those.
+export const undoUploads = async (
+	placeId: number,
+	imageIds: number[],
+	token: string,
+): Promise<number[]> => {
+	const results = await Promise.allSettled(
+		imageIds.map((id) => deletePlacePhoto(placeId, id, token)),
+	);
+	return imageIds.filter((_, i) => results[i].status === "fulfilled");
+};
+
 export const uploadPlacePhoto = async (
 	placeId: number,
 	token: string,

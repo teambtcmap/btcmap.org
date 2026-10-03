@@ -16,6 +16,7 @@ import {
 	placePhotoUrl,
 	prepareUpload,
 	splitPick,
+	undoUploads,
 	uploadPlacePhoto,
 	uploadPlacePhotos,
 	withPhotoParam,
@@ -197,6 +198,26 @@ const handleAuthenticated = async () => {
 	fileInput?.click();
 };
 
+// "Undo" on the upload toast: an accidental upload is one tap from gone
+const undoUpload = async (id: number, stored: PlaceImage[], token: string) => {
+	trackEvent("place_photo_upload_undo", { source, count: stored.length });
+	const removed = await undoUploads(
+		id,
+		stored.map((p) => p.id),
+		token,
+	);
+	if (id === placeId) {
+		photos = (photos ?? []).filter((p) => !removed.includes(p.id));
+	}
+	if (removed.length === stored.length) {
+		successToast(
+			$_("placePhotos.undone", { values: { count: removed.length } }),
+		);
+	} else {
+		errToast($_("placePhotos.deleteFailed"));
+	}
+};
+
 const handleFiles = async (event: Event) => {
 	const input = event.currentTarget as HTMLInputElement;
 	const { batch, dropped } = splitPick(Array.from(input.files ?? []));
@@ -223,6 +244,10 @@ const handleFiles = async (event: Event) => {
 		if (id === placeId) photos = [...stored, ...(photos ?? [])];
 		successToast(
 			$_("placePhotos.uploaded", { values: { count: stored.length } }),
+			{
+				label: $_("placePhotos.undo"),
+				onClick: () => undoUpload(id, stored, token),
+			},
 		);
 		trackEvent("place_photo_add_success", { source, count: stored.length });
 	}

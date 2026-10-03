@@ -15,6 +15,7 @@ import {
 	photoShareUrl,
 	placePhotoUrl,
 	splitPick,
+	undoUploads,
 	uploadPlacePhoto,
 	uploadPlacePhotos,
 	withPhotoParam,
@@ -319,5 +320,19 @@ describe("deletePlacePhoto", () => {
 			`${API_BASE}/v4/places/20423/images/12`,
 			{ headers: { Authorization: "Bearer tok" } },
 		);
+	});
+});
+
+describe("undoUploads", () => {
+	it("deletes every just-uploaded photo and reports which ones went", async () => {
+		const { default: api } = await import("$lib/axios");
+		vi.mocked(api.delete)
+			.mockResolvedValueOnce({ data: {} })
+			.mockRejectedValueOnce(new Error("500"));
+
+		const removed = await undoUploads(20423, [12, 13], "tok");
+
+		expect(api.delete).toHaveBeenCalledTimes(2);
+		expect(removed).toEqual([12]);
 	});
 });

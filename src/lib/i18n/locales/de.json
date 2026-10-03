@@ -1269,7 +1269,9 @@
 		"cancel": "Abbrechen",
 		"deleted": "Foto gelöscht",
 		"deleteFailed": "Das Foto konnte nicht gelöscht werden. Bitte versuche es erneut.",
-		"deleteForbidden": "Du kannst nur deine eigenen Fotos löschen."
+		"deleteForbidden": "Du kannst nur deine eigenen Fotos löschen.",
+		"undo": "Rückgängig",
+		"undone": "{count, plural, one {Foto entfernt} other {# Fotos entfernt}}"
 	},
 	"authPrompt": {
 		"createAccount": "Konto erstellen",

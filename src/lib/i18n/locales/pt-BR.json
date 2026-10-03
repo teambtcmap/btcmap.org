@@ -1243,7 +1243,9 @@
 		"cancel": "Cancelar",
 		"deleted": "Foto excluída",
 		"deleteFailed": "Não foi possível excluir a foto. Tente novamente.",
-		"deleteForbidden": "Você só pode excluir suas próprias fotos."
+		"deleteForbidden": "Você só pode excluir suas próprias fotos.",
+		"undo": "Desfazer",
+		"undone": "{count, plural, one {Foto removida} other {# fotos removidas}}"
 	},
 	"authPrompt": {
 		"createAccount": "Criar conta",

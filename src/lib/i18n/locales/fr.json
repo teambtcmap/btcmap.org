@@ -1269,7 +1269,9 @@
 		"cancel": "Annuler",
 		"deleted": "Photo supprimée",
 		"deleteFailed": "Impossible de supprimer la photo. Veuillez réessayer.",
-		"deleteForbidden": "Vous ne pouvez supprimer que vos propres photos."
+		"deleteForbidden": "Vous ne pouvez supprimer que vos propres photos.",
+		"undo": "Annuler",
+		"undone": "{count, plural, one {Photo retirée} other {# photos retirées}}"
 	},
 	"authPrompt": {
 		"createAccount": "Créer un compte",
