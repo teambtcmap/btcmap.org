@@ -7,6 +7,7 @@ import {
 	fetchPlacePhotos,
 	fitWithin,
 	MAX_PHOTOS_PER_PICK,
+	photoAuthorName,
 	photoIdFromSearch,
 	photoPagePath,
 	photoShareUrl,
@@ -256,5 +257,20 @@ describe("deepLinkTarget", () => {
 	it("does nothing without a usable photo param", () => {
 		expect(deepLinkTarget(list, "?merchant=1")).toBeNull();
 		expect(deepLinkTarget(list, "?photo=abc")).toBeNull();
+	});
+});
+
+describe("photoAuthorName", () => {
+	it("returns the uploader's name", () => {
+		expect(
+			photoAuthorName({ ...photo, author: { id: 668, name: "satoshi" } }),
+		).toBe("satoshi");
+	});
+
+	it("is null without a usable author, so the UI falls back to 'Community photo'", () => {
+		expect(photoAuthorName(photo)).toBeNull();
+		expect(
+			photoAuthorName({ ...photo, author: { id: 1, name: "  " } }),
+		).toBeNull();
 	});
 });

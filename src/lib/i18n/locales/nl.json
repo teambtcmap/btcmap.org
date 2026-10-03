@@ -1331,7 +1331,8 @@
 		"copyLink": "Link naar foto kopiëren",
 		"linkCopied": "Link gekopieerd",
 		"copyLinkFailed": "Kan de link niet kopiëren",
-		"moreActions": "Meer acties"
+		"moreActions": "Meer acties",
+		"credit": "Foto door {name}"
 	},
 	"authPrompt": {
 		"createAccount": "Account aanmaken",

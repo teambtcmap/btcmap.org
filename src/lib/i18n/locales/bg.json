@@ -1330,7 +1330,8 @@
 		"copyLink": "Копирай връзка към снимката",
 		"linkCopied": "Връзката е копирана",
 		"copyLinkFailed": "Връзката не можа да бъде копирана",
-		"moreActions": "Още действия"
+		"moreActions": "Още действия",
+		"credit": "Снимка от {name}"
 	},
 	"authPrompt": {
 		"createAccount": "Създай акаунт",

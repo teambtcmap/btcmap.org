@@ -1331,7 +1331,8 @@
 		"copyLink": "Copy link to photo",
 		"linkCopied": "Link copied",
 		"copyLinkFailed": "Couldn't copy the link",
-		"moreActions": "More actions"
+		"moreActions": "More actions",
+		"credit": "Photo by {name}"
 	},
 	"authPrompt": {
 		"createAccount": "Create account",

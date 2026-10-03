@@ -13,7 +13,11 @@ import { _, locale } from "$lib/i18n";
 import type { LightboxHandle } from "$lib/placePhotoLightbox";
 import { buildSlides, openPlaceLightbox } from "$lib/placePhotoLightbox";
 import type { PlacePhotoSource } from "$lib/placePhotos";
-import { photoShareUrl, placePhotoUrl } from "$lib/placePhotos";
+import {
+	photoAuthorName,
+	photoShareUrl,
+	placePhotoUrl,
+} from "$lib/placePhotos";
 import { errToast, successToast } from "$lib/utils";
 
 import type { PlaceImage } from "$types/btcmap-api/PlaceImage";
@@ -52,6 +56,7 @@ const MAX_DOTS = 8;
 
 let index = $state(untrack(() => startIndex));
 const photo = $derived(photos[index]);
+const authorName = $derived(photoAuthorName(photo));
 
 // Relative date in the app's language; English until its dayjs locale loads
 let timeLocale = $state<Locales>("en");
@@ -197,7 +202,11 @@ onDestroy(() => {
 		<div class="min-w-0 flex-1">
 			<p class="truncate text-[15px] leading-5 font-bold">{placeName}</p>
 			<p class="mt-0.5 flex flex-wrap items-center gap-1.5 text-[13px] leading-[18px] text-white/80">
-				<span>{$_('placePhotos.communityPhoto')}</span>
+				<span>
+					{authorName
+						? $_('placePhotos.credit', { values: { name: authorName } })
+						: $_('placePhotos.communityPhoto')}
+				</span>
 				<span aria-hidden="true">·</span>
 				<!-- live keeps "a few seconds ago" current while the viewer is open -->
 				<Time timestamp={photo.created_at} relative live locale={timeLocale} />
