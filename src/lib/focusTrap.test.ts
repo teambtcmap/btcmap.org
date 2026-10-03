@@ -82,6 +82,27 @@ describe("trapTab", () => {
 		expect(event.defaultPrevented).toBe(false);
 	});
 
+	it("ignores controls that aren't Tab stops at either end", () => {
+		// tabindex="-1" and fieldset-disabled controls match the selector but
+		// the browser never tabs to them
+		root.insertAdjacentHTML(
+			"afterbegin",
+			'<button tabindex="-1">pre</button><fieldset disabled><button tabindex="0">pre2</button></fieldset>',
+		);
+		root.insertAdjacentHTML(
+			"beforeend",
+			'<button tabindex="-1">post</button><fieldset disabled><button tabindex="0">post2</button></fieldset>',
+		);
+
+		last.focus();
+		trapTab(tab(), root);
+		expect(document.activeElement).toBe(first);
+
+		first.focus();
+		trapTab(tab(true), root);
+		expect(document.activeElement).toBe(last);
+	});
+
 	it("ignores other keys", () => {
 		last.focus();
 		const event = new KeyboardEvent("keydown", {
