@@ -117,6 +117,20 @@ export const undoUploads = async (
 	return { removed, complete: removed.length === imageIds.length };
 };
 
+// The signed-in user's uploads across all places, newest first ("My photos").
+// Throws on an unexpected response so the page can show its error state.
+export const fetchMyPlacePhotos = async (
+	token: string,
+): Promise<PlaceImage[]> => {
+	const res = await api.get<unknown>(`${API_BASE}/v4/users/me/place-images`, {
+		headers: { Authorization: `Bearer ${token}` },
+	});
+	if (!Array.isArray(res.data)) {
+		throw new Error("my place images returned an unexpected response");
+	}
+	return res.data.filter(isPlaceImage);
+};
+
 export const uploadPlacePhoto = async (
 	placeId: number,
 	token: string,
