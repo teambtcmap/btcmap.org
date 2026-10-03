@@ -1352,5 +1352,11 @@
 		"createAccount": "Account aanmaken",
 		"login": "Aanmelden",
 		"back": "Terug"
+	},
+	"myPhotos": {
+		"title": "Mijn foto's",
+		"empty": "Je hebt nog geen foto's toegevoegd. Open een plek en tik op 'Foto toevoegen'.",
+		"loadError": "Kan je foto's niet laden. Probeer het opnieuw.",
+		"unknownPlace": "Plek #{id}"
 	}
 }

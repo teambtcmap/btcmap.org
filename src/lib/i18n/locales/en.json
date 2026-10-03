@@ -1352,5 +1352,11 @@
 		"createAccount": "Create account",
 		"login": "Log in",
 		"back": "Back"
+	},
+	"myPhotos": {
+		"title": "My photos",
+		"empty": "You haven't added any photos yet. Open a place and tap \"Add photo\".",
+		"loadError": "Couldn't load your photos. Please try again.",
+		"unknownPlace": "Place #{id}"
 	}
 }

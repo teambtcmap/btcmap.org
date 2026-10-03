@@ -1277,5 +1277,11 @@
 		"createAccount": "Créer un compte",
 		"login": "Se connecter",
 		"back": "Retour"
+	},
+	"myPhotos": {
+		"title": "Mes photos",
+		"empty": "Vous n'avez encore ajouté aucune photo. Ouvrez un lieu et touchez « Ajouter une photo ».",
+		"loadError": "Impossible de charger vos photos. Veuillez réessayer.",
+		"unknownPlace": "Lieu #{id}"
 	}
 }
