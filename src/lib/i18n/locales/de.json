@@ -54,7 +54,8 @@
 		"taggingIssues": "Tagging-Probleme",
 		"communities": "Communities",
 		"countries": "Länder",
-		"signup": "Registrieren"
+		"signup": "Registrieren",
+		"myPhotos": "Meine Fotos"
 	},
 	"search": {
 		"placeholderPlaces": "Orte suchen...",
@@ -1272,5 +1273,11 @@
 		"createAccount": "Konto erstellen",
 		"login": "Anmelden",
 		"back": "Zurück"
+	},
+	"myPhotos": {
+		"title": "Meine Fotos",
+		"empty": "Du hast noch keine Fotos hinzugefügt. Öffne einen Ort und tippe auf „Foto hinzufügen“.",
+		"loadError": "Deine Fotos konnten nicht geladen werden. Bitte versuche es erneut.",
+		"unknownPlace": "Ort #{id}"
 	}
 }

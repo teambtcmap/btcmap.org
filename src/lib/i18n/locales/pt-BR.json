@@ -54,7 +54,8 @@
 		"taggingIssues": "Problemas de Etiquetagem",
 		"communities": "Comunidades",
 		"countries": "Países",
-		"signup": "Cadastrar"
+		"signup": "Cadastrar",
+		"myPhotos": "Minhas fotos"
 	},
 	"search": {
 		"placeholderPlaces": "Pesquisar lugares...",
@@ -1246,5 +1247,11 @@
 		"createAccount": "Criar conta",
 		"login": "Entrar",
 		"back": "Voltar"
+	},
+	"myPhotos": {
+		"title": "Minhas fotos",
+		"empty": "Você ainda não adicionou fotos. Abra um lugar e toque em \"Adicionar foto\".",
+		"loadError": "Não foi possível carregar suas fotos. Tente novamente.",
+		"unknownPlace": "Lugar #{id}"
 	}
 }

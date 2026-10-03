@@ -99,6 +99,15 @@ afterNavigate(() => {
 					</a>
 
 					<a
+						href="/user/photos"
+						on:click={() => trackEvent("my_photos_click")}
+						class="flex items-center gap-2 px-4 py-2 text-sm text-primary transition-colors hover:bg-gray-100 dark:text-white dark:hover:bg-white/10"
+					>
+						<Icon type="material" icon="photo_library" w="16" h="16" />
+						{$_("nav.myPhotos")}
+					</a>
+
+					<a
 						href="/user/activity"
 						class="flex items-center gap-2 px-4 py-2 text-sm text-primary transition-colors hover:bg-gray-100 dark:text-white dark:hover:bg-white/10"
 					>
