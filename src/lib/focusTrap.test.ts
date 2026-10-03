@@ -143,6 +143,39 @@ describe("trapTab", () => {
 		expect(document.activeElement).toBe(first);
 	});
 
+	it("wraps when focus sits inside the root but past a boundary", () => {
+		// The list panel focuses its tabindex="-1" list container after
+		// "enable location"; with an empty list nothing follows it
+		root.insertAdjacentHTML(
+			"beforeend",
+			'<div tabindex="-1" id="after">empty list</div>',
+		);
+		root.insertAdjacentHTML(
+			"afterbegin",
+			'<div tabindex="-1" id="before">intro</div>',
+		);
+		const after = root.querySelector("#after") as HTMLElement;
+		const before = root.querySelector("#before") as HTMLElement;
+
+		after.focus();
+		trapTab(tab(), root);
+		expect(document.activeElement).toBe(first);
+
+		before.focus();
+		trapTab(tab(true), root);
+		expect(document.activeElement).toBe(last);
+	});
+
+	it("leaves Tab from a focused container between controls to the browser", () => {
+		first.insertAdjacentHTML("afterend", '<div tabindex="-1" id="mid">x</div>');
+		const mid = root.querySelector("#mid") as HTMLElement;
+		mid.focus();
+
+		const event = tab();
+		trapTab(event, root);
+		expect(event.defaultPrevented).toBe(false);
+	});
+
 	it("ignores other keys", () => {
 		last.focus();
 		const event = new KeyboardEvent("keydown", {

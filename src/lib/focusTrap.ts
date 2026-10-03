@@ -61,13 +61,27 @@ export const trapTab = (event: KeyboardEvent, root: HTMLElement): void => {
 	const last = items[items.length - 1];
 	const inside = active instanceof Node && root.contains(active);
 
+	// "At or past" a boundary in DOM order, not just on it: a focused
+	// non-tabbable container after the last control (or before the first)
+	// would otherwise let Tab walk out
+	const atOrAfter = (node: Node, boundary: HTMLElement) =>
+		node === boundary ||
+		Boolean(
+			boundary.compareDocumentPosition(node) & Node.DOCUMENT_POSITION_FOLLOWING,
+		);
+	const atOrBefore = (node: Node, boundary: HTMLElement) =>
+		node === boundary ||
+		Boolean(
+			boundary.compareDocumentPosition(node) & Node.DOCUMENT_POSITION_PRECEDING,
+		);
+
 	if (!inside) {
 		event.preventDefault();
 		(event.shiftKey ? last : first).focus();
-	} else if (event.shiftKey && active === first) {
+	} else if (event.shiftKey && atOrBefore(active, first)) {
 		event.preventDefault();
 		last.focus();
-	} else if (!event.shiftKey && active === last) {
+	} else if (!event.shiftKey && atOrAfter(active, last)) {
 		event.preventDefault();
 		first.focus();
 	}
