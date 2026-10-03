@@ -4,6 +4,7 @@ import { fade, fly } from "svelte/transition";
 
 import CloseButton from "$components/CloseButton.svelte";
 import { lockBodyScroll, unlockBodyScroll } from "$lib/bodyScrollLock";
+import { trapTab } from "$lib/focusTrap";
 
 export let open = false;
 export let title: string;
@@ -42,7 +43,10 @@ onDestroy(() => {
 });
 
 function handleKeydown(e: KeyboardEvent) {
-	if (e.key === "Escape" && open) open = false;
+	if (!open) return;
+	if (e.key === "Escape") open = false;
+	// aria-modal: Tab must not walk out to the page behind the backdrop
+	else if (modalEl) trapTab(e, modalEl);
 }
 
 export function setTrigger(el: HTMLElement) {
