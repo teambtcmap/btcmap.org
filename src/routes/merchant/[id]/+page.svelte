@@ -6,6 +6,7 @@ import { onMount } from "svelte";
 import Boost from "$components/Boost.svelte";
 import BoostCard from "$components/BoostCard.svelte";
 import CompanionAppPill from "$components/CompanionAppPill.svelte";
+import CommentAddButton from "$components/comments/CommentAddButton.svelte";
 import Icon from "$components/Icon.svelte";
 import OpenStatusPill from "$components/OpenStatusPill.svelte";
 import PaymentMethodPills from "$components/PaymentMethodPills.svelte";
@@ -17,7 +18,6 @@ import { boost, placesById, resetBoost } from "$lib/store";
 import type { MerchantActivityEvent, MerchantPageData } from "$lib/types";
 import { isBoosted } from "$lib/utils";
 
-import CommentAddButton from "./components/CommentAddButton.svelte";
 import MerchantActionChips from "./components/MerchantActionChips.svelte";
 import MerchantComment from "./components/MerchantComment.svelte";
 import MerchantDetailsPanel from "./components/MerchantDetailsPanel.svelte";
@@ -26,6 +26,7 @@ import MerchantHero from "./components/MerchantHero.svelte";
 import MerchantTabs from "./components/MerchantTabs.svelte";
 import MerchantVerifyRow from "./components/MerchantVerifyRow.svelte";
 import { browser } from "$app/environment";
+import { invalidateAll } from "$app/navigation";
 import { page } from "$app/stores";
 
 // Server data is consumed directly; only the fields the page itself renders
@@ -227,7 +228,7 @@ const ogImage = `https://api.btcmap.org/og/element/${data.id}`;
 			<MerchantTabs commentsCount={comments.length} activityCount={merchantEvents.length}>
 				<svelte:fragment slot="comments">
 					<div class="mb-4 flex justify-center lg:justify-start">
-						<CommentAddButton elementId={data.id} />
+						<CommentAddButton elementId={data.id} onSuccess={invalidateAll} />
 					</div>
 					{#if comments && comments.length}
 						<div class="divide-y divide-gray-200 dark:divide-white/10">

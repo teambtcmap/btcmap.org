@@ -6,8 +6,13 @@ import type { MerchantPageData } from "$lib/types.js";
 import CommentAdd from "./CommentAdd.svelte";
 import { browser } from "$app/environment";
 
-export let elementId: MerchantPageData["id"] | undefined;
-let open = false;
+type Props = {
+	elementId: MerchantPageData["id"] | undefined;
+	/** Forwarded to `CommentAdd`: runs after a published comment, once the modal closes. */
+	onSuccess?: () => void;
+};
+let { elementId, onSuccess }: Props = $props();
+let open = $state(false);
 </script>
 
 <PrimaryButton
@@ -23,5 +28,5 @@ let open = false;
 </PrimaryButton>
 
 {#if browser}
-	<CommentAdd {open} onOpenChange={(val) => (open = val)} {elementId} />
+	<CommentAdd {open} onOpenChange={(val) => (open = val)} {elementId} {onSuccess} />
 {/if}
