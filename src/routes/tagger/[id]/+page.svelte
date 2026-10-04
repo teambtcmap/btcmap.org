@@ -1,6 +1,7 @@
 <script lang="ts">
 import { get } from "svelte/store";
 
+import Skeleton from "$components/Skeleton.svelte";
 import { _ } from "$lib/i18n";
 
 import type { PageData } from "./$types";
@@ -507,7 +508,7 @@ onDestroy(() => {
 				}}
 			/>
 		{:else}
-			<div class="mx-auto h-32 w-32 animate-pulse rounded-full bg-link/50"></div>
+			<Skeleton class="mx-auto h-32 w-32 rounded-full" />
 		{/if}
 
 		<div class="space-y-1">
@@ -573,8 +574,8 @@ onDestroy(() => {
 			{:else}
 				{#each Array(3) as _, i (i)}
 					<div class="mx-3 mb-6">
-						<div class="mx-auto mb-1 h-24 w-24 animate-pulse rounded-full bg-link/50"></div>
-						<div class="mx-auto h-5 w-20 animate-pulse rounded bg-link/50"></div>
+						<Skeleton class="mx-auto mb-1 h-24 w-24 rounded-full" />
+						<Skeleton class="mx-auto h-5 w-20 rounded" />
 					</div>
 				{/each}
 			{/if}

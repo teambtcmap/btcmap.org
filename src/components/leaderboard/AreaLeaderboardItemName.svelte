@@ -1,5 +1,6 @@
 <script lang="ts">
 import LeaderboardCountryName from "$components/leaderboard/LeaderboardCountryName.svelte";
+import Skeleton from "$components/Skeleton.svelte";
 import { _ } from "$lib/i18n";
 import type { AreaType } from "$lib/types";
 import { areaIconSrc } from "$lib/utils";
@@ -66,8 +67,8 @@ function handleImageError(event: Event) {
 {:else}
 	<!-- Skeleton loading state -->
 	<div class="flex items-center gap-3" role="status" aria-label={$_('areaLeaderboard.loadingAreaInfo')}>
-		<div class="h-10 w-10 shrink-0 animate-pulse rounded-full bg-link/50" aria-hidden="true"></div>
-		<div class="h-5 w-24 animate-pulse rounded bg-link/50" aria-hidden="true"></div>
+		<Skeleton class="h-10 w-10 shrink-0 rounded-full" />
+		<Skeleton class="h-5 w-24 rounded" />
 		<span class="sr-only">Loading...</span>
 	</div>
 {/if}
