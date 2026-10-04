@@ -9,6 +9,7 @@ import TextArea from "$components/form/TextArea.svelte";
 import Icon from "$components/Icon.svelte";
 import InvoicePaymentStage from "$components/InvoicePaymentStage.svelte";
 import PrimaryButton from "$components/PrimaryButton.svelte";
+import { type CommentSource, trackEvent } from "$lib/analytics";
 import { API_BASE } from "$lib/api-base";
 import { _ } from "$lib/i18n";
 import { fieldError, inputProps, ruleValidation } from "$lib/ruleValidation";
@@ -22,12 +23,15 @@ type Props = {
 	/** Runs when the modal closes after a published comment, so the host can refresh its own view. */
 	onSuccess?: () => void;
 	elementId: MerchantPageData["id"] | undefined;
+	/** Which surface opened the flow; reported with the `comment_add_success` event. */
+	source?: CommentSource;
 };
 let {
 	open = false,
 	onOpenChange = () => {},
 	onSuccess = () => {},
 	elementId,
+	source = "merchant_page",
 }: Props = $props();
 
 let stage = $state(0);
@@ -99,6 +103,7 @@ const handlePaymentSuccess = async () => {
 	// Comment will be published automatically by the backend
 	stage = 2;
 	commentComplete = true;
+	trackEvent("comment_add_success", { source });
 
 	// Update the place in localforage and store immediately
 	if (elementId) {
