@@ -16,14 +16,19 @@ import { updateSinglePlace } from "$lib/sync/places";
 import type { MerchantPageData } from "$lib/types.js";
 import { errToast } from "$lib/utils";
 
-import { invalidateAll } from "$app/navigation";
-
 type Props = {
 	open?: boolean;
 	onOpenChange?: (value: boolean) => void;
+	/** Runs when the modal closes after a published comment, so the host can refresh its own view. */
+	onSuccess?: () => void;
 	elementId: MerchantPageData["id"] | undefined;
 };
-let { open = false, onOpenChange = () => {}, elementId }: Props = $props();
+let {
+	open = false,
+	onOpenChange = () => {},
+	onSuccess = () => {},
+	elementId,
+}: Props = $props();
 
 let stage = $state(0);
 let commentInput = $state<HTMLTextAreaElement>();
@@ -33,7 +38,7 @@ let loading = $state(false);
 let commentComplete = $state(false);
 const closeModal = () => {
 	if (commentComplete) {
-		invalidateAll();
+		onSuccess();
 	}
 	onOpenChange(false);
 	// The draft stays for the next open; its error doesn't.
