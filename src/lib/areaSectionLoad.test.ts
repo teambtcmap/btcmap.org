@@ -53,6 +53,7 @@ const EVENTS_OK = [
 		lon: 98.38,
 		name: "Phuket Bitcoin Meetup",
 		website: "https://example.com/meetup",
+		status: "live",
 		starts_at: "2099-08-29T19:00:00+07:00",
 	},
 ] satisfies AreaEvent[];

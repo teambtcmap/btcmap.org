@@ -15,6 +15,7 @@ const event = (starts_at: string, ends_at?: string): AreaEvent => ({
 	lon: 0,
 	name: "Meetup",
 	website: "https://example.com",
+	status: "live",
 	starts_at,
 	ends_at,
 });
