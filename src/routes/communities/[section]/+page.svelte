@@ -4,7 +4,7 @@ import { onDestroy, onMount } from "svelte";
 import { _ } from "svelte-i18n";
 
 import { getOrganizationDisplayName } from "#lib/organizationDisplayNames.js";
-import { areaError, areas, reportError, syncStatus } from "#lib/store.js";
+import { areaError, areas, syncStatus } from "#lib/store.js";
 import { areasSync } from "#lib/sync/areas.js";
 import { theme } from "#lib/theme.js";
 import type { Community } from "#lib/types.js";
@@ -24,9 +24,6 @@ export let data: PageData;
 
 // alert for area errors
 $: $areaError && errToast($areaError);
-
-// alert for report errors
-$: $reportError && errToast($reportError);
 
 let chartRendered = false;
 let initialRenderComplete = false;
