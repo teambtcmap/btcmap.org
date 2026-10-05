@@ -3,6 +3,7 @@ import type { GeoJSON, MultiPolygon, Polygon } from "geojson";
 import type { MobileNavIconName } from "$lib/icons/types";
 
 // Aliased: this module also exports its own v2 activity `Event` type.
+import type { AreaReport } from "$types/btcmap-api/AreaReport";
 import type { Event as ApiEvent } from "$types/btcmap-api/Event";
 
 // nominatim.openstreetmap.org API
@@ -213,29 +214,6 @@ export type MerchantActivityEvent = {
 
 export type EventType = "create" | "update" | "delete";
 
-export type Report = {
-	id: number;
-	area_id: string;
-	date: string;
-	tags: ReportTags;
-	created_at: string;
-	updated_at: string;
-	deleted_at: string;
-};
-
-export type ReportTags = {
-	total_elements: number;
-	total_elements_onchain: number;
-	total_elements_lightning: number;
-	total_elements_lightning_contactless: number;
-	total_atms: number;
-	up_to_date_elements: number;
-	up_to_date_percent: number;
-	outdated_elements: number;
-	legacy_elements: number;
-	avg_verification_date: string;
-};
-
 export type Grade = 1 | 2 | 3 | 4 | 5;
 
 export type User = {
@@ -433,6 +411,16 @@ export type AreaPageProps = {
 	// area page down with a 502 — the badge just shows (0) until the
 	// endpoint recovers.
 	events: AreaEvent[];
+	// This area's daily aggregate report history from
+	// GET /v4/areas/{id}/reports, newest first (the API returns oldest first;
+	// the loader reverses it so consumers can read [0] as the latest snapshot).
+	// Fetched per section for stats and merchants; [] for the sections that
+	// don't render reports.
+	reports: AreaReport[];
+	// True when the reports fetch failed on a section that renders them. The
+	// section shows an inline error instead of the whole page 502ing, and the
+	// AreaMap grade stars fall back to their loading state.
+	reportsError: boolean;
 	// Full v3 tags, polygon included — the client renders from these instead
 	// of re-crawling the world areas feed to recover them (#1174)
 	tags: AreaTags;

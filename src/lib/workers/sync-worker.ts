@@ -2,7 +2,7 @@ import type { Place, ProgressUpdate } from "../types";
 
 export type ParseJSONPayload = {
 	json: string;
-	type: "places" | "areas" | "users" | "events" | "reports";
+	type: "places" | "areas" | "users" | "events";
 };
 
 export type FilterPlacesPayload = {

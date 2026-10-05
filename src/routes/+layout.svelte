@@ -88,7 +88,7 @@ onMount(async () => {
 		$syncStatus = true;
 
 		// Load places (map is primary use case)
-		// Other syncs (events, users, areas, reports) are lazy-loaded by pages that need them
+		// Other syncs (events, users, areas) are lazy-loaded by pages that need them
 		await elementsSync();
 
 		$syncStatus = false;

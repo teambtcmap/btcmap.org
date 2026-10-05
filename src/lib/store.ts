@@ -8,7 +8,6 @@ import type {
 	Issue,
 	OSMTags,
 	Place,
-	Report,
 	User,
 } from "$lib/types";
 
@@ -53,9 +52,6 @@ export const eventError = writable("");
 
 export const areas: Writable<Area[]> = writable([]);
 export const areaError = writable("");
-
-export const reports: Writable<Report[]> = writable([]);
-export const reportError = writable("");
 
 export const syncStatus: Writable<boolean> = writable();
 

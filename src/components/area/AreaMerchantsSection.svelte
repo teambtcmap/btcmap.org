@@ -17,7 +17,7 @@ const { filteredPlaces, sweepDone, areaReports } = getAreaSectionContext();
 	geoJSON={data.tags?.geo_json}
 	filteredPlaces={$filteredPlaces}
 	cameraBbox={data.cameraBbox}
-	upToDatePercent={$areaReports?.[0]?.tags.up_to_date_percent}
+	upToDatePercent={$areaReports[0]?.tags.up_to_date_percent}
 />
 <!-- Gate on sweep completion: an empty filteredPlaces mid-sweep is
      "still loading", not "no merchants here". -->
