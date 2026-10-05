@@ -228,7 +228,7 @@ const ogImage = `https://api.btcmap.org/og/element/${data.id}`;
 			<MerchantTabs commentsCount={comments.length} activityCount={merchantEvents.length}>
 				<svelte:fragment slot="comments">
 					<div class="mb-4 flex justify-center lg:justify-start">
-						<CommentAddButton elementId={data.id} onSuccess={invalidateAll} />
+						<CommentAddButton elementId={data.id} onSuccess={invalidateAll} source="merchant_page" />
 					</div>
 					{#if comments && comments.length}
 						<div class="divide-y divide-gray-200 dark:divide-white/10">

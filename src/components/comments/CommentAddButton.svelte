@@ -1,5 +1,7 @@
 <script lang="ts">
 import PrimaryButton from "$components/PrimaryButton.svelte";
+import type { CommentSource } from "$lib/analytics";
+import { trackEvent } from "$lib/analytics";
 import { _ } from "$lib/i18n";
 import type { MerchantPageData } from "$lib/types.js";
 
@@ -10,13 +12,19 @@ type Props = {
 	elementId: MerchantPageData["id"] | undefined;
 	/** Forwarded to `CommentAdd`: runs after a published comment, once the modal closes. */
 	onSuccess?: () => void;
+	/** Which surface hosts the button; reported with the comment funnel events. */
+	source?: CommentSource;
 };
-let { elementId, onSuccess }: Props = $props();
+let { elementId, onSuccess, source = "merchant_page" }: Props = $props();
 let open = $state(false);
+const openModal = () => {
+	trackEvent("comment_add_click", { source });
+	open = true;
+};
 </script>
 
 <PrimaryButton
-	on:click={() => (open = true)}
+	onclick={openModal}
 	disabled={open}
 	style="flex w-40 items-center justify-center rounded-xl p-3"
 >
@@ -28,5 +36,5 @@ let open = $state(false);
 </PrimaryButton>
 
 {#if browser}
-	<CommentAdd {open} onOpenChange={(val) => (open = val)} {elementId} {onSuccess} />
+	<CommentAdd {open} onOpenChange={(val) => (open = val)} {elementId} {onSuccess} {source} />
 {/if}

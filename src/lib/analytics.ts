@@ -64,7 +64,12 @@ export type EventName =
 	| "add_place_osm_edit_click"
 	| "join_us_link_click"
 	| "add_place_tagger_guide_click"
-	| "add_place_review_queue_click";
+	| "add_place_review_queue_click"
+	| "comment_add_click"
+	| "comment_add_success";
+
+// Where the comment flow was opened from (funnel breakdown).
+export type CommentSource = "map_drawer" | "area_drawer" | "merchant_page";
 
 declare global {
 	interface Window {
