@@ -26,10 +26,9 @@ import { computeBbox } from "#lib/map/bbox.js";
 import type { BtcmapMapHandle } from "#lib/map/createMap.js";
 import { createBtcmapMap } from "#lib/map/createMap.js";
 import { parseHashCoords, writeHashCoords } from "#lib/map/mapHash.js";
-import { areaError, areas, reportError, reports } from "#lib/store.js";
+import { areaError, areas } from "#lib/store.js";
 import { areasSync } from "#lib/sync/areas.js";
 import { batchSync } from "#lib/sync/batchSync.js";
-import { reportsSync } from "#lib/sync/reports.js";
 import { theme } from "#lib/theme.js";
 import type { Area } from "#lib/types.js";
 import { areaIconSrc, errToast } from "#lib/utils.js";
@@ -61,7 +60,6 @@ const communityLang = page.url.searchParams.get("communityLang");
 const organization = page.url.searchParams.get("organization");
 
 $: $areaError && errToast($areaError);
-$: $reportError && errToast($reportError);
 
 const SOURCE_ID = "communities";
 const FILL_LAYER_ID = "communities-fill";
@@ -232,7 +230,6 @@ const initializeCommunities = async () => {
 			area.tags.name &&
 			area.tags["icon:square"] &&
 			area.tags.continent &&
-			$reports.find((report) => report.area_id === area.id) &&
 			(communityLang ? area.tags.language === communityLang : true) &&
 			(organization ? area.tags.organization === organization : true),
 	);
@@ -279,7 +276,7 @@ const initializeCommunities = async () => {
 	communitiesLoaded = true;
 };
 
-$: if ($areas?.length && $reports?.length && mapLoaded && !communitiesLoaded) {
+$: if ($areas?.length && mapLoaded && !communitiesLoaded) {
 	initializeCommunities();
 }
 
@@ -380,7 +377,7 @@ const attachInteractions = (m: MapLibreMap) => {
 };
 
 onMount(() => {
-	batchSync([areasSync, reportsSync]);
+	batchSync([areasSync]);
 	if (browser) {
 		initializeMap();
 	}
