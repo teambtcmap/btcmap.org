@@ -1,6 +1,7 @@
 <script lang="ts">
 import PrimaryButton from "$components/PrimaryButton.svelte";
-import { type CommentSource, trackEvent } from "$lib/analytics";
+import type { CommentSource } from "$lib/analytics";
+import { trackEvent } from "$lib/analytics";
 import { _ } from "$lib/i18n";
 import type { MerchantPageData } from "$lib/types.js";
 
@@ -23,7 +24,7 @@ const openModal = () => {
 </script>
 
 <PrimaryButton
-	on:click={openModal}
+	onclick={openModal}
 	disabled={open}
 	style="flex w-40 items-center justify-center rounded-xl p-3"
 >
