@@ -7,13 +7,14 @@ import Icon from "$components/Icon.svelte";
 import ProfileStat from "$components/ProfileStat.svelte";
 import TextLink from "$components/TextLink.svelte";
 import { theme } from "$lib/theme";
-import type { AreaTags, Report } from "$lib/types.js";
+import type { AreaTags } from "$lib/types.js";
 import { updateChartThemes } from "$lib/utils";
 
 import { browser } from "$app/environment";
+import type { AreaReport } from "$types/btcmap-api/AreaReport";
 
 export let name: string;
-export let areaReports: Report[];
+export let areaReports: AreaReport[];
 export let areaTags: AreaTags | undefined = undefined;
 
 const getPopulationDate = (tags: AreaTags | undefined): string | undefined => {

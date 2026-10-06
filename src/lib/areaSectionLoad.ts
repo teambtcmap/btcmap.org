@@ -9,6 +9,8 @@ import type {
 	PlaceIssue,
 } from "$lib/types";
 
+import type { AreaReport } from "$types/btcmap-api/AreaReport";
+
 // Shared loader for the community/[area]/<section> and country/[area]/<section>
 // literal-section routes (merchants, stats, activity, maintain). Both fetch
 // the same v3 area data and share the same error handling; they differ only
@@ -60,6 +62,11 @@ export type AreaSection = (typeof AREA_SECTIONS)[number];
 // rows (the US) they never render. Section navigation re-runs this loader,
 // so landing on /maintain fetches them then.
 const SECTIONS_WITH_ISSUES = new Set(["maintain"]);
+
+// Area aggregate reports are consumed only by the stats section (charts +
+// headline) and the merchants section (the AreaMap grade stars). Other
+// sections don't render them, so their payloads stay report-free.
+const SECTIONS_WITH_REPORTS = new Set(["stats", "merchants"]);
 
 // Bitcoin meetups and conferences inside the area polygon, fetched on
 // every section because the events tab badge needs the future-event count
@@ -153,6 +160,43 @@ const fetchAreaEvents = async (
 	}
 };
 
+// This area's daily aggregate report history from GET /v4/areas/{id}/reports
+// (the *area* report, not a place report). The API returns oldest-first but
+// the app's consumers read [0] as the latest snapshot, so reverse to
+// newest-first here. A non-array payload is an upstream schema break. Any
+// failure degrades to [] + reportsError rather than 502ing: the stats section
+// shows its inline error and the merchants map renders without grade stars,
+// matching how the pre-endpoint client behaved when its reports sync failed.
+const fetchAreaReports = async (
+	fetch: FetchLike,
+	areaAlias: string,
+): Promise<{ reports: AreaReport[]; reportsError: boolean }> => {
+	try {
+		const response = await fetch(
+			`${API_BASE}/v4/areas/${encodeURIComponent(areaAlias)}/reports`,
+		);
+		// 404 means the alias vanished between the area fetch and this one;
+		// treat it as no reports.
+		if (response.status === 404) {
+			return { reports: [], reportsError: false };
+		}
+		if (!response.ok) {
+			throw new Error(`reports endpoint returned ${response.status}`);
+		}
+		const body = await response.json();
+		if (!Array.isArray(body)) {
+			throw new Error("reports payload is not an array");
+		}
+		return {
+			reports: [...(body as AreaReport[])].reverse(),
+			reportsError: false,
+		};
+	} catch (err) {
+		console.error(err);
+		return { reports: [], reportsError: true };
+	}
+};
+
 // box:* tags are human-authored camera hints, served as numbers despite
 // their string typing — coerce and validate. They are CAMERA-ONLY, never
 // containment: a stale or too-small box must not be able to drop real
@@ -234,6 +278,10 @@ export const loadAreaSection = async (
 			section === "events",
 		);
 
+		const { reports, reportsError } = SECTIONS_WITH_REPORTS.has(section)
+			? await fetchAreaReports(fetch, tags.url_alias)
+			: { reports: [], reportsError: false };
+
 		return {
 			data: {
 				id: tags.url_alias,
@@ -242,6 +290,8 @@ export const loadAreaSection = async (
 				tickets: tickets,
 				issues,
 				events,
+				reports,
+				reportsError,
 				description: tags.description,
 				tags,
 				contacts: extractContacts(tags),

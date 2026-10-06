@@ -8,7 +8,7 @@ import HeaderPlaceholder from "$components/layout/HeaderPlaceholder.svelte";
 import PrimaryButton from "$components/PrimaryButton.svelte";
 import Skeleton from "$components/Skeleton.svelte";
 import { getOrganizationDisplayName } from "$lib/organizationDisplayNames";
-import { areaError, areas, reportError, syncStatus } from "$lib/store";
+import { areaError, areas, syncStatus } from "$lib/store";
 import { areasSync } from "$lib/sync/areas";
 import { theme } from "$lib/theme";
 import type { Community } from "$lib/types";
@@ -24,9 +24,6 @@ export let data: PageData;
 
 // alert for area errors
 $: $areaError && errToast($areaError);
-
-// alert for report errors
-$: $reportError && errToast($reportError);
 
 let chartRendered = false;
 let initialRenderComplete = false;

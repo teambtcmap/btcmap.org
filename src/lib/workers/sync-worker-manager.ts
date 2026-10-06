@@ -137,7 +137,7 @@ async function sendWorkerMessage<T>(
 
 export async function parseJSON<T>(
 	json: string,
-	type: "places" | "areas" | "users" | "events" | "reports",
+	type: "places" | "areas" | "users" | "events",
 	onProgress?: (progress: ProgressUpdate) => void,
 ): Promise<T> {
 	try {

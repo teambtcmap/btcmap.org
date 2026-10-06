@@ -5,6 +5,7 @@ import type { AreaEvent, AreaTags } from "$lib/types";
 
 import type { AreaSectionConfig } from "./areaSectionLoad";
 import { loadAreaSection } from "./areaSectionLoad";
+import type { AreaReport } from "$types/btcmap-api/AreaReport";
 // The section-validation redirect itself now lives in these catch-all
 // routes (loadAreaSection no longer validates the section at all — see
 // areaSectionLoad.ts), so the redirect is pinned here instead of against
@@ -24,6 +25,7 @@ type FetchResponses = {
 	areas?: ResponseOverrides;
 	issues?: ResponseOverrides;
 	events?: ResponseOverrides;
+	reports?: ResponseOverrides;
 };
 
 // satisfies (not a plain annotation) keeps literal inference, so the tests
@@ -58,6 +60,38 @@ const EVENTS_OK = [
 	},
 ] satisfies AreaEvent[];
 
+const reportTags = (upToDatePercent: number) => ({
+	total_elements: 10,
+	total_elements_onchain: 6,
+	total_elements_lightning: 5,
+	total_elements_lightning_contactless: 1,
+	total_atms: 1,
+	total_merchants: 9,
+	total_exchanges: 1,
+	up_to_date_elements: upToDatePercent / 10,
+	up_to_date_percent: upToDatePercent,
+	outdated_elements: 10 - upToDatePercent / 10,
+	legacy_elements: 0,
+});
+
+// As the API returns them: oldest first.
+const REPORTS_OK: AreaReport[] = [
+	{
+		id: 1,
+		date: "2024-01-01",
+		tags: reportTags(50),
+		created_at: "2024-01-01T00:00:00Z",
+		updated_at: "2024-01-01T00:00:00Z",
+	},
+	{
+		id: 2,
+		date: "2024-01-02",
+		tags: reportTags(80),
+		created_at: "2024-01-02T00:00:00Z",
+		updated_at: "2024-01-02T00:00:00Z",
+	},
+];
+
 const buildResponse = (overrides: ResponseOverrides) =>
 	({
 		ok: overrides.ok ?? true,
@@ -77,6 +111,10 @@ const makeFetch = (responses: FetchResponses = {}) =>
 		if (/\/v4\/areas\/[^/]+\/events/.test(href)) {
 			if (responses.events?.reject) throw new TypeError("network error");
 			return buildResponse({ json: () => EVENTS_OK, ...responses.events });
+		}
+		if (/\/v4\/areas\/[^/]+\/reports/.test(href)) {
+			if (responses.reports?.reject) throw new TypeError("network error");
+			return buildResponse({ json: () => REPORTS_OK, ...responses.reports });
 		}
 		throw new Error(`unexpected fetch URL: ${href}`);
 	});
@@ -261,7 +299,7 @@ describe("loadAreaSection", () => {
 		const result = await loadAreaSection(
 			{ params: { area: "some-area" }, fetch },
 			communityConfig,
-			"stats",
+			"activity",
 		);
 
 		expect(result.data).toEqual({
@@ -276,6 +314,10 @@ describe("loadAreaSection", () => {
 			// can read the future-event count regardless of which tab is
 			// active.
 			events: EVENTS_OK,
+			// Reports are fetched only for the stats and merchants sections;
+			// activity doesn't render them.
+			reports: [],
+			reportsError: false,
 			description: "An area description",
 			tags: AREA_OK.tags,
 			contacts: {},
@@ -288,6 +330,9 @@ describe("loadAreaSection", () => {
 		expect(fetch.mock.calls[1][0].toString()).toContain(
 			"/v4/areas/some-area/events",
 		);
+		expect(
+			fetch.mock.calls.some(([u]) => u.toString().includes("/reports")),
+		).toBe(false);
 	});
 
 	it("fetches issues for the maintain section, paginating past the limit", async () => {
@@ -353,9 +398,9 @@ describe("loadAreaSection", () => {
 		// The `from` query is now-365d; we don't pin the exact timestamp,
 		// just that the lower-bound window is plumbed through.
 		expect(eventsUrl?.[0].toString()).toMatch(/[?&]from=\d{4}-\d{2}-\d{2}T/);
-		// Two fetches: the v3 area + the v4 events endpoint. No issues fetch
-		// because the section is "stats".
-		expect(fetch).toHaveBeenCalledTimes(2);
+		// Three fetches: the v3 area + the v4 events endpoint + the v4 reports
+		// endpoint (stats renders reports). No issues fetch.
+		expect(fetch).toHaveBeenCalledTimes(3);
 	});
 
 	it("treats a 404 from the events endpoint as no events rather than a 502", async () => {
@@ -495,6 +540,79 @@ describe("loadAreaSection", () => {
 		);
 
 		expect(result.data.events).toEqual([]);
+	});
+
+	it("fetches the area's reports newest-first for the stats and merchants sections", async () => {
+		for (const section of ["stats", "merchants"] as const) {
+			const fetch = makeFetch();
+			const result = await loadAreaSection(
+				{ params: { area: "some-area" }, fetch },
+				communityConfig,
+				section,
+			);
+
+			// The API returns oldest-first; the loader reverses so consumers
+			// can read [0] as the latest snapshot.
+			expect(result.data.reports).toEqual([...REPORTS_OK].reverse());
+			expect(result.data.reportsError).toBe(false);
+			expect(
+				fetch.mock.calls.some(([u]) =>
+					u.toString().includes("/v4/areas/some-area/reports"),
+				),
+			).toBe(true);
+		}
+	});
+
+	it("treats a 404 from the reports endpoint as no reports rather than an error", async () => {
+		const fetch = makeFetch({ reports: { ok: false, status: 404 } });
+
+		const result = await loadAreaSection(
+			{ params: { area: "some-area" }, fetch },
+			communityConfig,
+			"stats",
+		);
+
+		expect(result.data.reports).toEqual([]);
+		expect(result.data.reportsError).toBe(false);
+	});
+
+	it("degrades to [] + reportsError when the reports endpoint fails", async () => {
+		const fetch = makeFetch({ reports: { ok: false, status: 500 } });
+
+		const result = await loadAreaSection(
+			{ params: { area: "some-area" }, fetch },
+			communityConfig,
+			"stats",
+		);
+
+		expect(result.data.reports).toEqual([]);
+		expect(result.data.reportsError).toBe(true);
+	});
+
+	it("degrades to [] + reportsError on a malformed reports payload", async () => {
+		const fetch = makeFetch({ reports: { json: () => ({ nope: true }) } });
+
+		const result = await loadAreaSection(
+			{ params: { area: "some-area" }, fetch },
+			communityConfig,
+			"stats",
+		);
+
+		expect(result.data.reports).toEqual([]);
+		expect(result.data.reportsError).toBe(true);
+	});
+
+	it("degrades to [] + reportsError when the reports fetch rejects", async () => {
+		const fetch = makeFetch({ reports: { reject: true } });
+
+		const result = await loadAreaSection(
+			{ params: { area: "some-area" }, fetch },
+			communityConfig,
+			"merchants",
+		);
+
+		expect(result.data.reports).toEqual([]);
+		expect(result.data.reportsError).toBe(true);
 	});
 
 	it("returns a 404 when url_alias is missing, regardless of config", async () => {

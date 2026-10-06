@@ -34,8 +34,9 @@ export let name: string;
 export let geoJSON: GeoJSON;
 export let filteredPlaces: Place[];
 // Latest report's up_to_date_percent for this area (same source AreaStats
-// renders); undefined while reports load or when the area has none — the
-// stars stay in their loading state rather than fabricating a grade.
+// renders); undefined when the area has no report rows, or when the reports
+// fetch failed — the stars stay in their loading state rather than
+// fabricating a grade.
 export let upToDatePercent: number | undefined = undefined;
 // Validated box:* camera hint from the SSR bundle (see areaSectionLoad).
 // Camera-only, never containment; null falls back to fitting the polygon.
