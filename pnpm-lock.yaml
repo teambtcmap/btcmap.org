@@ -24,8 +24,8 @@ importers:
         specifier: ^1.33.5
         version: 1.33.5(svelte@5.57.1)
       '@tanstack/svelte-table':
-        specifier: ^9.2.4
-        version: 9.2.4(svelte@5.57.1)
+        specifier: ^9.2.5
+        version: 9.2.5(svelte@5.57.1)
       axios:
         specifier: ^1.20.0
         version: 1.20.0(debug@4.4.3)
@@ -982,6 +982,9 @@ packages:
   '@tanstack/store@0.11.1':
     resolution: {integrity: sha512-mzTOBhypOuDJAy/D8n2MfUZ1HFkXnmSETviRyhqEC8LUE7/IZQExOTxMANj3KjTofYTkFNpBY67qaVrT41YccA==}
 
+  '@tanstack/store@0.11.2':
+    resolution: {integrity: sha512-sJ4mjol8uQsHV0gOJzzjwXfh2Fwm+Sz0+8deqiTm4jGbMdjzNSW+xZCFm0kUa870uhd8yi+DpKnZb5Kc4apa0Q==}
+
   '@tanstack/svelte-form@1.33.5':
     resolution: {integrity: sha512-GGlLocQwc4f15EoslfSKSiFwGy1Wz8CPTl6LXcykg4XUEGOmgs8Dg4/RjNyHeN/qrbIMemWuwzbt2wXBq50eXg==}
     peerDependencies:
@@ -992,14 +995,19 @@ packages:
     peerDependencies:
       svelte: ^5.0.0
 
-  '@tanstack/svelte-table@9.2.4':
-    resolution: {integrity: sha512-s1A82cJhp3e2Lx3mhVJnhswnGJihBaFNs+gf3/jsDdmKa/zjUDY43Z7kWLZ8408yuNwFG0dR4WGdJ0g8dnuMkQ==}
+  '@tanstack/svelte-store@0.12.2':
+    resolution: {integrity: sha512-zI+LjpxnbfKm5vDogx07RN12oOuI6LR+GysrQ4aVCuw76pY8pwcPT2DU9JGIX+L+r1dzsxBGac8XZETzLGQxiA==}
+    peerDependencies:
+      svelte: ^5.0.0
+
+  '@tanstack/svelte-table@9.2.5':
+    resolution: {integrity: sha512-LSZIx2cqzzv5+qjROobN/EMfrRuxBXLrIkJ1BU8M5RrvHpk6XZup82jxQUlwExZeLrLiNNUF18SzcFbYYF/x7g==}
     engines: {node: '>=20'}
     peerDependencies:
       svelte: ^5.0.0
 
-  '@tanstack/table-core@9.2.4':
-    resolution: {integrity: sha512-GwdDyGGr6UXAtubF14yAwcXvdaogqfsQgIk89Suebjxob/Rjq2xvfmXsjDF1rQmKmhHsJm9TOY7myxv3i6geJw==}
+  '@tanstack/table-core@9.2.5':
+    resolution: {integrity: sha512-HCMUpaEBEBS9AkV44sdTDmNgFrAA6H4NAnUgwuoWN7IkPgwXWlf3bfZ0moyxLwZqQXdpNQZdEl7LMW4rqm9zQQ==}
     engines: {node: '>=20'}
 
   '@types/chai@5.2.3':
@@ -2673,6 +2681,8 @@ snapshots:
 
   '@tanstack/store@0.11.1': {}
 
+  '@tanstack/store@0.11.2': {}
+
   '@tanstack/svelte-form@1.33.5(svelte@5.57.1)':
     dependencies:
       '@tanstack/form-core': 1.33.5
@@ -2684,15 +2694,20 @@ snapshots:
       '@tanstack/store': 0.11.1
       svelte: 5.57.1
 
-  '@tanstack/svelte-table@9.2.4(svelte@5.57.1)':
+  '@tanstack/svelte-store@0.12.2(svelte@5.57.1)':
     dependencies:
-      '@tanstack/svelte-store': 0.12.1(svelte@5.57.1)
-      '@tanstack/table-core': 9.2.4
+      '@tanstack/store': 0.11.2
       svelte: 5.57.1
 
-  '@tanstack/table-core@9.2.4':
+  '@tanstack/svelte-table@9.2.5(svelte@5.57.1)':
     dependencies:
-      '@tanstack/store': 0.11.1
+      '@tanstack/svelte-store': 0.12.2(svelte@5.57.1)
+      '@tanstack/table-core': 9.2.5
+      svelte: 5.57.1
+
+  '@tanstack/table-core@9.2.5':
+    dependencies:
+      '@tanstack/store': 0.11.2
 
   '@types/chai@5.2.3':
     dependencies:
