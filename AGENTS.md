@@ -76,15 +76,19 @@ class Resource implements Disposable { ... }
 
 ```typescript
 // ❌ Don't mix types and values
-import { merchantList, type MerchantListMode } from '$lib/merchantListStore';
+import { merchantList, type MerchantListMode } from '#lib/merchantListStore.js';
 
 // ✅ Separate type imports from value imports
-import type { MerchantListMode } from '$lib/merchantListStore';
-import { merchantList } from '$lib/merchantListStore';
+import type { MerchantListMode } from '#lib/merchantListStore.js';
+import { merchantList } from '#lib/merchantListStore.js';
 
 // ✅ Type-only imports use `import type`
-import type { Place, Report, AreaTags } from '$lib/types';
+import type { Place, Report, AreaTags } from '#lib/types.js';
 ```
+
+### Imports: `#lib`, not `$lib`
+
+- SvelteKit 3 removed `$lib`. `src/lib` is reached through the `#lib` subpath import declared in `package.json` `imports`, with an explicit extension: `#lib/utils.js` for `utils.ts` (TypeScript maps `.js` to `.ts`), `#lib/x.svelte` for components. A bare `#lib/utils` doesn't resolve
 
 ### Generated API types (`$types/btcmap-api`)
 
@@ -99,17 +103,17 @@ import type { Place, Report, AreaTags } from '$lib/types';
   `npx degit "teambtcmap/btcmap-api/bindings/ts#<branch>" src/types/btcmap-api`
 - Import these types (via the `$types` alias) when typing raw v4 API responses,
   e.g. `import type { SearchResponse } from "$types/btcmap-api/SearchResponse"`
-- **Two `Place` types exist during the migration:** `Place` from `$lib/types`
+- **Two `Place` types exist during the migration:** `Place` from `#lib/types.js`
   stays the app-facing type used by stores and components; the generated
   `$types/btcmap-api/Place` is the API contract shape for the `fields`-driven
   endpoints (all fields optional). Don't autocomplete the wrong one — if a
-  store or component needs `Place`, it's the `$lib/types` one
+  store or component needs `Place`, it's the `#lib/types.js` one
 
 ### Tests
 
 - A module with a sibling `*.test.ts` (e.g. `src/lib/session.ts`) gets new cases for every behavior change in the same PR, written before the change so they fail first
 - Server routes under `src/routes/api/**` get a `server.test.ts` beside `+server.ts`, modeled on `src/routes/api/search/places/server.test.ts`: stub `request` and `fetch`, assert the status of every error path and the forwarded upstream call on success
-- There are no component tests (no testing-library). Keep logic that needs testing in `$lib` modules and keep components thin
+- There are no component tests (no testing-library). Keep logic that needs testing in `src/lib` modules and keep components thin
 
 ### Comments
 
@@ -207,12 +211,12 @@ When editing locale files in `src/lib/i18n/locales/*.json`:
 
 ## API Base URL
 
-All API fetch calls use `API_BASE` from `$lib/api-base.ts` instead of hardcoding `https://api.btcmap.org`. The base URL is controlled by the `VITE_API_BASE_URL` environment variable:
+All API fetch calls use `API_BASE` from `src/lib/api-base.ts` instead of hardcoding `https://api.btcmap.org`. The base URL is controlled by the `VITE_API_BASE_URL` environment variable:
 
 - **Production / default (no env var set):** `https://api.btcmap.org`
 - **Local API development:** Set `VITE_API_BASE_URL=/btcmap-api-proxy` in `.env` to route requests through the Vite dev proxy to a local `btcmap-api` on `127.0.0.1:8000`
 
-When adding new API calls, always use `${API_BASE}/...` (imported from `$lib/api-base`) with the correct version/endpoint (e.g. `/v2/`, `/v3/`, `/v4/`, `/rpc`) — never hardcode `https://api.btcmap.org` directly.
+When adding new API calls, always use `${API_BASE}/...` (imported from `#lib/api-base.js`) with the correct version/endpoint (e.g. `/v2/`, `/v3/`, `/v4/`, `/rpc`) — never hardcode `https://api.btcmap.org` directly.
 
 User-facing URLs (Atom feed `href` attributes, OpenGraph image URLs) should remain hardcoded to the production API since they're rendered in HTML and must resolve publicly.
 
@@ -285,11 +289,12 @@ Use [https://nostrhub.io/nips](https://nostrhub.io/nips) as the definitive NIP s
 - Use `Place` type for v4 API data; the remaining v2 surfaces (area/report/event/user crawls via `createSyncFactory`, per-place issues on the merchant page from `/v2/elements`) use their own types (`Area`, `Report`, `Event`, `User`, `Issue`) — there is no `Element` type anymore
 - Prefer editing existing files over creating new ones
 - Only create documentation files when explicitly requested
-- **Area pages (`/community/[area]/*`, `/country/[area]/*`)** — sections are literal route directories (`merchants|events|stats|activity|maintain`, the `AREA_SECTIONS`/`AreaSection` union in `$lib/areaSectionLoad.ts`), not a `[section]` param; the `[...section]` catch-all only 302s unknown sections to `/merchants`. Each section's `+page.server.ts` is a one-liner calling `loadCommunityArea`/`loadCountryArea` from `$lib/area/routeConfigs.ts` (there is no layout `load` — every section runs the full `loadAreaSection`, keeping tab-switch refetch parity), and each `+page.svelte` is a one-line wrapper around the shared `$components/area/Area*Section.svelte`. The per-type `+layout.svelte` mounts `$components/area/AreaLayout.svelte`, which owns the chrome, the containment sweep, the taggers fetch and the `areaReports` tri-state (`undefined` loading / `[]` none / data — don't collapse it) and shares them through store-valued context (`AREA_SECTION_CONTEXT` / `getAreaSectionContext()` in `$lib/area/sectionContext.ts`). That context is the only sanctioned way for a section component to read `filteredPlaces`, `sweepDone`, `areaReports` or the taggers — don't re-derive them from `page.data`. Page instances are reused across X→Y area navigation, so section-side triggers (e.g. `ensureTaggers()`) belong in a reactive `$effect` over the context stores, never in `onMount`. `data.events` is fetched on every section because the tab badge counts it: only `/events` 502s on an upstream error, the other sections degrade to `[]` so an events hiccup can't take down the area.
+- **Area pages (`/community/[area]/*`, `/country/[area]/*`)** — sections are literal route directories (`merchants|events|stats|activity|maintain`, the `AREA_SECTIONS`/`AreaSection` union in `src/lib/areaSectionLoad.ts`), not a `[section]` param; the `[...section]` catch-all only 302s unknown sections to `/merchants`. Each section's `+page.server.ts` is a one-liner calling `loadCommunityArea`/`loadCountryArea` from `src/lib/area/routeConfigs.ts` (there is no layout `load` — every section runs the full `loadAreaSection`, keeping tab-switch refetch parity), and each `+page.svelte` is a one-line wrapper around the shared `$components/area/Area*Section.svelte`. The per-type `+layout.svelte` mounts `$components/area/AreaLayout.svelte`, which owns the chrome, the containment sweep, the taggers fetch and the `areaReports` tri-state (`undefined` loading / `[]` none / data — don't collapse it) and shares them through store-valued context (`AREA_SECTION_CONTEXT` / `getAreaSectionContext()` in `src/lib/area/sectionContext.ts`). That context is the only sanctioned way for a section component to read `filteredPlaces`, `sweepDone`, `areaReports` or the taggers — don't re-derive them from `page.data`. Page instances are reused across X→Y area navigation, so section-side triggers (e.g. `ensureTaggers()`) belong in a reactive `$effect` over the context stores, never in `onMount`. `data.events` is fetched on every section because the tab badge counts it: only `/events` 502s on an upstream error, the other sections degrade to `[]` so an events hiccup can't take down the area.
 - **Svelte 5, mixed-mode → runes** — the app runs Svelte 5; the table cluster (`src/routes/leaderboard`, `src/components/leaderboard/*` — except `AreaLeaderboardItemName`, `GradeDisplay`, and `LeaderboardCountryName`, which are still legacy — `IssuesTable`, `ProfileActivity`) is runes-mode, most other components are still legacy (Svelte-4 syntax). Write NEW components in runes mode (`$props`, `$state`, `$derived`, `$effect`), also when the new file is modeled on a legacy sibling: a new form copied from `LoginForm` is still a new file, port it while writing. Runes references to copy from: `src/routes/map/components/MapMenuModal.svelte` (typed `Props` + `$props()`, `$bindable`, `$derived`, `onclick`) and `src/components/form/OpeningHoursEditor.svelte`. A form handler takes the `SubmitEvent` and calls `event.preventDefault()` itself; `on:submit|preventDefault` is legacy syntax. **Boy-scout rule: when a PR makes meaningful changes to a legacy component, convert that file to runes mode in the same PR** — as its own commit, so the conversion diff stays separately reviewable from the feature change. Conversions are whole-file (runes and legacy syntax cannot mix within one file) and include the template idioms: `on:` → event attributes, `<svelte:component>` → dynamic components, slots → snippets where practical. Exceptions — do NOT convert as a drive-by: trivial edits (a one-line fix doesn't obligate converting a large file), and the #1208 hotspots that need deliberate hand-conversion (`CommunityCard`, `MerchantListPanel`, `merchant/[id]/+page.svelte`, `Socials`, `area/MerchantCard`, `routes/map/+page.svelte`, and `area/AreaLayout` — its sweep reset/trigger `$:` pair relies on source-order evaluation, the #1177 lesson; a runes conversion has to re-establish that ordering by hand). Tick converted files/folders off in #1208. Never use the removed imperative component API (`new Component()`/`$destroy`) — use `mount()`/`unmount()` from `svelte`.
-- **Forms (TanStack Form)** — forms are built on `@tanstack/svelte-form` with the app's inline-validation semantics; copy `$components/area/VerifyCommunityForm.svelte` or `$components/auth/SignupForm.svelte`. The rules live in a DOM-free `$lib/*Validation.ts` module (`validateX(input)` returns a rule code per failed field, plus a `FIELD_ORDER` for focus) with its own `*.test.ts`; the template maps codes to i18n messages. Wire them with `ruleValidation({ order, validate, controls })` from `$lib/ruleValidation.ts`: spread `validation.options` into `createForm`, submit through `validation.submit(form)` (not `form.handleSubmit()`), mark the `<form>` `novalidate`. Render fields with `$components/form/*` (`TextField`, `TextArea`, `FormSelect`, `CaptchaField`) fed `{...inputProps(field)}`; a hand-rolled control reads `fieldError(field)`, styles its border with `fieldBorderClasses` from `$lib/fieldStyles.ts`, and points `aria-describedby` at the `FieldError` id. UI state that depends on a field's content (e.g. disabling a control) uses the same helper as the rule, so the form can't block what the rule demands.
+- **Forms (TanStack Form)** — forms are built on `@tanstack/svelte-form` with the app's inline-validation semantics; copy `$components/area/VerifyCommunityForm.svelte` or `$components/auth/SignupForm.svelte`. The rules live in a DOM-free `src/lib/*Validation.ts` module (`validateX(input)` returns a rule code per failed field, plus a `FIELD_ORDER` for focus) with its own `*.test.ts`; the template maps codes to i18n messages. Wire them with `ruleValidation({ order, validate, controls })` from `src/lib/ruleValidation.ts`: spread `validation.options` into `createForm`, submit through `validation.submit(form)` (not `form.handleSubmit()`), mark the `<form>` `novalidate`. Render fields with `$components/form/*` (`TextField`, `TextArea`, `FormSelect`, `CaptchaField`) fed `{...inputProps(field)}`; a hand-rolled control reads `fieldError(field)`, styles its border with `fieldBorderClasses` from `src/lib/fieldStyles.ts`, and points `aria-describedby` at the `FieldError` id. UI state that depends on a field's content (e.g. disabling a control) uses the same helper as the rule, so the form can't block what the rule demands.
 - **TanStack Table v9** — every table shares the feature set from `src/lib/tableFeatures.ts` (`btcmapTableFeatures`, which registers the typed `'fuzzy'` filterFn). Create tables with `createTable({ features: btcmapTableFeatures, get data() { ... } })` getter options in a runes-mode component; read state via `table.atoms.<slice>.get()`; render header cells with the shared `$components/leaderboard/SortableHeaderCell.svelte` inside `<th aria-sort={resolveAriaSort(header)}>` (don't hand-roll the sort button — that duplication was removed in #1244); render body cells with `<FlexRender cell={cell} />` / `renderComponent()`. No writable-options stores, no `getCoreRowModel()` — those are v8 patterns.
 - **Tailwind v4** — uses `@tailwindcss/vite` plugin, not the v3 PostCSS setup; do not use `theme.extend` patterns from v3 docs
-- **`$components` path alias** resolves to `src/components/` — use it instead of relative paths or `$lib/components`
+- **`$components` path alias** resolves to `src/components/` — use it instead of relative paths or `src/lib/components`. It and `$types` are declared in `sveltekit({ alias })` in `vite.config.ts` (SvelteKit 3 has no `svelte.config.js`; all Kit options live there). Kit 3 deprecates `alias` in favour of subpath imports, so build output warns `config_option_deprecated_alias` until they move to `#components`/`#types`
+- **Environment variables** — declared in `src/env.ts` (`defineEnvVars`) and imported from `$app/env/private` / `$app/env/public`; `$env/*` and `$app/environment` are gone. A new variable goes into `src/env.ts` first, with a schema if it may be unset (Kit refuses to start or build on a missing schema-less variable)
 - **Offline icon bundle** — `src/lib/icons/generated/iconData.json` (per-prefix IconifyJSON) is generated by `pnpm icons:generate` and rendered at runtime so the map/`<Icon>` don't burst-fetch `api.iconify.design` (which Cloudflare-rate-limits). Never hand-edit it; it's excluded from biome. It's deterministic from the committed pin vocabulary (`scripts/pin-icons.json`) plus the pinned `@iconify-json/*` sets and the app's `<Icon>` usages — `format-and-lint` CI fails if it's stale. Run `pnpm icons:refresh` (rescans the places API → rewrites the vocabulary) when a new tag/category appears, then `icons:generate`; the live API stays a fallback for anything unbundled
 - **Analytics** — every user-facing entry point (link, button, menu row) fires `trackEvent` with a name from the `EventName` union in `src/lib/analytics.ts`; add the name there first. Funnels pair a `*_click` with a `*_success` event, and a link that appears in several menus fires the same event from each
