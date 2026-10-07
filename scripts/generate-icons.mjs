@@ -216,6 +216,9 @@ const main = async () => {
 			console.warn(`No icon data for ${prefix}: ${subset.not_found.join(", ")}`);
 			delete subset.not_found;
 		}
+		// The set's release timestamp: nothing reads it, and keeping it made
+		// every @iconify-json/* bump a stale-bundle diff with no icon change.
+		delete subset.lastModified;
 		iconData[prefix] = subset;
 		console.info(`${prefix}: ${Object.keys(subset.icons).length} icons`);
 	}
