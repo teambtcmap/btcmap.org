@@ -25,7 +25,7 @@ import MerchantEvent from "./components/MerchantEvent.svelte";
 import MerchantHero from "./components/MerchantHero.svelte";
 import MerchantTabs from "./components/MerchantTabs.svelte";
 import MerchantVerifyRow from "./components/MerchantVerifyRow.svelte";
-import { browser } from "$app/environment";
+import { browser } from "$app/env";
 import { invalidateAll } from "$app/navigation";
 import { page } from "$app/stores";
 

@@ -21,7 +21,7 @@ import MerchantDetailsContent from "$components/MerchantDetailsContent.svelte";
 import MerchantDetailsSkeleton from "$components/MerchantDetailsSkeleton.svelte";
 
 import MerchantPeekContentMobile from "./MerchantPeekContentMobile.svelte";
-import { browser } from "$app/environment";
+import { browser } from "$app/env";
 import { invalidateAll } from "$app/navigation";
 
 // ?issues worklist (#921): show the merchant's derived-issue row.

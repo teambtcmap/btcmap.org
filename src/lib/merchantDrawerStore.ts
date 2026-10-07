@@ -14,7 +14,7 @@ import {
 import { placesById } from "#lib/store.js";
 import type { Place } from "#lib/types.js";
 
-import { browser } from "$app/environment";
+import { browser } from "$app/env";
 
 export type MerchantDrawerState = {
 	isOpen: boolean;

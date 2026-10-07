@@ -16,7 +16,7 @@ import { theme } from "#lib/theme.js";
 import LoadingIndicator from "$components/LoadingIndicator.svelte";
 import Header from "$components/layout/Header.svelte";
 
-import { browser, dev } from "$app/environment";
+import { browser, dev } from "$app/env";
 import "#lib/icons/registerOfflineIcons.js";
 import "tippy.js/dist/tippy.css";
 import "../app.css";

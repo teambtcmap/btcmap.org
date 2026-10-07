@@ -37,7 +37,7 @@ import MapLoadingMain from "$components/MapLoadingMain.svelte";
 import MapUnsupportedFallback from "$components/MapUnsupportedFallback.svelte";
 import Socials from "$components/Socials.svelte";
 
-import { browser } from "$app/environment";
+import { browser } from "$app/env";
 import { resolve } from "$app/paths";
 import { page } from "$app/state";
 import MapControls from "../../map/components/MapControls.svelte";

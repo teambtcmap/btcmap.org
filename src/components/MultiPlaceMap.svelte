@@ -19,7 +19,7 @@ import AreaMerchantDrawer from "$components/area/AreaMerchantDrawer.svelte";
 import MapLoadingEmbed from "$components/MapLoadingEmbed.svelte";
 import MapUnsupportedFallback from "$components/MapUnsupportedFallback.svelte";
 
-import { browser } from "$app/environment";
+import { browser } from "$app/env";
 
 export let places: SavedPlace[];
 

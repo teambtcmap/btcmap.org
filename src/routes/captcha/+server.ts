@@ -3,7 +3,7 @@ import crypto from "node:crypto";
 import { error, json } from "@sveltejs/kit";
 import svgCaptcha from "svg-captcha";
 
-import { env } from "$env/dynamic/private";
+import * as env from "$app/env/private";
 
 // generate and return captcha
 export function GET() {

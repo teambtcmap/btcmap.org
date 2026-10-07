@@ -5,7 +5,7 @@ import AreaMap from "$components/area/AreaMap.svelte";
 import AreaMerchantHighlights from "$components/area/AreaMerchantHighlights.svelte";
 import Boost from "$components/Boost.svelte";
 
-import { browser } from "$app/environment";
+import { browser } from "$app/env";
 
 let { data }: { data: AreaPageProps } = $props();
 

@@ -32,7 +32,7 @@ vi.mock("#lib/utils.js", async () => {
 });
 
 // Mock isBoosted from merchantDrawerLogic — merchantListStore imports it
-// unconditionally, and the real module pulls in $app/environment
+// unconditionally, and the real module pulls in $app/env
 // transitively (merchantDrawerHash.ts), which crashes at import time
 // outside a SvelteKit runtime.
 vi.mock("#lib/merchantDrawerLogic.js", () => ({

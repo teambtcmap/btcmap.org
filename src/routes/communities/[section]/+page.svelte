@@ -16,7 +16,7 @@ import Skeleton from "$components/Skeleton.svelte";
 
 import type { PageData } from "./$types";
 import CommunitySection from "./components/CommunitySection.svelte";
-import { browser } from "$app/environment";
+import { browser } from "$app/env";
 import { goto } from "$app/navigation";
 import { resolve } from "$app/paths";
 

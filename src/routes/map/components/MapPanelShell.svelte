@@ -4,7 +4,7 @@ import { fly } from "svelte/transition";
 
 import { MAP_PANEL_MARGIN, MERCHANT_DRAWER_WIDTH } from "#lib/constants.js";
 
-import { browser } from "$app/environment";
+import { browser } from "$app/env";
 
 // The map's one panel-card definition: desktop floating card (drawer
 // sizing, max-height leaving the attribution corner uncovered, fly-in,

@@ -5,7 +5,7 @@ import { areas } from "#lib/store.js";
 import type { GiteaIssue, GiteaLabel } from "#lib/types.js";
 import { getRandomColor } from "#lib/utils.js";
 
-import { env } from "$env/dynamic/private";
+import * as env from "$app/env/private";
 
 // Cache structure with TTL
 type IssuesCache = {

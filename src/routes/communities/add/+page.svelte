@@ -24,7 +24,7 @@ import HeaderPlaceholder from "$components/layout/HeaderPlaceholder.svelte";
 import PrimaryButton from "$components/PrimaryButton.svelte";
 import TextLink from "$components/TextLink.svelte";
 
-import { browser } from "$app/environment";
+import { browser } from "$app/env";
 
 const t = $derived($_);
 const routes = $derived([

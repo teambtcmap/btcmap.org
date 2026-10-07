@@ -2,7 +2,7 @@ import type { BinaryLike, CipherKey } from "node:crypto";
 import crypto from "node:crypto";
 import { error } from "@sveltejs/kit";
 
-import { env } from "$env/dynamic/private";
+import * as env from "$app/env/private";
 
 // TTL-based cache for used captcha secrets to prevent memory leaks
 const CAPTCHA_TTL_MS = 10 * 60 * 1000; // 10 minutes

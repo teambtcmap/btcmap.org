@@ -10,7 +10,7 @@ import { validateCaptcha } from "#lib/server/captcha.js";
 import { isValidLatitude, isValidLongitude } from "#lib/utils.js";
 
 import type { RequestHandler } from "./$types";
-import { env } from "$env/dynamic/private";
+import * as env from "$app/env/private";
 
 // The RPC envelope of submit_place — only what this endpoint reads.
 type SubmitPlaceRpcBody = {

@@ -1,7 +1,7 @@
 import { describe, expect, it, vi } from "vitest";
 
-vi.mock("$env/dynamic/private", () => ({
-	env: { BTCMAP_IMPORT_TOKEN: "import-token" },
+vi.mock("$app/env/private", () => ({
+	BTCMAP_IMPORT_TOKEN: "import-token",
 }));
 vi.mock("#lib/server/captcha.js", () => ({
 	validateCaptcha: vi.fn(),

@@ -28,7 +28,7 @@ import MapUnsupportedFallback from "$components/MapUnsupportedFallback.svelte";
 import ShowTags from "$components/ShowTags.svelte";
 import TaggingIssues from "$components/TaggingIssues.svelte";
 
-import { browser } from "$app/environment";
+import { browser } from "$app/env";
 
 export let name: string;
 export let geoJSON: GeoJSON;

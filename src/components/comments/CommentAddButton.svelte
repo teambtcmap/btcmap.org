@@ -6,7 +6,7 @@ import type { MerchantPageData } from "#lib/types.js";
 import PrimaryButton from "$components/PrimaryButton.svelte";
 
 import CommentAdd from "./CommentAdd.svelte";
-import { browser } from "$app/environment";
+import { browser } from "$app/env";
 
 type Props = {
 	elementId: MerchantPageData["id"] | undefined;

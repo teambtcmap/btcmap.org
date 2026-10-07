@@ -7,7 +7,7 @@ const mockEnv = vi.hoisted(() => ({
 	SERVER_INIT_VECTOR: "bb".repeat(16),
 }));
 
-vi.mock("$env/dynamic/private", () => ({ env: mockEnv }));
+vi.mock("$app/env/private", () => mockEnv);
 
 import crypto from "node:crypto";
 import { describe, expect, it } from "vitest";

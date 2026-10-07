@@ -9,7 +9,7 @@ import type { BtcmapMapHandle } from "#lib/map/createMap.js";
 import { createBtcmapMap } from "#lib/map/createMap.js";
 import { theme } from "#lib/theme.js";
 
-import { browser } from "$app/environment";
+import { browser } from "$app/env";
 
 // Lightweight, NON-interactive map preview: the merchant hero backdrop and
 // the add-location pin preview. Deliberately has no controls, no sprites

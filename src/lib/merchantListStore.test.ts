@@ -46,7 +46,7 @@ vi.mock("#lib/merchantDrawerLogic.js", () => ({
 		place.boosted_until && new Date(place.boosted_until) > new Date(),
 }));
 
-// merchantListStore's new imports (#1173) drag $app/environment into the
+// merchantListStore's new imports (#1173) drag $app/env into the
 // graph via merchantDrawerStore/merchantDrawerHash, which crashes at import
 // time under vitest without these.
 vi.mock("#lib/merchantDrawerStore.js", () => ({

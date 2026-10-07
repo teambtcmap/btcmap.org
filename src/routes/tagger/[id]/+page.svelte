@@ -37,7 +37,7 @@ import ProfileStat from "$components/ProfileStat.svelte";
 import Tip from "$components/Tip.svelte";
 
 import ProfileActivity from "./components/ProfileActivity.svelte";
-import { browser } from "$app/environment";
+import { browser } from "$app/env";
 import { goto } from "$app/navigation";
 
 // alert for user errors

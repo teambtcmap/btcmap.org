@@ -17,7 +17,7 @@ import FieldError from "$components/form/FieldError.svelte";
 import TextArea from "$components/form/TextArea.svelte";
 import PrimaryButton from "$components/PrimaryButton.svelte";
 
-import { browser } from "$app/environment";
+import { browser } from "$app/env";
 
 type Props = {
 	communityName: string;

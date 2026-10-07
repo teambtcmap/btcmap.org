@@ -10,7 +10,7 @@ import Icon from "$components/Icon.svelte";
 import ProfileStat from "$components/ProfileStat.svelte";
 import TextLink from "$components/TextLink.svelte";
 
-import { browser } from "$app/environment";
+import { browser } from "$app/env";
 
 export let name: string;
 export let areaReports: Report[];

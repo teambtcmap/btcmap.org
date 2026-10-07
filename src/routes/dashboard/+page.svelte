@@ -16,7 +16,7 @@ import HeaderPlaceholder from "$components/layout/HeaderPlaceholder.svelte";
 import TextLink from "$components/TextLink.svelte";
 
 import DashboardStat from "./components/DashboardStat.svelte";
-import { browser } from "$app/environment";
+import { browser } from "$app/env";
 
 export let data;
 

@@ -24,7 +24,7 @@ import PrimaryButton from "$components/PrimaryButton.svelte";
 import TextLink from "$components/TextLink.svelte";
 
 import type { PageProps } from "./$types";
-import { browser } from "$app/environment";
+import { browser } from "$app/env";
 
 let { data }: PageProps = $props();
 

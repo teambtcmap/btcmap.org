@@ -26,7 +26,7 @@ import SearchInput from "$components/SearchInput.svelte";
 import MerchantListItem from "./MerchantListItem.svelte";
 import NearbyCountPill from "./NearbyCountPill.svelte";
 import SearchFacade from "./SearchFacade.svelte";
-import { browser } from "$app/environment";
+import { browser } from "$app/env";
 
 // Get translated category label
 function getCategoryLabel(key: CategoryKey): string {

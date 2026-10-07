@@ -113,7 +113,7 @@ import MapSearchBar from "./components/MapSearchBar.svelte";
 import MerchantDrawerHash from "./components/MerchantDrawerHash.svelte";
 import MerchantListPanel from "./components/MerchantListPanel.svelte";
 import TileLoadingIndicator from "./components/TileLoadingIndicator.svelte";
-import { browser } from "$app/environment";
+import { browser } from "$app/env";
 import { replaceState } from "$app/navigation";
 
 export let data: PageData;
