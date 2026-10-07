@@ -6,23 +6,23 @@ import type {
 } from "maplibre-gl";
 import { tick } from "svelte";
 
-import Icon from "$components/Icon.svelte";
-import PlacementPinIcon from "$components/PlacementPinIcon.svelte";
-import { trackEvent } from "$lib/analytics";
+import { trackEvent } from "#lib/analytics.js";
 import {
 	CLUSTERING_DISABLED_ZOOM,
 	MERCHANT_LIST_MIN_ZOOM,
 	NEARBY_RADIUS_MULTIPLIER,
-} from "$lib/constants";
-import { _ } from "$lib/i18n";
-import { calculateRadiusKmFromLngLatBounds } from "$lib/map/viewport";
-import type { NearbyPlace } from "$lib/placementMode";
+} from "#lib/constants.js";
+import { _ } from "#lib/i18n/index.js";
+import { calculateRadiusKmFromLngLatBounds } from "#lib/map/viewport.js";
+import type { NearbyPlace } from "#lib/placementMode.js";
 import {
 	clampDedupeRadiusKm,
 	fetchNearbyPlaceNames,
 	findNearbyPlaces,
-} from "$lib/placementMode";
-import { places } from "$lib/store";
+} from "#lib/placementMode.js";
+import { places } from "#lib/store.js";
+import Icon from "$components/Icon.svelte";
+import PlacementPinIcon from "$components/PlacementPinIcon.svelte";
 
 import AddPlaceFormPanel from "./AddPlaceFormPanel.svelte";
 import PlacementSearchBar from "./PlacementSearchBar.svelte";
@@ -64,7 +64,7 @@ let formEntryPushed = false;
 
 // Keep ?add in the URL so placement mode is linkable (?add=form while
 // the form is open — the pin itself lives in the hash). Same raw
-// history.replaceState idiom as writeHashCoords ($lib/map/mapHash.ts),
+// history.replaceState idiom as writeHashCoords (#lib/map/mapHash.ts),
 // which preserves location.search on every viewport write — so ?add
 // survives map moves and the hash survives this toggle. Other query
 // params (e.g. ?issues) must be preserved, so edit, don't rebuild.

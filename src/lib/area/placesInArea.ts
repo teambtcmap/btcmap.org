@@ -2,8 +2,8 @@ import rewind from "@mapbox/geojson-rewind";
 import { geoBounds, geoContains } from "d3-geo";
 import type { GeoJSON } from "geojson";
 
-import type { Place } from "$lib/types";
-import { yieldToMain } from "$lib/utils";
+import type { Place } from "#lib/types.js";
+import { yieldToMain } from "#lib/utils.js";
 
 // The one point-in-area rule: a wrap-aware bbox prefilter cheaply rejects the
 // obvious outsiders, then geoContains decides for the survivors against the

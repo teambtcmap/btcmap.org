@@ -2,15 +2,15 @@
 import type { Table } from "@tanstack/svelte-table";
 import { FlexRender } from "@tanstack/svelte-table";
 
+import { _ } from "#lib/i18n/index.js";
+import type { BtcmapTableFeatures } from "#lib/tableFeatures.js";
+import { resolveAriaSort } from "#lib/tableFeatures.js";
+import type { AreaLeaderboardRow, AreaType } from "#lib/types.js";
+import { isEven } from "#lib/utils.js";
 import Icon from "$components/Icon.svelte";
 import AreaLeaderboardItemName from "$components/leaderboard/AreaLeaderboardItemName.svelte";
 import GradeDisplay from "$components/leaderboard/GradeDisplay.svelte";
 import SortableHeaderCell from "$components/leaderboard/SortableHeaderCell.svelte";
-import { _ } from "$lib/i18n";
-import type { BtcmapTableFeatures } from "$lib/tableFeatures";
-import { resolveAriaSort } from "$lib/tableFeatures";
-import type { AreaLeaderboardRow, AreaType } from "$lib/types";
-import { isEven } from "$lib/utils";
 
 type Props = {
 	table: Table<BtcmapTableFeatures, AreaLeaderboardRow>;

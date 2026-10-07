@@ -1,15 +1,15 @@
 <script lang="ts">
 import { _ } from "svelte-i18n";
 
-import Icon from "$components/Icon.svelte";
 import {
 	isEpochSentinel,
 	isFutureEvent,
 	parseLocalDateTime,
 	toDate,
-} from "$lib/area/events";
-import { safeHttpUrl } from "$lib/safeUrl";
-import type { AreaEvent, AreaPageProps } from "$lib/types";
+} from "#lib/area/events.js";
+import { safeHttpUrl } from "#lib/safeUrl.js";
+import type { AreaEvent, AreaPageProps } from "#lib/types.js";
+import Icon from "$components/Icon.svelte";
 
 let { data }: { data: AreaPageProps } = $props();
 

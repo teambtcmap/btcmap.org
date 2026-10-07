@@ -4,6 +4,15 @@ import axios from "axios";
 import { onMount } from "svelte";
 import { _ } from "svelte-i18n";
 
+import {
+	COMMUNITY_FIELDS,
+	validateCommunity,
+} from "#lib/addCommunityValidation.js";
+import { fieldBorderClasses } from "#lib/fieldStyles.js";
+import { fieldError, inputProps, ruleValidation } from "#lib/ruleValidation.js";
+import { theme } from "#lib/theme.js";
+import type { NominatimResponse } from "#lib/types.js";
+import { errToast, successToast, warningToast } from "#lib/utils.js";
 import Breadcrumbs from "$components/Breadcrumbs.svelte";
 import FormHelperText from "$components/FormHelperText.svelte";
 import FormSuccess from "$components/FormSuccess.svelte";
@@ -14,15 +23,6 @@ import TextField from "$components/form/TextField.svelte";
 import HeaderPlaceholder from "$components/layout/HeaderPlaceholder.svelte";
 import PrimaryButton from "$components/PrimaryButton.svelte";
 import TextLink from "$components/TextLink.svelte";
-import {
-	COMMUNITY_FIELDS,
-	validateCommunity,
-} from "$lib/addCommunityValidation";
-import { fieldBorderClasses } from "$lib/fieldStyles";
-import { fieldError, inputProps, ruleValidation } from "$lib/ruleValidation";
-import { theme } from "$lib/theme";
-import type { NominatimResponse } from "$lib/types";
-import { errToast, successToast, warningToast } from "$lib/utils";
 
 import { browser } from "$app/environment";
 

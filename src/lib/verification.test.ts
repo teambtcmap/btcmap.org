@@ -1,6 +1,6 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 
-import type { Place } from "$lib/types";
+import type { Place } from "#lib/types.js";
 
 import {
 	calcVerifiedDate,

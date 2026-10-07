@@ -3,28 +3,28 @@ import { get } from "svelte/store";
 import type { Mock } from "vitest";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 
-import { CATEGORIES, placeMatchesCategory } from "$lib/categoryMapping";
+import { CATEGORIES, placeMatchesCategory } from "#lib/categoryMapping.js";
 import {
 	MERCHANT_LIST_FETCH_CEILING,
 	MERCHANT_LIST_MAX_ITEMS,
-} from "$lib/constants";
-import { VERIFIED_FILTER_STORAGE_KEY } from "$lib/map/verifiedFilter";
-import { paymentTagsLoaded } from "$lib/store";
-import type { Place } from "$lib/types";
-import { filterPlacesByRecency } from "$lib/verification";
+} from "#lib/constants.js";
+import { VERIFIED_FILTER_STORAGE_KEY } from "#lib/map/verifiedFilter.js";
+import { paymentTagsLoaded } from "#lib/store.js";
+import type { Place } from "#lib/types.js";
+import { filterPlacesByRecency } from "#lib/verification.js";
 
 // Mock the centralized axios instance
-vi.mock("$lib/axios", () => ({
+vi.mock("#lib/axios.js", () => ({
 	default: {
 		get: vi.fn(),
 		post: vi.fn(),
 	},
 }));
 
-import api from "$lib/axios";
+import api from "#lib/axios.js";
 
 // Mock i18n to avoid intl-messageformat module resolution in tests
-vi.mock("$lib/i18n", () => {
+vi.mock("#lib/i18n/index.js", () => {
 	const { writable } = require("svelte/store");
 	const mockT = (key: string) =>
 		key === "errors.loadFailed" ? "Failed to load nearby merchants" : key;
@@ -32,8 +32,8 @@ vi.mock("$lib/i18n", () => {
 });
 
 // Mock errToast and calculateDistance
-vi.mock("$lib/utils", async () => {
-	const actual = await vi.importActual("$lib/utils");
+vi.mock("#lib/utils.js", async () => {
+	const actual = await vi.importActual("#lib/utils.js");
 	return {
 		...actual,
 		errToast: vi.fn(),
@@ -41,7 +41,7 @@ vi.mock("$lib/utils", async () => {
 });
 
 // Mock isBoosted from merchantDrawerLogic
-vi.mock("$lib/merchantDrawerLogic", () => ({
+vi.mock("#lib/merchantDrawerLogic.js", () => ({
 	isBoosted: (place: Place) =>
 		place.boosted_until && new Date(place.boosted_until) > new Date(),
 }));
@@ -49,10 +49,10 @@ vi.mock("$lib/merchantDrawerLogic", () => ({
 // merchantListStore's new imports (#1173) drag $app/environment into the
 // graph via merchantDrawerStore/merchantDrawerHash, which crashes at import
 // time under vitest without these.
-vi.mock("$lib/merchantDrawerStore", () => ({
+vi.mock("#lib/merchantDrawerStore.js", () => ({
 	merchantDrawer: { close: vi.fn(), open: vi.fn() },
 }));
-vi.mock("$lib/analytics", () => ({ trackEvent: vi.fn() }));
+vi.mock("#lib/analytics.js", () => ({ trackEvent: vi.fn() }));
 
 // Hoisted so the vi.mock factory below can reference it before module init
 const { mockUserLocationStore } = vi.hoisted(() => {
@@ -67,7 +67,7 @@ const { mockUserLocationStore } = vi.hoisted(() => {
 });
 
 // Mock userLocationStore - matches real module shape: { subscribe, getLocationWithCache, setLocation }
-vi.mock("$lib/userLocationStore", () => {
+vi.mock("#lib/userLocationStore.js", () => {
 	return {
 		userLocation: {
 			subscribe: mockUserLocationStore.subscribe,
@@ -77,7 +77,7 @@ vi.mock("$lib/userLocationStore", () => {
 	};
 });
 
-import { errToast } from "$lib/utils";
+import { errToast } from "#lib/utils.js";
 
 // Import after mocks are set up
 import { merchantList } from "./merchantListStore";

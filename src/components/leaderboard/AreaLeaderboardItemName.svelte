@@ -1,9 +1,9 @@
 <script lang="ts">
+import { _ } from "#lib/i18n/index.js";
+import type { AreaType } from "#lib/types.js";
+import { areaIconSrc } from "#lib/utils.js";
 import LeaderboardCountryName from "$components/leaderboard/LeaderboardCountryName.svelte";
 import Skeleton from "$components/Skeleton.svelte";
-import { _ } from "$lib/i18n";
-import type { AreaType } from "$lib/types";
-import { areaIconSrc } from "$lib/utils";
 
 export let type: AreaType;
 export let avatar: string;

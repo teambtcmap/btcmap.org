@@ -1,13 +1,13 @@
 <script lang="ts">
+import { _ } from "#lib/i18n/index.js";
+import IconMobileNav from "#lib/icons/IconMobileNav.svelte";
+import type { MobileNavIconName } from "#lib/icons/types.js";
+import { placementEntryUrl } from "#lib/placementMode.js";
+import type { DropdownLink } from "#lib/types.js";
 import NavDropdownDesktop from "$components/layout/NavDropdownDesktop.svelte";
 import NavDropdownMobile from "$components/layout/NavDropdownMobile.svelte";
 import UserMenu from "$components/layout/UserMenu.svelte";
 import ThemeToggle from "$components/ThemeToggle.svelte";
-import { _ } from "$lib/i18n";
-import IconMobileNav from "$lib/icons/IconMobileNav.svelte";
-import type { MobileNavIconName } from "$lib/icons/types";
-import { placementEntryUrl } from "$lib/placementMode";
-import type { DropdownLink } from "$lib/types";
 
 import { afterNavigate } from "$app/navigation";
 

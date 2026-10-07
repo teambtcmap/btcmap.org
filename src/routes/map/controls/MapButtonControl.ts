@@ -6,7 +6,7 @@ import type {
 import type { Readable } from "svelte/store";
 import { get } from "svelte/store";
 
-import { _, locale } from "$lib/i18n";
+import { _, locale } from "#lib/i18n/index.js";
 
 import "./controls.css";
 

@@ -1,16 +1,16 @@
 <script lang="ts">
 import { _ } from "svelte-i18n";
 
+import type { AreaPageProps } from "#lib/types.js";
+import { TipType } from "#lib/types.js";
+import { areaIconSrc, formatVerifiedHuman } from "#lib/utils.js";
+import { isRecentlyVerified } from "#lib/verification.js";
 import Icon from "$components/Icon.svelte";
 import OrgBadge from "$components/OrgBadge.svelte";
 import SaveButton from "$components/SaveButton.svelte";
 import Socials from "$components/Socials.svelte";
 import SponsorBadge from "$components/SponsorBadge.svelte";
 import Tip from "$components/Tip.svelte";
-import type { AreaPageProps } from "$lib/types.js";
-import { TipType } from "$lib/types.js";
-import { areaIconSrc, formatVerifiedHuman } from "$lib/utils";
-import { isRecentlyVerified } from "$lib/verification";
 
 export let type: "country" | "community";
 export let data: AreaPageProps;

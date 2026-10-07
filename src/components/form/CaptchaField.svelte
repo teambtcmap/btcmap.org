@@ -2,11 +2,11 @@
 import DOMPurify from "dompurify";
 import type { HTMLInputAttributes } from "svelte/elements";
 
+import { fieldBorderClasses } from "#lib/fieldStyles.js";
+import { _ } from "#lib/i18n/index.js";
 import FieldError from "$components/form/FieldError.svelte";
 import Icon from "$components/Icon.svelte";
 import Skeleton from "$components/Skeleton.svelte";
-import { fieldBorderClasses } from "$lib/fieldStyles";
-import { _ } from "$lib/i18n";
 
 // The captcha block the public forms share (#1406): label, refresh, the
 // image and the answer input, with the inline error of #1404 for a

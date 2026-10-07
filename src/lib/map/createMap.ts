@@ -4,11 +4,11 @@ import type {
 	StyleSpecification,
 } from "maplibre-gl";
 
-import { styleForBasemap } from "$lib/map/basemaps";
-import { installPlaceholderHandler } from "$lib/map/maplibreSprites";
-import { ensureRtlTextPlugin } from "$lib/map/rtl";
-import { hasWebGL } from "$lib/map/webgl";
-import { ensureMapLibreWorkerUrl } from "$lib/map/worker";
+import { styleForBasemap } from "#lib/map/basemaps.js";
+import { installPlaceholderHandler } from "#lib/map/maplibreSprites.js";
+import { ensureRtlTextPlugin } from "#lib/map/rtl.js";
+import { hasWebGL } from "#lib/map/webgl.js";
+import { ensureMapLibreWorkerUrl } from "#lib/map/worker.js";
 
 export type MapThemeName = "light" | "dark" | undefined;
 

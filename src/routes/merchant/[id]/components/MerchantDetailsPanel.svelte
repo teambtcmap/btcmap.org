@@ -1,8 +1,8 @@
 <script lang="ts">
+import { _ } from "#lib/i18n/index.js";
+import type { MerchantPageData } from "#lib/types.js";
+import { areaIconSrc, formatOpeningHours } from "#lib/utils.js";
 import Icon from "$components/Icon.svelte";
-import { _ } from "$lib/i18n";
-import type { MerchantPageData } from "$lib/types";
-import { areaIconSrc, formatOpeningHours } from "$lib/utils";
 
 import TaggerTools from "./TaggerTools.svelte";
 import { resolve } from "$app/paths";

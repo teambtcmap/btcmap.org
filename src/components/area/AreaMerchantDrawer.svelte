@@ -1,18 +1,18 @@
 <script lang="ts">
 import { fly } from "svelte/transition";
 
-import CloseButton from "$components/CloseButton.svelte";
-import MerchantDetailsContent from "$components/MerchantDetailsContent.svelte";
-import MerchantDetailsSkeleton from "$components/MerchantDetailsSkeleton.svelte";
 import {
 	handleBoost as boostMerchant,
 	isBoosted as checkBoosted,
 	clearBoostState,
 	fetchMerchantDetails,
-} from "$lib/merchantDrawerLogic";
-import { boost } from "$lib/store";
-import type { Boost, Place } from "$lib/types";
-import { isUpToDate as checkUpToDate } from "$lib/verification";
+} from "#lib/merchantDrawerLogic.js";
+import { boost } from "#lib/store.js";
+import type { Boost, Place } from "#lib/types.js";
+import { isUpToDate as checkUpToDate } from "#lib/verification.js";
+import CloseButton from "$components/CloseButton.svelte";
+import MerchantDetailsContent from "$components/MerchantDetailsContent.svelte";
+import MerchantDetailsSkeleton from "$components/MerchantDetailsSkeleton.svelte";
 
 export let merchantId: number | null = null;
 export let onClose: () => void;

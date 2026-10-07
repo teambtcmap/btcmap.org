@@ -1,12 +1,12 @@
 <script lang="ts">
 import type { Table } from "@tanstack/svelte-table";
 
+import { _ } from "#lib/i18n/index.js";
+import type { BtcmapTableFeatures } from "#lib/tableFeatures.js";
+import type { AreaLeaderboardRow, AreaType } from "#lib/types.js";
+import { areaIconSrc, isEven } from "#lib/utils.js";
 import GradeDisplay from "$components/leaderboard/GradeDisplay.svelte";
 import LeaderboardCountryName from "$components/leaderboard/LeaderboardCountryName.svelte";
-import { _ } from "$lib/i18n";
-import type { BtcmapTableFeatures } from "$lib/tableFeatures";
-import type { AreaLeaderboardRow, AreaType } from "$lib/types";
-import { areaIconSrc, isEven } from "$lib/utils";
 
 type Props = {
 	table: Table<BtcmapTableFeatures, AreaLeaderboardRow>;

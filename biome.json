@@ -33,7 +33,7 @@
 							":NODE:",
 							":PACKAGE:",
 							":BLANK_LINE:",
-							["$lib/**", "$components/**"],
+							["#lib", "#lib/**", "$components/**"],
 							":BLANK_LINE:",
 							["./**"]
 						]

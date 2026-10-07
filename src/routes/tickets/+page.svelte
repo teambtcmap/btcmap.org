@@ -1,18 +1,18 @@
 <script lang="ts">
+import { GITEA_LABELS } from "#lib/constants.js";
+import { _ } from "#lib/i18n/index.js";
+import { theme } from "#lib/theme.js";
 import HeaderPlaceholder from "$components/layout/HeaderPlaceholder.svelte";
 import OpenTicket from "$components/OpenTicket.svelte";
 import TextLink from "$components/TextLink.svelte";
 import TopButton from "$components/TopButton.svelte";
-import { GITEA_LABELS } from "$lib/constants";
-import { _ } from "$lib/i18n";
-import { theme } from "$lib/theme";
 
 import OpenTicketSkeleton from "./components/OpenTicketSkeleton.svelte";
 
 // Temporarily disabled during maintenance
-// import { errToast } from '$lib/utils';
+// import { errToast } from '#lib/utils.js';
 
-import type { GiteaIssue, GiteaLabel } from "$lib/types";
+import type { GiteaIssue, GiteaLabel } from "#lib/types.js";
 
 const ticketTypes = ["Add", "Verify", "Community"];
 let showType = "Add";

@@ -1,8 +1,8 @@
 <script lang="ts">
 import { locale } from "svelte-i18n";
 
+import { getCountryName } from "#lib/countryNames.js";
 import TextLink from "$components/TextLink.svelte";
-import { getCountryName } from "$lib/countryNames";
 
 import { resolve } from "$app/paths";
 

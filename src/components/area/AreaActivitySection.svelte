@@ -1,7 +1,7 @@
 <script lang="ts">
+import { getAreaSectionContext } from "#lib/area/sectionContext.js";
+import type { AreaPageProps } from "#lib/types.js";
 import AreaActivity from "$components/area/AreaActivity.svelte";
-import { getAreaSectionContext } from "$lib/area/sectionContext";
-import type { AreaPageProps } from "$lib/types";
 
 let { data }: { data: AreaPageProps } = $props();
 

@@ -1,5 +1,5 @@
 <script lang="ts">
-import { _ } from "$lib/i18n";
+import { _ } from "#lib/i18n/index.js";
 
 // Comments / Activity. On mobile only the active panel is shown behind a
 // tab bar (fixes the cramped scroll-boxes). At lg+ the tab bar is hidden

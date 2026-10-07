@@ -1,9 +1,9 @@
 <script lang="ts">
+import type { AppConfig } from "#lib/apps.js";
+import { _ } from "#lib/i18n/index.js";
+import IconApps from "#lib/icons/IconApps.svelte";
+import type { AppIconName } from "#lib/icons/types.js";
 import AppDownloadModal from "$components/AppDownloadModal.svelte";
-import type { AppConfig } from "$lib/apps";
-import { _ } from "$lib/i18n";
-import IconApps from "$lib/icons/IconApps.svelte";
-import type { AppIconName } from "$lib/icons/types";
 
 import { goto } from "$app/navigation";
 

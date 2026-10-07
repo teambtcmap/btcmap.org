@@ -1,7 +1,7 @@
 import { isHttpError, isRedirect } from "@sveltejs/kit";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 
-import type { AreaEvent, AreaTags } from "$lib/types";
+import type { AreaEvent, AreaTags } from "#lib/types.js";
 
 import type { AreaSectionConfig } from "./areaSectionLoad";
 import { loadAreaSection } from "./areaSectionLoad";

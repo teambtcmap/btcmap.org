@@ -3,7 +3,7 @@
 // The hash holds ONLY the viewport: `#zoom/lat/lng`, optionally extended with
 // `/bearing/pitch` segments (written only when non-zero). The merchant drawer
 // params (`merchant`, `view`) live in the QUERY STRING instead — see
-// $lib/merchantDrawerHash — so the server-side OG-image loader can read them
+// #lib/merchantDrawerHash — so the server-side OG-image loader can read them
 // (the hash fragment is never sent to the server). Build the canonical
 // merchant deep link with buildMerchantMapHref().
 //

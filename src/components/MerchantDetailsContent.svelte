@@ -2,6 +2,15 @@
 import axios from "axios";
 import { onDestroy } from "svelte";
 
+import { trackEvent } from "#lib/analytics.js";
+import { API_BASE } from "#lib/api-base.js";
+import {
+	CATEGORY_COLOR_CLASSES,
+	getIconColorWithFallback,
+} from "#lib/categoryMapping.js";
+import { _, getDisplayLang, locale } from "#lib/i18n/index.js";
+import type { Place } from "#lib/types.js";
+import { formatVerifiedHuman, sanitizeUrl, shareMerchant } from "#lib/utils.js";
 import BoostCard from "$components/BoostCard.svelte";
 import CompanionAppPill from "$components/CompanionAppPill.svelte";
 import CopyButton from "$components/CopyButton.svelte";
@@ -12,15 +21,6 @@ import OpenStatusPill from "$components/OpenStatusPill.svelte";
 import PaymentMethodPills from "$components/PaymentMethodPills.svelte";
 import SaveButton from "$components/SaveButton.svelte";
 import Skeleton from "$components/Skeleton.svelte";
-import { trackEvent } from "$lib/analytics";
-import { API_BASE } from "$lib/api-base";
-import {
-	CATEGORY_COLOR_CLASSES,
-	getIconColorWithFallback,
-} from "$lib/categoryMapping";
-import { _, getDisplayLang, locale } from "$lib/i18n";
-import type { Place } from "$lib/types";
-import { formatVerifiedHuman, sanitizeUrl, shareMerchant } from "$lib/utils";
 
 import { resolve } from "$app/paths";
 

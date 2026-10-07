@@ -10,7 +10,7 @@ import type {
 	Place,
 	Report,
 	User,
-} from "$lib/types";
+} from "#lib/types.js";
 
 export const socials = readable({
 	x: "https://x.com/btcmap",

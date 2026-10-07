@@ -1,4 +1,4 @@
-import type { RecencyFilter } from "$lib/verification";
+import type { RecencyFilter } from "#lib/verification.js";
 
 // Persisted "verified within N years" map filter. The map control renders the
 // UI, the merchant store owns the runtime selection AND its localStorage

@@ -1,9 +1,9 @@
 <script lang="ts">
+import { trackEvent } from "#lib/analytics.js";
+import { _ } from "#lib/i18n/index.js";
+import { session } from "#lib/session.js";
 import BackupCredentials from "$components/auth/BackupCredentials.svelte";
 import Modal from "$components/Modal.svelte";
-import { trackEvent } from "$lib/analytics";
-import { _ } from "$lib/i18n";
-import { session } from "$lib/session";
 
 export let open = false;
 

@@ -1,6 +1,6 @@
 <script lang="ts">
-import { _ } from "$lib/i18n";
-import { theme } from "$lib/theme";
+import { _ } from "#lib/i18n/index.js";
+import { theme } from "#lib/theme.js";
 </script>
 
 <button

@@ -1,10 +1,10 @@
 <script lang="ts">
+import { _ } from "#lib/i18n/index.js";
+import { safeHttpUrl } from "#lib/safeUrl.js";
+import type { AreaPageProps } from "#lib/types.js";
+import { buildMetaDescription } from "#lib/utils.js";
 import AreaLayout from "$components/area/AreaLayout.svelte";
 import Breadcrumbs from "$components/Breadcrumbs.svelte";
-import { _ } from "$lib/i18n";
-import { safeHttpUrl } from "$lib/safeUrl";
-import type { AreaPageProps } from "$lib/types";
-import { buildMetaDescription } from "$lib/utils";
 
 import { page } from "$app/state";
 

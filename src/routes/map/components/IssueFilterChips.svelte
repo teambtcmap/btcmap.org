@@ -1,9 +1,9 @@
 <script lang="ts">
+import { _ } from "#lib/i18n/index.js";
+import { ISSUE_PIN_VARIANTS, PIN_FILLS } from "#lib/map/maplibreSprites.js";
+import type { DerivedIssueCode } from "#lib/placeIssues.js";
+import { DERIVED_ISSUE_CODES } from "#lib/placeIssues.js";
 import Icon from "$components/Icon.svelte";
-import { _ } from "$lib/i18n";
-import { ISSUE_PIN_VARIANTS, PIN_FILLS } from "$lib/map/maplibreSprites";
-import type { DerivedIssueCode } from "$lib/placeIssues";
-import { DERIVED_ISSUE_CODES } from "$lib/placeIssues";
 
 // The ?issues-mode bar (#921, layout per the Claude Design wireframe):
 // mobile renders a fixed-height card — title + live in-view count + exit on

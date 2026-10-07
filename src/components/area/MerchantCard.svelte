@@ -3,18 +3,18 @@ import { onDestroy, onMount } from "svelte";
 import Time from "svelte-time";
 import tippy, { type Instance } from "tippy.js";
 
-import BoostButton from "$components/BoostButton.svelte";
-import Icon from "$components/Icon.svelte";
-import { _ } from "$lib/i18n";
-import { DETAIL_FIELDS, hasDetailFields } from "$lib/placeDetails";
-import type { Place } from "$lib/types";
+import { _ } from "#lib/i18n/index.js";
+import { DETAIL_FIELDS, hasDetailFields } from "#lib/placeDetails.js";
+import type { Place } from "#lib/types.js";
 import {
 	fetchEnhancedPlace,
 	formatOpeningHours,
 	formatVerifiedHuman,
 	isBoosted,
-} from "$lib/utils";
-import { isRecentlyVerified } from "$lib/verification";
+} from "#lib/utils.js";
+import { isRecentlyVerified } from "#lib/verification.js";
+import BoostButton from "$components/BoostButton.svelte";
+import Icon from "$components/Icon.svelte";
 
 import { resolve } from "$app/paths";
 

@@ -1,5 +1,5 @@
-import { reportError, reports } from "$lib/store";
-import type { Report } from "$lib/types";
+import { reportError, reports } from "#lib/store.js";
+import type { Report } from "#lib/types.js";
 
 import { createSyncFunction } from "./createSyncFactory";
 

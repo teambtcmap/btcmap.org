@@ -11,14 +11,14 @@ import { subDays } from "date-fns/subDays";
 import { get } from "svelte/store";
 import { toast } from "svelte-sonner";
 
-import { API_BASE } from "$lib/api-base";
-import api from "$lib/axios";
-import { MERCHANT_LIST_MAX_ITEMS } from "$lib/constants";
-import { completePlaceUrl, getPlaceDetails } from "$lib/placeDetails";
-import { areas } from "$lib/store";
-import { areasSync } from "$lib/sync/areas";
-import { theme } from "$lib/theme";
-import type { Area, Continents, Grade, IssueIcon, Place } from "$lib/types";
+import { API_BASE } from "#lib/api-base.js";
+import api from "#lib/axios.js";
+import { MERCHANT_LIST_MAX_ITEMS } from "#lib/constants.js";
+import { completePlaceUrl, getPlaceDetails } from "#lib/placeDetails.js";
+import { areas } from "#lib/store.js";
+import { areasSync } from "#lib/sync/areas.js";
+import { theme } from "#lib/theme.js";
+import type { Area, Continents, Grade, IssueIcon, Place } from "#lib/types.js";
 
 // Validates place ID format (numeric or OSM-style type:id like "node:123456")
 export const isValidPlaceId = (id: string): boolean =>
@@ -426,7 +426,7 @@ export const formatVerifiedHuman = (isoDateString?: string): string => {
 };
 
 // Cache for enhanced place data — keyed separately from the raw details
-// cache in $lib/placeDetails because the entries here carry the normalized
+// cache in #lib/placeDetails because the entries here carry the normalized
 // osm:contact:* social fallbacks
 const enhancedPlacesCache = new Map<string, Place>();
 

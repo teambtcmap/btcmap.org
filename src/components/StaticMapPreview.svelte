@@ -4,10 +4,10 @@ import "maplibre-gl/dist/maplibre-gl.css";
 import type { Map as MapLibreMap } from "maplibre-gl";
 import { onDestroy, onMount } from "svelte";
 
-import { previewStyleForTheme } from "$lib/map/basemaps";
-import type { BtcmapMapHandle } from "$lib/map/createMap";
-import { createBtcmapMap } from "$lib/map/createMap";
-import { theme } from "$lib/theme";
+import { previewStyleForTheme } from "#lib/map/basemaps.js";
+import type { BtcmapMapHandle } from "#lib/map/createMap.js";
+import { createBtcmapMap } from "#lib/map/createMap.js";
+import { theme } from "#lib/theme.js";
 
 import { browser } from "$app/environment";
 

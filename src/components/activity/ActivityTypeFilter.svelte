@@ -6,8 +6,8 @@ import {
 	type ActivityType,
 	dotColor,
 	TYPE_LABEL_KEYS,
-} from "$lib/activity";
-import { _ } from "$lib/i18n";
+} from "#lib/activity.js";
+import { _ } from "#lib/i18n/index.js";
 
 // activeTypes is intended for two-way binding: `bind:activeTypes` in
 // the parent. The component reassigns the Set on each toggle, so the

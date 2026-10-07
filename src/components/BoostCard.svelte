@@ -1,8 +1,8 @@
 <script lang="ts">
 import Time from "svelte-time";
 
+import { _ } from "#lib/i18n/index.js";
 import Icon from "$components/Icon.svelte";
-import { _ } from "$lib/i18n";
 
 // Shared boost CTA card, used by the merchant detail page and the map drawer.
 // The trigger differs per context, so the consumer passes `onClick`: the page

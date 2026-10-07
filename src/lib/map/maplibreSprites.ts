@@ -1,11 +1,11 @@
 import type { ExpressionSpecification, Map as MapLibreMap } from "maplibre-gl";
 
-import { renderBundledIcon } from "$lib/icons/renderBundledIcon";
-import { resolveMaterialIcon } from "$lib/materialIcons";
-import type { DerivedIssueCode } from "$lib/placeIssues";
-import { derivePlaceIssues, dominantIssue } from "$lib/placeIssues";
-import type { Place } from "$lib/types";
-import { isBoosted } from "$lib/utils";
+import { renderBundledIcon } from "#lib/icons/renderBundledIcon.js";
+import { resolveMaterialIcon } from "#lib/materialIcons.js";
+import type { DerivedIssueCode } from "#lib/placeIssues.js";
+import { derivePlaceIssues, dominantIssue } from "#lib/placeIssues.js";
+import type { Place } from "#lib/types.js";
+import { isBoosted } from "#lib/utils.js";
 
 export const resolveIconifyName = (icon: string): string => {
 	// "question_mark" is the API's placeholder for an untagged place; the
@@ -22,7 +22,7 @@ export const PIN_FILL_REGULAR = "#0E95AF";
 export const PIN_FILL_BOOSTED = "#F7931A";
 
 // One sprite variant per pin body color: regular teal, boosted orange, and
-// the four ?issues-worklist category colors (see $lib/placeIssues).
+// the four ?issues-worklist category colors (see #lib/placeIssues).
 export type PinVariant = "r" | "b" | "od" | "os" | "nv" | "mi";
 
 export const ISSUE_PIN_VARIANTS: Record<DerivedIssueCode, PinVariant> = {

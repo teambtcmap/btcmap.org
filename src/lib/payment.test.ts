@@ -1,6 +1,6 @@
 import { describe, expect, it, vi } from "vitest";
 
-import { API_BASE } from "$lib/api-base";
+import { API_BASE } from "#lib/api-base.js";
 
 import {
 	classifyBoostError,
@@ -8,7 +8,7 @@ import {
 	pollInvoiceStatus,
 } from "./payment";
 
-vi.mock("$lib/axios", () => ({
+vi.mock("#lib/axios.js", () => ({
 	default: { get: vi.fn(async () => ({ data: { status: "paid" } })) },
 }));
 
@@ -38,7 +38,7 @@ describe("isInvoicePaid", () => {
 
 describe("pollInvoiceStatus", () => {
 	it("queries the invoice straight on the v4 API, id encoded", async () => {
-		const { default: api } = await import("$lib/axios");
+		const { default: api } = await import("#lib/axios.js");
 		await pollInvoiceStatus("abc/123");
 		expect(api.get).toHaveBeenCalledWith(`${API_BASE}/v4/invoices/abc%2F123`);
 	});

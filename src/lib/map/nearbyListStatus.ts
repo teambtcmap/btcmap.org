@@ -1,4 +1,4 @@
-import type { ZoomBehavior } from "$lib/map/viewport";
+import type { ZoomBehavior } from "#lib/map/viewport.js";
 
 export type NearbyListStatus =
 	| "loading"

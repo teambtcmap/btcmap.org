@@ -1,6 +1,6 @@
 <script lang="ts">
-import { _ } from "$lib/i18n";
-import { TipType } from "$lib/types";
+import { _ } from "#lib/i18n/index.js";
+import { TipType } from "#lib/types.js";
 
 export let user: undefined | string = undefined;
 export let destination: string;

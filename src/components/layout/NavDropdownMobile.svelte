@@ -1,10 +1,10 @@
 <script lang="ts">
 import { OutClick } from "svelte-outclick";
 
+import IconMobileNav from "#lib/icons/IconMobileNav.svelte";
+import type { MobileNavIconName } from "#lib/icons/types.js";
+import type { DropdownLink } from "#lib/types.js";
 import Icon from "$components/Icon.svelte";
-import IconMobileNav from "$lib/icons/IconMobileNav.svelte";
-import type { MobileNavIconName } from "$lib/icons/types";
-import type { DropdownLink } from "$lib/types";
 
 export let title: string;
 export let icon: MobileNavIconName;

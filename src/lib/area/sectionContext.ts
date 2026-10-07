@@ -1,7 +1,7 @@
 import { getContext } from "svelte";
 import type { Readable } from "svelte/store";
 
-import type { Place, Report, Tagger } from "$lib/types";
+import type { Place, Report, Tagger } from "#lib/types.js";
 
 // Set once by AreaLayout at init; entries are stores because context
 // values freeze at first render — contents mutate, entries never do.

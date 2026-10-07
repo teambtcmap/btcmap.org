@@ -6,10 +6,10 @@ export let buttonWidth = "w-52";
 export let repo: "btcmap-data" | "btcmap-infra" = "btcmap-data";
 export let showIssueLink = true;
 
+import { _ } from "#lib/i18n/index.js";
+import { theme } from "#lib/theme.js";
 import HeaderPlaceholder from "$components/layout/HeaderPlaceholder.svelte";
 import PrimaryButton from "$components/PrimaryButton.svelte";
-import { _ } from "$lib/i18n";
-import { theme } from "$lib/theme";
 </script>
 
 <div class="mt-10 flex items-center justify-center pb-20 text-center md:pb-32">

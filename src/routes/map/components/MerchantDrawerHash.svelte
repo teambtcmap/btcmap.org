@@ -1,5 +1,5 @@
 <script lang="ts">
-import { BREAKPOINTS } from "$lib/constants";
+import { BREAKPOINTS } from "#lib/constants.js";
 
 import MerchantDrawerDesktop from "./MerchantDrawerDesktop.svelte";
 import MerchantDrawerMobile from "./MerchantDrawerMobile.svelte";

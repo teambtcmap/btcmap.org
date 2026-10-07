@@ -1,6 +1,6 @@
 <script lang="ts">
-import IconSocials from "$lib/icons/IconSocials.svelte";
-import type { SocialIconName } from "$lib/icons/types";
+import IconSocials from "#lib/icons/IconSocials.svelte";
+import type { SocialIconName } from "#lib/icons/types.js";
 
 export let url: string;
 export let social: SocialIconName;

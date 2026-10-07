@@ -1,4 +1,4 @@
-import { forwardLnurlp } from "$lib/lnurlpForwarder";
+import { forwardLnurlp } from "#lib/lnurlpForwarder.js";
 
 import type { RequestHandler } from "./$types";
 

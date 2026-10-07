@@ -1,14 +1,14 @@
 <script lang="ts">
 import { get } from "svelte/store";
 
+import { trackEvent } from "#lib/analytics.js";
+import { _ } from "#lib/i18n/index.js";
+import type { Session } from "#lib/session.js";
+import { mintToken, session } from "#lib/session.js";
+import { errToast } from "#lib/utils.js";
 import TextField from "$components/form/TextField.svelte";
 import PrimaryButton from "$components/PrimaryButton.svelte";
 import TextLink from "$components/TextLink.svelte";
-import { trackEvent } from "$lib/analytics";
-import { _ } from "$lib/i18n";
-import type { Session } from "$lib/session";
-import { mintToken, session } from "$lib/session";
-import { errToast } from "$lib/utils";
 
 // Caller receives the new session after a successful login. This keeps the
 // form reusable: /login navigates, the save-flow modal completes a pending

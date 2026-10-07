@@ -1,7 +1,7 @@
 import { error } from "@sveltejs/kit";
 
-import { API_BASE } from "$lib/api-base";
-import api from "$lib/axios";
+import { API_BASE } from "#lib/api-base.js";
+import api from "#lib/axios.js";
 
 import type { PageLoad } from "./$types";
 

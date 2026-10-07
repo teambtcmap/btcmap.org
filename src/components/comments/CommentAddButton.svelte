@@ -1,9 +1,9 @@
 <script lang="ts">
+import type { CommentSource } from "#lib/analytics.js";
+import { trackEvent } from "#lib/analytics.js";
+import { _ } from "#lib/i18n/index.js";
+import type { MerchantPageData } from "#lib/types.js";
 import PrimaryButton from "$components/PrimaryButton.svelte";
-import type { CommentSource } from "$lib/analytics";
-import { trackEvent } from "$lib/analytics";
-import { _ } from "$lib/i18n";
-import type { MerchantPageData } from "$lib/types.js";
 
 import CommentAdd from "./CommentAdd.svelte";
 import { browser } from "$app/environment";

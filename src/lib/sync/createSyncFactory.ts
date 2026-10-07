@@ -1,9 +1,9 @@
 import localforage from "localforage";
 import type { Writable } from "svelte/store";
 
-import { API_BASE } from "$lib/api-base";
-import api from "$lib/axios";
-import { clearTables } from "$lib/sync/clearTables";
+import { API_BASE } from "#lib/api-base.js";
+import api from "#lib/axios.js";
+import { clearTables } from "#lib/sync/clearTables.js";
 
 // Base interface for syncable entities
 interface SyncableEntity {

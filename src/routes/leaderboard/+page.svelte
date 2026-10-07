@@ -2,6 +2,12 @@
 import type { ColumnDef } from "@tanstack/svelte-table";
 import { createTable } from "@tanstack/svelte-table";
 
+import { _ } from "#lib/i18n/index.js";
+import type { BtcmapTableFeatures } from "#lib/tableFeatures.js";
+import { btcmapTableFeatures } from "#lib/tableFeatures.js";
+import { theme } from "#lib/theme.js";
+import type { TaggerLeaderboard } from "#lib/types.js";
+import { debounce } from "#lib/utils.js";
 import FormSelect from "$components/form/FormSelect.svelte";
 import Icon from "$components/Icon.svelte";
 import LoadingSpinner from "$components/LoadingSpinner.svelte";
@@ -11,12 +17,6 @@ import SortHeaderButton from "$components/leaderboard/SortHeaderButton.svelte";
 import TaggerLeaderboardDesktopTable from "$components/leaderboard/TaggerLeaderboardDesktopTable.svelte";
 import TaggerLeaderboardMobileCard from "$components/leaderboard/TaggerLeaderboardMobileCard.svelte";
 import PrimaryButton from "$components/PrimaryButton.svelte";
-import { _ } from "$lib/i18n";
-import type { BtcmapTableFeatures } from "$lib/tableFeatures";
-import { btcmapTableFeatures } from "$lib/tableFeatures";
-import { theme } from "$lib/theme";
-import type { TaggerLeaderboard } from "$lib/types";
-import { debounce } from "$lib/utils";
 
 import type { PageData } from "./$types";
 import { goto } from "$app/navigation";

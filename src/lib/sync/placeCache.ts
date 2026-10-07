@@ -1,9 +1,9 @@
 import localforage from "localforage";
 import { writable } from "svelte/store";
 
-import { places } from "$lib/store";
-import type { Place } from "$lib/types";
-import { yieldToMain } from "$lib/utils";
+import { places } from "#lib/store.js";
+import type { Place } from "#lib/types.js";
+import { yieldToMain } from "#lib/utils.js";
 
 // The one owner of the places_v4 blob and the $places write path (#1172).
 // Previously three writers (elementsSync, ensureVerifiedDates,

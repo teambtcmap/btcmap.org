@@ -8,12 +8,12 @@ import { subYears } from "date-fns/subYears";
 import { onDestroy, onMount } from "svelte";
 import { get } from "svelte/store";
 
+import { _ } from "#lib/i18n/index.js";
+import { theme } from "#lib/theme.js";
+import type { ChartHistory } from "#lib/types.js";
+import { updateChartThemes } from "#lib/utils.js";
 import HeaderPlaceholder from "$components/layout/HeaderPlaceholder.svelte";
 import TextLink from "$components/TextLink.svelte";
-import { _ } from "$lib/i18n";
-import { theme } from "$lib/theme";
-import type { ChartHistory } from "$lib/types";
-import { updateChartThemes } from "$lib/utils";
 
 import DashboardStat from "./components/DashboardStat.svelte";
 import { browser } from "$app/environment";

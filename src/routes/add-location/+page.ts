@@ -4,7 +4,7 @@ import {
 	buildAddFormUrl,
 	parseCoordsParams,
 	placementEntryUrl,
-} from "$lib/placementMode";
+} from "#lib/placementMode.js";
 
 import type { PageLoad } from "./$types";
 

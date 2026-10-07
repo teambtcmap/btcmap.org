@@ -2,7 +2,7 @@ import { decode } from "nostr-tools/nip19";
 import type { Event, EventTemplate } from "nostr-tools/pure";
 import { finalizeEvent } from "nostr-tools/pure";
 
-import { API_BASE } from "$lib/api-base";
+import { API_BASE } from "#lib/api-base.js";
 
 // URL the API verifies in the NIP-98 event's "u" tag. Must match what the
 // btcmap-api server reconstructs (its BTCMAP_API_BASE_URL + request path),

@@ -1,7 +1,7 @@
 <script lang="ts">
+import { _ } from "#lib/i18n/index.js";
+import { sanitizeUrl } from "#lib/utils.js";
 import Icon from "$components/Icon.svelte";
-import { _ } from "$lib/i18n";
-import { sanitizeUrl } from "$lib/utils";
 
 export let url: string;
 

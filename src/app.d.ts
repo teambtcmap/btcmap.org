@@ -1,4 +1,4 @@
-import type { GeoLocation } from "$lib/types";
+import type { GeoLocation } from "#lib/types.js";
 
 // See https://kit.svelte.dev/docs/types#app
 // for information about these interfaces

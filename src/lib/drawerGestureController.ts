@@ -4,8 +4,8 @@
 import { spring } from "svelte/motion";
 import { derived, get, writable } from "svelte/store";
 
-import type { EventName } from "$lib/analytics";
-import { trackEvent } from "$lib/analytics";
+import type { EventName } from "#lib/analytics.js";
+import { trackEvent } from "#lib/analytics.js";
 
 import {
 	DISMISS_THRESHOLD,

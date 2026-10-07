@@ -1,8 +1,8 @@
 <script lang="ts">
+import { _ } from "#lib/i18n/index.js";
+import { formatVerifiedHuman } from "#lib/utils.js";
+import { isRecentlyVerified } from "#lib/verification.js";
 import Icon from "$components/Icon.svelte";
-import { _ } from "$lib/i18n";
-import { formatVerifiedHuman } from "$lib/utils";
-import { isRecentlyVerified } from "$lib/verification";
 
 import { resolve } from "$app/paths";
 

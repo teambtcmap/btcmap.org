@@ -1,7 +1,7 @@
 <script lang="ts">
-import { trackEvent } from "$lib/analytics";
-import { merchantList } from "$lib/merchantListStore";
-import { formatNearbyPillCount } from "$lib/utils";
+import { trackEvent } from "#lib/analytics.js";
+import { merchantList } from "#lib/merchantListStore.js";
+import { formatNearbyPillCount } from "#lib/utils.js";
 
 import SearchFacade from "./SearchFacade.svelte";
 

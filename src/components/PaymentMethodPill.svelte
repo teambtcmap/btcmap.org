@@ -1,5 +1,5 @@
 <script lang="ts">
-import { theme } from "$lib/theme";
+import { theme } from "#lib/theme.js";
 
 export let method: "btc" | "ln" | "nfc";
 export let label: string;

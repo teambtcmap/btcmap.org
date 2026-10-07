@@ -1,7 +1,7 @@
 import { decode } from "nostr-tools/nip19";
 import { SimplePool } from "nostr-tools/pool";
 
-import { safeHttpUrl } from "$lib/safeUrl";
+import { safeHttpUrl } from "#lib/safeUrl.js";
 
 // Fields we read from a user's NIP-01 kind:0 metadata event. All optional —
 // a profile may set any subset (or publish nothing at all).

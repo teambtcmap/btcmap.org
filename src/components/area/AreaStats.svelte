@@ -3,12 +3,12 @@ import Chart from "chart.js/auto";
 import { onMount } from "svelte";
 import { _ } from "svelte-i18n";
 
+import { theme } from "#lib/theme.js";
+import type { AreaTags, Report } from "#lib/types.js";
+import { updateChartThemes } from "#lib/utils.js";
 import Icon from "$components/Icon.svelte";
 import ProfileStat from "$components/ProfileStat.svelte";
 import TextLink from "$components/TextLink.svelte";
-import { theme } from "$lib/theme";
-import type { AreaTags, Report } from "$lib/types.js";
-import { updateChartThemes } from "$lib/utils";
 
 import { browser } from "$app/environment";
 

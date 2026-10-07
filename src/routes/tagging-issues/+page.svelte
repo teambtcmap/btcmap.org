@@ -1,10 +1,10 @@
 <script lang="ts">
+import { _ } from "#lib/i18n/index.js";
+import { theme } from "#lib/theme.js";
+import type { PlaceIssue } from "#lib/types.js";
 import IssuesTable from "$components/IssuesTable.svelte";
 import HeaderPlaceholder from "$components/layout/HeaderPlaceholder.svelte";
 import TextLink from "$components/TextLink.svelte";
-import { _ } from "$lib/i18n";
-import { theme } from "$lib/theme";
-import type { PlaceIssue } from "$lib/types";
 
 export let data;
 let issues: PlaceIssue[] = data.result?.requested_issues ?? [];

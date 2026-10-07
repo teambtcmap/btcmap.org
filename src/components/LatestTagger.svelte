@@ -1,8 +1,8 @@
 <script lang="ts">
 import Time from "svelte-time";
 
+import type { EventType, User } from "#lib/types.js";
 import Tip from "$components/Tip.svelte";
-import type { EventType, User } from "$lib/types";
 
 import { resolve } from "$app/paths";
 

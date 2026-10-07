@@ -8,8 +8,8 @@ export let updated: number;
 export let deleted: number;
 export let tip: string;
 
+import { _ } from "#lib/i18n/index.js";
 import Tip from "$components/Tip.svelte";
-import { _ } from "$lib/i18n";
 
 import { resolve } from "$app/paths";
 

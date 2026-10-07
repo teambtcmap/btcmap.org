@@ -2,10 +2,10 @@ import { beforeEach, describe, expect, it, vi } from "vitest";
 
 const { hasWebGLMock } = vi.hoisted(() => ({ hasWebGLMock: vi.fn() }));
 
-vi.mock("$lib/map/webgl", () => ({ hasWebGL: hasWebGLMock }));
-vi.mock("$lib/map/rtl", () => ({ ensureRtlTextPlugin: vi.fn() }));
-vi.mock("$lib/map/worker", () => ({ ensureMapLibreWorkerUrl: vi.fn() }));
-vi.mock("$lib/map/maplibreSprites", () => ({
+vi.mock("#lib/map/webgl.js", () => ({ hasWebGL: hasWebGLMock }));
+vi.mock("#lib/map/rtl.js", () => ({ ensureRtlTextPlugin: vi.fn() }));
+vi.mock("#lib/map/worker.js", () => ({ ensureMapLibreWorkerUrl: vi.fn() }));
+vi.mock("#lib/map/maplibreSprites.js", () => ({
 	installPlaceholderHandler: vi.fn(),
 }));
 

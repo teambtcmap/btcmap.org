@@ -2,8 +2,8 @@
 import { fly } from "svelte/transition";
 import { OutClick } from "svelte-outclick";
 
+import { showTags } from "#lib/store.js";
 import CloseButton from "$components/CloseButton.svelte";
-import { showTags } from "$lib/store";
 
 const closeModal = () => ($showTags = undefined);
 </script>

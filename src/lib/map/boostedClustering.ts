@@ -1,6 +1,6 @@
-import { BOOSTED_CLUSTERING_MAX_ZOOM } from "$lib/constants";
-import type { Place } from "$lib/types";
-import { isBoosted } from "$lib/utils";
+import { BOOSTED_CLUSTERING_MAX_ZOOM } from "#lib/constants.js";
+import type { Place } from "#lib/types.js";
+import { isBoosted } from "#lib/utils.js";
 
 // The legacy Leaflet /map clustered boosted (orange) markers together with
 // regular ones at world/continent zoom and only pulled them out into a

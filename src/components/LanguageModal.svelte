@@ -1,7 +1,7 @@
 <script lang="ts">
+import { trackEvent } from "#lib/analytics.js";
+import { _, locale } from "#lib/i18n/index.js";
 import Modal from "$components/Modal.svelte";
-import { trackEvent } from "$lib/analytics";
-import { _, locale } from "$lib/i18n";
 
 const languages = [
 	{ code: "en", name: "English", short: "EN" },

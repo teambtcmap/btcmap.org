@@ -1,18 +1,18 @@
 <script lang="ts">
 import { onDestroy, onMount } from "svelte";
 
-import Icon from "$components/Icon.svelte";
-import MultiPlaceMap from "$components/MultiPlaceMap.svelte";
-import api from "$lib/axios";
-import { _ } from "$lib/i18n";
+import api from "#lib/axios.js";
+import { _ } from "#lib/i18n/index.js";
 import {
 	removeSavedItem,
 	SAVED_ITEM_ENDPOINTS,
 	setSavedList,
-} from "$lib/savedItems";
-import { session } from "$lib/session";
-import type { SavedPlace } from "$lib/types";
-import { errToast } from "$lib/utils";
+} from "#lib/savedItems.js";
+import { session } from "#lib/session.js";
+import type { SavedPlace } from "#lib/types.js";
+import { errToast } from "#lib/utils.js";
+import Icon from "$components/Icon.svelte";
+import MultiPlaceMap from "$components/MultiPlaceMap.svelte";
 
 import { goto } from "$app/navigation";
 import { resolve } from "$app/paths";

@@ -1,9 +1,9 @@
 <script lang="ts">
 import Time from "svelte-time";
 
+import { _ } from "#lib/i18n/index.js";
 import Icon from "$components/Icon.svelte";
 import TicketLabel from "$components/TicketLabel.svelte";
-import { _ } from "$lib/i18n";
 
 export let assignees: {
 	html_url: string;

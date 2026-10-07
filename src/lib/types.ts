@@ -1,6 +1,6 @@
 import type { GeoJSON, MultiPolygon, Polygon } from "geojson";
 
-import type { MobileNavIconName } from "$lib/icons/types";
+import type { MobileNavIconName } from "#lib/icons/types.js";
 
 // Aliased: this module also exports its own v2 activity `Event` type.
 import type { Event as ApiEvent } from "$types/btcmap-api/Event";

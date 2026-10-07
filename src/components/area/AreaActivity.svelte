@@ -1,10 +1,10 @@
 <script lang="ts">
 import { _ } from "svelte-i18n";
 
+import type { Tagger } from "#lib/types.js";
 import AreaFeed from "$components/area/AreaFeed.svelte";
 import Icon from "$components/Icon.svelte";
 import Skeleton from "$components/Skeleton.svelte";
-import type { Tagger } from "$lib/types.js";
 
 import { resolve } from "$app/paths";
 

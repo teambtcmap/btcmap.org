@@ -1,10 +1,10 @@
 <script lang="ts">
 import { get } from "svelte/store";
 
-import { trackEvent } from "$lib/analytics";
-import type { GeocodeResult } from "$lib/geocoding";
-import { searchAddress } from "$lib/geocoding";
-import { _, locale } from "$lib/i18n";
+import { trackEvent } from "#lib/analytics.js";
+import type { GeocodeResult } from "#lib/geocoding.js";
+import { searchAddress } from "#lib/geocoding.js";
+import { _, locale } from "#lib/i18n/index.js";
 
 // Placement mode's address-first path (#1134, storyboard screen 1):
 // people who know the street but not the map type it and jump there —

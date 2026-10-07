@@ -1,8 +1,8 @@
 <script lang="ts">
 import { get } from "svelte/store";
 
+import { _ } from "#lib/i18n/index.js";
 import Skeleton from "$components/Skeleton.svelte";
-import { _ } from "$lib/i18n";
 
 import type { PageData } from "./$types";
 export let data: PageData;
@@ -13,10 +13,7 @@ import DOMPurify from "dompurify";
 import { marked } from "marked";
 import { onDestroy, onMount } from "svelte";
 
-import Icon from "$components/Icon.svelte";
-import ProfileStat from "$components/ProfileStat.svelte";
-import Tip from "$components/Tip.svelte";
-import { API_BASE } from "$lib/api-base";
+import { API_BASE } from "#lib/api-base.js";
 import {
 	eventError,
 	events,
@@ -24,17 +21,20 @@ import {
 	placesError,
 	userError,
 	users,
-} from "$lib/store";
-import { batchSync } from "$lib/sync/batchSync";
-import { eventsSync } from "$lib/sync/events";
-import { usersSync } from "$lib/sync/users";
+} from "#lib/store.js";
+import { batchSync } from "#lib/sync/batchSync.js";
+import { eventsSync } from "#lib/sync/events.js";
+import { usersSync } from "#lib/sync/users.js";
 import {
 	type ActivityEvent,
 	BadgeType,
 	type EarnedBadge,
 	type ProfileLeaderboard,
-} from "$lib/types.js";
-import { errToast, formatElementID } from "$lib/utils";
+} from "#lib/types.js";
+import { errToast, formatElementID } from "#lib/utils.js";
+import Icon from "$components/Icon.svelte";
+import ProfileStat from "$components/ProfileStat.svelte";
+import Tip from "$components/Tip.svelte";
 
 import ProfileActivity from "./components/ProfileActivity.svelte";
 import { browser } from "$app/environment";

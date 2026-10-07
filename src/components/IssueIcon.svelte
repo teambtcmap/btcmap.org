@@ -1,6 +1,6 @@
 <script lang="ts">
+import type { IssueIcon } from "#lib/types.js";
 import Icon from "$components/Icon.svelte";
-import type { IssueIcon } from "$lib/types";
 
 export let icon: IssueIcon | string;
 

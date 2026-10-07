@@ -5,6 +5,31 @@ import axios from "axios";
 import { onMount, tick, untrack } from "svelte";
 import { get } from "svelte/store";
 
+import type { DetailsStep } from "#lib/addLocationValidation.js";
+import {
+	DETAILS_FIELDS,
+	normalizeWebsite,
+	validateDetails,
+} from "#lib/addLocationValidation.js";
+import { trackEvent } from "#lib/analytics.js";
+import { API_BASE } from "#lib/api-base.js";
+import { CATEGORIES, CATEGORY_GROUPS } from "#lib/categoryMapping.js";
+import { fieldBorderClasses } from "#lib/fieldStyles.js";
+import { reverseGeocode } from "#lib/geocoding.js";
+import { _, locale } from "#lib/i18n/index.js";
+import type { PaymentMethod } from "#lib/map/paymentMethodFilter.js";
+import { PAYMENT_METHODS } from "#lib/map/paymentMethodFilter.js";
+import { fetchProfile } from "#lib/nostrProfile.js";
+import { formatPinCoords } from "#lib/placementMode.js";
+import type {
+	SubmitPlaceRequest,
+	SubmitPlaceResponse,
+} from "#lib/placeSubmission.js";
+import { buildPlaceSubmissionArgs } from "#lib/placeSubmission.js";
+import { fieldError, inputProps, ruleValidation } from "#lib/ruleValidation.js";
+import { session } from "#lib/session.js";
+import { theme } from "#lib/theme.js";
+import { errToast } from "#lib/utils.js";
 import LoginForm from "$components/auth/LoginForm.svelte";
 import NostrLoginForm from "$components/auth/NostrLoginForm.svelte";
 import FormHelperText from "$components/FormHelperText.svelte";
@@ -19,31 +44,6 @@ import Icon from "$components/Icon.svelte";
 import NostrAvatar from "$components/NostrAvatar.svelte";
 import PlacementPinIcon from "$components/PlacementPinIcon.svelte";
 import PrimaryButton from "$components/PrimaryButton.svelte";
-import type { DetailsStep } from "$lib/addLocationValidation";
-import {
-	DETAILS_FIELDS,
-	normalizeWebsite,
-	validateDetails,
-} from "$lib/addLocationValidation";
-import { trackEvent } from "$lib/analytics";
-import { API_BASE } from "$lib/api-base";
-import { CATEGORIES, CATEGORY_GROUPS } from "$lib/categoryMapping";
-import { fieldBorderClasses } from "$lib/fieldStyles";
-import { reverseGeocode } from "$lib/geocoding";
-import { _, locale } from "$lib/i18n";
-import type { PaymentMethod } from "$lib/map/paymentMethodFilter";
-import { PAYMENT_METHODS } from "$lib/map/paymentMethodFilter";
-import { fetchProfile } from "$lib/nostrProfile";
-import { formatPinCoords } from "$lib/placementMode";
-import type {
-	SubmitPlaceRequest,
-	SubmitPlaceResponse,
-} from "$lib/placeSubmission";
-import { buildPlaceSubmissionArgs } from "$lib/placeSubmission";
-import { fieldError, inputProps, ruleValidation } from "$lib/ruleValidation";
-import { session } from "$lib/session";
-import { theme } from "$lib/theme";
-import { errToast } from "$lib/utils";
 
 import type { PostPlaceSubmissionResponse } from "$types/btcmap-api/PostPlaceSubmissionResponse";
 

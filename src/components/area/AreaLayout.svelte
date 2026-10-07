@@ -10,22 +10,22 @@ import type { GeoJSON } from "geojson";
 import { onDestroy, onMount, setContext } from "svelte";
 import { get, toStore, writable } from "svelte/store";
 
+import { API_BASE } from "#lib/api-base.js";
+import { countFutureEvents } from "#lib/area/events.js";
+import { placesInAreaChunked } from "#lib/area/placesInArea.js";
+import type { AreaSectionContext } from "#lib/area/sectionContext.js";
+import { AREA_SECTION_CONTEXT } from "#lib/area/sectionContext.js";
+import type { AreaSection } from "#lib/areaSectionLoad.js";
+import { AREA_SECTIONS } from "#lib/areaSectionLoad.js";
+import api from "#lib/axios.js";
+import { places, placesError, reportError, reports } from "#lib/store.js";
+import { batchSync } from "#lib/sync/batchSync.js";
+import { placesPublished } from "#lib/sync/placeCache.js";
+import { reportsSync } from "#lib/sync/reports.js";
+import type { AreaPageProps, Place, Report, Tagger } from "#lib/types.js";
+import { errToast } from "#lib/utils.js";
 import AreaHeader from "$components/area/AreaHeader.svelte";
 import Icon from "$components/Icon.svelte";
-import { API_BASE } from "$lib/api-base";
-import { countFutureEvents } from "$lib/area/events";
-import { placesInAreaChunked } from "$lib/area/placesInArea";
-import type { AreaSectionContext } from "$lib/area/sectionContext";
-import { AREA_SECTION_CONTEXT } from "$lib/area/sectionContext";
-import type { AreaSection } from "$lib/areaSectionLoad";
-import { AREA_SECTIONS } from "$lib/areaSectionLoad";
-import api from "$lib/axios";
-import { places, placesError, reportError, reports } from "$lib/store";
-import { batchSync } from "$lib/sync/batchSync";
-import { placesPublished } from "$lib/sync/placeCache";
-import { reportsSync } from "$lib/sync/reports";
-import type { AreaPageProps, Place, Report, Tagger } from "$lib/types.js";
-import { errToast } from "$lib/utils";
 
 onMount(() => {
 	// reportsSync feeds the stats section and the AreaMap grade stars. The
@@ -40,7 +40,7 @@ $: $placesError && errToast($placesError);
 $: $reportError && errToast($reportError);
 
 // One source of truth: the section id IS the route slug IS the i18n key
-// suffix — AREA_SECTIONS/AreaSection in $lib/areaSectionLoad carry this,
+// suffix — AREA_SECTIONS/AreaSection in #lib/areaSectionLoad carry this,
 // shared with every loader call site.
 let scrolled = false;
 
@@ -66,7 +66,7 @@ const handleSectionChange = (section: AreaSection) => {
 // taggersInFlight prevents re-fire during the async fetch; taggersLoaded
 // gates the UI so the skeleton stays up until the fetch completes. Per-
 // request transient failures are handled by axiosRetry on the shared
-// $lib/axios instance, so a single attempt is sufficient.
+// #lib/axios instance, so a single attempt is sufficient.
 // taggersFetchGeneration is a monotonic request token: each fetch
 // captures the current value and later compares it to discard its result
 // if a newer fetch has since started (including same-area re-entry,

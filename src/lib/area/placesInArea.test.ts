@@ -3,7 +3,7 @@ import { geoBounds, geoContains } from "d3-geo";
 import type { GeoJSON } from "geojson";
 import { describe, expect, it } from "vitest";
 
-import type { Place } from "$lib/types";
+import type { Place } from "#lib/types.js";
 
 import { placesInArea, placesInAreaChunked, pointInArea } from "./placesInArea";
 

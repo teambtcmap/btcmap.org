@@ -1,4 +1,4 @@
-import { firstInvalid } from "$lib/formValidation";
+import { firstInvalid } from "#lib/formValidation.js";
 
 // /communities/add's rules (#1409). The page runs `novalidate` and checks
 // these on submit instead, so every field reports its error inline, the

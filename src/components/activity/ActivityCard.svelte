@@ -1,10 +1,10 @@
 <script lang="ts">
 import Time from "svelte-time";
 
+import { type ActivityItem, dotColor } from "#lib/activity.js";
+import { _ } from "#lib/i18n/index.js";
 import Icon from "$components/Icon.svelte";
 import SaveButton from "$components/SaveButton.svelte";
-import { type ActivityItem, dotColor } from "$lib/activity";
-import { _ } from "$lib/i18n";
 
 import { resolve } from "$app/paths";
 

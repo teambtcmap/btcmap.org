@@ -1,12 +1,12 @@
 import { get } from "svelte/store";
 import { describe, expect, it } from "vitest";
 
-import { CATEGORIES, placeMatchesCategory } from "$lib/categoryMapping";
-import { PAYMENT_METHODS } from "$lib/map/paymentMethodFilter";
-import { DERIVED_ISSUE_CODES } from "$lib/placeIssues";
-import { places } from "$lib/store";
-import type { Place } from "$lib/types";
-import { filterPlacesByRecency } from "$lib/verification";
+import { CATEGORIES, placeMatchesCategory } from "#lib/categoryMapping.js";
+import { PAYMENT_METHODS } from "#lib/map/paymentMethodFilter.js";
+import { DERIVED_ISSUE_CODES } from "#lib/placeIssues.js";
+import { places } from "#lib/store.js";
+import type { Place } from "#lib/types.js";
+import { filterPlacesByRecency } from "#lib/verification.js";
 
 import {
 	computeVisibleSignature,

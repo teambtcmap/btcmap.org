@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 
-import type { Place } from "$lib/types";
+import type { Place } from "#lib/types.js";
 
 import {
 	CATEGORIES,

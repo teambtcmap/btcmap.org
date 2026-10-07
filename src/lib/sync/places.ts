@@ -1,14 +1,14 @@
 import type { AxiosProgressEvent } from "axios";
 import { get } from "svelte/store";
 
-import { API_BASE } from "$lib/api-base";
-import { buildFieldsParam, PLACE_FIELD_SETS } from "$lib/api-fields";
-import api from "$lib/axios";
+import { API_BASE } from "#lib/api-base.js";
+import { buildFieldsParam, PLACE_FIELD_SETS } from "#lib/api-fields.js";
+import api from "#lib/axios.js";
 import {
 	completePlaceUrl,
 	evictPlaceDetails,
 	primePlaceDetails,
-} from "$lib/placeDetails";
+} from "#lib/placeDetails.js";
 import {
 	paymentTagsLoaded,
 	places,
@@ -16,16 +16,16 @@ import {
 	placesLoadingProgress,
 	placesLoadingStatus,
 	verifiedDatesLoaded,
-} from "$lib/store";
-import { clearTables } from "$lib/sync/clearTables";
+} from "#lib/store.js";
+import { clearTables } from "#lib/sync/clearTables.js";
 import {
 	publishPlaces,
 	readPlaceCache,
 	readPlacesSyncedAt,
 	writePlacesSyncedAt,
-} from "$lib/sync/placeCache";
-import type { Place } from "$lib/types";
-import { filterPlaces, parseJSON } from "$lib/workers/sync-worker-manager";
+} from "#lib/sync/placeCache.js";
+import type { Place } from "#lib/types.js";
+import { filterPlaces, parseJSON } from "#lib/workers/sync-worker-manager.js";
 
 // Concurrency protection to prevent multiple simultaneous syncs
 let syncInProgress = false;
@@ -615,7 +615,7 @@ export const elementsSync = async () => {
 
 // Shared write-through for a single fresh place record: update localforage +
 // $places, drop the record everywhere if it's deleted, and keep the details
-// cache in $lib/placeDetails coherent. Returns the place, or null when it was
+// cache in #lib/placeDetails coherent. Returns the place, or null when it was
 // deleted or no cache exists yet.
 const applyPlaceUpdate = async (place: Place): Promise<Place | null> => {
 	const cachedPlaces = await readPlaceCache();

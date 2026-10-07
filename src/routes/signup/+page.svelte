@@ -1,12 +1,12 @@
 <script lang="ts">
 import { onMount } from "svelte";
 
+import { _ } from "#lib/i18n/index.js";
+import { hydrateSavedFromServer } from "#lib/savedItems.js";
+import type { Session } from "#lib/session.js";
+import { session } from "#lib/session.js";
 import SignupForm from "$components/auth/SignupForm.svelte";
 import TextLink from "$components/TextLink.svelte";
-import { _ } from "$lib/i18n";
-import { hydrateSavedFromServer } from "$lib/savedItems";
-import type { Session } from "$lib/session";
-import { session } from "$lib/session";
 
 import { goto } from "$app/navigation";
 

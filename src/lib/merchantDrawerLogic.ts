@@ -2,16 +2,16 @@ import axios from "axios";
 import type { Writable } from "svelte/store";
 import { get } from "svelte/store";
 
-import { _ } from "$lib/i18n";
-import { updateMerchantHash } from "$lib/merchantDrawerHash";
+import { _ } from "#lib/i18n/index.js";
+import { updateMerchantHash } from "#lib/merchantDrawerHash.js";
 import {
 	DETAIL_FIELDS,
 	getPlaceDetails,
 	hasDetailFields,
-} from "$lib/placeDetails";
-import { boost } from "$lib/store";
-import type { Boost, Place } from "$lib/types";
-import { errToast } from "$lib/utils";
+} from "#lib/placeDetails.js";
+import { boost } from "#lib/store.js";
+import type { Boost, Place } from "#lib/types.js";
+import { errToast } from "#lib/utils.js";
 
 export function isBoosted(merchant: Place | null): boolean {
 	return !!(

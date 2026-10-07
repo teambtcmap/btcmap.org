@@ -1,14 +1,14 @@
 <script lang="ts">
+import { extractContacts } from "#lib/area/contacts.js";
+import { getOrganizationDisplayName } from "#lib/organizationDisplayNames.js";
+import type { AreaTags } from "#lib/types.js";
+import { TipType } from "#lib/types.js";
+import { areaIconSrc } from "#lib/utils.js";
 import OrgBadge from "$components/OrgBadge.svelte";
 import Socials from "$components/Socials.svelte";
 import SponsorBadge from "$components/SponsorBadge.svelte";
 import TextLink from "$components/TextLink.svelte";
 import Tip from "$components/Tip.svelte";
-import { extractContacts } from "$lib/area/contacts";
-import { getOrganizationDisplayName } from "$lib/organizationDisplayNames";
-import type { AreaTags } from "$lib/types";
-import { TipType } from "$lib/types";
-import { areaIconSrc } from "$lib/utils";
 
 import { resolve } from "$app/paths";
 

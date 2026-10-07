@@ -1,14 +1,14 @@
 <script lang="ts">
 import { OutClick } from "svelte-outclick";
 
+import { hasNewActivity } from "#lib/activityNotifier.js";
+import { trackEvent } from "#lib/analytics.js";
+import { _ } from "#lib/i18n/index.js";
+import { fetchProfile } from "#lib/nostrProfile.js";
+import { session } from "#lib/session.js";
 import BackupModal from "$components/auth/BackupModal.svelte";
 import Icon from "$components/Icon.svelte";
 import NostrAvatar from "$components/NostrAvatar.svelte";
-import { hasNewActivity } from "$lib/activityNotifier";
-import { trackEvent } from "$lib/analytics";
-import { _ } from "$lib/i18n";
-import { fetchProfile } from "$lib/nostrProfile";
-import { session } from "$lib/session";
 
 import { afterNavigate, goto } from "$app/navigation";
 

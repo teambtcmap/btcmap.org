@@ -4,7 +4,7 @@ export let status: string | undefined = undefined;
 
 import { fade } from "svelte/transition";
 
-import { _ } from "$lib/i18n";
+import { _ } from "#lib/i18n/index.js";
 
 let shouldHide = false;
 

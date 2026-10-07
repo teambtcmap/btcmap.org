@@ -1,4 +1,4 @@
-import { loadCommunityArea } from "$lib/area/routeConfigs";
+import { loadCommunityArea } from "#lib/area/routeConfigs.js";
 
 import type { PageServerLoad } from "./$types";
 

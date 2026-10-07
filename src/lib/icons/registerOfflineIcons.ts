@@ -1,6 +1,6 @@
 import { addCollection } from "@iconify/svelte/dist/functions";
 
-import { iconCollections } from "$lib/icons/bundle";
+import { iconCollections } from "#lib/icons/bundle.js";
 
 // Preload the app's known icon vocabulary into @iconify/svelte's in-memory
 // store so <Icon> renders without calling api.iconify.design.

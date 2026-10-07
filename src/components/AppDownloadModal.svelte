@@ -1,7 +1,7 @@
 <script lang="ts">
+import type { AppConfig, StoreKey } from "#lib/apps.js";
+import IconApps from "#lib/icons/IconApps.svelte";
 import Modal from "$components/Modal.svelte";
-import type { AppConfig, StoreKey } from "$lib/apps";
-import IconApps from "$lib/icons/IconApps.svelte";
 
 export let app: AppConfig | null;
 export let open = false;

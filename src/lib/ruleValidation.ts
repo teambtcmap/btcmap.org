@@ -1,12 +1,12 @@
 import type { AnyFieldApi, AnyFormApi } from "@tanstack/svelte-form";
 import { revalidateLogic } from "@tanstack/svelte-form";
 
-import type { RuleErrors } from "$lib/formValidation";
+import type { RuleErrors } from "#lib/formValidation.js";
 import {
 	firstInvalid,
 	focusInvalid,
 	recheckFlagged,
-} from "$lib/formValidation";
+} from "#lib/formValidation.js";
 
 // A form's rules on TanStack Form, with the app's inline validation
 // semantics (#1404, #1406):

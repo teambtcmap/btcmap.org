@@ -3,16 +3,16 @@ import Chart from "chart.js/auto";
 import { onDestroy, onMount } from "svelte";
 import { _ } from "svelte-i18n";
 
+import { getOrganizationDisplayName } from "#lib/organizationDisplayNames.js";
+import { areaError, areas, reportError, syncStatus } from "#lib/store.js";
+import { areasSync } from "#lib/sync/areas.js";
+import { theme } from "#lib/theme.js";
+import type { Community } from "#lib/types.js";
+import { errToast } from "#lib/utils.js";
 import FormSelect from "$components/form/FormSelect.svelte";
 import HeaderPlaceholder from "$components/layout/HeaderPlaceholder.svelte";
 import PrimaryButton from "$components/PrimaryButton.svelte";
 import Skeleton from "$components/Skeleton.svelte";
-import { getOrganizationDisplayName } from "$lib/organizationDisplayNames";
-import { areaError, areas, reportError, syncStatus } from "$lib/store";
-import { areasSync } from "$lib/sync/areas";
-import { theme } from "$lib/theme";
-import type { Community } from "$lib/types";
-import { errToast } from "$lib/utils";
 
 import type { PageData } from "./$types";
 import CommunitySection from "./components/CommunitySection.svelte";

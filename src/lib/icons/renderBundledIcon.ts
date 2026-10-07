@@ -1,6 +1,6 @@
 import { getIconData, iconToHTML, iconToSVG, replaceIDs } from "@iconify/utils";
 
-import { iconCollections } from "$lib/icons/bundle";
+import { iconCollections } from "#lib/icons/bundle.js";
 
 // Render one bundled icon to the exact SVG string the Iconify API would return
 // for the given color and pixel size. These are the same steps the API's own

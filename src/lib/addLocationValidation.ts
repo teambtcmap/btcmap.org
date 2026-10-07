@@ -1,5 +1,5 @@
-import { firstInvalid } from "$lib/formValidation";
-import type { PaymentMethod } from "$lib/map/paymentMethodFilter";
+import { firstInvalid } from "#lib/formValidation.js";
+import type { PaymentMethod } from "#lib/map/paymentMethodFilter.js";
 
 // The add-location form's rules for the two editing steps (#1404). The
 // form runs with `novalidate` and checks these when the step's own

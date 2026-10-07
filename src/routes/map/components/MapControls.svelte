@@ -3,16 +3,16 @@ import type { Map as MapLibreMap } from "maplibre-gl";
 import { onDestroy, onMount } from "svelte";
 import { get, writable } from "svelte/store";
 
-import { trackEvent } from "$lib/analytics";
+import { trackEvent } from "#lib/analytics.js";
 import {
 	BASEMAP_STORAGE_KEY,
 	type BasemapId,
 	defaultBasemap,
 	getStoredBasemap,
-} from "$lib/map/basemaps";
-import { HEATMAP_STORAGE_KEY } from "$lib/map/heatmap";
-import type { VerifiedFilterYears } from "$lib/map/verifiedFilter";
-import { theme } from "$lib/theme";
+} from "#lib/map/basemaps.js";
+import { HEATMAP_STORAGE_KEY } from "#lib/map/heatmap.js";
+import type { VerifiedFilterYears } from "#lib/map/verifiedFilter.js";
+import { theme } from "#lib/theme.js";
 
 import MapMenuModal from "./MapMenuModal.svelte";
 import MapToolsModal from "./MapToolsModal.svelte";

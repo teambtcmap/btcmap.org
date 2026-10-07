@@ -2,13 +2,13 @@
 import { onMount } from "svelte";
 import { _ } from "svelte-i18n";
 
+import { areaError, areas } from "#lib/store.js";
+import { areasSync } from "#lib/sync/areas.js";
+import { theme } from "#lib/theme.js";
+import { errToast, validateContinents } from "#lib/utils.js";
 import FormSelect from "$components/form/FormSelect.svelte";
 import HeaderPlaceholder from "$components/layout/HeaderPlaceholder.svelte";
 import PrimaryButton from "$components/PrimaryButton.svelte";
-import { areaError, areas } from "$lib/store";
-import { areasSync } from "$lib/sync/areas";
-import { theme } from "$lib/theme";
-import { errToast, validateContinents } from "$lib/utils";
 
 import type { PageData } from "./$types";
 import CountrySection from "./components/CountrySection.svelte";

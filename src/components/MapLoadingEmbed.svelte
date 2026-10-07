@@ -1,8 +1,8 @@
 <script lang="ts">
 export let style: undefined | string = undefined;
 
+import { _ } from "#lib/i18n/index.js";
 import LoadingSpinner from "$components/LoadingSpinner.svelte";
-import { _ } from "$lib/i18n";
 </script>
 
 <div

@@ -1,18 +1,18 @@
 <script lang="ts">
 import { _ } from "svelte-i18n";
 
-import ActivityCard from "$components/activity/ActivityCard.svelte";
-import ActivityTypeFilter from "$components/activity/ActivityTypeFilter.svelte";
-import Icon from "$components/Icon.svelte";
-import TaggerSkeleton from "$components/TaggerSkeleton.svelte";
 import {
 	ACTIVITY_TYPES,
 	type ActivityItem,
 	type ActivityType,
 	countByType,
-} from "$lib/activity";
-import { API_BASE } from "$lib/api-base";
-import api from "$lib/axios";
+} from "#lib/activity.js";
+import { API_BASE } from "#lib/api-base.js";
+import api from "#lib/axios.js";
+import ActivityCard from "$components/activity/ActivityCard.svelte";
+import ActivityTypeFilter from "$components/activity/ActivityTypeFilter.svelte";
+import Icon from "$components/Icon.svelte";
+import TaggerSkeleton from "$components/TaggerSkeleton.svelte";
 
 export let alias: string;
 export let name: string;

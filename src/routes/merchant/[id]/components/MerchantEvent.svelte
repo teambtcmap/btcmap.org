@@ -1,9 +1,9 @@
 <script lang="ts">
 import Time from "svelte-time";
 
+import type { EventType, User } from "#lib/types.js";
+import { isValidLightningTip, stripLightningScheme } from "#lib/utils.js";
 import Tip from "$components/Tip.svelte";
-import type { EventType, User } from "$lib/types";
-import { isValidLightningTip, stripLightningScheme } from "$lib/utils";
 
 import { resolve } from "$app/paths";
 

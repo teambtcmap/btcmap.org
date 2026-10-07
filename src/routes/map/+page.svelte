@@ -14,10 +14,7 @@ import { onDestroy, onMount, tick } from "svelte";
 import { get } from "svelte/store";
 import { fade } from "svelte/transition";
 
-import CommunityRail from "$components/CommunityRail.svelte";
-import MapLoadingMain from "$components/MapLoadingMain.svelte";
-import MapUnsupportedFallback from "$components/MapUnsupportedFallback.svelte";
-import { trackEvent } from "$lib/analytics";
+import { trackEvent } from "#lib/analytics.js";
 import {
 	BREAKPOINTS,
 	CLUSTERING_DISABLED_ZOOM,
@@ -32,9 +29,9 @@ import {
 	MERCHANT_LIST_WIDTH,
 	NEARBY_RADIUS_MULTIPLIER,
 	PANEL_DRAWER_GAP,
-} from "$lib/constants";
-import { SEARCH_SHEET_PEEK_HEIGHT } from "$lib/drawerConfig";
-import { _, getDisplayLang, locale } from "$lib/i18n";
+} from "#lib/constants.js";
+import { SEARCH_SHEET_PEEK_HEIGHT } from "#lib/drawerConfig.js";
+import { _, getDisplayLang, locale } from "#lib/i18n/index.js";
 import {
 	BASEMAPS,
 	type BasemapId,
@@ -42,53 +39,53 @@ import {
 	getStoredBasemap,
 	SUPPORT_ATTR,
 	styleForBasemap,
-} from "$lib/map/basemaps";
-import { shouldClusterBoostedAtZoom } from "$lib/map/boostedClustering";
-import type { BtcmapMapHandle } from "$lib/map/createMap";
-import { createBtcmapMap } from "$lib/map/createMap";
+} from "#lib/map/basemaps.js";
+import { shouldClusterBoostedAtZoom } from "#lib/map/boostedClustering.js";
+import type { BtcmapMapHandle } from "#lib/map/createMap.js";
+import { createBtcmapMap } from "#lib/map/createMap.js";
 import {
 	type HashCoords,
 	parseHashCoords,
 	writeHashCoords,
-} from "$lib/map/mapHash";
+} from "#lib/map/mapHash.js";
 import {
 	ensureSpritesForPlaces,
 	PIN_FILLS,
 	pinIconImageExpression,
 	pinVariantFor,
-} from "$lib/map/maplibreSprites";
+} from "#lib/map/maplibreSprites.js";
 import {
 	applyPaymentMethodFilter,
 	parsePaymentMethodsParam,
-} from "$lib/map/paymentMethodFilter";
-import { createPlacePinSource } from "$lib/map/placePinSource";
-import { parseLatLongQuery } from "$lib/map/queryViewport";
-import type { VerifiedFilterYears } from "$lib/map/verifiedFilter";
+} from "#lib/map/paymentMethodFilter.js";
+import { createPlacePinSource } from "#lib/map/placePinSource.js";
+import { parseLatLongQuery } from "#lib/map/queryViewport.js";
+import type { VerifiedFilterYears } from "#lib/map/verifiedFilter.js";
 import {
 	calculateRadiusKmFromLngLatBounds,
 	getZoomBehavior,
-} from "$lib/map/viewport";
-import { loadCachedView, saveCachedView } from "$lib/map/viewportCache";
+} from "#lib/map/viewport.js";
+import { loadCachedView, saveCachedView } from "#lib/map/viewportCache.js";
 import {
 	computeVisibleSignature,
 	placesRevision,
 	selectVisiblePlaces,
-} from "$lib/map/visiblePlaces";
+} from "#lib/map/visiblePlaces.js";
 import {
 	MERCHANT_URL_CHANGE_EVENT,
 	parseMerchantHash,
 	withLiteralCommas,
-} from "$lib/merchantDrawerHash";
-import { merchantDrawer } from "$lib/merchantDrawerStore";
-import { merchantList } from "$lib/merchantListStore";
-import type { DerivedIssueCode } from "$lib/placeIssues";
+} from "#lib/merchantDrawerHash.js";
+import { merchantDrawer } from "#lib/merchantDrawerStore.js";
+import { merchantList } from "#lib/merchantListStore.js";
+import type { DerivedIssueCode } from "#lib/placeIssues.js";
 import {
 	countIssuesByCode,
 	parseIssuesParam,
 	placeMatchesIssueCodes,
 	serializeIssuesParam,
-} from "$lib/placeIssues";
-import { savedPlaceIds } from "$lib/session";
+} from "#lib/placeIssues.js";
+import { savedPlaceIds } from "#lib/session.js";
 import {
 	paymentTagsLoaded,
 	places,
@@ -97,13 +94,16 @@ import {
 	placesLoadingProgress,
 	placesLoadingStatus,
 	verifiedDatesLoaded,
-} from "$lib/store";
-import { ensurePaymentMethods, ensureVerifiedDates } from "$lib/sync/places";
-import { theme } from "$lib/theme";
-import type { Place } from "$lib/types";
-import { userLocation } from "$lib/userLocationStore";
-import { debounce, errToast, isBoosted } from "$lib/utils";
-import { filterPlacesByRecency } from "$lib/verification";
+} from "#lib/store.js";
+import { ensurePaymentMethods, ensureVerifiedDates } from "#lib/sync/places.js";
+import { theme } from "#lib/theme.js";
+import type { Place } from "#lib/types.js";
+import { userLocation } from "#lib/userLocationStore.js";
+import { debounce, errToast, isBoosted } from "#lib/utils.js";
+import { filterPlacesByRecency } from "#lib/verification.js";
+import CommunityRail from "$components/CommunityRail.svelte";
+import MapLoadingMain from "$components/MapLoadingMain.svelte";
+import MapUnsupportedFallback from "$components/MapUnsupportedFallback.svelte";
 
 import type { PageData } from "./$types";
 import AddPlaceMode from "./components/AddPlaceMode.svelte";

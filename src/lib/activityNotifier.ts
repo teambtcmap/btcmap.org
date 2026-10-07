@@ -3,10 +3,10 @@ import { parseISO } from "date-fns/parseISO";
 import type { Readable } from "svelte/store";
 import { derived, writable } from "svelte/store";
 
-import type { ActivityItem } from "$lib/activity";
-import { API_BASE } from "$lib/api-base";
-import api from "$lib/axios";
-import type { Session } from "$lib/session";
+import type { ActivityItem } from "#lib/activity.js";
+import { API_BASE } from "#lib/api-base.js";
+import api from "#lib/axios.js";
+import type { Session } from "#lib/session.js";
 
 export const POLL_INTERVAL_MS = 30 * 60 * 1000; // 30 minutes
 export const POLL_DAYS = 1;

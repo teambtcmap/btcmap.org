@@ -1,5 +1,5 @@
-import type { AreaContacts, AreaTags } from "$lib/types";
-import { AREA_CONTACT_KEYS } from "$lib/types";
+import type { AreaContacts, AreaTags } from "#lib/types.js";
+import { AREA_CONTACT_KEYS } from "#lib/types.js";
 
 // Lift the 22 `contact:*` string tags into one typed object so consumers
 // stop spelling `area["contact:satlantis"]` at every read site. Shared by

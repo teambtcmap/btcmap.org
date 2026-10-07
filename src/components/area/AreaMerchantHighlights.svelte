@@ -1,11 +1,11 @@
 <script lang="ts">
+import { _ } from "#lib/i18n/index.js";
+import { placementEntryUrl } from "#lib/placementMode.js";
+import type { Place } from "#lib/types.js";
+import { isBoosted } from "#lib/utils.js";
 import MerchantCard from "$components/area/MerchantCard.svelte";
 import Skeleton from "$components/Skeleton.svelte";
 import TextLink from "$components/TextLink.svelte";
-import { _ } from "$lib/i18n";
-import { placementEntryUrl } from "$lib/placementMode";
-import type { Place } from "$lib/types";
-import { isBoosted } from "$lib/utils";
 
 export let dataInitialized: boolean;
 export let filteredPlaces: Place[];

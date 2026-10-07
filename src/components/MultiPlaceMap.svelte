@@ -8,16 +8,16 @@ import type {
 } from "maplibre-gl";
 import { onDestroy, onMount } from "svelte";
 
+import { CLUSTERING_DISABLED_ZOOM } from "#lib/constants.js";
+import { computeBbox } from "#lib/map/bbox.js";
+import type { BtcmapMapHandle } from "#lib/map/createMap.js";
+import { createBtcmapMap } from "#lib/map/createMap.js";
+import { ensureSprite } from "#lib/map/maplibreSprites.js";
+import { theme } from "#lib/theme.js";
+import type { SavedPlace } from "#lib/types.js";
 import AreaMerchantDrawer from "$components/area/AreaMerchantDrawer.svelte";
 import MapLoadingEmbed from "$components/MapLoadingEmbed.svelte";
 import MapUnsupportedFallback from "$components/MapUnsupportedFallback.svelte";
-import { CLUSTERING_DISABLED_ZOOM } from "$lib/constants";
-import { computeBbox } from "$lib/map/bbox";
-import type { BtcmapMapHandle } from "$lib/map/createMap";
-import { createBtcmapMap } from "$lib/map/createMap";
-import { ensureSprite } from "$lib/map/maplibreSprites";
-import { theme } from "$lib/theme";
-import type { SavedPlace } from "$lib/types";
 
 import { browser } from "$app/environment";
 

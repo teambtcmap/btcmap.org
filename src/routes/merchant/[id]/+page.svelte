@@ -3,6 +3,11 @@ export let data: MerchantPageData;
 
 import { onMount } from "svelte";
 
+import { commentAnchorFromHash, commentDomId } from "#lib/commentPermalink.js";
+import { _, getDisplayLang, locale } from "#lib/i18n/index.js";
+import { boost, placesById, resetBoost } from "#lib/store.js";
+import type { MerchantActivityEvent, MerchantPageData } from "#lib/types.js";
+import { isBoosted } from "#lib/utils.js";
 import Boost from "$components/Boost.svelte";
 import BoostCard from "$components/BoostCard.svelte";
 import CompanionAppPill from "$components/CompanionAppPill.svelte";
@@ -12,11 +17,6 @@ import OpenStatusPill from "$components/OpenStatusPill.svelte";
 import PaymentMethodPills from "$components/PaymentMethodPills.svelte";
 import ShowTags from "$components/ShowTags.svelte";
 import TaggingIssues from "$components/TaggingIssues.svelte";
-import { commentAnchorFromHash, commentDomId } from "$lib/commentPermalink";
-import { _, getDisplayLang, locale } from "$lib/i18n";
-import { boost, placesById, resetBoost } from "$lib/store";
-import type { MerchantActivityEvent, MerchantPageData } from "$lib/types";
-import { isBoosted } from "$lib/utils";
 
 import MerchantActionChips from "./components/MerchantActionChips.svelte";
 import MerchantComment from "./components/MerchantComment.svelte";
@@ -123,7 +123,7 @@ onMount(async () => {
 	if (browser) {
 		// Refresh localforage so the main map / saved lists reflect current data.
 		try {
-			const { updatePlaceInCache } = await import("$lib/sync/places");
+			const { updatePlaceInCache } = await import("#lib/sync/places.js");
 			await updatePlaceInCache(data.placeData);
 		} catch (error) {
 			console.error("Could not update place in localforage:", error);

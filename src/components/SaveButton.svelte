@@ -1,18 +1,18 @@
 <script lang="ts">
-import SaveAuthPrompt from "$components/auth/SaveAuthPrompt.svelte";
-import Icon from "$components/Icon.svelte";
-import { trackEvent } from "$lib/analytics";
-import { _ } from "$lib/i18n";
-import type { SavedItemType } from "$lib/savedItems";
+import { trackEvent } from "#lib/analytics.js";
+import { _ } from "#lib/i18n/index.js";
+import type { SavedItemType } from "#lib/savedItems.js";
 import {
 	addSavedItem,
 	getSavedList,
 	removeSavedItem,
 	setSavedList,
 	toggleSavedLocal,
-} from "$lib/savedItems";
-import { session } from "$lib/session";
-import { errToast } from "$lib/utils";
+} from "#lib/savedItems.js";
+import { session } from "#lib/session.js";
+import { errToast } from "#lib/utils.js";
+import SaveAuthPrompt from "$components/auth/SaveAuthPrompt.svelte";
+import Icon from "$components/Icon.svelte";
 
 // The numeric ID of the item to save/unsave.
 export let id: number;

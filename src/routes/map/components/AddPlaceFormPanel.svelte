@@ -1,11 +1,11 @@
 <script lang="ts">
+import { trackEvent } from "#lib/analytics.js";
+import { _ } from "#lib/i18n/index.js";
+import { osmEditUrl } from "#lib/placeSubmission.js";
 import AddLocationForm from "$components/add-location/AddLocationForm.svelte";
 import CloseButton from "$components/CloseButton.svelte";
 import Icon from "$components/Icon.svelte";
 import PrimaryButton from "$components/PrimaryButton.svelte";
-import { trackEvent } from "$lib/analytics";
-import { _ } from "$lib/i18n";
-import { osmEditUrl } from "$lib/placeSubmission";
 
 import MapPanelShell from "./MapPanelShell.svelte";
 
