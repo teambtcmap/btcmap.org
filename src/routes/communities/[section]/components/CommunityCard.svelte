@@ -31,7 +31,7 @@ $: tip =
 >
 	<div class="my-4 space-y-2 p-4">
 		<TextLink
-			link={resolve(`/community/${encodeURIComponent(id)}`)}
+			link={resolve(`community/${encodeURIComponent(id)}`)}
 			style="space-y-2"
 		>
 			<img

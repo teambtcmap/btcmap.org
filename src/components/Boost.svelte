@@ -6,13 +6,13 @@ import { boost, resetBoost } from "#lib/store.js";
 import BoostContent from "$components/BoostContent.svelte";
 import CloseButton from "$components/CloseButton.svelte";
 
-import { invalidateAll } from "$app/navigation";
+import { refreshAll } from "$app/navigation";
 
 let boostComplete = false;
 
 const closeModal = () => {
 	if (boostComplete) {
-		invalidateAll();
+		refreshAll();
 	}
 	$boost = undefined;
 	$resetBoost = $resetBoost + 1;

@@ -34,7 +34,7 @@ $: tipDestination =
 				<!-- user -->
 				{#if user_id && user_name}
 					by <a
-						href={resolve(`/tagger/${user_id}`)}
+						href={resolve(`tagger/${user_id}`)}
 						class="block break-all text-link transition-colors hover:text-hover lg:inline"
 						>{user_name}
 					</a>

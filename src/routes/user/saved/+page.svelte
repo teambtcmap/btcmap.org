@@ -186,7 +186,7 @@ onDestroy(() => {
 								: ''}"
 						>
 							<a
-								href={resolve(`/merchant/${place.id}`)}
+								href={resolve(`merchant/${place.id}`)}
 								class="flex min-w-0 flex-1 items-center gap-3 p-4"
 							>
 								<Icon
@@ -234,7 +234,7 @@ onDestroy(() => {
 						>
 							<a
 								href={resolve(
-									`/${area.type === "community" ? "community" : "country"}/${area.url_alias}/merchants`,
+									`${area.type === "community" ? "community" : "country"}/${area.url_alias}/merchants`,
 								)}
 								class="flex min-w-0 flex-1 items-center gap-3 p-4"
 							>

@@ -168,7 +168,7 @@ const searchDebounce = debounce((e) => handleKeyUp(e));
 										>
 											{#if cell.column.id === 'location'}
 												<a
-													href={resolve(`/merchant/${row.original.merchantId}`)}
+													href={resolve(`merchant/${row.original.merchantId}`)}
 													class="text-link transition-colors hover:text-hover"
 												>
 													{row.original.location}

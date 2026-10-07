@@ -109,7 +109,7 @@ $: if (data.isOrganization && organizationSections.length > 0) {
 		(org) => org.id === data.section,
 	);
 	if (!isValidOrganization) {
-		goto("/communities/africa", { replaceState: true });
+		goto("/communities/africa", { replace: true });
 	}
 }
 
@@ -267,7 +267,7 @@ const continentDisplayNames: Record<string, string> = {
 
 // Handle section changes via dropdown
 const handleSectionChange = (newSection: string) => {
-	goto(`/communities/${newSection}`, { replaceState: false });
+	goto(`/communities/${newSection}`, { replace: false });
 };
 
 onMount(() => {
@@ -348,7 +348,7 @@ onDestroy(() => {
 		<div class="mb-5 justify-between md:flex">
 			{#if data.section}
 				<h2 class="mb-2 text-3xl font-semibold text-primary md:mb-0 md:text-left dark:text-white">
-					<a href={resolve(`/communities/${data.section}`)}>
+					<a href={resolve(`communities/${data.section}`)}>
 						{organizationSections.find((org) => org.id === data.section)?.displayName ||
 							continentDisplayNames[data.section] ||
 							data.section}

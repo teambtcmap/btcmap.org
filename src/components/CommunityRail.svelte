@@ -61,7 +61,7 @@ const avatarUrl = (community: Area): string =>
 	areaIconSrc(community.id, community.tags["icon:square"], 64);
 
 const communityHref = (community: Area): string =>
-	resolve(`/community/${encodeURIComponent(community.id)}`);
+	resolve(`community/${encodeURIComponent(community.id)}`);
 
 const handleImgError = (e: Event) => {
 	const img = e.currentTarget as HTMLImageElement;

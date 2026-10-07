@@ -1,4 +1,4 @@
-import type { HandleFetch } from "@sveltejs/kit";
+import type { HandleFetch } from "@sveltejs/kit/hooks";
 
 // Set User-Agent on all server-side fetch calls to the upstream API,
 // matching the header previously set by the #lib/axios wrapper.

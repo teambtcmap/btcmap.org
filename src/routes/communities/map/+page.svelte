@@ -203,7 +203,7 @@ const buildPopupHtml = (
 	wrapper.appendChild(socialsMount);
 
 	const link = document.createElement("a");
-	link.href = resolve(`/community/${encodeURIComponent(community.id)}`);
+	link.href = resolve(`community/${encodeURIComponent(community.id)}`);
 	link.className =
 		"block bg-link hover:bg-hover !text-white text-center font-semibold py-3 rounded-xl transition-colors";
 	link.title = t("communityMap.communityPageTitle");

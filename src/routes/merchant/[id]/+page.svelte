@@ -2,6 +2,7 @@
 export let data: MerchantPageData;
 
 import { onMount } from "svelte";
+import { toStore } from "svelte/store";
 
 import { commentAnchorFromHash, commentDomId } from "#lib/commentPermalink.js";
 import { _, getDisplayLang, locale } from "#lib/i18n/index.js";
@@ -26,8 +27,8 @@ import MerchantHero from "./components/MerchantHero.svelte";
 import MerchantTabs from "./components/MerchantTabs.svelte";
 import MerchantVerifyRow from "./components/MerchantVerifyRow.svelte";
 import { browser } from "$app/env";
-import { invalidateAll } from "$app/navigation";
-import { page } from "$app/stores";
+import { refreshAll } from "$app/navigation";
+import { page } from "$app/state";
 
 // Server data is consumed directly; only the fields the page itself renders
 // (hero, payment indicator, action chips, activity) are mirrored here.
@@ -70,7 +71,7 @@ $: heroIcon = deletedAt
 		? icon
 		: "currency_bitcoin";
 
-// Make comments reactive to server data updates (from invalidateAll() after adding comment)
+// Make comments reactive to server data updates (from refreshAll() after adding comment)
 let comments: typeof data.comments;
 $: comments = data.comments;
 
@@ -107,10 +108,13 @@ let eventCount = 50;
 $: eventsPaginated = merchantEvents.slice(0, eventCount);
 
 // Which comment the current #comment-<id> permalink targets. Read the hash
-// from $page.url, not window.location: Kit updates the store inside its
+// from page.url, not window.location: Kit updates page state inside its
 // link click handler before the browser applies the fragment navigation,
 // so the window value can be one hash behind at that point.
-$: targetCommentAnchor = commentAnchorFromHash($page.url.hash);
+// toStore bridges the runes-based page state into this legacy component's $:
+// statement, which only re-runs on store or local-variable changes.
+const pageHash = toStore(() => page.url.hash);
+$: targetCommentAnchor = commentAnchorFromHash($pageHash);
 
 onMount(async () => {
 	// A shared permalink misses the browser's native anchor scroll because
@@ -228,7 +232,7 @@ const ogImage = `https://api.btcmap.org/og/element/${data.id}`;
 			<MerchantTabs commentsCount={comments.length} activityCount={merchantEvents.length}>
 				<svelte:fragment slot="comments">
 					<div class="mb-4 flex justify-center lg:justify-start">
-						<CommentAddButton elementId={data.id} onSuccess={invalidateAll} source="merchant_page" />
+						<CommentAddButton elementId={data.id} onSuccess={refreshAll} source="merchant_page" />
 					</div>
 					{#if comments && comments.length}
 						<div class="divide-y divide-gray-200 dark:divide-white/10">

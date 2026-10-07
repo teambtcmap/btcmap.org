@@ -35,7 +35,7 @@ let taggerDiv: HTMLDivElement;
 				<div class="flex flex-wrap items-center justify-center">
 					{#each taggersPaginated as tagger (tagger.id)}
 						<div class="m-4 space-y-1 transition-transform hover:scale-110">
-							<a href={resolve(`/tagger/${tagger.id}`)}>
+							<a href={resolve(`tagger/${tagger.id}`)}>
 								<img
 									src={tagger.avatar_url ?? '/images/satoshi-nakamoto.png'}
 									alt={$_('aria.avatarAlt')}

@@ -88,11 +88,11 @@ export async function handleBoost(
 
 export async function handleBoostComplete(
 	merchantId: number | null,
-	invalidateAll: () => Promise<void>,
+	refreshAll: () => Promise<void>,
 	resetBoostStore?: Writable<number>,
 ): Promise<void> {
 	try {
-		await invalidateAll();
+		await refreshAll();
 	} catch (error) {
 		console.error("Error invalidating data after boost:", error);
 		// Continue with cleanup even if invalidation fails

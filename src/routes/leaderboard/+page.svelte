@@ -214,7 +214,7 @@ const searchDebounce = debounce((e) => handleKeyUp(e));
 
 const handlePeriodChange = async (event: Event) => {
 	const nextValue = (event.target as HTMLSelectElement).value as PeriodOption;
-	const search = new URLSearchParams(page.url.searchParams);
+	const search = new URLSearchParams(page.url.search);
 	if (nextValue === DEFAULT_PERIOD) {
 		search.delete("period");
 	} else {
@@ -227,8 +227,8 @@ const handlePeriodChange = async (event: Event) => {
 
 	try {
 		await goto(nextUrl, {
-			replaceState: true,
-			noScroll: true,
+			replace: true,
+			reset: false,
 		});
 	} finally {
 		periodLoading = false;

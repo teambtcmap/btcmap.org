@@ -22,7 +22,7 @@ import MerchantDetailsSkeleton from "$components/MerchantDetailsSkeleton.svelte"
 
 import MerchantPeekContentMobile from "./MerchantPeekContentMobile.svelte";
 import { browser } from "$app/env";
-import { invalidateAll } from "$app/navigation";
+import { refreshAll } from "$app/navigation";
 
 // ?issues worklist (#921): show the merchant's derived-issue row.
 export let showIssues = false;
@@ -120,7 +120,7 @@ $: if (drawerView !== "boost" && $boost !== undefined) {
 
 const handleBoost = () => boostMerchant(merchant, merchantId, setBoostLoading);
 const handleBoostComplete = () =>
-	completeBoost(merchantId, invalidateAll, resetBoost);
+	completeBoost(merchantId, refreshAll, resetBoost);
 
 function handleKeydown(event: KeyboardEvent) {
 	if (!isOpen) return;

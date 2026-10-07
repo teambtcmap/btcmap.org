@@ -36,7 +36,7 @@ $: showSaveButton = item.type !== "place_deleted";
 			<span class="text-primary lg:mr-5 dark:text-white">
 				{#if item.type === "place_added" || item.type === "place_updated" || item.type === "place_deleted"}
 					<a
-						href={resolve(`/merchant/${item.place_id}`)}
+						href={resolve(`merchant/${item.place_id}`)}
 						class="break-all text-link transition-colors hover:text-hover"
 					>
 						{item.place_name || item.place_id}
@@ -52,7 +52,7 @@ $: showSaveButton = item.type !== "place_deleted";
 					{#if item.osm_user_id && item.osm_user_name}
 						{$_("areaActivity.by")}
 						<a
-							href={resolve(`/tagger/${item.osm_user_id}`)}
+							href={resolve(`tagger/${item.osm_user_id}`)}
 							class="break-all text-link transition-colors hover:text-hover"
 						>
 							{item.osm_user_name}
@@ -61,7 +61,7 @@ $: showSaveButton = item.type !== "place_deleted";
 				{:else if item.type === "place_commented"}
 					<Icon type="fa" icon="comment" w="16" h="16" class="mr-1 inline align-middle" />
 					<a
-						href={resolve(`/merchant/${item.place_id}`)}
+						href={resolve(`merchant/${item.place_id}`)}
 						class="break-all text-link transition-colors hover:text-hover"
 					>
 						{item.place_name || item.place_id}
@@ -83,7 +83,7 @@ $: showSaveButton = item.type !== "place_deleted";
 						class="mr-1 inline align-middle text-orange-500"
 					/>
 					<a
-						href={resolve(`/merchant/${item.place_id}`)}
+						href={resolve(`merchant/${item.place_id}`)}
 						class="break-all text-link transition-colors hover:text-hover"
 					>
 						{item.place_name || item.place_id}

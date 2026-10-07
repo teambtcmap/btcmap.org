@@ -150,7 +150,7 @@ function handleSectionChange(event: Event) {
 		<div class="mb-5 justify-between md:flex">
 			{#if data.section}
 				<h2 class="mb-2 text-3xl font-semibold text-primary md:mb-0 md:text-left dark:text-white">
-					<a href={resolve(`/countries/${data.section}`)}
+					<a href={resolve(`countries/${data.section}`)}
 						>{$_(continentConfig[data.section]?.i18nKey ?? "")}</a
 					>
 				</h2>

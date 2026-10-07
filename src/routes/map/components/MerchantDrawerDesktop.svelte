@@ -25,7 +25,7 @@ import MerchantDetailsContent from "$components/MerchantDetailsContent.svelte";
 import MerchantDetailsSkeleton from "$components/MerchantDetailsSkeleton.svelte";
 
 import MapPanelShell from "./MapPanelShell.svelte";
-import { invalidateAll } from "$app/navigation";
+import { refreshAll } from "$app/navigation";
 
 // ?issues worklist (#921): show the merchant's derived-issue row.
 type Props = { showIssues?: boolean };
@@ -87,7 +87,7 @@ $effect(() => {
 
 const handleBoost = () => boostMerchant(merchant, merchantId, setBoostLoading);
 const handleBoostComplete = () =>
-	completeBoost(merchantId, invalidateAll, resetBoost);
+	completeBoost(merchantId, refreshAll, resetBoost);
 
 function handleKeydown(event: KeyboardEvent) {
 	if (!isOpen) return;

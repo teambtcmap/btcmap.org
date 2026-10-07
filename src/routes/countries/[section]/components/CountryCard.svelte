@@ -30,7 +30,7 @@ $: {
 >
 	<div class="my-4 space-y-2 p-4">
 		<TextLink
-			link={resolve(`/country/${id}`)}
+			link={resolve(`country/${id}`)}
 			style="space-y-2"
 		>
 			<img

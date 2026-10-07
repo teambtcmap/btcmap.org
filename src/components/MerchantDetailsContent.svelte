@@ -149,7 +149,7 @@ async function fetchComments(placeId: number) {
 		<div class="min-w-0 flex-1">
 			{#if displayName}
 				<a
-					href={resolve(`/merchant/${merchant.id}`)}
+					href={resolve(`merchant/${merchant.id}`)}
 					on:click={() => trackEvent('merchant_name_click')}
 					class="inline-block text-[22px] leading-snug font-semibold text-link transition-colors hover:text-hover"
 					title={$_('merchant.merchantName')}
@@ -281,7 +281,7 @@ async function fetchComments(placeId: number) {
 		</button>
 
 		<a
-			href={resolve(`/merchant/${merchant.id}#comments`)}
+			href={resolve(`merchant/${merchant.id}#comments`)}
 			class="flex flex-col items-center gap-1 text-primary dark:text-white"
 		>
 			<span
@@ -389,7 +389,7 @@ async function fetchComments(placeId: number) {
 
 	<div class="pt-2 text-center">
 		<a
-			href={resolve(`/merchant/${merchant.id}`)}
+			href={resolve(`merchant/${merchant.id}`)}
 			on:click={() => trackEvent('merchant_profile_click')}
 			class="inline-flex items-center gap-1 text-sm text-link transition-colors hover:text-hover"
 		>

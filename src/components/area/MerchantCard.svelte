@@ -110,7 +110,7 @@ onDestroy(() => {
 	<div>
 		<div class="mb-3 flex w-full flex-col items-center justify-between gap-2 sm:flex-row">
 			<a
-				href={resolve(`/merchant/${merchantLinkId}`)}
+				href={resolve(`merchant/${merchantLinkId}`)}
 				class="inline-flex w-full flex-col items-center gap-2 font-bold transition-colors sm:w-auto sm:flex-row {boosted
 					? 'text-bitcoin hover:text-bitcoinHover'
 					: 'text-link hover:text-hover'}"
@@ -259,7 +259,7 @@ onDestroy(() => {
 
 		<div class="flex justify-between space-x-2 sm:justify-start">
 			<a
-				href={resolve(`/merchant/${merchantLinkId}`)}
+				href={resolve(`merchant/${merchantLinkId}`)}
 				class="inline-flex items-center space-x-1 font-semibold text-link transition-colors hover:text-hover"
 				title={$_("verification.helpImprove")}
 			>

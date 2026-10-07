@@ -65,7 +65,7 @@ let { table }: { table: Table<BtcmapTableFeatures, TaggerRow> } = $props();
 										loading="lazy"
 									/>
 									<a
-										href={resolve(`/tagger/${row.original.id}`)}
+										href={resolve(`tagger/${row.original.id}`)}
 										class="text-link transition-colors hover:text-hover"
 									>
 										{row.original.tagger}

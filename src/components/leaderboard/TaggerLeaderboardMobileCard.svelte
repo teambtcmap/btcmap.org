@@ -58,7 +58,7 @@ let { table }: { table: Table<BtcmapTableFeatures, TaggerRow> } = $props();
 				<!-- Name (flex-1 to take remaining space) -->
 				<div class="min-w-0 flex-1">
 					<a
-						href={resolve(`/tagger/${tagger.id}`)}
+						href={resolve(`tagger/${tagger.id}`)}
 						class="text-lg font-semibold break-words text-link transition-colors hover:text-hover"
 					>
 						{tagger.tagger}

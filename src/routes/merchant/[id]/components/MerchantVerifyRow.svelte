@@ -13,7 +13,7 @@ export let id: string | number;
 export let verifiedAt: string | undefined | null = undefined;
 
 $: upToDate = isRecentlyVerified(verifiedAt);
-$: href = resolve(`/verify-location?id=${encodeURIComponent(String(id))}`);
+$: href = resolve(`verify-location?id=${encodeURIComponent(String(id))}`);
 </script>
 
 <div class="flex items-center gap-2">
