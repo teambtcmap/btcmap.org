@@ -38,7 +38,6 @@ import Tip from "$components/Tip.svelte";
 
 import ProfileActivity from "./components/ProfileActivity.svelte";
 import { browser } from "$app/env";
-import { goto } from "$app/navigation";
 
 // alert for user errors
 $: $userError && errToast($userError);
@@ -59,7 +58,9 @@ const initializeData = async () => {
 	const userFound = $users.find((user) => user.id === data.user);
 	if (!userFound) {
 		console.error("Could not find user, please try again or contact BTC Map.");
-		goto("/404");
+		// No /404 route: Kit 2's goto fell back to a full load (server 404
+		// page); Kit 3's goto rejects instead, so load it directly
+		window.location.assign("/404");
 		return;
 	}
 	userCreated = userFound.created_at;
