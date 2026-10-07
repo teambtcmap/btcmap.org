@@ -96,7 +96,6 @@
 	},
 	"packageManager": "pnpm@11.21.0",
 	"imports": {
-		"#lib": "./src/lib/index.js",
 		"#lib/*": "./src/lib/*"
 	}
 }
