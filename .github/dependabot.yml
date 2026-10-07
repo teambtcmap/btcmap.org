@@ -5,6 +5,12 @@ updates:
     schedule:
       interval: 'weekly'
     open-pull-requests-limit: 10
+    ignore:
+      # @types/node tracks the runtime Node major (NODE_VERSION in
+      # netlify.toml); a newer major types APIs Netlify doesn't run.
+      # Raise this together with NODE_VERSION.
+      - dependency-name: '@types/node'
+        versions: ['>=25.0.0']
     groups:
       biome:
         patterns:
