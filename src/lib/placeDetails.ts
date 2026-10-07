@@ -1,9 +1,9 @@
 import { CanceledError } from "axios";
 
-import { API_BASE } from "$lib/api-base";
-import { buildFieldsParam, PLACE_FIELD_SETS } from "$lib/api-fields";
-import api from "$lib/axios";
-import type { Place } from "$lib/types";
+import { API_BASE } from "#lib/api-base.js";
+import { buildFieldsParam, PLACE_FIELD_SETS } from "#lib/api-fields.js";
+import api from "#lib/axios.js";
+import type { Place } from "#lib/types.js";
 
 // The one URL for "the complete record of place X", shared by every fetcher —
 // client and SSR. Accepts numeric Place ids and OSM-style "type:id" strings

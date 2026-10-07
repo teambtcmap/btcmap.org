@@ -1,11 +1,12 @@
 import { error } from "@sveltejs/kit";
 import { get } from "svelte/store";
 
-import { GITEA_LABELS } from "$lib/constants";
-import { createIssueWithLabels, type GiteaRepo } from "$lib/gitea";
-import { validateCaptcha } from "$lib/server/captcha";
-import { areas } from "$lib/store";
-import { getAreaIdsByCoordinates } from "$lib/utils";
+import { GITEA_LABELS } from "#lib/constants.js";
+import type { GiteaRepo } from "#lib/gitea.js";
+import { createIssueWithLabels } from "#lib/gitea.js";
+import { validateCaptcha } from "#lib/server/captcha.js";
+import { areas } from "#lib/store.js";
+import { getAreaIdsByCoordinates } from "#lib/utils.js";
 
 import type { RequestHandler } from "./$types";
 

@@ -1,8 +1,8 @@
 <script lang="ts">
+import { appConfigs } from "#lib/apps.js";
+import { _ } from "#lib/i18n/index.js";
+import { theme } from "#lib/theme.js";
 import HeaderPlaceholder from "$components/layout/HeaderPlaceholder.svelte";
-import { appConfigs } from "$lib/apps";
-import { _ } from "$lib/i18n";
-import { theme } from "$lib/theme";
 
 import AppCard from "./components/AppCard.svelte";
 

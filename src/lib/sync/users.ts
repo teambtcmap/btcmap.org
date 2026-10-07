@@ -1,5 +1,5 @@
-import { userError, users } from "$lib/store";
-import type { User } from "$lib/types";
+import { userError, users } from "#lib/store.js";
+import type { User } from "#lib/types.js";
 
 import { createSyncFunction } from "./createSyncFactory";
 

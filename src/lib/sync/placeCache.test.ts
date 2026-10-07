@@ -1,8 +1,8 @@
 import { get } from "svelte/store";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 
-import { places } from "$lib/store";
-import type { Place } from "$lib/types";
+import { places } from "#lib/store.js";
+import type { Place } from "#lib/types.js";
 
 vi.mock("localforage", () => ({
 	default: {

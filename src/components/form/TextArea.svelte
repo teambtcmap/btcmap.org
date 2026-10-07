@@ -2,9 +2,9 @@
 import type { Snippet } from "svelte";
 import type { HTMLTextareaAttributes } from "svelte/elements";
 
+import { fieldBorderClasses } from "#lib/fieldStyles.js";
+import { _ } from "#lib/i18n/index.js";
 import FieldError from "$components/form/FieldError.svelte";
-import { fieldBorderClasses } from "$lib/fieldStyles";
-import { _ } from "$lib/i18n";
 
 // TextField's multi-line sibling (#1406), with the same contract: a label,
 // `hint` between label and textarea, `children` below, and an `error`

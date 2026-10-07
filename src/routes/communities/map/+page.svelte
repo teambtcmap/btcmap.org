@@ -13,31 +13,31 @@ import type {
 import { mount, onDestroy, onMount, unmount } from "svelte";
 import { get } from "svelte/store";
 
-import MapLoadingMain from "$components/MapLoadingMain.svelte";
-import MapUnsupportedFallback from "$components/MapUnsupportedFallback.svelte";
-import Socials from "$components/Socials.svelte";
-import { extractContacts } from "$lib/area/contacts";
-import { _ } from "$lib/i18n";
+import { extractContacts } from "#lib/area/contacts.js";
+import { _ } from "#lib/i18n/index.js";
+import type { BasemapId } from "#lib/map/basemaps.js";
 import {
 	BASEMAPS,
-	type BasemapId,
 	defaultBasemap,
 	getStoredBasemap,
 	styleForBasemap,
-} from "$lib/map/basemaps";
-import { computeBbox } from "$lib/map/bbox";
-import type { BtcmapMapHandle } from "$lib/map/createMap";
-import { createBtcmapMap } from "$lib/map/createMap";
-import { parseHashCoords, writeHashCoords } from "$lib/map/mapHash";
-import { areaError, areas, reportError, reports } from "$lib/store";
-import { areasSync } from "$lib/sync/areas";
-import { batchSync } from "$lib/sync/batchSync";
-import { reportsSync } from "$lib/sync/reports";
-import { theme } from "$lib/theme";
-import type { Area } from "$lib/types";
-import { areaIconSrc, errToast } from "$lib/utils";
+} from "#lib/map/basemaps.js";
+import { computeBbox } from "#lib/map/bbox.js";
+import type { BtcmapMapHandle } from "#lib/map/createMap.js";
+import { createBtcmapMap } from "#lib/map/createMap.js";
+import { parseHashCoords, writeHashCoords } from "#lib/map/mapHash.js";
+import { areaError, areas, reportError, reports } from "#lib/store.js";
+import { areasSync } from "#lib/sync/areas.js";
+import { batchSync } from "#lib/sync/batchSync.js";
+import { reportsSync } from "#lib/sync/reports.js";
+import { theme } from "#lib/theme.js";
+import type { Area } from "#lib/types.js";
+import { areaIconSrc, errToast } from "#lib/utils.js";
+import MapLoadingMain from "$components/MapLoadingMain.svelte";
+import MapUnsupportedFallback from "$components/MapUnsupportedFallback.svelte";
+import Socials from "$components/Socials.svelte";
 
-import { browser } from "$app/environment";
+import { browser } from "$app/env";
 import { resolve } from "$app/paths";
 import { page } from "$app/state";
 import MapControls from "../../map/components/MapControls.svelte";
@@ -203,7 +203,7 @@ const buildPopupHtml = (
 	wrapper.appendChild(socialsMount);
 
 	const link = document.createElement("a");
-	link.href = resolve(`/community/${encodeURIComponent(community.id)}`);
+	link.href = resolve(`community/${encodeURIComponent(community.id)}`);
 	link.className =
 		"block bg-link hover:bg-hover !text-white text-center font-semibold py-3 rounded-xl transition-colors";
 	link.title = t("communityMap.communityPageTitle");

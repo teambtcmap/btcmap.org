@@ -1,4 +1,4 @@
-import { API_BASE } from "$lib/api-base";
+import { API_BASE } from "#lib/api-base.js";
 
 // URL shape and row validation for /v4/places/search/ — shared by the
 // merchant-list fetcher (axios transport) and the placement dedupe name

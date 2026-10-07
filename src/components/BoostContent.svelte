@@ -3,20 +3,20 @@ import axios from "axios";
 import { onDestroy } from "svelte";
 import { fade } from "svelte/transition";
 
-import Icon from "$components/Icon.svelte";
-import InvoicePaymentStage from "$components/InvoicePaymentStage.svelte";
-import PrimaryButton from "$components/PrimaryButton.svelte";
-import { API_BASE } from "$lib/api-base";
-import { _ } from "$lib/i18n";
-import IconSocials from "$lib/icons/IconSocials.svelte";
+import { API_BASE } from "#lib/api-base.js";
+import { _ } from "#lib/i18n/index.js";
+import IconSocials from "#lib/icons/IconSocials.svelte";
 import {
 	classifyBoostError,
 	isInvoicePaid,
 	pollInvoiceStatus,
-} from "$lib/payment";
-import { boost, boostHash } from "$lib/store";
-import { updateSinglePlace } from "$lib/sync/places";
-import { errToast, warningToast } from "$lib/utils";
+} from "#lib/payment.js";
+import { boost, boostHash } from "#lib/store.js";
+import { updateSinglePlace } from "#lib/sync/places.js";
+import { errToast, warningToast } from "#lib/utils.js";
+import Icon from "$components/Icon.svelte";
+import InvoicePaymentStage from "$components/InvoicePaymentStage.svelte";
+import PrimaryButton from "$components/PrimaryButton.svelte";
 
 type Props = {
 	merchantId: number | string;

@@ -1,17 +1,17 @@
 <script lang="ts">
-import BoostBadge from "$components/BoostBadge.svelte";
-import Icon from "$components/Icon.svelte";
-import Skeleton from "$components/Skeleton.svelte";
 import {
 	CATEGORY_COLOR_CLASSES,
 	getIconColorWithFallback,
-} from "$lib/categoryMapping";
-import { _ } from "$lib/i18n";
-import { isBoosted as checkBoosted } from "$lib/merchantDrawerLogic";
-import type { Place } from "$lib/types";
-import { userLocation } from "$lib/userLocationStore";
-import { calculateDistance, formatDistance } from "$lib/utils";
-import { isUpToDate as checkUpToDate } from "$lib/verification";
+} from "#lib/categoryMapping.js";
+import { _ } from "#lib/i18n/index.js";
+import { isBoosted as checkBoosted } from "#lib/merchantDrawerLogic.js";
+import type { Place } from "#lib/types.js";
+import { userLocation } from "#lib/userLocationStore.js";
+import { calculateDistance, formatDistance } from "#lib/utils.js";
+import { isUpToDate as checkUpToDate } from "#lib/verification.js";
+import BoostBadge from "$components/BoostBadge.svelte";
+import Icon from "$components/Icon.svelte";
+import Skeleton from "$components/Skeleton.svelte";
 
 export let merchant: Place;
 export let enrichedData: Place | null = null;

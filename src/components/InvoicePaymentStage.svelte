@@ -1,7 +1,7 @@
 <script lang="ts">
+import { _ } from "#lib/i18n/index.js";
 import CopyButton from "$components/CopyButton.svelte";
 import InvoicePayment from "$components/InvoicePayment.svelte";
-import { _ } from "$lib/i18n";
 
 export let invoice: string;
 export let invoiceId: string;

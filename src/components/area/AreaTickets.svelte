@@ -1,13 +1,12 @@
 <script lang="ts">
 import { _ } from "svelte-i18n";
 
+import { GITEA_LABELS } from "#lib/constants.js";
+import type { GiteaIssue, GiteaLabel, Tickets } from "#lib/types.js";
+import { errToast } from "#lib/utils.js";
 import FormHelperText from "$components/FormHelperText.svelte";
 import OpenTicket from "$components/OpenTicket.svelte";
 import TextLink from "$components/TextLink.svelte";
-import { GITEA_LABELS } from "$lib/constants";
-import type { GiteaIssue, GiteaLabel } from "$lib/types";
-import type { Tickets } from "$lib/types.js";
-import { errToast } from "$lib/utils";
 
 export let title: string;
 export let tickets: Tickets;

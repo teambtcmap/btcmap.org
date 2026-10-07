@@ -1,7 +1,7 @@
 // Temporarily disabled during maintenance
-// import { getIssues } from '$lib/gitea';
+// import { getIssues } from '#lib/gitea.js';
 
-import type { GiteaIssue } from "$lib/types";
+import type { GiteaIssue } from "#lib/types.js";
 
 import type { PageServerLoad } from "./$types";
 

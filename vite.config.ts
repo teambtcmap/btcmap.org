@@ -1,9 +1,32 @@
+import adapter from '@sveltejs/adapter-netlify';
+import { vitePreprocess } from '@sveltejs/vite-plugin-svelte';
 import { sveltekit } from '@sveltejs/kit/vite';
 import { defineConfig } from 'vite';
 import tailwindcss from '@tailwindcss/vite';
 
 export default defineConfig({
-	plugins: [tailwindcss(), sveltekit()],
+	plugins: [
+		tailwindcss(),
+		// SvelteKit 3 takes its config here; there is no svelte.config.js
+		sveltekit({
+			preprocess: vitePreprocess(),
+			adapter: adapter(),
+			// Deprecated in Kit 3 in favour of subpath imports (like #lib);
+			// kept until $components/$types move over
+			alias: {
+				$components: 'src/components',
+				'$components/*': 'src/components/*',
+				$types: 'src/types',
+				'$types/*': 'src/types/*'
+			},
+			serviceWorker: {
+				register: true,
+				options: {
+					scope: '/'
+				}
+			}
+		})
+	],
 	ssr: {
 		// Force the TanStack packages (and match-sorter's transitive
 		// remove-accents) INTO the server bundle. Most are transitive deps,

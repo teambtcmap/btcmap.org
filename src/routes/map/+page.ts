@@ -1,4 +1,4 @@
-import { addEntryMethod } from "$lib/placementMode";
+import { addEntryMethod } from "#lib/placementMode.js";
 
 import type { PageLoad } from "./$types";
 

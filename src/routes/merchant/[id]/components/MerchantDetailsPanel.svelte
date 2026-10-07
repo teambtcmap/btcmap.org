@@ -1,8 +1,8 @@
 <script lang="ts">
+import { _ } from "#lib/i18n/index.js";
+import type { MerchantPageData } from "#lib/types.js";
+import { areaIconSrc, formatOpeningHours } from "#lib/utils.js";
 import Icon from "$components/Icon.svelte";
-import { _ } from "$lib/i18n";
-import type { MerchantPageData } from "$lib/types";
-import { areaIconSrc, formatOpeningHours } from "$lib/utils";
 
 import TaggerTools from "./TaggerTools.svelte";
 import { resolve } from "$app/paths";
@@ -142,7 +142,7 @@ const withProtocol = (value: string, base: string): string =>
 			<div class="flex flex-wrap gap-4">
 				{#each data.areas as community (community.id)}
 					<a
-						href={resolve(`/community/${encodeURIComponent(community.id)}`)}
+						href={resolve(`community/${encodeURIComponent(community.id)}`)}
 						class="flex w-20 flex-col items-center gap-1 transition-transform hover:scale-105"
 					>
 						<img

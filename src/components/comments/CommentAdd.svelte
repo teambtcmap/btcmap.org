@@ -4,19 +4,19 @@ import axios from "axios";
 import { fly } from "svelte/transition";
 import { OutClick } from "svelte-outclick";
 
+import type { CommentSource } from "#lib/analytics.js";
+import { trackEvent } from "#lib/analytics.js";
+import { API_BASE } from "#lib/api-base.js";
+import { _ } from "#lib/i18n/index.js";
+import { fieldError, inputProps, ruleValidation } from "#lib/ruleValidation.js";
+import { updateSinglePlace } from "#lib/sync/places.js";
+import type { MerchantPageData } from "#lib/types.js";
+import { errToast } from "#lib/utils.js";
 import CloseButton from "$components/CloseButton.svelte";
 import TextArea from "$components/form/TextArea.svelte";
 import Icon from "$components/Icon.svelte";
 import InvoicePaymentStage from "$components/InvoicePaymentStage.svelte";
 import PrimaryButton from "$components/PrimaryButton.svelte";
-import type { CommentSource } from "$lib/analytics";
-import { trackEvent } from "$lib/analytics";
-import { API_BASE } from "$lib/api-base";
-import { _ } from "$lib/i18n";
-import { fieldError, inputProps, ruleValidation } from "$lib/ruleValidation";
-import { updateSinglePlace } from "$lib/sync/places";
-import type { MerchantPageData } from "$lib/types.js";
-import { errToast } from "$lib/utils";
 
 type Props = {
 	open?: boolean;

@@ -1,6 +1,9 @@
 import type { LngLatBounds } from "maplibre-gl";
 
-import { MERCHANT_LIST_LOW_ZOOM, MERCHANT_LIST_MIN_ZOOM } from "$lib/constants";
+import {
+	MERCHANT_LIST_LOW_ZOOM,
+	MERCHANT_LIST_MIN_ZOOM,
+} from "#lib/constants.js";
 
 export type ZoomBehavior = "none" | "api-with-limit" | "local-markers";
 

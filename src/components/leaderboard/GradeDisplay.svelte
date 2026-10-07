@@ -1,7 +1,7 @@
 <script lang="ts">
 import { get } from "svelte/store";
 
-import { _ } from "$lib/i18n";
+import { _ } from "#lib/i18n/index.js";
 
 export let grade: number = 0;
 export let percentage: number | undefined = undefined;

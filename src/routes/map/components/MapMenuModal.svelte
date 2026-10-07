@@ -1,9 +1,9 @@
 <script lang="ts">
+import { trackEvent } from "#lib/analytics.js";
+import { _ } from "#lib/i18n/index.js";
+import { placementEntryUrl } from "#lib/placementMode.js";
+import { session } from "#lib/session.js";
 import Modal from "$components/Modal.svelte";
-import { trackEvent } from "$lib/analytics";
-import { _ } from "$lib/i18n";
-import { placementEntryUrl } from "$lib/placementMode";
-import { session } from "$lib/session";
 
 // Page-navigation menu, modal twin of the tools panel. Two variants mirror
 // the old NavButtonsControl: "main" (/map) and "communities" (/communities/map).

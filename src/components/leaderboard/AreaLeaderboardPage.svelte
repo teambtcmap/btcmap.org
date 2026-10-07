@@ -1,11 +1,11 @@
 <script lang="ts">
 import type { Snippet } from "svelte";
 
+import { _ } from "#lib/i18n/index.js";
+import { theme } from "#lib/theme.js";
 import Breadcrumbs from "$components/Breadcrumbs.svelte";
 import HeaderPlaceholder from "$components/layout/HeaderPlaceholder.svelte";
 import AreaLeaderboard from "$components/leaderboard/AreaLeaderboard.svelte";
-import { _ } from "$lib/i18n";
-import { theme } from "$lib/theme";
 
 // The /communities/leaderboard and /countries/leaderboard pages: same
 // layout, per-type copy. Keys are spelled out (not built from the type) so

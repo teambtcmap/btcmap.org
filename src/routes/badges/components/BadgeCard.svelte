@@ -1,6 +1,6 @@
 <script lang="ts">
-import { _ } from "$lib/i18n";
-import type { BadgeType } from "$lib/types";
+import { _ } from "#lib/i18n/index.js";
+import type { BadgeType } from "#lib/types.js";
 
 export let icon: string;
 export let titleKey: string;

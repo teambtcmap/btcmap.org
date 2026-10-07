@@ -10,25 +10,25 @@ import type {
 import { onDestroy, onMount } from "svelte";
 import tippy from "tippy.js";
 
+import { CLUSTERING_DISABLED_ZOOM, GradeTable } from "#lib/constants.js";
+import { computeBbox } from "#lib/map/bbox.js";
+import type { BtcmapMapHandle } from "#lib/map/createMap.js";
+import { createBtcmapMap } from "#lib/map/createMap.js";
+import {
+	ensureCommentBadgeSprite,
+	ensureSpritesForPlaces,
+} from "#lib/map/maplibreSprites.js";
+import { theme } from "#lib/theme.js";
+import type { Grade, Place } from "#lib/types.js";
+import { getGrade, isBoosted } from "#lib/utils.js";
 import AreaMerchantDrawer from "$components/area/AreaMerchantDrawer.svelte";
 import Icon from "$components/Icon.svelte";
 import MapLoadingEmbed from "$components/MapLoadingEmbed.svelte";
 import MapUnsupportedFallback from "$components/MapUnsupportedFallback.svelte";
 import ShowTags from "$components/ShowTags.svelte";
 import TaggingIssues from "$components/TaggingIssues.svelte";
-import { CLUSTERING_DISABLED_ZOOM, GradeTable } from "$lib/constants";
-import { computeBbox } from "$lib/map/bbox";
-import type { BtcmapMapHandle } from "$lib/map/createMap";
-import { createBtcmapMap } from "$lib/map/createMap";
-import {
-	ensureCommentBadgeSprite,
-	ensureSpritesForPlaces,
-} from "$lib/map/maplibreSprites";
-import { theme } from "$lib/theme";
-import type { Grade, Place } from "$lib/types";
-import { getGrade, isBoosted } from "$lib/utils";
 
-import { browser } from "$app/environment";
+import { browser } from "$app/env";
 
 export let name: string;
 export let geoJSON: GeoJSON;

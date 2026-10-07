@@ -1,4 +1,4 @@
-import type { GeoLocation } from "$lib/types";
+import type { GeoLocation } from "#lib/types.js";
 
 import type { PageServerLoad } from "./$types";
 

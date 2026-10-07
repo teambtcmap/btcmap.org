@@ -1,8 +1,8 @@
 <script lang="ts" generics="TData extends RowData">
 import type { RowData, Table } from "@tanstack/svelte-table";
 
-import { _ } from "$lib/i18n";
-import type { BtcmapTableFeatures } from "$lib/tableFeatures";
+import { _ } from "#lib/i18n/index.js";
+import type { BtcmapTableFeatures } from "#lib/tableFeatures.js";
 
 type Props = {
 	table: Table<BtcmapTableFeatures, TData>;

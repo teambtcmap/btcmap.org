@@ -1,20 +1,17 @@
-// @ts-nocheck
-
-/// <reference types="@sveltejs/kit" />
-/// <reference no-default-lib="true"/>
-/// <reference lib="esnext" />
-/// <reference lib="webworker" />
-
-const sw = /** @type {ServiceWorkerGlobalScope} */ /** @type {unknown} */ self;
-
-import { build, files, version } from "$service-worker";
+import { version } from "$app/env";
+import { assets, immutable } from "$app/manifest";
+import { asset } from "$app/paths";
+import { self as sw } from "$app/service-worker";
+import type { AssetPath } from "$app/types";
 
 // Create a unique cache name for this deployment
 const CACHE = `cache-${version}`;
 
-const ASSETS = [
-	...build, // the app itself
-	...files, // everything in `static`
+// Manifest paths are base-relative; the fetch handler matches absolute
+// pathnames. `immutable` is typed as plain strings, asset() accepts them.
+const ASSETS: string[] = [
+	...immutable.map(({ path }) => asset(path as AssetPath)), // the app itself
+	...assets.map(({ path }) => asset(path)), // everything in `static`
 ];
 
 sw.addEventListener("install", (event) => {
@@ -95,7 +92,7 @@ sw.addEventListener("fetch", (event) => {
 			(url.hostname === "static.btcmap.org" &&
 				url.pathname.includes("map-styles"));
 
-		// `build`/`files` can always be served from the cache
+		// `immutable`/`assets` can always be served from the cache
 		if (ASSETS.includes(url.pathname)) {
 			const res = await cache.match(url.pathname);
 			if (res) return res;
@@ -121,7 +118,8 @@ sw.addEventListener("fetch", (event) => {
 			if (cachedPage && cachedPage.status === 200) {
 				return cachedPage;
 			} else {
-				return cache.match("/offline.html");
+				// Response.error() is what respondWith(undefined) amounted to before
+				return (await cache.match("/offline.html")) ?? Response.error();
 			}
 		}
 	}

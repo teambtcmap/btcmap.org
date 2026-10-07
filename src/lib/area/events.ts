@@ -1,4 +1,4 @@
-import type { AreaEvent } from "$lib/types";
+import type { AreaEvent } from "#lib/types.js";
 
 // The API serializes timestamps with a timezone designator (e.g. "+07:00"
 // or "Z"). The upstream records the wall-clock time the organizer wrote,

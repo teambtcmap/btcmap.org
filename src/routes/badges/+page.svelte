@@ -1,8 +1,8 @@
 <script lang="ts">
+import { _ } from "#lib/i18n/index.js";
+import { theme } from "#lib/theme.js";
+import { BadgeType } from "#lib/types.js";
 import HeaderPlaceholder from "$components/layout/HeaderPlaceholder.svelte";
-import { _ } from "$lib/i18n";
-import { theme } from "$lib/theme";
-import { BadgeType } from "$lib/types";
 
 import BadgeCard from "./components/BadgeCard.svelte";
 

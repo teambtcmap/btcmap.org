@@ -2,9 +2,9 @@
 import { onDestroy, tick } from "svelte";
 import { fade, fly } from "svelte/transition";
 
+import { lockBodyScroll, unlockBodyScroll } from "#lib/bodyScrollLock.js";
+import { trapTab } from "#lib/focusTrap.js";
 import CloseButton from "$components/CloseButton.svelte";
-import { lockBodyScroll, unlockBodyScroll } from "$lib/bodyScrollLock";
-import { trapTab } from "$lib/focusTrap";
 
 export let open = false;
 export let title: string;

@@ -1,8 +1,8 @@
 <script lang="ts">
+import { _ } from "#lib/i18n/index.js";
+import { showTags, taggingIssues } from "#lib/store.js";
+import type { Issue, OSMTags } from "#lib/types.js";
 import Icon from "$components/Icon.svelte";
-import { _ } from "$lib/i18n";
-import { showTags, taggingIssues } from "$lib/store";
-import type { Issue, OSMTags } from "$lib/types";
 
 // Collapsed disclosure for the power-user / tagger actions that shouldn't
 // compete with the traveller-facing chips.

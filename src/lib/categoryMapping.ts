@@ -1,4 +1,4 @@
-import type { Place } from "$lib/types";
+import type { Place } from "#lib/types.js";
 
 export type CategoryColor =
 	| "orange"

@@ -1,22 +1,25 @@
 import { derived } from "svelte/store";
 
-import type { CategoryCounts, CategoryKey } from "$lib/categoryMapping";
+import type { CategoryCounts, CategoryKey } from "#lib/categoryMapping.js";
 import {
 	countMerchantsByCategory,
 	placeMatchesCategory,
-} from "$lib/categoryMapping";
-import type { PaymentMethod } from "$lib/map/paymentMethodFilter";
+} from "#lib/categoryMapping.js";
+import type { PaymentMethod } from "#lib/map/paymentMethodFilter.js";
 import {
 	applyPaymentMethodFilter,
 	serializePaymentMethodsParam,
-} from "$lib/map/paymentMethodFilter";
-import type { VerifiedFilterYears } from "$lib/map/verifiedFilter";
-import type { DerivedIssueCode } from "$lib/placeIssues";
-import { placeMatchesIssueCodes, serializeIssuesParam } from "$lib/placeIssues";
-import { places } from "$lib/store";
-import type { Place } from "$lib/types";
-import { isBoosted } from "$lib/utils";
-import { filterPlacesByRecency } from "$lib/verification";
+} from "#lib/map/paymentMethodFilter.js";
+import type { VerifiedFilterYears } from "#lib/map/verifiedFilter.js";
+import type { DerivedIssueCode } from "#lib/placeIssues.js";
+import {
+	placeMatchesIssueCodes,
+	serializeIssuesParam,
+} from "#lib/placeIssues.js";
+import { places } from "#lib/store.js";
+import type { Place } from "#lib/types.js";
+import { isBoosted } from "#lib/utils.js";
+import { filterPlacesByRecency } from "#lib/verification.js";
 
 // The single decision pipeline for "which places are visible" (#1168). Every
 // consumer — map pins, nearby list, search list, chip counts — derives from
@@ -42,7 +45,7 @@ export type VisibleSelectionInputs = {
 	boostsOnly: boolean;
 	// The ?issues worklist mode: null when off; otherwise the selected issue
 	// categories — a place stays visible when any of its derived codes (see
-	// $lib/placeIssues) is selected. Applied pre-category so chip counts
+	// #lib/placeIssues) is selected. Applied pre-category so chip counts
 	// describe the issue set. Callers resolve search exemption like boosts.
 	issueCodes: ReadonlySet<DerivedIssueCode> | null;
 	// Same readiness contract as recencyReady: issue derivation needs

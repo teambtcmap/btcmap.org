@@ -1,31 +1,31 @@
 <script lang="ts">
 import { tick } from "svelte";
 
-import BoostContent from "$components/BoostContent.svelte";
-import CloseButton from "$components/CloseButton.svelte";
-import Icon from "$components/Icon.svelte";
-import MerchantDetailsContent from "$components/MerchantDetailsContent.svelte";
-import MerchantDetailsSkeleton from "$components/MerchantDetailsSkeleton.svelte";
 import {
 	MAP_PANEL_MARGIN,
 	MERCHANT_LIST_WIDTH,
 	PANEL_DRAWER_GAP,
-} from "$lib/constants";
-import { _ } from "$lib/i18n";
+} from "#lib/constants.js";
+import { _ } from "#lib/i18n/index.js";
 import {
 	handleBoost as boostMerchant,
 	isBoosted as checkBoosted,
 	clearBoostState,
 	handleBoostComplete as completeBoost,
 	ensureBoostData,
-} from "$lib/merchantDrawerLogic";
-import { merchantDrawer } from "$lib/merchantDrawerStore";
-import { merchantList } from "$lib/merchantListStore";
-import { boost, resetBoost } from "$lib/store";
-import { isUpToDate as checkUpToDate } from "$lib/verification";
+} from "#lib/merchantDrawerLogic.js";
+import { merchantDrawer } from "#lib/merchantDrawerStore.js";
+import { merchantList } from "#lib/merchantListStore.js";
+import { boost, resetBoost } from "#lib/store.js";
+import { isUpToDate as checkUpToDate } from "#lib/verification.js";
+import BoostContent from "$components/BoostContent.svelte";
+import CloseButton from "$components/CloseButton.svelte";
+import Icon from "$components/Icon.svelte";
+import MerchantDetailsContent from "$components/MerchantDetailsContent.svelte";
+import MerchantDetailsSkeleton from "$components/MerchantDetailsSkeleton.svelte";
 
 import MapPanelShell from "./MapPanelShell.svelte";
-import { invalidateAll } from "$app/navigation";
+import { refreshAll } from "$app/navigation";
 
 // ?issues worklist (#921): show the merchant's derived-issue row.
 type Props = { showIssues?: boolean };
@@ -87,7 +87,7 @@ $effect(() => {
 
 const handleBoost = () => boostMerchant(merchant, merchantId, setBoostLoading);
 const handleBoostComplete = () =>
-	completeBoost(merchantId, invalidateAll, resetBoost);
+	completeBoost(merchantId, refreshAll, resetBoost);
 
 function handleKeydown(event: KeyboardEvent) {
 	if (!isOpen) return;

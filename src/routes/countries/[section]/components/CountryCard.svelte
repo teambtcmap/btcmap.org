@@ -1,8 +1,8 @@
 <script lang="ts">
 import { locale } from "svelte-i18n";
 
+import { getCountryName } from "#lib/countryNames.js";
 import TextLink from "$components/TextLink.svelte";
-import { getCountryName } from "$lib/countryNames";
 
 import { resolve } from "$app/paths";
 
@@ -30,7 +30,7 @@ $: {
 >
 	<div class="my-4 space-y-2 p-4">
 		<TextLink
-			link={resolve(`/country/${id}`)}
+			link={resolve(`country/${id}`)}
 			style="space-y-2"
 		>
 			<img

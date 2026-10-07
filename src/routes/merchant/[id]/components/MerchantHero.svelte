@@ -1,9 +1,9 @@
 <script lang="ts">
+import { _ } from "#lib/i18n/index.js";
+import { buildMerchantMapHref } from "#lib/merchantDrawerHash.js";
 import Icon from "$components/Icon.svelte";
 import SaveButton from "$components/SaveButton.svelte";
 import StaticMapPreview from "$components/StaticMapPreview.svelte";
-import { _ } from "$lib/i18n";
-import { buildMerchantMapHref } from "$lib/merchantDrawerHash";
 
 // Compact identity hero: a non-interactive map preview with Save +
 // "View on main map" overlaid on top and the name/address on a scrim below.

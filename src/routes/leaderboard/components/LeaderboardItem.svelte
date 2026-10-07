@@ -8,8 +8,8 @@ export let updated: number;
 export let deleted: number;
 export let tip: string;
 
+import { _ } from "#lib/i18n/index.js";
 import Tip from "$components/Tip.svelte";
-import { _ } from "$lib/i18n";
 
 import { resolve } from "$app/paths";
 
@@ -53,7 +53,7 @@ $: lightning = regexMatch?.[0].slice(10);
 		/>
 
 		<a
-			href={resolve(`/tagger/${id}`)}
+			href={resolve(`tagger/${id}`)}
 			class="text-link hover:text-hover lg:text-left {tagger.match('([^ ]{16})')
 				? 'break-all'
 				: ''} transition-colors">{tagger}</a

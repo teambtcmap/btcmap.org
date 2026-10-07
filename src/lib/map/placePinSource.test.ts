@@ -1,14 +1,14 @@
 import type { Map as MapLibreMap } from "maplibre-gl";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 
-import { HEATMAP_STORAGE_KEY } from "$lib/map/heatmap";
-import type { Place } from "$lib/types";
+import { HEATMAP_STORAGE_KEY } from "#lib/map/heatmap.js";
+import type { Place } from "#lib/types.js";
 
 const { ensureSpritesMock } = vi.hoisted(() => ({
 	ensureSpritesMock: vi.fn(),
 }));
 
-vi.mock("$lib/map/maplibreSprites", async (importOriginal) => ({
+vi.mock("#lib/map/maplibreSprites.js", async (importOriginal) => ({
 	...(await importOriginal<object>()),
 	ensureSpritesForPlaces: ensureSpritesMock,
 	loadSvgImage: vi.fn(),

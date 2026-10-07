@@ -2,31 +2,31 @@
 import { onDestroy, onMount, tick } from "svelte";
 import { get } from "svelte/store";
 
+import { trackEvent } from "#lib/analytics.js";
+import { lockBodyScroll, unlockBodyScroll } from "#lib/bodyScrollLock.js";
+import type { CategoryCounts, CategoryKey } from "#lib/categoryMapping.js";
+import { CATEGORY_ENTRIES } from "#lib/categoryMapping.js";
+import { SEARCH_SHEET_PEEK_HEIGHT } from "#lib/drawerConfig.js";
+import { createDrawerGestureController } from "#lib/drawerGestureController.js";
+import { trapTab } from "#lib/focusTrap.js";
+import { _ } from "#lib/i18n/index.js";
+import { deriveNearbyListStatus } from "#lib/map/nearbyListStatus.js";
+import type { ZoomBehavior } from "#lib/map/viewport.js";
+import { selectVisiblePlaces } from "#lib/map/visiblePlaces.js";
+import { merchantDrawer } from "#lib/merchantDrawerStore.js";
+import { merchantList } from "#lib/merchantListStore.js";
+import type { Place } from "#lib/types.js";
+import { userLocation } from "#lib/userLocationStore.js";
+import { errToast, formatNearbyPillCount } from "#lib/utils.js";
 import CollapseButton from "$components/CollapseButton.svelte";
 import Icon from "$components/Icon.svelte";
 import LoadingSpinner from "$components/LoadingSpinner.svelte";
 import SearchInput from "$components/SearchInput.svelte";
-import { trackEvent } from "$lib/analytics";
-import { lockBodyScroll, unlockBodyScroll } from "$lib/bodyScrollLock";
-import type { CategoryCounts, CategoryKey } from "$lib/categoryMapping";
-import { CATEGORY_ENTRIES } from "$lib/categoryMapping";
-import { SEARCH_SHEET_PEEK_HEIGHT } from "$lib/drawerConfig";
-import { createDrawerGestureController } from "$lib/drawerGestureController";
-import { trapTab } from "$lib/focusTrap";
-import { _ } from "$lib/i18n";
-import { deriveNearbyListStatus } from "$lib/map/nearbyListStatus";
-import type { ZoomBehavior } from "$lib/map/viewport";
-import { selectVisiblePlaces } from "$lib/map/visiblePlaces";
-import { merchantDrawer } from "$lib/merchantDrawerStore";
-import { merchantList } from "$lib/merchantListStore";
-import type { Place } from "$lib/types";
-import { userLocation } from "$lib/userLocationStore";
-import { errToast, formatNearbyPillCount } from "$lib/utils";
 
 import MerchantListItem from "./MerchantListItem.svelte";
 import NearbyCountPill from "./NearbyCountPill.svelte";
 import SearchFacade from "./SearchFacade.svelte";
-import { browser } from "$app/environment";
+import { browser } from "$app/env";
 
 // Get translated category label
 function getCategoryLabel(key: CategoryKey): string {

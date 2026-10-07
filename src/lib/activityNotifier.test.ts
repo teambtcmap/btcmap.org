@@ -1,10 +1,10 @@
 import { get, writable } from "svelte/store";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 
-import api from "$lib/axios";
-import type { Session } from "$lib/session";
+import api from "#lib/axios.js";
+import type { Session } from "#lib/session.js";
 
-vi.mock("$lib/axios", () => ({
+vi.mock("#lib/axios.js", () => ({
 	default: { get: vi.fn() },
 }));
 
@@ -40,7 +40,7 @@ async function flushMicrotasks() {
 
 async function freshModule() {
 	vi.resetModules();
-	return await import("$lib/activityNotifier");
+	return await import("#lib/activityNotifier.js");
 }
 
 describe("activityNotifier — pure helpers and stores", () => {

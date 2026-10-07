@@ -7,16 +7,21 @@ import {
 } from "@tanstack/svelte-table";
 import { _ } from "svelte-i18n";
 
+import type { BtcmapTableFeatures } from "#lib/tableFeatures.js";
+import { btcmapTableFeatures, resolveAriaSort } from "#lib/tableFeatures.js";
+import { theme } from "#lib/theme.js";
+import type { PlaceIssue } from "#lib/types.js";
+import {
+	debounce,
+	getIssueHelpLink,
+	getIssueIcon,
+	isEven,
+} from "#lib/utils.js";
 import Icon from "$components/Icon.svelte";
 import IssueCell from "$components/IssueCell.svelte";
 import LeaderboardPagination from "$components/leaderboard/LeaderboardPagination.svelte";
 import LeaderboardSearch from "$components/leaderboard/LeaderboardSearch.svelte";
 import SortableHeaderCell from "$components/leaderboard/SortableHeaderCell.svelte";
-import type { BtcmapTableFeatures } from "$lib/tableFeatures";
-import { btcmapTableFeatures, resolveAriaSort } from "$lib/tableFeatures";
-import { theme } from "$lib/theme";
-import type { PlaceIssue } from "$lib/types";
-import { debounce, getIssueHelpLink, getIssueIcon, isEven } from "$lib/utils";
 
 type Props = {
 	title: string;

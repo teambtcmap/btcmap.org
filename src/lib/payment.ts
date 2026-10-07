@@ -1,8 +1,8 @@
 // Shared payment utilities for comment and boost flows
 import type { AxiosError } from "axios";
 
-import { API_BASE } from "$lib/api-base";
-import api from "$lib/axios";
+import { API_BASE } from "#lib/api-base.js";
+import api from "#lib/axios.js";
 
 // Poll invoice status straight from the v4 API — it answers CORS
 // preflights, so no server proxy is involved (#1348).

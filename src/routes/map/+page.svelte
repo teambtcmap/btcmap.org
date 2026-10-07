@@ -14,10 +14,7 @@ import { onDestroy, onMount, tick } from "svelte";
 import { get } from "svelte/store";
 import { fade } from "svelte/transition";
 
-import CommunityRail from "$components/CommunityRail.svelte";
-import MapLoadingMain from "$components/MapLoadingMain.svelte";
-import MapUnsupportedFallback from "$components/MapUnsupportedFallback.svelte";
-import { trackEvent } from "$lib/analytics";
+import { trackEvent } from "#lib/analytics.js";
 import {
 	BREAKPOINTS,
 	CLUSTERING_DISABLED_ZOOM,
@@ -32,63 +29,60 @@ import {
 	MERCHANT_LIST_WIDTH,
 	NEARBY_RADIUS_MULTIPLIER,
 	PANEL_DRAWER_GAP,
-} from "$lib/constants";
-import { SEARCH_SHEET_PEEK_HEIGHT } from "$lib/drawerConfig";
-import { _, getDisplayLang, locale } from "$lib/i18n";
+} from "#lib/constants.js";
+import { SEARCH_SHEET_PEEK_HEIGHT } from "#lib/drawerConfig.js";
+import { _, getDisplayLang, locale } from "#lib/i18n/index.js";
+import type { BasemapId } from "#lib/map/basemaps.js";
 import {
 	BASEMAPS,
-	type BasemapId,
 	defaultBasemap,
 	getStoredBasemap,
 	SUPPORT_ATTR,
 	styleForBasemap,
-} from "$lib/map/basemaps";
-import { shouldClusterBoostedAtZoom } from "$lib/map/boostedClustering";
-import type { BtcmapMapHandle } from "$lib/map/createMap";
-import { createBtcmapMap } from "$lib/map/createMap";
-import {
-	type HashCoords,
-	parseHashCoords,
-	writeHashCoords,
-} from "$lib/map/mapHash";
+} from "#lib/map/basemaps.js";
+import { shouldClusterBoostedAtZoom } from "#lib/map/boostedClustering.js";
+import type { BtcmapMapHandle } from "#lib/map/createMap.js";
+import { createBtcmapMap } from "#lib/map/createMap.js";
+import type { HashCoords } from "#lib/map/mapHash.js";
+import { parseHashCoords, writeHashCoords } from "#lib/map/mapHash.js";
 import {
 	ensureSpritesForPlaces,
 	PIN_FILLS,
 	pinIconImageExpression,
 	pinVariantFor,
-} from "$lib/map/maplibreSprites";
+} from "#lib/map/maplibreSprites.js";
 import {
 	applyPaymentMethodFilter,
 	parsePaymentMethodsParam,
-} from "$lib/map/paymentMethodFilter";
-import { createPlacePinSource } from "$lib/map/placePinSource";
-import { parseLatLongQuery } from "$lib/map/queryViewport";
-import type { VerifiedFilterYears } from "$lib/map/verifiedFilter";
+} from "#lib/map/paymentMethodFilter.js";
+import { createPlacePinSource } from "#lib/map/placePinSource.js";
+import { parseLatLongQuery } from "#lib/map/queryViewport.js";
+import type { VerifiedFilterYears } from "#lib/map/verifiedFilter.js";
 import {
 	calculateRadiusKmFromLngLatBounds,
 	getZoomBehavior,
-} from "$lib/map/viewport";
-import { loadCachedView, saveCachedView } from "$lib/map/viewportCache";
+} from "#lib/map/viewport.js";
+import { loadCachedView, saveCachedView } from "#lib/map/viewportCache.js";
 import {
 	computeVisibleSignature,
 	placesRevision,
 	selectVisiblePlaces,
-} from "$lib/map/visiblePlaces";
+} from "#lib/map/visiblePlaces.js";
 import {
 	MERCHANT_URL_CHANGE_EVENT,
 	parseMerchantHash,
 	withLiteralCommas,
-} from "$lib/merchantDrawerHash";
-import { merchantDrawer } from "$lib/merchantDrawerStore";
-import { merchantList } from "$lib/merchantListStore";
-import type { DerivedIssueCode } from "$lib/placeIssues";
+} from "#lib/merchantDrawerHash.js";
+import { merchantDrawer } from "#lib/merchantDrawerStore.js";
+import { merchantList } from "#lib/merchantListStore.js";
+import type { DerivedIssueCode } from "#lib/placeIssues.js";
 import {
 	countIssuesByCode,
 	parseIssuesParam,
 	placeMatchesIssueCodes,
 	serializeIssuesParam,
-} from "$lib/placeIssues";
-import { savedPlaceIds } from "$lib/session";
+} from "#lib/placeIssues.js";
+import { savedPlaceIds } from "#lib/session.js";
 import {
 	paymentTagsLoaded,
 	places,
@@ -97,13 +91,16 @@ import {
 	placesLoadingProgress,
 	placesLoadingStatus,
 	verifiedDatesLoaded,
-} from "$lib/store";
-import { ensurePaymentMethods, ensureVerifiedDates } from "$lib/sync/places";
-import { theme } from "$lib/theme";
-import type { Place } from "$lib/types";
-import { userLocation } from "$lib/userLocationStore";
-import { debounce, errToast, isBoosted } from "$lib/utils";
-import { filterPlacesByRecency } from "$lib/verification";
+} from "#lib/store.js";
+import { ensurePaymentMethods, ensureVerifiedDates } from "#lib/sync/places.js";
+import { theme } from "#lib/theme.js";
+import type { Place } from "#lib/types.js";
+import { userLocation } from "#lib/userLocationStore.js";
+import { debounce, errToast, isBoosted } from "#lib/utils.js";
+import { filterPlacesByRecency } from "#lib/verification.js";
+import CommunityRail from "$components/CommunityRail.svelte";
+import MapLoadingMain from "$components/MapLoadingMain.svelte";
+import MapUnsupportedFallback from "$components/MapUnsupportedFallback.svelte";
 
 import type { PageData } from "./$types";
 import AddPlaceMode from "./components/AddPlaceMode.svelte";
@@ -113,8 +110,8 @@ import MapSearchBar from "./components/MapSearchBar.svelte";
 import MerchantDrawerHash from "./components/MerchantDrawerHash.svelte";
 import MerchantListPanel from "./components/MerchantListPanel.svelte";
 import TileLoadingIndicator from "./components/TileLoadingIndicator.svelte";
-import { browser } from "$app/environment";
-import { replaceState } from "$app/navigation";
+import { browser } from "$app/env";
+import { goto } from "$app/navigation";
 
 export let data: PageData;
 
@@ -194,8 +191,10 @@ let issueCounts: Record<DerivedIssueCode, number> | null = null;
 
 // Chip toggle: reassign the set (the render block and updateMerchantList
 // both read it), mirror the selection into ?issues= via a shallow
-// replaceState so the worklist URL stays shareable — no navigation, the
-// mode itself is locked for the session.
+// replacing goto so the worklist URL stays shareable — no navigation, the
+// mode itself is locked for the session. Kit 3 runs afterNavigate hooks for
+// shallow navigations; the app's handlers (close menus, re-apply
+// ?language) are idempotent here.
 const toggleIssueCode = (code: DerivedIssueCode) => {
 	const next = new Set(selectedIssueCodes ?? []);
 	if (next.has(code)) {
@@ -206,7 +205,11 @@ const toggleIssueCode = (code: DerivedIssueCode) => {
 	selectedIssueCodes = next;
 	const url = new URL(window.location.href);
 	url.searchParams.set("issues", serializeIssuesParam(next));
-	replaceState(withLiteralCommas(url.toString()), {});
+	void goto(withLiteralCommas(url.toString()), {
+		shallow: true,
+		replace: true,
+		state: {},
+	});
 	updateMerchantList({ force: true });
 };
 

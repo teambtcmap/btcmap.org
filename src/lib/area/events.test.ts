@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 
-import type { AreaEvent } from "$lib/types";
+import type { AreaEvent } from "#lib/types.js";
 
 import {
 	countFutureEvents,

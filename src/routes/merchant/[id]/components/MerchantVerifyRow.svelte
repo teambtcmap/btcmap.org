@@ -1,8 +1,8 @@
 <script lang="ts">
+import { _ } from "#lib/i18n/index.js";
+import { formatVerifiedHuman } from "#lib/utils.js";
+import { isRecentlyVerified } from "#lib/verification.js";
 import Icon from "$components/Icon.svelte";
-import { _ } from "$lib/i18n";
-import { formatVerifiedHuman } from "$lib/utils";
-import { isRecentlyVerified } from "$lib/verification";
 
 import { resolve } from "$app/paths";
 
@@ -13,7 +13,7 @@ export let id: string | number;
 export let verifiedAt: string | undefined | null = undefined;
 
 $: upToDate = isRecentlyVerified(verifiedAt);
-$: href = resolve(`/verify-location?id=${encodeURIComponent(String(id))}`);
+$: href = resolve(`verify-location?id=${encodeURIComponent(String(id))}`);
 </script>
 
 <div class="flex items-center gap-2">

@@ -1,8 +1,8 @@
 <script lang="ts">
 import { onDestroy, onMount } from "svelte";
 
-import { _, locale } from "$lib/i18n";
-import { getOpenStatus } from "$lib/openingHoursStatus";
+import { _, locale } from "#lib/i18n/index.js";
+import { getOpenStatus } from "#lib/openingHoursStatus.js";
 
 // Shared live open/closed pill, used by the merchant detail page and the map
 // drawer (MerchantDetailsContent). Reuses the timezone-aware getOpenStatus

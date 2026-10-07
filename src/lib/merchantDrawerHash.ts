@@ -1,4 +1,4 @@
-import { browser } from "$app/environment";
+import { browser } from "$app/env";
 
 export type DrawerView = "details" | "boost";
 
@@ -78,7 +78,7 @@ export function updateMerchantHash(
 // Canonical /map deep link to a single merchant. The merchant id goes in the
 // query string (read by parseMerchantHash above and by the server-side
 // OG-image loader in map/+page.server.ts), while the viewport goes in the hash
-// (read by parseHashCoords in $lib/map/mapHash). Both readers must agree with
+// (read by parseHashCoords in #lib/map/mapHash). Both readers must agree with
 // this format — the round-trip is covered in merchantDrawerHash.test.ts. Do
 // NOT move the merchant into the hash: the fragment is never sent to the
 // server, and parseMerchantHash only reads window.location.search.

@@ -1,8 +1,8 @@
 <script lang="ts">
+import { _ } from "#lib/i18n/index.js";
+import type { DonationType } from "#lib/types.js";
 import CopyButton from "$components/CopyButton.svelte";
 import Icon from "$components/Icon.svelte";
-import { _ } from "$lib/i18n";
-import type { DonationType } from "$lib/types";
 
 type Props = {
 	value: string;

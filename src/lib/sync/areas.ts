@@ -1,6 +1,6 @@
-import { serverCache } from "$lib/cache";
-import { areaError, areas } from "$lib/store";
-import type { Area } from "$lib/types";
+import { serverCache } from "#lib/cache.js";
+import { areaError, areas } from "#lib/store.js";
+import type { Area } from "#lib/types.js";
 
 import { createSyncFunction } from "./createSyncFactory";
 

@@ -1,4 +1,4 @@
-import type { OSMTags, PayMerchant, Place } from "$lib/types";
+import type { OSMTags, PayMerchant, Place } from "#lib/types.js";
 
 export type ContactFields = {
 	phone?: string;

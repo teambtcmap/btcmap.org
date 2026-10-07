@@ -1,12 +1,12 @@
 import { describe, expect, it } from "vitest";
 
-import type { Place } from "$lib/types";
+import type { Place } from "#lib/types.js";
 
+import type { CategoryKey } from "./categoryMapping";
 import {
 	CATEGORIES,
 	CATEGORY_ENTRIES,
 	CATEGORY_GROUPS,
-	type CategoryKey,
 	countMerchantsByCategory,
 	createEmptyCategoryCounts,
 	filterMerchantsByCategory,

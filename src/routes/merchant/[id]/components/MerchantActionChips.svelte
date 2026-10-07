@@ -1,9 +1,9 @@
 <script lang="ts">
 import { onDestroy } from "svelte";
 
+import { _ } from "#lib/i18n/index.js";
+import { shareMerchant } from "#lib/utils.js";
 import Icon from "$components/Icon.svelte";
-import { _ } from "$lib/i18n";
-import { shareMerchant } from "$lib/utils";
 
 // Primary traveller actions, rendered as an equal-width chip row. Secondary
 // actions (socials, pay) and tagger tools live in the Details tab instead.

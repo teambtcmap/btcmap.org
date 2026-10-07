@@ -1,10 +1,10 @@
 <script lang="ts">
 import { _ } from "svelte-i18n";
 
+import type { AreaPageProps } from "#lib/types.js";
 import AreaTickets from "$components/area/AreaTickets.svelte";
 import VerifyCommunityForm from "$components/area/VerifyCommunityForm.svelte";
 import IssuesTable from "$components/IssuesTable.svelte";
-import type { AreaPageProps } from "$lib/types";
 
 let {
 	data,

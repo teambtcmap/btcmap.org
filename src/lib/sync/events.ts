@@ -1,5 +1,5 @@
-import { eventError, events } from "$lib/store";
-import type { Event } from "$lib/types";
+import { eventError, events } from "#lib/store.js";
+import type { Event } from "#lib/types.js";
 
 import { createSyncFunction } from "./createSyncFactory";
 

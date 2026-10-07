@@ -2,9 +2,9 @@
 import type { Snippet } from "svelte";
 import type { HTMLInputAttributes } from "svelte/elements";
 
+import { fieldBorderClasses } from "#lib/fieldStyles.js";
+import { _ } from "#lib/i18n/index.js";
 import FieldError from "$components/form/FieldError.svelte";
-import { fieldBorderClasses } from "$lib/fieldStyles";
-import { _ } from "$lib/i18n";
 
 // The app's one single-line text field (#1326) — one visual family, the
 // public forms' field. The short-lived compact/auth style (an ad-hoc

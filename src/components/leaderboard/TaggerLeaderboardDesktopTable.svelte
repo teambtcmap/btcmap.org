@@ -2,13 +2,13 @@
 import type { Table } from "@tanstack/svelte-table";
 import { FlexRender } from "@tanstack/svelte-table";
 
+import { _ } from "#lib/i18n/index.js";
+import type { BtcmapTableFeatures } from "#lib/tableFeatures.js";
+import { resolveAriaSort } from "#lib/tableFeatures.js";
+import type { TaggerLeaderboard } from "#lib/types.js";
+import { isEven } from "#lib/utils.js";
 import SortableHeaderCell from "$components/leaderboard/SortableHeaderCell.svelte";
 import Tip from "$components/Tip.svelte";
-import { _ } from "$lib/i18n";
-import type { BtcmapTableFeatures } from "$lib/tableFeatures";
-import { resolveAriaSort } from "$lib/tableFeatures";
-import type { TaggerLeaderboard } from "$lib/types";
-import { isEven } from "$lib/utils";
 
 import { resolve } from "$app/paths";
 
@@ -65,7 +65,7 @@ let { table }: { table: Table<BtcmapTableFeatures, TaggerRow> } = $props();
 										loading="lazy"
 									/>
 									<a
-										href={resolve(`/tagger/${row.original.id}`)}
+										href={resolve(`tagger/${row.original.id}`)}
 										class="text-link transition-colors hover:text-hover"
 									>
 										{row.original.tagger}

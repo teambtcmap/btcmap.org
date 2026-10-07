@@ -1,4 +1,4 @@
-import type { Place } from "$lib/types";
+import type { Place } from "#lib/types.js";
 
 // Returns the timestamp exactly `years` before "now". Intentionally
 // uncached: a previous module-scope cache keyed on Date.getDate()

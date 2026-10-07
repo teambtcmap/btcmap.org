@@ -2,7 +2,7 @@
 // No cookies, no PII, GDPR compliant
 // Only enabled in production
 
-import { dev } from "$app/environment";
+import { dev } from "$app/env";
 
 const ANALYTICS_HOSTNAME = "btcmap.org";
 

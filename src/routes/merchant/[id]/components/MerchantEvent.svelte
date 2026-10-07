@@ -1,9 +1,9 @@
 <script lang="ts">
 import Time from "svelte-time";
 
+import type { EventType, User } from "#lib/types.js";
+import { isValidLightningTip, stripLightningScheme } from "#lib/utils.js";
 import Tip from "$components/Tip.svelte";
-import type { EventType, User } from "$lib/types";
-import { isValidLightningTip, stripLightningScheme } from "$lib/utils";
 
 import { resolve } from "$app/paths";
 
@@ -34,7 +34,7 @@ $: tipDestination =
 				<!-- user -->
 				{#if user_id && user_name}
 					by <a
-						href={resolve(`/tagger/${user_id}`)}
+						href={resolve(`tagger/${user_id}`)}
 						class="block break-all text-link transition-colors hover:text-hover lg:inline"
 						>{user_name}
 					</a>

@@ -5,13 +5,13 @@ import type { GeoJSONSource, Map as MapLibreMap } from "maplibre-gl";
 import { onMount } from "svelte";
 import { fly } from "svelte/transition";
 
-import { MAP_PANEL_MARGIN } from "$lib/constants";
-import { merchantDrawer } from "$lib/merchantDrawerStore";
-import { merchantList } from "$lib/merchantListStore";
-import { areas } from "$lib/store";
-import { areasSync } from "$lib/sync/areas";
-import type { Area } from "$lib/types";
-import { areaIconSrc, getCommunitiesAtCoordinates } from "$lib/utils";
+import { MAP_PANEL_MARGIN } from "#lib/constants.js";
+import { merchantDrawer } from "#lib/merchantDrawerStore.js";
+import { merchantList } from "#lib/merchantListStore.js";
+import { areas } from "#lib/store.js";
+import { areasSync } from "#lib/sync/areas.js";
+import type { Area } from "#lib/types.js";
+import { areaIconSrc, getCommunitiesAtCoordinates } from "#lib/utils.js";
 
 import { resolve } from "$app/paths";
 
@@ -61,7 +61,7 @@ const avatarUrl = (community: Area): string =>
 	areaIconSrc(community.id, community.tags["icon:square"], 64);
 
 const communityHref = (community: Area): string =>
-	resolve(`/community/${encodeURIComponent(community.id)}`);
+	resolve(`community/${encodeURIComponent(community.id)}`);
 
 const handleImgError = (e: Event) => {
 	const img = e.currentTarget as HTMLImageElement;

@@ -1,10 +1,10 @@
 <script lang="ts">
+import { _ } from "#lib/i18n/index.js";
+import { socials } from "#lib/store.js";
 import LanguageModal from "$components/LanguageModal.svelte";
 import SocialLink from "$components/SocialLink.svelte";
-import { _ } from "$lib/i18n";
-import { socials } from "$lib/store";
 
-import { env } from "$env/dynamic/public";
+import * as env from "$app/env/public";
 
 // Left column: user-facing resources
 const leftLinks = [

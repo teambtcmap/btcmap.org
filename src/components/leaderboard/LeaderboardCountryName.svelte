@@ -1,7 +1,7 @@
 <script lang="ts">
 import { locale } from "svelte-i18n";
 
-import { getCountryName } from "$lib/countryNames";
+import { getCountryName } from "#lib/countryNames.js";
 
 export let countryCode: string;
 export let name: string;

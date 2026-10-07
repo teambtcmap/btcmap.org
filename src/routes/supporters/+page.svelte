@@ -2,13 +2,13 @@
 import { onMount } from "svelte";
 import type { Action } from "svelte/action";
 
+import { BREAKPOINTS, QR_CODE_SIZE } from "#lib/constants.js";
+import { _ } from "#lib/i18n/index.js";
+import { theme } from "#lib/theme.js";
+import type { DonationType } from "#lib/types.js";
+import { warningToast } from "#lib/utils.js";
 import HeaderPlaceholder from "$components/layout/HeaderPlaceholder.svelte";
 import Modal from "$components/Modal.svelte";
-import { BREAKPOINTS, QR_CODE_SIZE } from "$lib/constants";
-import { _ } from "$lib/i18n";
-import { theme } from "$lib/theme";
-import type { DonationType } from "$lib/types";
-import { warningToast } from "$lib/utils";
 
 import type { PageProps } from "./$types";
 import DonationOption from "./components/DonationOption.svelte";

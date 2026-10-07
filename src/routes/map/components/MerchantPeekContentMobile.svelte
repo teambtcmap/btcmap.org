@@ -1,10 +1,10 @@
 <script lang="ts">
+import { _ } from "#lib/i18n/index.js";
+import type { Place } from "#lib/types.js";
 import BoostBadge from "$components/BoostBadge.svelte";
 import Icon from "$components/Icon.svelte";
 import PaymentMethodPill from "$components/PaymentMethodPill.svelte";
 import Skeleton from "$components/Skeleton.svelte";
-import { _ } from "$lib/i18n";
-import type { Place } from "$lib/types";
 
 export let merchant: Place;
 export let isUpToDate: boolean;

@@ -1,15 +1,18 @@
 <script lang="ts">
 import { createForm } from "@tanstack/svelte-form";
 
+import { trackEvent } from "#lib/analytics.js";
+import { _ } from "#lib/i18n/index.js";
+import {
+	PASSWORD_MAX_LENGTH,
+	PASSWORD_MIN_LENGTH,
+} from "#lib/passwordPolicy.js";
+import { fieldError, inputProps, ruleValidation } from "#lib/ruleValidation.js";
+import type { Session } from "#lib/session.js";
+import { session } from "#lib/session.js";
+import { errToast } from "#lib/utils.js";
 import TextField from "$components/form/TextField.svelte";
 import PrimaryButton from "$components/PrimaryButton.svelte";
-import { trackEvent } from "$lib/analytics";
-import { _ } from "$lib/i18n";
-import { PASSWORD_MAX_LENGTH, PASSWORD_MIN_LENGTH } from "$lib/passwordPolicy";
-import { fieldError, inputProps, ruleValidation } from "$lib/ruleValidation";
-import type { Session } from "$lib/session";
-import { session } from "$lib/session";
-import { errToast } from "$lib/utils";
 
 type Props = {
 	// Caller receives the new session after a successful signup, matching the

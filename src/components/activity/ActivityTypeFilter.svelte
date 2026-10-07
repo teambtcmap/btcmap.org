@@ -1,13 +1,9 @@
 <script lang="ts">
 import { createEventDispatcher } from "svelte";
 
-import {
-	ACTIVITY_TYPES,
-	type ActivityType,
-	dotColor,
-	TYPE_LABEL_KEYS,
-} from "$lib/activity";
-import { _ } from "$lib/i18n";
+import type { ActivityType } from "#lib/activity.js";
+import { ACTIVITY_TYPES, dotColor, TYPE_LABEL_KEYS } from "#lib/activity.js";
+import { _ } from "#lib/i18n/index.js";
 
 // activeTypes is intended for two-way binding: `bind:activeTypes` in
 // the parent. The component reassigns the Set on each toggle, so the

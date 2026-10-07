@@ -3,20 +3,20 @@ import Chart from "chart.js/auto";
 import { onDestroy, onMount } from "svelte";
 import { _ } from "svelte-i18n";
 
+import { getOrganizationDisplayName } from "#lib/organizationDisplayNames.js";
+import { areaError, areas, reportError, syncStatus } from "#lib/store.js";
+import { areasSync } from "#lib/sync/areas.js";
+import { theme } from "#lib/theme.js";
+import type { Community } from "#lib/types.js";
+import { errToast } from "#lib/utils.js";
 import FormSelect from "$components/form/FormSelect.svelte";
 import HeaderPlaceholder from "$components/layout/HeaderPlaceholder.svelte";
 import PrimaryButton from "$components/PrimaryButton.svelte";
 import Skeleton from "$components/Skeleton.svelte";
-import { getOrganizationDisplayName } from "$lib/organizationDisplayNames";
-import { areaError, areas, reportError, syncStatus } from "$lib/store";
-import { areasSync } from "$lib/sync/areas";
-import { theme } from "$lib/theme";
-import type { Community } from "$lib/types";
-import { errToast } from "$lib/utils";
 
 import type { PageData } from "./$types";
 import CommunitySection from "./components/CommunitySection.svelte";
-import { browser } from "$app/environment";
+import { browser } from "$app/env";
 import { goto } from "$app/navigation";
 import { resolve } from "$app/paths";
 
@@ -109,7 +109,7 @@ $: if (data.isOrganization && organizationSections.length > 0) {
 		(org) => org.id === data.section,
 	);
 	if (!isValidOrganization) {
-		goto("/communities/africa", { replaceState: true });
+		goto("/communities/africa", { replace: true });
 	}
 }
 
@@ -267,7 +267,7 @@ const continentDisplayNames: Record<string, string> = {
 
 // Handle section changes via dropdown
 const handleSectionChange = (newSection: string) => {
-	goto(`/communities/${newSection}`, { replaceState: false });
+	goto(`/communities/${newSection}`, { replace: false });
 };
 
 onMount(() => {
@@ -348,7 +348,7 @@ onDestroy(() => {
 		<div class="mb-5 justify-between md:flex">
 			{#if data.section}
 				<h2 class="mb-2 text-3xl font-semibold text-primary md:mb-0 md:text-left dark:text-white">
-					<a href={resolve(`/communities/${data.section}`)}>
+					<a href={resolve(`communities/${data.section}`)}>
 						{organizationSections.find((org) => org.id === data.section)?.displayName ||
 							continentDisplayNames[data.section] ||
 							data.section}

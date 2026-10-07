@@ -3,12 +3,12 @@ import { fly } from "svelte/transition";
 import { _ } from "svelte-i18n";
 import { OutClick } from "svelte-outclick";
 
+import { taggingIssues } from "#lib/store.js";
+import { getIssueHelpLink, getIssueIcon } from "#lib/utils.js";
 import CloseButton from "$components/CloseButton.svelte";
 import Icon from "$components/Icon.svelte";
 import IssueIcon from "$components/IssueIcon.svelte";
 import TextLink from "$components/TextLink.svelte";
-import { taggingIssues } from "$lib/store";
-import { getIssueHelpLink, getIssueIcon } from "$lib/utils";
 
 const closeModal = () => ($taggingIssues = undefined);
 </script>

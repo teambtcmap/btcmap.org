@@ -1,8 +1,8 @@
 <script lang="ts">
 import { onMount } from "svelte";
 
+import { _ } from "#lib/i18n/index.js";
 import Icon from "$components/Icon.svelte";
-import { _ } from "$lib/i18n";
 
 import { resolve } from "$app/paths";
 import { page } from "$app/state";

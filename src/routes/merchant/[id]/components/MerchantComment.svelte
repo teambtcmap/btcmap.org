@@ -1,8 +1,8 @@
 <script lang="ts">
 import Time from "svelte-time";
 
-import { commentDomId } from "$lib/commentPermalink";
-import type { MerchantPageData } from "$lib/types";
+import { commentDomId } from "#lib/commentPermalink.js";
+import type { MerchantPageData } from "#lib/types.js";
 
 type Props = {
 	commentId: MerchantPageData["comments"][number]["id"];

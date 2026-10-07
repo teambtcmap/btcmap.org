@@ -2,20 +2,20 @@ import { get } from "svelte/store";
 import type { Mock } from "vitest";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 
-import type { Place } from "$lib/types";
+import type { Place } from "#lib/types.js";
 
 // Mock the centralized axios instance
-vi.mock("$lib/axios", () => ({
+vi.mock("#lib/axios.js", () => ({
 	default: {
 		get: vi.fn(),
 		post: vi.fn(),
 	},
 }));
 
-import api from "$lib/axios";
+import api from "#lib/axios.js";
 
 // Mock i18n to avoid intl-messageformat module resolution in tests
-vi.mock("$lib/i18n", () => {
+vi.mock("#lib/i18n/index.js", () => {
 	const { writable } = require("svelte/store");
 	const mockT = (key: string) => key;
 	return { _: writable(mockT) };
@@ -23,8 +23,8 @@ vi.mock("$lib/i18n", () => {
 
 // Mock errToast and let calculateDistance/debounce pass through unmocked —
 // the debounce IS the thing under test.
-vi.mock("$lib/utils", async () => {
-	const actual = await vi.importActual("$lib/utils");
+vi.mock("#lib/utils.js", async () => {
+	const actual = await vi.importActual("#lib/utils.js");
 	return {
 		...actual,
 		errToast: vi.fn(),
@@ -32,10 +32,10 @@ vi.mock("$lib/utils", async () => {
 });
 
 // Mock isBoosted from merchantDrawerLogic — merchantListStore imports it
-// unconditionally, and the real module pulls in $app/environment
+// unconditionally, and the real module pulls in $app/env
 // transitively (merchantDrawerHash.ts), which crashes at import time
 // outside a SvelteKit runtime.
-vi.mock("$lib/merchantDrawerLogic", () => ({
+vi.mock("#lib/merchantDrawerLogic.js", () => ({
 	isBoosted: (place: Place) =>
 		place.boosted_until && new Date(place.boosted_until) > new Date(),
 }));
@@ -53,7 +53,7 @@ const { mockUserLocationStore } = vi.hoisted(() => {
 });
 
 // Mock userLocationStore - matches real module shape: { subscribe, getLocationWithCache, setLocation }
-vi.mock("$lib/userLocationStore", () => {
+vi.mock("#lib/userLocationStore.js", () => {
 	return {
 		userLocation: {
 			subscribe: mockUserLocationStore.subscribe,
@@ -63,14 +63,14 @@ vi.mock("$lib/userLocationStore", () => {
 	};
 });
 
-vi.mock("$lib/merchantDrawerStore", () => ({
+vi.mock("#lib/merchantDrawerStore.js", () => ({
 	merchantDrawer: { close: vi.fn(), open: vi.fn() },
 }));
-vi.mock("$lib/analytics", () => ({ trackEvent: vi.fn() }));
+vi.mock("#lib/analytics.js", () => ({ trackEvent: vi.fn() }));
 
-import { trackEvent } from "$lib/analytics";
-import { merchantDrawer } from "$lib/merchantDrawerStore";
-import { errToast } from "$lib/utils";
+import { trackEvent } from "#lib/analytics.js";
+import { merchantDrawer } from "#lib/merchantDrawerStore.js";
+import { errToast } from "#lib/utils.js";
 
 // Import after mocks are set up
 import { merchantList } from "./merchantListStore";

@@ -1,6 +1,6 @@
 import { error } from "@sveltejs/kit";
 
-import { API_BASE } from "$lib/api-base";
+import { API_BASE } from "#lib/api-base.js";
 
 import type { PageServerLoad } from "./$types";
 

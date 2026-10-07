@@ -1,7 +1,7 @@
 <script lang="ts">
 export let communities: Area[] | undefined;
 
-import type { Area } from "$lib/types";
+import type { Area } from "#lib/types.js";
 
 import CommunityCard from "./CommunityCard.svelte";
 import CommunitySkeleton from "./CommunitySkeleton.svelte";

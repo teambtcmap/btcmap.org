@@ -1,7 +1,7 @@
 <script lang="ts">
+import { _ } from "#lib/i18n/index.js";
+import { fetchProfile } from "#lib/nostrProfile.js";
 import Icon from "$components/Icon.svelte";
-import { _ } from "$lib/i18n";
-import { fetchProfile } from "$lib/nostrProfile";
 
 export let npub: string;
 export let size = 24;

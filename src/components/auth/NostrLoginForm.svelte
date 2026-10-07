@@ -1,10 +1,9 @@
 <script lang="ts">
 import { get } from "svelte/store";
 
-import TextField from "$components/form/TextField.svelte";
-import api from "$lib/axios";
-import { _ } from "$lib/i18n";
-import type { SignedAuthEvent } from "$lib/nostr";
+import api from "#lib/axios.js";
+import { _ } from "#lib/i18n/index.js";
+import type { SignedAuthEvent } from "#lib/nostr.js";
 import {
 	decodeNsec,
 	encodeNip98Event,
@@ -13,10 +12,11 @@ import {
 	parseNostrAuthResponse,
 	signAuthWithExtension,
 	signAuthWithSecretKey,
-} from "$lib/nostr";
-import type { Session } from "$lib/session";
-import { session } from "$lib/session";
-import { errToast } from "$lib/utils";
+} from "#lib/nostr.js";
+import type { Session } from "#lib/session.js";
+import { session } from "#lib/session.js";
+import { errToast } from "#lib/utils.js";
+import TextField from "$components/form/TextField.svelte";
 
 type Props = {
 	// Mirrors LoginForm's contract: caller decides what happens after a

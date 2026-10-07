@@ -1,11 +1,11 @@
 <script lang="ts">
+import { getAreaSectionContext } from "#lib/area/sectionContext.js";
+import type { AreaPageProps } from "#lib/types.js";
 import AreaMap from "$components/area/AreaMap.svelte";
 import AreaMerchantHighlights from "$components/area/AreaMerchantHighlights.svelte";
 import Boost from "$components/Boost.svelte";
-import { getAreaSectionContext } from "$lib/area/sectionContext";
-import type { AreaPageProps } from "$lib/types";
 
-import { browser } from "$app/environment";
+import { browser } from "$app/env";
 
 let { data }: { data: AreaPageProps } = $props();
 

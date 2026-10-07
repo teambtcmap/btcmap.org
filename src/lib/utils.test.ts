@@ -1,7 +1,7 @@
 import { describe, expect, it } from "vitest";
 
-import { MERCHANT_LIST_MAX_ITEMS } from "$lib/constants";
-import type { Area } from "$lib/types";
+import { MERCHANT_LIST_MAX_ITEMS } from "#lib/constants.js";
+import type { Area } from "#lib/types.js";
 
 import {
 	areaIconSrc,

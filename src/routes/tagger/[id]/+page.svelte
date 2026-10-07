@@ -1,8 +1,8 @@
 <script lang="ts">
 import { get } from "svelte/store";
 
+import { _ } from "#lib/i18n/index.js";
 import Skeleton from "$components/Skeleton.svelte";
-import { _ } from "$lib/i18n";
 
 import type { PageData } from "./$types";
 export let data: PageData;
@@ -13,10 +13,7 @@ import DOMPurify from "dompurify";
 import { marked } from "marked";
 import { onDestroy, onMount } from "svelte";
 
-import Icon from "$components/Icon.svelte";
-import ProfileStat from "$components/ProfileStat.svelte";
-import Tip from "$components/Tip.svelte";
-import { API_BASE } from "$lib/api-base";
+import { API_BASE } from "#lib/api-base.js";
 import {
 	eventError,
 	events,
@@ -24,21 +21,23 @@ import {
 	placesError,
 	userError,
 	users,
-} from "$lib/store";
-import { batchSync } from "$lib/sync/batchSync";
-import { eventsSync } from "$lib/sync/events";
-import { usersSync } from "$lib/sync/users";
-import {
-	type ActivityEvent,
-	BadgeType,
-	type EarnedBadge,
-	type ProfileLeaderboard,
-} from "$lib/types.js";
-import { errToast, formatElementID } from "$lib/utils";
+} from "#lib/store.js";
+import { batchSync } from "#lib/sync/batchSync.js";
+import { eventsSync } from "#lib/sync/events.js";
+import { usersSync } from "#lib/sync/users.js";
+import type {
+	ActivityEvent,
+	EarnedBadge,
+	ProfileLeaderboard,
+} from "#lib/types.js";
+import { BadgeType } from "#lib/types.js";
+import { errToast, formatElementID } from "#lib/utils.js";
+import Icon from "$components/Icon.svelte";
+import ProfileStat from "$components/ProfileStat.svelte";
+import Tip from "$components/Tip.svelte";
 
 import ProfileActivity from "./components/ProfileActivity.svelte";
-import { browser } from "$app/environment";
-import { goto } from "$app/navigation";
+import { browser } from "$app/env";
 
 // alert for user errors
 $: $userError && errToast($userError);
@@ -59,7 +58,9 @@ const initializeData = async () => {
 	const userFound = $users.find((user) => user.id === data.user);
 	if (!userFound) {
 		console.error("Could not find user, please try again or contact BTC Map.");
-		goto("/404");
+		// No /404 route: Kit 2's goto fell back to a full load (server 404
+		// page); Kit 3's goto rejects instead, so load it directly
+		window.location.assign("/404");
 		return;
 	}
 	userCreated = userFound.created_at;

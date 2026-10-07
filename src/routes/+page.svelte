@@ -1,18 +1,18 @@
 <script lang="ts">
 import { _ } from "svelte-i18n";
 
+import { trackEvent } from "#lib/analytics.js";
+import type { AppConfig } from "#lib/apps.js";
+import { appConfigs } from "#lib/apps.js";
+import IconApps from "#lib/icons/IconApps.svelte";
+import type { AppIconName } from "#lib/icons/types.js";
+import { placementEntryUrl } from "#lib/placementMode.js";
+import { theme } from "#lib/theme.js";
 import AppDownloadModal from "$components/AppDownloadModal.svelte";
 import Footer from "$components/layout/Footer.svelte";
 import Header from "$components/layout/Header.svelte";
 import HeaderPlaceholder from "$components/layout/HeaderPlaceholder.svelte";
 import PrimaryButton from "$components/PrimaryButton.svelte";
-import { trackEvent } from "$lib/analytics";
-import type { AppConfig } from "$lib/apps";
-import { appConfigs } from "$lib/apps";
-import IconApps from "$lib/icons/IconApps.svelte";
-import type { AppIconName } from "$lib/icons/types";
-import { placementEntryUrl } from "$lib/placementMode";
-import { theme } from "$lib/theme";
 
 import { goto } from "$app/navigation";
 import { resolve } from "$app/paths";

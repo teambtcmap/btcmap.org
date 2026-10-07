@@ -1,20 +1,20 @@
 <script lang="ts">
 import OpeningHours from "opening_hours";
 
-import { _ } from "$lib/i18n";
-import type { DayState } from "$lib/openingHours";
+import { _ } from "#lib/i18n/index.js";
+import type { DayState } from "#lib/openingHours.js";
 import {
 	defaultRange,
 	generateOpeningHours,
 	makeDefaultDays,
 	OSM_DAYS,
 	parseOpeningHours,
-} from "$lib/openingHours";
+} from "#lib/openingHours.js";
 
 // Friendly editor that produces an OSM `opening_hours` string — the same
 // syntax OSM editors like iD use. Supports multiple ranges per day (split
 // hours / lunch breaks), all-day days and a 24/7 shortcut. Salvaged from
-// the #1135 wizard PoC; the grid model lives in $lib/openingHours.
+// the #1135 wizard PoC; the grid model lives in #lib/openingHours.
 type Props = { value?: string; disabled?: boolean };
 let { value = $bindable(""), disabled = false }: Props = $props();
 

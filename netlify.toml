@@ -13,6 +13,3 @@
 
 [images]
   remote_images = ["https://static.btcmap.org/images/.*", "https://www.openstreetmap.org/.*", "https://avatars.githubusercontent.com/.*" ]
-
-[functions]
-  included_files = [".netlify/server/_app/immutable/assets/*.ttf"]

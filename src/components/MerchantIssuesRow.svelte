@@ -1,9 +1,9 @@
 <script lang="ts">
+import { _ } from "#lib/i18n/index.js";
+import { ISSUE_PIN_VARIANTS, PIN_FILLS } from "#lib/map/maplibreSprites.js";
+import { derivePlaceIssues } from "#lib/placeIssues.js";
+import type { Place } from "#lib/types.js";
 import Icon from "$components/Icon.svelte";
-import { _ } from "$lib/i18n";
-import { ISSUE_PIN_VARIANTS, PIN_FILLS } from "$lib/map/maplibreSprites";
-import { derivePlaceIssues } from "$lib/placeIssues";
-import type { Place } from "$lib/types";
 
 import { resolve } from "$app/paths";
 

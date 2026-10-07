@@ -4,17 +4,20 @@ import axios from "axios";
 import { onMount } from "svelte";
 import { _ } from "svelte-i18n";
 
+import { fieldError, inputProps, ruleValidation } from "#lib/ruleValidation.js";
+import { errToast } from "#lib/utils.js";
+import type { VerifyInput } from "#lib/verifyValidation.js";
+import {
+	describesChanges,
+	validateVerification,
+} from "#lib/verifyValidation.js";
 import FormSuccess from "$components/FormSuccess.svelte";
 import CaptchaField from "$components/form/CaptchaField.svelte";
 import FieldError from "$components/form/FieldError.svelte";
 import TextArea from "$components/form/TextArea.svelte";
 import PrimaryButton from "$components/PrimaryButton.svelte";
-import { fieldError, inputProps, ruleValidation } from "$lib/ruleValidation";
-import { errToast } from "$lib/utils";
-import type { VerifyInput } from "$lib/verifyValidation";
-import { describesChanges, validateVerification } from "$lib/verifyValidation";
 
-import { browser } from "$app/environment";
+import { browser } from "$app/env";
 
 type Props = {
 	communityName: string;

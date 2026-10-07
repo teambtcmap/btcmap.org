@@ -3,9 +3,9 @@ import type { Header, RowData } from "@tanstack/svelte-table";
 import { FlexRender } from "@tanstack/svelte-table";
 import type { Snippet } from "svelte";
 
-import { _ } from "$lib/i18n";
-import type { BtcmapTableFeatures } from "$lib/tableFeatures";
-import { resolveHeaderLabel } from "$lib/tableFeatures";
+import { _ } from "#lib/i18n/index.js";
+import type { BtcmapTableFeatures } from "#lib/tableFeatures.js";
+import { resolveHeaderLabel } from "#lib/tableFeatures.js";
 
 type Props = {
 	header: Header<BtcmapTableFeatures, TData, any>;

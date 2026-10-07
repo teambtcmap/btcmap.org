@@ -2,16 +2,16 @@ import axios from "axios";
 import type { Writable } from "svelte/store";
 import { get } from "svelte/store";
 
-import { _ } from "$lib/i18n";
-import { updateMerchantHash } from "$lib/merchantDrawerHash";
+import { _ } from "#lib/i18n/index.js";
+import { updateMerchantHash } from "#lib/merchantDrawerHash.js";
 import {
 	DETAIL_FIELDS,
 	getPlaceDetails,
 	hasDetailFields,
-} from "$lib/placeDetails";
-import { boost } from "$lib/store";
-import type { Boost, Place } from "$lib/types";
-import { errToast } from "$lib/utils";
+} from "#lib/placeDetails.js";
+import { boost } from "#lib/store.js";
+import type { Boost, Place } from "#lib/types.js";
+import { errToast } from "#lib/utils.js";
 
 export function isBoosted(merchant: Place | null): boolean {
 	return !!(
@@ -88,14 +88,14 @@ export async function handleBoost(
 
 export async function handleBoostComplete(
 	merchantId: number | null,
-	invalidateAll: () => Promise<void>,
+	refreshAll: () => Promise<void>,
 	resetBoostStore?: Writable<number>,
 ): Promise<void> {
 	try {
-		await invalidateAll();
+		await refreshAll();
 	} catch (error) {
-		console.error("Error invalidating data after boost:", error);
-		// Continue with cleanup even if invalidation fails
+		console.error("Error refreshing data after boost:", error);
+		// Continue with cleanup even if the refresh fails
 	}
 
 	clearBoostState();

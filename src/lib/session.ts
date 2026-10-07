@@ -1,7 +1,7 @@
 import { derived, writable } from "svelte/store";
 
-import { API_BASE } from "$lib/api-base";
-import api from "$lib/axios";
+import { API_BASE } from "#lib/api-base.js";
+import api from "#lib/axios.js";
 
 // Session is the BTC Map account behind saved places/areas. Accounts are
 // created on /signup (or inline in the save prompt) with user-chosen

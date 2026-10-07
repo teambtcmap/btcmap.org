@@ -1,7 +1,7 @@
-import { API_BASE } from "$lib/api-base";
-import api from "$lib/axios";
-import type { Session } from "$lib/session";
-import { session } from "$lib/session";
+import { API_BASE } from "#lib/api-base.js";
+import api from "#lib/axios.js";
+import type { Session } from "#lib/session.js";
+import { session } from "#lib/session.js";
 
 export type SavedItemType = "place" | "area";
 

@@ -1,12 +1,15 @@
 import type { GeoJSONSource, Map as MapLibreMap } from "maplibre-gl";
 
-import { CLUSTERING_DISABLED_ZOOM, LABEL_VISIBLE_ZOOM } from "$lib/constants";
+import {
+	CLUSTERING_DISABLED_ZOOM,
+	LABEL_VISIBLE_ZOOM,
+} from "#lib/constants.js";
 import {
 	routePlacesByBoostAndZoom,
 	shouldClusterBoostedAtZoom,
-} from "$lib/map/boostedClustering";
-import { HEATMAP_STORAGE_KEY } from "$lib/map/heatmap";
-import type { PinVariant } from "$lib/map/maplibreSprites";
+} from "#lib/map/boostedClustering.js";
+import { HEATMAP_STORAGE_KEY } from "#lib/map/heatmap.js";
+import type { PinVariant } from "#lib/map/maplibreSprites.js";
 import {
 	addRealImage,
 	ensureCommentBadgeSprite,
@@ -16,10 +19,10 @@ import {
 	loadSvgImage,
 	pinIconImageExpression,
 	pinVariantFor,
-} from "$lib/map/maplibreSprites";
-import type { DerivedIssueCode } from "$lib/placeIssues";
-import type { Place } from "$lib/types";
-import { isBoosted } from "$lib/utils";
+} from "#lib/map/maplibreSprites.js";
+import type { DerivedIssueCode } from "#lib/placeIssues.js";
+import type { Place } from "#lib/types.js";
+import { isBoosted } from "#lib/utils.js";
 
 export type PlaceFeature = {
 	type: "Feature";
@@ -234,7 +237,7 @@ export const createPlacePinSource = (deps: PlacePinSourceDeps) => {
 		// BOOSTED_CLUSTERING_MAX_ZOOM, render() routes boosted features here so
 		// they stay visually prominent above cluster discs and never get
 		// absorbed into a cluster icon. At/below that zoom they're routed into
-		// the clustered `places` source instead (see $lib/map/boostedClustering)
+		// the clustered `places` source instead (see #lib/map/boostedClustering)
 		// — the MapLibre analogue of the legacy /map's dedicated boostedLayer +
 		// BOOSTED_CLUSTERING_MAX_ZOOM swap.
 		map.addSource("places-boosted", {

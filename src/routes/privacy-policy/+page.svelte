@@ -1,6 +1,6 @@
 <script lang="ts">
-import { _ } from "$lib/i18n";
-import { socials } from "$lib/store";
+import { _ } from "#lib/i18n/index.js";
+import { socials } from "#lib/store.js";
 
 const linkClass = "text-link transition-colors hover:text-hover";
 </script>

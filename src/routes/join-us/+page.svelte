@@ -1,7 +1,7 @@
 <script lang="ts">
-import { trackEvent } from "$lib/analytics";
-import { _ } from "$lib/i18n";
-import { theme } from "$lib/theme";
+import { trackEvent } from "#lib/analytics.js";
+import { _ } from "#lib/i18n/index.js";
+import { theme } from "#lib/theme.js";
 
 // The native onboarding guide (#1376): the content of Igor's
 // join.btcmap.org proof of concept, rebuilt in the app's own design,

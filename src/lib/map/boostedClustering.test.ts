@@ -1,7 +1,7 @@
 import { describe, expect, it } from "vitest";
 
-import { BOOSTED_CLUSTERING_MAX_ZOOM } from "$lib/constants";
-import type { Place } from "$lib/types";
+import { BOOSTED_CLUSTERING_MAX_ZOOM } from "#lib/constants.js";
+import type { Place } from "#lib/types.js";
 
 import {
 	routePlacesByBoostAndZoom,

@@ -1,7 +1,7 @@
 <script lang="ts">
 import IconIconify from "@iconify/svelte";
 
-import { resolveMaterialIcon } from "$lib/materialIcons";
+import { resolveMaterialIcon } from "#lib/materialIcons.js";
 
 export let w: string;
 export let h: string;

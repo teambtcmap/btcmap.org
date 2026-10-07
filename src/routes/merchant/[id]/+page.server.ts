@@ -1,14 +1,14 @@
 import { error, isHttpError } from "@sveltejs/kit";
 
-import { API_BASE } from "$lib/api-base";
-import { completePlaceUrl } from "$lib/placeDetails";
+import { API_BASE } from "#lib/api-base.js";
+import { completePlaceUrl } from "#lib/placeDetails.js";
 import {
 	buildOsmTags,
 	getBoosted,
 	getContactFields,
 	getPaymentMethod,
 	mapPayment,
-} from "$lib/transforms/place";
+} from "#lib/transforms/place.js";
 import type {
 	Issue,
 	MerchantActivityEvent,
@@ -16,8 +16,8 @@ import type {
 	MerchantComment,
 	MerchantPageData,
 	Place,
-} from "$lib/types";
-import { isValidPlaceId } from "$lib/utils";
+} from "#lib/types.js";
+import { isValidPlaceId } from "#lib/utils.js";
 
 import type { PageServerLoad } from "./$types";
 

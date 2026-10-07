@@ -18,7 +18,7 @@ export type FormSelectOption = {
 import type { Snippet } from "svelte";
 import type { HTMLSelectAttributes } from "svelte/elements";
 
-import { fieldBorderClasses } from "$lib/fieldStyles";
+import { fieldBorderClasses } from "#lib/fieldStyles.js";
 
 type Props = {
 	value?: string;

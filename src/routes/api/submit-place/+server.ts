@@ -1,16 +1,16 @@
 import { error, json } from "@sveltejs/kit";
 
-import { API_BASE } from "$lib/api-base";
+import { API_BASE } from "#lib/api-base.js";
 import type {
 	AddLocationSubmission,
 	SubmitPlaceResponse,
-} from "$lib/placeSubmission";
-import { buildSubmitPlaceParams } from "$lib/placeSubmission";
-import { validateCaptcha } from "$lib/server/captcha";
-import { isValidLatitude, isValidLongitude } from "$lib/utils";
+} from "#lib/placeSubmission.js";
+import { buildSubmitPlaceParams } from "#lib/placeSubmission.js";
+import { validateCaptcha } from "#lib/server/captcha.js";
+import { isValidLatitude, isValidLongitude } from "#lib/utils.js";
 
 import type { RequestHandler } from "./$types";
-import { env } from "$env/dynamic/private";
+import * as env from "$app/env/private";
 
 // The RPC envelope of submit_place — only what this endpoint reads.
 type SubmitPlaceRpcBody = {

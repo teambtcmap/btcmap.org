@@ -7,12 +7,12 @@ import {
 	CONFETTI_CANVAS_Z_INDEX,
 	POLLING_INTERVAL,
 	QR_CODE_SIZE,
-} from "$lib/constants";
-import { _ } from "$lib/i18n";
-import { isInvoicePaid, pollInvoiceStatus } from "$lib/payment";
-import { errToast } from "$lib/utils";
+} from "#lib/constants.js";
+import { _ } from "#lib/i18n/index.js";
+import { isInvoicePaid, pollInvoiceStatus } from "#lib/payment.js";
+import { errToast } from "#lib/utils.js";
 
-import { invalidateAll } from "$app/navigation";
+import { refreshAll } from "$app/navigation";
 
 export let invoice = "";
 export let invoiceId = "";
@@ -63,7 +63,7 @@ const checkInvoiceStatus = async () => {
 		if (isInvoicePaid(response.data.status)) {
 			polling = false;
 			clearInterval(pollInterval);
-			invalidateAll(); // Refresh UI immediately
+			refreshAll(); // Refresh UI immediately
 			jsConfetti.addConfetti();
 			liftConfettiCanvas();
 			onSuccess();

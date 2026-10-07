@@ -1,7 +1,7 @@
 <script lang="ts">
 import { locale } from "svelte-i18n";
 
-import type { Area } from "$lib/types";
+import type { Area } from "#lib/types.js";
 
 import CountryCard from "./CountryCard.svelte";
 import CountrySkeleton from "./CountrySkeleton.svelte";

@@ -1,7 +1,7 @@
-import type { HandleFetch } from "@sveltejs/kit";
+import type { HandleFetch } from "@sveltejs/kit/hooks";
 
 // Set User-Agent on all server-side fetch calls to the upstream API,
-// matching the header previously set by the $lib/axios wrapper.
+// matching the header previously set by the #lib/axios wrapper.
 export const handleFetch: HandleFetch = async ({ request, fetch }) => {
 	if (request.url.startsWith("https://api.btcmap.org")) {
 		request.headers.set("User-Agent", "btcmap.org");

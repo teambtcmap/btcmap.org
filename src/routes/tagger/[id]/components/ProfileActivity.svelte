@@ -4,15 +4,15 @@ import { createTable } from "@tanstack/svelte-table";
 import { format } from "date-fns/format";
 import { untrack } from "svelte";
 
+import { _ } from "#lib/i18n/index.js";
+import type { BtcmapTableFeatures } from "#lib/tableFeatures.js";
+import { btcmapTableFeatures, resolveAriaSort } from "#lib/tableFeatures.js";
+import type { ActivityEvent } from "#lib/types.js";
+import { debounce } from "#lib/utils.js";
 import LeaderboardPagination from "$components/leaderboard/LeaderboardPagination.svelte";
 import LeaderboardSearch from "$components/leaderboard/LeaderboardSearch.svelte";
 import SortableHeaderCell from "$components/leaderboard/SortableHeaderCell.svelte";
 import Skeleton from "$components/Skeleton.svelte";
-import { _ } from "$lib/i18n";
-import type { BtcmapTableFeatures } from "$lib/tableFeatures";
-import { btcmapTableFeatures, resolveAriaSort } from "$lib/tableFeatures";
-import type { ActivityEvent } from "$lib/types";
-import { debounce } from "$lib/utils";
 
 import { resolve } from "$app/paths";
 
@@ -168,7 +168,7 @@ const searchDebounce = debounce((e) => handleKeyUp(e));
 										>
 											{#if cell.column.id === 'location'}
 												<a
-													href={resolve(`/merchant/${row.original.merchantId}`)}
+													href={resolve(`merchant/${row.original.merchantId}`)}
 													class="text-link transition-colors hover:text-hover"
 												>
 													{row.original.location}

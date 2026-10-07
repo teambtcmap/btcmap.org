@@ -1,10 +1,10 @@
 import { describe, expect, it, vi } from "vitest";
 
-import { API_BASE } from "$lib/api-base";
+import { API_BASE } from "#lib/api-base.js";
 
 import { addSavedItem, removeSavedItem } from "./savedItems";
 
-vi.mock("$lib/axios", () => ({
+vi.mock("#lib/axios.js", () => ({
 	default: {
 		post: vi.fn(async () => ({ data: [5] })),
 		delete: vi.fn(async () => ({ data: [] })),
@@ -13,7 +13,7 @@ vi.mock("$lib/axios", () => ({
 
 describe("addSavedItem", () => {
 	it("POSTs the id as explicit JSON — axios would form-encode a bare number", async () => {
-		const { default: api } = await import("$lib/axios");
+		const { default: api } = await import("#lib/axios.js");
 		const ids = await addSavedItem("place", "tok", 5);
 
 		expect(api.post).toHaveBeenCalledWith(
@@ -32,7 +32,7 @@ describe("addSavedItem", () => {
 
 describe("removeSavedItem", () => {
 	it("DELETEs the per-id endpoint with the Bearer token", async () => {
-		const { default: api } = await import("$lib/axios");
+		const { default: api } = await import("#lib/axios.js");
 		const ids = await removeSavedItem("area", "tok", 7);
 
 		expect(api.delete).toHaveBeenCalledWith(`${API_BASE}/v4/areas/saved/7`, {

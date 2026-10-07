@@ -5,23 +5,23 @@ import { onDestroy, onMount } from "svelte";
 import { _, locale } from "svelte-i18n";
 import tippy from "tippy.js";
 
+import { API_BASE } from "#lib/api-base.js";
+import { GradeTable } from "#lib/constants.js";
+import type { BtcmapTableFeatures } from "#lib/tableFeatures.js";
+import { btcmapTableFeatures } from "#lib/tableFeatures.js";
+import { theme } from "#lib/theme.js";
+import type {
+	ApiLeaderboardArea,
+	AreaLeaderboardRow,
+	AreaType,
+} from "#lib/types.js";
+import { debounce, errToast } from "#lib/utils.js";
 import Icon from "$components/Icon.svelte";
 import AreaLeaderboardDesktopTable from "$components/leaderboard/AreaLeaderboardDesktopTable.svelte";
 import AreaLeaderboardMobileCard from "$components/leaderboard/AreaLeaderboardMobileCard.svelte";
 import LeaderboardPagination from "$components/leaderboard/LeaderboardPagination.svelte";
 import LeaderboardSearch from "$components/leaderboard/LeaderboardSearch.svelte";
 import SortHeaderButton from "$components/leaderboard/SortHeaderButton.svelte";
-import { API_BASE } from "$lib/api-base";
-import { GradeTable } from "$lib/constants";
-import type { BtcmapTableFeatures } from "$lib/tableFeatures";
-import { btcmapTableFeatures } from "$lib/tableFeatures";
-import { theme } from "$lib/theme";
-import type {
-	ApiLeaderboardArea,
-	AreaLeaderboardRow,
-	AreaType,
-} from "$lib/types";
-import { debounce, errToast } from "$lib/utils";
 
 let {
 	type,

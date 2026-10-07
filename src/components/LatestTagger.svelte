@@ -1,8 +1,8 @@
 <script lang="ts">
 import Time from "svelte-time";
 
+import type { EventType, User } from "#lib/types.js";
 import Tip from "$components/Tip.svelte";
-import type { EventType, User } from "$lib/types";
 
 import { resolve } from "$app/paths";
 
@@ -87,7 +87,7 @@ $: username = profile?.display_name;
 				<!-- user -->
 				{#if user && username}
 					by <a
-						href={resolve(`/tagger/${user.id}`)}
+						href={resolve(`tagger/${user.id}`)}
 						class="block break-all text-link transition-colors hover:text-hover lg:inline"
 						>{username}
 					</a>

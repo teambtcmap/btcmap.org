@@ -1,33 +1,33 @@
 import axios from "axios";
 import { get, writable } from "svelte/store";
 
-import { trackEvent } from "$lib/analytics";
-import { buildFieldsParam, PLACE_FIELD_SETS } from "$lib/api-fields";
-import api from "$lib/axios";
-import type { CategoryCounts, CategoryKey } from "$lib/categoryMapping";
-import { createEmptyCategoryCounts } from "$lib/categoryMapping";
-import { MERCHANT_LIST_MAX_ITEMS } from "$lib/constants";
-import { _ } from "$lib/i18n";
+import { trackEvent } from "#lib/analytics.js";
+import { buildFieldsParam, PLACE_FIELD_SETS } from "#lib/api-fields.js";
+import api from "#lib/axios.js";
+import type { CategoryCounts, CategoryKey } from "#lib/categoryMapping.js";
+import { createEmptyCategoryCounts } from "#lib/categoryMapping.js";
+import { MERCHANT_LIST_MAX_ITEMS } from "#lib/constants.js";
+import { _ } from "#lib/i18n/index.js";
 import type {
 	PaymentMethod,
 	PaymentTaggedPlace,
-} from "$lib/map/paymentMethodFilter";
-import { applyPaymentMethodFilter } from "$lib/map/paymentMethodFilter";
-import type { VerifiedFilterYears } from "$lib/map/verifiedFilter";
+} from "#lib/map/paymentMethodFilter.js";
+import { applyPaymentMethodFilter } from "#lib/map/paymentMethodFilter.js";
+import type { VerifiedFilterYears } from "#lib/map/verifiedFilter.js";
 import {
 	getStoredVerifiedFilter,
 	storeVerifiedFilter,
-} from "$lib/map/verifiedFilter";
-import { selectVisiblePlaces } from "$lib/map/visiblePlaces";
-import { isBoosted } from "$lib/merchantDrawerLogic";
-import { merchantDrawer } from "$lib/merchantDrawerStore";
-import { buildRadiusSearchUrl, filterValidPlaces } from "$lib/radiusSearch";
-import { paymentTagsLoaded, verifiedDatesLoaded } from "$lib/store";
-import type { Place } from "$lib/types";
-import type { UserLocation } from "$lib/userLocationStore";
-import { userLocation } from "$lib/userLocationStore";
-import { calculateDistance, debounce, errToast } from "$lib/utils";
-import { filterPlacesByRecency } from "$lib/verification";
+} from "#lib/map/verifiedFilter.js";
+import { selectVisiblePlaces } from "#lib/map/visiblePlaces.js";
+import { isBoosted } from "#lib/merchantDrawerLogic.js";
+import { merchantDrawer } from "#lib/merchantDrawerStore.js";
+import { buildRadiusSearchUrl, filterValidPlaces } from "#lib/radiusSearch.js";
+import { paymentTagsLoaded, verifiedDatesLoaded } from "#lib/store.js";
+import type { Place } from "#lib/types.js";
+import type { UserLocation } from "#lib/userLocationStore.js";
+import { userLocation } from "#lib/userLocationStore.js";
+import { calculateDistance, debounce, errToast } from "#lib/utils.js";
+import { filterPlacesByRecency } from "#lib/verification.js";
 
 export type MerchantListMode = "nearby" | "search";
 
@@ -157,7 +157,7 @@ function isCancellation(error: Error): boolean {
 // transport policy (axios, 10s timeout, caller-managed AbortSignal) and the
 // error-shape policy (the array-shape check below — the API can return an
 // HTML error page). The URL shape and the dropping of rows without a
-// numeric id live in $lib/radiusSearch, shared with the placement dedupe
+// numeric id live in #lib/radiusSearch, shared with the placement dedupe
 // name lookup. What each reducer does with the rows — and how loudly it
 // fails — stays that reducer's own policy.
 async function searchPlacesInRadius<T extends { id?: unknown }>(

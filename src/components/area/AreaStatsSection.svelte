@@ -1,10 +1,10 @@
 <script lang="ts">
 import { _ } from "svelte-i18n";
 
+import { getAreaSectionContext } from "#lib/area/sectionContext.js";
+import { reportError } from "#lib/store.js";
+import type { AreaPageProps } from "#lib/types.js";
 import AreaStats from "$components/area/AreaStats.svelte";
-import { getAreaSectionContext } from "$lib/area/sectionContext";
-import { reportError } from "$lib/store";
-import type { AreaPageProps } from "$lib/types";
 
 let { data }: { data: AreaPageProps } = $props();
 

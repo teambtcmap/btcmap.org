@@ -1,24 +1,24 @@
 <script lang="ts">
 import { get } from "svelte/store";
 
+import { trackEvent } from "#lib/analytics.js";
+import { _ } from "#lib/i18n/index.js";
+import type { SavedItemType } from "#lib/savedItems.js";
+import {
+	addSavedItem,
+	getSavedList,
+	hydrateSavedFromServer,
+	setSavedList,
+} from "#lib/savedItems.js";
+import type { Session } from "#lib/session.js";
+import { session } from "#lib/session.js";
+import { errToast } from "#lib/utils.js";
 import LoginForm from "$components/auth/LoginForm.svelte";
 import NostrLoginForm from "$components/auth/NostrLoginForm.svelte";
 import SignupForm from "$components/auth/SignupForm.svelte";
 import Modal from "$components/Modal.svelte";
 import PrimaryButton from "$components/PrimaryButton.svelte";
 import TextLink from "$components/TextLink.svelte";
-import { trackEvent } from "$lib/analytics";
-import { _ } from "$lib/i18n";
-import type { SavedItemType } from "$lib/savedItems";
-import {
-	addSavedItem,
-	getSavedList,
-	hydrateSavedFromServer,
-	setSavedList,
-} from "$lib/savedItems";
-import type { Session } from "$lib/session";
-import { session } from "$lib/session";
-import { errToast } from "$lib/utils";
 
 type Props = {
 	id: number;

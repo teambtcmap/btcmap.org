@@ -3,28 +3,28 @@ import localforage from "localforage";
 import { onDestroy, onMount } from "svelte";
 import { Toaster } from "svelte-sonner";
 
-import LoadingIndicator from "$components/LoadingIndicator.svelte";
-import Header from "$components/layout/Header.svelte";
-import { startActivityPolling } from "$lib/activityNotifier";
-import { trackBrowserLanguage } from "$lib/analytics";
-import { session } from "$lib/session";
+import { startActivityPolling } from "#lib/activityNotifier.js";
+import { trackBrowserLanguage } from "#lib/analytics.js";
+import { session } from "#lib/session.js";
 import {
 	placesLoadingProgress,
 	placesLoadingStatus,
 	syncStatus,
-} from "$lib/store";
-import { elementsSync } from "$lib/sync/places";
-import { theme } from "$lib/theme";
+} from "#lib/store.js";
+import { elementsSync } from "#lib/sync/places.js";
+import { theme } from "#lib/theme.js";
+import LoadingIndicator from "$components/LoadingIndicator.svelte";
+import Header from "$components/layout/Header.svelte";
 
-import { browser, dev } from "$app/environment";
-import "$lib/icons/registerOfflineIcons";
+import { browser, dev } from "$app/env";
+import "#lib/icons/registerOfflineIcons.js";
 import "tippy.js/dist/tippy.css";
 import "../app.css";
 
 import { isLoading, locale } from "svelte-i18n";
 
+import { isSupportedLocale } from "#lib/i18n/index.js";
 import Footer from "$components/layout/Footer.svelte";
-import { isSupportedLocale } from "$lib/i18n";
 
 import { afterNavigate } from "$app/navigation";
 import { page } from "$app/state";

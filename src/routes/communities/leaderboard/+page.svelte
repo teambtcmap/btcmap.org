@@ -1,7 +1,7 @@
 <script lang="ts">
+import { _ } from "#lib/i18n/index.js";
 import AreaLeaderboardPage from "$components/leaderboard/AreaLeaderboardPage.svelte";
 import PrimaryButton from "$components/PrimaryButton.svelte";
-import { _ } from "$lib/i18n";
 </script>
 
 <AreaLeaderboardPage type="community">

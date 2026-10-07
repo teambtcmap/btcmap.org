@@ -2,9 +2,9 @@ import type {
 	AreaSection,
 	AreaSectionConfig,
 	AreaSectionEvent,
-} from "$lib/areaSectionLoad";
-import { loadAreaSection } from "$lib/areaSectionLoad";
-import { validateContinents } from "$lib/utils";
+} from "#lib/areaSectionLoad.js";
+import { loadAreaSection } from "#lib/areaSectionLoad.js";
+import { validateContinents } from "#lib/utils.js";
 
 export const communityAreaConfig: AreaSectionConfig = {
 	notFoundMessage: "Community Not Found",

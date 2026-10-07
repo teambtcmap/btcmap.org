@@ -1,13 +1,13 @@
 import { error, isHttpError } from "@sveltejs/kit";
 
-import { API_BASE } from "$lib/api-base";
-import { extractContacts } from "$lib/area/contacts";
+import { API_BASE } from "#lib/api-base.js";
+import { extractContacts } from "#lib/area/contacts.js";
 import type {
 	AreaEvent,
 	AreaPageProps,
 	AreaTags,
 	PlaceIssue,
-} from "$lib/types";
+} from "#lib/types.js";
 
 // Shared loader for the community/[area]/<section> and country/[area]/<section>
 // literal-section routes (merchants, stats, activity, maintain). Both fetch

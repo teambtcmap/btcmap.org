@@ -1,11 +1,11 @@
 <script lang="ts">
 import type { Table } from "@tanstack/svelte-table";
 
+import { _ } from "#lib/i18n/index.js";
+import type { BtcmapTableFeatures } from "#lib/tableFeatures.js";
+import type { TaggerLeaderboard } from "#lib/types.js";
+import { isEven } from "#lib/utils.js";
 import Icon from "$components/Icon.svelte";
-import { _ } from "$lib/i18n";
-import type { BtcmapTableFeatures } from "$lib/tableFeatures";
-import type { TaggerLeaderboard } from "$lib/types";
-import { isEven } from "$lib/utils";
 
 import { resolve } from "$app/paths";
 
@@ -58,7 +58,7 @@ let { table }: { table: Table<BtcmapTableFeatures, TaggerRow> } = $props();
 				<!-- Name (flex-1 to take remaining space) -->
 				<div class="min-w-0 flex-1">
 					<a
-						href={resolve(`/tagger/${tagger.id}`)}
+						href={resolve(`tagger/${tagger.id}`)}
 						class="text-lg font-semibold break-words text-link transition-colors hover:text-hover"
 					>
 						{tagger.tagger}

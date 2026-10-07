@@ -1,4 +1,4 @@
-import type { Place } from "$lib/types";
+import type { Place } from "#lib/types.js";
 
 // Legacy embed contract restored (#1269): bare URL params (?onchain&lightning&nfc)
 // narrow the map to places accepting each method — AND across params, presence

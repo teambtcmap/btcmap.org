@@ -1,14 +1,14 @@
 import { get } from "svelte/store";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 
-import { paymentTagsLoaded, places, verifiedDatesLoaded } from "$lib/store";
-import type { Place } from "$lib/types";
+import { paymentTagsLoaded, places, verifiedDatesLoaded } from "#lib/store.js";
+import type { Place } from "#lib/types.js";
 
-vi.mock("$lib/axios", () => ({
+vi.mock("#lib/axios.js", () => ({
 	default: { get: vi.fn(), head: vi.fn() },
 }));
 
-import api from "$lib/axios";
+import api from "#lib/axios.js";
 
 import {
 	applyEnrichmentCaches,

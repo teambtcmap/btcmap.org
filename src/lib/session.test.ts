@@ -1,10 +1,10 @@
 import { get } from "svelte/store";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 
-import { API_BASE } from "$lib/api-base";
+import { API_BASE } from "#lib/api-base.js";
 
 // Mock axios to prevent real API calls
-vi.mock("$lib/axios", () => ({
+vi.mock("#lib/axios.js", () => ({
 	default: {
 		get: vi.fn(),
 		post: vi.fn(),
@@ -14,7 +14,7 @@ vi.mock("$lib/axios", () => ({
 // Fresh session store for each test
 async function createTestSession() {
 	vi.resetModules();
-	const { session } = await import("$lib/session");
+	const { session } = await import("#lib/session.js");
 	return session;
 }
 
@@ -197,7 +197,7 @@ describe("session store", () => {
 		// api.post is a shared vi.fn across tests; reset calls + implementations
 		// so assertions on call counts and bodies don't leak between cases.
 		async function postMock() {
-			const { default: api } = await import("$lib/axios");
+			const { default: api } = await import("#lib/axios.js");
 			const post = api.post as ReturnType<typeof vi.fn>;
 			post.mockReset();
 			return post;

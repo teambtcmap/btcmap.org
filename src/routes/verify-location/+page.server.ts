@@ -1,7 +1,7 @@
 import { error, isHttpError } from "@sveltejs/kit";
 
-import { API_BASE } from "$lib/api-base";
-import { isValidPlaceId } from "$lib/utils";
+import { API_BASE } from "#lib/api-base.js";
+import { isValidPlaceId } from "#lib/utils.js";
 
 import type { PageServerLoad } from "./$types";
 

@@ -1,8 +1,8 @@
 <script lang="ts">
 import { OutClick } from "svelte-outclick";
 
+import type { DropdownLink } from "#lib/types.js";
 import Icon from "$components/Icon.svelte";
-import type { DropdownLink } from "$lib/types";
 
 import { afterNavigate } from "$app/navigation";
 

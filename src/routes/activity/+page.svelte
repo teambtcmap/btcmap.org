@@ -1,13 +1,8 @@
 <script lang="ts">
 import { onMount } from "svelte";
 
-import LatestTagger from "$components/LatestTagger.svelte";
-import HeaderPlaceholder from "$components/layout/HeaderPlaceholder.svelte";
-import TaggerSkeleton from "$components/TaggerSkeleton.svelte";
-import TextLink from "$components/TextLink.svelte";
-import TopButton from "$components/TopButton.svelte";
-import { API_BASE } from "$lib/api-base";
-import { _ } from "$lib/i18n";
+import { API_BASE } from "#lib/api-base.js";
+import { _ } from "#lib/i18n/index.js";
 import {
 	eventError,
 	events,
@@ -15,13 +10,18 @@ import {
 	syncStatus,
 	userError,
 	users,
-} from "$lib/store";
-import { batchSync } from "$lib/sync/batchSync";
-import { eventsSync } from "$lib/sync/events";
-import { usersSync } from "$lib/sync/users";
-import { theme } from "$lib/theme";
-import type { ActivityEvent, Event, Place, User } from "$lib/types";
-import { errToast, formatElementID } from "$lib/utils";
+} from "#lib/store.js";
+import { batchSync } from "#lib/sync/batchSync.js";
+import { eventsSync } from "#lib/sync/events.js";
+import { usersSync } from "#lib/sync/users.js";
+import { theme } from "#lib/theme.js";
+import type { ActivityEvent, Event, Place, User } from "#lib/types.js";
+import { errToast, formatElementID } from "#lib/utils.js";
+import LatestTagger from "$components/LatestTagger.svelte";
+import HeaderPlaceholder from "$components/layout/HeaderPlaceholder.svelte";
+import TaggerSkeleton from "$components/TaggerSkeleton.svelte";
+import TextLink from "$components/TextLink.svelte";
+import TopButton from "$components/TopButton.svelte";
 
 onMount(() => {
 	batchSync([eventsSync, usersSync]);

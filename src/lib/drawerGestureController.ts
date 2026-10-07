@@ -4,8 +4,8 @@
 import { spring } from "svelte/motion";
 import { derived, get, writable } from "svelte/store";
 
-import type { EventName } from "$lib/analytics";
-import { trackEvent } from "$lib/analytics";
+import type { EventName } from "#lib/analytics.js";
+import { trackEvent } from "#lib/analytics.js";
 
 import {
 	DISMISS_THRESHOLD,
@@ -15,11 +15,11 @@ import {
 	SPRING_CONFIG,
 	VELOCITY_THRESHOLD,
 } from "./drawerConfig";
+import type { VelocityState } from "./drawerGestureUtils";
 import {
 	createVelocityState,
 	determineSnapState,
 	updateVelocity,
-	type VelocityState,
 } from "./drawerGestureUtils";
 
 export interface DrawerGestureState {

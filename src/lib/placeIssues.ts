@@ -1,4 +1,4 @@
-import type { Place } from "$lib/types";
+import type { Place } from "#lib/types.js";
 
 // Client-side mirror of btcmap-api's per-place issue generation, for the
 // /map?issues worklist. The server only serves issues per-area (v4

@@ -2,10 +2,10 @@
 import axios from "axios";
 import axiosRetry from "axios-retry";
 
+import { _ } from "#lib/i18n/index.js";
+import { boost, resetBoost } from "#lib/store.js";
+import type { Place } from "#lib/types.js";
 import Icon from "$components/Icon.svelte";
-import { _ } from "$lib/i18n";
-import { boost, resetBoost } from "$lib/store";
-import type { Place } from "$lib/types";
 
 export let merchant: Place | undefined;
 export let boosted: string | undefined;

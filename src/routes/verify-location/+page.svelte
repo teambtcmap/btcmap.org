@@ -4,6 +4,16 @@ import axios from "axios";
 import { onMount } from "svelte";
 import { get } from "svelte/store";
 
+import { _ } from "#lib/i18n/index.js";
+import { fieldError, inputProps, ruleValidation } from "#lib/ruleValidation.js";
+import { placesError } from "#lib/store.js";
+import { theme } from "#lib/theme.js";
+import { errToast } from "#lib/utils.js";
+import type { VerifyInput } from "#lib/verifyValidation.js";
+import {
+	describesChanges,
+	validateVerification,
+} from "#lib/verifyValidation.js";
 import FormHelperText from "$components/FormHelperText.svelte";
 import FormSuccess from "$components/FormSuccess.svelte";
 import CaptchaField from "$components/form/CaptchaField.svelte";
@@ -12,16 +22,9 @@ import TextArea from "$components/form/TextArea.svelte";
 import HeaderPlaceholder from "$components/layout/HeaderPlaceholder.svelte";
 import PrimaryButton from "$components/PrimaryButton.svelte";
 import TextLink from "$components/TextLink.svelte";
-import { _ } from "$lib/i18n";
-import { fieldError, inputProps, ruleValidation } from "$lib/ruleValidation";
-import { placesError } from "$lib/store";
-import { theme } from "$lib/theme";
-import { errToast } from "$lib/utils";
-import type { VerifyInput } from "$lib/verifyValidation";
-import { describesChanges, validateVerification } from "$lib/verifyValidation";
 
 import type { PageProps } from "./$types";
-import { browser } from "$app/environment";
+import { browser } from "$app/env";
 
 let { data }: PageProps = $props();
 

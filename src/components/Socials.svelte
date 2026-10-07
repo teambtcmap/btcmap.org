@@ -1,13 +1,13 @@
 <script lang="ts">
-// One typed object (see $lib/area/contacts) instead of 22 named props
+// One typed object (see #lib/area/contacts) instead of 22 named props
 export let contacts: AreaContacts = {};
 
 export let style: undefined | string = undefined;
 
+import IconSocials from "#lib/icons/IconSocials.svelte";
+import type { AreaContacts } from "#lib/types.js";
+import { sanitizeUrl } from "#lib/utils.js";
 import Icon from "$components/Icon.svelte";
-import IconSocials from "$lib/icons/IconSocials.svelte";
-import type { AreaContacts } from "$lib/types";
-import { sanitizeUrl } from "$lib/utils";
 
 // Sanitize URLs to prevent XSS from malicious protocols like javascript:
 $: safeWebsite = sanitizeUrl(contacts.website);

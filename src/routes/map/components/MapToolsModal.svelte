@@ -1,9 +1,9 @@
 <script lang="ts">
+import { _ } from "#lib/i18n/index.js";
+import type { BasemapId } from "#lib/map/basemaps.js";
+import type { VerifiedFilterYears } from "#lib/map/verifiedFilter.js";
+import { VERIFIED_FILTER_OPTIONS } from "#lib/map/verifiedFilter.js";
 import Modal from "$components/Modal.svelte";
-import { _ } from "$lib/i18n";
-import type { BasemapId } from "$lib/map/basemaps";
-import type { VerifiedFilterYears } from "$lib/map/verifiedFilter";
-import { VERIFIED_FILTER_OPTIONS } from "$lib/map/verifiedFilter";
 
 type BasemapEntry = { id: BasemapId; label: string };
 

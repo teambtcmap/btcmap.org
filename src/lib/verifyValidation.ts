@@ -1,4 +1,4 @@
-import { firstInvalid } from "$lib/formValidation";
+import { firstInvalid } from "#lib/formValidation.js";
 
 // The verification reports' rules (#1407, #1408). /verify-location and a
 // community's Maintain tab ask the same things: confirm the listing is

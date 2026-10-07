@@ -1,10 +1,10 @@
 <script lang="ts">
+import { getCountryName } from "#lib/countryNames.js";
+import { _, locale } from "#lib/i18n/index.js";
+import type { AreaPageProps } from "#lib/types.js";
+import { buildMetaDescription } from "#lib/utils.js";
 import AreaLayout from "$components/area/AreaLayout.svelte";
 import Breadcrumbs from "$components/Breadcrumbs.svelte";
-import { getCountryName } from "$lib/countryNames";
-import { _, locale } from "$lib/i18n";
-import type { AreaPageProps } from "$lib/types";
-import { buildMetaDescription } from "$lib/utils";
 
 import { page } from "$app/state";
 

@@ -1,17 +1,20 @@
 import axios from "axios";
 import { get, writable } from "svelte/store";
 
-import type { DrawerView } from "$lib/merchantDrawerHash";
-import { parseMerchantHash, updateMerchantHash } from "$lib/merchantDrawerHash";
+import type { DrawerView } from "#lib/merchantDrawerHash.js";
+import {
+	parseMerchantHash,
+	updateMerchantHash,
+} from "#lib/merchantDrawerHash.js";
 import {
 	DETAIL_FIELDS,
 	getPlaceDetails,
 	hasDetailFields,
-} from "$lib/placeDetails";
-import { placesById } from "$lib/store";
-import type { Place } from "$lib/types";
+} from "#lib/placeDetails.js";
+import { placesById } from "#lib/store.js";
+import type { Place } from "#lib/types.js";
 
-import { browser } from "$app/environment";
+import { browser } from "$app/env";
 
 export type MerchantDrawerState = {
 	isOpen: boolean;

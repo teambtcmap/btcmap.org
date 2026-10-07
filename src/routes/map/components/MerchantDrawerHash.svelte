@@ -1,9 +1,9 @@
 <script lang="ts">
-import { BREAKPOINTS } from "$lib/constants";
+import { BREAKPOINTS } from "#lib/constants.js";
 
 import MerchantDrawerDesktop from "./MerchantDrawerDesktop.svelte";
 import MerchantDrawerMobile from "./MerchantDrawerMobile.svelte";
-import { browser } from "$app/environment";
+import { browser } from "$app/env";
 
 // ?issues worklist (#921): forwarded to whichever drawer variant renders.
 export let showIssues = false;

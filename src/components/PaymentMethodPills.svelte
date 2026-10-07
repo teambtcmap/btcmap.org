@@ -1,6 +1,6 @@
 <script lang="ts">
+import { _ } from "#lib/i18n/index.js";
 import PaymentMethodPill from "$components/PaymentMethodPill.svelte";
-import { _ } from "$lib/i18n";
 
 export let onchain: "yes" | undefined = undefined;
 export let lightning: "yes" | undefined = undefined;

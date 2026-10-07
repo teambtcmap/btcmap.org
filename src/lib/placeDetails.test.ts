@@ -1,7 +1,7 @@
 import axios from "axios";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 
-import type { Place } from "$lib/types";
+import type { Place } from "#lib/types.js";
 
 import {
 	completePlaceUrl,
@@ -12,11 +12,11 @@ import {
 	primePlaceDetails,
 } from "./placeDetails";
 
-vi.mock("$lib/axios", () => ({
+vi.mock("#lib/axios.js", () => ({
 	default: { get: vi.fn() },
 }));
 
-import api from "$lib/axios";
+import api from "#lib/axios.js";
 
 const mockGet = vi.mocked(api.get);
 

@@ -1,8 +1,8 @@
-import { CLUSTERING_DISABLED_ZOOM } from "$lib/constants";
-import { parseLatLongQuery } from "$lib/map/queryViewport";
-import { buildRadiusSearchUrl, filterValidPlaces } from "$lib/radiusSearch";
-import type { Place } from "$lib/types";
-import { calculateDistance } from "$lib/utils";
+import { CLUSTERING_DISABLED_ZOOM } from "#lib/constants.js";
+import { parseLatLongQuery } from "#lib/map/queryViewport.js";
+import { buildRadiusSearchUrl, filterValidPlaces } from "#lib/radiusSearch.js";
+import type { Place } from "#lib/types.js";
+import { calculateDistance } from "#lib/utils.js";
 
 import type { Place as ApiPlace } from "$types/btcmap-api/Place";
 

@@ -1,9 +1,9 @@
 <script lang="ts">
+import { trackEvent } from "#lib/analytics.js";
+import { _ } from "#lib/i18n/index.js";
+import { errToast, successToast } from "#lib/utils.js";
 import Icon from "$components/Icon.svelte";
 import IconButton from "$components/IconButton.svelte";
-import { trackEvent } from "$lib/analytics";
-import { _ } from "$lib/i18n";
-import { errToast, successToast } from "$lib/utils";
 
 export let username: string;
 export let password: string | null;

@@ -1,29 +1,25 @@
 <script lang="ts">
 import { onMount } from "svelte";
 
-import ActivityCard from "$components/activity/ActivityCard.svelte";
-import ActivityTypeFilter from "$components/activity/ActivityTypeFilter.svelte";
-import type { FormSelectOption } from "$components/form/FormSelect.svelte";
-import FormSelect from "$components/form/FormSelect.svelte";
-import Icon from "$components/Icon.svelte";
-import {
-	ACTIVITY_TYPES,
-	type ActivityItem,
-	type ActivityType,
-	countByType,
-} from "$lib/activity";
+import type { ActivityItem, ActivityType } from "#lib/activity.js";
+import { ACTIVITY_TYPES, countByType } from "#lib/activity.js";
 import {
 	isValidLastSeen,
 	MAX_PLACES,
 	markActivitySeen,
 	storageKeyFor,
-} from "$lib/activityNotifier";
-import { API_BASE } from "$lib/api-base";
-import api from "$lib/axios";
-import { _ } from "$lib/i18n";
-import { SAVED_ITEM_ENDPOINTS } from "$lib/savedItems";
-import { session } from "$lib/session";
-import type { SavedPlace } from "$lib/types";
+} from "#lib/activityNotifier.js";
+import { API_BASE } from "#lib/api-base.js";
+import api from "#lib/axios.js";
+import { _ } from "#lib/i18n/index.js";
+import { SAVED_ITEM_ENDPOINTS } from "#lib/savedItems.js";
+import { session } from "#lib/session.js";
+import type { SavedPlace } from "#lib/types.js";
+import ActivityCard from "$components/activity/ActivityCard.svelte";
+import ActivityTypeFilter from "$components/activity/ActivityTypeFilter.svelte";
+import type { FormSelectOption } from "$components/form/FormSelect.svelte";
+import FormSelect from "$components/form/FormSelect.svelte";
+import Icon from "$components/Icon.svelte";
 
 import { goto } from "$app/navigation";
 
