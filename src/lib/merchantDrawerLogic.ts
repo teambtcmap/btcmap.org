@@ -94,8 +94,8 @@ export async function handleBoostComplete(
 	try {
 		await refreshAll();
 	} catch (error) {
-		console.error("Error invalidating data after boost:", error);
-		// Continue with cleanup even if invalidation fails
+		console.error("Error refreshing data after boost:", error);
+		// Continue with cleanup even if the refresh fails
 	}
 
 	clearBoostState();
