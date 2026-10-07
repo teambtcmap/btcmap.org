@@ -111,7 +111,7 @@ import MerchantDrawerHash from "./components/MerchantDrawerHash.svelte";
 import MerchantListPanel from "./components/MerchantListPanel.svelte";
 import TileLoadingIndicator from "./components/TileLoadingIndicator.svelte";
 import { browser } from "$app/env";
-import { replaceState } from "$app/navigation";
+import { goto } from "$app/navigation";
 
 export let data: PageData;
 
@@ -191,8 +191,10 @@ let issueCounts: Record<DerivedIssueCode, number> | null = null;
 
 // Chip toggle: reassign the set (the render block and updateMerchantList
 // both read it), mirror the selection into ?issues= via a shallow
-// replaceState so the worklist URL stays shareable — no navigation, the
-// mode itself is locked for the session.
+// replacing goto so the worklist URL stays shareable — no navigation, the
+// mode itself is locked for the session. Kit 3 runs afterNavigate hooks for
+// shallow navigations; the app's handlers (close menus, re-apply
+// ?language) are idempotent here.
 const toggleIssueCode = (code: DerivedIssueCode) => {
 	const next = new Set(selectedIssueCodes ?? []);
 	if (next.has(code)) {
@@ -203,7 +205,11 @@ const toggleIssueCode = (code: DerivedIssueCode) => {
 	selectedIssueCodes = next;
 	const url = new URL(window.location.href);
 	url.searchParams.set("issues", serializeIssuesParam(next));
-	replaceState(withLiteralCommas(url.toString()), {});
+	void goto(withLiteralCommas(url.toString()), {
+		shallow: true,
+		replace: true,
+		state: {},
+	});
 	updateMerchantList({ force: true });
 };
 
