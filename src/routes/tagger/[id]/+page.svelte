@@ -25,12 +25,12 @@ import {
 import { batchSync } from "#lib/sync/batchSync.js";
 import { eventsSync } from "#lib/sync/events.js";
 import { usersSync } from "#lib/sync/users.js";
-import {
-	type ActivityEvent,
-	BadgeType,
-	type EarnedBadge,
-	type ProfileLeaderboard,
+import type {
+	ActivityEvent,
+	EarnedBadge,
+	ProfileLeaderboard,
 } from "#lib/types.js";
+import { BadgeType } from "#lib/types.js";
 import { errToast, formatElementID } from "#lib/utils.js";
 import Icon from "$components/Icon.svelte";
 import ProfileStat from "$components/ProfileStat.svelte";

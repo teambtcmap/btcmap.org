@@ -15,9 +15,9 @@ import { get } from "svelte/store";
 
 import { extractContacts } from "#lib/area/contacts.js";
 import { _ } from "#lib/i18n/index.js";
+import type { BasemapId } from "#lib/map/basemaps.js";
 import {
 	BASEMAPS,
-	type BasemapId,
 	defaultBasemap,
 	getStoredBasemap,
 	styleForBasemap,

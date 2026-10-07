@@ -2,7 +2,8 @@ import { error } from "@sveltejs/kit";
 import { get } from "svelte/store";
 
 import { GITEA_LABELS } from "#lib/constants.js";
-import { createIssueWithLabels, type GiteaRepo } from "#lib/gitea.js";
+import type { GiteaRepo } from "#lib/gitea.js";
+import { createIssueWithLabels } from "#lib/gitea.js";
 import { validateCaptcha } from "#lib/server/captcha.js";
 import { areas } from "#lib/store.js";
 import { getAreaIdsByCoordinates } from "#lib/utils.js";

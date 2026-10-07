@@ -1,12 +1,8 @@
 <script lang="ts">
 import { onMount } from "svelte";
 
-import {
-	ACTIVITY_TYPES,
-	type ActivityItem,
-	type ActivityType,
-	countByType,
-} from "#lib/activity.js";
+import type { ActivityItem, ActivityType } from "#lib/activity.js";
+import { ACTIVITY_TYPES, countByType } from "#lib/activity.js";
 import {
 	isValidLastSeen,
 	MAX_PLACES,

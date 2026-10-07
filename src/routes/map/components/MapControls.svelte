@@ -4,9 +4,9 @@ import { onDestroy, onMount } from "svelte";
 import { get, writable } from "svelte/store";
 
 import { trackEvent } from "#lib/analytics.js";
+import type { BasemapId } from "#lib/map/basemaps.js";
 import {
 	BASEMAP_STORAGE_KEY,
-	type BasemapId,
 	defaultBasemap,
 	getStoredBasemap,
 } from "#lib/map/basemaps.js";

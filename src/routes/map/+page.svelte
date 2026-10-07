@@ -32,9 +32,9 @@ import {
 } from "#lib/constants.js";
 import { SEARCH_SHEET_PEEK_HEIGHT } from "#lib/drawerConfig.js";
 import { _, getDisplayLang, locale } from "#lib/i18n/index.js";
+import type { BasemapId } from "#lib/map/basemaps.js";
 import {
 	BASEMAPS,
-	type BasemapId,
 	defaultBasemap,
 	getStoredBasemap,
 	SUPPORT_ATTR,
@@ -43,11 +43,8 @@ import {
 import { shouldClusterBoostedAtZoom } from "#lib/map/boostedClustering.js";
 import type { BtcmapMapHandle } from "#lib/map/createMap.js";
 import { createBtcmapMap } from "#lib/map/createMap.js";
-import {
-	type HashCoords,
-	parseHashCoords,
-	writeHashCoords,
-} from "#lib/map/mapHash.js";
+import type { HashCoords } from "#lib/map/mapHash.js";
+import { parseHashCoords, writeHashCoords } from "#lib/map/mapHash.js";
 import {
 	ensureSpritesForPlaces,
 	PIN_FILLS,

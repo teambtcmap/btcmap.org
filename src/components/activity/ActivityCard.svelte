@@ -1,7 +1,8 @@
 <script lang="ts">
 import Time from "svelte-time";
 
-import { type ActivityItem, dotColor } from "#lib/activity.js";
+import type { ActivityItem } from "#lib/activity.js";
+import { dotColor } from "#lib/activity.js";
 import { _ } from "#lib/i18n/index.js";
 import Icon from "$components/Icon.svelte";
 import SaveButton from "$components/SaveButton.svelte";

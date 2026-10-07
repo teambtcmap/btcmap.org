@@ -15,11 +15,11 @@ import {
 	SPRING_CONFIG,
 	VELOCITY_THRESHOLD,
 } from "./drawerConfig";
+import type { VelocityState } from "./drawerGestureUtils";
 import {
 	createVelocityState,
 	determineSnapState,
 	updateVelocity,
-	type VelocityState,
 } from "./drawerGestureUtils";
 
 export interface DrawerGestureState {

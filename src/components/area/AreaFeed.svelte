@@ -1,12 +1,8 @@
 <script lang="ts">
 import { _ } from "svelte-i18n";
 
-import {
-	ACTIVITY_TYPES,
-	type ActivityItem,
-	type ActivityType,
-	countByType,
-} from "#lib/activity.js";
+import type { ActivityItem, ActivityType } from "#lib/activity.js";
+import { ACTIVITY_TYPES, countByType } from "#lib/activity.js";
 import { API_BASE } from "#lib/api-base.js";
 import api from "#lib/axios.js";
 import ActivityCard from "$components/activity/ActivityCard.svelte";
