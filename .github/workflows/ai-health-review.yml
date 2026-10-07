@@ -116,9 +116,11 @@ jobs:
             | sed 's|.* b/||' \
             | sort -u > /tmp/diff-files.txt
 
-          # $lib/ and $components/ imports referenced in the diff but not themselves changed
-          grep -ohP 'from ["\x27]\$(lib|components)/[^"\x27]+["\x27]' /tmp/raw-diff.txt \
-            | sed 's/from ["'"'"']\$lib\//src\/lib\//; s/from ["'"'"']\$components\//src\/components\//; s/["'"'"']$//' \
+          # #lib/ ($lib/ before SvelteKit 3) and $components/ imports referenced
+          # in the diff but not themselves changed; #lib paths carry a .js
+          # extension, which the resolver below maps back to .ts
+          grep -ohP 'from ["\x27](#lib|\$lib|\$components)/[^"\x27]+["\x27]' /tmp/raw-diff.txt \
+            | sed 's/from ["'"'"'][#$]lib\//src\/lib\//; s/from ["'"'"']\$components\//src\/components\//; s/["'"'"']$//' \
             | sort -u > /tmp/imports-raw.txt || true
 
           > /tmp/imports-resolved.txt
