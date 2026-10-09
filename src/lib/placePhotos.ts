@@ -50,8 +50,12 @@ const isPlaceImage = (value: unknown): value is PlaceImage => {
 
 // Uploader name for the photo credit; null means "Community photo". The
 // name is user-chosen: render it as text only.
-export const photoAuthorName = (photo: PlaceImage): string | null =>
-	photo.author?.name.trim() || null;
+export const photoAuthorName = (photo: PlaceImage): string | null => {
+	// Typed as a string, but only the response's top level is checked at
+	// runtime: a malformed author must read as "no credit", not throw
+	const name: unknown = photo.author?.name;
+	return (typeof name === "string" && name.trim()) || null;
+};
 
 // Only `type=user` uploads are public here: report evidence is for
 // reviewers and can show the reporter (e.g. a selfie at the storefront).
