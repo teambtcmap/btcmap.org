@@ -11,11 +11,7 @@ import {
 	confirmPhotoDelete,
 } from "#lib/placePhotoDelete.js";
 import type { PlacePhotoSource } from "#lib/placePhotos.js";
-import {
-	fetchMyPlacePhotos,
-	photoPagePath,
-	placePhotoUrl,
-} from "#lib/placePhotos.js";
+import { fetchMyPlacePhotos, placePhotoUrl } from "#lib/placePhotos.js";
 import { session } from "#lib/session.js";
 import { placesById } from "#lib/store.js";
 import Icon from "$components/Icon.svelte";
@@ -128,7 +124,7 @@ onMount(async () => {
 			{#each photos as photo (photo.id)}
 				<li class="overflow-hidden rounded-2xl border border-gray-300 dark:border-white/20 dark:bg-white/5">
 					<a
-						href={photoPagePath(photo.place_id, photo.id)}
+						href={`${resolve(`merchant/${photo.place_id}`)}?photo=${photo.id}`}
 						onclick={() => trackEvent("my_photos_tile_click", { link: "photo" })}
 						class="block bg-link/50 dark:bg-white/10"
 					>
