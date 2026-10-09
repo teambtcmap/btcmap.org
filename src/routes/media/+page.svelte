@@ -68,20 +68,9 @@ const promotional = [
 	},
 ];
 
-const team = [
-	{ link: "/images/team/igor.jpg", nameKey: "media.assetNames.igor" },
-	{ link: "/images/team/karnage.jpg", nameKey: "media.assetNames.karnage" },
-	{ link: "/images/team/nathan.jpg", nameKey: "media.assetNames.nathanDay" },
-	{
-		link: "/images/team/secondl1ght.jpg",
-		nameKey: "media.assetNames.secondl1ght",
-	},
-];
-
 const assetSections = [
 	{ titleKey: "media.brand", data: brand },
 	{ titleKey: "media.promotional", data: promotional },
-	{ titleKey: "media.team", data: team },
 ];
 </script>
 

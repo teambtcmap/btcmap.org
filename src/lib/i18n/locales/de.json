@@ -1078,7 +1078,6 @@
 		"downloadAll": "Alle herunterladen",
 		"brand": "Marke",
 		"promotional": "Promotionell",
-		"team": "Team",
 		"assetNames": {
 			"appScreenshot": "App-Screenshot",
 			"btcmapLogo": "BTC Map Logo",
@@ -1100,11 +1099,7 @@
 			"supporters": "Unterstütze uns",
 			"topCommunities": "Top Communities",
 			"topCountries": "Top Länder",
-			"verifyLocations": "Standorte verifizieren",
-			"Igor": "Igor",
-			"karnage": "Karnage",
-			"nathanDay": "Nathan Day",
-			"secondl1ght": "secondl1ght"
+			"verifyLocations": "Standorte verifizieren"
 		}
 	},
 	"supporters": {
