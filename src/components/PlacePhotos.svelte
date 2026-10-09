@@ -35,7 +35,7 @@ type Props = {
 	// Shown in the viewer's caption, so a shared photo says where it is
 	placeName: string;
 	// page: 112px tiles at the photo's ratio, full-bleed on mobile.
-	// drawer: square 88px tiles, plus a scroll chevron on pointer devices.
+	// drawer: square 88px tiles. Both get scroll chevrons on pointer devices.
 	layout?: "page" | "drawer";
 	// Deleted places keep their photos but take no new ones
 	canAdd?: boolean;
@@ -116,6 +116,12 @@ $effect(() => {
 	observer.observe(strip);
 	return () => observer.disconnect();
 });
+
+// The edge fades blend into what's behind the strip: the drawer's white
+// panel, or the page's teal background
+const fadeTo = $derived(
+	layout === "drawer" ? "to-white dark:to-dark" : "to-teal dark:to-dark",
+);
 
 const scrollStrip = (direction: "back" | "forward") => {
 	trackEvent("place_photo_strip_scroll", { source, direction });
@@ -387,8 +393,8 @@ const handleFiles = async (event: Event) => {
 
 			<!-- Pointer devices only: touch users swipe, and a fade over a
 			     swipeable strip would just hide part of a photo -->
-			{#if layout === 'drawer' && scrollState.canScrollBack}
-				<div class="pointer-events-none absolute inset-y-0 left-0 hidden w-12 bg-gradient-to-l from-transparent to-white pointer-fine:block dark:to-dark"></div>
+			{#if scrollState.canScrollBack}
+				<div class="pointer-events-none absolute inset-y-0 left-0 hidden w-12 bg-gradient-to-l from-transparent pointer-fine:block {fadeTo}"></div>
 				<button
 					type="button"
 					onclick={() => scrollStrip('back')}
@@ -398,8 +404,8 @@ const handleFiles = async (event: Event) => {
 					<Icon w="20" h="20" icon="chevron_left" type="material" />
 				</button>
 			{/if}
-			{#if layout === 'drawer' && scrollState.canScrollForward}
-				<div class="pointer-events-none absolute inset-y-0 right-0 hidden w-12 bg-gradient-to-r from-transparent to-white pointer-fine:block dark:to-dark"></div>
+			{#if scrollState.canScrollForward}
+				<div class="pointer-events-none absolute inset-y-0 right-0 hidden w-12 bg-gradient-to-r from-transparent pointer-fine:block {fadeTo}"></div>
 				<button
 					type="button"
 					onclick={() => scrollStrip('forward')}
