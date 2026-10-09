@@ -2,6 +2,7 @@
 import axios from "axios";
 import { onDestroy } from "svelte";
 
+import type { PlacePhotoSource } from "#lib/analytics.js";
 import { trackEvent } from "#lib/analytics.js";
 import { API_BASE } from "#lib/api-base.js";
 import {
@@ -9,7 +10,6 @@ import {
 	getIconColorWithFallback,
 } from "#lib/categoryMapping.js";
 import { _, getDisplayLang, locale } from "#lib/i18n/index.js";
-import type { PlacePhotoSource } from "#lib/placePhotos.js";
 import type { Place } from "#lib/types.js";
 import { formatVerifiedHuman, sanitizeUrl, shareMerchant } from "#lib/utils.js";
 import BoostCard from "$components/BoostCard.svelte";

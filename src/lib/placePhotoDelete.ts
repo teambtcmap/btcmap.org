@@ -1,5 +1,5 @@
+import type { PlacePhotoSource } from "#lib/analytics.js";
 import { trackEvent } from "#lib/analytics.js";
-import type { PlacePhotoSource } from "#lib/placePhotos.js";
 import { deleteErrorKey, deletePlacePhoto } from "#lib/placePhotos.js";
 import { errToast, successToast } from "#lib/utils.js";
 

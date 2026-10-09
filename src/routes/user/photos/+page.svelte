@@ -2,6 +2,7 @@
 import { onMount } from "svelte";
 import Time from "svelte-time";
 
+import type { PlacePhotoSource } from "#lib/analytics.js";
 import { trackEvent } from "#lib/analytics.js";
 import { createTimeLocale } from "#lib/dayjsLocale.js";
 import { _, locale } from "#lib/i18n/index.js";
@@ -10,7 +11,6 @@ import {
 	cancelPhotoDelete,
 	confirmPhotoDelete,
 } from "#lib/placePhotoDelete.js";
-import type { PlacePhotoSource } from "#lib/placePhotos.js";
 import { fetchMyPlacePhotos, placePhotoUrl } from "#lib/placePhotos.js";
 import { session } from "#lib/session.js";
 import { placesById } from "#lib/store.js";

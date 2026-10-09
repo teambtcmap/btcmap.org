@@ -87,6 +87,13 @@ export type EventName =
 // Where the comment flow was opened from (funnel breakdown).
 export type CommentSource = "map_drawer" | "area_drawer" | "merchant_page";
 
+// Where the photo strip, viewer or My photos was used (funnel breakdown).
+export type PlacePhotoSource =
+	| "merchant_page"
+	| "map_drawer"
+	| "area_drawer"
+	| "my_photos";
+
 declare global {
 	interface Window {
 		umami?: {

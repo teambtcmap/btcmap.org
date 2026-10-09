@@ -3,10 +3,11 @@ import { tick } from "svelte";
 import { SvelteSet } from "svelte/reactivity";
 import Time from "svelte-time";
 
+import type { PlacePhotoSource } from "#lib/analytics.js";
 import { trackEvent } from "#lib/analytics.js";
 import { createTimeLocale } from "#lib/dayjsLocale.js";
 import { _, locale } from "#lib/i18n/index.js";
-import type { PlacePhotoSource, StripScrollState } from "#lib/placePhotos.js";
+import type { StripScrollState } from "#lib/placePhotos.js";
 import {
 	deepLinkTarget,
 	fetchPlacePhotos,

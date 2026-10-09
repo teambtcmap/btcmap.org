@@ -3,6 +3,7 @@ import { onDestroy, onMount, untrack } from "svelte";
 import { OutClick } from "svelte-outclick";
 import Time from "svelte-time";
 
+import type { PlacePhotoSource } from "#lib/analytics.js";
 import { trackEvent } from "#lib/analytics.js";
 import { lockBodyScroll, unlockBodyScroll } from "#lib/bodyScrollLock.js";
 import type { CurrentUser } from "#lib/currentUser.js";
@@ -17,7 +18,6 @@ import {
 } from "#lib/placePhotoDelete.js";
 import type { LightboxHandle } from "#lib/placePhotoLightbox.js";
 import { buildSlides, openPlaceLightbox } from "#lib/placePhotoLightbox.js";
-import type { PlacePhotoSource } from "#lib/placePhotos.js";
 import {
 	canDeletePhoto,
 	photoAuthorName,
