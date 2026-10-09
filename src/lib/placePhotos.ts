@@ -194,6 +194,20 @@ export const uploadPlacePhotos = async <T>(
 	return { stored, failed };
 };
 
+// New uploads go first. The strip may already hold them: switching places
+// and back mid-upload refetches the list, and a keyed {#each} throws on a
+// duplicate id, so the refetched copies give way to the fresh ones.
+export const prependUploaded = (
+	stored: PlaceImage[],
+	current: PlaceImage[] | undefined,
+): PlaceImage[] => {
+	const storedIds = new Set(stored.map((photo) => photo.id));
+	return [
+		...stored,
+		...(current ?? []).filter((photo) => !storedIds.has(photo.id)),
+	];
+};
+
 // Which way a horizontal photo strip can still scroll, for its chevrons.
 // abs(): right-to-left strips report a negative scrollLeft; 1px of slack
 // absorbs sub-pixel rounding at either end.

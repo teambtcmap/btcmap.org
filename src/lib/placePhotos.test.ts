@@ -18,6 +18,7 @@ import {
 	photoPagePath,
 	photoShareUrl,
 	placePhotoUrl,
+	prependUploaded,
 	splitPick,
 	stripScrollState,
 	undoUploads,
@@ -453,5 +454,29 @@ describe("stripScrollState", () => {
 			canScrollBack: true,
 			canScrollForward: true,
 		});
+	});
+});
+
+describe("prependUploaded", () => {
+	const a = { ...photo, id: 1 };
+	const b = { ...photo, id: 2 };
+	const fresh = { ...photo, id: 3 };
+
+	it("puts the new uploads first", () => {
+		expect(prependUploaded([fresh], [a, b]).map((p) => p.id)).toEqual([
+			3, 1, 2,
+		]);
+	});
+
+	it("keeps each photo once when a refetch already brought the upload", () => {
+		// Switch away and back while uploading: the strip refetches and gets
+		// the stored photo before the upload loop reports it
+		expect(prependUploaded([fresh], [fresh, a]).map((p) => p.id)).toEqual([
+			3, 1,
+		]);
+	});
+
+	it("starts the list when there was none yet", () => {
+		expect(prependUploaded([fresh], undefined)).toEqual([fresh]);
 	});
 });
