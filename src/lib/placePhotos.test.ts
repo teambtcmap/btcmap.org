@@ -281,6 +281,16 @@ describe("photoAuthorName", () => {
 			photoAuthorName({ ...photo, author: { id: 1, name: "  " } }),
 		).toBeNull();
 	});
+
+	it("is null when the API sends an author without a string name", () => {
+		// The response isn't validated beyond its top-level shape: a malformed
+		// author must not throw inside the viewer's $derived
+		for (const author of [{}, { id: 1, name: null }, { id: 1, name: 42 }]) {
+			expect(
+				photoAuthorName({ ...photo, author } as unknown as typeof photo),
+			).toBeNull();
+		}
+	});
 });
 
 describe("canDeletePhoto", () => {
