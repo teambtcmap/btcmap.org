@@ -34,7 +34,7 @@ const cache = new Map<
 
 export const resetCurrentUserCache = () => cache.clear();
 
-const parse = (data: unknown): CurrentUser | null => {
+const parseCurrentUser = (data: unknown): CurrentUser | null => {
 	if (typeof data !== "object" || data === null) return null;
 	const { id, roles } = data as Record<string, unknown>;
 	if (typeof id !== "number") return null;
@@ -51,7 +51,7 @@ export const fetchCurrentUser = (
 	if (cached && Date.now() - cached.at < CACHE_MS) return cached.request;
 	const request = api
 		.get<unknown>(`${API_BASE}/v4/users/me`, authHeaders(token))
-		.then((res) => parse(res.data))
+		.then((res) => parseCurrentUser(res.data))
 		.catch((error) => {
 			console.error("current user: lookup failed", error);
 			return null;
