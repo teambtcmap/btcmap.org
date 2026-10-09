@@ -165,14 +165,19 @@ const handleTileClick = (event: MouseEvent, index: number) => {
 	openViewer(index);
 };
 
+// Close the viewer and drop ?photo= from the URL
+const dismissViewer = () => {
+	viewerIndex = null;
+	syncPhotoParam(null);
+};
+
 // Focus the tile of the photo that was on screen: works for deep-link
 // opens too, and on macOS Safari, where a click doesn't focus the link
 const closeViewer = async (index: number) => {
 	// Already reset by a place switch in the reused drawer: the old viewer's
 	// late close must not pull focus to the new place's tiles
 	if (viewerIndex === null) return;
-	viewerIndex = null;
-	syncPhotoParam(null);
+	dismissViewer();
 	await tick();
 	tileEls[index]?.focus();
 };
@@ -184,8 +189,7 @@ const handlePhotoDeleted = async (imageId: number, index: number) => {
 	// old viewer's callback must not touch the new place's URL or focus.
 	if (viewerIndex === null || !photos?.some((p) => p.id === imageId)) return;
 	photos = photos.filter((p) => p.id !== imageId);
-	viewerIndex = null;
-	syncPhotoParam(null);
+	dismissViewer();
 	await tick();
 	// No photos left: the empty-state add button takes the focus
 	if (photos.length) tileEls[Math.min(index, photos.length - 1)]?.focus();
@@ -232,10 +236,7 @@ const undoUpload = async (id: number, stored: PlaceImage[], token: string) => {
 	trackEvent("place_photo_upload_undo_click", { source, count: stored.length });
 	// The toast sits above the viewer: close it first so its photo list
 	// can't change underneath it
-	if (id === placeId && viewerIndex !== null) {
-		viewerIndex = null;
-		syncPhotoParam(null);
-	}
+	if (id === placeId && viewerIndex !== null) dismissViewer();
 	const { removed, complete } = await undoUploads(
 		id,
 		stored.map((p) => p.id),
