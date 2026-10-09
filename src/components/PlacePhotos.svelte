@@ -84,10 +84,14 @@ const timeLocale = createTimeLocale(locale);
 // Through a $derived: a legacy parent's prop getter (placeId={merchant.id})
 // makes every refresh of its merchant object a dependency, and re-running
 // on the same id would close an open viewer (e.g. a ?photo= deep link).
+// A failed load hides the strip: "Be the first to add a photo" would be a
+// false claim about a place whose photos just didn't arrive
+let loadFailed = $state(false);
 const currentPlaceId = $derived(placeId);
 $effect(() => {
 	const id = currentPlaceId;
 	photos = undefined;
+	loadFailed = false;
 	viewerIndex = null;
 	fetchPlacePhotos(id)
 		.then((list) => {
@@ -97,7 +101,9 @@ $effect(() => {
 		})
 		.catch((error) => {
 			console.error("place photos: failed to load", error);
-			if (id === placeId) photos = [];
+			if (id !== placeId) return;
+			photos = [];
+			loadFailed = true;
 		});
 });
 
@@ -327,7 +333,9 @@ const handleFiles = async (event: Event) => {
 	</button>
 {/snippet}
 
-{#if photos === undefined}
+{#if loadFailed}
+	<!-- Nothing: see loadFailed -->
+{:else if photos === undefined}
 	<div
 		class="flex gap-2 overflow-hidden"
 		style:--tile="{tileHeight}px"
