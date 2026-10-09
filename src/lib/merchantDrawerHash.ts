@@ -4,11 +4,11 @@ import { browser } from "$app/env";
 
 export type DrawerView = "details" | "boost";
 
-export interface MerchantHashState {
+export type MerchantHashState = {
 	merchantId: number | null;
 	drawerView: DrawerView;
 	isOpen: boolean;
-}
+};
 
 export const MERCHANT_URL_CHANGE_EVENT = "merchant-url-change";
 
