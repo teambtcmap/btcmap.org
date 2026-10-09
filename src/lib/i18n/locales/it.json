@@ -1327,7 +1327,7 @@
 		"promptDescription": "Accedi al tuo account esistente o creane uno nuovo per aggiungere foto di questo luogo.",
 		"tooMany": "Puoi aggiungere fino a {max} foto alla volta. Verranno caricate le prime {max}.",
 		"emptyTitle": "Aggiungi tu la prima foto",
-		"emptyHint": "Vetrina, insegna o l'adesivo o il QR bitcoin",
+		"emptyHint": "Vetrina, interno, adesivo o QR bitcoin",
 		"morePhotos": "Altre foto",
 		"previousPhotos": "Foto precedenti",
 		"communityPhoto": "Foto della community",

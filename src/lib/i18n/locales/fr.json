@@ -1252,7 +1252,7 @@
 		"promptDescription": "Connectez-vous à votre compte ou créez-en un nouveau pour ajouter des photos de ce lieu.",
 		"tooMany": "Vous pouvez ajouter jusqu'à {max} photos à la fois. Envoi des {max} premières.",
 		"emptyTitle": "Soyez le premier à ajouter une photo",
-		"emptyHint": "Devanture, enseigne, ou l'autocollant ou le QR bitcoin",
+		"emptyHint": "Devanture, intérieur, autocollant ou QR bitcoin",
 		"morePhotos": "Plus de photos",
 		"previousPhotos": "Photos précédentes",
 		"communityPhoto": "Photo de la communauté",

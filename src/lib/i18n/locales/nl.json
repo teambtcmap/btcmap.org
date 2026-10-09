@@ -1327,7 +1327,7 @@
 		"promptDescription": "Log in met je bestaande account of maak een nieuw account aan om foto's van deze plek toe te voegen.",
 		"tooMany": "Je kunt maximaal {max} foto's tegelijk toevoegen. De eerste {max} worden geüpload.",
 		"emptyTitle": "Voeg als eerste een foto toe",
-		"emptyHint": "Gevel, uithangbord, of de bitcoin-sticker of QR-code",
+		"emptyHint": "Gevel, interieur, bitcoin-sticker of QR-code",
 		"morePhotos": "Meer foto's",
 		"previousPhotos": "Vorige foto's",
 		"communityPhoto": "Communityfoto",
