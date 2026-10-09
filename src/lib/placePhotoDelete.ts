@@ -1,7 +1,7 @@
-import { trackEvent } from "$lib/analytics";
-import type { PlacePhotoSource } from "$lib/placePhotos";
-import { deleteErrorKey, deletePlacePhoto } from "$lib/placePhotos";
-import { errToast, successToast } from "$lib/utils";
+import { trackEvent } from "#lib/analytics.js";
+import type { PlacePhotoSource } from "#lib/placePhotos.js";
+import { deleteErrorKey, deletePlacePhoto } from "#lib/placePhotos.js";
+import { errToast, successToast } from "#lib/utils.js";
 
 // "Delete photo" is ask → cancel | confirm in both the viewer's ⋯ menu and
 // on My photos. Each surface keeps its own confirm state; the tracking, the

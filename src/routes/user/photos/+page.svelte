@@ -2,24 +2,24 @@
 import { onMount } from "svelte";
 import Time from "svelte-time";
 
-import Icon from "$components/Icon.svelte";
-import PhotoDeleteConfirm from "$components/PhotoDeleteConfirm.svelte";
-import { trackEvent } from "$lib/analytics";
-import { createTimeLocale } from "$lib/dayjsLocale";
-import { _, locale } from "$lib/i18n";
+import { trackEvent } from "#lib/analytics.js";
+import { createTimeLocale } from "#lib/dayjsLocale.js";
+import { _, locale } from "#lib/i18n/index.js";
 import {
 	askPhotoDelete,
 	cancelPhotoDelete,
 	confirmPhotoDelete,
-} from "$lib/placePhotoDelete";
-import type { PlacePhotoSource } from "$lib/placePhotos";
+} from "#lib/placePhotoDelete.js";
+import type { PlacePhotoSource } from "#lib/placePhotos.js";
 import {
 	fetchMyPlacePhotos,
 	photoPagePath,
 	placePhotoUrl,
-} from "$lib/placePhotos";
-import { session } from "$lib/session";
-import { placesById } from "$lib/store";
+} from "#lib/placePhotos.js";
+import { session } from "#lib/session.js";
+import { placesById } from "#lib/store.js";
+import Icon from "$components/Icon.svelte";
+import PhotoDeleteConfirm from "$components/PhotoDeleteConfirm.svelte";
 
 import { goto } from "$app/navigation";
 import { resolve } from "$app/paths";
@@ -142,7 +142,7 @@ onMount(async () => {
 					</a>
 					<div class="space-y-2 p-3">
 						<a
-							href={resolve(`/merchant/${photo.place_id}`)}
+							href={resolve(`merchant/${photo.place_id}`)}
 							onclick={() => trackEvent("my_photos_tile_click", { link: "place" })}
 							class="block truncate text-sm font-semibold text-primary hover:text-link dark:text-white"
 						>

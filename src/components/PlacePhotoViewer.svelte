@@ -3,36 +3,36 @@ import { onDestroy, onMount, untrack } from "svelte";
 import { OutClick } from "svelte-outclick";
 import Time from "svelte-time";
 
-import Icon from "$components/Icon.svelte";
-import PhotoDeleteConfirm from "$components/PhotoDeleteConfirm.svelte";
-import { trackEvent } from "$lib/analytics";
-import { lockBodyScroll, unlockBodyScroll } from "$lib/bodyScrollLock";
-import type { CurrentUser } from "$lib/currentUser";
-import { fetchCurrentUser } from "$lib/currentUser";
-import { createTimeLocale } from "$lib/dayjsLocale";
-import { trapTab } from "$lib/focusTrap";
-import { _, locale } from "$lib/i18n";
+import { trackEvent } from "#lib/analytics.js";
+import { lockBodyScroll, unlockBodyScroll } from "#lib/bodyScrollLock.js";
+import type { CurrentUser } from "#lib/currentUser.js";
+import { fetchCurrentUser } from "#lib/currentUser.js";
+import { createTimeLocale } from "#lib/dayjsLocale.js";
+import { trapTab } from "#lib/focusTrap.js";
+import { _, locale } from "#lib/i18n/index.js";
 import {
 	askPhotoDelete,
 	cancelPhotoDelete,
 	confirmPhotoDelete,
-} from "$lib/placePhotoDelete";
-import type { LightboxHandle } from "$lib/placePhotoLightbox";
-import { buildSlides, openPlaceLightbox } from "$lib/placePhotoLightbox";
-import type { PlacePhotoSource } from "$lib/placePhotos";
+} from "#lib/placePhotoDelete.js";
+import type { LightboxHandle } from "#lib/placePhotoLightbox.js";
+import { buildSlides, openPlaceLightbox } from "#lib/placePhotoLightbox.js";
+import type { PlacePhotoSource } from "#lib/placePhotos.js";
 import {
 	canDeletePhoto,
 	photoAuthorName,
 	photoShareUrl,
 	placePhotoUrl,
-} from "$lib/placePhotos";
-import { session } from "$lib/session";
-import { errToast, successToast } from "$lib/utils";
+} from "#lib/placePhotos.js";
+import { session } from "#lib/session.js";
+import { errToast, successToast } from "#lib/utils.js";
+import Icon from "$components/Icon.svelte";
+import PhotoDeleteConfirm from "$components/PhotoDeleteConfirm.svelte";
 
 import type { PlaceImage } from "$types/btcmap-api/PlaceImage";
 
 // Full-screen photo viewer (#1469). PhotoSwipe renders the image stage
-// (swipe, pinch/zoom, swipe-down to close) through $lib/placePhotoLightbox;
+// (swipe, pinch/zoom, swipe-down to close) through src/lib/placePhotoLightbox.ts;
 // this component owns the chrome: caption bar, arrows, filmstrip/dots,
 // keyboard and focus.
 type Props = {

@@ -2,7 +2,7 @@ import type { AxiosResponse } from "axios";
 import { AxiosError } from "axios";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 
-import { API_BASE } from "$lib/api-base";
+import { API_BASE } from "#lib/api-base.js";
 
 import {
 	canDeletePhoto,
@@ -25,7 +25,7 @@ import {
 	withPhotoParam,
 } from "./placePhotos";
 
-vi.mock("$lib/axios", () => ({
+vi.mock("#lib/axios.js", () => ({
 	default: {
 		get: vi.fn(),
 		post: vi.fn(),
@@ -71,7 +71,7 @@ describe("placePhotoUrl", () => {
 
 describe("fetchPlacePhotos", () => {
 	it("requests user uploads only — report evidence can show reporters", async () => {
-		const { default: api } = await import("$lib/axios");
+		const { default: api } = await import("#lib/axios.js");
 		vi.mocked(api.get).mockResolvedValue({ data: [photo] });
 
 		await fetchPlacePhotos(20423);
@@ -82,7 +82,7 @@ describe("fetchPlacePhotos", () => {
 	});
 
 	it("returns the photos newest first as the API sends them", async () => {
-		const { default: api } = await import("$lib/axios");
+		const { default: api } = await import("#lib/axios.js");
 		const older = { ...photo, id: 8 };
 		vi.mocked(api.get).mockResolvedValue({ data: [photo, older] });
 
@@ -90,7 +90,7 @@ describe("fetchPlacePhotos", () => {
 	});
 
 	it("drops entries without usable dimensions instead of rendering broken boxes", async () => {
-		const { default: api } = await import("$lib/axios");
+		const { default: api } = await import("#lib/axios.js");
 		vi.mocked(api.get).mockResolvedValue({
 			data: [photo, { id: 1, width: 0, height: 10 }, { id: "x" }, null],
 		});
@@ -99,7 +99,7 @@ describe("fetchPlacePhotos", () => {
 	});
 
 	it("treats a non-array response as no photos", async () => {
-		const { default: api } = await import("$lib/axios");
+		const { default: api } = await import("#lib/axios.js");
 		vi.mocked(api.get).mockResolvedValue({ data: "<html>" });
 
 		expect(await fetchPlacePhotos(20423)).toEqual([]);
@@ -108,7 +108,7 @@ describe("fetchPlacePhotos", () => {
 
 describe("uploadPlacePhoto", () => {
 	it("POSTs the base64 body with the Bearer token", async () => {
-		const { default: api } = await import("$lib/axios");
+		const { default: api } = await import("#lib/axios.js");
 		vi.mocked(api.post).mockResolvedValue({ data: photo });
 
 		const stored = await uploadPlacePhoto(20423, "tok", "AAAA");
@@ -122,7 +122,7 @@ describe("uploadPlacePhoto", () => {
 	});
 
 	it("throws when the API answers with something that is not a photo", async () => {
-		const { default: api } = await import("$lib/axios");
+		const { default: api } = await import("#lib/axios.js");
 		vi.mocked(api.post).mockResolvedValue({ data: {} });
 
 		await expect(uploadPlacePhoto(20423, "tok", "AAAA")).rejects.toThrow();
@@ -315,7 +315,7 @@ describe("canDeletePhoto", () => {
 
 describe("deletePlacePhoto", () => {
 	it("DELETEs the image with the Bearer token", async () => {
-		const { default: api } = await import("$lib/axios");
+		const { default: api } = await import("#lib/axios.js");
 		vi.mocked(api.delete).mockResolvedValue({ data: photo });
 
 		await deletePlacePhoto(20423, 12, "tok");
@@ -329,7 +329,7 @@ describe("deletePlacePhoto", () => {
 
 describe("undoUploads", () => {
 	it("deletes every just-uploaded photo and reports which ones went", async () => {
-		const { default: api } = await import("$lib/axios");
+		const { default: api } = await import("#lib/axios.js");
 		vi.mocked(api.delete)
 			.mockResolvedValueOnce({ data: {} })
 			.mockRejectedValueOnce(new Error("500"));
@@ -341,7 +341,7 @@ describe("undoUploads", () => {
 	});
 
 	it("counts a photo that's already gone (404) as removed", async () => {
-		const { default: api } = await import("$lib/axios");
+		const { default: api } = await import("#lib/axios.js");
 		const notFound = new AxiosError(
 			"404",
 			"ERR_BAD_REQUEST",
@@ -380,7 +380,7 @@ describe("deleteErrorKey", () => {
 
 describe("fetchMyPlacePhotos", () => {
 	it("lists the caller's uploads with the Bearer token", async () => {
-		const { default: api } = await import("$lib/axios");
+		const { default: api } = await import("#lib/axios.js");
 		vi.mocked(api.get).mockResolvedValue({ data: [photo, { id: "x" }] });
 
 		expect(await fetchMyPlacePhotos("tok")).toEqual([photo]);
@@ -391,7 +391,7 @@ describe("fetchMyPlacePhotos", () => {
 	});
 
 	it("leaves out report evidence: only the user's public uploads", async () => {
-		const { default: api } = await import("$lib/axios");
+		const { default: api } = await import("#lib/axios.js");
 		vi.mocked(api.get).mockResolvedValue({
 			data: [photo, { ...photo, id: 7, type: "report" }],
 		});
@@ -400,7 +400,7 @@ describe("fetchMyPlacePhotos", () => {
 	});
 
 	it("throws on a non-array response so the page can show its error state", async () => {
-		const { default: api } = await import("$lib/axios");
+		const { default: api } = await import("#lib/axios.js");
 		vi.mocked(api.get).mockResolvedValue({ data: "<html>" });
 
 		await expect(fetchMyPlacePhotos("tok")).rejects.toThrow();

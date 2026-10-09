@@ -1,9 +1,9 @@
 import { isAxiosError } from "axios";
 
-import { API_BASE } from "$lib/api-base";
-import api from "$lib/axios";
-import type { CurrentUser, Role } from "$lib/currentUser";
-import { withLiteralCommas } from "$lib/literalCommas";
+import { API_BASE } from "#lib/api-base.js";
+import api from "#lib/axios.js";
+import type { CurrentUser, Role } from "#lib/currentUser.js";
+import { withLiteralCommas } from "#lib/literalCommas.js";
 
 import type { PlaceImage } from "$types/btcmap-api/PlaceImage";
 

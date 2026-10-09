@@ -1,5 +1,5 @@
-import { API_BASE } from "$lib/api-base";
-import api from "$lib/axios";
+import { API_BASE } from "#lib/api-base.js";
+import api from "#lib/axios.js";
 
 // The signed-in user's id and roles. The session only keeps the username
 // and token, but ownership checks (e.g. who may delete a place photo) need

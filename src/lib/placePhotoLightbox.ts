@@ -1,6 +1,6 @@
 import type { SlideData } from "photoswipe";
 
-import { fitWithin, placePhotoUrl } from "$lib/placePhotos";
+import { fitWithin, placePhotoUrl } from "#lib/placePhotos.js";
 
 import type { PlaceImage } from "$types/btcmap-api/PlaceImage";
 
