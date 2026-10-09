@@ -1327,7 +1327,7 @@
 		"promptDescription": "Log in to your existing account, or create a new one to add photos of this place.",
 		"tooMany": "You can add up to {max} photos at a time. Uploading the first {max}.",
 		"emptyTitle": "Be the first to add a photo",
-		"emptyHint": "Storefront, sign, or the bitcoin sticker or QR",
+		"emptyHint": "Storefront, inside, bitcoin sticker or QR",
 		"morePhotos": "More photos",
 		"previousPhotos": "Previous photos",
 		"communityPhoto": "Community photo",
