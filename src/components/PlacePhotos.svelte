@@ -396,15 +396,10 @@ const handleFiles = async (event: Event) => {
 									aria-hidden="true"
 									class="pointer-events-none absolute inset-x-0 bottom-0 bg-gradient-to-t from-black/70 to-transparent px-2 pt-4 pb-1.5 text-[11px] leading-tight text-white opacity-0 transition-opacity group-hover:opacity-100 group-focus-visible:opacity-100"
 								>
-									<!-- The drawer's 88px tile has room for the name alone -->
+									<!-- The uploader's name alone: portrait tiles on the page and the
+									     drawer's 88px squares have no room for "Photo by …" -->
 									<span class="block truncate font-semibold">
-										{#if !photoAuthorName(photo)}
-											{$_('placePhotos.communityPhoto')}
-										{:else if layout === 'drawer'}
-											{photoAuthorName(photo)}
-										{:else}
-											{$_('placePhotos.credit', { values: { name: photoAuthorName(photo) } })}
-										{/if}
+										{photoAuthorName(photo) ?? $_('placePhotos.communityPhoto')}
 									</span>
 									{#if layout === 'page'}
 										<span class="block truncate text-white/80">
