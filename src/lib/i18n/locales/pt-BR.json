@@ -1226,7 +1226,7 @@
 		"promptDescription": "Entre na sua conta ou crie uma nova para adicionar fotos deste lugar.",
 		"tooMany": "Você pode adicionar até {max} fotos por vez. Enviando as primeiras {max}.",
 		"emptyTitle": "Seja o primeiro a adicionar uma foto",
-		"emptyHint": "Fachada, placa, ou o adesivo ou QR de bitcoin",
+		"emptyHint": "Fachada, interior, adesivo ou QR de bitcoin",
 		"morePhotos": "Mais fotos",
 		"previousPhotos": "Fotos anteriores",
 		"communityPhoto": "Foto da comunidade",

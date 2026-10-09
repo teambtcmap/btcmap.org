@@ -1252,7 +1252,7 @@
 		"promptDescription": "Inicia sesión con tu cuenta o crea una nueva para añadir fotos de este lugar.",
 		"tooMany": "Puedes añadir hasta {max} fotos a la vez. Se subirán las primeras {max}.",
 		"emptyTitle": "Sé el primero en añadir una foto",
-		"emptyHint": "Fachada, letrero o la pegatina o el QR de bitcoin",
+		"emptyHint": "Fachada, interior, pegatina o QR de bitcoin",
 		"morePhotos": "Más fotos",
 		"previousPhotos": "Fotos anteriores",
 		"communityPhoto": "Foto de la comunidad",
