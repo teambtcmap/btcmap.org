@@ -28,6 +28,7 @@ import { errToast, successToast, warningToast } from "#lib/utils.js";
 import PhotoAuthPrompt from "$components/auth/PhotoAuthPrompt.svelte";
 import Icon from "$components/Icon.svelte";
 import PlacePhotoViewer from "$components/PlacePhotoViewer.svelte";
+import Skeleton from "$components/Skeleton.svelte";
 
 import type { PlaceImage } from "$types/btcmap-api/PlaceImage";
 
@@ -317,9 +318,7 @@ const handleFiles = async (event: Event) => {
 		aria-hidden="true"
 	>
 		{#each [0, 1, 2] as i (i)}
-			<div
-				class="size-(--tile) shrink-0 animate-pulse rounded-xl bg-link/20 dark:bg-white/10"
-			></div>
+			<Skeleton class="size-(--tile) shrink-0 rounded-xl" />
 		{/each}
 	</div>
 {:else if photos.length || uploading}
@@ -375,7 +374,7 @@ const handleFiles = async (event: Event) => {
 								href={photoPagePath(placeId, photo.id)}
 								bind:this={tileEls[i]}
 								onclickcapture={(event) => handleTileClick(event, i)}
-								class="group relative block h-(--tile) overflow-hidden rounded-xl bg-link/20 focus-visible:ring-2 focus-visible:ring-link dark:bg-white/10 {loadedIds.has(photo.id) ? '' : 'animate-pulse'}"
+								class="group relative block h-(--tile) overflow-hidden rounded-xl bg-link/50 focus-visible:ring-2 focus-visible:ring-link dark:bg-white/10 {loadedIds.has(photo.id) ? '' : 'animate-pulse'}"
 								style:width="{tileWidth(photo)}px"
 								aria-haspopup="dialog"
 							>

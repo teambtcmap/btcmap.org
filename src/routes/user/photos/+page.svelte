@@ -20,6 +20,7 @@ import { session } from "#lib/session.js";
 import { placesById } from "#lib/store.js";
 import Icon from "$components/Icon.svelte";
 import PhotoDeleteConfirm from "$components/PhotoDeleteConfirm.svelte";
+import Skeleton from "$components/Skeleton.svelte";
 
 import { goto } from "$app/navigation";
 import { resolve } from "$app/paths";
@@ -108,11 +109,11 @@ onMount(async () => {
 			<ul aria-hidden="true" class="grid grid-cols-2 gap-4 sm:grid-cols-3 lg:grid-cols-4">
 				{#each { length: SKELETON_CARDS } as _card, i (i)}
 					<li class="overflow-hidden rounded-2xl border border-gray-300 dark:border-white/20 dark:bg-white/5">
-						<div class="h-40 animate-pulse bg-link/20 dark:bg-white/10"></div>
+						<Skeleton class="h-40" />
 						<div class="space-y-2 p-3">
-							<div class="h-4 w-3/4 animate-pulse rounded bg-link/20 dark:bg-white/10"></div>
-							<div class="h-3 w-1/3 animate-pulse rounded bg-link/20 dark:bg-white/10"></div>
-							<div class="h-4 w-24 animate-pulse rounded bg-link/20 dark:bg-white/10"></div>
+							<Skeleton class="h-4 w-3/4 rounded" />
+							<Skeleton class="h-3 w-1/3 rounded" />
+							<Skeleton class="h-4 w-24 rounded" />
 						</div>
 					</li>
 				{/each}
@@ -129,7 +130,7 @@ onMount(async () => {
 					<a
 						href={photoPagePath(photo.place_id, photo.id)}
 						onclick={() => trackEvent("my_photos_tile_click", { link: "photo" })}
-						class="block bg-link/20 dark:bg-white/10"
+						class="block bg-link/50 dark:bg-white/10"
 					>
 						<img
 							src={placePhotoUrl(photo.place_id, photo.id, { h: TILE_HEIGHT * 2 })}
