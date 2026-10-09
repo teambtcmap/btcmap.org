@@ -194,6 +194,30 @@ export const uploadPlacePhotos = async <T>(
 	return { stored, failed };
 };
 
+// Which way a horizontal photo strip can still scroll, for its chevrons.
+// abs(): right-to-left strips report a negative scrollLeft; 1px of slack
+// absorbs sub-pixel rounding at either end.
+export type StripScrollState = {
+	canScrollBack: boolean;
+	canScrollForward: boolean;
+};
+
+export const stripScrollState = ({
+	scrollLeft,
+	clientWidth,
+	scrollWidth,
+}: {
+	scrollLeft: number;
+	clientWidth: number;
+	scrollWidth: number;
+}): StripScrollState => {
+	const offset = Math.abs(scrollLeft);
+	return {
+		canScrollBack: offset > 1,
+		canScrollForward: offset + clientWidth < scrollWidth - 1,
+	};
+};
+
 export const fitWithin = (
 	width: number,
 	height: number,

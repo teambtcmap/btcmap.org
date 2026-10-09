@@ -19,6 +19,7 @@ import {
 	photoShareUrl,
 	placePhotoUrl,
 	splitPick,
+	stripScrollState,
 	undoUploads,
 	uploadPlacePhoto,
 	uploadPlacePhotos,
@@ -414,5 +415,43 @@ describe("fetchMyPlacePhotos", () => {
 		vi.mocked(api.get).mockResolvedValue({ data: "<html>" });
 
 		await expect(fetchMyPlacePhotos("tok")).rejects.toThrow();
+	});
+});
+
+describe("stripScrollState", () => {
+	const box = { clientWidth: 300, scrollWidth: 900 };
+
+	it("can only go forward at the start", () => {
+		expect(stripScrollState({ ...box, scrollLeft: 0 })).toEqual({
+			canScrollBack: false,
+			canScrollForward: true,
+		});
+	});
+
+	it("can go both ways in the middle", () => {
+		expect(stripScrollState({ ...box, scrollLeft: 300 })).toEqual({
+			canScrollBack: true,
+			canScrollForward: true,
+		});
+	});
+
+	it("can only go back at the end, within a pixel of rounding", () => {
+		expect(stripScrollState({ ...box, scrollLeft: 599.5 })).toEqual({
+			canScrollBack: true,
+			canScrollForward: false,
+		});
+	});
+
+	it("can't scroll at all when everything fits", () => {
+		expect(
+			stripScrollState({ scrollLeft: 0, clientWidth: 300, scrollWidth: 300 }),
+		).toEqual({ canScrollBack: false, canScrollForward: false });
+	});
+
+	it("reads right-to-left strips, where scrollLeft runs negative", () => {
+		expect(stripScrollState({ ...box, scrollLeft: -300 })).toEqual({
+			canScrollBack: true,
+			canScrollForward: true,
+		});
 	});
 });
