@@ -239,6 +239,20 @@ onDestroy(() => {
 });
 </script>
 
+{#snippet arrow(direction: 'previous' | 'next')}
+	<button
+		type="button"
+		onclick={() => goTo(direction === 'previous' ? index - 1 : index + 1)}
+		disabled={direction === 'previous' ? index === 0 : index === total - 1}
+		class="group absolute inset-y-0 z-10 hidden w-[72px] items-center justify-center disabled:cursor-default disabled:opacity-25 pointer-fine:flex {direction === 'previous' ? 'left-0' : 'right-0'}"
+		aria-label={$_(direction === 'previous' ? 'placePhotos.previous' : 'placePhotos.next')}
+	>
+		<span class="flex h-11 w-11 items-center justify-center rounded-full bg-white/12 group-enabled:group-hover:bg-white/20">
+			<Icon w="28" h="28" icon={direction === 'previous' ? 'chevron_left' : 'chevron_right'} type="material" />
+		</span>
+	</button>
+{/snippet}
+
 <svelte:window onkeydowncapture={handleKeydown} />
 
 <div
@@ -336,28 +350,8 @@ onDestroy(() => {
 
 		{#if total > 1}
 			<!-- Pointer devices only: touch users swipe -->
-			<button
-				type="button"
-				onclick={() => goTo(index - 1)}
-				disabled={index === 0}
-				class="group absolute inset-y-0 left-0 z-10 hidden w-[72px] items-center justify-center disabled:cursor-default disabled:opacity-25 pointer-fine:flex"
-				aria-label={$_('placePhotos.previous')}
-			>
-				<span class="flex h-11 w-11 items-center justify-center rounded-full bg-white/12 group-enabled:group-hover:bg-white/20">
-					<Icon w="28" h="28" icon="chevron_left" type="material" />
-				</span>
-			</button>
-			<button
-				type="button"
-				onclick={() => goTo(index + 1)}
-				disabled={index === total - 1}
-				class="group absolute inset-y-0 right-0 z-10 hidden w-[72px] items-center justify-center disabled:cursor-default disabled:opacity-25 pointer-fine:flex"
-				aria-label={$_('placePhotos.next')}
-			>
-				<span class="flex h-11 w-11 items-center justify-center rounded-full bg-white/12 group-enabled:group-hover:bg-white/20">
-					<Icon w="28" h="28" icon="chevron_right" type="material" />
-				</span>
-			</button>
+			{@render arrow('previous')}
+			{@render arrow('next')}
 		{/if}
 	</div>
 

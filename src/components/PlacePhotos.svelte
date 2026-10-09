@@ -312,6 +312,20 @@ const handleFiles = async (event: Event) => {
 };
 </script>
 
+{#snippet stripChevron(direction: 'back' | 'forward')}
+	<div
+		class="pointer-events-none absolute inset-y-0 hidden w-12 from-transparent pointer-fine:block {fadeTo} {direction === 'back' ? 'left-0 bg-gradient-to-l' : 'right-0 bg-gradient-to-r'}"
+	></div>
+	<button
+		type="button"
+		onclick={() => scrollStrip(direction)}
+		class="absolute top-1/2 hidden h-8 w-8 -translate-y-1/2 items-center justify-center rounded-full border border-gray-300 bg-white text-primary shadow-md pointer-fine:flex dark:border-white/20 dark:bg-dark dark:text-white {direction === 'back' ? 'left-1' : 'right-1'}"
+		aria-label={$_(direction === 'back' ? 'placePhotos.previousPhotos' : 'placePhotos.morePhotos')}
+	>
+		<Icon w="20" h="20" icon={direction === 'back' ? 'chevron_left' : 'chevron_right'} type="material" />
+	</button>
+{/snippet}
+
 {#if photos === undefined}
 	<div
 		class="flex gap-2 overflow-hidden"
@@ -417,26 +431,10 @@ const handleFiles = async (event: Event) => {
 			<!-- Pointer devices only: touch users swipe, and a fade over a
 			     swipeable strip would just hide part of a photo -->
 			{#if scrollState.canScrollBack}
-				<div class="pointer-events-none absolute inset-y-0 left-0 hidden w-12 bg-gradient-to-l from-transparent pointer-fine:block {fadeTo}"></div>
-				<button
-					type="button"
-					onclick={() => scrollStrip('back')}
-					class="absolute top-1/2 left-1 hidden h-8 w-8 -translate-y-1/2 items-center justify-center rounded-full border border-gray-300 bg-white text-primary shadow-md pointer-fine:flex dark:border-white/20 dark:bg-dark dark:text-white"
-					aria-label={$_('placePhotos.previousPhotos')}
-				>
-					<Icon w="20" h="20" icon="chevron_left" type="material" />
-				</button>
+				{@render stripChevron('back')}
 			{/if}
 			{#if scrollState.canScrollForward}
-				<div class="pointer-events-none absolute inset-y-0 right-0 hidden w-12 bg-gradient-to-r from-transparent pointer-fine:block {fadeTo}"></div>
-				<button
-					type="button"
-					onclick={() => scrollStrip('forward')}
-					class="absolute top-1/2 right-1 hidden h-8 w-8 -translate-y-1/2 items-center justify-center rounded-full border border-gray-300 bg-white text-primary shadow-md pointer-fine:flex dark:border-white/20 dark:bg-dark dark:text-white"
-					aria-label={$_('placePhotos.morePhotos')}
-				>
-					<Icon w="20" h="20" icon="chevron_right" type="material" />
-				</button>
+				{@render stripChevron('forward')}
 			{/if}
 		</div>
 	</section>
