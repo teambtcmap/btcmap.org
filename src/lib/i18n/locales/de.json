@@ -1078,7 +1078,6 @@
 		"downloadAll": "Alle herunterladen",
 		"brand": "Marke",
 		"promotional": "Promotionell",
-		"team": "Team",
 		"assetNames": {
 			"appScreenshot": "App-Screenshot",
 			"btcmapLogo": "BTC Map Logo",
@@ -1097,14 +1096,10 @@
 			"statsDashboard": "Statistik-Übersicht",
 			"supertaggerLeaderboard": "Supertagger-Rangliste",
 			"supertaggerProfile": "Supertagger-Profil",
-			"supporters": "Unterstütze uns",
+			"supportUs": "Unterstütze uns",
 			"topCommunities": "Top Communities",
 			"topCountries": "Top Länder",
-			"verifyLocations": "Standorte verifizieren",
-			"Igor": "Igor",
-			"karnage": "Karnage",
-			"nathanDay": "Nathan Day",
-			"secondl1ght": "secondl1ght"
+			"verifyLocations": "Standorte verifizieren"
 		}
 	},
 	"supporters": {

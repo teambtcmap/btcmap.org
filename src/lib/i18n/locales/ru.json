@@ -1078,7 +1078,6 @@
 		"downloadAll": "Скачать всё",
 		"brand": "Бренд",
 		"promotional": "Рекламные",
-		"team": "Команда",
 		"assetNames": {
 			"appScreenshot": "Скриншот приложения",
 			"btcmapLogo": "Логотип BTC Map",
@@ -1097,14 +1096,10 @@
 			"statsDashboard": "Панель статистики",
 			"supertaggerLeaderboard": "Рейтинг супертеггеров",
 			"supertaggerProfile": "Профиль супертеггера",
-			"supporters": "Поддержите нас",
+			"supportUs": "Поддержите нас",
 			"topCommunities": "Лучшие сообщества",
 			"topCountries": "Лучшие страны",
-			"verifyLocations": "Подтвердить местоположения",
-			"igor": "Игорь",
-			"karnage": "Карнаж",
-			"nathanDay": "Нейтан Дей",
-			"secondl1ght": "secondl1ght"
+			"verifyLocations": "Подтвердить местоположения"
 		}
 	},
 	"supporters": {
