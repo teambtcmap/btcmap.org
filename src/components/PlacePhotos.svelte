@@ -15,6 +15,7 @@ import {
 	photoPagePath,
 	placePhotoUrl,
 	prepareUpload,
+	prependUploaded,
 	splitPick,
 	stripScrollState,
 	undoUploads,
@@ -288,7 +289,7 @@ const handleFiles = async (event: Event) => {
 
 	if (stored.length) {
 		if (id === placeId) {
-			photos = [...stored, ...(photos ?? [])];
+			photos = prependUploaded(stored, photos);
 			showStripStart();
 		}
 		successToast(
