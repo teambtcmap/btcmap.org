@@ -4,6 +4,7 @@ import { API_BASE } from "#lib/api-base.js";
 import api from "#lib/axios.js";
 import type { CurrentUser, Role } from "#lib/currentUser.js";
 import { withLiteralCommas } from "#lib/literalCommas.js";
+import { authHeaders } from "#lib/session.js";
 
 import type { PlaceImage } from "$types/btcmap-api/PlaceImage";
 
@@ -89,9 +90,10 @@ export const deletePlacePhoto = async (
 	imageId: number,
 	token: string,
 ): Promise<void> => {
-	await api.delete(`${API_BASE}/v4/places/${placeId}/images/${imageId}`, {
-		headers: { Authorization: `Bearer ${token}` },
-	});
+	await api.delete(
+		`${API_BASE}/v4/places/${placeId}/images/${imageId}`,
+		authHeaders(token),
+	);
 };
 
 // i18n key for a failed delete: 403 means the photo isn't the caller's
@@ -132,9 +134,10 @@ export const undoUploads = async (
 export const fetchMyPlacePhotos = async (
 	token: string,
 ): Promise<PlaceImage[]> => {
-	const res = await api.get<unknown>(`${API_BASE}/v4/users/me/place-images`, {
-		headers: { Authorization: `Bearer ${token}` },
-	});
+	const res = await api.get<unknown>(
+		`${API_BASE}/v4/users/me/place-images`,
+		authHeaders(token),
+	);
 	if (!Array.isArray(res.data)) {
 		throw new Error("my place images returned an unexpected response");
 	}
@@ -149,7 +152,7 @@ export const uploadPlacePhoto = async (
 	const res = await api.post<unknown>(
 		`${API_BASE}/v4/places/${placeId}/images`,
 		{ data_base64: dataBase64 },
-		{ headers: { Authorization: `Bearer ${token}` } },
+		authHeaders(token),
 	);
 	if (!isPlaceImage(res.data)) {
 		throw new Error("place image upload returned an unexpected response");

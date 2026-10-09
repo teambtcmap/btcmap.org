@@ -1,5 +1,6 @@
 import { API_BASE } from "#lib/api-base.js";
 import api from "#lib/axios.js";
+import { authHeaders } from "#lib/session.js";
 
 // The signed-in user's id and roles. The session only keeps the username
 // and token, but ownership checks (e.g. who may delete a place photo) need
@@ -49,9 +50,7 @@ export const fetchCurrentUser = (
 	const cached = cache.get(token);
 	if (cached && Date.now() - cached.at < CACHE_MS) return cached.request;
 	const request = api
-		.get<unknown>(`${API_BASE}/v4/users/me`, {
-			headers: { Authorization: `Bearer ${token}` },
-		})
+		.get<unknown>(`${API_BASE}/v4/users/me`, authHeaders(token))
 		.then((res) => parse(res.data))
 		.catch((error) => {
 			console.error("current user: lookup failed", error);
