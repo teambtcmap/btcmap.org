@@ -360,11 +360,13 @@ const handleFiles = async (event: Event) => {
 			{/if}
 		</div>
 
-		<div class="relative">
+		<!-- The page strip bleeds to the screen edge below lg; the bleed sits on
+		     this wrapper so the chevrons and fades line up with the strip's edges -->
+		<div class="relative {layout === 'page' ? '-mx-4 lg:mx-0' : ''}">
 			<div
 				bind:this={strip}
 				onscroll={updateScrollState}
-				class="flex snap-x gap-2 overflow-x-auto pb-1 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden {layout === 'page' ? '-mx-4 scroll-px-4 px-4 lg:mx-0 lg:scroll-px-0 lg:px-0' : ''}"
+				class="flex snap-x gap-2 overflow-x-auto pb-1 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden {layout === 'page' ? 'scroll-px-4 px-4 lg:scroll-px-0 lg:px-0' : ''}"
 				style:--tile="{tileHeight}px"
 			>
 				<!-- Uploads in progress sit first, where the new photos will land -->
