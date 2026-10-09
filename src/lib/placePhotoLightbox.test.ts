@@ -1,6 +1,6 @@
 import { beforeEach, describe, expect, it, vi } from "vitest";
 
-import { API_BASE } from "$lib/api-base";
+import { API_BASE } from "#lib/api-base.js";
 
 import { buildSlides, openPlaceLightbox } from "./placePhotoLightbox";
 

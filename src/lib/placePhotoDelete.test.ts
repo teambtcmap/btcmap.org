@@ -2,9 +2,9 @@ import type { AxiosResponse } from "axios";
 import { AxiosError } from "axios";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 
-import { trackEvent } from "$lib/analytics";
-import { deletePlacePhoto } from "$lib/placePhotos";
-import { errToast, successToast } from "$lib/utils";
+import { trackEvent } from "#lib/analytics.js";
+import { deletePlacePhoto } from "#lib/placePhotos.js";
+import { errToast, successToast } from "#lib/utils.js";
 
 import {
 	askPhotoDelete,
@@ -12,10 +12,10 @@ import {
 	confirmPhotoDelete,
 } from "./placePhotoDelete";
 
-vi.mock("$lib/analytics", () => ({ trackEvent: vi.fn() }));
-vi.mock("$lib/utils", () => ({ errToast: vi.fn(), successToast: vi.fn() }));
-vi.mock("$lib/placePhotos", async (importOriginal) => ({
-	...(await importOriginal<typeof import("$lib/placePhotos")>()),
+vi.mock("#lib/analytics.js", () => ({ trackEvent: vi.fn() }));
+vi.mock("#lib/utils.js", () => ({ errToast: vi.fn(), successToast: vi.fn() }));
+vi.mock("#lib/placePhotos.js", async (importOriginal) => ({
+	...(await importOriginal<typeof import("#lib/placePhotos.js")>()),
 	deletePlacePhoto: vi.fn(),
 }));
 

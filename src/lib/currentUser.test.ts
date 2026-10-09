@@ -1,10 +1,10 @@
 import { beforeEach, describe, expect, it, vi } from "vitest";
 
-import { API_BASE } from "$lib/api-base";
+import { API_BASE } from "#lib/api-base.js";
 
 import { fetchCurrentUser, resetCurrentUserCache } from "./currentUser";
 
-vi.mock("$lib/axios", () => ({ default: { get: vi.fn() } }));
+vi.mock("#lib/axios.js", () => ({ default: { get: vi.fn() } }));
 
 beforeEach(() => {
 	vi.clearAllMocks();
@@ -13,7 +13,7 @@ beforeEach(() => {
 
 describe("fetchCurrentUser", () => {
 	it("reads id and roles from /v4/users/me with the Bearer token", async () => {
-		const { default: api } = await import("$lib/axios");
+		const { default: api } = await import("#lib/axios.js");
 		vi.mocked(api.get).mockResolvedValue({
 			data: { id: 17, name: "satoshi", roles: ["user", "admin"] },
 		});
@@ -28,7 +28,7 @@ describe("fetchCurrentUser", () => {
 	});
 
 	it("asks the API once per token", async () => {
-		const { default: api } = await import("$lib/axios");
+		const { default: api } = await import("#lib/axios.js");
 		vi.mocked(api.get).mockResolvedValue({ data: { id: 17, roles: [] } });
 
 		await fetchCurrentUser("tok");
@@ -41,7 +41,7 @@ describe("fetchCurrentUser", () => {
 
 	it("asks again after the cache expires, so role changes apply without a reload", async () => {
 		vi.useFakeTimers();
-		const { default: api } = await import("$lib/axios");
+		const { default: api } = await import("#lib/axios.js");
 		vi.mocked(api.get).mockResolvedValue({ data: { id: 17, roles: [] } });
 
 		await fetchCurrentUser("tok");
@@ -56,7 +56,7 @@ describe("fetchCurrentUser", () => {
 	});
 
 	it("is null for an unexpected response or a failed request, and retries later", async () => {
-		const { default: api } = await import("$lib/axios");
+		const { default: api } = await import("#lib/axios.js");
 		vi.mocked(api.get).mockResolvedValueOnce({ data: "<html>" });
 		expect(await fetchCurrentUser("tok")).toBeNull();
 
@@ -66,7 +66,7 @@ describe("fetchCurrentUser", () => {
 	});
 
 	it("drops non-string and unknown roles", async () => {
-		const { default: api } = await import("$lib/axios");
+		const { default: api } = await import("#lib/axios.js");
 		vi.mocked(api.get).mockResolvedValue({
 			data: { id: 1, roles: ["admin", 5, null, "Admin", "superuser"] },
 		});
@@ -74,7 +74,7 @@ describe("fetchCurrentUser", () => {
 	});
 
 	it("keeps every role the API defines", async () => {
-		const { default: api } = await import("$lib/axios");
+		const { default: api } = await import("#lib/axios.js");
 		const all = [
 			"user",
 			"admin",

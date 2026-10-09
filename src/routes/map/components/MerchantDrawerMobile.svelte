@@ -12,6 +12,7 @@ import {
 	ensureBoostData,
 } from "#lib/merchantDrawerLogic.js";
 import { merchantDrawer } from "#lib/merchantDrawerStore.js";
+import { photoIdFromSearch } from "#lib/placePhotos.js";
 import { boost, resetBoost } from "#lib/store.js";
 import { isUpToDate as checkUpToDate } from "#lib/verification.js";
 import BoostContent from "$components/BoostContent.svelte";
@@ -19,7 +20,6 @@ import CollapseButton from "$components/CollapseButton.svelte";
 import Icon from "$components/Icon.svelte";
 import MerchantDetailsContent from "$components/MerchantDetailsContent.svelte";
 import MerchantDetailsSkeleton from "$components/MerchantDetailsSkeleton.svelte";
-import { photoIdFromSearch } from "#lib/placePhotos.js";
 
 import MerchantPeekContentMobile from "./MerchantPeekContentMobile.svelte";
 import { browser } from "$app/env";

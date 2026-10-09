@@ -1,5 +1,5 @@
 <script lang="ts">
-import { _ } from "$lib/i18n";
+import { _ } from "#lib/i18n/index.js";
 
 // Cancel · Delete pair for a photo's delete confirm step, shared by the
 // viewer's ⋯ menu and My photos; the parent lays out the row

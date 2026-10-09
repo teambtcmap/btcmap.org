@@ -1,12 +1,12 @@
 <script lang="ts">
+import { _ } from "#lib/i18n/index.js";
+import type { Session } from "#lib/session.js";
 import LoginForm from "$components/auth/LoginForm.svelte";
 import NostrLoginForm from "$components/auth/NostrLoginForm.svelte";
 import SignupForm from "$components/auth/SignupForm.svelte";
 import Modal from "$components/Modal.svelte";
 import PrimaryButton from "$components/PrimaryButton.svelte";
 import TextLink from "$components/TextLink.svelte";
-import { _ } from "$lib/i18n";
-import type { Session } from "$lib/session";
 
 // In-place sign-in modal: a choice screen (create account / log in) that
 // switches to the signup or login forms. Callers own what happens after

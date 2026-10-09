@@ -2,12 +2,9 @@
 import { tick } from "svelte";
 import { SvelteSet } from "svelte/reactivity";
 
-import PhotoAuthPrompt from "$components/auth/PhotoAuthPrompt.svelte";
-import Icon from "$components/Icon.svelte";
-import PlacePhotoViewer from "$components/PlacePhotoViewer.svelte";
-import { trackEvent } from "$lib/analytics";
-import { _ } from "$lib/i18n";
-import type { PlacePhotoSource } from "$lib/placePhotos";
+import { trackEvent } from "#lib/analytics.js";
+import { _ } from "#lib/i18n/index.js";
+import type { PlacePhotoSource } from "#lib/placePhotos.js";
 import {
 	deepLinkTarget,
 	fetchPlacePhotos,
@@ -20,9 +17,12 @@ import {
 	uploadPlacePhoto,
 	uploadPlacePhotos,
 	withPhotoParam,
-} from "$lib/placePhotos";
-import { session } from "$lib/session";
-import { errToast, successToast, warningToast } from "$lib/utils";
+} from "#lib/placePhotos.js";
+import { session } from "#lib/session.js";
+import { errToast, successToast, warningToast } from "#lib/utils.js";
+import PhotoAuthPrompt from "$components/auth/PhotoAuthPrompt.svelte";
+import Icon from "$components/Icon.svelte";
+import PlacePhotoViewer from "$components/PlacePhotoViewer.svelte";
 
 import type { PlaceImage } from "$types/btcmap-api/PlaceImage";
 
@@ -120,7 +120,7 @@ const scrollMore = () => {
 };
 
 // Mirror the shown photo in ?photo=<id> without a navigation. Plain
-// history.replaceState like the map's own hash writer ($lib/map/mapHash),
+// history.replaceState like the map's own hash writer (src/lib/map/mapHash.ts),
 // so SvelteKit's page store doesn't re-run the drawer's URL logic.
 const syncPhotoParam = (imageId: number | null) => {
 	history.replaceState(

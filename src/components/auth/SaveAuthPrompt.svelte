@@ -1,7 +1,6 @@
 <script lang="ts">
 import { get } from "svelte/store";
 
-import AuthPrompt from "$components/auth/AuthPrompt.svelte";
 import { trackEvent } from "#lib/analytics.js";
 import { _ } from "#lib/i18n/index.js";
 import type { SavedItemType } from "#lib/savedItems.js";
@@ -14,6 +13,7 @@ import {
 import type { Session } from "#lib/session.js";
 import { session } from "#lib/session.js";
 import { errToast } from "#lib/utils.js";
+import AuthPrompt from "$components/auth/AuthPrompt.svelte";
 
 type Props = {
 	id: number;

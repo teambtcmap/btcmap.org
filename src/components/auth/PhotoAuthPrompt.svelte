@@ -1,9 +1,9 @@
 <script lang="ts">
+import { trackEvent } from "#lib/analytics.js";
+import { _ } from "#lib/i18n/index.js";
+import { hydrateSavedFromServer } from "#lib/savedItems.js";
+import type { Session } from "#lib/session.js";
 import AuthPrompt from "$components/auth/AuthPrompt.svelte";
-import { trackEvent } from "$lib/analytics";
-import { _ } from "$lib/i18n";
-import { hydrateSavedFromServer } from "$lib/savedItems";
-import type { Session } from "$lib/session";
 
 // Sign-in for adding a place photo, in place (shared AuthPrompt): leaving
 // for /login dropped the user on /user/activity, away from the place.
