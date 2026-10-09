@@ -4,7 +4,7 @@ import { SvelteSet } from "svelte/reactivity";
 
 import { trackEvent } from "#lib/analytics.js";
 import { _ } from "#lib/i18n/index.js";
-import type { PlacePhotoSource } from "#lib/placePhotos.js";
+import type { PlacePhotoSource, StripScrollState } from "#lib/placePhotos.js";
 import {
 	deepLinkTarget,
 	fetchPlacePhotos,
@@ -13,6 +13,7 @@ import {
 	placePhotoUrl,
 	prepareUpload,
 	splitPick,
+	stripScrollState,
 	undoUploads,
 	uploadPlacePhoto,
 	uploadPlacePhotos,
@@ -59,7 +60,10 @@ let viewerIndex = $state<number | null>(null);
 let fileInput = $state<HTMLInputElement>();
 let strip = $state<HTMLDivElement>();
 const tileEls: HTMLAnchorElement[] = $state([]);
-let canScrollMore = $state(false);
+let scrollState = $state<StripScrollState>({
+	canScrollBack: false,
+	canScrollForward: false,
+});
 let showAuthPrompt = $state(false);
 let addButton = $state<HTMLButtonElement>();
 let highlightAdd = $state(false);
@@ -98,9 +102,8 @@ const tileWidth = (photo: PlaceImage) =>
 				tileHeight * Math.min(1.8, Math.max(0.6, photo.width / photo.height)),
 			);
 
-const updateCanScrollMore = () => {
-	if (!strip) return;
-	canScrollMore = strip.scrollLeft + strip.clientWidth < strip.scrollWidth - 1;
+const updateScrollState = () => {
+	if (strip) scrollState = stripScrollState(strip);
 };
 
 // Re-measure when the tiles change or the strip resizes
@@ -108,15 +111,19 @@ $effect(() => {
 	void photos?.length;
 	void uploading;
 	if (!strip) return;
-	updateCanScrollMore();
-	const observer = new ResizeObserver(updateCanScrollMore);
+	updateScrollState();
+	const observer = new ResizeObserver(updateScrollState);
 	observer.observe(strip);
 	return () => observer.disconnect();
 });
 
-const scrollMore = () => {
-	trackEvent("place_photo_strip_scroll", { source });
-	strip?.scrollBy({ left: strip.clientWidth * 0.8, behavior: "smooth" });
+const scrollStrip = (direction: "back" | "forward") => {
+	trackEvent("place_photo_strip_scroll", { source, direction });
+	const step = (strip?.clientWidth ?? 0) * 0.8;
+	strip?.scrollBy({
+		left: direction === "forward" ? step : -step,
+		behavior: "smooth",
+	});
 };
 
 // Mirror the shown photo in ?photo=<id> without a navigation. Plain
@@ -329,7 +336,7 @@ const handleFiles = async (event: Event) => {
 		<div class="relative">
 			<div
 				bind:this={strip}
-				onscroll={updateCanScrollMore}
+				onscroll={updateScrollState}
 				class="flex snap-x gap-2 overflow-x-auto pb-1 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden {layout === 'page' ? '-mx-4 scroll-px-4 px-4 lg:mx-0 lg:scroll-px-0 lg:px-0' : ''}"
 				style:--tile="{tileHeight}px"
 			>
@@ -378,13 +385,24 @@ const handleFiles = async (event: Event) => {
 				</ul>
 			</div>
 
-			{#if layout === 'drawer' && canScrollMore}
-				<!-- Pointer devices only: touch users swipe, and a fade over a
-				     swipeable strip would just hide part of a photo -->
+			<!-- Pointer devices only: touch users swipe, and a fade over a
+			     swipeable strip would just hide part of a photo -->
+			{#if layout === 'drawer' && scrollState.canScrollBack}
+				<div class="pointer-events-none absolute inset-y-0 left-0 hidden w-12 bg-gradient-to-l from-transparent to-white pointer-fine:block dark:to-dark"></div>
+				<button
+					type="button"
+					onclick={() => scrollStrip('back')}
+					class="absolute top-1/2 left-1 hidden h-8 w-8 -translate-y-1/2 items-center justify-center rounded-full border border-gray-300 bg-white text-primary shadow-md pointer-fine:flex dark:border-white/20 dark:bg-dark dark:text-white"
+					aria-label={$_('placePhotos.previousPhotos')}
+				>
+					<Icon w="20" h="20" icon="chevron_left" type="material" />
+				</button>
+			{/if}
+			{#if layout === 'drawer' && scrollState.canScrollForward}
 				<div class="pointer-events-none absolute inset-y-0 right-0 hidden w-12 bg-gradient-to-r from-transparent to-white pointer-fine:block dark:to-dark"></div>
 				<button
 					type="button"
-					onclick={scrollMore}
+					onclick={() => scrollStrip('forward')}
 					class="absolute top-1/2 right-1 hidden h-8 w-8 -translate-y-1/2 items-center justify-center rounded-full border border-gray-300 bg-white text-primary shadow-md pointer-fine:flex dark:border-white/20 dark:bg-dark dark:text-white"
 					aria-label={$_('placePhotos.morePhotos')}
 				>
