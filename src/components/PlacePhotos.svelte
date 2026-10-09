@@ -1,14 +1,17 @@
 <script lang="ts">
 import { tick } from "svelte";
 import { SvelteSet } from "svelte/reactivity";
+import Time from "svelte-time";
 
 import { trackEvent } from "#lib/analytics.js";
-import { _ } from "#lib/i18n/index.js";
+import { createTimeLocale } from "#lib/dayjsLocale.js";
+import { _, locale } from "#lib/i18n/index.js";
 import type { PlacePhotoSource, StripScrollState } from "#lib/placePhotos.js";
 import {
 	deepLinkTarget,
 	fetchPlacePhotos,
 	MAX_PHOTOS_PER_PICK,
+	photoAuthorName,
 	photoPagePath,
 	placePhotoUrl,
 	prepareUpload,
@@ -70,6 +73,8 @@ let highlightAdd = $state(false);
 // Briefly marks whichever add control is on screen after sign-in
 const HIGHLIGHT_ADD_CLASS = "animate-pulse bg-link/10 ring-2 ring-link";
 const loadedIds = new SvelteSet<number>();
+// Hover captions' relative date, in the app's language
+const timeLocale = createTimeLocale(locale);
 
 // The map drawer reuses this component across merchants, so refetch on
 // every placeId change and drop answers for a place we already left.
@@ -369,7 +374,7 @@ const handleFiles = async (event: Event) => {
 								href={photoPagePath(placeId, photo.id)}
 								bind:this={tileEls[i]}
 								onclickcapture={(event) => handleTileClick(event, i)}
-								class="relative block h-(--tile) overflow-hidden rounded-xl bg-link/20 focus-visible:ring-2 focus-visible:ring-link dark:bg-white/10 {loadedIds.has(photo.id) ? '' : 'animate-pulse'}"
+								class="group relative block h-(--tile) overflow-hidden rounded-xl bg-link/20 focus-visible:ring-2 focus-visible:ring-link dark:bg-white/10 {loadedIds.has(photo.id) ? '' : 'animate-pulse'}"
 								style:width="{tileWidth(photo)}px"
 								aria-haspopup="dialog"
 							>
@@ -385,6 +390,23 @@ const handleFiles = async (event: Event) => {
 									onerror={() => loadedIds.add(photo.id)}
 									class="h-full w-full object-cover transition-opacity duration-300 {loadedIds.has(photo.id) ? 'opacity-100' : 'opacity-0'}"
 								/>
+								<!-- Hover/focus caption, like the viewer's credit line. aria-hidden:
+								     the alt already names the link -->
+								<span
+									aria-hidden="true"
+									class="pointer-events-none absolute inset-x-0 bottom-0 bg-gradient-to-t from-black/70 to-transparent px-2 pt-4 pb-1.5 text-[11px] leading-tight text-white opacity-0 transition-opacity group-hover:opacity-100 group-focus-visible:opacity-100"
+								>
+									<!-- The uploader's name alone: portrait tiles on the page and the
+									     drawer's 88px squares have no room for "Photo by …" -->
+									<span class="block truncate font-semibold">
+										{photoAuthorName(photo) ?? $_('placePhotos.communityPhoto')}
+									</span>
+									{#if layout === 'page'}
+										<span class="block truncate text-white/80">
+											<Time timestamp={photo.created_at} relative locale={$timeLocale} />
+										</span>
+									{/if}
+								</span>
 							</a>
 						</li>
 					{/each}
