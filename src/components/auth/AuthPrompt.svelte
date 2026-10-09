@@ -18,8 +18,10 @@ type Props = {
 	// Title and description of the choice screen
 	title: string;
 	description: string;
-	onCreateAccountClick?: () => void;
-	onLoginClick?: () => void;
+	// Each prompt tracks its own funnel (AGENTS.md: every entry point fires
+	// trackEvent), so these are required
+	onCreateAccountClick: () => void;
+	onLoginClick: () => void;
 	onLoginSuccess: (session: Session) => void | Promise<void>;
 	onSignupSuccess: (session: Session) => void | Promise<void>;
 };
@@ -64,7 +66,7 @@ $effect.pre(() => {
 			<PrimaryButton
 				type="button"
 				onclick={() => {
-					onCreateAccountClick?.();
+					onCreateAccountClick();
 					view = "signup";
 				}}
 				style="w-full rounded-lg px-4 py-2"
@@ -74,7 +76,7 @@ $effect.pre(() => {
 			<button
 				type="button"
 				onclick={() => {
-					onLoginClick?.();
+					onLoginClick();
 					view = "login";
 				}}
 				class="w-full rounded-lg border border-link px-4 py-2 font-semibold text-link transition-colors hover:bg-link/10"
