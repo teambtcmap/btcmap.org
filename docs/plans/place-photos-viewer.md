@@ -39,12 +39,13 @@ Risk: no npm release since May 2024, although fixes land in the repo until Nov 2
 
 - Header: "Photos N" with the same label style as "Accepts" (reusing the `placePhotos.title` key), plus an "Add photo" text button with the `add_a_photo` icon. The button fires `place_photo_add_click`.
 - The trailing add tile goes away. Upload spinner tiles move to the start of the strip.
-- Empty state (`photos.length === 0 && canAdd`): a dashed 64px row reading "Be the first to add a photo", with the photo guideline as the subline. No header. Deleted places render nothing.
-- Merchant page on mobile: the strip runs edge to edge (`-mx-4 px-4 scroll-px-4`).
+- Empty state (`photos.length === 0 && canAdd`): a dashed 64px row reading "Be the first to add a photo", with "Storefront, inside, bitcoin sticker or QR" as the subline. No header. Deleted places render nothing, and so does a failed load (the invitation would be a false claim).
+- Merchant page on mobile: the strip runs edge to edge (`-mx-4` on the wrapper, `px-4 scroll-px-4` on the strip), so the overlays line up with its edges.
 - Drawer: square 88px tiles.
-- Drawer on pointer devices (Tailwind `pointer-fine`): an edge fade plus a chevron that calls `scrollBy(clientWidth * 0.8)` and fires `place_photo_strip_scroll`. Hide the chevron at the end of the strip.
-- Skeleton: a single row at tile height.
-- New i18n keys in all 9 locales: `placePhotos.emptyTitle`, `emptyHint`, `morePhotos`.
+- Scroll chevrons on pointer devices (Tailwind `pointer-fine`), in every layout (merchant page and drawers): back and forward, each with an edge fade into the background behind the strip (teal on the page, white in the drawer). Each shows only while that direction can scroll (`stripScrollState`), scrolls by `clientWidth * 0.8` and fires `place_photo_strip_scroll` with its `direction`.
+- Tile caption on hover or keyboard focus: the uploader's name (or "Community photo"), plus the relative date on the merchant page. `aria-hidden`; the alt names the link.
+- Skeleton: a single row at tile height, from the shared `Skeleton` component.
+- New i18n keys in all 9 locales: `placePhotos.emptyTitle`, `emptyHint`, `morePhotos`, `previousPhotos`.
 
 ### 2. PhotoSwipe wrapper (`src/lib/placePhotoLightbox.ts`)
 
@@ -98,7 +99,7 @@ Risk: no npm release since May 2024, although fixes land in the repo until Nov 2
 | `place_photo_view` | slide change (new), once per photo per open | `source`, `index` |
 | `place_photo_link_copy` | copy link (new) | `source` |
 | `place_photo_add_click` | header button or empty row (existing) | `source`, `entry: header \| empty`, `signedIn` |
-| `place_photo_strip_scroll` | drawer chevron (new) | `source` |
+| `place_photo_strip_scroll` | strip chevron (new) | `source`, `direction: back \| forward` |
 | `place_photo_menu_open` | viewer ⋯ menu (new) | `source` |
 | `place_photo_add_success` | upload stored | `source`, `count` |
 | `place_photo_delete_click` / `_cancel` / `_success` | ⋯ menu or My photos delete | `source` |
@@ -108,6 +109,8 @@ Risk: no npm release since May 2024, although fixes land in the repo until Nov 2
 | `my_photos_tile_click` | My photos card | `link: photo \| place` |
 
 ### 6. QA
+
+The Playwright spec below was not written; the behaviours were checked by hand and with before/after screenshots.
 
 - Playwright on `/merchant/20423` and `/map?merchant=20423`. CI runs it, because local e2e is broken on this machine. The spec checks:
   - the counter reads "1 / N"
