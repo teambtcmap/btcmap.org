@@ -1,6 +1,6 @@
 <script lang="ts">
 import axios from "axios";
-import { onDestroy } from "svelte";
+import { onDestroy, untrack } from "svelte";
 
 import type { PlacePhotoSource } from "#lib/analytics.js";
 import { trackEvent } from "#lib/analytics.js";
@@ -26,34 +26,47 @@ import Skeleton from "$components/Skeleton.svelte";
 
 import { resolve } from "$app/paths";
 
-export let merchant: Place;
-export let isUpToDate: boolean;
-export let isBoosted: boolean;
-export let boostLoading: boolean;
-export let onBoostClick: () => void;
-export let isLoading: boolean = false;
-// Analytics source for the photo strip: this content renders in the /map
-// drawer and in the area-page drawer
-export let photoSource: Extract<
-	PlacePhotoSource,
-	"map_drawer" | "area_drawer"
-> = "map_drawer";
-// ?issues worklist (#921): surface the place's derived issues as a
-// collapsed row. Off by default — only the map drawers opt in, and only
-// while the worklist mode is active.
-export let showIssues: boolean = false;
+type Props = {
+	merchant: Place;
+	isUpToDate: boolean;
+	isBoosted: boolean;
+	boostLoading: boolean;
+	onBoostClick: () => void;
+	isLoading?: boolean;
+	// Analytics source for the photo strip: this content renders in the /map
+	// drawer and in the area-page drawer
+	photoSource?: Extract<PlacePhotoSource, "map_drawer" | "area_drawer">;
+	// ?issues worklist (#921): surface the place's derived issues as a
+	// collapsed row. Off by default — only the map drawers opt in, and only
+	// while the worklist mode is active.
+	showIssues?: boolean;
+};
+let {
+	merchant,
+	isUpToDate,
+	isBoosted,
+	boostLoading,
+	onBoostClick,
+	isLoading = false,
+	photoSource = "map_drawer",
+	showIssues = false,
+}: Props = $props();
 
-$: displayName =
-	merchant.localized_name?.[getDisplayLang($locale)] || merchant.name;
+const displayName = $derived(
+	merchant.localized_name?.[getDisplayLang($locale)] || merchant.name,
+);
 
-$: companionAppUrl =
+const companionAppUrl = $derived(
 	merchant["osm:payment:lightning:companion_app_url"] ||
-	merchant.required_app_url;
+		merchant.required_app_url,
+);
 
-$: phone = merchant.phone || merchant["osm:contact:phone"];
-$: websiteRaw = merchant.website || merchant["osm:contact:website"];
-$: websiteUrl = sanitizeUrl(websiteRaw);
-$: websiteDisplay = (() => {
+const phone = $derived(merchant.phone || merchant["osm:contact:phone"]);
+const websiteRaw = $derived(
+	merchant.website || merchant["osm:contact:website"],
+);
+const websiteUrl = $derived(sanitizeUrl(websiteRaw));
+const websiteDisplay = $derived.by(() => {
 	if (!websiteUrl) return null;
 	try {
 		const hostname = new URL(websiteUrl).hostname.replace(/^www\./, "");
@@ -61,44 +74,49 @@ $: websiteDisplay = (() => {
 	} catch {
 		return null;
 	}
-})();
+});
 
-$: osmEditUrl =
+const osmEditUrl = $derived(
 	merchant.osm_edit_url ||
-	merchant.osm_url ||
-	`https://www.openstreetmap.org/node/${merchant.id}`;
+		merchant.osm_url ||
+		`https://www.openstreetmap.org/node/${merchant.id}`,
+);
 
 onDestroy(() => {
 	clearTimeout(shareTimeout);
 });
 
-let shareConfirm = false;
+let shareConfirm = $state(false);
 let shareTimeout: ReturnType<typeof setTimeout>;
 
 // Comments state
-let comments: { id: number; text: string; created_at: string }[] = [];
-let commentsLoading = false;
-let commentsError = false;
+let comments = $state<{ id: number; text: string; created_at: string }[]>([]);
+let commentsLoading = $state(false);
+let commentsError = $state(false);
+// Plain variables: the fetch guard reads them, but writing them must not
+// re-run the effect below.
 let lastFetchedId: number | null = null;
 let abortController: AbortController | null = null;
 
 // Non-retrying axios instance for fast fail
 const fastApi = axios.create({ timeout: 5000 });
 
-// Fetch comments when merchant changes (with proper guards)
-$: if (
-	merchant?.id &&
-	merchant.id !== lastFetchedId &&
-	(merchant.comments || 0) > 0
-) {
-	fetchComments(merchant.id);
-} else if (merchant?.id && (merchant.comments || 0) === 0) {
-	// Skip fetch if no comments exist
-	comments = [];
-	commentsLoading = false;
-	commentsError = false;
-	lastFetchedId = null;
-}
+// Fetch comments when merchant changes (with proper guards). `.pre` keeps the
+// legacy `$:` timing: it runs before the first render, so the loading
+// skeleton shows from the first paint.
+$effect.pre(() => {
+	const id = merchant?.id;
+	const commentCount = merchant?.comments || 0;
+	if (id && id !== lastFetchedId && commentCount > 0) {
+		untrack(() => fetchComments(id));
+	} else if (id && commentCount === 0) {
+		// Skip fetch if no comments exist
+		comments = [];
+		commentsLoading = false;
+		commentsError = false;
+		lastFetchedId = null;
+	}
+});
 
 async function fetchComments(placeId: number) {
 	// Cancel any pending request
@@ -158,7 +176,7 @@ async function fetchComments(placeId: number) {
 			{#if displayName}
 				<a
 					href={resolve(`merchant/${merchant.id}`)}
-					on:click={() => trackEvent('merchant_name_click')}
+					onclick={() => trackEvent('merchant_name_click')}
 					class="inline-block text-[22px] leading-snug font-semibold text-link transition-colors hover:text-hover"
 					title={$_('merchant.merchantName')}
 				>
@@ -272,7 +290,7 @@ async function fetchComments(placeId: number) {
 		</a>
 
 		<button
-			on:click={() => {
+			onclick={() => {
 				shareMerchant(merchant.id);
 				clearTimeout(shareTimeout);
 				shareConfirm = true;
@@ -402,7 +420,7 @@ async function fetchComments(placeId: number) {
 	<div class="pt-2 text-center">
 		<a
 			href={resolve(`merchant/${merchant.id}`)}
-			on:click={() => trackEvent('merchant_profile_click')}
+			onclick={() => trackEvent('merchant_profile_click')}
 			class="inline-flex items-center gap-1 text-sm text-link transition-colors hover:text-hover"
 		>
 			{$_('merchant.seeFullProfile')}
