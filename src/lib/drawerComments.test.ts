@@ -38,6 +38,11 @@ describe("planCommentsSync", () => {
 		expect(planCommentsSync({ ...base, id: undefined })).toBe("keep");
 		expect(planCommentsSync({ ...base, id: null, count: 5 })).toBe("keep");
 	});
+
+	it("treats 0 as a merchant id, not as no merchant", () => {
+		expect(planCommentsSync({ ...base, id: 0, count: 2 })).toBe("fetch");
+		expect(planCommentsSync({ ...base, id: 0 })).toBe("clear");
+	});
 });
 
 describe("displayCommentCount", () => {

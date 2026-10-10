@@ -28,7 +28,7 @@ export const planCommentsSync = ({
 	lastFetchedId,
 	addedForId,
 }: CommentsSyncState): CommentsSyncPlan => {
-	if (!id) return "keep";
+	if (id === null || id === undefined) return "keep";
 	const known = count || 0;
 	if (known > 0) return id === lastFetchedId ? "keep" : "fetch";
 	return addedForId === id ? "keep" : "clear";

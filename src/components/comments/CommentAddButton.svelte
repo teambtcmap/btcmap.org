@@ -28,8 +28,15 @@ let {
 let open = $state(false);
 let trigger: HTMLElement | null = null;
 
-const openModal = (event: MouseEvent) => {
-	trigger = event.currentTarget as HTMLElement;
+// The event is optional: a wrapper component may call the handler without it,
+// in which case the focused element (the button that was just activated) is
+// the trigger
+const openModal = (event?: MouseEvent) => {
+	trigger =
+		(event?.currentTarget as HTMLElement | null | undefined) ??
+		(document.activeElement instanceof HTMLElement
+			? document.activeElement
+			: null);
 	trackEvent("comment_add_click", { source });
 	open = true;
 };

@@ -104,7 +104,7 @@ const handleKeydown = (event: KeyboardEvent) => {
 		event.stopPropagation();
 		event.preventDefault();
 		if (stage !== 1 && !loading) closeModal();
-	} else if (rootEl) {
+	} else if (event.key === "Tab" && rootEl) {
 		trapTab(event, rootEl);
 	}
 };

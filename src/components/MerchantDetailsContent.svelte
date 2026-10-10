@@ -121,10 +121,13 @@ $effect.pre(() => {
 		lastFetchedId,
 		addedForId,
 	});
-	if (plan === "fetch" && id) {
+	if (plan === "fetch" && id !== undefined) {
 		untrack(() => fetchComments(id));
 	} else if (plan === "clear") {
-		// Skip fetch if no comments exist
+		// Skip fetch if no comments exist. A request still in flight for the
+		// previous place must not repopulate the list.
+		abortController?.abort();
+		abortController = null;
 		comments = [];
 		commentsLoading = false;
 		commentsError = false;
@@ -144,7 +147,8 @@ async function fetchComments(placeId: number) {
 	if (abortController) {
 		abortController.abort();
 	}
-	abortController = new AbortController();
+	const controller = new AbortController();
+	abortController = controller;
 
 	commentsLoading = true;
 	commentsError = false;
@@ -154,7 +158,7 @@ async function fetchComments(placeId: number) {
 	try {
 		const response = await fastApi.get(
 			`${API_BASE}/v4/places/${placeId}/comments`,
-			{ signal: abortController.signal },
+			{ signal: controller.signal },
 		);
 		// Validate response is an array
 		if (Array.isArray(response.data)) {
@@ -169,8 +173,12 @@ async function fetchComments(placeId: number) {
 		console.error("Error fetching comments:", err);
 		commentsError = true;
 	} finally {
-		commentsLoading = false;
-		abortController = null;
+		// Only the latest request owns the loading state: a cancelled one must
+		// not clear it (or the controller) of the request that replaced it
+		if (abortController === controller) {
+			commentsLoading = false;
+			abortController = null;
+		}
 	}
 }
 </script>
