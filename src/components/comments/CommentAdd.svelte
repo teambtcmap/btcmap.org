@@ -116,9 +116,11 @@ const portal = (node: HTMLElement) => {
 	return { destroy: () => node.remove() };
 };
 
-// Land in the comment field when the form opens
+// Land in the comment field when the form opens, on desktop only: on a touch
+// device the on-screen keyboard would pop up at once and cover the note about
+// the fee and anonymity before it is read (same rule as AddLocationForm).
 $effect(() => {
-	if (open && stage === 0) {
+	if (open && stage === 0 && window.matchMedia("(pointer: fine)").matches) {
 		tick().then(() => commentInput?.focus());
 	}
 });
@@ -165,7 +167,7 @@ const handleStatusCheckError = (error: unknown) => {
 			aria-modal="true"
 			aria-label={$_("commentAdd.title")}
 			transition:fly={{ y: 200, duration: 300 }}
-			class="center-fixed z-[2000] max-h-[90dvh] w-[90vw] overflow-auto rounded-xl border border-gray-300 bg-white p-6 text-left shadow-2xl md:w-[430px] dark:border-white/95 dark:bg-dark"
+			class="fixed inset-x-4 bottom-[max(1rem,env(safe-area-inset-bottom))] z-[2000] max-h-[85dvh] overflow-auto rounded-xl border border-gray-300 bg-white p-6 text-left shadow-2xl md:inset-auto md:top-1/2 md:left-1/2 md:max-h-[90dvh] md:w-[430px] md:-translate-x-1/2 md:-translate-y-1/2 dark:border-white/95 dark:bg-dark"
 		>
 			<CloseButton
 				position="flex justify-end"
