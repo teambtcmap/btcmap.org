@@ -13,12 +13,7 @@ import {
 import type { Session } from "#lib/session.js";
 import { session } from "#lib/session.js";
 import { errToast } from "#lib/utils.js";
-import LoginForm from "$components/auth/LoginForm.svelte";
-import NostrLoginForm from "$components/auth/NostrLoginForm.svelte";
-import SignupForm from "$components/auth/SignupForm.svelte";
-import Modal from "$components/Modal.svelte";
-import PrimaryButton from "$components/PrimaryButton.svelte";
-import TextLink from "$components/TextLink.svelte";
+import AuthPrompt from "$components/auth/AuthPrompt.svelte";
 
 type Props = {
 	id: number;
@@ -28,9 +23,6 @@ type Props = {
 
 let { id, type, open = $bindable(false) }: Props = $props();
 
-type View = "choice" | "login" | "signup";
-let view = $state<View>("choice");
-
 const promptTitleKey = $derived(
 	type === "area" ? "save.prompt.titleArea" : "save.prompt.titlePlace",
 );
@@ -39,22 +31,6 @@ const promptDescriptionKey = $derived(
 		? "save.prompt.descriptionArea"
 		: "save.prompt.descriptionPlace",
 );
-
-// $_ is read inside the derived so a locale change retitles the modal.
-const title = $derived(
-	view === "signup"
-		? $_("signup.title")
-		: view === "login"
-			? $_("login.title")
-			: $_(promptTitleKey),
-);
-
-// Reset view state whenever the modal is (re)opened/closed.
-$effect.pre(() => {
-	if (!open) {
-		view = "choice";
-	}
-});
 
 async function performInitialSave(current: Session) {
 	const existing = getSavedList(current, type);
@@ -112,58 +88,14 @@ async function handleLoginSuccess(current: Session) {
 }
 </script>
 
-<Modal bind:open {title} titleId="save-auth-prompt-title">
-	{#if view === "choice"}
-		<p class="mb-6 text-sm text-body dark:text-white/70">
-			{$_(promptDescriptionKey)}
-		</p>
-		<div class="space-y-3">
-			<PrimaryButton
-				type="button"
-				onclick={() => {
-					trackEvent("save_prompt_create_account_click", { type });
-					view = "signup";
-				}}
-				style="w-full rounded-lg px-4 py-2"
-			>
-				{$_("save.prompt.createAccount")}
-			</PrimaryButton>
-			<button
-				type="button"
-				onclick={() => {
-					trackEvent("save_prompt_login_click", { type });
-					view = "login";
-				}}
-				class="w-full rounded-lg border border-link px-4 py-2 font-semibold text-link transition-colors hover:bg-link/10"
-			>
-				{$_("save.prompt.login")}
-			</button>
-		</div>
-	{:else if view === "login"}
-		<LoginForm compact onSuccess={handleLoginSuccess} />
-		<div class="my-4 flex items-center gap-3">
-			<div class="h-px flex-1 bg-gray-300 dark:bg-white/20"></div>
-			<span class="text-xs text-body dark:text-white/50">
-				{$_("login.otherMethods")}
-			</span>
-			<div class="h-px flex-1 bg-gray-300 dark:bg-white/20"></div>
-		</div>
-		<NostrLoginForm onSuccess={handleLoginSuccess} />
-		<TextLink
-			type="button"
-			onclick={() => (view = "choice")}
-			style="mt-4 text-sm"
-		>
-			← {$_("save.prompt.back")}
-		</TextLink>
-	{:else if view === "signup"}
-		<SignupForm onSuccess={handleSignupSuccess} />
-		<TextLink
-			type="button"
-			onclick={() => (view = "choice")}
-			style="mt-4 text-sm"
-		>
-			← {$_("save.prompt.back")}
-		</TextLink>
-	{/if}
-</Modal>
+<AuthPrompt
+	bind:open
+	titleId="save-auth-prompt-title"
+	title={$_(promptTitleKey)}
+	description={$_(promptDescriptionKey)}
+	onCreateAccountClick={() =>
+		trackEvent("save_prompt_create_account_click", { type })}
+	onLoginClick={() => trackEvent("save_prompt_login_click", { type })}
+	onLoginSuccess={handleLoginSuccess}
+	onSignupSuccess={handleSignupSuccess}
+/>

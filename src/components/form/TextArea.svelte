@@ -61,7 +61,7 @@ const note = $derived(labelNote ?? (optional ? $_("forms.optional") : ""));
 </script>
 
 <div>
-	<label for={id} class="mb-2 block font-semibold">
+	<label for={id} class="mb-2 block font-semibold text-primary dark:text-white">
 		{label}
 		{#if note}
 			<span class="font-normal">{note}</span>
@@ -82,7 +82,7 @@ const note = $derived(labelNote ?? (optional ? $_("forms.optional") : ""));
 		aria-describedby={describedBy}
 		class="w-full rounded-2xl border-2 {fieldBorderClasses(
 			showInvalid,
-		)} p-3 transition-all disabled:cursor-not-allowed disabled:bg-gray-100 disabled:text-gray-500 dark:bg-white/[0.15] dark:disabled:bg-gray-700 dark:disabled:text-gray-400"
+		)} p-3 text-primary transition-all disabled:cursor-not-allowed disabled:bg-gray-100 disabled:text-gray-500 dark:bg-white/[0.15] dark:text-white dark:disabled:bg-gray-700 dark:disabled:text-gray-400"
 		{...rest}
 	></textarea>
 	{#if children}

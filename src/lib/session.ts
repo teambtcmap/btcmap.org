@@ -101,6 +101,11 @@ function normalizeCredentials(
 	return { username, password: credentials.password };
 }
 
+// Request config for an authenticated API call (axios `headers` option)
+export const authHeaders = (token: string) => ({
+	headers: { Authorization: `Bearer ${token}` },
+});
+
 // Mints a Bearer token for a user — the password authenticates the mint
 // (sent as the Bearer on this one endpoint). Shared by login and signup.
 export const mintToken = async (

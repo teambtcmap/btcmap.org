@@ -335,3 +335,12 @@ describe("session store", () => {
 		});
 	});
 });
+
+describe("authHeaders", () => {
+	it("sends the token as a Bearer Authorization header", async () => {
+		const { authHeaders } = await import("#lib/session.js");
+		expect(authHeaders("tok")).toEqual({
+			headers: { Authorization: "Bearer tok" },
+		});
+	});
+});

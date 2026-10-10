@@ -32,6 +32,7 @@ import {
 } from "#lib/constants.js";
 import { SEARCH_SHEET_PEEK_HEIGHT } from "#lib/drawerConfig.js";
 import { _, getDisplayLang, locale } from "#lib/i18n/index.js";
+import { withLiteralCommas } from "#lib/literalCommas.js";
 import type { BasemapId } from "#lib/map/basemaps.js";
 import {
 	BASEMAPS,
@@ -71,7 +72,6 @@ import {
 import {
 	MERCHANT_URL_CHANGE_EVENT,
 	parseMerchantHash,
-	withLiteralCommas,
 } from "#lib/merchantDrawerHash.js";
 import { merchantDrawer } from "#lib/merchantDrawerStore.js";
 import { merchantList } from "#lib/merchantListStore.js";

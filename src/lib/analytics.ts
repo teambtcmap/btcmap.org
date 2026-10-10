@@ -66,10 +66,33 @@ export type EventName =
 	| "add_place_tagger_guide_click"
 	| "add_place_review_queue_click"
 	| "comment_add_click"
-	| "comment_add_success";
+	| "comment_add_success"
+	| "place_photo_open"
+	| "place_photo_add_click"
+	| "place_photo_add_success"
+	| "place_photo_prompt_create_account_click"
+	| "place_photo_prompt_login_click"
+	| "place_photo_strip_scroll"
+	| "place_photo_view"
+	| "place_photo_link_copy"
+	| "place_photo_menu_open"
+	| "place_photo_delete_click"
+	| "place_photo_delete_success"
+	| "place_photo_upload_undo_click"
+	| "place_photo_upload_undo_success"
+	| "place_photo_delete_cancel"
+	| "my_photos_click"
+	| "my_photos_tile_click";
 
 // Where the comment flow was opened from (funnel breakdown).
 export type CommentSource = "map_drawer" | "area_drawer" | "merchant_page";
+
+// Where the photo strip, viewer or My photos was used (funnel breakdown).
+export type PlacePhotoSource =
+	| "merchant_page"
+	| "map_drawer"
+	| "area_drawer"
+	| "my_photos";
 
 declare global {
 	interface Window {

@@ -54,7 +54,8 @@
 		"taggingIssues": "Problemas de Etiquetagem",
 		"communities": "Comunidades",
 		"countries": "Países",
-		"signup": "Cadastrar"
+		"signup": "Cadastrar",
+		"myPhotos": "Minhas fotos"
 	},
 	"search": {
 		"placeholderPlaces": "Pesquisar lugares...",
@@ -463,7 +464,8 @@
 		"searchButton": "Pesquisar 🔍",
 		"address": "Endereço",
 		"captchaPlaceholder": "Por favor insira o texto do captcha.",
-		"captchaRequired": "Digite os caracteres da imagem."
+		"captchaRequired": "Digite os caracteres da imagem.",
+		"cancel": "Cancelar"
 	},
 	"openingHours": {
 		"open247": "Aberto 24/7",
@@ -1209,5 +1211,48 @@
 		"error": "Não foi possível criar a conta. O nome de usuário pode já estar em uso.",
 		"haveAccount": "Já tem uma conta?",
 		"signIn": "Entrar com senha ou Nostr"
+	},
+	"placePhotos": {
+		"title": "Fotos",
+		"add": "Adicionar foto",
+		"uploading": "Enviando foto…",
+		"uploaded": "{count, plural, one {Obrigado! Sua foto já está publicada.} other {Obrigado! Suas # fotos já estão publicadas.}}",
+		"uploadFailed": "{count, plural, one {Não foi possível enviar uma foto. Tente novamente.} other {Não foi possível enviar # fotos. Tente novamente.}}",
+		"photoAlt": "Foto {n} de {total}",
+		"previous": "Foto anterior",
+		"next": "Próxima foto",
+		"close": "Fechar",
+		"promptTitle": "Adicionar uma foto",
+		"promptDescription": "Entre na sua conta ou crie uma nova para adicionar fotos deste lugar.",
+		"tooMany": "Você pode adicionar até {max} fotos por vez. Enviando as primeiras {max}.",
+		"emptyTitle": "Seja o primeiro a adicionar uma foto",
+		"emptyHint": "Fachada, interior, adesivo ou QR de bitcoin",
+		"morePhotos": "Mais fotos",
+		"previousPhotos": "Fotos anteriores",
+		"communityPhoto": "Foto da comunidade",
+		"copyLink": "Copiar link da foto",
+		"linkCopied": "Link copiado",
+		"copyLinkFailed": "Não foi possível copiar o link",
+		"moreActions": "Mais ações",
+		"credit": "Foto de {name}",
+		"deletePhoto": "Excluir foto",
+		"deleteConfirm": "Excluir esta foto? Isso não pode ser desfeito.",
+		"deleteConfirmAction": "Excluir",
+		"deleted": "Foto excluída",
+		"deleteFailed": "Não foi possível excluir a foto. Tente novamente.",
+		"deleteForbidden": "Você só pode excluir suas próprias fotos.",
+		"undo": "Desfazer",
+		"undone": "{count, plural, one {Foto removida} other {# fotos removidas}}"
+	},
+	"authPrompt": {
+		"createAccount": "Criar conta",
+		"login": "Entrar",
+		"back": "Voltar"
+	},
+	"myPhotos": {
+		"title": "Minhas fotos",
+		"empty": "Você ainda não adicionou fotos. Abra um lugar e toque em \"Adicionar foto\".",
+		"loadError": "Não foi possível carregar suas fotos. Tente novamente.",
+		"unknownPlace": "Lugar #{id}"
 	}
 }

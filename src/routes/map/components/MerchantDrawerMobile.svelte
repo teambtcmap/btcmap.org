@@ -12,6 +12,7 @@ import {
 	ensureBoostData,
 } from "#lib/merchantDrawerLogic.js";
 import { merchantDrawer } from "#lib/merchantDrawerStore.js";
+import { photoIdFromSearch } from "#lib/placePhotos.js";
 import { boost, resetBoost } from "#lib/store.js";
 import { isUpToDate as checkUpToDate } from "#lib/verification.js";
 import BoostContent from "$components/BoostContent.svelte";
@@ -52,7 +53,13 @@ $: if (isOpen && merchantId !== previousMerchantId) {
 	// Track previous merchant to prevent re-triggering
 
 	previousMerchantId = merchantId;
-	drawerGesture.resetToPeek();
+	// A ?photo= deep link opens the sheet expanded: the photo strip (which
+	// opens the viewer) only mounts in the expanded sheet
+	if (browser && photoIdFromSearch(window.location.search) !== null) {
+		drawerGesture.expand();
+	} else {
+		drawerGesture.resetToPeek();
+	}
 }
 
 // Focus management: save/restore focus when expanding/collapsing
