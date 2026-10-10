@@ -9,12 +9,14 @@ import {
 	CATEGORY_COLOR_CLASSES,
 	getIconColorWithFallback,
 } from "#lib/categoryMapping.js";
+import { displayCommentCount, planCommentsSync } from "#lib/drawerComments.js";
 import { _, getDisplayLang, locale } from "#lib/i18n/index.js";
 import type { Place } from "#lib/types.js";
 import { formatVerifiedHuman, sanitizeUrl, shareMerchant } from "#lib/utils.js";
 import BoostCard from "$components/BoostCard.svelte";
 import CompanionAppPill from "$components/CompanionAppPill.svelte";
 import CopyButton from "$components/CopyButton.svelte";
+import CommentAddButton from "$components/comments/CommentAddButton.svelte";
 import Icon from "$components/Icon.svelte";
 import MerchantComment from "$components/MerchantComment.svelte";
 import MerchantIssuesRow from "$components/MerchantIssuesRow.svelte";
@@ -96,6 +98,12 @@ let commentsError = $state(false);
 // Plain variables: the fetch guard reads them, but writing them must not
 // re-run the effect below.
 let lastFetchedId: number | null = null;
+// The place a comment was just posted for from this drawer. Its record still
+// says 0 comments (see drawerComments.ts), so the effect below must not wipe
+// the list that was just fetched.
+let addedForId: number | null = null;
+// The place `comments` was fetched for: lifts the chip count past a stale record
+let commentsLoadedFor = $state<number | null>(null);
 let abortController: AbortController | null = null;
 
 // Non-retrying axios instance for fast fail
@@ -106,17 +114,30 @@ const fastApi = axios.create({ timeout: 5000 });
 // skeleton shows from the first paint.
 $effect.pre(() => {
 	const id = merchant?.id;
-	const commentCount = merchant?.comments || 0;
-	if (id && id !== lastFetchedId && commentCount > 0) {
+	if (addedForId !== null && addedForId !== id) addedForId = null;
+	const plan = planCommentsSync({
+		id,
+		count: merchant?.comments,
+		lastFetchedId,
+		addedForId,
+	});
+	if (plan === "fetch" && id) {
 		untrack(() => fetchComments(id));
-	} else if (id && commentCount === 0) {
+	} else if (plan === "clear") {
 		// Skip fetch if no comments exist
 		comments = [];
 		commentsLoading = false;
 		commentsError = false;
 		lastFetchedId = null;
+		commentsLoadedFor = null;
 	}
 });
+
+// A comment was published from this drawer: show it without a reload
+function handleCommentAdded() {
+	addedForId = merchant.id;
+	fetchComments(merchant.id);
+}
 
 async function fetchComments(placeId: number) {
 	// Cancel any pending request
@@ -128,6 +149,7 @@ async function fetchComments(placeId: number) {
 	commentsLoading = true;
 	commentsError = false;
 	lastFetchedId = placeId;
+	commentsLoadedFor = null;
 
 	try {
 		const response = await fastApi.get(
@@ -137,6 +159,7 @@ async function fetchComments(placeId: number) {
 		// Validate response is an array
 		if (Array.isArray(response.data)) {
 			comments = response.data;
+			commentsLoadedFor = placeId;
 		} else {
 			comments = [];
 			commentsError = true;
@@ -313,7 +336,7 @@ async function fetchComments(placeId: number) {
 			<span
 				class="flex h-9 w-9 items-center justify-center rounded-full border border-gray-300 transition-colors hover:bg-gray-50 dark:border-white/20 dark:hover:bg-white/10"
 			>
-				<span class="text-sm font-bold">{merchant.comments || 0}</span>
+				<span class="text-sm font-bold">{displayCommentCount(merchant.comments, comments.length, commentsLoadedFor === merchant.id)}</span>
 			</span>
 			<span class="text-[11px]">{$_('merchant.comments')}</span>
 		</a>
@@ -393,27 +416,39 @@ async function fetchComments(placeId: number) {
 		onClick={onBoostClick}
 	/>
 
-	<!-- Comments Section -->
-	{#if commentsLoading}
-		<div class="space-y-2">
-			<Skeleton class="h-4 w-24 rounded" />
-			<div class="space-y-2">
-				<Skeleton class="h-12 w-full rounded" />
-				<Skeleton class="h-12 w-full rounded" />
-			</div>
-		</div>
-	{:else if commentsError}
-		<div class="rounded-lg bg-red-100 p-3 text-sm text-red-700 dark:bg-red-900/30 dark:text-red-300">
-			{$_('errors.loadFailed')}
-		</div>
-	{:else if comments.length > 0}
+	<!-- Comments Section: always shown with its entry point, except on a deleted
+	     place without comments -->
+	{#if !merchant.deleted_at || comments.length > 0 || commentsLoading || commentsError}
 		<div class="border-t border-gray-200 pt-4 dark:border-white/10">
-			<span class="block text-xs text-mapLabel dark:text-white/70">{$_('merchant.comments')}</span>
-			<div class="mt-2 space-y-2">
-				{#each [...comments].reverse() as comment (comment.id)}
-					<MerchantComment text={comment.text} time={comment.created_at} compact={true} />
-				{/each}
+			<div class="mb-2 flex items-center justify-between gap-3">
+				<span class="block text-xs text-mapLabel dark:text-white/70">{$_('merchant.comments')}</span>
+				{#if !merchant.deleted_at}
+					<CommentAddButton
+						elementId={merchant.id}
+						source={photoSource}
+						variant="text"
+						onSuccess={handleCommentAdded}
+					/>
+				{/if}
 			</div>
+			{#if commentsLoading}
+				<div class="space-y-2">
+					<Skeleton class="h-12 w-full rounded" />
+					<Skeleton class="h-12 w-full rounded" />
+				</div>
+			{:else if commentsError}
+				<div class="rounded-lg bg-red-100 p-3 text-sm text-red-700 dark:bg-red-900/30 dark:text-red-300">
+					{$_('errors.loadFailed')}
+				</div>
+			{:else if comments.length > 0}
+				<div class="space-y-2">
+					{#each [...comments].reverse() as comment (comment.id)}
+						<MerchantComment text={comment.text} time={comment.created_at} compact={true} />
+					{/each}
+				</div>
+			{:else}
+				<p class="text-sm text-body dark:text-white/70">{$_('comments.none')}</p>
+			{/if}
 		</div>
 	{/if}
 
