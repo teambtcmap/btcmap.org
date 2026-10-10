@@ -1,16 +1,17 @@
 <script lang="ts">
 import { createForm } from "@tanstack/svelte-form";
 import axios from "axios";
-import { fly } from "svelte/transition";
+import { tick } from "svelte";
+import { fade, fly } from "svelte/transition";
 import { OutClick } from "svelte-outclick";
 
 import type { CommentSource } from "#lib/analytics.js";
 import { trackEvent } from "#lib/analytics.js";
 import { API_BASE } from "#lib/api-base.js";
+import { trapTab } from "#lib/focusTrap.js";
 import { _ } from "#lib/i18n/index.js";
 import { fieldError, inputProps, ruleValidation } from "#lib/ruleValidation.js";
 import { updateSinglePlace } from "#lib/sync/places.js";
-import type { MerchantPageData } from "#lib/types.js";
 import { errToast } from "#lib/utils.js";
 import CloseButton from "$components/CloseButton.svelte";
 import TextArea from "$components/form/TextArea.svelte";
@@ -23,7 +24,7 @@ type Props = {
 	onOpenChange?: (value: boolean) => void;
 	/** Runs when the modal closes after a published comment, so the host can refresh its own view. */
 	onSuccess?: () => void;
-	elementId: MerchantPageData["id"] | undefined;
+	elementId: string | number | undefined;
 	/** Which surface opened the flow; reported with the `comment_add_success` event. */
 	source?: CommentSource;
 };
@@ -36,6 +37,7 @@ let {
 }: Props = $props();
 
 let stage = $state(0);
+let rootEl = $state<HTMLDivElement>();
 let commentInput = $state<HTMLTextAreaElement>();
 let invoice = $state("");
 let invoiceId = $state("");
@@ -92,6 +94,35 @@ const form = createForm(() => ({
 	},
 }));
 
+// Capture phase + stopPropagation: the map drawers close themselves on a
+// bubbling window Escape, which would take the drawer down with this modal.
+// Escape closes the form and the thank-you, but not the invoice step: a paid
+// invoice is not lost to a stray key (the Close button is still there).
+const handleKeydown = (event: KeyboardEvent) => {
+	if (!open) return;
+	if (event.key === "Escape") {
+		event.stopPropagation();
+		event.preventDefault();
+		if (stage !== 1 && !loading) closeModal();
+	} else if (rootEl) {
+		trapTab(event, rootEl);
+	}
+};
+
+// Render at the end of <body>: the map drawers are position-fixed with their
+// own stacking context, which would trap this overlay inside them.
+const portal = (node: HTMLElement) => {
+	document.body.appendChild(node);
+	return { destroy: () => node.remove() };
+};
+
+// Land in the comment field when the form opens
+$effect(() => {
+	if (open && stage === 0) {
+		tick().then(() => commentInput?.focus());
+	}
+});
+
 const handleOutClick = () => {
 	// Never close the modal on outside clicks to prevent accidental loss of progress
 };
@@ -122,8 +153,17 @@ const handleStatusCheckError = (error: unknown) => {
 </script>
 
 {#if open}
+	<div use:portal>
+	<!-- Blocks the page behind: the host (e.g. the map drawer) must not switch
+	     to another place while this form is bound to one. Like the modal
+	     itself it never closes on an outside click. -->
+	<div transition:fade={{ duration: 200 }} class="fixed inset-0 z-[1999] bg-black/40 dark:bg-black/60" aria-hidden="true"></div>
 	<OutClick excludeQuerySelectorAll="#boost-button" onOutClick={handleOutClick}>
 		<div
+			bind:this={rootEl}
+			role="dialog"
+			aria-modal="true"
+			aria-label={$_("commentAdd.title")}
 			transition:fly={{ y: 200, duration: 300 }}
 			class="center-fixed z-[2000] max-h-[90dvh] w-[90vw] overflow-auto rounded-xl border border-gray-300 bg-white p-6 text-left shadow-2xl md:w-[430px] dark:border-white/95 dark:bg-dark"
 		>
@@ -194,4 +234,7 @@ const handleStatusCheckError = (error: unknown) => {
 			{/if}
 		</div>
 	</OutClick>
+	</div>
 {/if}
+
+<svelte:window onkeydowncapture={handleKeydown} />
