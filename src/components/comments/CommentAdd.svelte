@@ -116,12 +116,15 @@ const portal = (node: HTMLElement) => {
 	return { destroy: () => node.remove() };
 };
 
-// Land in the comment field when the form opens, on desktop only: on a touch
-// device the on-screen keyboard would pop up at once and cover the note about
-// the fee and anonymity before it is read (same rule as AddLocationForm).
+// Move focus into the dialog when the form opens (aria-modal alone doesn't:
+// it would stay on the trigger behind the backdrop). Desktop lands in the
+// comment field; on a touch device that would pop the on-screen keyboard at
+// once and cover the note about the fee and anonymity before it is read (same
+// rule as AddLocationForm), so focus goes to the dialog itself there.
 $effect(() => {
-	if (open && stage === 0 && window.matchMedia("(pointer: fine)").matches) {
-		tick().then(() => commentInput?.focus());
+	if (open && stage === 0) {
+		const fine = window.matchMedia("(pointer: fine)").matches;
+		tick().then(() => (fine ? commentInput : rootEl)?.focus());
 	}
 });
 
@@ -163,11 +166,12 @@ const handleStatusCheckError = (error: unknown) => {
 	<OutClick excludeQuerySelectorAll="#boost-button" onOutClick={handleOutClick}>
 		<div
 			bind:this={rootEl}
+			tabindex="-1"
 			role="dialog"
 			aria-modal="true"
 			aria-label={$_("commentAdd.title")}
 			transition:fly={{ y: 200, duration: 300 }}
-			class="fixed inset-x-4 bottom-[max(1rem,env(safe-area-inset-bottom))] z-[2000] max-h-[85dvh] overflow-auto rounded-xl border border-gray-300 bg-white p-6 text-left shadow-2xl md:inset-auto md:top-1/2 md:left-1/2 md:max-h-[90dvh] md:w-[430px] md:-translate-x-1/2 md:-translate-y-1/2 dark:border-white/95 dark:bg-dark"
+			class="fixed inset-x-4 outline-none bottom-[max(1rem,env(safe-area-inset-bottom))] z-[2000] max-h-[85dvh] overflow-auto rounded-xl border border-gray-300 bg-white p-6 text-left shadow-2xl md:inset-auto md:top-1/2 md:left-1/2 md:max-h-[90dvh] md:w-[430px] md:-translate-x-1/2 md:-translate-y-1/2 dark:border-white/95 dark:bg-dark"
 		>
 			<CloseButton
 				position="flex justify-end"
