@@ -12,7 +12,7 @@ import { browser } from "$app/env";
 
 type Props = {
 	elementId: string | number | undefined;
-	/** Forwarded to `CommentAdd`: runs after a published comment, once the modal closes. */
+	/** Forwarded to `CommentAdd`: runs once a comment is paid and live. */
 	onSuccess?: () => void;
 	/** Which surface hosts the button; reported with the comment funnel events. */
 	source?: CommentSource;

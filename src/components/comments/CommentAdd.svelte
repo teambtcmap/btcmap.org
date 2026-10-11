@@ -22,7 +22,12 @@ import PrimaryButton from "$components/PrimaryButton.svelte";
 type Props = {
 	open?: boolean;
 	onOpenChange?: (value: boolean) => void;
-	/** Runs when the modal closes after a published comment, so the host can refresh its own view. */
+	/**
+	 * Runs once the invoice is paid, which is when the comment goes live (the
+	 * API publishes it while answering the status poll), not when the modal is
+	 * closed: the host refreshes behind the thank-you, and a modal dismissed
+	 * some other way can't leave it stale.
+	 */
 	onSuccess?: () => void;
 	elementId: string | number | undefined;
 	/** Which surface opened the flow; reported with the `comment_add_success` event. */
@@ -42,11 +47,7 @@ let commentInput = $state<HTMLTextAreaElement>();
 let invoice = $state("");
 let invoiceId = $state("");
 let loading = $state(false);
-let commentComplete = $state(false);
 const closeModal = () => {
-	if (commentComplete) {
-		onSuccess();
-	}
 	onOpenChange(false);
 	// The draft stays for the next open; its error doesn't.
 	form.reset(form.state.values);
@@ -55,7 +56,6 @@ const closeModal = () => {
 	invoice = "";
 	invoiceId = "";
 	loading = false;
-	commentComplete = false;
 };
 
 // The comment on TanStack Form (#1406): an empty or blank one is marked on
@@ -137,15 +137,17 @@ const generateInvoice = (event: SubmitEvent) => {
 };
 
 const handlePaymentSuccess = async () => {
-	// Comment will be published automatically by the backend
+	// The API publishes the comment while answering the status poll that
+	// reported the payment, so it is live now
 	stage = 2;
-	commentComplete = true;
 	trackEvent("comment_add_success", { source });
 
-	// Update the place in localforage and store immediately
+	// Update the place in localforage and store immediately, then let the host
+	// refresh its own view (after, so it reads the updated place)
 	if (elementId) {
 		await updateSinglePlace(elementId);
 	}
+	onSuccess();
 };
 
 const handlePaymentError = (error: unknown) => {
