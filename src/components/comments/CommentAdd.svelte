@@ -20,20 +20,19 @@ import InvoicePaymentStage from "$components/InvoicePaymentStage.svelte";
 import PrimaryButton from "$components/PrimaryButton.svelte";
 
 import type { PostPlaceCommentArgs } from "$types/btcmap-api/PostPlaceCommentArgs";
+import type { PostPlaceCommentResponse } from "$types/btcmap-api/PostPlaceCommentResponse";
 
 type Props = {
 	open?: boolean;
 	onOpenChange?: (value: boolean) => void;
-	/**
-	 * Runs once the invoice is paid, which is when the comment goes live (the
-	 * API publishes it while answering the status poll), not when the modal is
-	 * closed: the host refreshes behind the thank-you, and a modal dismissed
-	 * some other way can't leave it stale.
-	 */
+	// Runs once the invoice is paid, which is when the comment goes live (the
+	// API publishes it while answering the status poll), not when the modal is
+	// closed: the host refreshes behind the thank-you, and a modal dismissed
+	// some other way can't leave it stale.
 	onSuccess?: () => void;
-	/** The API's `place_id`: a string, so callers holding a numeric id convert it (`String(id)`). */
+	// The API's `place_id`: a string, so callers holding a numeric id convert it (`String(id)`).
 	elementId: PostPlaceCommentArgs["place_id"] | undefined;
-	/** Which surface opened the flow; reported with the `comment_add_success` event. */
+	// Which surface opened the flow; reported with the `comment_add_success` event.
 	source?: CommentSource;
 };
 let {
@@ -78,11 +77,12 @@ const form = createForm(() => ({
 	onSubmit: ({ value }) => {
 		if (!elementId) return;
 		loading = true;
+		const args: PostPlaceCommentArgs = {
+			place_id: elementId,
+			comment: value.comment.trim(),
+		};
 		axios
-			.post(`${API_BASE}/v4/place-comments`, {
-				place_id: elementId,
-				comment: value.comment.trim(),
-			})
+			.post<PostPlaceCommentResponse>(`${API_BASE}/v4/place-comments`, args)
 			.then((response) => {
 				invoice = response.data.invoice;
 				invoiceId = response.data.invoice_id;

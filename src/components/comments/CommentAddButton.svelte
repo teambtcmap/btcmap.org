@@ -13,11 +13,11 @@ import type { PostPlaceCommentArgs } from "$types/btcmap-api/PostPlaceCommentArg
 
 type Props = {
 	elementId: PostPlaceCommentArgs["place_id"] | undefined;
-	/** Forwarded to `CommentAdd`: runs once a comment is paid and live. */
+	// Forwarded to `CommentAdd`: runs once a comment is paid and live.
 	onSuccess?: () => void;
-	/** Which surface hosts the button; reported with the comment funnel events. */
+	// Which surface hosts the button; reported with the comment funnel events.
 	source?: CommentSource;
-	/** `button`: the filled call to action (merchant page). `text`: a section-header link (drawers). */
+	// `button`: the filled call to action (merchant page). `text`: a section-header link (drawers).
 	variant?: "button" | "text";
 };
 let {
