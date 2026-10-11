@@ -436,7 +436,7 @@ async function fetchComments(placeId: number) {
 				<span class="block text-xs text-mapLabel dark:text-white/70">{$_('merchant.comments')}</span>
 				{#if !merchant.deleted_at}
 					<CommentAddButton
-						elementId={merchant.id}
+						elementId={String(merchant.id)}
 						source={commentSource}
 						variant="text"
 						onSuccess={handleCommentAdded}

@@ -19,6 +19,8 @@ import Icon from "$components/Icon.svelte";
 import InvoicePaymentStage from "$components/InvoicePaymentStage.svelte";
 import PrimaryButton from "$components/PrimaryButton.svelte";
 
+import type { PostPlaceCommentArgs } from "$types/btcmap-api/PostPlaceCommentArgs";
+
 type Props = {
 	open?: boolean;
 	onOpenChange?: (value: boolean) => void;
@@ -29,7 +31,8 @@ type Props = {
 	 * some other way can't leave it stale.
 	 */
 	onSuccess?: () => void;
-	elementId: string | number | undefined;
+	/** The API's `place_id`: a string, so callers holding a numeric id convert it (`String(id)`). */
+	elementId: PostPlaceCommentArgs["place_id"] | undefined;
 	/** Which surface opened the flow; reported with the `comment_add_success` event. */
 	source?: CommentSource;
 };

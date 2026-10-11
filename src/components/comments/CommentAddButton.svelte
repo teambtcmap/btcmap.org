@@ -9,9 +9,10 @@ import PrimaryButton from "$components/PrimaryButton.svelte";
 
 import CommentAdd from "./CommentAdd.svelte";
 import { browser } from "$app/env";
+import type { PostPlaceCommentArgs } from "$types/btcmap-api/PostPlaceCommentArgs";
 
 type Props = {
-	elementId: string | number | undefined;
+	elementId: PostPlaceCommentArgs["place_id"] | undefined;
 	/** Forwarded to `CommentAdd`: runs once a comment is paid and live. */
 	onSuccess?: () => void;
 	/** Which surface hosts the button; reported with the comment funnel events. */
