@@ -101,4 +101,40 @@ test.describe('Map drawer — add comment', () => {
 		await expect(comment).toHaveAttribute('aria-invalid', 'true');
 		expect(posts).toBe(0);
 	});
+	// The mobile sheet traps focus while expanded and pulls anything that leaves
+	// it back to its drag handle. The modal is portaled outside the sheet, so a
+	// tap on its field used to lose focus at once and the keyboard never opened
+	// (clicks still worked, which hid it). The desktop drawer has no such trap,
+	// so this needs the phone viewport, real touch and a coarse pointer.
+	test.describe('on a phone', () => {
+		test.use({ viewport: { width: 390, height: 844 }, hasTouch: true, isMobile: true });
+
+		test('the comment field keeps focus when tapped, over the expanded sheet', async ({
+			page
+		}) => {
+			await page.route('**/v4/place-comments', async (route) => {
+				await route.abort();
+			});
+			await openDrawer(page, 0, []);
+
+			// The trap only acts while the sheet is expanded
+			await page.keyboard.press('ArrowUp');
+			await expect(page.locator('[aria-controls="drawer-content"]')).toHaveAttribute(
+				'aria-expanded',
+				'true'
+			);
+
+			await page.getByRole('button', { name: 'Add Comment' }).tap();
+			const modal = page.getByRole('dialog', { name: 'Add Comment' });
+			await expect(modal).toBeVisible();
+			// Touch devices focus the dialog, not the field: no keyboard on open
+			await expect(modal).toBeFocused();
+
+			const comment = page.getByLabel('Your comment');
+			await comment.tap();
+			await expect(comment).toBeFocused();
+			await page.keyboard.type('Paid with Lightning');
+			await expect(comment).toHaveValue('Paid with Lightning');
+		});
+	});
 });
