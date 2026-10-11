@@ -125,6 +125,7 @@ function handleKeydown(event: KeyboardEvent) {
 					<MerchantDetailsContent
 						{merchant}
 						photoSource="area_drawer"
+						commentSource="area_drawer"
 						{isUpToDate}
 						{isBoosted}
 						{boostLoading}

@@ -2,7 +2,7 @@
 import axios from "axios";
 import { onDestroy, untrack } from "svelte";
 
-import type { PlacePhotoSource } from "#lib/analytics.js";
+import type { CommentSource, PlacePhotoSource } from "#lib/analytics.js";
 import { trackEvent } from "#lib/analytics.js";
 import { API_BASE } from "#lib/api-base.js";
 import {
@@ -42,6 +42,9 @@ type Props = {
 	// collapsed row. Off by default — only the map drawers opt in, and only
 	// while the worklist mode is active.
 	showIssues?: boolean;
+	// Analytics source for the comment funnel. Its own prop, not photoSource:
+	// the two funnels only share values by coincidence.
+	commentSource?: Extract<CommentSource, "map_drawer" | "area_drawer">;
 };
 let {
 	merchant,
@@ -52,6 +55,7 @@ let {
 	isLoading = false,
 	photoSource = "map_drawer",
 	showIssues = false,
+	commentSource = "map_drawer",
 }: Props = $props();
 
 const displayName = $derived(
@@ -433,7 +437,7 @@ async function fetchComments(placeId: number) {
 				{#if !merchant.deleted_at}
 					<CommentAddButton
 						elementId={merchant.id}
-						source={photoSource}
+						source={commentSource}
 						variant="text"
 						onSuccess={handleCommentAdded}
 					/>
