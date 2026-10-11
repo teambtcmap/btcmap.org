@@ -86,6 +86,40 @@ test.describe('Map drawer — add comment', () => {
 		expect(posts).toBe(0);
 	});
 
+	test('posts the place id as a string, as the API requires', async ({ page }) => {
+		// btcmap-api deserializes `place_id` as a String (PostPlaceCommentArgs), and
+		// serde rejects a JSON number there. The drawer holds a numeric Place.id, so
+		// it must convert; nothing else would notice, because every other test
+		// aborts the request before it is parsed. Mocked: no real invoice is minted.
+		let body: Record<string, unknown> | undefined;
+		// The invoice step polls the status; keep it unpaid, off the real API
+		await page.route('**/v4/invoices/*', async (route) => {
+			await route.fulfill({
+				status: 200,
+				contentType: 'application/json',
+				body: JSON.stringify({ id: 'mock-invoice-id', status: 'unpaid' })
+			});
+		});
+		await page.route('**/v4/place-comments', async (route) => {
+			body = route.request().postDataJSON();
+			await route.fulfill({
+				status: 200,
+				contentType: 'application/json',
+				body: JSON.stringify({ invoice_id: 'mock-invoice-id', invoice: 'lnbc1mockinvoice' })
+			});
+		});
+		const drawer = await openDrawer(page, 0, []);
+		await drawer.getByRole('button', { name: 'Add Comment' }).click();
+		await page.getByLabel('Your comment').fill('Great coffee, paid over Lightning');
+		await page.getByRole('button', { name: 'Comment', exact: true }).click();
+
+		await expect(page.getByText('Scan or click to pay with lightning')).toBeVisible();
+		expect(body).toBeDefined();
+		expect(body?.place_id).toBe('6556');
+		expect(typeof body?.place_id).toBe('string');
+		expect(body?.comment).toBe('Great coffee, paid over Lightning');
+	});
+
 	test('an empty comment is marked inline and posts nothing', async ({ page }) => {
 		let posts = 0;
 		await page.route('**/v4/place-comments', async (route) => {
