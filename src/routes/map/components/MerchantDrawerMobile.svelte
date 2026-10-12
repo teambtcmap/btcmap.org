@@ -89,14 +89,13 @@ $: if ($expanded && !wasExpanded) {
 
 // Focus trap: keep focus inside drawer when expanded
 function handleFocusOut(event: FocusEvent) {
-	if ($expanded && drawerElement && event.relatedTarget) {
-		const focusMovingOutside = !drawerElement.contains(
-			event.relatedTarget as Node,
-		);
-		if (focusMovingOutside) {
-			handleElement?.focus();
-		}
-	}
+	const next = event.relatedTarget;
+	if (!$expanded || !drawerElement || !(next instanceof Element)) return;
+	if (drawerElement.contains(next)) return;
+	// A modal portaled over the sheet (comment form, photo viewer) owns focus
+	// now: pulling it back would keep the on-screen keyboard from opening
+	if (next.closest('[role="dialog"][aria-modal="true"]')) return;
+	handleElement?.focus();
 }
 
 $: isUpToDate = checkUpToDate(merchant);

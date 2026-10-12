@@ -1,0 +1,174 @@
+import { expect, test } from '@playwright/test';
+
+import { checkForConsoleErrors, setupConsoleErrorCollection, waitForMarkersToLoad } from './helpers';
+
+// The map drawer's "Add Comment" entry point (#1489). `POST /v4/place-comments`
+// mints a real invoice, so it is always intercepted and aborted: these tests
+// stop at the form and never reach the payment step.
+const MERCHANT_URL = '/map?merchant=6556#15/53.55573/10.00825';
+
+test.describe('Map drawer — add comment', () => {
+	test.beforeEach(async ({ page }) => {
+		setupConsoleErrorCollection(page);
+	});
+
+	test.afterEach(async ({ page }) => {
+		checkForConsoleErrors(page);
+	});
+
+	// Opens the drawer for merchant 6556 with `count` comments on its record
+	// and `comments` as the list the comments endpoint returns.
+	const openDrawer = async (
+		page: import('@playwright/test').Page,
+		count: number,
+		comments: { id: number; text: string; created_at: string }[]
+	) => {
+		await page.route('**/v4/places/*/comments', async (route) => {
+			await route.fulfill({
+				status: 200,
+				contentType: 'application/json',
+				body: JSON.stringify(comments)
+			});
+		});
+		await page.route('**/v4/places/6556', async (route) => {
+			const response = await route.fetch();
+			const json = await response.json();
+			json.comments = count;
+			json.deleted_at = null;
+			await route.fulfill({ response, json });
+		});
+		await page.goto(MERCHANT_URL, { waitUntil: 'load' });
+		await waitForMarkersToLoad(page);
+		const drawer = page.locator('[role="dialog"]');
+		await expect(drawer).toBeVisible({ timeout: 15000 });
+		return drawer;
+	};
+
+	test('a place without comments shows the empty state and the entry point', async ({ page }) => {
+		const drawer = await openDrawer(page, 0, []);
+		await expect(drawer.getByText('No comments yet.')).toBeVisible({ timeout: 10000 });
+		await expect(drawer.getByRole('button', { name: 'Add Comment' })).toBeVisible();
+	});
+
+	test('the form opens over the drawer; Escape closes only the form', async ({ page }) => {
+		let posts = 0;
+		await page.route('**/v4/place-comments', async (route) => {
+			posts++;
+			await route.abort();
+		});
+		const drawer = await openDrawer(page, 1, [
+			{ id: 1, text: 'Great place!', created_at: '2025-01-15T12:00:00Z' }
+		]);
+		await expect(drawer.getByText('Great place!')).toBeVisible({ timeout: 10000 });
+
+		const trigger = drawer.getByRole('button', { name: 'Add Comment' });
+		await trigger.click();
+
+		const modal = page.getByRole('dialog', { name: 'Add Comment' });
+		await expect(modal).toBeVisible();
+		await expect(page.getByLabel('Your comment')).toBeFocused();
+
+		// Tab stays inside the modal
+		for (let i = 0; i < 6; i++) {
+			await page.keyboard.press('Tab');
+			expect(await modal.evaluate((el) => el.contains(document.activeElement))).toBe(true);
+		}
+
+		// Escape closes the form but not the drawer behind it, and focus returns
+		await page.keyboard.press('Escape');
+		await expect(modal).toBeHidden();
+		await expect(drawer.getByText('Great place!')).toBeVisible();
+		await expect(trigger).toBeFocused();
+
+		// A second Escape now reaches the drawer
+		await page.keyboard.press('Escape');
+		await expect(drawer.getByText('Great place!')).toBeHidden();
+		expect(posts).toBe(0);
+	});
+
+	test('posts the place id as a string, as the API requires', async ({ page }) => {
+		// btcmap-api deserializes `place_id` as a String (PostPlaceCommentArgs), and
+		// serde rejects a JSON number there. The drawer holds a numeric Place.id, so
+		// it must convert; nothing else would notice, because every other test
+		// aborts the request before it is parsed. Mocked: no real invoice is minted.
+		let body: Record<string, unknown> | undefined;
+		// The invoice step polls the status; keep it unpaid, off the real API
+		await page.route('**/v4/invoices/*', async (route) => {
+			await route.fulfill({
+				status: 200,
+				contentType: 'application/json',
+				body: JSON.stringify({ id: 'mock-invoice-id', status: 'unpaid' })
+			});
+		});
+		await page.route('**/v4/place-comments', async (route) => {
+			body = route.request().postDataJSON();
+			await route.fulfill({
+				status: 200,
+				contentType: 'application/json',
+				body: JSON.stringify({ invoice_id: 'mock-invoice-id', invoice: 'lnbc1mockinvoice' })
+			});
+		});
+		const drawer = await openDrawer(page, 0, []);
+		await drawer.getByRole('button', { name: 'Add Comment' }).click();
+		await page.getByLabel('Your comment').fill('Great coffee, paid over Lightning');
+		await page.getByRole('button', { name: 'Comment', exact: true }).click();
+
+		await expect(page.getByText('Scan or click to pay with lightning')).toBeVisible();
+		expect(body).toBeDefined();
+		expect(body?.place_id).toBe('6556');
+		expect(typeof body?.place_id).toBe('string');
+		expect(body?.comment).toBe('Great coffee, paid over Lightning');
+	});
+
+	test('an empty comment is marked inline and posts nothing', async ({ page }) => {
+		let posts = 0;
+		await page.route('**/v4/place-comments', async (route) => {
+			posts++;
+			await route.abort();
+		});
+		const drawer = await openDrawer(page, 0, []);
+		await drawer.getByRole('button', { name: 'Add Comment' }).click();
+
+		const comment = page.getByLabel('Your comment');
+		await expect(comment).toBeVisible();
+		await page.getByRole('button', { name: 'Comment', exact: true }).click();
+		await expect(comment).toHaveAttribute('aria-invalid', 'true');
+		expect(posts).toBe(0);
+	});
+	// The mobile sheet traps focus while expanded and pulls anything that leaves
+	// it back to its drag handle. The modal is portaled outside the sheet, so a
+	// tap on its field used to lose focus at once and the keyboard never opened
+	// (clicks still worked, which hid it). The desktop drawer has no such trap,
+	// so this needs the phone viewport, real touch and a coarse pointer.
+	test.describe('on a phone', () => {
+		test.use({ viewport: { width: 390, height: 844 }, hasTouch: true, isMobile: true });
+
+		test('the comment field keeps focus when tapped, over the expanded sheet', async ({
+			page
+		}) => {
+			await page.route('**/v4/place-comments', async (route) => {
+				await route.abort();
+			});
+			await openDrawer(page, 0, []);
+
+			// The trap only acts while the sheet is expanded
+			await page.keyboard.press('ArrowUp');
+			await expect(page.locator('[aria-controls="drawer-content"]')).toHaveAttribute(
+				'aria-expanded',
+				'true'
+			);
+
+			await page.getByRole('button', { name: 'Add Comment' }).tap();
+			const modal = page.getByRole('dialog', { name: 'Add Comment' });
+			await expect(modal).toBeVisible();
+			// Touch devices focus the dialog, not the field: no keyboard on open
+			await expect(modal).toBeFocused();
+
+			const comment = page.getByLabel('Your comment');
+			await comment.tap();
+			await expect(comment).toBeFocused();
+			await page.keyboard.type('Paid with Lightning');
+			await expect(comment).toHaveValue('Paid with Lightning');
+		});
+	});
+});
