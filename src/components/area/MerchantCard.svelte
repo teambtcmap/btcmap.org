@@ -233,7 +233,7 @@ onDestroy(() => {
 			<div class="flex items-center space-x-1">
 				<p class="text-sm font-semibold text-gray-500 dark:text-gray-400">
 					Last Surveyed: <span class="text-primary dark:text-white"
-						>{formatVerifiedHuman(verifiedAt)}</span
+						>{formatVerifiedHuman(verifiedAt, $locale ?? "en")}</span
 					>
 				</p>
 

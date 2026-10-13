@@ -1,8 +1,6 @@
 import rewind from "@mapbox/geojson-rewind";
 import type { Chart } from "chart.js";
 import { geoBounds, geoContains } from "d3-geo";
-import { format } from "date-fns/format";
-import { formatDistanceToNow } from "date-fns/formatDistanceToNow";
 import { isAfter } from "date-fns/isAfter";
 import { isThisYear } from "date-fns/isThisYear";
 import { isToday } from "date-fns/isToday";
@@ -404,29 +402,74 @@ const isRecentDate = (
 	return isAfter(date, subDays(new Date(), thresholdDays));
 };
 
-export const formatVerifiedHuman = (isoDateString?: string): string => {
+// Intl throws on a malformed tag and quietly uses the system language for an
+// unknown one. Fall back to English for both.
+const supportedLocale = (locale: string): string => {
+	try {
+		return Intl.DateTimeFormat.supportedLocalesOf(locale).length > 0
+			? locale
+			: "en";
+	} catch {
+		return "en";
+	}
+};
+
+// `en` alone writes "June 15"; the app has always shown "15 June".
+const dateLocale = (locale: string): string =>
+	locale === "en" ? "en-GB" : locale;
+
+// "40 minutes ago" / "vor 3 Tagen": the coarsest of minutes, hours and days
+// that the distance reaches.
+const formatRecentDistance = (date: Date, locale: string): string => {
+	const diffMs = date.getTime() - Date.now();
+	const minutes = Math.round(diffMs / 60_000);
+	const hours = Math.round(diffMs / 3_600_000);
+	const days = Math.round(diffMs / 86_400_000);
+	const formatter = new Intl.RelativeTimeFormat(locale, { numeric: "always" });
+
+	if (Math.abs(minutes) < 60) return formatter.format(minutes, "minute");
+	if (Math.abs(hours) < 24) return formatter.format(hours, "hour");
+	return formatter.format(days, "day");
+};
+
+export const formatVerifiedHuman = (
+	isoDateString?: string,
+	locale = "en",
+): string => {
 	if (!isoDateString) return "";
 
 	const parsedDate = parseDateSafely(isoDateString);
 	if (!parsedDate) return isoDateString;
 
-	// Today → "Today"
+	const appLocale = supportedLocale(locale);
+
+	// Today → "Today" / "Heute", capitalised as the label it is shown as
 	if (isToday(parsedDate)) {
-		return "Today";
+		const today = new Intl.RelativeTimeFormat(appLocale, {
+			numeric: "auto",
+		}).format(0, "day");
+		return today.charAt(0).toLocaleUpperCase(appLocale) + today.slice(1);
 	}
 
-	// Recent dates (≤30 days) → "3 days ago"
+	// Recent dates (≤30 days) → "3 days ago" / "vor 3 Tagen"
 	if (isRecentDate(parsedDate)) {
-		return formatDistanceToNow(parsedDate, { addSuffix: true });
+		return formatRecentDistance(parsedDate, appLocale);
 	}
 
-	// Same year → "15 October"
+	// Same year → "15 October" / "15. Oktober"
 	if (isThisYear(parsedDate)) {
-		return format(parsedDate, "d MMMM");
+		return new Intl.DateTimeFormat(dateLocale(appLocale), {
+			day: "numeric",
+			month: "long",
+		}).format(parsedDate);
 	}
 
-	// Different year → "15 October 2023"
-	return format(parsedDate, "d MMMM yyyy");
+	// Different year → "15 October 2023" / "15. Oktober 2023"
+	return new Intl.DateTimeFormat(dateLocale(appLocale), {
+		day: "numeric",
+		month: "long",
+		year: "numeric",
+	}).format(parsedDate);
 };
 
 // Cache for enhanced place data — keyed separately from the raw details

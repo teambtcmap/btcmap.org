@@ -1,5 +1,5 @@
 <script lang="ts">
-import { _ } from "#lib/i18n/index.js";
+import { _, locale } from "#lib/i18n/index.js";
 import { formatVerifiedHuman } from "#lib/utils.js";
 import { isRecentlyVerified } from "#lib/verification.js";
 import Icon from "$components/Icon.svelte";
@@ -25,7 +25,7 @@ $: href = resolve(`verify-location?id=${encodeURIComponent(String(id))}`);
 			icon={upToDate ? 'verified' : 'error_outline'}
 			type="material"
 		/>
-		<span class="text-sm text-body dark:text-white">{formatVerifiedHuman(verifiedAt)}</span>
+		<span class="text-sm text-body dark:text-white">{formatVerifiedHuman(verifiedAt, $locale ?? "en")}</span>
 	{:else}
 		<Icon
 			w="16"

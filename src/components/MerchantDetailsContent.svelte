@@ -387,7 +387,7 @@ async function fetchComments(placeId: number) {
 					type="material"
 				/>
 				<span class="text-sm text-body dark:text-white">
-					{formatVerifiedHuman(merchant.verified_at)}
+					{formatVerifiedHuman(merchant.verified_at, $locale ?? "en")}
 				</span>
 			{:else if isLoading}
 				<Skeleton class="h-5 w-32 rounded" />
