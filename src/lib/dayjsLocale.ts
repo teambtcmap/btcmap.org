@@ -1,6 +1,14 @@
+import localizedFormat from "dayjs/plugin/localizedFormat.js";
 import type { Readable } from "svelte/store";
 import { derived } from "svelte/store";
 import type { Locales } from "svelte-time";
+import { dayjs } from "svelte-time/dayjs";
+
+// "Oct 7, 2026" / "7. Okt. 2026": a calendar date in the order the language
+// writes it. svelte-time's default "MMM DD, YYYY" keeps the English order in
+// every language. Importing the constant registers the plugin it needs.
+dayjs.extend(localizedFormat);
+export const LOCALIZED_DATE_FORMAT = "ll";
 
 // svelte-time formats with dayjs, which only knows English until a locale
 // file registers itself. Load the app language's file on demand and return
