@@ -49,7 +49,12 @@ let commentInput = $state<HTMLTextAreaElement>();
 let invoice = $state("");
 let invoiceId = $state("");
 let loading = $state(false);
+// The invoice request in flight: closing aborts it, so a late answer can't
+// put an abandoned comment's invoice on the next open.
+let invoiceRequest: AbortController | null = null;
 const closeModal = () => {
+	invoiceRequest?.abort();
+	invoiceRequest = null;
 	onOpenChange(false);
 	// The draft stays for the next open; its error doesn't.
 	form.reset(form.state.values);
@@ -81,8 +86,13 @@ const form = createForm(() => ({
 			place_id: elementId,
 			comment: value.comment.trim(),
 		};
+		const controller = new AbortController();
+		invoiceRequest = controller;
 		axios
-			.post<PostPlaceCommentResponse>(`${API_BASE}/v4/place-comments`, args)
+			.post<PostPlaceCommentResponse>(`${API_BASE}/v4/place-comments`, args, {
+				signal: controller.signal,
+				timeout: 30000,
+			})
 			.then((response) => {
 				invoice = response.data.invoice;
 				invoiceId = response.data.invoice_id;
@@ -90,9 +100,13 @@ const form = createForm(() => ({
 				loading = false;
 			})
 			.catch((error) => {
+				if (axios.isCancel(error)) return;
 				errToast($_("errors.invoiceGenerate"));
 				console.error(error);
 				loading = false;
+			})
+			.finally(() => {
+				if (invoiceRequest === controller) invoiceRequest = null;
 			});
 	},
 }));
@@ -101,12 +115,13 @@ const form = createForm(() => ({
 // bubbling window Escape, which would take the drawer down with this modal.
 // Escape closes the form and the thank-you, but not the invoice step: a paid
 // invoice is not lost to a stray key (the Close button is still there).
+// Like Close, it works while the invoice is being requested: closing aborts it.
 const handleKeydown = (event: KeyboardEvent) => {
 	if (!open) return;
 	if (event.key === "Escape") {
 		event.stopPropagation();
 		event.preventDefault();
-		if (stage !== 1 && !loading) closeModal();
+		if (stage !== 1) closeModal();
 	} else if (event.key === "Tab" && rootEl) {
 		trapTab(event, rootEl);
 	}
