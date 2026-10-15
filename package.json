@@ -76,7 +76,7 @@
 		"@iconify-json/material-symbols": "^1.2.95",
 		"@iconify/svelte": "^5.2.2",
 		"@mapbox/mapbox-gl-rtl-text": "^0.4.0",
-		"@playwright/test": "^1.63.0",
+		"@playwright/test": "^1.64.0",
 		"@sveltejs/adapter-netlify": "^7.0.1",
 		"@sveltejs/kit": "^3.0.1",
 		"@sveltejs/vite-plugin-svelte": "^7.3.1",
