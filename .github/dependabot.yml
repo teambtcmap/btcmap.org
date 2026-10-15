@@ -12,9 +12,11 @@ updates:
       - dependency-name: '@types/node'
         versions: ['>=25.0.0']
     groups:
-      biome:
+      lint:
         patterns:
           - '@biomejs/*'
+          - 'lint-staged'
+          - 'husky'
       svelte:
         patterns:
           - 'svelte'
@@ -27,12 +29,22 @@ updates:
       playwright:
         patterns:
           - '@playwright/*'
-      leaflet:
+      maplibre:
         patterns:
-          - 'leaflet'
-          - 'leaflet-*'
           - '@maplibre/*'
           - 'maplibre-gl'
+      tanstack:
+        patterns:
+          - '@tanstack/*'
+      vite:
+        patterns:
+          - 'vite'
+          - 'vitest'
+          - 'jsdom'
+      iconify:
+        patterns:
+          - '@iconify/*'
+          - '@iconify-json/*'
 
   - package-ecosystem: 'github-actions'
     directory: '/'
