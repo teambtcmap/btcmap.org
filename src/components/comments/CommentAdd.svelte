@@ -10,6 +10,7 @@ import { trackEvent } from "#lib/analytics.js";
 import { API_BASE } from "#lib/api-base.js";
 import { trapTab } from "#lib/focusTrap.js";
 import { _ } from "#lib/i18n/index.js";
+import { portal } from "#lib/portal.js";
 import { fieldError, inputProps, ruleValidation } from "#lib/ruleValidation.js";
 import { updateSinglePlace } from "#lib/sync/places.js";
 import { errToast } from "#lib/utils.js";
@@ -125,13 +126,6 @@ const handleKeydown = (event: KeyboardEvent) => {
 	} else if (event.key === "Tab" && rootEl) {
 		trapTab(event, rootEl);
 	}
-};
-
-// Render at the end of <body>: the map drawers are position-fixed with their
-// own stacking context, which would trap this overlay inside them.
-const portal = (node: HTMLElement) => {
-	document.body.appendChild(node);
-	return { destroy: () => node.remove() };
 };
 
 // Move focus into the dialog when the form opens (aria-modal alone doesn't:
