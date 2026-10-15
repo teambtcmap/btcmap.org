@@ -24,8 +24,8 @@ importers:
         specifier: ^1.33.5
         version: 1.33.5(svelte@5.57.2)
       '@tanstack/svelte-table':
-        specifier: ^9.2.5
-        version: 9.2.5(svelte@5.57.2)
+        specifier: ^9.2.8
+        version: 9.2.8(svelte@5.57.2)
       axios:
         specifier: ^1.20.0
         version: 1.20.0(debug@4.4.3)
@@ -1001,19 +1001,19 @@ packages:
     peerDependencies:
       svelte: ^5.0.0
 
-  '@tanstack/svelte-store@0.12.2':
-    resolution: {integrity: sha512-zI+LjpxnbfKm5vDogx07RN12oOuI6LR+GysrQ4aVCuw76pY8pwcPT2DU9JGIX+L+r1dzsxBGac8XZETzLGQxiA==}
+  '@tanstack/svelte-store@0.12.3':
+    resolution: {integrity: sha512-mF0Pe+OUmhMYjbX6jm0Ox6Zdhloi28piFekz6BWJn6oDhEY8SzJsjJKTfcT5/4JS0TSi74tDVWlF/NTM+jtfDw==}
     peerDependencies:
       svelte: ^5.0.0
 
-  '@tanstack/svelte-table@9.2.5':
-    resolution: {integrity: sha512-LSZIx2cqzzv5+qjROobN/EMfrRuxBXLrIkJ1BU8M5RrvHpk6XZup82jxQUlwExZeLrLiNNUF18SzcFbYYF/x7g==}
+  '@tanstack/svelte-table@9.2.8':
+    resolution: {integrity: sha512-HHhGb/MmA6n/G8IQMJAMgt/dRtzn0nQ7gvnUi74WFxjezD+qx4un3caWP2YM5wzgnL/AwVStrZBxQrIGFs4zQQ==}
     engines: {node: '>=20'}
     peerDependencies:
       svelte: ^5.0.0
 
-  '@tanstack/table-core@9.2.5':
-    resolution: {integrity: sha512-HCMUpaEBEBS9AkV44sdTDmNgFrAA6H4NAnUgwuoWN7IkPgwXWlf3bfZ0moyxLwZqQXdpNQZdEl7LMW4rqm9zQQ==}
+  '@tanstack/table-core@9.2.8':
+    resolution: {integrity: sha512-M4D6fY5jnc7z7TaoD3Pjvz5R+8MbhzCGYdkcFf2T1AgjigwLinvFWZh6mtqfN016A7yGIroOL0GiTlVGsTh6Vg==}
     engines: {node: '>=20'}
 
   '@types/chai@5.2.3':
@@ -2704,18 +2704,18 @@ snapshots:
       '@tanstack/store': 0.11.1
       svelte: 5.57.2
 
-  '@tanstack/svelte-store@0.12.2(svelte@5.57.2)':
+  '@tanstack/svelte-store@0.12.3(svelte@5.57.2)':
     dependencies:
       '@tanstack/store': 0.11.2
       svelte: 5.57.2
 
-  '@tanstack/svelte-table@9.2.5(svelte@5.57.2)':
+  '@tanstack/svelte-table@9.2.8(svelte@5.57.2)':
     dependencies:
-      '@tanstack/svelte-store': 0.12.2(svelte@5.57.2)
-      '@tanstack/table-core': 9.2.5
+      '@tanstack/svelte-store': 0.12.3(svelte@5.57.2)
+      '@tanstack/table-core': 9.2.8
       svelte: 5.57.2
 
-  '@tanstack/table-core@9.2.5':
+  '@tanstack/table-core@9.2.8':
     dependencies:
       '@tanstack/store': 0.11.2
 
