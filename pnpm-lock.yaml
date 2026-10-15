@@ -117,9 +117,6 @@ importers:
       '@iconify/svelte':
         specifier: ^5.2.2
         version: 5.2.2(svelte@5.57.2)
-      '@mapbox/mapbox-gl-rtl-text':
-        specifier: ^0.4.0
-        version: 0.4.0
       '@playwright/test':
         specifier: ^1.64.0
         version: 1.64.0
@@ -662,9 +659,6 @@ packages:
   '@mapbox/jsonlint-lines-primitives@2.0.3':
     resolution: {integrity: sha512-0SElaV0uMxEnxzBhhX9WTuPyUeMsAN/SS0i16tjuba4/mio63MG9khjC1a0JAiPGXAwvwm4UfHJURCN7nyudQg==}
     engines: {node: '>= 22'}
-
-  '@mapbox/mapbox-gl-rtl-text@0.4.0':
-    resolution: {integrity: sha512-WNSgEFxXd2a15Eh2GwZNWBiV7Z8leq8JEGcoHpfrgaBDmFQMW4a1MO5Ol9BNv6APqTbHZ8uq7L8H5q2KCVt1kg==}
 
   '@mapbox/point-geometry@1.1.0':
     resolution: {integrity: sha512-YGcBz1cg4ATXDCM/71L9xveh4dynfGmcLDqufR+nQQy3fKwsAZsWd/x4621/6uJaeB9mwOHE6hPeDgXz9uViUQ==}
@@ -2540,8 +2534,6 @@ snapshots:
       minimist: 1.2.8
 
   '@mapbox/jsonlint-lines-primitives@2.0.3': {}
-
-  '@mapbox/mapbox-gl-rtl-text@0.4.0': {}
 
   '@mapbox/point-geometry@1.1.0': {}
 

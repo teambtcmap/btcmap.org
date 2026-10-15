@@ -11,9 +11,8 @@
 // and then 404s the sibling import only in production builds.
 import workerUrl from "maplibre-gl/dist/maplibre-gl-worker.mjs?worker&url";
 
-// Idempotent for the same reason as ensureRtlTextPlugin: several
-// components initialise their own map and client-side navigation can
-// re-run onMount. setWorkerUrl is a plain module-global setter, so
+// Idempotent: several components initialise their own map and
+// client-side navigation can re-run onMount. setWorkerUrl is a plain module-global setter, so
 // repeat calls are harmless — the guard just keeps intent obvious.
 let registered = false;
 

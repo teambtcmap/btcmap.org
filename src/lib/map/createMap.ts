@@ -6,7 +6,6 @@ import type {
 
 import { styleForBasemap } from "#lib/map/basemaps.js";
 import { installPlaceholderHandler } from "#lib/map/maplibreSprites.js";
-import { ensureRtlTextPlugin } from "#lib/map/rtl.js";
 import { hasWebGL } from "#lib/map/webgl.js";
 import { ensureMapLibreWorkerUrl } from "#lib/map/worker.js";
 
@@ -93,7 +92,6 @@ export const createBtcmapMap = async (opts: {
 
 	const maplibre = await import("maplibre-gl");
 	ensureMapLibreWorkerUrl(maplibre);
-	ensureRtlTextPlugin(maplibre);
 	if (opts.isCancelled?.()) return { status: "cancelled" };
 
 	// Normalize so undefined ≡ "light" (they resolve to the same style):
