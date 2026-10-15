@@ -11,10 +11,10 @@
 	},
 	"type": "module",
 	"scripts": {
-		"build": "pnpm run sync:rtl-plugin && vite build",
+		"build": "vite build",
 		"check": "svelte-kit sync && svelte-check --tsconfig ./tsconfig.json",
 		"check:watch": "svelte-kit sync && svelte-check --tsconfig ./tsconfig.json --watch",
-		"dev": "pnpm run sync:rtl-plugin && vite dev --host",
+		"dev": "vite dev --host",
 		"format": "biome check src",
 		"format:fix": "biome format --write src",
 		"icons:generate": "node scripts/generate-icons.mjs",
@@ -23,7 +23,6 @@
 		"lint:fix": "biome check --write src",
 		"prepare": "husky",
 		"preview": "vite preview",
-		"sync:rtl-plugin": "cp node_modules/@mapbox/mapbox-gl-rtl-text/dist/mapbox-gl-rtl-text.js static/mapbox-gl-rtl-text.js",
 		"test": "vitest",
 		"types:api": "rm -rf src/types/btcmap-api && npx degit teambtcmap/btcmap-api/bindings/ts src/types/btcmap-api",
 		"typecheck": "tsc --project ./tsconfig.json --noEmit --pretty && tsc --project ./src/service-worker/tsconfig.json --noEmit --pretty"
@@ -75,7 +74,6 @@
 		"@iconify-json/ic": "^1.2.4",
 		"@iconify-json/material-symbols": "^1.2.95",
 		"@iconify/svelte": "^5.2.2",
-		"@mapbox/mapbox-gl-rtl-text": "^0.4.0",
 		"@playwright/test": "^1.64.0",
 		"@sveltejs/adapter-netlify": "^7.0.1",
 		"@sveltejs/kit": "^3.0.1",
