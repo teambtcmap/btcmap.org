@@ -20,9 +20,12 @@ permissions:
 jobs:
   ai-review:
     runs-on: ubuntu-latest
-    timeout-minutes: 10
+    # Two completions: the review, then the verification pass
+    timeout-minutes: 20
     env:
       GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      # Read by the review step and verify_findings.py
+      HEALTH_REVIEW_MODEL: claude-opus-5
     steps:
       - uses: actions/checkout@v7
         with:
@@ -165,7 +168,7 @@ jobs:
         run: |
           set -euo pipefail
 
-          MODEL="claude-opus-5"
+          MODEL="$HEALTH_REVIEW_MODEL"
 
           COMMIT_LOG=$(cat /tmp/commit-log.txt)
           DIFF=$(cat /tmp/diff.txt)
@@ -401,6 +404,14 @@ jobs:
         run: |
           set -euo pipefail
           python3 .github/scripts/validate_findings.py
+
+      - name: Verify findings (second pass against the files each finding names)
+        if: steps.commits.outputs.skip != 'true'
+        env:
+          PPQ_API_KEY: ${{ secrets.PPQ_API_KEY }}
+        run: |
+          set -euo pipefail
+          python3 .github/scripts/verify_findings.py
 
       - name: Create issue
         if: steps.commits.outputs.skip != 'true'
