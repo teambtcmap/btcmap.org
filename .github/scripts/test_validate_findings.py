@@ -24,6 +24,12 @@ def finding(title: str, quote: str) -> str:
     )
 
 
+def checked(block: str, counter: str) -> str:
+    # Adds a **Checked against:** quote after the finding's **Quote:** fence
+    head, sep, rest = block.partition("```\nExplanation.")
+    return f"{head}```\n**Checked against:**\n```\n{counter}\n```\nExplanation.{rest}"
+
+
 def run(review: str, corpus: str) -> tuple[str, str]:
     tmp = tempfile.mkdtemp()
     (Path(tmp) / "review.md").write_text(review, encoding="utf-8")
@@ -93,6 +99,33 @@ class SplitFindings(unittest.TestCase):
         self.assertIn("No findings dropped", log)
         self.assertEqual(main_body(out).count("### LOW:"), 3)
         self.assertEqual(separator_lines_outside_fences(main_body(out)), 2)
+
+
+class CheckedAgainst(unittest.TestCase):
+    def test_counter_quote_found_in_inputs_keeps_finding(self):
+        review = REPORT.format(
+            findings=checked(finding("guarded", "const a = 1;"), "if (!a) return;")
+        )
+        out, log = run(review, "const a = 1;\nif (!a) return;\n")
+        self.assertIn("No findings dropped", log)
+        self.assertIn("### LOW: guarded", main_body(out))
+
+    def test_invented_counter_quote_drops_finding(self):
+        review = REPORT.format(
+            findings=checked(finding("invented", "const a = 1;"), "if (!b) return;")
+        )
+        out, log = run(review, "const a = 1;\nif (!a) return;\n")
+        self.assertIn("Dropped 1 finding(s)", log)
+        self.assertIn("**Checked against:** quote not found", log)
+        self.assertNotIn("### LOW: invented", main_body(out))
+
+    def test_none_provided_is_accepted(self):
+        review = REPORT.format(
+            findings=checked(finding("unchecked", "const a = 1;"), "none provided")
+        )
+        out, log = run(review, "const a = 1;\n")
+        self.assertIn("No findings dropped", log)
+        self.assertIn("### LOW: unchecked", main_body(out))
 
 
 if __name__ == "__main__":

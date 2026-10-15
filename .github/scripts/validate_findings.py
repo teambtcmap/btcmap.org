@@ -5,6 +5,9 @@
 #   2. **Quote:** ```...``` must appear verbatim in the diff or
 #      file contents the model was given
 #      (catches misattribution and paraphrased "from memory" claims)
+#   3. **Checked against:** ```...```, the code the model says it checked
+#      the finding against, must appear the same way unless it reads
+#      "none provided" (catches an invented counter-check)
 # Findings that fail either check are dropped from the main section but kept
 # in a collapsed details block for human review, with a log line explaining
 # why so the failure mode is visible in CI history.
@@ -152,6 +155,10 @@ quote_re = re.compile(
     r"\*\*Quote:\*\*\s*\n+(?:```|~~~)[^\n]*\n(.*?)\n(?:```|~~~)",
     re.DOTALL,
 )
+checked_re = re.compile(
+    r"\*\*Checked against:\*\*\s*\n+(?:```|~~~)[^\n]*\n(.*?)\n(?:```|~~~)",
+    re.DOTALL,
+)
 
 kept = []
 dropped = []
@@ -194,6 +201,16 @@ for block in blocks:
         preview = quote_norm[:80] + ("…" if len(quote_norm) > 80 else "")
         dropped.append((title, f"quote not found in diff or file-contents: '{preview}'", block))
         continue
+
+    # 3. Counter-check quote, when given, verifiable too. A finding without
+    # one is kept: the verification pass still gets to refute it.
+    cm = checked_re.search(block)
+    if cm:
+        checked_norm = norm(cm.group(1))
+        if checked_norm.lower() != "none provided" and checked_norm not in corpus:
+            preview = checked_norm[:80] + ("…" if len(checked_norm) > 80 else "")
+            dropped.append((title, f"**Checked against:** quote not found in diff or file-contents: '{preview}'", block))
+            continue
 
     kept.append(block)
 

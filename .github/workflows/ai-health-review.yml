@@ -396,7 +396,7 @@ jobs:
 
           echo "Review generated ($(wc -c < /tmp/review.md) bytes)"
 
-      - name: Validate findings (drop hallucinated files and unverifiable quotes)
+      - name: Validate findings (drop hallucinated files and unverifiable quotes or counter-checks)
         if: steps.commits.outputs.skip != 'true'
         run: |
           set -euo pipefail
