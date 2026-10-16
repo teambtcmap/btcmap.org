@@ -30,7 +30,7 @@ TMP = os.environ.get("HEALTH_REVIEW_TMP", "/tmp")
 MODEL = os.environ.get("HEALTH_REVIEW_MODEL", "claude-opus-5")
 API_URL = "https://api.ppq.ai/chat/completions"
 
-MAX_FILES_PER_FINDING = 4
+MAX_FILES_PER_FINDING = 6
 # Characters, not bytes: these bound the prompt, and the sources are ASCII
 # but for the odd string literal
 MAX_FILE_CHARS = 40_000
@@ -56,17 +56,23 @@ verify_re = re.compile(r"\*\*Verify with:\*\*\s*(.+)")
 path_re = re.compile(r"`([^`]+)`")
 
 
-def finding_paths(block: str) -> list[str]:
+def line_paths(block: str, line_re: re.Pattern[str]) -> list[str]:
+    m = line_re.search(block)
     paths: list[str] = []
-    for line_re in (files_re, verify_re):
-        m = line_re.search(block)
-        if not m:
-            continue
-        for p in path_re.findall(m.group(1)):
-            p = p.strip()
-            if p and p not in paths:
-                paths.append(p)
-    return paths[:MAX_FILES_PER_FINDING]
+    for p in path_re.findall(m.group(1)) if m else []:
+        p = p.strip()
+        if p and p not in paths:
+            paths.append(p)
+    return paths
+
+
+# **Verify with:** names the code that could refute the finding, so a long
+# **Files:** line can't crowd it out; the finding's own file always comes first
+def finding_paths(block: str) -> list[str]:
+    files = line_paths(block, files_re)
+    verify = [p for p in line_paths(block, verify_re) if p not in files]
+    verify = verify[:MAX_FILES_PER_FINDING - 1]
+    return files[:MAX_FILES_PER_FINDING - len(verify)] + verify
 
 
 def tracked_files() -> set[str]:
@@ -141,22 +147,25 @@ def build_user_prompt(findings: list[str], files: dict[str, str]) -> str:
     return "\n".join(parts)
 
 
+# The first JSON list in the reply that holds a verdict: brackets in prose
+# before it ("files[0]") decode to other lists or not at all
 def parse_verdicts(text: str) -> dict[int, tuple[str, str]]:
-    m = re.search(r"\[.*\]", text, re.DOTALL)
-    if not m:
-        return {}
-    try:
-        entries = json.loads(m.group(0))
-    except json.JSONDecodeError:
-        return {}
-    verdicts: dict[int, tuple[str, str]] = {}
-    for entry in entries if isinstance(entries, list) else []:
-        if not isinstance(entry, dict):
+    decoder = json.JSONDecoder()
+    for match in re.finditer(r"\[", text):
+        try:
+            entries, _end = decoder.raw_decode(text, match.start())
+        except json.JSONDecodeError:
             continue
-        fid, verdict = entry.get("id"), entry.get("verdict")
-        if isinstance(fid, int) and verdict in ("refuted", "confirmed", "unsure"):
-            verdicts[fid] = (verdict, str(entry.get("reason") or "").strip())
-    return verdicts
+        verdicts: dict[int, tuple[str, str]] = {}
+        for entry in entries if isinstance(entries, list) else []:
+            if not isinstance(entry, dict):
+                continue
+            fid, verdict = entry.get("id"), entry.get("verdict")
+            if isinstance(fid, int) and verdict in ("refuted", "confirmed", "unsure"):
+                verdicts[fid] = (verdict, str(entry.get("reason") or "").strip())
+        if verdicts:
+            return verdicts
+    return {}
 
 
 def complete_ppq(system: str, user: str) -> str:
@@ -212,6 +221,8 @@ def verify_report(
         verdicts = parse_verdicts(
             complete(SYSTEM_PROMPT, build_user_prompt(findings, files))
         )
+        if not verdicts:
+            raise RuntimeError("reply held no verdicts")
         failure = None
     except Exception as error:  # the report still publishes, marked unverified
         verdicts, failure = {}, error
@@ -234,7 +245,7 @@ def verify_report(
 
     new_main = "\n\n---\n\n".join(kept).strip() + "\n\n"
     if failure is not None:
-        new_main += f"_Verification pass did not run ({failure}); findings above are unverified._\n\n"
+        new_main += f"_Verification pass failed ({failure}); findings above are unverified._\n\n"
     elif not any(b.strip().startswith("###") for b in kept):
         new_main += "_All findings were refuted by the verification pass._\n\n"
     if refuted:
@@ -259,7 +270,7 @@ def main() -> None:
     result = verify_report(review, complete=complete_ppq, tracked=tracked_files())
     with open(path, "w", encoding="utf-8") as f:
         f.write(result)
-    if "Verification pass did not run" in result:
+    if "Verification pass failed" in result:
         print("::warning title=Health review verifier::Verification call failed; report published unverified")
     print(f"Refuted: {result.count('_Refuted: ')}, kept with a note: {result.count('**Second pass:**')}")
 

@@ -40,8 +40,15 @@ class FindingPaths(unittest.TestCase):
         self.assertEqual(vf.finding_paths(block), ["src/a.ts", "src/b.ts"])
 
     def test_caps_paths_per_finding(self):
-        verify = ", ".join(f"`src/{n}.ts`" for n in "bcdef")
+        verify = ", ".join(f"`src/{n}.ts`" for n in "bcdefghij")
         paths = vf.finding_paths(finding("x", "`src/a.ts`", verify))
+        self.assertEqual(len(paths), vf.MAX_FILES_PER_FINDING)
+        self.assertEqual(paths[0], "src/a.ts")
+
+    def test_verify_with_paths_survive_a_full_files_line(self):
+        files = ", ".join(f"`src/{n}.ts`" for n in range(vf.MAX_FILES_PER_FINDING))
+        paths = vf.finding_paths(finding("x", files, "`src/caller.ts`"))
+        self.assertIn("src/caller.ts", paths)
         self.assertEqual(len(paths), vf.MAX_FILES_PER_FINDING)
 
 
@@ -102,6 +109,10 @@ class ParseVerdicts(unittest.TestCase):
         text = '[{"id": 1, "verdict": "maybe"}, {"id": "x"}, {"id": 2, "verdict": "confirmed"}]'
         self.assertEqual(vf.parse_verdicts(text), {2: ("confirmed", "")})
 
+    def test_brackets_in_prose_before_the_array(self):
+        text = 'Checked files[0] and [the caller].\n[{"id": 1, "verdict": "confirmed", "reason": "ok"}]'
+        self.assertEqual(vf.parse_verdicts(text), {1: ("confirmed", "ok")})
+
     def test_no_json_returns_nothing(self):
         self.assertEqual(vf.parse_verdicts("no idea"), {})
 
@@ -147,7 +158,13 @@ class Run(unittest.TestCase):
         review = REPORT.format(findings=finding("a"))
         out = self.run_report(review, RuntimeError("HTTP 500"))
         self.assertIn("### LOW: a", main_body(out))
-        self.assertIn("Verification pass did not run", main_body(out))
+        self.assertIn("Verification pass failed (HTTP 500)", main_body(out))
+
+    def test_unparseable_reply_publishes_unverified_with_a_note(self):
+        review = REPORT.format(findings=finding("a"))
+        out = self.run_report(review, "I could not decide.")
+        self.assertIn("Verification pass failed", main_body(out))
+        self.assertNotIn("**Second pass:**", main_body(out))
 
     def test_report_without_findings_is_untouched(self):
         review = REPORT.format(findings="None.")
