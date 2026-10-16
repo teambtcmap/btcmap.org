@@ -31,8 +31,10 @@ MODEL = os.environ.get("HEALTH_REVIEW_MODEL", "claude-opus-5")
 API_URL = "https://api.ppq.ai/chat/completions"
 
 MAX_FILES_PER_FINDING = 4
-MAX_FILE_BYTES = 40_000
-MAX_TOTAL_BYTES = 240_000
+# Characters, not bytes: these bound the prompt, and the sources are ASCII
+# but for the odd string literal
+MAX_FILE_CHARS = 40_000
+MAX_TOTAL_CHARS = 240_000
 
 # The marker validate_findings.py opens its collapsed block with
 VALIDATOR_DETAILS = "<details>\n<summary>⚠️"
@@ -79,30 +81,48 @@ def read_file(path: str) -> str:
         return f.read()
 
 
+# The tracked file a path reads from, or None. A tracked symlink is followed
+# only to another tracked file: one pointing at /proc/self/environ would hand
+# this step's PPQ_API_KEY to the prompt, and a verdict could echo it into the
+# public issue.
+def readable_target(path: str, tracked: set[str], root: str) -> str | None:
+    if path not in tracked:
+        return None
+    real = os.path.realpath(os.path.join(root, path))
+    target = os.path.relpath(real, os.path.realpath(root))
+    return target if target in tracked else None
+
+
 # Files in finding order, so a budget cut costs the last findings their
 # context rather than every finding a little
 def collect_files(
     per_finding: list[list[str]],
     tracked: set[str],
     read: Callable[[str], str] = read_file,
+    root: str = ".",
 ) -> dict[str, str]:
     files: dict[str, str] = {}
     total = 0
     for paths in per_finding:
         for path in paths:
-            if path in files or path not in tracked:
+            if path in files:
                 continue
-            if total >= MAX_TOTAL_BYTES:
+            target = readable_target(path, tracked, root)
+            if target is None:
+                continue
+            # Each file gets the per-file cap or what is left of the total,
+            # marker included, so the total is never overshot
+            room = min(MAX_FILE_CHARS, MAX_TOTAL_CHARS - total)
+            if room < 1000:
                 return files
             try:
-                content = read(path)
+                content = read(os.path.join(root, target))
             except OSError:
                 continue
-            if len(content) > MAX_FILE_BYTES:
-                content = (
-                    content[:MAX_FILE_BYTES]
-                    + f"\n[truncated: first {MAX_FILE_BYTES} of {len(content)} bytes shown]\n"
-                )
+            if len(content) > room:
+                marker = f"\n[truncated: first {{}} of {len(content)} characters shown]\n"
+                keep = room - len(marker.format(room))
+                content = content[:keep] + marker.format(keep)
             files[path] = content
             total += len(content)
     return files

@@ -1,6 +1,7 @@
 # Unit tests for verify_findings.py. Run from the repo root:
 #   python3 -m unittest discover -s .github/scripts -p 'test_*.py'
 import sys
+import tempfile
 import unittest
 from pathlib import Path
 
@@ -56,22 +57,39 @@ class CollectFiles(unittest.TestCase):
         )
         self.assertEqual(list(files), ["src/a.ts"])
 
+    def test_tracked_symlink_to_an_untracked_file_is_not_read(self):
+        root = Path(tempfile.mkdtemp())
+        outside = Path(tempfile.mkdtemp()) / "secret"
+        outside.write_text("token\n")
+        (root / "link.ts").symlink_to(outside)
+        files = vf.collect_files([["link.ts"]], tracked={"link.ts"}, root=str(root))
+        self.assertEqual(files, {})
+
+    def test_tracked_symlink_to_a_tracked_file_reads_the_target(self):
+        root = Path(tempfile.mkdtemp())
+        (root / "AGENTS.md").write_text("conventions\n")
+        (root / "CLAUDE.md").symlink_to("AGENTS.md")
+        files = vf.collect_files(
+            [["CLAUDE.md"]], tracked={"CLAUDE.md", "AGENTS.md"}, root=str(root)
+        )
+        self.assertEqual(files, {"CLAUDE.md": "conventions\n"})
+
     def test_oversized_file_is_truncated_with_marker(self):
         files = vf.collect_files(
             [["src/a.ts"]],
             tracked={"src/a.ts"},
-            read=lambda _p: "x" * (vf.MAX_FILE_BYTES + 10),
+            read=lambda _p: "x" * (vf.MAX_FILE_CHARS + 10),
         )
         self.assertIn("[truncated", files["src/a.ts"])
-        self.assertLess(len(files["src/a.ts"]), vf.MAX_FILE_BYTES + 100)
+        self.assertLess(len(files["src/a.ts"]), vf.MAX_FILE_CHARS + 100)
 
-    def test_total_budget_stops_adding_files(self):
-        big = "x" * vf.MAX_FILE_BYTES
+    def test_total_budget_is_never_exceeded(self):
+        # Just under the per-file cap, so only the total budget cuts them
+        big = "x" * (vf.MAX_FILE_CHARS - 1)
         paths = [f"src/{n}.ts" for n in range(20)]
         files = vf.collect_files([paths[i:i + 4] for i in range(0, 20, 4)],
                                  tracked=set(paths), read=lambda _p: big)
-        self.assertLessEqual(sum(len(c) for c in files.values()),
-                             vf.MAX_TOTAL_BYTES + vf.MAX_FILE_BYTES)
+        self.assertLessEqual(sum(len(c) for c in files.values()), vf.MAX_TOTAL_CHARS)
         self.assertLess(len(files), 20)
 
 
