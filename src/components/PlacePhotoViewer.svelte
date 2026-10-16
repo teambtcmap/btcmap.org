@@ -24,6 +24,7 @@ import {
 	photoShareUrl,
 	placePhotoUrl,
 } from "#lib/placePhotos.js";
+import { portal } from "#lib/portal.js";
 import { session } from "#lib/session.js";
 import { errToast, successToast } from "#lib/utils.js";
 import Icon from "$components/Icon.svelte";
@@ -178,13 +179,6 @@ const handleKeydown = (event: KeyboardEvent) => {
 	} else if (rootEl) {
 		trapTab(event, rootEl);
 	}
-};
-
-// Render at the end of <body>: the map drawer is position-fixed with its
-// own stacking context, which would trap a fixed overlay inside it.
-const portal = (node: HTMLElement) => {
-	document.body.appendChild(node);
-	return { destroy: () => node.remove() };
 };
 
 onMount(() => {

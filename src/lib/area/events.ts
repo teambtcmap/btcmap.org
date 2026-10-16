@@ -54,5 +54,7 @@ export const isFutureEvent = (event: AreaEvent, now: number): boolean => {
 
 // The events tab badge and the events section must agree on this count,
 // so both go through isFutureEvent.
-export const countFutureEvents = (events: AreaEvent[], now: number): number =>
-	events.filter((event) => isFutureEvent(event, now)).length;
+export const countFutureEvents = (
+	events: readonly AreaEvent[],
+	now: number,
+): number => events.filter((event) => isFutureEvent(event, now)).length;
