@@ -1,4 +1,4 @@
-import { derived, writable } from "svelte/store";
+import { derived, get, writable } from "svelte/store";
 
 import { API_BASE } from "#lib/api-base.js";
 import api from "#lib/axios.js";
@@ -282,10 +282,20 @@ function createSessionStore() {
 			set(session);
 		},
 
-		// Clear the session (logout / forget account). No recovery.
-		clear: () => {
+		// Log out: clear the session first so logout never waits on the
+		// network, then revoke the token on the API so a copy of it (see the
+		// header comment) stops working. Best effort: offline or an
+		// already-revoked token (401) leaves nothing to clean up.
+		logout: async () => {
+			const token = get({ subscribe })?.token;
 			saveToStorage(null);
 			set(null);
+			if (!token) return;
+			try {
+				await api.post(`${API_BASE}/v4/auth/signout`, null, authHeaders(token));
+			} catch (err) {
+				console.warn("session: failed to revoke token on logout", err);
+			}
 		},
 	};
 }

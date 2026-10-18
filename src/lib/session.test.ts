@@ -309,6 +309,63 @@ describe("session store", () => {
 		});
 	});
 
+	describe("logout", () => {
+		async function postMock() {
+			const { default: api } = await import("#lib/axios.js");
+			const post = api.post as ReturnType<typeof vi.fn>;
+			post.mockReset();
+			return post;
+		}
+
+		it("clears the session before the revoke settles", async () => {
+			const post = await postMock();
+			post.mockReturnValueOnce(new Promise(() => {}));
+			seedStorage({ username: "alice", token: "tok", savedPlaces: [] });
+			const session = await createTestSession();
+			session.init();
+
+			void session.logout();
+
+			expect(get(session)).toBeNull();
+			expect(localStorage.getItem("btcmap_session")).toBeNull();
+		});
+
+		it("revokes the logged-out token on the API", async () => {
+			const post = await postMock();
+			post.mockResolvedValueOnce({ data: { id: 1, label: "BTC Map Web" } });
+			seedStorage({ username: "alice", token: "tok", savedPlaces: [] });
+			const session = await createTestSession();
+			session.init();
+
+			await session.logout();
+
+			expect(post).toHaveBeenCalledWith(`${API_BASE}/v4/auth/signout`, null, {
+				headers: { Authorization: "Bearer tok" },
+			});
+		});
+
+		it("resolves when the revoke fails", async () => {
+			const post = await postMock();
+			post.mockRejectedValueOnce(new Error("offline"));
+			vi.spyOn(console, "warn").mockImplementation(() => {});
+			seedStorage({ username: "alice", token: "tok", savedPlaces: [] });
+			const session = await createTestSession();
+			session.init();
+
+			await expect(session.logout()).resolves.toBeUndefined();
+			expect(get(session)).toBeNull();
+		});
+
+		it("calls nothing without a session", async () => {
+			const post = await postMock();
+			const session = await createTestSession();
+
+			await session.logout();
+
+			expect(post).not.toHaveBeenCalled();
+		});
+	});
+
 	describe("setSavedPlaces / setSavedAreas with null session", () => {
 		it("setSavedPlaces warns and no-ops when session is null", async () => {
 			const warnSpy = vi.spyOn(console, "warn").mockImplementation(() => {});
