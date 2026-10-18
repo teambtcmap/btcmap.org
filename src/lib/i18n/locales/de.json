@@ -55,7 +55,8 @@
 		"communities": "Communities",
 		"countries": "Länder",
 		"signup": "Registrieren",
-		"myPhotos": "Meine Fotos"
+		"myPhotos": "Meine Fotos",
+		"accountSettings": "Kontoeinstellungen"
 	},
 	"search": {
 		"placeholderPlaces": "Orte suchen...",
@@ -1307,5 +1308,52 @@
 		"empty": "Du hast noch keine Fotos hinzugefügt. Öffne einen Ort und tippe auf „Foto hinzufügen“.",
 		"loadError": "Deine Fotos konnten nicht geladen werden. Bitte versuche es erneut.",
 		"unknownPlace": "Ort #{id}"
+	},
+	"account": {
+		"title": "Kontoeinstellungen",
+		"saving": "Wird gespeichert…",
+		"username": {
+			"heading": "Benutzername",
+			"description": "Wird bei deinen Kommentaren, Fotos und in der Bestenliste angezeigt. Du meldest dich auch damit an.",
+			"label": "Benutzername",
+			"required": "Gib einen Benutzernamen ein.",
+			"taken": "Dieser Benutzername ist bereits vergeben. Versuche einen anderen.",
+			"save": "Benutzernamen speichern",
+			"success": "Benutzername geändert.",
+			"error": "Dein Benutzername konnte nicht geändert werden. Bitte versuche es erneut."
+		},
+		"nostr": {
+			"heading": "Nostr",
+			"description": "Verknüpfe einen Nostr-Schlüssel, um dich auch mit Nostr bei diesem Konto anzumelden. Ohne Verknüpfung erstellt eine Nostr-Anmeldung ein separates Konto.",
+			"linked": "Verknüpfter Schlüssel",
+			"none": "Mit diesem Konto ist kein Nostr-Schlüssel verknüpft.",
+			"linkExtension": "Mit Nostr-Erweiterung verknüpfen",
+			"linkNsec": "Mit nsec verknüpfen",
+			"nsecWarning": "Dein nsec bleibt in deinem Browser: Er signiert nur diese eine Anfrage und wird nie gespeichert oder gesendet.",
+			"linkSuccess": "Nostr-Schlüssel verknüpft.",
+			"taken": "Dieser Nostr-Schlüssel gehört bereits zu einem anderen BTC Map-Konto.",
+			"linkError": "Dein Nostr-Schlüssel konnte nicht verknüpft werden. Bitte versuche es erneut.",
+			"unlink": "Trennen",
+			"unlinkWarning": "Du kannst dich danach nicht mehr mit diesem Nostr-Schlüssel anmelden. Wurde dieses Konto mit Nostr erstellt und hat kein Passwort, verlierst du nach dem Abmelden den Zugriff darauf.",
+			"unlinkConfirm": "Schlüssel trennen",
+			"unlinkSuccess": "Nostr-Schlüssel getrennt.",
+			"unlinkError": "Dein Nostr-Schlüssel konnte nicht getrennt werden. Bitte versuche es erneut."
+		},
+		"password": {
+			"heading": "Passwort",
+			"description": "Ändere das Passwort, mit dem du dich anmeldest.",
+			"current": "Aktuelles Passwort",
+			"next": "Neues Passwort",
+			"confirm": "Neues Passwort wiederholen",
+			"currentRequired": "Gib dein aktuelles Passwort ein.",
+			"nextRequired": "Gib ein neues Passwort ein.",
+			"tooShort": "Verwende mindestens {min} Zeichen.",
+			"mismatch": "Die Passwörter stimmen nicht überein.",
+			"wrongPassword": "Das ist nicht dein aktuelles Passwort.",
+			"noPassword": "Dieses Konto wurde mit Nostr erstellt und hat kein Passwort, das geändert werden könnte.",
+			"submit": "Passwort ändern",
+			"success": "Passwort geändert.",
+			"error": "Dein Passwort konnte nicht geändert werden. Bitte versuche es erneut."
+		}
 	}
 }

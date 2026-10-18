@@ -55,7 +55,8 @@
 		"communities": "Comunidades",
 		"countries": "Países",
 		"signup": "Registrarse",
-		"myPhotos": "Mis fotos"
+		"myPhotos": "Mis fotos",
+		"accountSettings": "Ajustes de la cuenta"
 	},
 	"search": {
 		"placeholderPlaces": "Buscar lugares...",
@@ -1307,5 +1308,52 @@
 		"empty": "Aún no has añadido fotos. Abre un lugar y toca «Añadir foto».",
 		"loadError": "No se pudieron cargar tus fotos. Inténtalo de nuevo.",
 		"unknownPlace": "Lugar #{id}"
+	},
+	"account": {
+		"title": "Ajustes de la cuenta",
+		"saving": "Guardando…",
+		"username": {
+			"heading": "Nombre de usuario",
+			"description": "Se muestra en tus comentarios, fotos y en la clasificación. También inicias sesión con él.",
+			"label": "Nombre de usuario",
+			"required": "Introduce un nombre de usuario.",
+			"taken": "Ese nombre de usuario ya está en uso. Prueba con otro.",
+			"save": "Guardar nombre de usuario",
+			"success": "Nombre de usuario cambiado.",
+			"error": "No se pudo cambiar tu nombre de usuario. Inténtalo de nuevo."
+		},
+		"nostr": {
+			"heading": "Nostr",
+			"description": "Vincula una clave Nostr para iniciar sesión en esta cuenta también con Nostr. Sin vincularla, iniciar sesión con Nostr crea una cuenta aparte.",
+			"linked": "Clave vinculada",
+			"none": "No hay ninguna clave Nostr vinculada a esta cuenta.",
+			"linkExtension": "Vincular con extensión Nostr",
+			"linkNsec": "Vincular con nsec",
+			"nsecWarning": "Tu nsec se queda en tu navegador: solo firma esta solicitud y nunca se guarda ni se envía.",
+			"linkSuccess": "Clave Nostr vinculada.",
+			"taken": "Esta clave Nostr ya pertenece a otra cuenta de BTC Map.",
+			"linkError": "No se pudo vincular tu clave Nostr. Inténtalo de nuevo.",
+			"unlink": "Desvincular",
+			"unlinkWarning": "Ya no podrás iniciar sesión con esta clave Nostr. Si esta cuenta se creó con Nostr y no tiene contraseña, perderás el acceso al cerrar sesión.",
+			"unlinkConfirm": "Desvincular clave",
+			"unlinkSuccess": "Clave Nostr desvinculada.",
+			"unlinkError": "No se pudo desvincular tu clave Nostr. Inténtalo de nuevo."
+		},
+		"password": {
+			"heading": "Contraseña",
+			"description": "Cambia la contraseña con la que inicias sesión.",
+			"current": "Contraseña actual",
+			"next": "Nueva contraseña",
+			"confirm": "Repite la nueva contraseña",
+			"currentRequired": "Introduce tu contraseña actual.",
+			"nextRequired": "Introduce una nueva contraseña.",
+			"tooShort": "Usa al menos {min} caracteres.",
+			"mismatch": "Las contraseñas no coinciden.",
+			"wrongPassword": "Esa no es tu contraseña actual.",
+			"noPassword": "Esta cuenta se creó con Nostr y no tiene contraseña que cambiar.",
+			"submit": "Cambiar contraseña",
+			"success": "Contraseña cambiada.",
+			"error": "No se pudo cambiar tu contraseña. Inténtalo de nuevo."
+		}
 	}
 }

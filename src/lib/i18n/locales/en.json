@@ -62,7 +62,8 @@
 		"signup": "Sign up",
 		"logout": "Log out",
 		"backupAccount": "Back up account",
-		"myPhotos": "My photos"
+		"myPhotos": "My photos",
+		"accountSettings": "Account settings"
 	},
 	"saved": {
 		"title": "My Saved",
@@ -1382,5 +1383,52 @@
 		"empty": "You haven't added any photos yet. Open a place and tap \"Add photo\".",
 		"loadError": "Couldn't load your photos. Please try again.",
 		"unknownPlace": "Place #{id}"
+	},
+	"account": {
+		"title": "Account settings",
+		"saving": "Saving…",
+		"username": {
+			"heading": "Username",
+			"description": "Shown on your comments, photos and the leaderboard. You also log in with it.",
+			"label": "Username",
+			"required": "Enter a username.",
+			"taken": "That username is already taken. Try another one.",
+			"save": "Save username",
+			"success": "Username changed.",
+			"error": "Couldn't change your username. Please try again."
+		},
+		"nostr": {
+			"heading": "Nostr",
+			"description": "Link a Nostr key to log in to this account with Nostr too. Without a link, logging in with Nostr creates a separate account.",
+			"linked": "Linked key",
+			"none": "No Nostr key is linked to this account.",
+			"linkExtension": "Link with Nostr extension",
+			"linkNsec": "Link with nsec",
+			"nsecWarning": "Your nsec stays in your browser: it signs this one request and is never stored or sent.",
+			"linkSuccess": "Nostr key linked.",
+			"taken": "This Nostr key already belongs to another BTC Map account.",
+			"linkError": "Couldn't link your Nostr key. Please try again.",
+			"unlink": "Unlink",
+			"unlinkWarning": "You won't be able to log in with this Nostr key anymore. If this account was created with Nostr and has no password, you lose access to it once you log out.",
+			"unlinkConfirm": "Unlink key",
+			"unlinkSuccess": "Nostr key unlinked.",
+			"unlinkError": "Couldn't unlink your Nostr key. Please try again."
+		},
+		"password": {
+			"heading": "Password",
+			"description": "Change the password you log in with.",
+			"current": "Current password",
+			"next": "New password",
+			"confirm": "Repeat new password",
+			"currentRequired": "Enter your current password.",
+			"nextRequired": "Enter a new password.",
+			"tooShort": "Use at least {min} characters.",
+			"mismatch": "The passwords don't match.",
+			"wrongPassword": "That isn't your current password.",
+			"noPassword": "This account was created with Nostr and has no password to change.",
+			"submit": "Change password",
+			"success": "Password changed.",
+			"error": "Couldn't change your password. Please try again."
+		}
 	}
 }
