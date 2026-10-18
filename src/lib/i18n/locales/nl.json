@@ -1397,8 +1397,8 @@
 			"error": "Kan je gebruikersnaam niet wijzigen. Probeer het opnieuw."
 		},
 		"nostr": {
-			"heading": "Nostr",
-			"description": "Koppel een Nostr-sleutel om je ook met Nostr bij dit account aan te melden. Zonder koppeling maakt aanmelden met Nostr een apart account aan.",
+			"heading": "Gekoppelde accounts",
+			"description": "Andere manieren om je bij dit account aan te melden, zoals een Nostr-sleutel. Zonder koppeling maakt aanmelden met Nostr een apart account aan.",
 			"linked": "Gekoppelde sleutel",
 			"none": "Er is geen Nostr-sleutel aan dit account gekoppeld.",
 			"linkExtension": "Koppelen met Nostr-extensie",
@@ -1408,7 +1408,7 @@
 			"taken": "Deze Nostr-sleutel hoort al bij een ander BTC Map-account.",
 			"linkError": "Kan je Nostr-sleutel niet koppelen. Probeer het opnieuw.",
 			"unlink": "Ontkoppelen",
-			"unlinkWarning": "Je kunt je daarna niet meer met deze Nostr-sleutel aanmelden. Is dit account met Nostr aangemaakt en heeft het geen wachtwoord, dan verlies je de toegang zodra je je afmeldt.",
+			"unlinkWarning": "Je kunt je daarna niet meer met deze Nostr-sleutel aanmelden. Heb je je met Nostr aangemeld, dan ken je het wachtwoord van dit account niet en verlies je de toegang zodra je je afmeldt.",
 			"unlinkConfirm": "Sleutel ontkoppelen",
 			"unlinkSuccess": "Nostr-sleutel ontkoppeld.",
 			"unlinkError": "Kan je Nostr-sleutel niet ontkoppelen. Probeer het opnieuw."
@@ -1416,6 +1416,7 @@
 		"password": {
 			"heading": "Wachtwoord",
 			"description": "Wijzig het wachtwoord waarmee je je aanmeldt.",
+			"nostrHint": "Aangemeld met Nostr? Je account heeft een wachtwoord dat je nooit is getoond, dus je kunt het hier nog niet wijzigen.",
 			"current": "Huidig wachtwoord",
 			"next": "Nieuw wachtwoord",
 			"confirm": "Herhaal nieuw wachtwoord",

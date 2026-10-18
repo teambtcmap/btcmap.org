@@ -1297,8 +1297,8 @@
 			"error": "Não foi possível alterar seu nome de usuário. Tente novamente."
 		},
 		"nostr": {
-			"heading": "Nostr",
-			"description": "Vincule uma chave Nostr para entrar nesta conta também com Nostr. Sem vínculo, entrar com Nostr cria uma conta separada.",
+			"heading": "Contas vinculadas",
+			"description": "Outras formas de entrar nesta conta, como uma chave Nostr. Sem vínculo, entrar com Nostr cria uma conta separada.",
 			"linked": "Chave vinculada",
 			"none": "Nenhuma chave Nostr está vinculada a esta conta.",
 			"linkExtension": "Vincular com extensão Nostr",
@@ -1308,7 +1308,7 @@
 			"taken": "Esta chave Nostr já pertence a outra conta do BTC Map.",
 			"linkError": "Não foi possível vincular sua chave Nostr. Tente novamente.",
 			"unlink": "Desvincular",
-			"unlinkWarning": "Você não poderá mais entrar com esta chave Nostr. Se esta conta foi criada com Nostr e não tem senha, você perderá o acesso a ela ao sair.",
+			"unlinkWarning": "Você não poderá mais entrar com esta chave Nostr. Se você se cadastrou com Nostr, não conhece a senha desta conta e perderá o acesso a ela ao sair.",
 			"unlinkConfirm": "Desvincular chave",
 			"unlinkSuccess": "Chave Nostr desvinculada.",
 			"unlinkError": "Não foi possível desvincular sua chave Nostr. Tente novamente."
@@ -1316,6 +1316,7 @@
 		"password": {
 			"heading": "Senha",
 			"description": "Altere a senha com que você entra.",
+			"nostrHint": "Cadastrou-se com Nostr? Sua conta tem uma senha que nunca foi mostrada a você, então ainda não é possível alterá-la aqui.",
 			"current": "Senha atual",
 			"next": "Nova senha",
 			"confirm": "Repita a nova senha",

@@ -1397,8 +1397,8 @@
 			"error": "Couldn't change your username. Please try again."
 		},
 		"nostr": {
-			"heading": "Nostr",
-			"description": "Link a Nostr key to log in to this account with Nostr too. Without a link, logging in with Nostr creates a separate account.",
+			"heading": "Linked accounts",
+			"description": "Other ways to log in to this account, like a Nostr key. Without a link, logging in with Nostr creates a separate account.",
 			"linked": "Linked key",
 			"none": "No Nostr key is linked to this account.",
 			"linkExtension": "Link with Nostr extension",
@@ -1408,7 +1408,7 @@
 			"taken": "This Nostr key already belongs to another BTC Map account.",
 			"linkError": "Couldn't link your Nostr key. Please try again.",
 			"unlink": "Unlink",
-			"unlinkWarning": "You won't be able to log in with this Nostr key anymore. If this account was created with Nostr and has no password, you lose access to it once you log out.",
+			"unlinkWarning": "You won't be able to log in with this Nostr key anymore. If you signed up with Nostr, you don't know this account's password, so you lose access to it once you log out.",
 			"unlinkConfirm": "Unlink key",
 			"unlinkSuccess": "Nostr key unlinked.",
 			"unlinkError": "Couldn't unlink your Nostr key. Please try again."
@@ -1416,6 +1416,7 @@
 		"password": {
 			"heading": "Password",
 			"description": "Change the password you log in with.",
+			"nostrHint": "Signed up with Nostr? Your account has a password you were never shown, so it can't be changed here yet.",
 			"current": "Current password",
 			"next": "New password",
 			"confirm": "Repeat new password",

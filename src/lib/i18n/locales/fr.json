@@ -1323,8 +1323,8 @@
 			"error": "Impossible de modifier votre nom d'utilisateur. Veuillez réessayer."
 		},
 		"nostr": {
-			"heading": "Nostr",
-			"description": "Associez une clé Nostr pour vous connecter aussi à ce compte avec Nostr. Sans association, une connexion avec Nostr crée un compte séparé.",
+			"heading": "Comptes associés",
+			"description": "D'autres moyens de vous connecter à ce compte, comme une clé Nostr. Sans association, une connexion avec Nostr crée un compte séparé.",
 			"linked": "Clé associée",
 			"none": "Aucune clé Nostr n'est associée à ce compte.",
 			"linkExtension": "Associer avec une extension Nostr",
@@ -1334,7 +1334,7 @@
 			"taken": "Cette clé Nostr appartient déjà à un autre compte BTC Map.",
 			"linkError": "Impossible d'associer votre clé Nostr. Veuillez réessayer.",
 			"unlink": "Dissocier",
-			"unlinkWarning": "Vous ne pourrez plus vous connecter avec cette clé Nostr. Si ce compte a été créé avec Nostr et n'a pas de mot de passe, vous en perdrez l'accès une fois déconnecté.",
+			"unlinkWarning": "Vous ne pourrez plus vous connecter avec cette clé Nostr. Si vous vous êtes inscrit avec Nostr, vous ne connaissez pas le mot de passe de ce compte et en perdrez l'accès une fois déconnecté.",
 			"unlinkConfirm": "Dissocier la clé",
 			"unlinkSuccess": "Clé Nostr dissociée.",
 			"unlinkError": "Impossible de dissocier votre clé Nostr. Veuillez réessayer."
@@ -1342,6 +1342,7 @@
 		"password": {
 			"heading": "Mot de passe",
 			"description": "Modifiez le mot de passe avec lequel vous vous connectez.",
+			"nostrHint": "Inscrit avec Nostr ? Votre compte a un mot de passe qui ne vous a jamais été montré : vous ne pouvez pas encore le modifier ici.",
 			"current": "Mot de passe actuel",
 			"next": "Nouveau mot de passe",
 			"confirm": "Répétez le nouveau mot de passe",

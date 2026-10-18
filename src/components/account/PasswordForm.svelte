@@ -79,6 +79,10 @@ const NEXT_MESSAGES = {
 </script>
 
 <form onsubmit={handleSubmit} novalidate class="space-y-4">
+	<!-- Nostr sign-up sets a random password the user never sees
+	     (teambtcmap/btcmap-api#122); setting one through the Nostr link is
+	     a later API change -->
+	<p class="text-sm text-body dark:text-white/70">{$_("account.password.nostrHint")}</p>
 	<form.Field name="current">
 		{#snippet children(field)}
 			{@const rule = fieldError(field)}

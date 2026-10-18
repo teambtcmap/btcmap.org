@@ -1397,8 +1397,8 @@
 			"error": "Impossibile modificare il nome utente. Riprova."
 		},
 		"nostr": {
-			"heading": "Nostr",
-			"description": "Collega una chiave Nostr per accedere a questo account anche con Nostr. Senza collegamento, l'accesso con Nostr crea un account separato.",
+			"heading": "Account collegati",
+			"description": "Altri modi per accedere a questo account, come una chiave Nostr. Senza collegamento, l'accesso con Nostr crea un account separato.",
 			"linked": "Chiave collegata",
 			"none": "Nessuna chiave Nostr è collegata a questo account.",
 			"linkExtension": "Collega con estensione Nostr",
@@ -1408,7 +1408,7 @@
 			"taken": "Questa chiave Nostr appartiene già a un altro account BTC Map.",
 			"linkError": "Impossibile collegare la tua chiave Nostr. Riprova.",
 			"unlink": "Scollega",
-			"unlinkWarning": "Non potrai più accedere con questa chiave Nostr. Se questo account è stato creato con Nostr e non ha una password, ne perderai l'accesso dopo la disconnessione.",
+			"unlinkWarning": "Non potrai più accedere con questa chiave Nostr. Se ti sei registrato con Nostr, non conosci la password di questo account e ne perderai l'accesso dopo la disconnessione.",
 			"unlinkConfirm": "Scollega chiave",
 			"unlinkSuccess": "Chiave Nostr scollegata.",
 			"unlinkError": "Impossibile scollegare la tua chiave Nostr. Riprova."
@@ -1416,6 +1416,7 @@
 		"password": {
 			"heading": "Password",
 			"description": "Cambia la password con cui accedi.",
+			"nostrHint": "Ti sei registrato con Nostr? Il tuo account ha una password che non ti è mai stata mostrata, quindi non puoi ancora cambiarla qui.",
 			"current": "Password attuale",
 			"next": "Nuova password",
 			"confirm": "Ripeti la nuova password",
