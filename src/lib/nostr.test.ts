@@ -5,8 +5,10 @@ import { describe, expect, it, vi } from "vitest";
 import {
 	decodeNsec,
 	encodeNip98Event,
+	NOSTR_LINK_URL,
 	parseNostrAuthResponse,
 	signAuthWithSecretKey,
+	signNip98WithSecretKey,
 } from "./nostr";
 
 describe("decodeNsec", () => {
@@ -87,6 +89,23 @@ describe("signAuthWithSecretKey", () => {
 		} finally {
 			vi.useRealTimers();
 		}
+	});
+});
+
+describe("signNip98WithSecretKey", () => {
+	it("binds the event to the given URL and method", () => {
+		const event = signNip98WithSecretKey(
+			generateSecretKey(),
+			NOSTR_LINK_URL,
+			"PUT",
+		);
+
+		expect(event.kind).toBe(27235);
+		expect(event.tags).toEqual([
+			["u", NOSTR_LINK_URL],
+			["method", "PUT"],
+		]);
+		expect(NOSTR_LINK_URL).toMatch(/\/v4\/users\/me\/nostr$/);
 	});
 });
 
