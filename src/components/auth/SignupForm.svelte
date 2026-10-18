@@ -1,8 +1,8 @@
 <script lang="ts">
 import { createForm } from "@tanstack/svelte-form";
-import { isAxiosError } from "axios";
 
 import { trackEvent } from "#lib/analytics.js";
+import { errorStatus } from "#lib/apiError.js";
 import { _ } from "#lib/i18n/index.js";
 import {
 	PASSWORD_MAX_LENGTH,
@@ -64,10 +64,7 @@ const form = createForm(() => ({
 			}
 			// The status only: the error carries the request body, password
 			// included
-			console.error(
-				"Signup failed:",
-				(isAxiosError(err) ? err.response?.status : undefined) ?? "unknown",
-			);
+			console.error("Signup failed:", errorStatus(err) ?? "unknown");
 			loading = false;
 			return;
 		}
@@ -77,10 +74,7 @@ const form = createForm(() => ({
 		try {
 			await onSuccess(current);
 		} catch (err) {
-			console.error(
-				"Signup follow-up failed:",
-				(isAxiosError(err) ? err.response?.status : undefined) ?? "unknown",
-			);
+			console.error("Signup follow-up failed:", errorStatus(err) ?? "unknown");
 		} finally {
 			loading = false;
 		}
