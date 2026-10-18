@@ -27,7 +27,7 @@ let usernameInput = $state<HTMLInputElement>();
 let passwordInput = $state<HTMLInputElement>();
 let loading = $state(false);
 // Set when the API refused the last name as taken (409); cleared on edit
-let taken = $state(false);
+let usernameTaken = $state(false);
 
 // Signup on TanStack Form (#1406). A too-short password on submit (#1411):
 // the rule's own line under the label turns into the error, like
@@ -56,7 +56,7 @@ const form = createForm(() => ({
 			await onSuccess(current);
 		} catch (err) {
 			if (isUsernameTaken(err)) {
-				taken = true;
+				usernameTaken = true;
 				usernameInput?.focus();
 			} else {
 				errToast($_("signup.error"));
@@ -97,10 +97,10 @@ function handleSubmit(event: SubmitEvent) {
 				label={$_("signup.username")}
 				autocomplete="username"
 				maxlength="100"
-				error={taken ? $_("signup.usernameTaken") : undefined}
+				error={usernameTaken ? $_("signup.usernameTaken") : undefined}
 				{...inputProps(field)}
 				oninput={(event: Event) => {
-					taken = false;
+					usernameTaken = false;
 					field.handleChange((event.currentTarget as HTMLInputElement).value);
 				}}
 				bind:element={usernameInput}

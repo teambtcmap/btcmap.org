@@ -413,7 +413,8 @@ describe("isUsernameTaken", () => {
 			config: { headers: new AxiosHeaders() },
 		});
 
-	// btcmap-api answers a taken name with 409 Conflict (#119)
+	// btcmap-api answers a taken name with 409 Conflict
+	// (teambtcmap/btcmap-api#119)
 	it("is true for a 409 from the API", async () => {
 		const { isUsernameTaken } = await import("#lib/session.js");
 		expect(isUsernameTaken(apiError(409))).toBe(true);
