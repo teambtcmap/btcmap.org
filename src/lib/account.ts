@@ -24,7 +24,10 @@ const errorMessage = (error: unknown): string | undefined => {
 	return typeof message === "string" ? message : undefined;
 };
 
-const errorStatus = (error: unknown): number | undefined =>
+// What a failed call may log: an Axios error carries the request config,
+// so logging it whole would leak the Bearer token and any request body
+// (passwords included). LoginForm logs the status the same way.
+export const errorStatus = (error: unknown): number | undefined =>
 	isAxiosError(error) ? error.response?.status : undefined;
 
 export type UsernameChange =

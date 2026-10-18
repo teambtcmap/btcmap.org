@@ -1,7 +1,7 @@
 <script lang="ts">
 import { createForm } from "@tanstack/svelte-form";
 
-import { changePassword } from "#lib/account.js";
+import { changePassword, errorStatus } from "#lib/account.js";
 import type { PasswordChangeInput } from "#lib/accountValidation.js";
 import {
 	PASSWORD_FIELD_ORDER,
@@ -62,7 +62,7 @@ const form = createForm(() => ({
 			successToast($_("account.password.success"));
 		} catch (err) {
 			errToast($_("account.password.error"));
-			console.error("Password change failed:", err);
+			console.error("Password change failed:", errorStatus(err) ?? "unknown");
 		} finally {
 			loading = false;
 		}

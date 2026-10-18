@@ -1,7 +1,12 @@
 <script lang="ts">
 import { onMount } from "svelte";
 
-import { fetchLinkedNpub, linkNostr, unlinkNostr } from "#lib/account.js";
+import {
+	errorStatus,
+	fetchLinkedNpub,
+	linkNostr,
+	unlinkNostr,
+} from "#lib/account.js";
 import { trackEvent } from "#lib/analytics.js";
 import { _ } from "#lib/i18n/index.js";
 import type { SignedAuthEvent } from "#lib/nostr.js";
@@ -45,7 +50,7 @@ onMount(async () => {
 			session.setNpub(linked);
 		}
 	} catch (err) {
-		console.error("Nostr link lookup failed:", err);
+		console.error("Nostr link lookup failed:", errorStatus(err) ?? "unknown");
 	}
 });
 
@@ -65,8 +70,7 @@ async function submitProof(signed: SignedAuthEvent) {
 
 const linkFailed = (err: unknown) => {
 	errToast($_("account.nostr.linkError"));
-	const status = (err as { response?: { status?: number } })?.response?.status;
-	console.error("Nostr link failed:", status ?? "unknown");
+	console.error("Nostr link failed:", errorStatus(err) ?? "unknown");
 };
 
 async function linkWithExtension() {
@@ -127,7 +131,7 @@ async function unlink() {
 		successToast($_("account.nostr.unlinkSuccess"));
 	} catch (err) {
 		errToast($_("account.nostr.unlinkError"));
-		console.error("Nostr unlink failed:", err);
+		console.error("Nostr unlink failed:", errorStatus(err) ?? "unknown");
 	} finally {
 		unlinking = false;
 	}
