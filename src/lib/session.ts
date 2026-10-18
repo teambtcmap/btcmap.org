@@ -261,7 +261,7 @@ function createSessionStore() {
 		},
 
 		// The account was renamed on the API (account page).
-		setUsername: (username: string) => {
+		setUsername: (username: Session["username"]) => {
 			update((current) => {
 				if (!current) {
 					console.warn("session.setUsername called with no active session");
@@ -275,7 +275,7 @@ function createSessionStore() {
 
 		// A Nostr key was linked to (or unlinked from) the account on the API
 		// (account page); drives the avatar like a Nostr login does.
-		setNpub: (npub: string | null) => {
+		setNpub: (npub: Session["npub"]) => {
 			update((current) => {
 				if (!current) {
 					console.warn("session.setNpub called with no active session");
