@@ -402,7 +402,7 @@ describe("session store", () => {
 			const session = await createTestSession();
 			session.init();
 
-			session.setUsername("alice2");
+			session.setUsername("tok", "alice2");
 
 			expect(get(session)?.username).toBe("alice2");
 			expect(get(session)?.savedPlaces).toEqual([1]);
@@ -415,26 +415,38 @@ describe("session store", () => {
 			const session = await createTestSession();
 			session.init();
 
-			session.setNpub("npub1example");
+			session.setNpub("tok", "npub1example");
 			expect(get(session)?.npub).toBe("npub1example");
 			expect(
 				JSON.parse(localStorage.getItem("btcmap_session") ?? "{}").npub,
 			).toBe("npub1example");
 
-			session.setNpub(null);
+			session.setNpub("tok", null);
 			expect(get(session)?.npub).toBeNull();
 		});
 
-		it("both warn and no-op without a session", async () => {
-			const warnSpy = vi.spyOn(console, "warn").mockImplementation(() => {});
+		// A response that lands after a logout, or after logging in to
+		// another account, belongs to the account the request was made for
+		it("both ignore a session for another account", async () => {
+			seedStorage({ username: "bob", token: "other", savedPlaces: [] });
+			const session = await createTestSession();
+			session.init();
+
+			session.setUsername("tok", "alice2");
+			session.setNpub("tok", "npub1example");
+
+			expect(get(session)?.username).toBe("bob");
+			expect(get(session)?.npub).toBeNull();
+		});
+
+		it("both no-op without a session", async () => {
 			const session = await createTestSession();
 
-			session.setUsername("alice");
-			session.setNpub("npub1example");
+			session.setUsername("tok", "alice");
+			session.setNpub("tok", "npub1example");
 
 			expect(get(session)).toBeNull();
 			expect(localStorage.getItem("btcmap_session")).toBeNull();
-			expect(warnSpy).toHaveBeenCalledTimes(2);
 		});
 	});
 

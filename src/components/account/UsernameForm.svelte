@@ -44,7 +44,7 @@ const form = createForm(() => ({
 				usernameInput?.focus();
 				return;
 			}
-			session.setUsername(result.username);
+			session.setUsername(token, result.username);
 			form.setFieldValue("username", result.username);
 			trackEvent("account_username_save_success");
 			successToast($_("account.username.success"));

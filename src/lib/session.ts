@@ -275,13 +275,13 @@ function createSessionStore() {
 			});
 		},
 
-		// The account was renamed on the API (account page).
-		setUsername: (username: Session["username"]) => {
+		// The account was renamed on the API (account page). Like the other
+		// account-page setters, it applies only while the session is still the
+		// account (`token`) the request was made for: a response that lands
+		// after a logout or another login must not rewrite that session.
+		setUsername: (token: Session["token"], username: Session["username"]) => {
 			update((current) => {
-				if (!current) {
-					console.warn("session.setUsername called with no active session");
-					return current;
-				}
+				if (current?.token !== token) return current;
 				const next = { ...current, username };
 				saveToStorage(next);
 				return next;
@@ -290,12 +290,9 @@ function createSessionStore() {
 
 		// A Nostr key was linked to (or unlinked from) the account on the API
 		// (account page); drives the avatar like a Nostr login does.
-		setNpub: (npub: Session["npub"]) => {
+		setNpub: (token: Session["token"], npub: Session["npub"]) => {
 			update((current) => {
-				if (!current) {
-					console.warn("session.setNpub called with no active session");
-					return current;
-				}
+				if (current?.token !== token) return current;
 				const next = { ...current, npub };
 				saveToStorage(next);
 				return next;
