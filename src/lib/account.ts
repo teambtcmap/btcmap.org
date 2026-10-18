@@ -3,6 +3,7 @@ import { isAxiosError } from "axios";
 import { API_BASE } from "#lib/api-base.js";
 import api from "#lib/axios.js";
 import { NOSTR_LINK_URL } from "#lib/nostr.js";
+import type { Session } from "#lib/session.js";
 import { authHeaders } from "#lib/session.js";
 
 import type { ChangePasswordArgs } from "$types/btcmap-api/ChangePasswordArgs";
@@ -35,7 +36,7 @@ export type UsernameChange =
 	| { status: "taken" };
 
 export const changeUsername = async (
-	token: string,
+	token: Session["token"],
 	username: UpdateUsernameArgs["username"],
 ): Promise<UsernameChange> => {
 	const body: UpdateUsernameArgs = { username };
@@ -61,7 +62,7 @@ export const changeUsername = async (
 export type PasswordChange = "changed" | "wrongPassword" | "noPassword";
 
 export const changePassword = async (
-	token: string,
+	token: Session["token"],
 	oldPassword: ChangePasswordArgs["old_password"],
 	newPassword: ChangePasswordArgs["new_password"],
 ): Promise<PasswordChange> => {
@@ -84,7 +85,7 @@ export const changePassword = async (
 };
 
 export const fetchLinkedNpub = async (
-	token: string,
+	token: Session["token"],
 ): Promise<NostrIdentityResponse["npub"]> => {
 	const res = await api.get<NostrIdentityResponse>(
 		NOSTR_LINK_URL,
@@ -101,7 +102,7 @@ export type NostrLink =
 // NOSTR_LINK_URL and PUT. Two credentials: the Bearer token says which
 // account, the proof that the user controls the key.
 export const linkNostr = async (
-	token: string,
+	token: Session["token"],
 	proof: string,
 ): Promise<NostrLink> => {
 	try {
@@ -130,6 +131,6 @@ export const linkNostr = async (
 	}
 };
 
-export const unlinkNostr = async (token: string): Promise<void> => {
+export const unlinkNostr = async (token: Session["token"]): Promise<void> => {
 	await api.delete(NOSTR_LINK_URL, authHeaders(token));
 };

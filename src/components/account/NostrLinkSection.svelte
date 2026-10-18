@@ -19,6 +19,7 @@ import {
 	signNip98WithExtension,
 	signNip98WithSecretKey,
 } from "#lib/nostr.js";
+import type { Session } from "#lib/session.js";
 import { session } from "#lib/session.js";
 import { errToast, successToast } from "#lib/utils.js";
 import TextField from "$components/form/TextField.svelte";
@@ -59,7 +60,7 @@ onMount(async () => {
 // `token` is the account the user started linking from. Signing can wait on
 // an extension prompt; if the session changed meanwhile (logout, another
 // login), the key must not go to whichever account is active now.
-async function submitProof(token: string, signed: SignedAuthEvent) {
+async function submitProof(token: Session["token"], signed: SignedAuthEvent) {
 	if ($session?.token !== token) return;
 	changedHere = true;
 	const result = await linkNostr(token, encodeNip98Event(signed));
