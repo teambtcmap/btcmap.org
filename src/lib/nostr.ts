@@ -18,6 +18,10 @@ import { API_BASE } from "#lib/api-base.js";
 // relative `u` that can't match the server's absolute reconstruction (→ 401).
 export const NOSTR_AUTH_URL = `${API_BASE}/v4/auth/nostr`;
 
+// Linking a key to the signed-in account (PUT): same NIP-98 rules, its own
+// URL and method in the signed event.
+export const NOSTR_LINK_URL = `${API_BASE}/v4/users/me/nostr`;
+
 // Both signing paths return something the server can verify. The local
 // path (finalizeEvent) yields nostr-tools' branded VerifiedEvent; NIP-07
 // extensions only return a plain signed Event (no verifiedSymbol). Our
@@ -54,15 +58,18 @@ export function getNostrExtension(): NostrExtension | null {
 	return window.nostr ?? null;
 }
 
-// Build the unsigned NIP-98 event template for POST /v4/auth/nostr.
-// kind 27235, with "u" (url) and "method" tags per the spec.
-function buildAuthTemplate(): EventTemplate {
+// The HTTP methods our NIP-98 requests use.
+export type Nip98Method = "POST" | "PUT";
+
+// Build the unsigned NIP-98 event template for a request: kind 27235, with
+// "u" (url) and "method" tags per the spec.
+function buildNip98Template(url: string, method: Nip98Method): EventTemplate {
 	return {
 		kind: 27235,
 		created_at: Math.floor(Date.now() / 1000),
 		tags: [
-			["u", NOSTR_AUTH_URL],
-			["method", "POST"],
+			["u", url],
+			["method", method],
 		],
 		content: "",
 	};
@@ -71,10 +78,13 @@ function buildAuthTemplate(): EventTemplate {
 // Sign via a NIP-07 browser extension. Throws if no extension is present or
 // the user rejects the signature request. Returns a plain signed Event —
 // extensions don't set the nostr-tools "verified" brand.
-export async function signAuthWithExtension(): Promise<SignedAuthEvent> {
+export async function signNip98WithExtension(
+	url: string,
+	method: Nip98Method,
+): Promise<SignedAuthEvent> {
 	const ext = getNostrExtension();
 	if (!ext) throw new Error("No Nostr extension detected");
-	return ext.signEvent(buildAuthTemplate());
+	return ext.signEvent(buildNip98Template(url, method));
 }
 
 // Sign locally with a raw secret key (typically the bytes returned by
@@ -82,9 +92,20 @@ export async function signAuthWithExtension(): Promise<SignedAuthEvent> {
 // (best-effort) after use. The underlying finalizeEvent returns a branded
 // VerifiedEvent which is assignable to Event — we widen to SignedAuthEvent
 // so both signing paths share one type at the call site.
-export function signAuthWithSecretKey(secretKey: Uint8Array): SignedAuthEvent {
-	return finalizeEvent(buildAuthTemplate(), secretKey);
+export function signNip98WithSecretKey(
+	secretKey: Uint8Array,
+	url: string,
+	method: Nip98Method,
+): SignedAuthEvent {
+	return finalizeEvent(buildNip98Template(url, method), secretKey);
 }
+
+// The login request, POST /v4/auth/nostr.
+export const signAuthWithExtension = (): Promise<SignedAuthEvent> =>
+	signNip98WithExtension(NOSTR_AUTH_URL, "POST");
+
+export const signAuthWithSecretKey = (secretKey: Uint8Array): SignedAuthEvent =>
+	signNip98WithSecretKey(secretKey, NOSTR_AUTH_URL, "POST");
 
 // Decode a bech32 nsec... string into its 32-byte secret key. Throws on any
 // non-nsec input (npub, invalid bech32, wrong length) — callers surface a
