@@ -1338,7 +1338,7 @@
 			"unlinkConfirm": "Desvincular clave",
 			"unlinkSuccess": "Clave Nostr desvinculada.",
 			"unlinkError": "No se pudo desvincular tu clave Nostr. Inténtalo de nuevo.",
-			"onlyLogin": "Esta clave es tu única forma de iniciar sesión en esta cuenta, así que no se puede desvincular."
+			"needsPassword": "Esta clave es tu única forma de iniciar sesión en esta cuenta. Primero establece una contraseña y luego desvincúlala."
 		},
 		"password": {
 			"heading": "Contraseña",

@@ -70,7 +70,7 @@ const MODERATOR_ROLES: readonly Role[] = ["admin", "root"];
 
 export const canDeletePhoto = (
 	photo: PlaceImage,
-	user: Pick<CurrentUser, "id" | "roles"> | null,
+	user: CurrentUser | null,
 ): boolean => {
 	if (!user) return false;
 	if (user.roles.some((role) => MODERATOR_ROLES.includes(role))) return true;

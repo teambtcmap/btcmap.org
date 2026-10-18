@@ -1,7 +1,6 @@
 <script lang="ts">
 import { onMount } from "svelte";
 
-import { fetchCurrentUser } from "#lib/currentUser.js";
 import { _ } from "#lib/i18n/index.js";
 import { session } from "#lib/session.js";
 import NostrLinkSection from "$components/account/NostrLinkSection.svelte";
@@ -11,18 +10,9 @@ import UsernameForm from "$components/account/UsernameForm.svelte";
 import { goto } from "$app/navigation";
 
 // Account settings (#1541): rename the account, link or unlink a Nostr
-// key, change the password. An account created via Nostr has no password
-// and its key is its only login: it only gets the username, and sees its
-// key without an unlink.
+// key, change the password.
 
 let ready = $state(false);
-// Settled once /me answered (or failed); until then the password section
-// waits, so it doesn't flash up for key-only accounts
-let lookupDone = $state(false);
-let hasPassword = $state<boolean | undefined>();
-// Only a definite "no password" hides anything: an API that doesn't send
-// the field yet, or a failed lookup, shows the full page
-const keyOnly = $derived(lookupDone && hasPassword === false);
 
 onMount(() => {
 	// Child onMount runs before the layout's, so hydrate the session here
@@ -32,10 +22,6 @@ onMount(() => {
 		return;
 	}
 	ready = true;
-	fetchCurrentUser($session.token).then((user) => {
-		hasPassword = user?.hasPassword;
-		lookupDone = true;
-	});
 });
 </script>
 
@@ -56,14 +42,12 @@ onMount(() => {
 			</section>
 			<section aria-labelledby="account-nostr-heading" class="space-y-4">
 				{@render heading("nostr")}
-				<NostrLinkSection canUnlink={lookupDone && !keyOnly} />
+				<NostrLinkSection />
 			</section>
-			{#if lookupDone && !keyOnly}
-				<section aria-labelledby="account-password-heading" class="space-y-4">
-					{@render heading("password")}
-					<PasswordForm />
-				</section>
-			{/if}
+			<section aria-labelledby="account-password-heading" class="space-y-4">
+				{@render heading("password")}
+				<PasswordForm />
+			</section>
 		{/if}
 	</div>
 </div>

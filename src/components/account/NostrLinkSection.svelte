@@ -28,13 +28,6 @@ import NostrAvatar from "$components/NostrAvatar.svelte";
 // Nostr login reaches this account (and its saved items) instead of
 // creating a new one. Signing follows NostrLoginForm: extension or nsec.
 
-type Props = {
-	// false for a key that is the account's only login (no password)
-	canUnlink: boolean;
-};
-
-let { canUnlink }: Props = $props();
-
 let showNsecInput = $state(false);
 let nsec = $state("");
 const linkAction = createAccountAction("Nostr link");
@@ -128,8 +121,8 @@ async function unlink() {
 	if (!token) return;
 	await unlinkAction.run($_("account.nostr.unlinkError"), async () => {
 		changedHere = true;
-		if ((await unlinkNostr(token)) === "onlyLogin") {
-			errToast($_("account.nostr.onlyLogin"));
+		if ((await unlinkNostr(token)) === "needsPassword") {
+			errToast($_("account.nostr.needsPassword"));
 			return;
 		}
 		session.setNpub(token, null);
@@ -149,7 +142,7 @@ async function unlink() {
 				{shortNpub}
 			</p>
 		</div>
-		{#if canUnlink && !confirmingUnlink}
+		{#if !confirmingUnlink}
 			<button
 				type="button"
 				onclick={() => {
@@ -163,7 +156,7 @@ async function unlink() {
 		{/if}
 	</div>
 
-	{#if canUnlink && confirmingUnlink}
+	{#if confirmingUnlink}
 		<div class="space-y-3" role="group" aria-labelledby="account-nostr-unlink-warning">
 			<p id="account-nostr-unlink-warning" class="text-sm text-body dark:text-white/70">
 				{$_("account.nostr.unlinkWarning")}

@@ -65,28 +65,6 @@ describe("fetchCurrentUser", () => {
 		expect(api.get).toHaveBeenCalledTimes(2);
 	});
 
-	it("reads whether the account has a password", async () => {
-		const { default: api } = await import("#lib/axios.js");
-		vi.mocked(api.get).mockResolvedValueOnce({
-			data: { id: 1, roles: [], has_password: false },
-		});
-		vi.mocked(api.get).mockResolvedValueOnce({
-			data: { id: 2, roles: [], has_password: true },
-		});
-
-		expect((await fetchCurrentUser("nostr"))?.hasPassword).toBe(false);
-		expect((await fetchCurrentUser("password"))?.hasPassword).toBe(true);
-	});
-
-	// An API without has_password (before teambtcmap/btcmap-api#120) can't
-	// tell, so callers treat the account as a password account
-	it("leaves hasPassword undefined when the API doesn't send it", async () => {
-		const { default: api } = await import("#lib/axios.js");
-		vi.mocked(api.get).mockResolvedValue({ data: { id: 1, roles: [] } });
-
-		expect((await fetchCurrentUser("tok"))?.hasPassword).toBeUndefined();
-	});
-
 	it("drops non-string and unknown roles", async () => {
 		const { default: api } = await import("#lib/axios.js");
 		vi.mocked(api.get).mockResolvedValue({

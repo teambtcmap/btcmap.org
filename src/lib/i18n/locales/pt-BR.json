@@ -1312,7 +1312,7 @@
 			"unlinkConfirm": "Desvincular chave",
 			"unlinkSuccess": "Chave Nostr desvinculada.",
 			"unlinkError": "Não foi possível desvincular sua chave Nostr. Tente novamente.",
-			"onlyLogin": "Esta chave é a única forma de entrar nesta conta, por isso não pode ser desvinculada."
+			"needsPassword": "Esta chave é a única forma de entrar nesta conta. Defina uma senha primeiro e depois desvincule-a."
 		},
 		"password": {
 			"heading": "Senha",

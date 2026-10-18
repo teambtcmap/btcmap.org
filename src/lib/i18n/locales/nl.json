@@ -1412,7 +1412,7 @@
 			"unlinkConfirm": "Sleutel ontkoppelen",
 			"unlinkSuccess": "Nostr-sleutel ontkoppeld.",
 			"unlinkError": "Kan je Nostr-sleutel niet ontkoppelen. Probeer het opnieuw.",
-			"onlyLogin": "Deze sleutel is je enige manier om je bij dit account aan te melden, dus hij kan niet worden ontkoppeld."
+			"needsPassword": "Deze sleutel is je enige manier om je bij dit account aan te melden. Stel eerst een wachtwoord in en ontkoppel hem daarna."
 		},
 		"password": {
 			"heading": "Wachtwoord",

@@ -129,18 +129,20 @@ export const linkNostr = async (
 	}
 };
 
-export type NostrUnlink = "unlinked" | "onlyLogin";
+export type NostrUnlink = "unlinked" | "needsPassword";
 
 export const unlinkNostr = async (token: string): Promise<NostrUnlink> => {
 	try {
 		await api.delete(NOSTR_LINK_URL, authHeaders(token));
 		return "unlinked";
 	} catch (error) {
-		// The key is the account's only login (created via Nostr, no
+		// The key is the account's only way to log in (created with Nostr, no
 		// password): the API refuses, as unlinking would lock the account out
-		// (teambtcmap/btcmap-api#120)
-		if (errorMessage(error) === "this Nostr key is the account's only login") {
-			return "onlyLogin";
+		// (teambtcmap/btcmap-api#118)
+		if (
+			errorMessage(error) === "set a password before unlinking your Nostr key"
+		) {
+			return "needsPassword";
 		}
 		throw error;
 	}

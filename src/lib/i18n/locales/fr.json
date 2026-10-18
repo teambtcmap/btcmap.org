@@ -1338,7 +1338,7 @@
 			"unlinkConfirm": "Dissocier la clé",
 			"unlinkSuccess": "Clé Nostr dissociée.",
 			"unlinkError": "Impossible de dissocier votre clé Nostr. Veuillez réessayer.",
-			"onlyLogin": "Cette clé est votre seul moyen de vous connecter à ce compte, elle ne peut donc pas être dissociée."
+			"needsPassword": "Cette clé est votre seul moyen de vous connecter à ce compte. Définissez d'abord un mot de passe, puis dissociez-la."
 		},
 		"password": {
 			"heading": "Mot de passe",
