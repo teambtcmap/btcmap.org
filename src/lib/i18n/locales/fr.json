@@ -1234,7 +1234,8 @@
 		"passwordTooShort": "Utilisez au moins {min} caractères pour continuer.",
 		"submit": "Créer un compte",
 		"creating": "Création du compte...",
-		"error": "Impossible de créer le compte. Le nom d'utilisateur est peut-être déjà pris.",
+		"error": "Impossible de créer le compte. Veuillez réessayer.",
+		"usernameTaken": "Ce nom d'utilisateur est déjà pris. Essayez-en un autre.",
 		"haveAccount": "Vous avez déjà un compte ?",
 		"signIn": "Se connecter avec un mot de passe ou Nostr"
 	},

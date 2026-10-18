@@ -1,5 +1,6 @@
 <script lang="ts">
 import { createForm } from "@tanstack/svelte-form";
+import { isAxiosError } from "axios";
 
 import { trackEvent } from "#lib/analytics.js";
 import { _ } from "#lib/i18n/index.js";
@@ -9,7 +10,7 @@ import {
 } from "#lib/passwordPolicy.js";
 import { fieldError, inputProps, ruleValidation } from "#lib/ruleValidation.js";
 import type { Session } from "#lib/session.js";
-import { session } from "#lib/session.js";
+import { isUsernameTaken, session } from "#lib/session.js";
 import { errToast } from "#lib/utils.js";
 import TextField from "$components/form/TextField.svelte";
 import PrimaryButton from "$components/PrimaryButton.svelte";
@@ -22,8 +23,11 @@ type Props = {
 
 let { onSuccess }: Props = $props();
 
+let usernameInput = $state<HTMLInputElement>();
 let passwordInput = $state<HTMLInputElement>();
 let loading = $state(false);
+// Set when the API refused the last name as taken (409); cleared on edit
+let taken = $state(false);
 
 // Signup on TanStack Form (#1406). A too-short password on submit (#1411):
 // the rule's own line under the label turns into the error, like
@@ -51,11 +55,18 @@ const form = createForm(() => ({
 			trackEvent("signup_create_account_success");
 			await onSuccess(current);
 		} catch (err) {
-			// The /v4/users endpoint surfaces duplicate-username as a 500 with a
-			// generic body (no machine-readable error code), so we treat any
-			// non-2xx the same way and let the user try a different name.
-			errToast($_("signup.error"));
-			console.error("Signup failed:", err);
+			if (isUsernameTaken(err)) {
+				taken = true;
+				usernameInput?.focus();
+			} else {
+				errToast($_("signup.error"));
+			}
+			// The status only: the error carries the request body, password
+			// included
+			console.error(
+				"Signup failed:",
+				isAxiosError(err) ? err.response?.status : "unknown",
+			);
 		} finally {
 			loading = false;
 		}
@@ -86,7 +97,13 @@ function handleSubmit(event: SubmitEvent) {
 				label={$_("signup.username")}
 				autocomplete="username"
 				maxlength="100"
+				error={taken ? $_("signup.usernameTaken") : undefined}
 				{...inputProps(field)}
+				oninput={(event: Event) => {
+					taken = false;
+					field.handleChange((event.currentTarget as HTMLInputElement).value);
+				}}
+				bind:element={usernameInput}
 			/>
 		{/snippet}
 	</form.Field>

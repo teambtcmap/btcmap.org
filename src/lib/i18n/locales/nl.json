@@ -124,7 +124,8 @@
 		"passwordTooShort": "Gebruik minimaal {min} tekens om door te gaan.",
 		"submit": "Account aanmaken",
 		"creating": "Account aanmaken...",
-		"error": "Account aanmaken mislukt. De gebruikersnaam bestaat mogelijk al.",
+		"error": "Account aanmaken mislukt. Probeer het opnieuw.",
+		"usernameTaken": "Deze gebruikersnaam is al bezet. Probeer een andere.",
 		"haveAccount": "Heb je al een account?",
 		"signIn": "Aanmelden met een wachtwoord of Nostr"
 	},

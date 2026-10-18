@@ -124,7 +124,8 @@
 		"passwordTooShort": "Use at least {min} characters to continue.",
 		"submit": "Create account",
 		"creating": "Creating account...",
-		"error": "Could not create account. The username may already be taken.",
+		"error": "Could not create account. Please try again.",
+		"usernameTaken": "That username is already taken. Try another one.",
 		"haveAccount": "Already have an account?",
 		"signIn": "Log in with a password or Nostr"
 	},
