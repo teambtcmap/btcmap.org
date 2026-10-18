@@ -101,6 +101,8 @@ export type EventName =
 	| "account_password_change_success"
 	| "account_nostr_link_click"
 	| "account_nostr_link_success"
+	| "account_nostr_nsec_open"
+	| "account_nostr_unlink_open"
 	| "account_nostr_unlink_click"
 	| "account_nostr_unlink_success";
 

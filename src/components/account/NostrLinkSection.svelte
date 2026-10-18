@@ -76,11 +76,13 @@ async function submitProof(token: string, signed: SignedAuthEvent) {
 async function linkWithExtension() {
 	const token = $session?.token;
 	if (linkAction.pending || !token) return;
+	// Counted before the extension check: a click without one is still a
+	// click on the entry point
+	trackEvent("account_nostr_link_click");
 	if (getNostrExtension() === null) {
 		errToast($_("login.nostrNoExtension"));
 		return;
 	}
-	trackEvent("account_nostr_link_click");
 	await linkAction.run($_("account.nostr.linkError"), async () => {
 		await submitProof(
 			token,
@@ -120,6 +122,9 @@ async function unlink() {
 	const token = $session?.token;
 	if (!token) return;
 	await unlinkAction.run($_("account.nostr.unlinkError"), async () => {
+		// The confirmed unlink, so the click/success pair counts attempts,
+		// not opened confirmations
+		trackEvent("account_nostr_unlink_click");
 		changedHere = true;
 		await unlinkNostr(token);
 		session.setNpub(token, null);
@@ -143,7 +148,7 @@ async function unlink() {
 			<button
 				type="button"
 				onclick={() => {
-					trackEvent("account_nostr_unlink_click");
+					trackEvent("account_nostr_unlink_open");
 					confirmingUnlink = true;
 				}}
 				class="rounded-lg px-3 py-1.5 text-sm font-semibold text-red-600 hover:bg-red-50 dark:text-red-400 dark:hover:bg-white/10"
@@ -217,7 +222,10 @@ async function unlink() {
 	{:else}
 		<button
 			type="button"
-			onclick={() => (showNsecInput = true)}
+			onclick={() => {
+				trackEvent("account_nostr_nsec_open");
+				showNsecInput = true;
+			}}
 			class="w-full text-center text-sm text-link transition-colors hover:text-hover"
 		>
 			{$_("account.nostr.linkNsec")}
