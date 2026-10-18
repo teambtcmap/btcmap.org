@@ -106,11 +106,7 @@ function handleSubmit(event: SubmitEvent) {
 				autocomplete="username"
 				maxlength="100"
 				error={usernameTaken ? $_("signup.usernameTaken") : undefined}
-				{...inputProps(field)}
-				oninput={(event: Event) => {
-					usernameTaken = false;
-					field.handleChange((event.currentTarget as HTMLInputElement).value);
-				}}
+				{...inputProps(field, { onEdit: () => (usernameTaken = false) })}
 				bind:element={usernameInput}
 			/>
 		{/snippet}
