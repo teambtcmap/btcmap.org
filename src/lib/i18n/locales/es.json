@@ -1337,7 +1337,8 @@
 			"unlinkWarning": "Ya no podrás iniciar sesión con esta clave Nostr. Si esta cuenta se creó con Nostr y no tiene contraseña, perderás el acceso al cerrar sesión.",
 			"unlinkConfirm": "Desvincular clave",
 			"unlinkSuccess": "Clave Nostr desvinculada.",
-			"unlinkError": "No se pudo desvincular tu clave Nostr. Inténtalo de nuevo."
+			"unlinkError": "No se pudo desvincular tu clave Nostr. Inténtalo de nuevo.",
+			"needsPassword": "Esta clave es tu única forma de iniciar sesión en esta cuenta. Primero establece una contraseña y luego desvincúlala."
 		},
 		"password": {
 			"heading": "Contraseña",

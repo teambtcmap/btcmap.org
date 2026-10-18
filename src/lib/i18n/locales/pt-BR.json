@@ -1311,7 +1311,8 @@
 			"unlinkWarning": "Você não poderá mais entrar com esta chave Nostr. Se esta conta foi criada com Nostr e não tem senha, você perderá o acesso a ela ao sair.",
 			"unlinkConfirm": "Desvincular chave",
 			"unlinkSuccess": "Chave Nostr desvinculada.",
-			"unlinkError": "Não foi possível desvincular sua chave Nostr. Tente novamente."
+			"unlinkError": "Não foi possível desvincular sua chave Nostr. Tente novamente.",
+			"needsPassword": "Esta chave é a única forma de entrar nesta conta. Defina uma senha primeiro e depois desvincule-a."
 		},
 		"password": {
 			"heading": "Senha",

@@ -121,7 +121,10 @@ async function unlink() {
 	if (!token) return;
 	await unlinkAction.run($_("account.nostr.unlinkError"), async () => {
 		changedHere = true;
-		await unlinkNostr(token);
+		if ((await unlinkNostr(token)) === "needsPassword") {
+			errToast($_("account.nostr.needsPassword"));
+			return;
+		}
 		session.setNpub(token, null);
 		confirmingUnlink = false;
 		trackEvent("account_nostr_unlink_success");

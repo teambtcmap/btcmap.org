@@ -1337,7 +1337,8 @@
 			"unlinkWarning": "Du kannst dich danach nicht mehr mit diesem Nostr-Schlüssel anmelden. Wurde dieses Konto mit Nostr erstellt und hat kein Passwort, verlierst du nach dem Abmelden den Zugriff darauf.",
 			"unlinkConfirm": "Schlüssel trennen",
 			"unlinkSuccess": "Nostr-Schlüssel getrennt.",
-			"unlinkError": "Dein Nostr-Schlüssel konnte nicht getrennt werden. Bitte versuche es erneut."
+			"unlinkError": "Dein Nostr-Schlüssel konnte nicht getrennt werden. Bitte versuche es erneut.",
+			"needsPassword": "Dieser Schlüssel ist deine einzige Möglichkeit, dich bei diesem Konto anzumelden. Lege zuerst ein Passwort fest und trenne ihn dann."
 		},
 		"password": {
 			"heading": "Passwort",

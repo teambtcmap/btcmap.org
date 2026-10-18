@@ -1337,7 +1337,8 @@
 			"unlinkWarning": "Vous ne pourrez plus vous connecter avec cette clé Nostr. Si ce compte a été créé avec Nostr et n'a pas de mot de passe, vous en perdrez l'accès une fois déconnecté.",
 			"unlinkConfirm": "Dissocier la clé",
 			"unlinkSuccess": "Clé Nostr dissociée.",
-			"unlinkError": "Impossible de dissocier votre clé Nostr. Veuillez réessayer."
+			"unlinkError": "Impossible de dissocier votre clé Nostr. Veuillez réessayer.",
+			"needsPassword": "Cette clé est votre seul moyen de vous connecter à ce compte. Définissez d'abord un mot de passe, puis dissociez-la."
 		},
 		"password": {
 			"heading": "Mot de passe",
