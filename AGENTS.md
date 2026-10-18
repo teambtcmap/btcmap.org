@@ -67,6 +67,21 @@ interface Disposable {
 class Resource implements Disposable { ... }
 ```
 
+### TypeScript: Use the real type, don't widen
+
+- **Type a value by where it goes**, not by what happens to compile. A prop or argument that ends up in an API payload takes that field's type from the generated binding or the owning module (`PostPlaceCommentArgs["place_id"]`, `MerchantPageData["id"]`, `CommentSource`), not a hand-written `string | number`
+- **Never widen a type to silence an error at a call site.** The error is saying the caller holds the wrong shape: convert there (`String(place.id)`), and keep the receiving type narrow. Widening hides the mismatch until runtime (#1489: a numeric `place_id` the API rejects)
+- The same goes for `any`, `unknown` casts and bare `string` where a union or an indexed-access type already exists
+
+```typescript
+// ❌ Widened so both callers compile; the number reaches the API
+type Props = { elementId: string | number | undefined };
+
+// ✅ The API's own type; the caller with a numeric id converts
+type Props = { elementId: PostPlaceCommentArgs["place_id"] | undefined };
+<CommentAddButton elementId={String(merchant.id)} />
+```
+
 ### Imports: Separate Types from Values
 
 - **Never mix type and value imports** in the same statement
