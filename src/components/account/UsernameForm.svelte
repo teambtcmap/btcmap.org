@@ -1,7 +1,8 @@
 <script lang="ts">
 import { createForm } from "@tanstack/svelte-form";
 
-import { changeUsername, errorStatus } from "#lib/account.js";
+import { changeUsername } from "#lib/account.js";
+import { createAccountAction } from "#lib/accountAction.svelte.js";
 import type { UsernameInput } from "#lib/accountValidation.js";
 import {
 	USERNAME_FIELD_ORDER,
@@ -12,7 +13,7 @@ import { trackEvent } from "#lib/analytics.js";
 import { _ } from "#lib/i18n/index.js";
 import { fieldError, inputProps, ruleValidation } from "#lib/ruleValidation.js";
 import { session } from "#lib/session.js";
-import { errToast, successToast } from "#lib/utils.js";
+import { successToast } from "#lib/utils.js";
 import TextField from "$components/form/TextField.svelte";
 import PrimaryButton from "$components/PrimaryButton.svelte";
 
@@ -20,7 +21,7 @@ import PrimaryButton from "$components/PrimaryButton.svelte";
 // leaderboard, and password logins use it.
 
 let usernameInput = $state<HTMLInputElement>();
-let loading = $state(false);
+const save = createAccountAction("Username change");
 // Set when the API refused the last name as taken; cleared on edit
 let taken = $state(false);
 
@@ -36,8 +37,7 @@ const form = createForm(() => ({
 	onSubmit: async ({ value }) => {
 		const token = $session?.token;
 		if (!token) return;
-		loading = true;
-		try {
+		await save.run($_("account.username.error"), async () => {
 			const result = await changeUsername(token, value.username.trim());
 			if (result.status === "taken") {
 				taken = true;
@@ -48,18 +48,13 @@ const form = createForm(() => ({
 			form.setFieldValue("username", result.username);
 			trackEvent("account_username_save_success");
 			successToast($_("account.username.success"));
-		} catch (err) {
-			errToast($_("account.username.error"));
-			console.error("Username change failed:", errorStatus(err) ?? "unknown");
-		} finally {
-			loading = false;
-		}
+		});
 	},
 }));
 const values = form.useSelector((state) => state.values);
 
 const submitDisabled = $derived(
-	loading ||
+	save.pending ||
 		!usernameChanged(values.current.username, $session?.username ?? ""),
 );
 
@@ -100,6 +95,6 @@ function handleSubmit(event: SubmitEvent) {
 		disabled={submitDisabled}
 		style="rounded-lg px-4 py-2 disabled:opacity-50"
 	>
-		{loading ? $_("account.saving") : $_("account.username.save")}
+		{save.pending ? $_("account.saving") : $_("account.username.save")}
 	</PrimaryButton>
 </form>

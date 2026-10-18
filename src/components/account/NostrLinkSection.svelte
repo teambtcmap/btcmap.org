@@ -7,6 +7,7 @@ import {
 	linkNostr,
 	unlinkNostr,
 } from "#lib/account.js";
+import { createAccountAction } from "#lib/accountAction.svelte.js";
 import { trackEvent } from "#lib/analytics.js";
 import { _ } from "#lib/i18n/index.js";
 import type { SignedAuthEvent } from "#lib/nostr.js";
@@ -29,9 +30,9 @@ import NostrAvatar from "$components/NostrAvatar.svelte";
 
 let showNsecInput = $state(false);
 let nsec = $state("");
-let linking = $state(false);
+const linkAction = createAccountAction("Nostr link");
 let confirmingUnlink = $state(false);
-let unlinking = $state(false);
+const unlinkAction = createAccountAction("Nostr unlink");
 // Set once a link or unlink starts: from then on the session holds newer
 // state than the lookup below can return
 let changedHere = false;
@@ -72,80 +73,60 @@ async function submitProof(token: string, signed: SignedAuthEvent) {
 	successToast($_("account.nostr.linkSuccess"));
 }
 
-const linkFailed = (err: unknown) => {
-	errToast($_("account.nostr.linkError"));
-	console.error("Nostr link failed:", errorStatus(err) ?? "unknown");
-};
-
 async function linkWithExtension() {
-	// Re-entry guard: disabled lands a tick late (see NostrLoginForm)
-	if (linking) return;
 	const token = $session?.token;
-	if (!token) return;
+	if (linkAction.pending || !token) return;
 	if (getNostrExtension() === null) {
 		errToast($_("login.nostrNoExtension"));
 		return;
 	}
 	trackEvent("account_nostr_link_click");
-	linking = true;
-	try {
+	await linkAction.run($_("account.nostr.linkError"), async () => {
 		await submitProof(
 			token,
 			await signNip98WithExtension(NOSTR_LINK_URL, "PUT"),
 		);
-	} catch (err) {
-		linkFailed(err);
-	} finally {
-		linking = false;
-	}
+	});
 }
 
 async function linkWithNsec(event: SubmitEvent) {
 	event.preventDefault();
 	const token = $session?.token;
-	if (linking || !token || !nsec.trim()) return;
+	if (linkAction.pending || !token || !nsec.trim()) return;
 	trackEvent("account_nostr_link_click");
-	linking = true;
-	let secretKey: Uint8Array | null = null;
-	let signed: SignedAuthEvent;
-	try {
-		secretKey = decodeNsec(nsec);
-		signed = signNip98WithSecretKey(secretKey, NOSTR_LINK_URL, "PUT");
-		nsec = "";
-	} catch {
-		errToast($_("login.nsecInvalid"));
-		secretKey?.fill(0);
-		linking = false;
-		return;
-	}
-	try {
-		await submitProof(token, signed);
-	} catch (err) {
-		linkFailed(err);
-	} finally {
-		// Best-effort zeroing, as on login
-		secretKey.fill(0);
-		linking = false;
-	}
+	await linkAction.run($_("account.nostr.linkError"), async () => {
+		let secretKey: Uint8Array | null = null;
+		let signed: SignedAuthEvent;
+		try {
+			secretKey = decodeNsec(nsec);
+			signed = signNip98WithSecretKey(secretKey, NOSTR_LINK_URL, "PUT");
+			nsec = "";
+		} catch {
+			// A malformed key is the user's input, not a failed request
+			errToast($_("login.nsecInvalid"));
+			secretKey?.fill(0);
+			return;
+		}
+		try {
+			await submitProof(token, signed);
+		} finally {
+			// Best-effort zeroing, as on login
+			secretKey.fill(0);
+		}
+	});
 }
 
 async function unlink() {
 	const token = $session?.token;
-	if (!token || unlinking) return;
-	unlinking = true;
-	changedHere = true;
-	try {
+	if (!token) return;
+	await unlinkAction.run($_("account.nostr.unlinkError"), async () => {
+		changedHere = true;
 		await unlinkNostr(token);
 		session.setNpub(token, null);
 		confirmingUnlink = false;
 		trackEvent("account_nostr_unlink_success");
 		successToast($_("account.nostr.unlinkSuccess"));
-	} catch (err) {
-		errToast($_("account.nostr.unlinkError"));
-		console.error("Nostr unlink failed:", errorStatus(err) ?? "unknown");
-	} finally {
-		unlinking = false;
-	}
+	});
 }
 </script>
 
@@ -188,7 +169,7 @@ async function unlink() {
 				<button
 					type="button"
 					onclick={unlink}
-					disabled={unlinking}
+					disabled={unlinkAction.pending}
 					class="rounded-lg bg-red-600 px-3 py-1.5 text-sm font-semibold text-white hover:bg-red-700 disabled:opacity-60"
 				>
 					{$_("account.nostr.unlinkConfirm")}
@@ -202,10 +183,10 @@ async function unlink() {
 	<button
 		type="button"
 		onclick={linkWithExtension}
-		disabled={linking}
+		disabled={linkAction.pending}
 		class="w-full rounded-lg bg-purple-600 px-4 py-2 font-semibold text-white transition-colors hover:bg-purple-700 disabled:opacity-50"
 	>
-		{linking && !showNsecInput ? $_("login.nostrSigning") : $_("account.nostr.linkExtension")}
+		{linkAction.pending && !showNsecInput ? $_("login.nostrSigning") : $_("account.nostr.linkExtension")}
 	</button>
 
 	{#if showNsecInput}
@@ -227,10 +208,10 @@ async function unlink() {
 			</p>
 			<button
 				type="submit"
-				disabled={linking || !nsec.trim()}
+				disabled={linkAction.pending || !nsec.trim()}
 				class="w-full rounded-lg bg-purple-600 px-4 py-2 font-semibold text-white transition-colors hover:bg-purple-700 disabled:opacity-50"
 			>
-				{linking ? $_("login.nostrSigning") : $_("account.nostr.linkNsec")}
+				{linkAction.pending ? $_("login.nostrSigning") : $_("account.nostr.linkNsec")}
 			</button>
 		</form>
 	{:else}
