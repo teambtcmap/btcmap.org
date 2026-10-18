@@ -46,23 +46,23 @@ onMount(async () => {
 	if (!token) return;
 	try {
 		const linked = await fetchLinkedNpub(token);
-		if ($session?.token === token && linked !== $session.npub) {
-			session.setNpub(linked);
-		}
+		session.setNpub(token, linked);
 	} catch (err) {
 		console.error("Nostr link lookup failed:", errorStatus(err) ?? "unknown");
 	}
 });
 
-async function submitProof(signed: SignedAuthEvent) {
-	const token = $session?.token;
-	if (!token) return;
+// `token` is the account the user started linking from. Signing can wait on
+// an extension prompt; if the session changed meanwhile (logout, another
+// login), the key must not go to whichever account is active now.
+async function submitProof(token: string, signed: SignedAuthEvent) {
+	if ($session?.token !== token) return;
 	const result = await linkNostr(token, encodeNip98Event(signed));
 	if (result.status === "taken") {
 		errToast($_("account.nostr.taken"));
 		return;
 	}
-	session.setNpub(result.npub);
+	session.setNpub(token, result.npub);
 	showNsecInput = false;
 	trackEvent("account_nostr_link_success");
 	successToast($_("account.nostr.linkSuccess"));
@@ -76,6 +76,8 @@ const linkFailed = (err: unknown) => {
 async function linkWithExtension() {
 	// Re-entry guard: disabled lands a tick late (see NostrLoginForm)
 	if (linking) return;
+	const token = $session?.token;
+	if (!token) return;
 	if (getNostrExtension() === null) {
 		errToast($_("login.nostrNoExtension"));
 		return;
@@ -83,7 +85,10 @@ async function linkWithExtension() {
 	trackEvent("account_nostr_link_click");
 	linking = true;
 	try {
-		await submitProof(await signNip98WithExtension(NOSTR_LINK_URL, "PUT"));
+		await submitProof(
+			token,
+			await signNip98WithExtension(NOSTR_LINK_URL, "PUT"),
+		);
 	} catch (err) {
 		linkFailed(err);
 	} finally {
@@ -93,7 +98,8 @@ async function linkWithExtension() {
 
 async function linkWithNsec(event: SubmitEvent) {
 	event.preventDefault();
-	if (linking || !nsec.trim()) return;
+	const token = $session?.token;
+	if (linking || !token || !nsec.trim()) return;
 	trackEvent("account_nostr_link_click");
 	linking = true;
 	let secretKey: Uint8Array | null = null;
@@ -109,7 +115,7 @@ async function linkWithNsec(event: SubmitEvent) {
 		return;
 	}
 	try {
-		await submitProof(signed);
+		await submitProof(token, signed);
 	} catch (err) {
 		linkFailed(err);
 	} finally {
@@ -125,7 +131,7 @@ async function unlink() {
 	unlinking = true;
 	try {
 		await unlinkNostr(token);
-		session.setNpub(null);
+		session.setNpub(token, null);
 		confirmingUnlink = false;
 		trackEvent("account_nostr_unlink_success");
 		successToast($_("account.nostr.unlinkSuccess"));
