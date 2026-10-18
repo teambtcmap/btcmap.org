@@ -49,13 +49,12 @@ const form = createForm(() => ({
 		loading = true;
 		// Only this submit's answer counts
 		usernameTaken = false;
+		let current: Session;
 		try {
-			const current = await session.signUp({
+			current = await session.signUp({
 				username: value.username.trim(),
 				password: value.password,
 			});
-			trackEvent("signup_create_account_success");
-			await onSuccess(current);
 		} catch (err) {
 			if (isUsernameTaken(err)) {
 				usernameTaken = true;
@@ -67,6 +66,19 @@ const form = createForm(() => ({
 			// included
 			console.error(
 				"Signup failed:",
+				isAxiosError(err) ? err.response?.status : "unknown",
+			);
+			loading = false;
+			return;
+		}
+		trackEvent("signup_create_account_success");
+		// The account exists from here on: a failing follow-up must not ask
+		// for a retry, which would only answer that the name is taken
+		try {
+			await onSuccess(current);
+		} catch (err) {
+			console.error(
+				"Signup follow-up failed:",
 				isAxiosError(err) ? err.response?.status : "unknown",
 			);
 		} finally {
