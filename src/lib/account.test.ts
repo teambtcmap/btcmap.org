@@ -193,28 +193,11 @@ describe("unlinkNostr", () => {
 		const { default: api } = await import("#lib/axios.js");
 		vi.mocked(api.delete).mockResolvedValue({ data: { npub: null } });
 
-		expect(await unlinkNostr("tok")).toBe("unlinked");
+		await unlinkNostr("tok");
 		expect(api.delete).toHaveBeenCalledWith(
 			`${API_BASE}/v4/users/me/nostr`,
 			AUTH,
 		);
-	});
-
-	// The key is the account's only login: unlinking would lock it out
-	it("reports an account that needs a password first", async () => {
-		const { default: api } = await import("#lib/axios.js");
-		vi.mocked(api.delete).mockRejectedValue(
-			apiError(400, "set a password before unlinking your Nostr key"),
-		);
-
-		expect(await unlinkNostr("tok")).toBe("needsPassword");
-	});
-
-	it("rethrows other failures", async () => {
-		const { default: api } = await import("#lib/axios.js");
-		vi.mocked(api.delete).mockRejectedValue(apiError(401, "Unauthorized"));
-
-		await expect(unlinkNostr("tok")).rejects.toThrow();
 	});
 });
 

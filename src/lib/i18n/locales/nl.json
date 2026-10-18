@@ -1411,8 +1411,7 @@
 			"unlinkWarning": "Je kunt je daarna niet meer met deze Nostr-sleutel aanmelden. Is dit account met Nostr aangemaakt en heeft het geen wachtwoord, dan verlies je de toegang zodra je je afmeldt.",
 			"unlinkConfirm": "Sleutel ontkoppelen",
 			"unlinkSuccess": "Nostr-sleutel ontkoppeld.",
-			"unlinkError": "Kan je Nostr-sleutel niet ontkoppelen. Probeer het opnieuw.",
-			"needsPassword": "Deze sleutel is je enige manier om je bij dit account aan te melden. Stel eerst een wachtwoord in en ontkoppel hem daarna."
+			"unlinkError": "Kan je Nostr-sleutel niet ontkoppelen. Probeer het opnieuw."
 		},
 		"password": {
 			"heading": "Wachtwoord",

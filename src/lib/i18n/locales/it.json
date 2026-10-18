@@ -1411,8 +1411,7 @@
 			"unlinkWarning": "Non potrai più accedere con questa chiave Nostr. Se questo account è stato creato con Nostr e non ha una password, ne perderai l'accesso dopo la disconnessione.",
 			"unlinkConfirm": "Scollega chiave",
 			"unlinkSuccess": "Chiave Nostr scollegata.",
-			"unlinkError": "Impossibile scollegare la tua chiave Nostr. Riprova.",
-			"needsPassword": "Questa chiave è l'unico modo per accedere a questo account. Imposta prima una password, poi scollegala."
+			"unlinkError": "Impossibile scollegare la tua chiave Nostr. Riprova."
 		},
 		"password": {
 			"heading": "Password",

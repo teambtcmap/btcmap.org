@@ -1411,8 +1411,7 @@
 			"unlinkWarning": "You won't be able to log in with this Nostr key anymore. If this account was created with Nostr and has no password, you lose access to it once you log out.",
 			"unlinkConfirm": "Unlink key",
 			"unlinkSuccess": "Nostr key unlinked.",
-			"unlinkError": "Couldn't unlink your Nostr key. Please try again.",
-			"needsPassword": "This key is your only way to log in to this account. Set a password first, then unlink it."
+			"unlinkError": "Couldn't unlink your Nostr key. Please try again."
 		},
 		"password": {
 			"heading": "Password",
