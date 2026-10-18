@@ -5,7 +5,14 @@ import { authHeaders } from "#lib/session.js";
 // The signed-in user's id and roles. The session only keeps the username
 // and token, but ownership checks (e.g. who may delete a place photo) need
 // the numeric id that the API attributes content to.
-export type CurrentUser = { id: number; roles: Role[] };
+export type CurrentUser = {
+	id: number;
+	roles: Role[];
+	// false for an account without a password (created via Nostr: the key
+	// is its only login). undefined while the API doesn't send it
+	// (teambtcmap/btcmap-api#120), so callers treat that as a password account
+	hasPassword: boolean | undefined;
+};
 
 // btcmap-api's Role enum as it serializes; it isn't in bindings/ts, so it
 // lives here. Unknown values are dropped rather than trusted.
@@ -36,11 +43,12 @@ export const resetCurrentUserCache = () => cache.clear();
 
 const parseCurrentUser = (data: unknown): CurrentUser | null => {
 	if (typeof data !== "object" || data === null) return null;
-	const { id, roles } = data as Record<string, unknown>;
+	const { id, roles, has_password } = data as Record<string, unknown>;
 	if (typeof id !== "number") return null;
 	return {
 		id,
 		roles: Array.isArray(roles) ? roles.filter(isRole) : [],
+		hasPassword: typeof has_password === "boolean" ? has_password : undefined,
 	};
 };
 

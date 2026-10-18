@@ -1338,7 +1338,7 @@
 			"unlinkConfirm": "Schlüssel trennen",
 			"unlinkSuccess": "Nostr-Schlüssel getrennt.",
 			"unlinkError": "Dein Nostr-Schlüssel konnte nicht getrennt werden. Bitte versuche es erneut.",
-			"needsPassword": "Dieser Schlüssel ist deine einzige Möglichkeit, dich bei diesem Konto anzumelden. Lege zuerst ein Passwort fest und trenne ihn dann."
+			"onlyLogin": "Dieser Schlüssel ist deine einzige Möglichkeit, dich bei diesem Konto anzumelden, deshalb kann er nicht getrennt werden."
 		},
 		"password": {
 			"heading": "Passwort",

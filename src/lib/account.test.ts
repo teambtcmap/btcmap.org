@@ -190,13 +190,13 @@ describe("unlinkNostr", () => {
 	});
 
 	// The key is the account's only login: unlinking would lock it out
-	it("reports an account that needs a password first", async () => {
+	it("reports a key that is the account's only login", async () => {
 		const { default: api } = await import("#lib/axios.js");
 		vi.mocked(api.delete).mockRejectedValue(
-			apiError(400, "set a password before unlinking your Nostr key"),
+			apiError(400, "this Nostr key is the account's only login"),
 		);
 
-		expect(await unlinkNostr("tok")).toBe("needsPassword");
+		expect(await unlinkNostr("tok")).toBe("onlyLogin");
 	});
 
 	it("rethrows other failures", async () => {

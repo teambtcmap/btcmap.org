@@ -1412,7 +1412,7 @@
 			"unlinkConfirm": "Unlink key",
 			"unlinkSuccess": "Nostr key unlinked.",
 			"unlinkError": "Couldn't unlink your Nostr key. Please try again.",
-			"needsPassword": "This key is your only way to log in to this account. Set a password first, then unlink it."
+			"onlyLogin": "This key is your only way to log in to this account, so it can't be unlinked."
 		},
 		"password": {
 			"heading": "Password",

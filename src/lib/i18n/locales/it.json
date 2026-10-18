@@ -1412,7 +1412,7 @@
 			"unlinkConfirm": "Scollega chiave",
 			"unlinkSuccess": "Chiave Nostr scollegata.",
 			"unlinkError": "Impossibile scollegare la tua chiave Nostr. Riprova.",
-			"needsPassword": "Questa chiave è l'unico modo per accedere a questo account. Imposta prima una password, poi scollegala."
+			"onlyLogin": "Questa chiave è l'unico modo per accedere a questo account, quindi non può essere scollegata."
 		},
 		"password": {
 			"heading": "Password",
