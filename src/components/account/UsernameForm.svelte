@@ -1,7 +1,7 @@
 <script lang="ts">
 import { createForm } from "@tanstack/svelte-form";
 
-import { changeUsername } from "#lib/account.js";
+import { changeUsername, errorStatus } from "#lib/account.js";
 import type { UsernameInput } from "#lib/accountValidation.js";
 import {
 	USERNAME_FIELD_ORDER,
@@ -50,7 +50,7 @@ const form = createForm(() => ({
 			successToast($_("account.username.success"));
 		} catch (err) {
 			errToast($_("account.username.error"));
-			console.error("Username change failed:", err);
+			console.error("Username change failed:", errorStatus(err) ?? "unknown");
 		} finally {
 			loading = false;
 		}
