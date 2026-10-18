@@ -260,6 +260,33 @@ function createSessionStore() {
 			return result;
 		},
 
+		// The account was renamed on the API (account page).
+		setUsername: (username: string) => {
+			update((current) => {
+				if (!current) {
+					console.warn("session.setUsername called with no active session");
+					return current;
+				}
+				const next = { ...current, username };
+				saveToStorage(next);
+				return next;
+			});
+		},
+
+		// A Nostr key was linked to (or unlinked from) the account on the API
+		// (account page); drives the avatar like a Nostr login does.
+		setNpub: (npub: string | null) => {
+			update((current) => {
+				if (!current) {
+					console.warn("session.setNpub called with no active session");
+					return current;
+				}
+				const next = { ...current, npub };
+				saveToStorage(next);
+				return next;
+			});
+		},
+
 		// Replace the current session with a different account (login flow).
 		// Saved items are populated separately after login. `npub` is set
 		// for Nostr logins (drives the avatar), null for password logins.

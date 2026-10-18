@@ -62,7 +62,8 @@
 		"signup": "Registrati",
 		"logout": "Esci",
 		"backupAccount": "Backup dell'account",
-		"myPhotos": "Le mie foto"
+		"myPhotos": "Le mie foto",
+		"accountSettings": "Impostazioni account"
 	},
 	"saved": {
 		"title": "I miei salvati",
@@ -1355,5 +1356,52 @@
 		"empty": "Non hai ancora aggiunto foto. Apri un luogo e tocca «Aggiungi foto».",
 		"loadError": "Impossibile caricare le tue foto. Riprova.",
 		"unknownPlace": "Luogo #{id}"
+	},
+	"account": {
+		"title": "Impostazioni account",
+		"saving": "Salvataggio…",
+		"username": {
+			"heading": "Nome utente",
+			"description": "Mostrato sui tuoi commenti, sulle foto e nella classifica. Lo usi anche per accedere.",
+			"label": "Nome utente",
+			"required": "Inserisci un nome utente.",
+			"taken": "Questo nome utente è già in uso. Provane un altro.",
+			"save": "Salva nome utente",
+			"success": "Nome utente modificato.",
+			"error": "Impossibile modificare il nome utente. Riprova."
+		},
+		"nostr": {
+			"heading": "Nostr",
+			"description": "Collega una chiave Nostr per accedere a questo account anche con Nostr. Senza collegamento, l'accesso con Nostr crea un account separato.",
+			"linked": "Chiave collegata",
+			"none": "Nessuna chiave Nostr è collegata a questo account.",
+			"linkExtension": "Collega con estensione Nostr",
+			"linkNsec": "Collega con nsec",
+			"nsecWarning": "La tua nsec resta nel browser: firma solo questa richiesta e non viene mai salvata né inviata.",
+			"linkSuccess": "Chiave Nostr collegata.",
+			"taken": "Questa chiave Nostr appartiene già a un altro account BTC Map.",
+			"linkError": "Impossibile collegare la tua chiave Nostr. Riprova.",
+			"unlink": "Scollega",
+			"unlinkWarning": "Non potrai più accedere con questa chiave Nostr. Se questo account è stato creato con Nostr e non ha una password, ne perderai l'accesso dopo la disconnessione.",
+			"unlinkConfirm": "Scollega chiave",
+			"unlinkSuccess": "Chiave Nostr scollegata.",
+			"unlinkError": "Impossibile scollegare la tua chiave Nostr. Riprova."
+		},
+		"password": {
+			"heading": "Password",
+			"description": "Cambia la password con cui accedi.",
+			"current": "Password attuale",
+			"next": "Nuova password",
+			"confirm": "Ripeti la nuova password",
+			"currentRequired": "Inserisci la password attuale.",
+			"nextRequired": "Inserisci una nuova password.",
+			"tooShort": "Usa almeno {min} caratteri.",
+			"mismatch": "Le password non coincidono.",
+			"wrongPassword": "Questa non è la tua password attuale.",
+			"noPassword": "Questo account è stato creato con Nostr e non ha una password da cambiare.",
+			"submit": "Cambia password",
+			"success": "Password cambiata.",
+			"error": "Impossibile cambiare la password. Riprova."
+		}
 	}
 }

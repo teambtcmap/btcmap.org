@@ -55,7 +55,8 @@
 		"communities": "Communautés",
 		"countries": "Pays",
 		"signup": "S'inscrire",
-		"myPhotos": "Mes photos"
+		"myPhotos": "Mes photos",
+		"accountSettings": "Paramètres du compte"
 	},
 	"search": {
 		"placeholderPlaces": "Rechercher des lieux...",
@@ -1280,5 +1281,52 @@
 		"empty": "Vous n'avez encore ajouté aucune photo. Ouvrez un lieu et touchez « Ajouter une photo ».",
 		"loadError": "Impossible de charger vos photos. Veuillez réessayer.",
 		"unknownPlace": "Lieu #{id}"
+	},
+	"account": {
+		"title": "Paramètres du compte",
+		"saving": "Enregistrement…",
+		"username": {
+			"heading": "Nom d'utilisateur",
+			"description": "Affiché sur vos commentaires, vos photos et dans le classement. Vous vous connectez aussi avec.",
+			"label": "Nom d'utilisateur",
+			"required": "Saisissez un nom d'utilisateur.",
+			"taken": "Ce nom d'utilisateur est déjà pris. Essayez-en un autre.",
+			"save": "Enregistrer le nom d'utilisateur",
+			"success": "Nom d'utilisateur modifié.",
+			"error": "Impossible de modifier votre nom d'utilisateur. Veuillez réessayer."
+		},
+		"nostr": {
+			"heading": "Nostr",
+			"description": "Associez une clé Nostr pour vous connecter aussi à ce compte avec Nostr. Sans association, une connexion avec Nostr crée un compte séparé.",
+			"linked": "Clé associée",
+			"none": "Aucune clé Nostr n'est associée à ce compte.",
+			"linkExtension": "Associer avec une extension Nostr",
+			"linkNsec": "Associer avec nsec",
+			"nsecWarning": "Votre nsec reste dans votre navigateur : il signe uniquement cette demande et n'est jamais enregistré ni envoyé.",
+			"linkSuccess": "Clé Nostr associée.",
+			"taken": "Cette clé Nostr appartient déjà à un autre compte BTC Map.",
+			"linkError": "Impossible d'associer votre clé Nostr. Veuillez réessayer.",
+			"unlink": "Dissocier",
+			"unlinkWarning": "Vous ne pourrez plus vous connecter avec cette clé Nostr. Si ce compte a été créé avec Nostr et n'a pas de mot de passe, vous en perdrez l'accès une fois déconnecté.",
+			"unlinkConfirm": "Dissocier la clé",
+			"unlinkSuccess": "Clé Nostr dissociée.",
+			"unlinkError": "Impossible de dissocier votre clé Nostr. Veuillez réessayer."
+		},
+		"password": {
+			"heading": "Mot de passe",
+			"description": "Modifiez le mot de passe avec lequel vous vous connectez.",
+			"current": "Mot de passe actuel",
+			"next": "Nouveau mot de passe",
+			"confirm": "Répétez le nouveau mot de passe",
+			"currentRequired": "Saisissez votre mot de passe actuel.",
+			"nextRequired": "Saisissez un nouveau mot de passe.",
+			"tooShort": "Utilisez au moins {min} caractères.",
+			"mismatch": "Les mots de passe ne correspondent pas.",
+			"wrongPassword": "Ce n'est pas votre mot de passe actuel.",
+			"noPassword": "Ce compte a été créé avec Nostr et n'a pas de mot de passe à modifier.",
+			"submit": "Modifier le mot de passe",
+			"success": "Mot de passe modifié.",
+			"error": "Impossible de modifier votre mot de passe. Veuillez réessayer."
+		}
 	}
 }

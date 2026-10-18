@@ -366,6 +366,48 @@ describe("session store", () => {
 		});
 	});
 
+	describe("setUsername / setNpub", () => {
+		it("setUsername renames the session and persists it", async () => {
+			seedStorage({ username: "alice", token: "tok", savedPlaces: [1] });
+			const session = await createTestSession();
+			session.init();
+
+			session.setUsername("alice2");
+
+			expect(get(session)?.username).toBe("alice2");
+			expect(get(session)?.savedPlaces).toEqual([1]);
+			const stored = JSON.parse(localStorage.getItem("btcmap_session") ?? "{}");
+			expect(stored.username).toBe("alice2");
+		});
+
+		it("setNpub links and unlinks the Nostr identity and persists it", async () => {
+			seedStorage({ username: "alice", token: "tok", savedPlaces: [] });
+			const session = await createTestSession();
+			session.init();
+
+			session.setNpub("npub1example");
+			expect(get(session)?.npub).toBe("npub1example");
+			expect(
+				JSON.parse(localStorage.getItem("btcmap_session") ?? "{}").npub,
+			).toBe("npub1example");
+
+			session.setNpub(null);
+			expect(get(session)?.npub).toBeNull();
+		});
+
+		it("both warn and no-op without a session", async () => {
+			const warnSpy = vi.spyOn(console, "warn").mockImplementation(() => {});
+			const session = await createTestSession();
+
+			session.setUsername("alice");
+			session.setNpub("npub1example");
+
+			expect(get(session)).toBeNull();
+			expect(localStorage.getItem("btcmap_session")).toBeNull();
+			expect(warnSpy).toHaveBeenCalledTimes(2);
+		});
+	});
+
 	describe("setSavedPlaces / setSavedAreas with null session", () => {
 		it("setSavedPlaces warns and no-ops when session is null", async () => {
 			const warnSpy = vi.spyOn(console, "warn").mockImplementation(() => {});
