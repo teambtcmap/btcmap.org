@@ -13,6 +13,7 @@ import { trackEvent } from "#lib/analytics.js";
 import { _ } from "#lib/i18n/index.js";
 import { fieldError, inputProps, ruleValidation } from "#lib/ruleValidation.js";
 import { session } from "#lib/session.js";
+import { USERNAME_MAX_LENGTH } from "#lib/usernamePolicy.js";
 import { successToast } from "#lib/utils.js";
 import TextField from "$components/form/TextField.svelte";
 import PrimaryButton from "$components/PrimaryButton.svelte";
@@ -74,7 +75,7 @@ function handleSubmit(event: SubmitEvent) {
 				id="account-username"
 				label={$_("account.username.label")}
 				autocomplete="username"
-				maxlength="100"
+				maxlength={USERNAME_MAX_LENGTH}
 				error={rule
 					? $_("account.username.required")
 					: taken
