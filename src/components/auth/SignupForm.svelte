@@ -49,16 +49,18 @@ const form = createForm(() => ({
 		loading = true;
 		// Only this submit's answer counts
 		usernameTaken = false;
+		const username = value.username.trim();
 		let current: Session;
 		try {
-			current = await session.signUp({
-				username: value.username.trim(),
-				password: value.password,
-			});
+			current = await session.signUp({ username, password: value.password });
 		} catch (err) {
 			if (isUsernameTaken(err)) {
-				usernameTaken = true;
-				usernameInput?.focus();
+				// Only for the name still in the field: an edit while the
+				// request ran already answered it
+				if (form.state.values.username.trim() === username) {
+					usernameTaken = true;
+					usernameInput?.focus();
+				}
 			} else {
 				errToast($_("signup.error"));
 			}
