@@ -1,7 +1,7 @@
-import { isAxiosError } from "axios";
 import { derived, get, writable } from "svelte/store";
 
 import { API_BASE } from "#lib/api-base.js";
+import { errorStatus } from "#lib/apiError.js";
 import api from "#lib/axios.js";
 
 // Session is the BTC Map account behind saved places/areas. Accounts are
@@ -105,7 +105,7 @@ function normalizeCredentials(
 // The API refused the chosen username because another account has it:
 // 409 Conflict (teambtcmap/btcmap-api#119)
 export const isUsernameTaken = (error: unknown): boolean =>
-	isAxiosError(error) && error.response?.status === 409;
+	errorStatus(error) === 409;
 
 // Request config for an authenticated API call (axios `headers` option)
 export const authHeaders = (token: string) => ({
