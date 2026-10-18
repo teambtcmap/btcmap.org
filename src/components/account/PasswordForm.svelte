@@ -1,6 +1,7 @@
 <script lang="ts">
 import { createForm } from "@tanstack/svelte-form";
 
+import type { PasswordChange } from "#lib/account.js";
 import { changePassword } from "#lib/account.js";
 import { createAccountAction } from "#lib/accountAction.svelte.js";
 import type { PasswordChangeInput } from "#lib/accountValidation.js";
@@ -29,7 +30,7 @@ let nextInput = $state<HTMLInputElement>();
 let confirmInput = $state<HTMLInputElement>();
 const change = createAccountAction("Password change");
 // The API's refusal of the last submit; cleared on edit
-let refusal = $state<"wrongPassword" | "noPassword" | null>(null);
+let refusal = $state<Exclude<PasswordChange, "changed"> | null>(null);
 
 const EMPTY: PasswordChangeInput = { current: "", next: "", confirm: "" };
 
