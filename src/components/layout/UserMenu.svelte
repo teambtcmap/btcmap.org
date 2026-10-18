@@ -140,7 +140,7 @@ afterNavigate(() => {
 					<button
 						type="button"
 						on:click={() => {
-							session.clear();
+							session.logout();
 							open = false;
 							// Authenticated pages (e.g. /user/saved, /user/activity)
 							// only check for a session in onMount, so without an
