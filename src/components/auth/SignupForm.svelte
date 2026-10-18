@@ -66,7 +66,7 @@ const form = createForm(() => ({
 			// included
 			console.error(
 				"Signup failed:",
-				isAxiosError(err) ? err.response?.status : "unknown",
+				(isAxiosError(err) ? err.response?.status : undefined) ?? "unknown",
 			);
 			loading = false;
 			return;
@@ -79,7 +79,7 @@ const form = createForm(() => ({
 		} catch (err) {
 			console.error(
 				"Signup follow-up failed:",
-				isAxiosError(err) ? err.response?.status : "unknown",
+				(isAxiosError(err) ? err.response?.status : undefined) ?? "unknown",
 			);
 		} finally {
 			loading = false;
