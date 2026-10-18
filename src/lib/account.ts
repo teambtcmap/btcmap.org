@@ -51,9 +51,9 @@ export const changeUsername = async (
 		}
 		return { status: "changed", username: name };
 	} catch (error) {
-		// A taken name trips the UNIQUE constraint, which the API reports as
-		// a generic 500 (same as signup), so a 500 here reads as "taken"
-		if (errorStatus(error) === 500) return { status: "taken" };
+		// The API answers a taken name with 409 Conflict
+		// (teambtcmap/btcmap-api#119)
+		if (errorStatus(error) === 409) return { status: "taken" };
 		throw error;
 	}
 };

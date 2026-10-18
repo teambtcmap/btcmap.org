@@ -48,13 +48,24 @@ describe("changeUsername", () => {
 		);
 	});
 
-	it("reads a 500 as a taken name", async () => {
+	it("reads a 409 as a taken name", async () => {
+		const { default: api } = await import("#lib/axios.js");
+		vi.mocked(api.put).mockRejectedValue(
+			apiError(409, "username already taken"),
+		);
+
+		expect(await changeUsername("tok", "bob")).toEqual({ status: "taken" });
+	});
+
+	// Since teambtcmap/btcmap-api#119 a taken name is a 409, so a 500 is a
+	// real failure, not a guess at "taken"
+	it("rethrows a 500", async () => {
 		const { default: api } = await import("#lib/axios.js");
 		vi.mocked(api.put).mockRejectedValue(
 			apiError(500, "Database query failed"),
 		);
 
-		expect(await changeUsername("tok", "bob")).toEqual({ status: "taken" });
+		await expect(changeUsername("tok", "bob")).rejects.toThrow();
 	});
 
 	it("rethrows other failures", async () => {
