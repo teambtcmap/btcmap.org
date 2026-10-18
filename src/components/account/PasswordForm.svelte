@@ -1,7 +1,8 @@
 <script lang="ts">
 import { createForm } from "@tanstack/svelte-form";
 
-import { changePassword, errorStatus } from "#lib/account.js";
+import { changePassword } from "#lib/account.js";
+import { createAccountAction } from "#lib/accountAction.svelte.js";
 import type { PasswordChangeInput } from "#lib/accountValidation.js";
 import {
 	PASSWORD_FIELD_ORDER,
@@ -15,7 +16,7 @@ import {
 } from "#lib/passwordPolicy.js";
 import { fieldError, inputProps, ruleValidation } from "#lib/ruleValidation.js";
 import { session } from "#lib/session.js";
-import { errToast, successToast } from "#lib/utils.js";
+import { successToast } from "#lib/utils.js";
 import TextField from "$components/form/TextField.svelte";
 import PrimaryButton from "$components/PrimaryButton.svelte";
 
@@ -26,7 +27,7 @@ import PrimaryButton from "$components/PrimaryButton.svelte";
 let currentInput = $state<HTMLInputElement>();
 let nextInput = $state<HTMLInputElement>();
 let confirmInput = $state<HTMLInputElement>();
-let loading = $state(false);
+const change = createAccountAction("Password change");
 // The API's refusal of the last submit; cleared on edit
 let refusal = $state<"wrongPassword" | "noPassword" | null>(null);
 
@@ -48,8 +49,7 @@ const form = createForm(() => ({
 	onSubmit: async ({ value }) => {
 		const token = $session?.token;
 		if (!token) return;
-		loading = true;
-		try {
+		await change.run($_("account.password.error"), async () => {
 			const result = await changePassword(token, value.current, value.next);
 			if (result !== "changed") {
 				refusal = result;
@@ -61,18 +61,13 @@ const form = createForm(() => ({
 			validation.reset();
 			trackEvent("account_password_change_success");
 			successToast($_("account.password.success"));
-		} catch (err) {
-			errToast($_("account.password.error"));
-			console.error("Password change failed:", errorStatus(err) ?? "unknown");
-		} finally {
-			loading = false;
-		}
+		});
 	},
 }));
 
 function handleSubmit(event: SubmitEvent) {
 	event.preventDefault();
-	if (loading) return;
+	if (change.pending) return;
 	trackEvent("account_password_change_click");
 	validation.submit(form);
 }
@@ -155,9 +150,9 @@ const NEXT_MESSAGES = {
 
 	<PrimaryButton
 		type="submit"
-		disabled={loading}
+		disabled={change.pending}
 		style="rounded-lg px-4 py-2 disabled:opacity-50"
 	>
-		{loading ? $_("account.saving") : $_("account.password.submit")}
+		{change.pending ? $_("account.saving") : $_("account.password.submit")}
 	</PrimaryButton>
 </form>
