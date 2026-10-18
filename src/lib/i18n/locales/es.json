@@ -54,9 +54,9 @@
 		"taggingIssues": "Problemas de Etiquetado",
 		"communities": "Comunidades",
 		"countries": "Países",
+		"account": "Cuenta",
 		"signup": "Registrarse",
-		"myPhotos": "Mis fotos",
-		"accountSettings": "Ajustes de la cuenta"
+		"myPhotos": "Mis fotos"
 	},
 	"search": {
 		"placeholderPlaces": "Buscar lugares...",
@@ -1283,7 +1283,7 @@
 		"unknownPlace": "Lugar #{id}"
 	},
 	"account": {
-		"title": "Ajustes de la cuenta",
+		"title": "Cuenta",
 		"saving": "Guardando…",
 		"username": {
 			"heading": "Nombre de usuario",

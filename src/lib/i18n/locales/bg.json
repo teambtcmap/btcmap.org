@@ -711,6 +711,7 @@
 		"communityLeaderboard": "Класация на общностите",
 		"communityMap": "Карта на общността",
 		"countries": "Държави",
+		"account": "Профил",
 		"countryLeaderboard": "Класация по държави",
 		"dashboard": "Табло",
 		"maintain": "Поддръжка",
@@ -725,8 +726,7 @@
 		"taggingIssues": "Проблеми с тагването",
 		"wiki": "Уики",
 		"signup": "Регистрация",
-		"myPhotos": "Моите снимки",
-		"accountSettings": "Настройки на профила"
+		"myPhotos": "Моите снимки"
 	},
 	"verificationFilter": {
 		"any": "Всички",
@@ -1357,7 +1357,7 @@
 		"unknownPlace": "Място #{id}"
 	},
 	"account": {
-		"title": "Настройки на профила",
+		"title": "Профил",
 		"saving": "Запазване…",
 		"username": {
 			"heading": "Потребителско име",
