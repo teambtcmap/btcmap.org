@@ -32,6 +32,9 @@ let nsec = $state("");
 let linking = $state(false);
 let confirmingUnlink = $state(false);
 let unlinking = $state(false);
+// Set once a link or unlink starts: from then on the session holds newer
+// state than the lookup below can return
+let changedHere = false;
 
 const npub = $derived($session?.npub ?? null);
 // npub1 + 6 … 6: enough to recognise a key without wrapping
@@ -46,7 +49,7 @@ onMount(async () => {
 	if (!token) return;
 	try {
 		const linked = await fetchLinkedNpub(token);
-		session.setNpub(token, linked);
+		if (!changedHere) session.setNpub(token, linked);
 	} catch (err) {
 		console.error("Nostr link lookup failed:", errorStatus(err) ?? "unknown");
 	}
@@ -57,6 +60,7 @@ onMount(async () => {
 // login), the key must not go to whichever account is active now.
 async function submitProof(token: string, signed: SignedAuthEvent) {
 	if ($session?.token !== token) return;
+	changedHere = true;
 	const result = await linkNostr(token, encodeNip98Event(signed));
 	if (result.status === "taken") {
 		errToast($_("account.nostr.taken"));
@@ -129,6 +133,7 @@ async function unlink() {
 	const token = $session?.token;
 	if (!token || unlinking) return;
 	unlinking = true;
+	changedHere = true;
 	try {
 		await unlinkNostr(token);
 		session.setNpub(token, null);
