@@ -1425,7 +1425,7 @@
 			"tooShort": "Gebruik minstens {min} tekens.",
 			"mismatch": "De wachtwoorden komen niet overeen.",
 			"wrongPassword": "Dat is niet je huidige wachtwoord.",
-			"noPassword": "Dit account is met Nostr aangemaakt en heeft geen wachtwoord om te wijzigen.",
+			"noPassword": "Je account heeft nog geen wachtwoord dat je kunt wijzigen.",
 			"submit": "Wachtwoord wijzigen",
 			"success": "Wachtwoord gewijzigd.",
 			"error": "Kan je wachtwoord niet wijzigen. Probeer het opnieuw."

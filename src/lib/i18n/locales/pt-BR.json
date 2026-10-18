@@ -1325,7 +1325,7 @@
 			"tooShort": "Use pelo menos {min} caracteres.",
 			"mismatch": "As senhas não coincidem.",
 			"wrongPassword": "Essa não é sua senha atual.",
-			"noPassword": "Esta conta foi criada com Nostr e não tem senha para alterar.",
+			"noPassword": "Sua conta ainda não tem uma senha que você possa alterar.",
 			"submit": "Alterar senha",
 			"success": "Senha alterada.",
 			"error": "Não foi possível alterar sua senha. Tente novamente."

@@ -20,9 +20,9 @@ import { successToast } from "#lib/utils.js";
 import TextField from "$components/form/TextField.svelte";
 import PrimaryButton from "$components/PrimaryButton.svelte";
 
-// Change the account's password (#1541). Accounts created with Nostr have
-// none, and the API can't tell us up front, so the form is always shown
-// and says so when the API refuses.
+// Change the account's password (#1541). A Nostr sign-up's password was
+// never shown to the user (teambtcmap/btcmap-api#122), so the form says up
+// front that it can't be changed here yet, and again if the API refuses.
 
 let currentInput = $state<HTMLInputElement>();
 let nextInput = $state<HTMLInputElement>();

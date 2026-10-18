@@ -75,8 +75,9 @@ export const changePassword = async (
 	} catch (error) {
 		const message = errorMessage(error);
 		if (message === "Invalid old password") return "wrongPassword";
-		// Accounts created with Nostr have no password hash to check against,
-		// so the API can't set one for them
+		// An account created by Nostr sign-up before every account got a
+		// password (teambtcmap/btcmap-api#122) has none to check against
+		// until its next Nostr login
 		if (message === "Invalid password hash") return "noPassword";
 		throw error;
 	}

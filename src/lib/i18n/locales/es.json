@@ -1351,7 +1351,7 @@
 			"tooShort": "Usa al menos {min} caracteres.",
 			"mismatch": "Las contraseñas no coinciden.",
 			"wrongPassword": "Esa no es tu contraseña actual.",
-			"noPassword": "Esta cuenta se creó con Nostr y no tiene contraseña que cambiar.",
+			"noPassword": "Tu cuenta aún no tiene una contraseña que puedas cambiar.",
 			"submit": "Cambiar contraseña",
 			"success": "Contraseña cambiada.",
 			"error": "No se pudo cambiar tu contraseña. Inténtalo de nuevo."
