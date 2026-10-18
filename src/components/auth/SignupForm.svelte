@@ -47,6 +47,8 @@ const form = createForm(() => ({
 	...validation.options,
 	onSubmit: async ({ value }) => {
 		loading = true;
+		// Only this submit's answer counts
+		usernameTaken = false;
 		try {
 			const current = await session.signUp({
 				username: value.username.trim(),
