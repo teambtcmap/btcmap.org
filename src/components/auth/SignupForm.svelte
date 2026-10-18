@@ -10,6 +10,7 @@ import {
 import { fieldError, inputProps, ruleValidation } from "#lib/ruleValidation.js";
 import type { Session } from "#lib/session.js";
 import { session } from "#lib/session.js";
+import { USERNAME_MAX_LENGTH } from "#lib/usernamePolicy.js";
 import { errToast } from "#lib/utils.js";
 import TextField from "$components/form/TextField.svelte";
 import PrimaryButton from "$components/PrimaryButton.svelte";
@@ -85,7 +86,7 @@ function handleSubmit(event: SubmitEvent) {
 				id="signup-username"
 				label={$_("signup.username")}
 				autocomplete="username"
-				maxlength="100"
+				maxlength={USERNAME_MAX_LENGTH}
 				{...inputProps(field)}
 			/>
 		{/snippet}
