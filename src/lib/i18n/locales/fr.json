@@ -54,9 +54,9 @@
 		"taggingIssues": "Problèmes de marquage",
 		"communities": "Communautés",
 		"countries": "Pays",
+		"account": "Compte",
 		"signup": "S'inscrire",
-		"myPhotos": "Mes photos",
-		"accountSettings": "Paramètres du compte"
+		"myPhotos": "Mes photos"
 	},
 	"search": {
 		"placeholderPlaces": "Rechercher des lieux...",
@@ -1310,7 +1310,7 @@
 		"unknownPlace": "Lieu #{id}"
 	},
 	"account": {
-		"title": "Paramètres du compte",
+		"title": "Compte",
 		"saving": "Enregistrement…",
 		"username": {
 			"heading": "Nom d'utilisateur",

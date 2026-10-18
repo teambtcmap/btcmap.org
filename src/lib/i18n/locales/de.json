@@ -54,9 +54,9 @@
 		"taggingIssues": "Tagging-Probleme",
 		"communities": "Communities",
 		"countries": "Länder",
+		"account": "Konto",
 		"signup": "Registrieren",
-		"myPhotos": "Meine Fotos",
-		"accountSettings": "Kontoeinstellungen"
+		"myPhotos": "Meine Fotos"
 	},
 	"search": {
 		"placeholderPlaces": "Orte suchen...",
@@ -1310,7 +1310,7 @@
 		"unknownPlace": "Ort #{id}"
 	},
 	"account": {
-		"title": "Kontoeinstellungen",
+		"title": "Konto",
 		"saving": "Wird gespeichert…",
 		"username": {
 			"heading": "Benutzername",

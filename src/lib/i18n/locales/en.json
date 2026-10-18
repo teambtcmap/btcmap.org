@@ -62,8 +62,7 @@
 		"signup": "Sign up",
 		"logout": "Log out",
 		"backupAccount": "Back up account",
-		"myPhotos": "My photos",
-		"accountSettings": "Account settings"
+		"myPhotos": "My photos"
 	},
 	"saved": {
 		"title": "My Saved",
@@ -1385,7 +1384,7 @@
 		"unknownPlace": "Place #{id}"
 	},
 	"account": {
-		"title": "Account settings",
+		"title": "Account",
 		"saving": "Saving…",
 		"username": {
 			"heading": "Username",

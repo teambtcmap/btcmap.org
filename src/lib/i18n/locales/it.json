@@ -62,8 +62,7 @@
 		"signup": "Registrati",
 		"logout": "Esci",
 		"backupAccount": "Backup dell'account",
-		"myPhotos": "Le mie foto",
-		"accountSettings": "Impostazioni account"
+		"myPhotos": "Le mie foto"
 	},
 	"saved": {
 		"title": "I miei salvati",
@@ -1385,7 +1384,7 @@
 		"unknownPlace": "Luogo #{id}"
 	},
 	"account": {
-		"title": "Impostazioni account",
+		"title": "Account",
 		"saving": "Salvataggio…",
 		"username": {
 			"heading": "Nome utente",

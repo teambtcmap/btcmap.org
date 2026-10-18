@@ -54,9 +54,9 @@
 		"taggingIssues": "Открытые задачи",
 		"communities": "Сообщества",
 		"countries": "Страны",
+		"account": "Аккаунт",
 		"signup": "Регистрация",
-		"myPhotos": "Мои фото",
-		"accountSettings": "Настройки аккаунта"
+		"myPhotos": "Мои фото"
 	},
 	"search": {
 		"placeholderPlaces": "Поиск мест...",
@@ -1310,7 +1310,7 @@
 		"unknownPlace": "Место #{id}"
 	},
 	"account": {
-		"title": "Настройки аккаунта",
+		"title": "Аккаунт",
 		"saving": "Сохранение…",
 		"username": {
 			"heading": "Имя пользователя",
