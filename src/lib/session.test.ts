@@ -1,3 +1,4 @@
+import { AxiosError, AxiosHeaders } from "axios";
 import { get } from "svelte/store";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 
@@ -399,5 +400,30 @@ describe("authHeaders", () => {
 		expect(authHeaders("tok")).toEqual({
 			headers: { Authorization: "Bearer tok" },
 		});
+	});
+});
+
+describe("isUsernameTaken", () => {
+	const apiError = (status: number) =>
+		new AxiosError("Request failed", "ERR_BAD_REQUEST", undefined, undefined, {
+			status,
+			statusText: "",
+			data: { code: "conflict", message: "username already taken" },
+			headers: {},
+			config: { headers: new AxiosHeaders() },
+		});
+
+	// btcmap-api answers a taken name with 409 Conflict
+	// (teambtcmap/btcmap-api#119)
+	it("is true for a 409 from the API", async () => {
+		const { isUsernameTaken } = await import("#lib/session.js");
+		expect(isUsernameTaken(apiError(409))).toBe(true);
+	});
+
+	it("is false for any other failure", async () => {
+		const { isUsernameTaken } = await import("#lib/session.js");
+		expect(isUsernameTaken(apiError(500))).toBe(false);
+		expect(isUsernameTaken(apiError(400))).toBe(false);
+		expect(isUsernameTaken(new Error("offline"))).toBe(false);
 	});
 });

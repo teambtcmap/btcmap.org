@@ -2,6 +2,7 @@
 import { createForm } from "@tanstack/svelte-form";
 
 import { trackEvent } from "#lib/analytics.js";
+import { errorStatus } from "#lib/apiError.js";
 import { _ } from "#lib/i18n/index.js";
 import {
 	PASSWORD_MAX_LENGTH,
@@ -9,7 +10,7 @@ import {
 } from "#lib/passwordPolicy.js";
 import { fieldError, inputProps, ruleValidation } from "#lib/ruleValidation.js";
 import type { Session } from "#lib/session.js";
-import { session } from "#lib/session.js";
+import { isUsernameTaken, session } from "#lib/session.js";
 import { errToast } from "#lib/utils.js";
 import TextField from "$components/form/TextField.svelte";
 import PrimaryButton from "$components/PrimaryButton.svelte";
@@ -22,8 +23,11 @@ type Props = {
 
 let { onSuccess }: Props = $props();
 
+let usernameInput = $state<HTMLInputElement>();
 let passwordInput = $state<HTMLInputElement>();
 let loading = $state(false);
+// Set when the API refused the last name as taken (409); cleared on edit
+let usernameTaken = $state(false);
 
 // Signup on TanStack Form (#1406). A too-short password on submit (#1411):
 // the rule's own line under the label turns into the error, like
@@ -43,19 +47,36 @@ const form = createForm(() => ({
 	...validation.options,
 	onSubmit: async ({ value }) => {
 		loading = true;
+		// Only this submit's answer counts
+		usernameTaken = false;
+		const username = value.username.trim();
+		let current: Session;
 		try {
-			const current = await session.signUp({
-				username: value.username.trim(),
-				password: value.password,
-			});
-			trackEvent("signup_create_account_success");
+			current = await session.signUp({ username, password: value.password });
+		} catch (err) {
+			if (isUsernameTaken(err)) {
+				// Only for the name still in the field: an edit while the
+				// request ran already answered it
+				if (form.state.values.username.trim() === username) {
+					usernameTaken = true;
+					usernameInput?.focus();
+				}
+			} else {
+				errToast($_("signup.error"));
+			}
+			// The status only: the error carries the request body, password
+			// included
+			console.error("Signup failed:", errorStatus(err) ?? "unknown");
+			loading = false;
+			return;
+		}
+		trackEvent("signup_create_account_success");
+		// The account exists from here on: a failing follow-up must not ask
+		// for a retry, which would only answer that the name is taken
+		try {
 			await onSuccess(current);
 		} catch (err) {
-			// The /v4/users endpoint surfaces duplicate-username as a 500 with a
-			// generic body (no machine-readable error code), so we treat any
-			// non-2xx the same way and let the user try a different name.
-			errToast($_("signup.error"));
-			console.error("Signup failed:", err);
+			console.error("Signup follow-up failed:", errorStatus(err) ?? "unknown");
 		} finally {
 			loading = false;
 		}
@@ -86,7 +107,9 @@ function handleSubmit(event: SubmitEvent) {
 				label={$_("signup.username")}
 				autocomplete="username"
 				maxlength="100"
-				{...inputProps(field)}
+				error={usernameTaken ? $_("signup.usernameTaken") : undefined}
+				{...inputProps(field, { onEdit: () => (usernameTaken = false) })}
+				bind:element={usernameInput}
 			/>
 		{/snippet}
 	</form.Field>

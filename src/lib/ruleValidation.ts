@@ -96,11 +96,17 @@ export const fieldError = (field: AnyFieldApi): string | undefined => {
 };
 
 // A text control (TextField, TextArea, CaptchaField) bound to its field:
-// spread as {...inputProps(field)}.
-export const inputProps = (field: AnyFieldApi) => ({
+// spread as {...inputProps(field)}. `onEdit` runs on every edit, e.g. to
+// clear an error the API gave for the last submit.
+export const inputProps = (
+	field: AnyFieldApi,
+	{ onEdit }: { onEdit?: () => void } = {},
+) => ({
 	value: field.state.value as string,
-	oninput: (event: Event) =>
+	oninput: (event: Event) => {
+		onEdit?.();
 		field.handleChange(
 			(event.currentTarget as HTMLInputElement | HTMLTextAreaElement).value,
-		),
+		);
+	},
 });

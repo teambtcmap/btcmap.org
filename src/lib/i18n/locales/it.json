@@ -124,7 +124,8 @@
 		"passwordTooShort": "Usa almeno {min} caratteri per continuare.",
 		"submit": "Crea account",
 		"creating": "Creazione account...",
-		"error": "Impossibile creare l'account. Il nome utente potrebbe essere già in uso.",
+		"error": "Impossibile creare l'account. Riprova.",
+		"usernameTaken": "Questo nome utente è già in uso. Provane un altro.",
 		"haveAccount": "Hai già un account?",
 		"signIn": "Accedi con password o Nostr"
 	},

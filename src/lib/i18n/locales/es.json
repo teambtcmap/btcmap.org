@@ -1234,7 +1234,8 @@
 		"passwordTooShort": "Usa al menos {min} caracteres para continuar.",
 		"submit": "Crear cuenta",
 		"creating": "Creando cuenta...",
-		"error": "No se pudo crear la cuenta. Es posible que el nombre de usuario ya esté en uso.",
+		"error": "No se pudo crear la cuenta. Inténtalo de nuevo.",
+		"usernameTaken": "Ese nombre de usuario ya está en uso. Prueba con otro.",
 		"haveAccount": "¿Ya tienes una cuenta?",
 		"signIn": "Iniciar sesión con contraseña o Nostr"
 	},
