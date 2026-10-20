@@ -15,6 +15,7 @@ import {
 	signAuthWithExtension,
 	signAuthWithSecretKey,
 } from "#lib/nostr.js";
+import { fetchProfile } from "#lib/nostrProfile.js";
 import type { SignerPairing } from "#lib/nostrSigner.js";
 import {
 	clearSignerPairing,
@@ -25,6 +26,7 @@ import {
 	SignerInputError,
 	SignerTimeoutError,
 	saveSignerPairing,
+	shortNpub,
 	signWithSigner,
 	startNostrConnect,
 } from "#lib/nostrSigner.js";
@@ -69,6 +71,9 @@ let nsecLoading = $state(false);
 // no longer privileged over a signer app or a QR pairing.
 let showOptions = $state(false);
 let savedPairing = $state<SignerPairing | null>(null);
+// kind:0 name for the saved signer, when public relays have one.
+let savedSignerName = $state<string | null>(null);
+let profileFor: string | null = null;
 let bunkerUri = $state("");
 let signerRun = $state<SignerRun | null>(null);
 let pairMode = $state<"qr" | "open" | "copy" | null>(null);
@@ -406,6 +411,21 @@ onMount(() => {
 	savedPairing = loadSignerPairing();
 });
 
+// Name the saved signer by its kind:0 profile when one exists, and fall back
+// to the shortened npub otherwise. fetchProfile caches per key and resolves to
+// null on timeout, so a dead relay just leaves the npub on screen.
+$effect(() => {
+	const npub = savedPairing?.npub ?? null;
+	if (npub === profileFor) return;
+	profileFor = npub;
+	savedSignerName = null;
+	if (!npub) return;
+	void fetchProfile(npub).then((profile) => {
+		if (profileFor !== npub) return;
+		savedSignerName = profile?.displayName ?? profile?.name ?? null;
+	});
+});
+
 onDestroy(() => {
 	cancelSigner();
 });
@@ -439,8 +459,12 @@ onDestroy(() => {
 				<div class="flex items-start justify-between gap-3">
 					<div class="min-w-0">
 						<p class={headingClass}>{$_("login.signerSaved")}</p>
-						<p class="truncate font-mono {hintClass}">
-							{savedPairing.npub ?? savedPairing.pubkey}
+						<p
+							class="truncate {hintClass}"
+							class:font-mono={savedSignerName === null}
+						>
+							{savedSignerName ??
+								shortNpub(savedPairing.npub ?? savedPairing.pubkey)}
 						</p>
 					</div>
 					<TextLink

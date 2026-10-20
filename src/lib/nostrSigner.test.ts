@@ -13,6 +13,7 @@ import {
 	SignerInputError,
 	SignerTimeoutError,
 	saveSignerPairing,
+	shortNpub,
 	signWithSigner,
 	toHex,
 	withTimeout,
@@ -250,6 +251,24 @@ describe("npubFor", () => {
 
 	it("returns null for a value that is not a pubkey", () => {
 		expect(npubFor("nope")).toBeNull();
+	});
+});
+
+describe("shortNpub", () => {
+	it("shortens an npub to a recognisable head and tail", () => {
+		const npub = npubEncode("cd".repeat(32));
+		const short = shortNpub(npub);
+		expect(short).toBe(`${npub.slice(0, 12)}…${npub.slice(-6)}`);
+		expect(short.length).toBeLessThan(npub.length);
+		expect(short.startsWith("npub1")).toBe(true);
+	});
+
+	it("shortens a hex pubkey the same way", () => {
+		expect(shortNpub("cd".repeat(32))).toBe("cdcdcdcdcdcd…cdcdcd");
+	});
+
+	it("leaves a value too short to shorten alone", () => {
+		expect(shortNpub("npub1short")).toBe("npub1short");
 	});
 });
 

@@ -111,6 +111,14 @@ export function npubFor(pubkey: string): string | null {
 	}
 }
 
+// Display form of an npub (or hex pubkey): npub1abcde…9wxyz. Used wherever a
+// key has to be named without a profile — long enough to recognise, short
+// enough not to wrap.
+export function shortNpub(value: string): string {
+	if (value.length <= 18) return value;
+	return `${value.slice(0, 12)}…${value.slice(-6)}`;
+}
+
 export function loadSignerPairing(): SignerPairing | null {
 	if (typeof localStorage === "undefined") return null;
 	try {
