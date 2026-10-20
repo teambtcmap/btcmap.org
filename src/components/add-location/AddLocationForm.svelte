@@ -1131,8 +1131,11 @@ onMount(() => {
 				</reviewForm.Field>
 			{/if}
 
+			<!-- busy while a captcha loads: a failed submit refetches one, and
+			     a disabled button would drop the focus it holds (#1548). -->
 			<PrimaryButton
 				loading={submitting}
+				busy={isCaptchaLoading}
 				disabled={submitting || (!identityAttached && !captchaSecret)}
 				style="w-full py-3 rounded-xl"
 			>

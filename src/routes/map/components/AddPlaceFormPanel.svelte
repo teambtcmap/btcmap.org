@@ -66,9 +66,8 @@ const onKeydown = (event: KeyboardEvent) => {
 // The success screen's title names the submitted place.
 let submittedName = $state("");
 // A later step can leave the panel scrolled down; the success screen
-// leads with its title (scroll-mt clears the sticky header). Focus moves
-// to the title too: the form it replaces held focus, which would fall to
-// <body> and leave the success unannounced (#1548).
+// leads with its title (scroll-mt clears the sticky header). Focusing the
+// title announces the success: the form it replaces held focus (#1548).
 let successElement = $state<HTMLElement>();
 let successHeading = $state<HTMLHeadingElement>();
 $effect(() => {

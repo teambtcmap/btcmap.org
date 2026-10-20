@@ -25,8 +25,7 @@ let {
 	onclick,
 }: Props = $props();
 
-// The form this replaces held focus; without a new target it falls to
-// <body> and the success goes unannounced (#1548).
+// Announces the success: the form this replaces held focus (#1548).
 let heading = $state<HTMLHeadingElement>();
 onMount(() => heading?.focus());
 </script>

@@ -1,9 +1,19 @@
 <script lang="ts">
 import type { Snippet } from "svelte";
+import type {
+	HTMLAnchorAttributes,
+	HTMLButtonAttributes,
+} from "svelte/elements";
 
 import LoadingSpinner from "$components/LoadingSpinner.svelte";
 
-type Props = {
+// The rest flows to whichever element renders, so it takes the attributes
+// both share.
+type Rest = Omit<
+	HTMLButtonAttributes & HTMLAnchorAttributes,
+	"style" | "type" | "disabled" | "onclick" | "children"
+>;
+type Props = Rest & {
 	style: string;
 	link?: string;
 	type?: "button" | "submit";
@@ -11,14 +21,13 @@ type Props = {
 	disabled?: boolean;
 	// Shows the spinner in place of the label; implies `busy`.
 	loading?: boolean;
-	// A request is running: the button blocks clicks but stays focusable
+	// Something is running: the button blocks clicks but stays focusable
 	// (#1548). A focused button that turns `disabled` drops focus to
 	// <body>, so a screen reader hears nothing during the request, and a
 	// failure toast has no place to land next to.
 	busy?: boolean;
 	onclick?: (event: MouseEvent) => void;
 	children?: Snippet;
-	[key: string]: unknown;
 };
 let {
 	style,

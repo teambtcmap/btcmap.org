@@ -56,10 +56,8 @@ async function exchangeSignedEvent(signedEvent: SignedAuthEvent) {
 }
 
 async function loginWithExtension() {
-	// Re-entry guard: the busy button is only aria-disabled (#1548), so a
-	// second click (or Enter on the focused button) still reaches this
-	// handler. Without the guard, the user would see two extension-signing
-	// popups for one click.
+	// Re-entry guard: the busy button still takes clicks (#1548). Without
+	// it, one click could open two extension-signing popups.
 	if (nostrLoading) return;
 	// Detect at click time rather than at mount: extensions inject
 	// window.nostr at their own pace, and a user without one gets told what
@@ -88,9 +86,8 @@ async function loginWithExtension() {
 
 async function loginWithNsec(event: SubmitEvent) {
 	event.preventDefault();
-	// Re-entry guard: the busy submit button is only aria-disabled
-	// (#1548), so Enter or a double-click still submits, which would decode
-	// + sign the same nsec twice and double-fire the network exchange.
+	// Re-entry guard: the busy button still takes clicks (#1548), which
+	// would decode + sign the same nsec twice and double-fire the exchange.
 	if (nsecLoading) return;
 	if (!nsec.trim()) return;
 	nsecLoading = true;
@@ -132,9 +129,8 @@ async function loginWithNsec(event: SubmitEvent) {
 }
 </script>
 
-<!-- Busy = aria-disabled, not disabled (#1548): a focused button that
-     turns disabled drops focus to <body>. The handlers' re-entry guards
-     block the clicks it still takes. -->
+<!-- Busy = aria-disabled, as in PrimaryButton (#1548); the handlers'
+     re-entry guards block the clicks it still takes. -->
 <button
 	type="button"
 	onclick={loginWithExtension}
