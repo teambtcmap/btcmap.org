@@ -584,8 +584,11 @@ onDestroy(() => {
 
 		<div class={cardClass}>
 			<p class={headingClass}>{$_("login.optionNsec")}</p>
+			<p class={hintClass}>
+				{$_("login.nsecWarning")}
+			</p>
 			<form onsubmit={loginWithNsec} class="space-y-2">
-				<!-- Same hand-rolled shape: the warning below describes the field. -->
+				<!-- Same hand-rolled shape: the subheading above describes the field. -->
 				<input
 					id="nsec"
 					type="password"
@@ -601,9 +604,6 @@ onDestroy(() => {
 						false,
 					)} p-3 font-mono text-sm transition-all dark:bg-white/[0.15]"
 				/>
-				<p class={hintClass}>
-					{$_("login.nsecWarning")}
-				</p>
 				<button
 					type="submit"
 					disabled={!nsec.trim()}
