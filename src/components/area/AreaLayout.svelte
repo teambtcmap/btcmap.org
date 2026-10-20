@@ -7,7 +7,7 @@ import { page } from "$app/state";
 export let type: "country" | "community";
 
 import type { GeoJSON } from "geojson";
-import { onDestroy, onMount, setContext } from "svelte";
+import { onDestroy, setContext } from "svelte";
 import { get, toStore, writable } from "svelte/store";
 
 import { API_BASE } from "#lib/api-base.js";
@@ -18,26 +18,17 @@ import { AREA_SECTION_CONTEXT } from "#lib/area/sectionContext.js";
 import type { AreaSection } from "#lib/areaSectionLoad.js";
 import { AREA_SECTIONS } from "#lib/areaSectionLoad.js";
 import api from "#lib/axios.js";
-import { places, placesError, reportError, reports } from "#lib/store.js";
-import { batchSync } from "#lib/sync/batchSync.js";
+import { places, placesError } from "#lib/store.js";
 import { placesPublished } from "#lib/sync/placeCache.js";
-import { reportsSync } from "#lib/sync/reports.js";
-import type { AreaPageProps, Place, Report, Tagger } from "#lib/types.js";
+import type { AreaPageProps, Place, Tagger } from "#lib/types.js";
 import { errToast } from "#lib/utils.js";
 import AreaHeader from "$components/area/AreaHeader.svelte";
 import Icon from "$components/Icon.svelte";
 
-onMount(() => {
-	// reportsSync feeds the stats section and the AreaMap grade stars. The
-	// world areas crawl (areasSync) is gone: the SSR bundle now carries this
-	// area's full tags, polygon included (#1174).
-	batchSync([reportsSync]);
-});
+import type { AreaReport } from "$types/btcmap-api/AreaReport";
 
 // alert for element errors
 $: $placesError && errToast($placesError);
-// alert for report errors
-$: $reportError && errToast($reportError);
 
 // One source of truth: the section id IS the route slug IS the i18n key
 // suffix — AREA_SECTIONS/AreaSection in #lib/areaSectionLoad carry this,
@@ -174,17 +165,14 @@ $: if (area?.geo_json && $placesPublished && sweptAreaId !== data.id) {
 	runContainmentSweep($places, area.geo_json);
 }
 
-// Returns undefined while loading, empty array if no reports for this area, or filtered reports
-// A $:, not a derived(): a derived would capture data.id in its closure
-// and go stale on X→Y navigation.
-const areaReports = writable<Report[] | undefined>(undefined);
-$: areaReports.set(
-	data?.id && $reports.length > 0
-		? $reports
-				.filter((report) => report.area_id === data.id)
-				.sort((a, b) => Date.parse(b.created_at) - Date.parse(a.created_at))
-		: undefined,
-);
+// The loader fetches this area's reports (newest-first), re-published here via
+// the page.data bridge on every X→Y navigation. A $:, not a derived(): a
+// derived would capture data.id in its closure and go stale across area
+// navigations.
+const areaReports = writable<AreaReport[]>([]);
+$: areaReports.set(data?.reports ?? []);
+const reportsError = writable(false);
+$: reportsError.set(data?.reportsError ?? false);
 
 // Derived, not initialized: a `const area = data.tags` would freeze the
 // first area's tags for the lifetime of the reused component instance —
@@ -202,6 +190,7 @@ setContext(AREA_SECTION_CONTEXT, {
 	filteredPlaces,
 	sweepDone,
 	areaReports,
+	reportsError,
 	taggers,
 	taggersLoaded,
 	taggersInFlight,
