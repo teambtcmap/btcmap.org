@@ -28,6 +28,7 @@ let { onSuccess }: Props = $props();
 
 let showNsecInput = $state(false);
 let nsec = $state("");
+let nsecInput = $state<HTMLInputElement>();
 let nostrLoading = $state(false);
 let nsecLoading = $state(false);
 
@@ -121,6 +122,9 @@ async function loginWithNsec(event: SubmitEvent) {
 				: $_("login.nostrError"),
 		);
 		console.error("Nsec login failed:", status ?? "unknown");
+		// The key was cleared before the exchange, so the empty field
+		// disables the focused submit (#1548): retrying starts there anyway.
+		nsecInput?.focus();
 	} finally {
 		// Best-effort zeroing. V8 may have copies elsewhere, but this covers
 		// the primary reference.
@@ -155,6 +159,7 @@ async function loginWithNsec(event: SubmitEvent) {
 			autocapitalize="off"
 			spellcheck="false"
 			inputClass="font-mono text-sm"
+			bind:element={nsecInput}
 		/>
 		<p class="text-xs text-body dark:text-white/50">
 			{$_("login.nsecWarning")}
