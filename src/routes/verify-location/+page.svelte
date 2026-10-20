@@ -325,6 +325,6 @@ onMount(async () => {
 		type={$_('verifyLocation.successType')}
 		text={$_('verifyLocation.successMessage')}
 		issue={submissionIssueNumber}
-		on:click={resetForm}
+		onclick={resetForm}
 	/>
 {/if}

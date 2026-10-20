@@ -5,6 +5,7 @@ export let style: undefined | string = undefined;
 </script>
 
 <svg
+	aria-hidden="true"
 	class="{style} animate-spin {size} {color} mx-auto"
 	xmlns="http://www.w3.org/2000/svg"
 	fill="none"

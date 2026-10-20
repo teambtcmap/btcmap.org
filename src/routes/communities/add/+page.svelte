@@ -295,7 +295,7 @@ onMount(async () => {
 							/>
 							<PrimaryButton
 								type="button"
-								on:click={searchLocation}
+								onclick={searchLocation}
 								loading={searchLoading}
 								disabled={!captchaSecret || searchLoading || !searchQuery}
 								style="{!searchQuery
@@ -493,6 +493,6 @@ onMount(async () => {
 		text={$_('addCommunityForm.successMessage')}
 		issue={submissionIssueNumber}
 		buttonWidth="w-60"
-		on:click={formReset}
+		onclick={formReset}
 	/>
 {/if}

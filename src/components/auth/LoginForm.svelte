@@ -79,7 +79,8 @@ async function handleSubmit(event: SubmitEvent) {
 	<PrimaryButton
 		type="submit"
 		disabled={loading || !username.trim() || !password}
-		style="w-full rounded-lg px-4 py-2 disabled:opacity-50"
+		busy={loading}
+		style="w-full rounded-lg px-4 py-2 disabled:opacity-50 aria-disabled:opacity-50"
 	>
 		{loading ? $_("login.loggingIn") : $_("login.submit")}
 	</PrimaryButton>

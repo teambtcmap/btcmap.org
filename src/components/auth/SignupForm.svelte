@@ -151,7 +151,8 @@ function handleSubmit(event: SubmitEvent) {
 	<PrimaryButton
 		type="submit"
 		disabled={submitDisabled}
-		style="w-full rounded-lg px-4 py-2 disabled:opacity-50"
+		busy={loading}
+		style="w-full rounded-lg px-4 py-2 disabled:opacity-50 aria-disabled:opacity-50"
 	>
 		{loading ? $_("signup.creating") : $_("signup.submit")}
 	</PrimaryButton>

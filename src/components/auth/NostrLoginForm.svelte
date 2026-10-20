@@ -28,10 +28,9 @@ let { onSuccess }: Props = $props();
 
 let showNsecInput = $state(false);
 let nsec = $state("");
+let nsecInput = $state<HTMLInputElement>();
 let nostrLoading = $state(false);
 let nsecLoading = $state(false);
-
-const anyLoading = $derived(nostrLoading || nsecLoading);
 
 async function exchangeSignedEvent(signedEvent: SignedAuthEvent) {
 	// Straight against the API per NIP-98 (it answers CORS preflights,
@@ -58,10 +57,8 @@ async function exchangeSignedEvent(signedEvent: SignedAuthEvent) {
 }
 
 async function loginWithExtension() {
-	// Re-entry guard: the disabled prop on the button propagates async, so
-	// a second click (or Enter on a focused button) can fire this handler
-	// before disabled takes effect. Without the guard, the user would see
-	// two extension-signing popups for one click.
+	// Re-entry guard: the busy button still takes clicks (#1548). Without
+	// it, one click could open two extension-signing popups.
 	if (nostrLoading) return;
 	// Detect at click time rather than at mount: extensions inject
 	// window.nostr at their own pace, and a user without one gets told what
@@ -90,11 +87,10 @@ async function loginWithExtension() {
 
 async function loginWithNsec(event: SubmitEvent) {
 	event.preventDefault();
-	// Re-entry guard: the form's submit can fire via Enter or rapid double-
-	// click before the disabled state on the button takes effect, which
-	// would decode + sign the same nsec twice and double-fire the network
-	// exchange.
-	if (nsecLoading) return;
+	// Re-entry guard: the busy button still takes clicks (#1548), which
+	// would decode + sign the same nsec twice and double-fire the exchange.
+	// Nor while the extension login runs: both would call onSuccess.
+	if (nsecLoading || nostrLoading) return;
 	if (!nsec.trim()) return;
 	nsecLoading = true;
 	let secretKey: Uint8Array | null = null;
@@ -126,6 +122,9 @@ async function loginWithNsec(event: SubmitEvent) {
 				: $_("login.nostrError"),
 		);
 		console.error("Nsec login failed:", status ?? "unknown");
+		// The key was cleared before the exchange, so the empty field
+		// disables the focused submit (#1548): retrying starts there anyway.
+		nsecInput?.focus();
 	} finally {
 		// Best-effort zeroing. V8 may have copies elsewhere, but this covers
 		// the primary reference.
@@ -135,11 +134,14 @@ async function loginWithNsec(event: SubmitEvent) {
 }
 </script>
 
+<!-- Busy = aria-disabled, as in PrimaryButton (#1548); the handlers'
+     re-entry guards block the clicks it still takes. -->
 <button
 	type="button"
 	onclick={loginWithExtension}
-	disabled={anyLoading}
-	class="w-full rounded-lg bg-purple-600 px-4 py-2 font-semibold text-white transition-colors hover:bg-purple-700 disabled:opacity-50"
+	disabled={nsecLoading}
+	aria-disabled={nostrLoading ? "true" : undefined}
+	class="w-full rounded-lg bg-purple-600 px-4 py-2 font-semibold text-white transition-colors hover:bg-purple-700 disabled:opacity-50 aria-disabled:opacity-50"
 >
 	{nostrLoading ? $_("login.nostrSigning") : $_("login.nostrExtension")}
 </button>
@@ -157,14 +159,16 @@ async function loginWithNsec(event: SubmitEvent) {
 			autocapitalize="off"
 			spellcheck="false"
 			inputClass="font-mono text-sm"
+			bind:element={nsecInput}
 		/>
 		<p class="text-xs text-body dark:text-white/50">
 			{$_("login.nsecWarning")}
 		</p>
 		<button
 			type="submit"
-			disabled={nsecLoading || !nsec.trim()}
-			class="w-full rounded-lg bg-purple-600 px-4 py-2 font-semibold text-white transition-colors hover:bg-purple-700 disabled:opacity-50"
+			disabled={nostrLoading || (!nsecLoading && !nsec.trim())}
+			aria-disabled={nsecLoading ? "true" : undefined}
+			class="w-full rounded-lg bg-purple-600 px-4 py-2 font-semibold text-white transition-colors hover:bg-purple-700 disabled:opacity-50 aria-disabled:opacity-50"
 		>
 			{nsecLoading ? $_("login.nostrSigning") : $_("login.nsecSubmit")}
 		</button>
