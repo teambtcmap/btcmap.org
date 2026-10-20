@@ -88,7 +88,8 @@ async function loginWithNsec(event: SubmitEvent) {
 	event.preventDefault();
 	// Re-entry guard: the busy button still takes clicks (#1548), which
 	// would decode + sign the same nsec twice and double-fire the exchange.
-	if (nsecLoading) return;
+	// Nor while the extension login runs: both would call onSuccess.
+	if (nsecLoading || nostrLoading) return;
 	if (!nsec.trim()) return;
 	nsecLoading = true;
 	let secretKey: Uint8Array | null = null;
@@ -160,7 +161,7 @@ async function loginWithNsec(event: SubmitEvent) {
 		</p>
 		<button
 			type="submit"
-			disabled={!nsecLoading && !nsec.trim()}
+			disabled={nostrLoading || (!nsecLoading && !nsec.trim())}
 			aria-disabled={nsecLoading ? "true" : undefined}
 			class="w-full rounded-lg bg-purple-600 px-4 py-2 font-semibold text-white transition-colors hover:bg-purple-700 disabled:opacity-50 aria-disabled:opacity-50"
 		>
