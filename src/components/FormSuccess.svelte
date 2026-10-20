@@ -1,15 +1,27 @@
 <script lang="ts">
-export let type: string;
-export let text: string;
-export let issue: number | undefined = undefined;
-export let buttonWidth = "w-52";
-export let repo: "btcmap-data" | "btcmap-infra" = "btcmap-data";
-export let showIssueLink = true;
-
 import { _ } from "#lib/i18n/index.js";
 import { theme } from "#lib/theme.js";
 import HeaderPlaceholder from "$components/layout/HeaderPlaceholder.svelte";
 import PrimaryButton from "$components/PrimaryButton.svelte";
+
+type Props = {
+	type: string;
+	text: string;
+	issue?: number;
+	buttonWidth?: string;
+	repo?: "btcmap-data" | "btcmap-infra";
+	showIssueLink?: boolean;
+	onclick?: (event: MouseEvent) => void;
+};
+let {
+	type,
+	text,
+	issue,
+	buttonWidth = "w-52",
+	repo = "btcmap-data",
+	showIssueLink = true,
+	onclick,
+}: Props = $props();
 </script>
 
 <div class="mt-10 flex items-center justify-center pb-20 text-center md:pb-32">
@@ -34,7 +46,7 @@ import PrimaryButton from "$components/PrimaryButton.svelte";
 			{/if}
 		</p>
 
-		<PrimaryButton on:click style="{buttonWidth} py-3 mx-auto mt-10 rounded-xl">
+		<PrimaryButton {onclick} style="{buttonWidth} py-3 mx-auto mt-10 rounded-xl">
 			{$_("formSuccess.submitAnother", { values: { type } })}
 		</PrimaryButton>
 	</div>

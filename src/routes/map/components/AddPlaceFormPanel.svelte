@@ -242,7 +242,7 @@ $effect(() => {
 				</li>
 			</ol>
 			<div class="mt-5 space-y-3">
-				<PrimaryButton on:click={onaddanother} style="w-full py-3 rounded-xl">
+				<PrimaryButton onclick={onaddanother} style="w-full py-3 rounded-xl">
 					{$_('formSuccess.submitAnother', {
 						values: { type: $_('addLocation.formSuccessType') }
 					})}

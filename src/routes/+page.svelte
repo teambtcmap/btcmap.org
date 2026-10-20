@@ -133,7 +133,7 @@ function openAppModal(app: AppConfig) {
 									? $_('home.openWebAppAria', { values: { type: label } })
 									: $_('home.downloadForAria', { values: { type: label } })}
 								style="mx-auto inline-flex cursor-pointer rounded-full p-3"
-								on:click={() => openAppModal(app)}
+								onclick={() => openAppModal(app)}
 							>
 								<IconApps w="32" h="32" {icon} />
 							</PrimaryButton>

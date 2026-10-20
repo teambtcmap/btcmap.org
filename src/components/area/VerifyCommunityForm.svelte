@@ -271,6 +271,6 @@ onMount(async () => {
 		type={$_(`verifyCommunity.successType`)}
 		text={$_(`verifyCommunity.successMessage`)}
 		issue={submissionIssueNumber}
-		on:click={resetForm}
+		onclick={resetForm}
 	/>
 {/if}

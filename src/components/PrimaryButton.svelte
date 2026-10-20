@@ -1,17 +1,35 @@
 <script lang="ts">
+import type { Snippet } from "svelte";
+
 import LoadingSpinner from "$components/LoadingSpinner.svelte";
 
-export let style: string;
-export let link: undefined | string = undefined;
-export let type: undefined | "button" | "submit" = undefined;
-export let external: undefined | boolean = undefined;
-export let disabled: undefined | boolean = undefined;
-export let loading: undefined | boolean = undefined;
+type Props = {
+	style: string;
+	link?: string;
+	type?: "button" | "submit";
+	external?: boolean;
+	disabled?: boolean;
+	loading?: boolean;
+	onclick?: (event: MouseEvent) => void;
+	children?: Snippet;
+	[key: string]: unknown;
+};
+let {
+	style,
+	link,
+	type,
+	external,
+	disabled,
+	loading,
+	onclick,
+	children,
+	...rest
+}: Props = $props();
 
 const baseStyles =
 	"block bg-link text-center font-semibold text-white hover:bg-hover transition-colors";
 
-$: combinedStyles = `${baseStyles} ${style}`;
+const combinedStyles = $derived(`${baseStyles} ${style}`);
 </script>
 
 {#if link}
@@ -20,16 +38,17 @@ $: combinedStyles = `${baseStyles} ${style}`;
 		target={external ? '_blank' : undefined}
 		rel={external ? 'noopener noreferrer' : undefined}
 		class={combinedStyles}
-		{...$$restProps}
+		{onclick}
+		{...rest}
 	>
-		<slot />
+		{@render children?.()}
 	</a>
 {:else}
-	<button on:click {type} {disabled} class={combinedStyles} {...$$restProps}>
+	<button {onclick} {type} {disabled} class={combinedStyles} {...rest}>
 		{#if loading}
 			<LoadingSpinner />
 		{:else}
-			<slot />
+			{@render children?.()}
 		{/if}
 	</button>
 {/if}

@@ -241,7 +241,7 @@ const handleStatusCheckError = (error: unknown) => {
 						{$_("commentAdd.publishNote")}
 					</p>
 
-					<PrimaryButton style="w-full rounded-xl p-3" on:click={closeModal}>{$_("commentAdd.close")}</PrimaryButton>
+					<PrimaryButton style="w-full rounded-xl p-3" onclick={closeModal}>{$_("commentAdd.close")}</PrimaryButton>
 				</InvoicePaymentStage>
 			{:else}
 				<div class="space-y-4 text-center">
@@ -249,7 +249,7 @@ const handleStatusCheckError = (error: unknown) => {
 
 					<p class="text-body dark:text-white">{$_("commentAdd.published")}</p>
 
-					<PrimaryButton style="w-full rounded-xl p-3" on:click={closeModal}>{$_("commentAdd.close")}</PrimaryButton>
+					<PrimaryButton style="w-full rounded-xl p-3" onclick={closeModal}>{$_("commentAdd.close")}</PrimaryButton>
 				</div>
 			{/if}
 		</div>
