@@ -42,6 +42,12 @@ export class SignerInputError extends Error {}
 // A signer that stays silent past its deadline: silence, not a rejection.
 export class SignerTimeoutError extends Error {}
 
+// Every relay refused the publish (or could not be reached), so the request
+// never left the browser — distinct from a signer that received it and stayed
+// quiet. nostr-tools surfaces this as an AggregateError from Promise.any, whose
+// raw text ("All promises were rejected") is meaningless to a user.
+export class SignerRelayError extends Error {}
+
 export type SignerPairing = {
 	v: 1;
 	// Hex client key paired with the signer; the signer holds the user's key.
@@ -70,6 +76,23 @@ type SignerOptions = {
 export function toHex(bytes: Uint8Array): string {
 	return Array.from(bytes, (byte) => byte.toString(16).padStart(2, "0")).join(
 		"",
+	);
+}
+
+// Union of relay lists, order preserved. A pairing has to keep the relays that
+// actually worked for this browser, not only the ones the signer prefers.
+function uniqueRelays(...lists: string[][]): string[] {
+	return [...new Set(lists.flat())];
+}
+
+// nostr-tools publishes NIP-46 requests with Promise.any over the relay list;
+// when every relay refuses, the rejection is an AggregateError.
+function isAggregateError(err: unknown): boolean {
+	return (
+		typeof err === "object" &&
+		err !== null &&
+		"name" in err &&
+		(err as { name?: unknown }).name === "AggregateError"
 	);
 }
 
@@ -191,11 +214,18 @@ export async function signWithSigner(
 ): Promise<Event> {
 	// The template is built here, at signing time: the API accepts a created_at
 	// within +/-60s, and connecting a signer can take minutes.
-	return withTimeout(
-		signer.signEvent(buildAuthTemplate()),
-		timeoutMs,
-		"Your signer did not return a signature",
-	);
+	try {
+		return await withTimeout(
+			signer.signEvent(buildAuthTemplate()),
+			timeoutMs,
+			"Your signer did not return a signature",
+		);
+	} catch (error) {
+		if (isAggregateError(error)) {
+			throw new SignerRelayError("No relay accepted the signer request");
+		}
+		throw error;
+	}
 }
 
 async function loadNip46() {
@@ -227,7 +257,11 @@ async function connectQuietly(
 			"connect was not acknowledged",
 		);
 	} catch (error) {
-		if (fatal && !(error instanceof SignerTimeoutError)) throw error;
+		if (fatal && !(error instanceof SignerTimeoutError)) {
+			throw isAggregateError(error)
+				? new SignerRelayError("No relay accepted the signer request")
+				: error;
+		}
 		console.warn("nostrSigner: the signer did not acknowledge connect", error);
 	}
 }
@@ -237,11 +271,18 @@ async function pairingFromSigner(
 	clientSecret: string,
 	signer: BunkerSigner,
 	pubkey: string,
+	startRelays: string[],
 ): Promise<SignerPairing> {
+	// The signer may have moved us onto its own relays (switch_relays) — keep
+	// the ones that worked at pairing time too, so a later reconnect is not
+	// left with a relay set this browser cannot publish to.
 	return {
 		v: 1,
 		clientSecret,
-		bunkerUrl: nip46.toBunkerURL(signer.bp),
+		bunkerUrl: nip46.toBunkerURL({
+			...signer.bp,
+			relays: uniqueRelays(startRelays, signer.bp.relays),
+		}),
 		pubkey,
 		npub: npubFor(pubkey),
 	};
@@ -279,7 +320,13 @@ export async function connectBunkerUri(
 	return {
 		signer,
 		pubkey,
-		pairing: await pairingFromSigner(nip46, toHex(secretKey), signer, pubkey),
+		pairing: await pairingFromSigner(
+			nip46,
+			toHex(secretKey),
+			signer,
+			pubkey,
+			pointer.relays,
+		),
 	};
 }
 
@@ -295,9 +342,15 @@ export async function connectSavedPairing(
 		throw new SignerInputError("The saved signer pairing is not valid");
 	}
 
+	// A signer can have switched us onto relays this browser cannot publish to
+	// (switch_relays replaced the pointer list at pairing time), and a pairing
+	// saved before that was handled keeps only that list. Union with the relays
+	// the app itself uses — one reachable relay is enough for the request.
+	const relays = uniqueRelays(pointer.relays, SIGNER_RELAYS);
+
 	const signer = nip46.BunkerSigner.fromBunker(
 		fromHex(pairing.clientSecret),
-		pointer,
+		{ ...pointer, relays },
 		{ onauth: options.onauth },
 	);
 	await connectQuietly(signer, SAVED_CONNECT_MS, { fatal: false });
@@ -347,6 +400,12 @@ export async function startNostrConnect(
 	return {
 		signer,
 		pubkey,
-		pairing: await pairingFromSigner(nip46, clientSecret, signer, pubkey),
+		pairing: await pairingFromSigner(
+			nip46,
+			clientSecret,
+			signer,
+			pubkey,
+			SIGNER_RELAYS,
+		),
 	};
 }

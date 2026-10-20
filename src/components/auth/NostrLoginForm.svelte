@@ -24,6 +24,7 @@ import {
 	connectSavedPairing,
 	loadSignerPairing,
 	SignerInputError,
+	SignerRelayError,
 	SignerTimeoutError,
 	saveSignerPairing,
 	shortNpub,
@@ -184,6 +185,10 @@ function failSigner(err: unknown, run: number) {
 	}
 	if (err instanceof SignerTimeoutError) {
 		errToast($_("login.signerNoAnswer"));
+		return;
+	}
+	if (err instanceof SignerRelayError) {
+		errToast($_("login.signerNoRelay"));
 		return;
 	}
 	// A signer that refuses says why (Opal: "already connected", "user

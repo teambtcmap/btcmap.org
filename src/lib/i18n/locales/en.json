@@ -117,6 +117,7 @@
 		"signerForget": "Forget",
 		"signerWaiting": "Waiting for your signer…",
 		"signerNoAnswer": "Your signer did not respond. Approve the request in the app and try again.",
+		"signerNoRelay": "No relay accepted the signer request. Check your connection and try again.",
 		"signerCancel": "Cancel",
 		"bunkerConnect": "Connect",
 		"bunkerInvalid": "That is not a bunker:// URI.",

@@ -10,11 +10,14 @@ import {
 	fromHex,
 	loadSignerPairing,
 	npubFor,
+	SIGNER_RELAYS,
 	SignerInputError,
+	SignerRelayError,
 	SignerTimeoutError,
 	saveSignerPairing,
 	shortNpub,
 	signWithSigner,
+	startNostrConnect,
 	toHex,
 	withTimeout,
 } from "./nostrSigner";
@@ -32,6 +35,7 @@ const nip46Mock = vi.hoisted(() => {
 		fromBunkerArgs: [] as unknown[][],
 		connectMetadata: [] as unknown[],
 		parseCalls: [] as string[],
+		bunkerPointers: [] as { relays?: string[] }[],
 	};
 	const signerPubkey = "ef".repeat(32);
 	const makeSigner = () => ({
@@ -67,8 +71,10 @@ vi.mock("nostr-tools/nip46", () => ({
 		},
 		fromURI: () => Promise.resolve(nip46Mock.makeSigner()),
 	},
-	toBunkerURL: (bp: { pubkey: string }) =>
-		`bunker://${bp.pubkey}?relay=wss%3A%2F%2Frelay.example&secret=s`,
+	toBunkerURL: (bp: { pubkey: string; relays?: string[] }) => {
+		nip46Mock.state.bunkerPointers.push(bp);
+		return `bunker://${bp.pubkey}?relay=wss%3A%2F%2Frelay.example&secret=s`;
+	},
 	createNostrConnectURI: () =>
 		"nostrconnect://abc?relay=wss%3A%2F%2Frelay.example&secret=s",
 }));
@@ -94,6 +100,7 @@ beforeEach(() => {
 	nip46Mock.state.fromBunkerArgs = [];
 	nip46Mock.state.connectMetadata = [];
 	nip46Mock.state.parseCalls = [];
+	nip46Mock.state.bunkerPointers = [];
 	vi.spyOn(console, "warn").mockImplementation(() => {});
 });
 
@@ -241,6 +248,20 @@ describe("signWithSigner", () => {
 			vi.useRealTimers();
 		}
 	});
+
+	it("reports a rejected publish as a relay error, not the raw AggregateError", async () => {
+		const signer = {
+			signEvent: () =>
+				Promise.reject(
+					Object.assign(new Error("All promises were rejected"), {
+						name: "AggregateError",
+					}),
+				),
+		};
+		await expect(signWithSigner(signer)).rejects.toBeInstanceOf(
+			SignerRelayError,
+		);
+	});
 });
 
 describe("npubFor", () => {
@@ -309,6 +330,34 @@ describe("connectSavedPairing", () => {
 		nip46Mock.state.parseResult = null;
 		await expect(connectSavedPairing(validPairing())).rejects.toBeInstanceOf(
 			SignerInputError,
+		);
+	});
+
+	// The saved URL can list only relays the signer prefers — including ones
+	// this browser cannot publish to. Union with the app's own relays, or the
+	// request never leaves the browser ("All promises were rejected").
+	it("publishes to the app's relays as well as the stored ones", async () => {
+		await connectSavedPairing(validPairing());
+		const pointer = nip46Mock.state.fromBunkerArgs[0]?.[1] as {
+			relays: string[];
+		};
+		expect(pointer.relays).toEqual(
+			expect.arrayContaining(["wss://relay.example", ...SIGNER_RELAYS]),
+		);
+	});
+});
+
+describe("startNostrConnect", () => {
+	// switch_relays rewrites bp.relays with the signer's list; the pairing must
+	// still remember the relays that actually reached it.
+	it("keeps the pairing's original relays when the signer switches", async () => {
+		const uris: string[] = [];
+		await startNostrConnect({ onUri: (uri) => uris.push(uri) });
+
+		expect(uris).toHaveLength(1);
+		const pointer = nip46Mock.state.bunkerPointers.at(-1);
+		expect(pointer?.relays).toEqual(
+			expect.arrayContaining(["wss://relay.example", ...SIGNER_RELAYS]),
 		);
 	});
 });

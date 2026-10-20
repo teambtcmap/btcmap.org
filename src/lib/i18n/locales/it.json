@@ -117,6 +117,7 @@
 		"signerForget": "Dimentica",
 		"signerWaiting": "In attesa della tua app di firma…",
 		"signerNoAnswer": "La tua app di firma non ha risposto. Approva la richiesta nell'app e riprova.",
+		"signerNoRelay": "Nessun relay ha accettato la richiesta dell'app di firma. Controlla la connessione e riprova.",
 		"signerCancel": "Annulla",
 		"bunkerConnect": "Connetti",
 		"bunkerInvalid": "Non è un URI bunker://.",

@@ -1202,6 +1202,7 @@
 		"signerForget": "Esquecer",
 		"signerWaiting": "Aguardando seu app de assinatura…",
 		"signerNoAnswer": "Seu app de assinatura não respondeu. Aprove a solicitação no app e tente novamente.",
+		"signerNoRelay": "Nenhum relay aceitou a solicitação do app de assinatura. Verifique sua conexão e tente novamente.",
 		"signerCancel": "Cancelar",
 		"bunkerConnect": "Conectar",
 		"bunkerInvalid": "Isso não é uma URI bunker://.",
