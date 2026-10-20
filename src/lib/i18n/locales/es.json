@@ -457,6 +457,7 @@
 		"contact": "Contacto Público",
 		"captcha": "Protección contra bots",
 		"captchaCaseSensitive": "distingue mayúsculas",
+		"captchaRefresh": "Cargar otro captcha",
 		"submitLocation": "Enviar Ubicación",
 		"submitReport": "Enviar Reporte",
 		"searchButton": "Buscar 🔍",

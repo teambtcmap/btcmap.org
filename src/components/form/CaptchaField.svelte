@@ -53,7 +53,7 @@ const errorId = $derived(`${id}-error`);
 		     must leave a retry, or the user is stranded with a disabled
 		     submit. -->
 		{#if !loading}
-			<button type="button" onclick={onrefresh}>
+			<button type="button" onclick={onrefresh} aria-label={$_('forms.captchaRefresh')}>
 				<Icon type="fa" icon="arrows-rotate" w="16" h="16" />
 			</button>
 		{/if}

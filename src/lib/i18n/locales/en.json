@@ -557,6 +557,7 @@
 		"contact": "Public Contact",
 		"captcha": "Bot protection",
 		"captchaCaseSensitive": "case-sensitive",
+		"captchaRefresh": "Load a new captcha",
 		"submitLocation": "Submit Location",
 		"submitReport": "Submit Report",
 		"searchButton": "Search 🔍",

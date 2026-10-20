@@ -31,8 +31,6 @@ let nsec = $state("");
 let nostrLoading = $state(false);
 let nsecLoading = $state(false);
 
-const anyLoading = $derived(nostrLoading || nsecLoading);
-
 async function exchangeSignedEvent(signedEvent: SignedAuthEvent) {
 	// Straight against the API per NIP-98 (it answers CORS preflights,
 	// #1348). NOSTR_AUTH_URL is the same constant the signed `u` tag is
@@ -58,10 +56,10 @@ async function exchangeSignedEvent(signedEvent: SignedAuthEvent) {
 }
 
 async function loginWithExtension() {
-	// Re-entry guard: the disabled prop on the button propagates async, so
-	// a second click (or Enter on a focused button) can fire this handler
-	// before disabled takes effect. Without the guard, the user would see
-	// two extension-signing popups for one click.
+	// Re-entry guard: the busy button is only aria-disabled (#1548), so a
+	// second click (or Enter on the focused button) still reaches this
+	// handler. Without the guard, the user would see two extension-signing
+	// popups for one click.
 	if (nostrLoading) return;
 	// Detect at click time rather than at mount: extensions inject
 	// window.nostr at their own pace, and a user without one gets told what
@@ -90,10 +88,9 @@ async function loginWithExtension() {
 
 async function loginWithNsec(event: SubmitEvent) {
 	event.preventDefault();
-	// Re-entry guard: the form's submit can fire via Enter or rapid double-
-	// click before the disabled state on the button takes effect, which
-	// would decode + sign the same nsec twice and double-fire the network
-	// exchange.
+	// Re-entry guard: the busy submit button is only aria-disabled
+	// (#1548), so Enter or a double-click still submits, which would decode
+	// + sign the same nsec twice and double-fire the network exchange.
 	if (nsecLoading) return;
 	if (!nsec.trim()) return;
 	nsecLoading = true;
@@ -135,11 +132,15 @@ async function loginWithNsec(event: SubmitEvent) {
 }
 </script>
 
+<!-- Busy = aria-disabled, not disabled (#1548): a focused button that
+     turns disabled drops focus to <body>. The handlers' re-entry guards
+     block the clicks it still takes. -->
 <button
 	type="button"
 	onclick={loginWithExtension}
-	disabled={anyLoading}
-	class="w-full rounded-lg bg-purple-600 px-4 py-2 font-semibold text-white transition-colors hover:bg-purple-700 disabled:opacity-50"
+	disabled={nsecLoading}
+	aria-disabled={nostrLoading ? "true" : undefined}
+	class="w-full rounded-lg bg-purple-600 px-4 py-2 font-semibold text-white transition-colors hover:bg-purple-700 disabled:opacity-50 aria-disabled:opacity-50"
 >
 	{nostrLoading ? $_("login.nostrSigning") : $_("login.nostrExtension")}
 </button>
@@ -163,8 +164,9 @@ async function loginWithNsec(event: SubmitEvent) {
 		</p>
 		<button
 			type="submit"
-			disabled={nsecLoading || !nsec.trim()}
-			class="w-full rounded-lg bg-purple-600 px-4 py-2 font-semibold text-white transition-colors hover:bg-purple-700 disabled:opacity-50"
+			disabled={!nsecLoading && !nsec.trim()}
+			aria-disabled={nsecLoading ? "true" : undefined}
+			class="w-full rounded-lg bg-purple-600 px-4 py-2 font-semibold text-white transition-colors hover:bg-purple-700 disabled:opacity-50 aria-disabled:opacity-50"
 		>
 			{nsecLoading ? $_("login.nostrSigning") : $_("login.nsecSubmit")}
 		</button>

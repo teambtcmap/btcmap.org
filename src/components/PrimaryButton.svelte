@@ -9,7 +9,13 @@ type Props = {
 	type?: "button" | "submit";
 	external?: boolean;
 	disabled?: boolean;
+	// Shows the spinner in place of the label; implies `busy`.
 	loading?: boolean;
+	// A request is running: the button blocks clicks but stays focusable
+	// (#1548). A focused button that turns `disabled` drops focus to
+	// <body>, so a screen reader hears nothing during the request, and a
+	// failure toast has no place to land next to.
+	busy?: boolean;
 	onclick?: (event: MouseEvent) => void;
 	children?: Snippet;
 	[key: string]: unknown;
@@ -21,6 +27,7 @@ let {
 	external,
 	disabled,
 	loading,
+	busy,
 	onclick,
 	children,
 	...rest
@@ -30,6 +37,17 @@ const baseStyles =
 	"block bg-link text-center font-semibold text-white hover:bg-hover transition-colors";
 
 const combinedStyles = $derived(`${baseStyles} ${style}`);
+const isBusy = $derived(loading || busy);
+
+// Swallowing the click also stops the form's implicit submission (Enter
+// in a field), which the browser delivers as a click on this button.
+const handleClick = (event: MouseEvent) => {
+	if (isBusy) {
+		event.preventDefault();
+		return;
+	}
+	onclick?.(event);
+};
 </script>
 
 {#if link}
@@ -44,8 +62,17 @@ const combinedStyles = $derived(`${baseStyles} ${style}`);
 		{@render children?.()}
 	</a>
 {:else}
-	<button {onclick} {type} {disabled} class={combinedStyles} {...rest}>
+	<button
+		onclick={handleClick}
+		{type}
+		disabled={disabled && !isBusy}
+		aria-disabled={isBusy ? 'true' : undefined}
+		class={combinedStyles}
+		{...rest}
+	>
 		{#if loading}
+			<!-- The label stays the button's name while the spinner shows. -->
+			<span class="sr-only">{@render children?.()}</span>
 			<LoadingSpinner />
 		{:else}
 			{@render children?.()}

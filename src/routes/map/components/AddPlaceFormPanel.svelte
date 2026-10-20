@@ -66,10 +66,14 @@ const onKeydown = (event: KeyboardEvent) => {
 // The success screen's title names the submitted place.
 let submittedName = $state("");
 // A later step can leave the panel scrolled down; the success screen
-// leads with its title (scroll-mt clears the sticky header).
+// leads with its title (scroll-mt clears the sticky header). Focus moves
+// to the title too: the form it replaces held focus, which would fall to
+// <body> and leave the success unannounced (#1548).
 let successElement = $state<HTMLElement>();
+let successHeading = $state<HTMLHeadingElement>();
 $effect(() => {
 	successElement?.scrollIntoView({ block: "start" });
+	successHeading?.focus({ preventScroll: true });
 });
 </script>
 
@@ -175,7 +179,11 @@ $effect(() => {
 			bind:this={successElement}
 			class="scroll-mt-16 px-4 pt-2 pb-[calc(env(safe-area-inset-bottom)+1.5rem)] md:pb-6"
 		>
-			<h2 class="text-2xl font-semibold text-primary dark:text-white">
+			<h2
+				bind:this={successHeading}
+				tabindex="-1"
+				class="text-2xl font-semibold text-primary focus:outline-none dark:text-white"
+			>
 				{$_('addLocation.successTitle', { values: { name: submittedName } })}
 			</h2>
 			<p class="mt-1 text-sm text-body dark:text-offwhite">
