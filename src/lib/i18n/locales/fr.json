@@ -1246,7 +1246,7 @@
 		"optionConnect": "NostrConnect",
 		"optionConnectHint": "Scannez un QR code avec votre application de signature ou ouvrez-la sur cet appareil.",
 		"optionBunker": "Bunker",
-		"bunkerSubheading": "Saisissez l'URI bunker:// de votre application de signature"
+		"bunkerSubheading": "Saisissez l'URI bunker:// de votre application de signature."
 	},
 	"signup": {
 		"title": "S'inscrire",

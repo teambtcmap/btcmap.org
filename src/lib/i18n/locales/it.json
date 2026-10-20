@@ -135,7 +135,7 @@
 		"optionConnect": "NostrConnect",
 		"optionConnectHint": "Scansiona un codice QR con la tua app di firma o aprila su questo dispositivo.",
 		"optionBunker": "Bunker",
-		"bunkerSubheading": "Inserisci l'URI bunker:// della tua app di firma"
+		"bunkerSubheading": "Inserisci l'URI bunker:// della tua app di firma."
 	},
 	"signup": {
 		"title": "Registrati",

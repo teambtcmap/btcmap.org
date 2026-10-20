@@ -1246,7 +1246,7 @@
 		"optionConnect": "NostrConnect",
 		"optionConnectHint": "Escanea un código QR con tu app de firma o ábrela en este dispositivo.",
 		"optionBunker": "Bunker",
-		"bunkerSubheading": "Introduce la URI bunker:// de tu app de firma"
+		"bunkerSubheading": "Introduce la URI bunker:// de tu app de firma."
 	},
 	"signup": {
 		"title": "Registrarse",

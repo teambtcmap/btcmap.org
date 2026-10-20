@@ -135,7 +135,7 @@
 		"optionConnect": "NostrConnect",
 		"optionConnectHint": "Scan een QR-code met je signeer-app of open hem op dit apparaat.",
 		"optionBunker": "Bunker",
-		"bunkerSubheading": "Voer de bunker://-URI uit je signeer-app in"
+		"bunkerSubheading": "Voer de bunker://-URI uit je signeer-app in."
 	},
 	"signup": {
 		"title": "Registreren",

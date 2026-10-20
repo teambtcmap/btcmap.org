@@ -1320,7 +1320,7 @@
 		"optionConnect": "NostrConnect",
 		"optionConnectHint": "Сканирайте QR код с приложението за подписване или го отворете на това устройство.",
 		"optionBunker": "Bunker",
-		"bunkerSubheading": "Въведете bunker:// URI от приложението за подписване"
+		"bunkerSubheading": "Въведете bunker:// URI от приложението за подписване."
 	},
 	"signup": {
 		"title": "Регистрация",

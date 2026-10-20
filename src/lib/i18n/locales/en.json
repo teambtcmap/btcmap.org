@@ -135,7 +135,7 @@
 		"optionConnect": "NostrConnect",
 		"optionConnectHint": "Scan a QR code with your signer app, or open it on this device.",
 		"optionBunker": "Bunker",
-		"bunkerSubheading": "Enter the bunker:// URI from your signer app"
+		"bunkerSubheading": "Enter the bunker:// URI from your signer app."
 	},
 	"signup": {
 		"title": "Sign up",

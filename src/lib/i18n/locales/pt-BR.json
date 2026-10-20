@@ -1220,7 +1220,7 @@
 		"optionConnect": "NostrConnect",
 		"optionConnectHint": "Escaneie um código QR com seu app de assinatura ou abra-o neste dispositivo.",
 		"optionBunker": "Bunker",
-		"bunkerSubheading": "Insira a URI bunker:// do seu app de assinatura"
+		"bunkerSubheading": "Insira a URI bunker:// do seu app de assinatura."
 	},
 	"signup": {
 		"title": "Cadastrar",
