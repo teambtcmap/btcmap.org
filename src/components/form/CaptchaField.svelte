@@ -49,14 +49,21 @@ const errorId = $derived(`${id}-error`);
 			>{$_('forms.captcha')}
 			<span class="font-normal">({$_('forms.captchaCaseSensitive')})</span></label
 		>
-		<!-- Visible whenever a (re)fetch is possible — a failed first fetch
-		     must leave a retry, or the user is stranded with a disabled
-		     submit. -->
-		{#if !loading}
-			<button type="button" onclick={onrefresh} aria-label={$_('forms.captchaRefresh')}>
-				<Icon type="fa" icon="arrows-rotate" w="16" h="16" />
-			</button>
-		{/if}
+		<!-- Always there — a failed first fetch must leave a retry, or the
+		     user is stranded with a disabled submit. Busy while loading, not
+		     removed: a pressed button that vanishes drops its focus to
+		     <body> (#1548). -->
+		<button
+			type="button"
+			onclick={() => {
+				if (!loading) onrefresh();
+			}}
+			aria-label={$_('forms.captchaRefresh')}
+			aria-disabled={loading ? 'true' : undefined}
+			class="aria-disabled:opacity-50"
+		>
+			<Icon type="fa" icon="arrows-rotate" w="16" h="16" />
+		</button>
 	</div>
 	{#if invalid}
 		<FieldError id={errorId} message={$_('forms.captchaRequired')} />
