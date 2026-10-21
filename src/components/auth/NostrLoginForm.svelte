@@ -141,8 +141,14 @@ async function exchangeSignedEvent(signedEvent: SignedAuthEvent) {
 	await onSuccess(current);
 }
 
+// The HTTP status of an API failure, if it was one. Shared by the toast paths:
+// a 401/403 means the API rejected the signature, not that the transport broke.
+function httpStatus(err: unknown): number | undefined {
+	return (err as { response?: { status?: number } })?.response?.status;
+}
+
 function showLoginError(err: unknown, logLabel: string) {
-	const status = (err as { response?: { status?: number } })?.response?.status;
+	const status = httpStatus(err);
 	errToast(
 		status === 401 || status === 403
 			? $_("login.nostrFailed")
@@ -151,16 +157,12 @@ function showLoginError(err: unknown, logLabel: string) {
 	console.error(logLabel, status ?? err);
 }
 
-function isHttpStatus(err: unknown): number | undefined {
-	return (err as { response?: { status?: number } })?.response?.status;
-}
-
 function failSigner(err: unknown, run: number) {
 	if (run !== generation || hasErrorName(err, "AbortError")) return;
 	cancelSigner();
 	// An API rejection is the same failure the other transports report, so it
 	// gets the same "signature rejected" wording rather than a signer message.
-	const status = isHttpStatus(err);
+	const status = httpStatus(err);
 	if (status !== undefined) {
 		showLoginError(err, "Nostr signer login failed:");
 		return;
@@ -351,7 +353,9 @@ async function connectWithBunker(event: SubmitEvent) {
 
 async function startPairing(mode: PairMode) {
 	// Another transport is running: the buttons are aria-disabled, and the
-	// click they still take must not start a second session.
+	// click they still take must not start a second session. Deliberately not
+	// anyLoading — switching between QR, open and copy has to work while this
+	// pairing is running.
 	if (nostrLoading || nsecLoading) return;
 	trackEvent(CONNECT_CLICK[mode]);
 	// One nostrconnect session, two presentations: switching after the URI
