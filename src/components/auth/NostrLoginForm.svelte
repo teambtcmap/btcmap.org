@@ -316,7 +316,10 @@ async function loginWithSavedPairing() {
 		if (classifySignerError(err) === "invalid") forgetSigner();
 	} finally {
 		await closeSigner(signer);
-		activeSigner = null;
+		// Only this run's signer: a cancelled run that resolves late must not
+		// clear the signer a newer run is holding, or cancelling that one leaks
+		// its request until the sign timeout.
+		if (activeSigner === signer) activeSigner = null;
 		if (run === generation) signerRun = null;
 	}
 }
@@ -338,7 +341,10 @@ async function connectWithBunker(event: SubmitEvent) {
 		failSigner(err, run);
 	} finally {
 		await closeSigner(signer);
-		activeSigner = null;
+		// Only this run's signer: a cancelled run that resolves late must not
+		// clear the signer a newer run is holding, or cancelling that one leaks
+		// its request until the sign timeout.
+		if (activeSigner === signer) activeSigner = null;
 		if (run === generation) signerRun = null;
 	}
 }
@@ -378,7 +384,10 @@ async function startPairing(mode: PairMode) {
 		failSigner(err, run);
 	} finally {
 		await closeSigner(signer);
-		activeSigner = null;
+		// Only this run's signer: a cancelled run that resolves late must not
+		// clear the signer a newer run is holding, or cancelling that one leaks
+		// its request until the sign timeout.
+		if (activeSigner === signer) activeSigner = null;
 		if (run === generation) {
 			abortController = null;
 			signerRun = null;
