@@ -25,7 +25,7 @@ $: href = resolve(`verify-location?id=${encodeURIComponent(String(id))}`);
 			icon={upToDate ? 'verified' : 'error_outline'}
 			type="material"
 		/>
-		<span class="text-sm text-body dark:text-white">{formatVerifiedHuman(verifiedAt, $locale ?? "en")}</span>
+		<span class="text-sm text-body dark:text-white">{formatVerifiedHuman(verifiedAt, $locale)}</span>
 	{:else}
 		<Icon
 			w="16"

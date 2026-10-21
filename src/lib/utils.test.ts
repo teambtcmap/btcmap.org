@@ -847,6 +847,11 @@ describe("formatVerifiedHuman", () => {
 		expect(formatVerifiedHuman("not a date", "de")).toBe("not a date");
 	});
 
+	it("falls back to English when the app locale is not set yet", () => {
+		expect(formatVerifiedHuman(daysAgo(3), null)).toBe("3 days ago");
+		expect(formatVerifiedHuman(daysAgo(3), undefined)).toBe("3 days ago");
+	});
+
 	it("keeps the English wording when no locale is given", () => {
 		expect(formatVerifiedHuman(at(2026, 9, 7, 8))).toBe("Today");
 		expect(formatVerifiedHuman(daysAgo(1))).toBe("1 day ago");
@@ -900,15 +905,18 @@ describe("formatVerifiedHuman", () => {
 		},
 	);
 
-	it("counts hours and minutes for a date just before midnight", () => {
+	it("counts calendar days, not 24-hour periods", () => {
+		// Verified late the evening before: one calendar day, not "2 hours"
 		vi.setSystemTime(new Date(2026, 9, 7, 0, 30, 0));
-		expect(formatVerifiedHuman(at(2026, 9, 6, 22, 30), "de")).toBe(
-			"vor 2 Stunden",
+		expect(formatVerifiedHuman(at(2026, 9, 6, 22, 30), "de")).toBe("vor 1 Tag");
+		expect(formatVerifiedHuman(at(2026, 9, 6, 23, 50))).toBe("1 day ago");
+
+		// Three calendar days back at 23:00, viewed at 08:00: 2.4 days of
+		// elapsed time, but three days on the calendar
+		vi.setSystemTime(new Date(2026, 9, 7, 8, 0, 0));
+		expect(formatVerifiedHuman(at(2026, 9, 4, 23, 0), "de")).toBe(
+			"vor 3 Tagen",
 		);
-		expect(formatVerifiedHuman(at(2026, 9, 6, 23, 50), "de")).toBe(
-			"vor 40 Minuten",
-		);
-		expect(formatVerifiedHuman(at(2026, 9, 6, 23, 50))).toBe("40 minutes ago");
 	});
 
 	it("switches from a distance to a calendar date after 30 days", () => {

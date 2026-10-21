@@ -98,7 +98,7 @@ $: lightning = area["tips:lightning_address"]
 							class="flex items-center gap-1 rounded-full bg-green-100 px-3 py-1 text-green-700 dark:bg-green-900/30 dark:text-green-300"
 						>
 							<Icon type="material" icon="verified" w="14" h="14" />
-							<span>{$_('area.verified')}: {formatVerifiedHuman(verifiedDate, $locale ?? "en")}</span>
+							<span>{$_('area.verified')}: {formatVerifiedHuman(verifiedDate, $locale)}</span>
 						</div>
 					{/if}
 				</div>

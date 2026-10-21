@@ -1,6 +1,7 @@
 import rewind from "@mapbox/geojson-rewind";
 import type { Chart } from "chart.js";
 import { geoBounds, geoContains } from "d3-geo";
+import { differenceInCalendarDays } from "date-fns/differenceInCalendarDays";
 import { isAfter } from "date-fns/isAfter";
 import { isThisYear } from "date-fns/isThisYear";
 import { isToday } from "date-fns/isToday";
@@ -418,30 +419,16 @@ const supportedLocale = (locale: string): string => {
 const dateLocale = (locale: string): string =>
 	locale === "en" ? "en-GB" : locale;
 
-// "40 minutes ago" / "vor 3 Tagen": the coarsest of minutes, hours and days
-// that the distance reaches.
-const formatRecentDistance = (date: Date, locale: string): string => {
-	const diffMs = date.getTime() - Date.now();
-	const minutes = Math.round(diffMs / 60_000);
-	const hours = Math.round(diffMs / 3_600_000);
-	const days = Math.round(diffMs / 86_400_000);
-	const formatter = new Intl.RelativeTimeFormat(locale, { numeric: "always" });
-
-	if (Math.abs(minutes) < 60) return formatter.format(minutes, "minute");
-	if (Math.abs(hours) < 24) return formatter.format(hours, "hour");
-	return formatter.format(days, "day");
-};
-
 export const formatVerifiedHuman = (
 	isoDateString?: string,
-	locale = "en",
+	locale?: string | null,
 ): string => {
 	if (!isoDateString) return "";
 
 	const parsedDate = parseDateSafely(isoDateString);
 	if (!parsedDate) return isoDateString;
 
-	const appLocale = supportedLocale(locale);
+	const appLocale = supportedLocale(locale ?? "en");
 
 	// Today → "Today" / "Heute", capitalised as the label it is shown as
 	if (isToday(parsedDate)) {
@@ -453,7 +440,12 @@ export const formatVerifiedHuman = (
 
 	// Recent dates (≤30 days) → "3 days ago" / "vor 3 Tagen"
 	if (isRecentDate(parsedDate)) {
-		return formatRecentDistance(parsedDate, appLocale);
+		// Calendar days, like the "Today" check above: `verified_at` is often a
+		// plain date, so hours would claim more precision than the data has
+		return new Intl.RelativeTimeFormat(appLocale, { numeric: "always" }).format(
+			-differenceInCalendarDays(new Date(), parsedDate),
+			"day",
+		);
 	}
 
 	// Same year → "15 October" / "15. Oktober"
