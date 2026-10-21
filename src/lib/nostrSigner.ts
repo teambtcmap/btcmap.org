@@ -17,7 +17,25 @@ import type { BunkerSigner } from "nostr-tools/nip46";
 import type { Event, EventTemplate } from "nostr-tools/pure";
 import { generateSecretKey, getPublicKey } from "nostr-tools/pure";
 
-export const SIGNER_RELAYS = ["wss://relay.nsec.app", "wss://relay.damus.io"];
+// Relays the NIP-46 transports publish their requests to: the nostrconnect://
+// URI advertises them (the signer subscribes to that list and answers over
+// it), and a saved pairing unions them with the relays it was saved with.
+//
+// They have to accept writes from an arbitrary client. relay.damus.io
+// rate-limits them away ("banned: too many rate-limit violations, try again
+// later"), which is how #1559 ended with every relay refusing and the panel
+// saying "No relay accepted the signer request". relay.nsec.app stays: it is
+// the relay nsec.app's signer listens on, so while it is refusing connections
+// the other entries carry the request and the day it recovers those users get
+// their own relay back. A pasted bunker:// URI keeps using the relays inside
+// the URI, which reaches a signer that listens only on its own relay.
+export const SIGNER_RELAYS = [
+	"wss://relay.nsec.app",
+	"wss://relay.nostrconnect.com",
+	"wss://relay.primal.net",
+	"wss://nos.lol",
+	"wss://public.relay.btcmap.org",
+];
 
 const CLIENT_NAME = "BTC Map";
 // NIP-46 permissions this app needs: read the key, sign NIP-98 events.
