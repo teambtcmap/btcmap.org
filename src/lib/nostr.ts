@@ -56,7 +56,7 @@ export function getNostrExtension(): NostrExtension | null {
 
 // Build the unsigned NIP-98 event template for POST /v4/auth/nostr.
 // kind 27235, with "u" (url) and "method" tags per the spec.
-function buildAuthTemplate(): EventTemplate {
+export function buildAuthTemplate(): EventTemplate {
 	return {
 		kind: 27235,
 		created_at: Math.floor(Date.now() / 1000),
