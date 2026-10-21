@@ -285,9 +285,12 @@ async function finishSignerRun(
 	if (run !== generation) return;
 	await exchangeSignedEvent(signed);
 	trackEvent("login_nostr_success", { method });
-	if (run !== generation) return;
-	// The signed event names the user's key; the bunker pointer names the
-	// signer's, and the two differ on signers like nsec.app.
+	// No generation check here: exchangeSignedEvent awaits onSuccess, and the
+	// add-location flow closes this form on success — onDestroy -> cancelSigner
+	// bumps the generation. The exchange succeeded either way, so the pairing is
+	// still worth keeping. It also carries the user's key as named by the signed
+	// event, where the bunker pointer names the signer's (they differ on
+	// signers like nsec.app).
 	const verified = pairingWithSignerKey(pairing, signed.pubkey);
 	saveSignerPairing(verified);
 	savedPairing = verified;
