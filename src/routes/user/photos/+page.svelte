@@ -4,7 +4,7 @@ import Time from "svelte-time";
 
 import type { PlacePhotoSource } from "#lib/analytics.js";
 import { trackEvent } from "#lib/analytics.js";
-import { createTimeLocale } from "#lib/dayjsLocale.js";
+import { createTimeLocale, LOCALIZED_DATE_FORMAT } from "#lib/dayjsLocale.js";
 import { _, locale } from "#lib/i18n/index.js";
 import {
 	askPhotoDelete,
@@ -146,7 +146,7 @@ onMount(async () => {
 							{placeName(photo.place_id)}
 						</a>
 						<p class="text-xs text-body dark:text-white/70">
-							<Time timestamp={photo.created_at} relative locale={$timeLocale} />
+							<Time timestamp={photo.created_at} relative format={LOCALIZED_DATE_FORMAT} locale={$timeLocale} />
 						</p>
 						{#if confirmingId === photo.id}
 							<div class="flex items-center gap-2">

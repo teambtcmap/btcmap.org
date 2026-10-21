@@ -5,7 +5,7 @@ import Time from "svelte-time";
 
 import type { PlacePhotoSource } from "#lib/analytics.js";
 import { trackEvent } from "#lib/analytics.js";
-import { createTimeLocale } from "#lib/dayjsLocale.js";
+import { createTimeLocale, LOCALIZED_DATE_FORMAT } from "#lib/dayjsLocale.js";
 import { _, locale } from "#lib/i18n/index.js";
 import type { StripScrollState } from "#lib/placePhotos.js";
 import {
@@ -429,7 +429,7 @@ const handleFiles = async (event: Event) => {
 									</span>
 									{#if layout === 'page'}
 										<span class="block truncate text-white/80">
-											<Time timestamp={photo.created_at} relative locale={$timeLocale} />
+											<Time timestamp={photo.created_at} relative format={LOCALIZED_DATE_FORMAT} locale={$timeLocale} />
 										</span>
 									{/if}
 								</span>
