@@ -48,7 +48,7 @@
 		"d3-geo": "^3.1.1",
 		"date-fns": "^4.3.0",
 		"dayjs": "^1.11.23",
-		"dompurify": "^3.4.16",
+		"dompurify": "^3.4.17",
 		"globals": "^17.13.0",
 		"husky": "^9.1.7",
 		"i18n-iso-countries": "^7.14.0",
