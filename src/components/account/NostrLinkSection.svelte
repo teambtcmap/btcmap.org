@@ -72,7 +72,8 @@ async function linkKey(signed: SignedAuthEvent): Promise<boolean> {
 
 async function unlink() {
 	const token = $session?.token;
-	if (!token) return;
+	// The busy button still takes clicks (#1548)
+	if (!token || unlinkAction.pending) return;
 	await unlinkAction.run($_("account.nostr.unlinkError"), async () => {
 		// The confirmed unlink, so the click/success pair counts attempts,
 		// not opened confirmations
@@ -126,8 +127,8 @@ async function unlink() {
 				<button
 					type="button"
 					onclick={unlink}
-					disabled={unlinkAction.pending}
-					class="rounded-lg bg-red-600 px-3 py-1.5 text-sm font-semibold text-white hover:bg-red-700 disabled:opacity-60"
+					aria-disabled={unlinkAction.pending ? "true" : undefined}
+					class="rounded-lg bg-red-600 px-3 py-1.5 text-sm font-semibold text-white hover:bg-red-700 aria-disabled:opacity-60"
 				>
 					{$_("account.nostr.unlinkConfirm")}
 				</button>

@@ -155,8 +155,8 @@ const NEXT_MESSAGES = {
 
 	<PrimaryButton
 		type="submit"
-		disabled={change.pending}
-		style="rounded-lg px-4 py-2 disabled:opacity-50"
+		busy={change.pending}
+		style="rounded-lg px-4 py-2 disabled:opacity-50 aria-disabled:opacity-50"
 	>
 		{change.pending ? $_("account.saving") : $_("account.password.submit")}
 	</PrimaryButton>

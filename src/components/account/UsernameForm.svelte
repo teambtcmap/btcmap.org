@@ -54,14 +54,16 @@ const form = createForm(() => ({
 }));
 const values = form.useSelector((state) => state.values);
 
-const submitDisabled = $derived(
-	save.pending ||
-		!usernameChanged(values.current.username, $session?.username ?? ""),
+// Nothing to save until the name differs from the account's: that is the
+// `disabled` case. A request in flight is `busy`, so the button keeps focus
+// and the failure toast has somewhere to land (#1548).
+const unchanged = $derived(
+	!usernameChanged(values.current.username, $session?.username ?? ""),
 );
 
 function handleSubmit(event: SubmitEvent) {
 	event.preventDefault();
-	if (submitDisabled) return;
+	if (save.pending || unchanged) return;
 	trackEvent("account_username_save_click");
 	validation.submit(form);
 }
@@ -93,8 +95,9 @@ function handleSubmit(event: SubmitEvent) {
 
 	<PrimaryButton
 		type="submit"
-		disabled={submitDisabled}
-		style="rounded-lg px-4 py-2 disabled:opacity-50"
+		disabled={unchanged}
+		busy={save.pending}
+		style="rounded-lg px-4 py-2 disabled:opacity-50 aria-disabled:opacity-50"
 	>
 		{save.pending ? $_("account.saving") : $_("account.username.save")}
 	</PrimaryButton>
