@@ -1,42 +1,39 @@
 <script lang="ts">
 import { onMount } from "svelte";
 
-import {
-	errorStatus,
-	fetchLinkedNpub,
-	linkNostr,
-	unlinkNostr,
-} from "#lib/account.js";
+import { fetchLinkedNpub, linkNostr, unlinkNostr } from "#lib/account.js";
 import { createAccountAction } from "#lib/accountAction.svelte.js";
 import { trackEvent } from "#lib/analytics.js";
+import { errorStatus } from "#lib/apiError.js";
 import { _ } from "#lib/i18n/index.js";
 import type { SignedAuthEvent } from "#lib/nostr.js";
 import {
-	decodeNsec,
+	buildNip98Template,
 	encodeNip98Event,
-	getNostrExtension,
 	NOSTR_LINK_URL,
-	signNip98WithExtension,
-	signNip98WithSecretKey,
 } from "#lib/nostr.js";
 import type { Session } from "#lib/session.js";
 import { session } from "#lib/session.js";
 import { errToast, successToast } from "#lib/utils.js";
-import TextField from "$components/form/TextField.svelte";
+import NostrAuthMethods from "$components/auth/NostrAuthMethods.svelte";
 import NostrAvatar from "$components/NostrAvatar.svelte";
 
 // Link a Nostr key to the account, or unlink it (#1541). Once linked, a
-// Nostr login reaches this account (and its saved items) instead of
-// creating a new one. Signing follows NostrLoginForm: extension or nsec.
+// Nostr login reaches this account (and its saved items) instead of creating
+// a new one. The transports are the login panel's (NostrAuthMethods), signing
+// a PUT for /v4/users/me/nostr instead of the login POST.
 
-let showNsecInput = $state(false);
-let nsec = $state("");
-const linkAction = createAccountAction("Nostr link");
-let confirmingUnlink = $state(false);
 const unlinkAction = createAccountAction("Nostr unlink");
+let confirmingUnlink = $state(false);
 // Set once a link or unlink starts: from then on the session holds newer
 // state than the lookup below can return
 let changedHere = false;
+// The account the signature is being made for. Signing can wait on an
+// extension prompt or a signer app, so a session that has moved on meanwhile
+// must not receive the key.
+let linkToken: Session["token"] | null = null;
+
+const linkTemplate = () => buildNip98Template(NOSTR_LINK_URL, "PUT");
 
 const npub = $derived($session?.npub ?? null);
 // npub1 + 6 … 6: enough to recognise a key without wrapping
@@ -57,66 +54,20 @@ onMount(async () => {
 	}
 });
 
-// `token` is the account the user started linking from. Signing can wait on
-// an extension prompt; if the session changed meanwhile (logout, another
-// login), the key must not go to whichever account is active now.
-async function submitProof(token: Session["token"], signed: SignedAuthEvent) {
-	if ($session?.token !== token) return;
+// Both credentials: the Bearer token says which account, the signed PUT
+// proves the user controls the key.
+async function linkKey(signed: SignedAuthEvent): Promise<boolean> {
+	const token = linkToken;
+	if (!token || $session?.token !== token) return false;
 	changedHere = true;
 	const result = await linkNostr(token, encodeNip98Event(signed));
 	if (result.status === "taken") {
 		errToast($_("account.nostr.taken"));
-		return;
+		return false;
 	}
 	session.setNpub(token, result.npub);
-	showNsecInput = false;
-	trackEvent("account_nostr_link_success");
 	successToast($_("account.nostr.linkSuccess"));
-}
-
-async function linkWithExtension() {
-	const token = $session?.token;
-	if (linkAction.pending || !token) return;
-	// Counted before the extension check: a click without one is still a
-	// click on the entry point
-	trackEvent("account_nostr_link_click");
-	if (getNostrExtension() === null) {
-		errToast($_("login.nostrNoExtension"));
-		return;
-	}
-	await linkAction.run($_("account.nostr.linkError"), async () => {
-		await submitProof(
-			token,
-			await signNip98WithExtension(NOSTR_LINK_URL, "PUT"),
-		);
-	});
-}
-
-async function linkWithNsec(event: SubmitEvent) {
-	event.preventDefault();
-	const token = $session?.token;
-	if (linkAction.pending || !token || !nsec.trim()) return;
-	trackEvent("account_nostr_link_click");
-	await linkAction.run($_("account.nostr.linkError"), async () => {
-		let secretKey: Uint8Array | null = null;
-		let signed: SignedAuthEvent;
-		try {
-			secretKey = decodeNsec(nsec);
-			signed = signNip98WithSecretKey(secretKey, NOSTR_LINK_URL, "PUT");
-			nsec = "";
-		} catch {
-			// A malformed key is the user's input, not a failed request
-			errToast($_("login.nsecInvalid"));
-			secretKey?.fill(0);
-			return;
-		}
-		try {
-			await submitProof(token, signed);
-		} finally {
-			// Best-effort zeroing, as on login
-			secretKey.fill(0);
-		}
-	});
+	return true;
 }
 
 async function unlink() {
@@ -186,50 +137,10 @@ async function unlink() {
 {:else}
 	<p class="text-sm text-body dark:text-white/70">{$_("account.nostr.none")}</p>
 
-	<button
-		type="button"
-		onclick={linkWithExtension}
-		disabled={linkAction.pending}
-		class="w-full rounded-lg bg-purple-600 px-4 py-2 font-semibold text-white transition-colors hover:bg-purple-700 disabled:opacity-50"
-	>
-		{linkAction.pending && !showNsecInput ? $_("login.nostrSigning") : $_("account.nostr.linkExtension")}
-	</button>
-
-	{#if showNsecInput}
-		<form onsubmit={linkWithNsec} class="space-y-2">
-			<TextField
-				id="account-nsec"
-				label={$_("login.nsecLabel")}
-				type="password"
-				bind:value={nsec}
-				placeholder="nsec1..."
-				autocomplete="new-password"
-				autocorrect="off"
-				autocapitalize="off"
-				spellcheck="false"
-				inputClass="font-mono text-sm"
-			/>
-			<p class="text-xs text-body dark:text-white/50">
-				{$_("account.nostr.nsecWarning")}
-			</p>
-			<button
-				type="submit"
-				disabled={linkAction.pending || !nsec.trim()}
-				class="w-full rounded-lg bg-purple-600 px-4 py-2 font-semibold text-white transition-colors hover:bg-purple-700 disabled:opacity-50"
-			>
-				{linkAction.pending ? $_("login.nostrSigning") : $_("account.nostr.linkNsec")}
-			</button>
-		</form>
-	{:else}
-		<button
-			type="button"
-			onclick={() => {
-				trackEvent("account_nostr_nsec_open");
-				showNsecInput = true;
-			}}
-			class="w-full text-center text-sm text-link transition-colors hover:text-hover"
-		>
-			{$_("account.nostr.linkNsec")}
-		</button>
-	{/if}
+	<NostrAuthMethods
+		mode="link"
+		template={linkTemplate}
+		submit={linkKey}
+		onStart={() => (linkToken = $session?.token ?? null)}
+	/>
 {/if}

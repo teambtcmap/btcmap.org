@@ -17,8 +17,6 @@ import type { BunkerSigner } from "nostr-tools/nip46";
 import type { Event, EventTemplate } from "nostr-tools/pure";
 import { generateSecretKey, getPublicKey } from "nostr-tools/pure";
 
-import { buildAuthTemplate } from "#lib/nostr.js";
-
 export const SIGNER_RELAYS = ["wss://relay.nsec.app", "wss://relay.damus.io"];
 
 const CLIENT_NAME = "BTC Map";
@@ -241,15 +239,20 @@ export async function closeSigner(signer: Closable | null): Promise<void> {
 	}
 }
 
+// Sign a NIP-98 event through a connected signer. `buildTemplate` is called
+// here, at signing time, rather than by the caller: the API accepts a
+// created_at within +/-60s, and connecting a signer can take minutes. The
+// template is also what differs between the surfaces that share this module —
+// a login signs POST /v4/auth/nostr, linking a key signs PUT
+// /v4/users/me/nostr.
 export async function signWithSigner(
 	signer: SignerLike,
+	buildTemplate: () => EventTemplate,
 	timeoutMs = SIGN_TIMEOUT_MS,
 ): Promise<Event> {
-	// The template is built here, at signing time: the API accepts a created_at
-	// within +/-60s, and connecting a signer can take minutes.
 	try {
 		return await withTimeout(
-			signer.signEvent(buildAuthTemplate()),
+			signer.signEvent(buildTemplate()),
 			timeoutMs,
 			"Your signer did not return a signature",
 		);
