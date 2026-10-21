@@ -336,9 +336,9 @@ describe("connectSavedPairing", () => {
 		});
 	});
 
-	// Opal rejects (or ignores) a connect on an already-paired session; a saved
-	// pairing must survive both, or the one-click button dies on every signer
-	// that behaves this way.
+	// Some signers reject (or ignore) a connect on an already-paired session; a
+	// saved pairing must survive both, or the one-click button dies on every
+	// signer that behaves this way.
 	it("signs anyway when the signer rejects the connect ack", async () => {
 		nip46Mock.state.connectBehaviour = "reject";
 		await expect(connectSavedPairing(validPairing())).resolves.toBeTruthy();
