@@ -43,7 +43,8 @@ const annotatedEvents: AnnotatedEvent[] = $derived.by(() => {
 	return [...future, ...past];
 });
 
-const formatDateRange = (event: AreaEvent, appLocale: string): string => {
+const formatDateRange = (event: AreaEvent): string => {
+	const appLocale = $locale ?? "en";
 	const start = parseLocalDateTime(event.starts_at);
 	if (!start || isEpochSentinel(start)) return $_("areaEvents.noDate");
 	const startDateStr = new Date(
@@ -116,7 +117,7 @@ const formatDateRange = (event: AreaEvent, appLocale: string): string => {
 								h="14"
 								class="mr-1 inline align-middle"
 							/>
-							{formatDateRange(event, $locale ?? "en")}
+							{formatDateRange(event)}
 						</p>
 					</div>
 				</li>
