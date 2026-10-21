@@ -1,6 +1,7 @@
 import { isAxiosError } from "axios";
 
 import { API_BASE } from "#lib/api-base.js";
+import { errorStatus } from "#lib/apiError.js";
 import api from "#lib/axios.js";
 import { NOSTR_LINK_URL } from "#lib/nostr.js";
 import type { Session } from "#lib/session.js";
@@ -27,9 +28,7 @@ const errorMessage = (error: unknown): string | undefined => {
 
 // What a failed call may log: an Axios error carries the request config,
 // so logging it whole would leak the Bearer token and any request body
-// (passwords included). LoginForm logs the status the same way.
-export const errorStatus = (error: unknown): number | undefined =>
-	isAxiosError(error) ? error.response?.status : undefined;
+// (passwords included). Callers log errorStatus(err) instead.
 
 export type UsernameChange =
 	| { status: "changed"; username: MeResponse["name"] }

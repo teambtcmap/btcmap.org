@@ -1,4 +1,4 @@
-import { errorStatus } from "#lib/account.js";
+import { errorStatus } from "#lib/apiError.js";
 import { errToast } from "#lib/utils.js";
 
 // One account-page request in flight (#1541): the shared try/toast/log/

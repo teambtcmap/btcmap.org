@@ -6,7 +6,6 @@ import { API_BASE } from "#lib/api-base.js";
 import {
 	changePassword,
 	changeUsername,
-	errorStatus,
 	fetchLinkedNpub,
 	linkNostr,
 	unlinkNostr,
@@ -198,18 +197,5 @@ describe("unlinkNostr", () => {
 			`${API_BASE}/v4/users/me/nostr`,
 			AUTH,
 		);
-	});
-});
-
-describe("errorStatus", () => {
-	it("reads the HTTP status of an API error", () => {
-		expect(errorStatus(apiError(400, "Invalid old password"))).toBe(400);
-	});
-
-	// What callers log instead of the error: an Axios error carries the
-	// request config, Bearer token and request body included
-	it("is undefined for anything else", () => {
-		expect(errorStatus(new Error("offline"))).toBeUndefined();
-		expect(errorStatus(undefined)).toBeUndefined();
 	});
 });
