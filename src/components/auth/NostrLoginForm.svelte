@@ -333,10 +333,14 @@ async function loginWithSavedPairing() {
 		await finishSignerRun(run, signer, result.pairing, "saved");
 	} catch (err) {
 		failSigner(err, run);
-		// A pairing the signer no longer knows is worse than none: drop it so
-		// the one-click button doesn't fail forever. After the toast — forgetting
-		// bumps the generation, which would swallow it.
-		if (classifySignerError(err) === "invalid") forgetSigner();
+		// A stored pairing that cannot be parsed is worse than none: drop it so
+		// the one-click button doesn't fail forever. Only when this run is still
+		// the current one — a stale failure must not cancel the newer login — and
+		// by clearing storage directly, since the user didn't click Forget.
+		if (run === generation && classifySignerError(err) === "invalid") {
+			clearSignerPairing();
+			savedPairing = null;
+		}
 	} finally {
 		await closeSigner(signer);
 		// Only this run's signer: a cancelled run that resolves late must not
