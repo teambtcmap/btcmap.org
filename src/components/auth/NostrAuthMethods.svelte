@@ -241,9 +241,9 @@ function failSigner(err: unknown, run: number) {
 			errToast($_("login.signerNoRelay"));
 			return;
 		default: {
-			// A signer that refuses says why (Opal: "already connected", "user
-			// rejected", …); that text is the only clue the user has, so it
-			// rides along with the generic message.
+			// A signer that refuses says why ("already connected", "user rejected",
+			// …); that text is the only clue the user has, so it rides along with the
+			// generic message.
 			const detail =
 				typeof err === "string" ? err : (err as Error | undefined)?.message;
 			errToast(detail ? `${$_(labels.error)} (${detail})` : $_(labels.error));

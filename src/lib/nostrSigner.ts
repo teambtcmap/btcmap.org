@@ -305,11 +305,11 @@ function clientMetadata() {
 }
 
 // NIP-46 connect is optional in practice, and it is the *ack* that is optional,
-// not the request. Opal acts on the request itself and either ignores a connect
-// on an already-paired session or rejects it outright, so a saved pairing must
-// never fail because the ack never came — the sign request that follows is the
-// real test. A pasted bunker URI is different: there the connect *is* the
-// approval prompt, so an explicit refusal is the user saying no.
+// not the request. Signers that act on the request itself either ignore a
+// connect on an already-paired session or reject it outright, so a saved
+// pairing must never fail because the ack never came — the sign request that
+// follows is the real test. A pasted bunker URI is different: there the connect
+// *is* the approval prompt, so an explicit refusal is the user saying no.
 async function connectQuietly(
 	signer: BunkerSigner,
 	waitMs: number,

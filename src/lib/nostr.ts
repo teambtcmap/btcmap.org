@@ -40,7 +40,7 @@ export function encodeNip98Event(event: SignedAuthEvent): string {
 }
 
 // NIP-07 extension interface (window.nostr) — minimal subset we use.
-// Extensions like Alby, nos2x inject this on page load.
+// Extensions inject this on page load.
 type NostrExtension = {
 	getPublicKey: () => Promise<string>;
 	signEvent: (event: EventTemplate) => Promise<Event>;
