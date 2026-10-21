@@ -13,8 +13,12 @@ export type NostrProfile = {
 };
 
 // Small hardcoded starter relay set queried for kind:0 metadata; first relay
-// to answer wins. NIP-65 (kind:10002) relay discovery is a later refinement.
+// to answer wins. purplepag.es mirrors kind 0 / 3 / 10002 from across the
+// network, so it is the one relay here that is likely to have a profile whose
+// own relays are slow or down. NIP-65 (kind:10002) relay discovery is a later
+// refinement.
 const RELAYS = [
+	"wss://purplepag.es",
 	"wss://relay.damus.io",
 	"wss://nos.lol",
 	"wss://relay.primal.net",
