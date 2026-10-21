@@ -15,7 +15,7 @@ export let compact = false;
 	<div class="rounded-lg bg-gray-50 p-3 dark:bg-white/5">
 		<p class="text-sm text-primary dark:text-white">{text}</p>
 		<span class="mt-1 block text-xs text-body dark:text-white/50">
-			<Time timestamp={time} relative live={60000} locale={$timeLocale} />
+			<Time timestamp={time} relative live={60000} format={LOCALIZED_DATE_FORMAT} locale={$timeLocale} />
 		</span>
 	</div>
 {:else}

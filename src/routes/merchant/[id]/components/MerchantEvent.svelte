@@ -1,7 +1,7 @@
 <script lang="ts">
 import Time from "svelte-time";
 
-import { createTimeLocale } from "#lib/dayjsLocale.js";
+import { createTimeLocale, LOCALIZED_DATE_FORMAT } from "#lib/dayjsLocale.js";
 import { locale } from "#lib/i18n/index.js";
 import type { EventType, User } from "#lib/types.js";
 import { isValidLightningTip, stripLightningScheme } from "#lib/utils.js";
@@ -51,7 +51,7 @@ $: tipDestination =
 					? 'lg:mr-5'
 					: ''}"
 			>
-				<Time live={3000} relative timestamp={time} locale={$timeLocale} />
+				<Time live={3000} relative timestamp={time} format={LOCALIZED_DATE_FORMAT} locale={$timeLocale} />
 			</span>
 		</div>
 

@@ -1,7 +1,7 @@
 <script lang="ts">
 import Time from "svelte-time";
 
-import { createTimeLocale } from "#lib/dayjsLocale.js";
+import { createTimeLocale, LOCALIZED_DATE_FORMAT } from "#lib/dayjsLocale.js";
 import { _, locale } from "#lib/i18n/index.js";
 import Icon from "$components/Icon.svelte";
 import TicketLabel from "$components/TicketLabel.svelte";
@@ -50,7 +50,7 @@ export let user: { html_url: string; login: string } = {
 			</p>
 
 			<p class="text-body dark:text-white">
-				#{id} {$_('maintain.opened')} <Time live={3000} relative timestamp={created} locale={$timeLocale} />
+				#{id} {$_('maintain.opened')} <Time live={3000} relative timestamp={created} format={LOCALIZED_DATE_FORMAT} locale={$timeLocale} />
 				<br class="block md:hidden" />
 				{$_('maintain.by')}
 				<a

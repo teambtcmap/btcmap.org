@@ -3,7 +3,7 @@ import Time from "svelte-time";
 
 import type { ActivityItem } from "#lib/activity.js";
 import { dotColor } from "#lib/activity.js";
-import { createTimeLocale } from "#lib/dayjsLocale.js";
+import { createTimeLocale, LOCALIZED_DATE_FORMAT } from "#lib/dayjsLocale.js";
 import { _, locale } from "#lib/i18n/index.js";
 import Icon from "$components/Icon.svelte";
 import SaveButton from "$components/SaveButton.svelte";
@@ -101,7 +101,7 @@ $: showSaveButton = item.type !== "place_deleted";
 			</span>
 
 			<span class="block text-center font-semibold text-taggerTime lg:inline dark:text-white/70">
-				<Time live={3000} relative timestamp={item.date} locale={$timeLocale} />
+				<Time live={3000} relative timestamp={item.date} format={LOCALIZED_DATE_FORMAT} locale={$timeLocale} />
 			</span>
 		</div>
 
