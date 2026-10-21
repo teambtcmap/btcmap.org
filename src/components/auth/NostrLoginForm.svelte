@@ -79,6 +79,10 @@ const statusClass = "text-xs text-body dark:text-white/50";
 
 let nsec = $state("");
 let nsecInput = $state<HTMLInputElement>();
+// A NIP-07 extension is only detectable in the browser, and it may inject after
+// mount (or after the user installs one), so the button's state is refreshed on
+// mount, on window focus and whenever the options panel opens.
+let hasExtension = $state(false);
 let nostrLoading = $state(false);
 let nsecLoading = $state(false);
 
@@ -244,7 +248,14 @@ function forgetSigner() {
 function toggleOptions() {
 	showOptions = !showOptions;
 	trackEvent("login_nostr_options_toggle", { open: showOptions });
-	if (!showOptions) cancelSigner();
+	if (showOptions) refreshExtension();
+	else cancelSigner();
+}
+
+// The extension button is live only when a NIP-07 provider is actually there,
+// so the user isn't offered a button whose only outcome is an error toast.
+function refreshExtension() {
+	hasExtension = getNostrExtension() !== null;
 }
 
 async function loginWithExtension() {
@@ -253,9 +264,11 @@ async function loginWithExtension() {
 	if (anyLoading) return;
 	trackEvent("login_nostr_extension_click");
 	// Detect at click time rather than at mount: extensions inject
-	// window.nostr at their own pace, and a user without one gets told what
-	// to install instead of never seeing the option.
+	// window.nostr at their own pace, and the button's disabled state reflects
+	// the last probe. Re-check here in case the provider went away between
+	// render and click.
 	if (getNostrExtension() === null) {
+		refreshExtension();
 		errToast($_("login.nostrNoExtension"));
 		return;
 	}
@@ -515,6 +528,15 @@ async function loginWithNsec(event: SubmitEvent) {
 
 onMount(() => {
 	savedPairing = loadSignerPairing();
+	refreshExtension();
+	// Extensions inject on their own schedule, and a user who installs one has
+	// to come back to this tab: re-probe on focus and once shortly after mount.
+	window.addEventListener("focus", refreshExtension);
+	const lateProbe = setTimeout(refreshExtension, 1_000);
+	return () => {
+		window.removeEventListener("focus", refreshExtension);
+		clearTimeout(lateProbe);
+	};
 });
 
 // Name the saved signer by its kind:0 profile when one exists, and fall back
@@ -599,11 +621,14 @@ onDestroy(() => {
 		<div class={cardClass}>
 			<p class={headingClass}>{$_("login.optionExtension")}</p>
 			<p class={hintClass}>
-				{$_("login.optionExtensionHint")}
+				{hasExtension
+					? $_("login.optionExtensionHint")
+					: $_("login.nostrNoExtension")}
 			</p>
 			<button
 				type="button"
 				onclick={loginWithExtension}
+				disabled={!hasExtension}
 				aria-disabled={anyLoading ? "true" : undefined}
 				class={outlineButton}
 			>
