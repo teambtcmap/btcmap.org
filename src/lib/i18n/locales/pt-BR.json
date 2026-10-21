@@ -54,6 +54,7 @@
 		"taggingIssues": "Problemas de Etiquetagem",
 		"communities": "Comunidades",
 		"countries": "Países",
+		"account": "Conta",
 		"signup": "Cadastrar",
 		"myPhotos": "Minhas fotos"
 	},
@@ -1281,5 +1282,55 @@
 		"empty": "Você ainda não adicionou fotos. Abra um lugar e toque em \"Adicionar foto\".",
 		"loadError": "Não foi possível carregar suas fotos. Tente novamente.",
 		"unknownPlace": "Lugar #{id}"
+	},
+	"account": {
+		"title": "Conta",
+		"saving": "Salvando…",
+		"username": {
+			"heading": "Nome de usuário",
+			"description": "Exibido nos seus comentários, fotos e no ranking. Você também entra com ele.",
+			"label": "Nome de usuário",
+			"required": "Digite um nome de usuário.",
+			"taken": "Esse nome de usuário já está em uso. Tente outro.",
+			"save": "Salvar nome de usuário",
+			"success": "Nome de usuário alterado.",
+			"error": "Não foi possível alterar seu nome de usuário. Tente novamente."
+		},
+		"nostr": {
+			"heading": "Contas vinculadas",
+			"description": "Outras formas de entrar nesta conta, como uma chave Nostr. Sem vínculo, entrar com Nostr cria uma conta separada.",
+			"linked": "Chave vinculada",
+			"none": "Nenhuma chave Nostr está vinculada a esta conta.",
+			"linkEntry": "Vincular uma chave Nostr",
+			"linkExtension": "Vincular com extensão Nostr",
+			"linkSaved": "Vincular com app de assinatura salvo",
+			"linkNsec": "Vincular com nsec",
+			"nsecWarning": "Sua nsec fica no seu navegador: ela assina apenas esta solicitação e nunca é salva nem enviada.",
+			"linkSuccess": "Chave Nostr vinculada.",
+			"taken": "Esta chave Nostr já pertence a outra conta do BTC Map.",
+			"linkError": "Não foi possível vincular sua chave Nostr. Tente novamente.",
+			"unlink": "Desvincular",
+			"unlinkWarning": "Você não poderá mais entrar com esta chave Nostr. Se você se cadastrou com Nostr, não conhece a senha desta conta e perderá o acesso a ela ao sair.",
+			"unlinkConfirm": "Desvincular chave",
+			"unlinkSuccess": "Chave Nostr desvinculada.",
+			"unlinkError": "Não foi possível desvincular sua chave Nostr. Tente novamente."
+		},
+		"password": {
+			"heading": "Senha",
+			"description": "Altere a senha com que você entra.",
+			"nostrHint": "Cadastrou-se com Nostr? Sua conta tem uma senha que nunca foi mostrada a você, então ainda não é possível alterá-la aqui.",
+			"current": "Senha atual",
+			"next": "Nova senha",
+			"confirm": "Repita a nova senha",
+			"currentRequired": "Digite sua senha atual.",
+			"nextRequired": "Digite uma nova senha.",
+			"tooShort": "Use pelo menos {min} caracteres.",
+			"mismatch": "As senhas não coincidem.",
+			"wrongPassword": "Essa não é sua senha atual.",
+			"noPassword": "Sua conta ainda não tem uma senha que você possa alterar.",
+			"submit": "Alterar senha",
+			"success": "Senha alterada.",
+			"error": "Não foi possível alterar sua senha. Tente novamente."
+		}
 	}
 }

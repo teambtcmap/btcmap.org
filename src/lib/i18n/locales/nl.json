@@ -1382,5 +1382,55 @@
 		"empty": "Je hebt nog geen foto's toegevoegd. Open een plek en tik op 'Foto toevoegen'.",
 		"loadError": "Kan je foto's niet laden. Probeer het opnieuw.",
 		"unknownPlace": "Plek #{id}"
+	},
+	"account": {
+		"title": "Account",
+		"saving": "Opslaan…",
+		"username": {
+			"heading": "Gebruikersnaam",
+			"description": "Zichtbaar bij je reacties, foto's en op het klassement. Je meldt je er ook mee aan.",
+			"label": "Gebruikersnaam",
+			"required": "Vul een gebruikersnaam in.",
+			"taken": "Deze gebruikersnaam is al bezet. Probeer een andere.",
+			"save": "Gebruikersnaam opslaan",
+			"success": "Gebruikersnaam gewijzigd.",
+			"error": "Kan je gebruikersnaam niet wijzigen. Probeer het opnieuw."
+		},
+		"nostr": {
+			"heading": "Gekoppelde accounts",
+			"description": "Andere manieren om je bij dit account aan te melden, zoals een Nostr-sleutel. Zonder koppeling maakt aanmelden met Nostr een apart account aan.",
+			"linked": "Gekoppelde sleutel",
+			"none": "Er is geen Nostr-sleutel aan dit account gekoppeld.",
+			"linkEntry": "Nostr-sleutel koppelen",
+			"linkExtension": "Koppelen met Nostr-extensie",
+			"linkSaved": "Koppelen met opgeslagen signeer-app",
+			"linkNsec": "Koppelen met nsec",
+			"nsecWarning": "Je nsec blijft in je browser: hij ondertekent alleen dit ene verzoek en wordt nooit opgeslagen of verzonden.",
+			"linkSuccess": "Nostr-sleutel gekoppeld.",
+			"taken": "Deze Nostr-sleutel hoort al bij een ander BTC Map-account.",
+			"linkError": "Kan je Nostr-sleutel niet koppelen. Probeer het opnieuw.",
+			"unlink": "Ontkoppelen",
+			"unlinkWarning": "Je kunt je daarna niet meer met deze Nostr-sleutel aanmelden. Heb je je met Nostr aangemeld, dan ken je het wachtwoord van dit account niet en verlies je de toegang zodra je je afmeldt.",
+			"unlinkConfirm": "Sleutel ontkoppelen",
+			"unlinkSuccess": "Nostr-sleutel ontkoppeld.",
+			"unlinkError": "Kan je Nostr-sleutel niet ontkoppelen. Probeer het opnieuw."
+		},
+		"password": {
+			"heading": "Wachtwoord",
+			"description": "Wijzig het wachtwoord waarmee je je aanmeldt.",
+			"nostrHint": "Aangemeld met Nostr? Je account heeft een wachtwoord dat je nooit is getoond, dus je kunt het hier nog niet wijzigen.",
+			"current": "Huidig wachtwoord",
+			"next": "Nieuw wachtwoord",
+			"confirm": "Herhaal nieuw wachtwoord",
+			"currentRequired": "Vul je huidige wachtwoord in.",
+			"nextRequired": "Vul een nieuw wachtwoord in.",
+			"tooShort": "Gebruik minstens {min} tekens.",
+			"mismatch": "De wachtwoorden komen niet overeen.",
+			"wrongPassword": "Dat is niet je huidige wachtwoord.",
+			"noPassword": "Je account heeft nog geen wachtwoord dat je kunt wijzigen.",
+			"submit": "Wachtwoord wijzigen",
+			"success": "Wachtwoord gewijzigd.",
+			"error": "Kan je wachtwoord niet wijzigen. Probeer het opnieuw."
+		}
 	}
 }

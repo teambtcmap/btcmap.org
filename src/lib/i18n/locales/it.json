@@ -1382,5 +1382,55 @@
 		"empty": "Non hai ancora aggiunto foto. Apri un luogo e tocca «Aggiungi foto».",
 		"loadError": "Impossibile caricare le tue foto. Riprova.",
 		"unknownPlace": "Luogo #{id}"
+	},
+	"account": {
+		"title": "Account",
+		"saving": "Salvataggio…",
+		"username": {
+			"heading": "Nome utente",
+			"description": "Mostrato sui tuoi commenti, sulle foto e nella classifica. Lo usi anche per accedere.",
+			"label": "Nome utente",
+			"required": "Inserisci un nome utente.",
+			"taken": "Questo nome utente è già in uso. Provane un altro.",
+			"save": "Salva nome utente",
+			"success": "Nome utente modificato.",
+			"error": "Impossibile modificare il nome utente. Riprova."
+		},
+		"nostr": {
+			"heading": "Account collegati",
+			"description": "Altri modi per accedere a questo account, come una chiave Nostr. Senza collegamento, l'accesso con Nostr crea un account separato.",
+			"linked": "Chiave collegata",
+			"none": "Nessuna chiave Nostr è collegata a questo account.",
+			"linkEntry": "Collega una chiave Nostr",
+			"linkExtension": "Collega con estensione Nostr",
+			"linkSaved": "Collega con l'app di firma salvata",
+			"linkNsec": "Collega con nsec",
+			"nsecWarning": "La tua nsec resta nel browser: firma solo questa richiesta e non viene mai salvata né inviata.",
+			"linkSuccess": "Chiave Nostr collegata.",
+			"taken": "Questa chiave Nostr appartiene già a un altro account BTC Map.",
+			"linkError": "Impossibile collegare la tua chiave Nostr. Riprova.",
+			"unlink": "Scollega",
+			"unlinkWarning": "Non potrai più accedere con questa chiave Nostr. Se ti sei registrato con Nostr, non conosci la password di questo account e ne perderai l'accesso dopo la disconnessione.",
+			"unlinkConfirm": "Scollega chiave",
+			"unlinkSuccess": "Chiave Nostr scollegata.",
+			"unlinkError": "Impossibile scollegare la tua chiave Nostr. Riprova."
+		},
+		"password": {
+			"heading": "Password",
+			"description": "Cambia la password con cui accedi.",
+			"nostrHint": "Ti sei registrato con Nostr? Il tuo account ha una password che non ti è mai stata mostrata, quindi non puoi ancora cambiarla qui.",
+			"current": "Password attuale",
+			"next": "Nuova password",
+			"confirm": "Ripeti la nuova password",
+			"currentRequired": "Inserisci la password attuale.",
+			"nextRequired": "Inserisci una nuova password.",
+			"tooShort": "Usa almeno {min} caratteri.",
+			"mismatch": "Le password non coincidono.",
+			"wrongPassword": "Questa non è la tua password attuale.",
+			"noPassword": "Il tuo account non ha ancora una password che puoi cambiare.",
+			"submit": "Cambia password",
+			"success": "Password cambiata.",
+			"error": "Impossibile cambiare la password. Riprova."
+		}
 	}
 }

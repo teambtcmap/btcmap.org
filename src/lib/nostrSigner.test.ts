@@ -3,6 +3,7 @@ import type { Event, EventTemplate } from "nostr-tools/pure";
 import { generateSecretKey, getPublicKey } from "nostr-tools/pure";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 
+import { buildAuthTemplate, buildNip98Template, NOSTR_LINK_URL } from "./nostr";
 import {
 	bytesToHex,
 	classifySignerError,
@@ -214,6 +215,10 @@ describe("signer pairing storage", () => {
 });
 
 describe("signWithSigner", () => {
+	// The login path's template; the link path passes the same factory shape
+	// with its own URL and method.
+	const loginTemplate = buildAuthTemplate;
+
 	it("asks the signer for a fresh NIP-98 event at signing time", async () => {
 		vi.useFakeTimers();
 		try {
@@ -225,7 +230,7 @@ describe("signWithSigner", () => {
 					return Promise.resolve({ id: "signed" } as unknown as Event);
 				},
 			};
-			await signWithSigner(signer);
+			await signWithSigner(signer, loginTemplate);
 			expect(captured).toHaveLength(1);
 			const template = captured.at(0);
 			expect(template?.kind).toBe(27235);
@@ -242,11 +247,30 @@ describe("signWithSigner", () => {
 		}
 	});
 
+	it("signs whatever the template factory builds", async () => {
+		const captured: EventTemplate[] = [];
+		const signer = {
+			signEvent: (event: EventTemplate) => {
+				captured.push(event);
+				return Promise.resolve({ id: "signed" } as unknown as Event);
+			},
+		};
+
+		await signWithSigner(signer, () =>
+			buildNip98Template(NOSTR_LINK_URL, "PUT"),
+		);
+
+		expect(captured.at(0)?.tags).toEqual([
+			["u", NOSTR_LINK_URL],
+			["method", "PUT"],
+		]);
+	});
+
 	it("rejects with a SignerTimeoutError when the signer stays silent", async () => {
 		vi.useFakeTimers();
 		try {
 			const signer = { signEvent: () => new Promise<never>(() => {}) };
-			const pending = signWithSigner(signer, 1000);
+			const pending = signWithSigner(signer, loginTemplate, 1000);
 			const assertion =
 				expect(pending).rejects.toBeInstanceOf(SignerTimeoutError);
 			await vi.advanceTimersByTimeAsync(1000);
@@ -265,7 +289,7 @@ describe("signWithSigner", () => {
 					}),
 				),
 		};
-		await expect(signWithSigner(signer)).rejects.toBeInstanceOf(
+		await expect(signWithSigner(signer, loginTemplate)).rejects.toBeInstanceOf(
 			SignerRelayError,
 		);
 	});

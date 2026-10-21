@@ -193,6 +193,7 @@ Use the appropriate tool attribution based on which tool generated the commit:
 - `test`: Test-related changes
 - `ci`: CI/CD configuration changes
 - `chore`: Maintenance tasks
+- `revert`: Undoes an earlier commit; name the reverted SHA in the body (`Reverts abc1234.`)
 
 ### Workflow:
 
