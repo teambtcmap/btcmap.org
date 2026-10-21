@@ -1314,7 +1314,7 @@
 		"saving": "Enregistrement…",
 		"username": {
 			"heading": "Nom d'utilisateur",
-			"description": "Affiché sur vos commentaires, vos photos et dans le classement. Vous vous connectez aussi avec.",
+			"description": "Affiché sur vos commentaires, vos photos et dans le classement. Ce nom vous sert également à vous connecter.",
 			"label": "Nom d'utilisateur",
 			"required": "Saisissez un nom d'utilisateur.",
 			"taken": "Ce nom d'utilisateur est déjà pris. Essayez-en un autre.",
