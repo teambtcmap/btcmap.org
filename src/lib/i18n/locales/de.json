@@ -1227,6 +1227,7 @@
 		"signerSaved": "Gespeicherter Signer",
 		"signerForget": "Entfernen",
 		"signerWaiting": "Warten auf deinen Signer…",
+		"signerAuthLink": "In der Signer-App bestätigen",
 		"signerNoAnswer": "Dein Signer hat nicht geantwortet. Bestätige die Anfrage in der App und versuche es erneut.",
 		"signerNoRelay": "Kein Relay hat die Signer-Anfrage angenommen. Prüfe deine Verbindung und versuche es erneut.",
 		"signerCancel": "Abbrechen",

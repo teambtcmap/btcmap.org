@@ -116,6 +116,7 @@
 		"signerSaved": "Opgeslagen signeer-app",
 		"signerForget": "Vergeten",
 		"signerWaiting": "Wachten op je signeer-app…",
+		"signerAuthLink": "Goedkeuren in je signer-app",
 		"signerNoAnswer": "Je signeer-app reageerde niet. Keur het verzoek goed in de app en probeer het opnieuw.",
 		"signerNoRelay": "Geen relay accepteerde het verzoek van de signeer-app. Controleer je verbinding en probeer het opnieuw.",
 		"signerCancel": "Annuleren",

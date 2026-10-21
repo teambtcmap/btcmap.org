@@ -1227,6 +1227,7 @@
 		"signerSaved": "App de firma guardada",
 		"signerForget": "Olvidar",
 		"signerWaiting": "Esperando a tu app de firma…",
+		"signerAuthLink": "Aprueba en tu app de firma",
 		"signerNoAnswer": "Tu app de firma no respondió. Aprueba la solicitud en la app e inténtalo de nuevo.",
 		"signerNoRelay": "Ningún relay aceptó la solicitud de la app de firma. Comprueba tu conexión e inténtalo de nuevo.",
 		"signerCancel": "Cancelar",

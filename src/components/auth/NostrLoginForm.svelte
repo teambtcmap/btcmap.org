@@ -95,6 +95,11 @@ let savedSignerName = $state<string | null>(null);
 let profileFor: string | null = null;
 let bunkerUri = $state("");
 let signerRun = $state<SignerRun | null>(null);
+// The signer's approval page, offered as a real link: auth_url arrives over the
+// relay long after the click that started the run, so a window.open() here is
+// outside the user-activation window and Safari (and sometimes Chromium) blocks
+// it without telling us.
+let authUrl = $state<string | null>(null);
 let pairMode = $state<PairMode | null>(null);
 let connectUri = $state<string | null>(null);
 let copied = $state(false);
@@ -198,14 +203,16 @@ function failSigner(err: unknown, run: number) {
 }
 
 // auth_url comes from the signer, so it is untrusted input on its way to a new
-// tab: only http(s) survives.
+// tab: only http(s) survives. The link is the reliable path — a popup opened
+// this late has usually lost the click's user activation.
 function openAuthUrl(url: string) {
 	const safe = safeHttpUrl(url);
 	if (!safe) {
 		console.warn("nostrSigner: refused a non-http auth_url");
 		return;
 	}
-	window.open(safe, "_blank", "noopener");
+	authUrl = safe;
+	window.open(safe, "_blank", "noopener,noreferrer");
 }
 
 // Abandon everything in flight: bump the generation, abort the pairing wait,
@@ -225,6 +232,7 @@ function cancelSigner() {
 	if (activeSigner) void closeSigner(activeSigner);
 	activeSigner = null;
 	signerRun = null;
+	authUrl = null;
 	connectUri = null;
 	pairMode = null;
 	copied = false;
@@ -773,6 +781,16 @@ onDestroy(() => {
 		</div>
 
 		{#if signerRun}
+			{#if authUrl}
+				<TextLink
+					link={authUrl}
+					external
+					style="block w-full truncate text-center text-sm"
+					onclick={() => trackEvent("login_nostr_auth_url_click")}
+				>
+					{$_("login.signerAuthLink")}
+				</TextLink>
+			{/if}
 			<TextLink
 				type="button"
 				onclick={cancelSigner}

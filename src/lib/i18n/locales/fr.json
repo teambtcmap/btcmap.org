@@ -1227,6 +1227,7 @@
 		"signerSaved": "Application de signature enregistrée",
 		"signerForget": "Oublier",
 		"signerWaiting": "En attente de votre application de signature…",
+		"signerAuthLink": "Approuvez dans votre application de signature",
 		"signerNoAnswer": "Votre application de signature n'a pas répondu. Approuvez la demande dans l'application et réessayez.",
 		"signerNoRelay": "Aucun relais n'a accepté la demande de l'application de signature. Vérifiez votre connexion et réessayez.",
 		"signerCancel": "Annuler",

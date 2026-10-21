@@ -116,6 +116,7 @@
 		"signerSaved": "Saved signer",
 		"signerForget": "Forget",
 		"signerWaiting": "Waiting for your signer…",
+		"signerAuthLink": "Approve in your signer app",
 		"signerNoAnswer": "Your signer did not respond. Approve the request in the app and try again.",
 		"signerNoRelay": "No relay accepted the signer request. Check your connection and try again.",
 		"signerCancel": "Cancel",
