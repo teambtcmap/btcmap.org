@@ -126,6 +126,7 @@
 		"connectWaiting": "Wachten tot een signeer-app verbinding maakt…",
 		"connectCopy": "Verbindingsstring kopiëren",
 		"connectCopied": "Gekopieerd",
+		"connectCopyFailed": "Kon de verbindingsstring niet kopiëren. Gebruik de QR-code.",
 		"connectNoApp": "Geen app geopend? Gebruik de QR-code of kopieer de verbindingsstring.",
 		"qrUnavailable": "QR-code kon niet worden getekend — kopieer de verbindingsstring.",
 		"nostrLogin": "Aanmelden met Nostr",

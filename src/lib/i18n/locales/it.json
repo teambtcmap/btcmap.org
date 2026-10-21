@@ -126,6 +126,7 @@
 		"connectWaiting": "In attesa che un'app di firma si connetta…",
 		"connectCopy": "Copia stringa di connessione",
 		"connectCopied": "Copiato",
+		"connectCopyFailed": "Impossibile copiare la stringa di connessione. Usa il codice QR.",
 		"connectNoApp": "Nessuna app aperta? Usa il codice QR o copia la stringa di connessione.",
 		"qrUnavailable": "Impossibile disegnare il codice QR: copia la stringa di connessione.",
 		"nostrLogin": "Accedi con Nostr",

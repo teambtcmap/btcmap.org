@@ -1237,6 +1237,7 @@
 		"connectWaiting": "Warten auf einen Signer, der sich verbindet…",
 		"connectCopy": "Verbindungsstring kopieren",
 		"connectCopied": "Kopiert",
+		"connectCopyFailed": "Der Verbindungsstring konnte nicht kopiert werden. Nutze stattdessen den QR-Code.",
 		"connectNoApp": "Keine App geöffnet? Nutze den QR-Code oder kopiere den Verbindungsstring.",
 		"qrUnavailable": "QR-Code konnte nicht gezeichnet werden — kopiere stattdessen den Verbindungsstring.",
 		"nostrLogin": "Mit Nostr anmelden",

@@ -1,16 +1,16 @@
-// NIP-46 signer-app support for the login flow: a bunker:// URI (or NIP-05
-// address) pasted by the user, and a client-initiated nostrconnect:// pairing
-// shown as a QR code or handed to a native app. Both produce a signed NIP-98
-// event through the same transport the API already verifies, so no backend
-// change is involved.
+// NIP-46 signer-app support for the login flow: a bunker:// URI pasted by the
+// user, and a client-initiated nostrconnect:// pairing shown as a QR code,
+// copied, or handed to a native app. Both produce a signed NIP-98 event through
+// the same transport the API already verifies, so no backend change is
+// involved.
 //
 // nostr-tools' nip46 module is imported lazily: it pulls in relay/websocket
 // code that only signer users need, and the extension login must keep working
 // if the chunk fails to load.
 //
-// A completed pairing (client secret + bunker URL) is kept in localStorage so
-// the next visit is one click. That is a credential at rest: it lets this
-// browser ask the signer for signatures, never sign without it.
+// A completed pairing (client key + bunker URL) is kept in localStorage so the
+// next visit is one click. That is a credential at rest: it lets this browser
+// ask the signer for signatures, never sign without it.
 
 import { npubEncode } from "nostr-tools/nip19";
 import type { BunkerSigner } from "nostr-tools/nip46";
@@ -35,8 +35,12 @@ const PASTE_CONNECT_MS = 12_000;
 export const PAIR_TIMEOUT_MS = 180_000;
 export const SIGN_TIMEOUT_MS = 120_000;
 
-// Input that cannot be a bunker URI/NIP-05 — the user's mistake, not the
-// signer's — so the UI can say "not a bunker URI" instead of "signer failed".
+// Anything the signer layer can close: the concrete BunkerSigner, or a test
+// double.
+export type Closable = { close?: () => Promise<void> };
+
+// Input that cannot be a bunker URI — the user's mistake, not the signer's — so
+// the UI can say "not a bunker URI" instead of "signer failed".
 export class SignerInputError extends Error {}
 
 // A signer that stays silent past its deadline: silence, not a rejection.
@@ -73,35 +77,52 @@ type SignerOptions = {
 	onauth?: (url: string) => void;
 };
 
-export function toHex(bytes: Uint8Array): string {
+export function bytesToHex(bytes: Uint8Array): string {
 	return Array.from(bytes, (byte) => byte.toString(16).padStart(2, "0")).join(
 		"",
 	);
 }
 
-// Union of relay lists, order preserved. A pairing has to keep the relays that
-// actually worked for this browser, not only the ones the signer prefers.
-function uniqueRelays(...lists: string[][]): string[] {
-	return [...new Set(lists.flat())];
-}
-
-// nostr-tools publishes NIP-46 requests with Promise.any over the relay list;
-// when every relay refuses, the rejection is an AggregateError.
-function isAggregateError(err: unknown): boolean {
-	return (
-		typeof err === "object" &&
-		err !== null &&
-		"name" in err &&
-		(err as { name?: unknown }).name === "AggregateError"
-	);
-}
-
-export function fromHex(hex: string): Uint8Array {
+export function hexToBytes(hex: string): Uint8Array {
 	const bytes = new Uint8Array(hex.length / 2);
 	for (let i = 0; i < bytes.length; i += 1) {
 		bytes[i] = Number.parseInt(hex.slice(i * 2, i * 2 + 2), 16);
 	}
 	return bytes;
+}
+
+// Error objects from nostr-tools and the DOM carry their class in `name`, which
+// survives across realms where `instanceof` does not.
+export function hasErrorName(err: unknown, name: string): boolean {
+	return (
+		typeof err === "object" &&
+		err !== null &&
+		"name" in err &&
+		(err as { name?: unknown }).name === name
+	);
+}
+
+// A relay URL we are willing to persist: TLS, or plain ws on the loopback for
+// local testing. switch_relays output is signer-controlled, so it never goes
+// into localStorage unchecked.
+function isSecureRelay(url: string): boolean {
+	try {
+		const parsed = new URL(url);
+		if (parsed.protocol === "wss:") return true;
+		return (
+			parsed.protocol === "ws:" &&
+			(parsed.hostname === "localhost" || parsed.hostname === "127.0.0.1")
+		);
+	} catch {
+		return false;
+	}
+}
+
+// Union of relay lists, order preserved, unsafe schemes dropped. A pairing has
+// to keep the relays that actually worked for this browser, not only the ones
+// the signer prefers.
+function uniqueRelays(...lists: string[][]): string[] {
+	return [...new Set(lists.flat().filter(isSecureRelay))];
 }
 
 // Every await on a signer needs a deadline: a signer that ignores a request is
@@ -140,6 +161,19 @@ export function npubFor(pubkey: string): string | null {
 export function shortNpub(value: string): string {
 	if (value.length <= 18) return value;
 	return `${value.slice(0, 12)}…${value.slice(-6)}`;
+}
+
+// What went wrong, in the terms the form's messages are written in. HTTP
+// failures (a rejected sign-in) come back as "other" and are handled by the
+// caller, which can read the response status.
+export function classifySignerError(
+	err: unknown,
+): "invalid" | "timeout" | "relay" | "other" {
+	if (err instanceof SignerInputError) return "invalid";
+	if (err instanceof SignerTimeoutError) return "timeout";
+	if (err instanceof SignerRelayError) return "relay";
+	if (hasErrorName(err, "AggregateError")) return "relay";
+	return "other";
 }
 
 export function loadSignerPairing(): SignerPairing | null {
@@ -198,9 +232,8 @@ export function clearSignerPairing(): void {
 	}
 }
 
-export async function closeSigner(signer: {
-	close?: () => Promise<void>;
-}): Promise<void> {
+export async function closeSigner(signer: Closable | null): Promise<void> {
+	if (!signer) return;
 	try {
 		await signer.close?.();
 	} catch {
@@ -221,11 +254,22 @@ export async function signWithSigner(
 			"Your signer did not return a signature",
 		);
 	} catch (error) {
-		if (isAggregateError(error)) {
+		if (hasErrorName(error, "AggregateError")) {
 			throw new SignerRelayError("No relay accepted the signer request");
 		}
 		throw error;
 	}
+}
+
+// The pairing's identity is the *user's* key, which only the signed event
+// names — the bunker pointer carries the remote signer's key instead, and the
+// two differ on signers like nsec.app.
+export function pairingWithSignerKey(
+	pairing: SignerPairing,
+	pubkey: string,
+): SignerPairing {
+	if (pairing.pubkey === pubkey) return pairing;
+	return { ...pairing, pubkey, npub: npubFor(pubkey) };
 }
 
 async function loadNip46() {
@@ -258,7 +302,7 @@ async function connectQuietly(
 		);
 	} catch (error) {
 		if (fatal && !(error instanceof SignerTimeoutError)) {
-			throw isAggregateError(error)
+			throw hasErrorName(error, "AggregateError")
 				? new SignerRelayError("No relay accepted the signer request")
 				: error;
 		}
@@ -275,12 +319,14 @@ async function pairingFromSigner(
 ): Promise<SignerPairing> {
 	// The signer may have moved us onto its own relays (switch_relays) — keep
 	// the ones that worked at pairing time too, so a later reconnect is not
-	// left with a relay set this browser cannot publish to.
+	// left with a relay set this browser cannot publish to. The connect secret
+	// is single-use per the spec, so the saved URL drops it.
 	return {
 		v: 1,
 		clientSecret,
 		bunkerUrl: nip46.toBunkerURL({
 			...signer.bp,
+			secret: null,
 			relays: uniqueRelays(startRelays, signer.bp.relays),
 		}),
 		pubkey,
@@ -294,10 +340,9 @@ export async function connectBunkerUri(
 	options: SignerOptions = {},
 ): Promise<SignerSession> {
 	const value = input.trim();
-	// Bunker URIs only. NIP-46 removed NIP-05 login, and nostr-tools' legacy
-	// lookup still resolves name@domain against the old .well-known shape that
-	// current signers no longer publish — accepting one here only buys a
-	// network round trip to a domain the user typed, then a confusing failure.
+	// Bunker URIs only: NIP-46 removed NIP-05 login, and the legacy .well-known
+	// shape nostr-tools still looks for is no longer published, so a
+	// name@domain would only cost a round trip to a domain the user typed.
 	if (!value.startsWith("bunker://")) {
 		throw new SignerInputError("That is not a bunker:// URI");
 	}
@@ -313,16 +358,24 @@ export async function connectBunkerUri(
 	const signer = nip46.BunkerSigner.fromBunker(secretKey, pointer, {
 		onauth: options.onauth,
 	});
-	await connectQuietly(signer, PASTE_CONNECT_MS, { fatal: true });
+	try {
+		await connectQuietly(signer, PASTE_CONNECT_MS, { fatal: true });
+	} catch (error) {
+		// A refused connect leaves the relay subscription open; release it
+		// before the failure goes back to the form.
+		await closeSigner(signer);
+		throw error;
+	}
 
-	// The bunker pointer names the signer, so this needs no round trip.
+	// The bunker pointer names the signer, so this needs no round trip. The
+	// pairing's pubkey is corrected from the signed event after login.
 	const pubkey = pointer.pubkey;
 	return {
 		signer,
 		pubkey,
 		pairing: await pairingFromSigner(
 			nip46,
-			toHex(secretKey),
+			bytesToHex(secretKey),
 			signer,
 			pubkey,
 			pointer.relays,
@@ -349,7 +402,7 @@ export async function connectSavedPairing(
 	const relays = uniqueRelays(pointer.relays, SIGNER_RELAYS);
 
 	const signer = nip46.BunkerSigner.fromBunker(
-		fromHex(pairing.clientSecret),
+		hexToBytes(pairing.clientSecret),
 		{ ...pointer, relays },
 		{ onauth: options.onauth },
 	);
@@ -372,14 +425,13 @@ export async function startNostrConnect(
 	const nip46 = await loadNip46();
 
 	const secretKey = generateSecretKey();
-	const clientSecret = toHex(secretKey);
+	const clientSecret = bytesToHex(secretKey);
 	const uri = nip46.createNostrConnectURI({
 		clientPubkey: getPublicKey(secretKey),
 		relays: SIGNER_RELAYS,
-		secret: toHex(crypto.getRandomValues(new Uint8Array(16))),
+		secret: bytesToHex(crypto.getRandomValues(new Uint8Array(16))),
 		perms: SIGNER_PERMS,
-		name: CLIENT_NAME,
-		url: typeof window === "undefined" ? undefined : window.location.origin,
+		...clientMetadata(),
 	});
 
 	options.onUri?.(uri);

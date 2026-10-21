@@ -1237,6 +1237,7 @@
 		"connectWaiting": "En attente de la connexion d'une application de signature…",
 		"connectCopy": "Copier la chaîne de connexion",
 		"connectCopied": "Copié",
+		"connectCopyFailed": "Impossible de copier la chaîne de connexion. Utilisez le QR code à la place.",
 		"connectNoApp": "Aucune application ne s'est ouverte ? Utilisez le QR code ou copiez la chaîne de connexion.",
 		"qrUnavailable": "Impossible de dessiner le QR code — copiez la chaîne de connexion.",
 		"nostrLogin": "Se connecter avec Nostr",

@@ -4,12 +4,15 @@ import { generateSecretKey, getPublicKey } from "nostr-tools/pure";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 
 import {
+	bytesToHex,
+	classifySignerError,
 	clearSignerPairing,
 	connectBunkerUri,
 	connectSavedPairing,
-	fromHex,
+	hexToBytes,
 	loadSignerPairing,
 	npubFor,
+	pairingWithSignerKey,
 	SIGNER_RELAYS,
 	SignerInputError,
 	SignerRelayError,
@@ -18,7 +21,6 @@ import {
 	shortNpub,
 	signWithSigner,
 	startNostrConnect,
-	toHex,
 	withTimeout,
 } from "./nostrSigner";
 
@@ -36,6 +38,7 @@ const nip46Mock = vi.hoisted(() => {
 		connectMetadata: [] as unknown[],
 		parseCalls: [] as string[],
 		bunkerPointers: [] as { relays?: string[] }[],
+		closeCalls: 0,
 	};
 	const signerPubkey = "ef".repeat(32);
 	const makeSigner = () => ({
@@ -52,7 +55,10 @@ const nip46Mock = vi.hoisted(() => {
 		},
 		signEvent: (event: EventTemplate) =>
 			Promise.resolve({ ...event, id: "signed" } as unknown as Event),
-		close: () => Promise.resolve(),
+		close: () => {
+			state.closeCalls += 1;
+			return Promise.resolve();
+		},
 	});
 	return { state, makeSigner, signerPubkey };
 });
@@ -101,6 +107,7 @@ beforeEach(() => {
 	nip46Mock.state.connectMetadata = [];
 	nip46Mock.state.parseCalls = [];
 	nip46Mock.state.bunkerPointers = [];
+	nip46Mock.state.closeCalls = 0;
 	vi.spyOn(console, "warn").mockImplementation(() => {});
 });
 
@@ -147,16 +154,16 @@ describe("withTimeout", () => {
 	});
 });
 
-describe("toHex / fromHex", () => {
+describe("bytesToHex / hexToBytes", () => {
 	it("round-trips a secret key", () => {
 		const secretKey = generateSecretKey();
-		expect(Array.from(fromHex(toHex(secretKey)))).toEqual(
+		expect(Array.from(hexToBytes(bytesToHex(secretKey)))).toEqual(
 			Array.from(secretKey),
 		);
 	});
 
 	it("pads single-digit bytes", () => {
-		expect(toHex(new Uint8Array([0, 1, 15, 255]))).toBe("00010fff");
+		expect(bytesToHex(new Uint8Array([0, 1, 15, 255]))).toBe("00010fff");
 	});
 });
 
@@ -298,7 +305,7 @@ describe("connectSavedPairing", () => {
 		const session = await connectSavedPairing(validPairing());
 		expect(session.pubkey).toBe(nip46Mock.signerPubkey);
 		expect(nip46Mock.state.fromBunkerArgs[0]?.[0]).toEqual(
-			fromHex(CLIENT_SECRET),
+			hexToBytes(CLIENT_SECRET),
 		);
 		expect(nip46Mock.state.connectMetadata[0]).toMatchObject({
 			name: "BTC Map",
@@ -345,6 +352,52 @@ describe("connectSavedPairing", () => {
 			expect.arrayContaining(["wss://relay.example", ...SIGNER_RELAYS]),
 		);
 	});
+
+	it("drops stored relays that are not wss", async () => {
+		nip46Mock.state.parseResult = {
+			pubkey: nip46Mock.signerPubkey,
+			relays: ["http://evil.example", "wss://good.example"],
+			secret: null,
+		};
+		await connectSavedPairing(validPairing());
+		const pointer = nip46Mock.state.fromBunkerArgs[0]?.[1] as {
+			relays: string[];
+		};
+		expect(pointer.relays).toContain("wss://good.example");
+		expect(pointer.relays).not.toContain("http://evil.example");
+	});
+});
+
+describe("classifySignerError", () => {
+	it("names each failure class the form has a message for", () => {
+		expect(classifySignerError(new SignerInputError("x"))).toBe("invalid");
+		expect(classifySignerError(new SignerTimeoutError("x"))).toBe("timeout");
+		expect(classifySignerError(new SignerRelayError("x"))).toBe("relay");
+		expect(
+			classifySignerError(
+				Object.assign(new Error("All promises were rejected"), {
+					name: "AggregateError",
+				}),
+			),
+		).toBe("relay");
+		expect(classifySignerError(new Error("whatever"))).toBe("other");
+	});
+});
+
+describe("pairingWithSignerKey", () => {
+	it("replaces the signer's key with the user's key from the signed event", () => {
+		const pairing = validPairing();
+		const userPubkey = "12".repeat(32);
+		const updated = pairingWithSignerKey(pairing, userPubkey);
+		expect(updated.pubkey).toBe(userPubkey);
+		expect(updated.npub).toBe(npubEncode(userPubkey));
+		expect(updated.clientSecret).toBe(pairing.clientSecret);
+	});
+
+	it("returns the same record when the key already matches", () => {
+		const pairing = validPairing();
+		expect(pairingWithSignerKey(pairing, pairing.pubkey)).toBe(pairing);
+	});
 });
 
 describe("startNostrConnect", () => {
@@ -360,6 +413,16 @@ describe("startNostrConnect", () => {
 			expect.arrayContaining(["wss://relay.example", ...SIGNER_RELAYS]),
 		);
 	});
+
+	// The connect secret is single-use per NIP-46, and a stored one is a spent
+	// credential: the saved URL drops it.
+	it("drops the spent connect secret from the pairing", async () => {
+		await startNostrConnect({});
+		const pointer = nip46Mock.state.bunkerPointers.at(-1) as {
+			secret?: string | null;
+		};
+		expect(pointer.secret ?? null).toBeNull();
+	});
 });
 
 describe("connectBunkerUri", () => {
@@ -368,6 +431,8 @@ describe("connectBunkerUri", () => {
 	it("fails when the signer explicitly refuses the connect", async () => {
 		nip46Mock.state.connectBehaviour = "reject";
 		await expect(connectBunkerUri(uri)).rejects.toThrow("already connected");
+		// The refused attempt must not leave its relay subscription open.
+		expect(nip46Mock.state.closeCalls).toBeGreaterThan(0);
 	});
 
 	it("continues when the connect ack only times out", async () => {

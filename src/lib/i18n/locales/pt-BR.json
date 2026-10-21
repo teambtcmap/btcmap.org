@@ -1211,6 +1211,7 @@
 		"connectWaiting": "Aguardando um app de assinatura se conectar…",
 		"connectCopy": "Copiar string de conexão",
 		"connectCopied": "Copiado",
+		"connectCopyFailed": "Não foi possível copiar a string de conexão. Use o código QR.",
 		"connectNoApp": "Nenhum app abriu? Use o código QR ou copie a string de conexão.",
 		"qrUnavailable": "Não foi possível desenhar o código QR — copie a string de conexão.",
 		"nostrLogin": "Entrar com Nostr",

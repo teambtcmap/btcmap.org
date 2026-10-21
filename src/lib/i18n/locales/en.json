@@ -126,6 +126,7 @@
 		"connectWaiting": "Waiting for a signer to connect…",
 		"connectCopy": "Copy connection string",
 		"connectCopied": "Copied",
+		"connectCopyFailed": "Could not copy the connection string. Use the QR code instead.",
 		"connectNoApp": "No app opened? Use the QR code or copy the connection string.",
 		"qrUnavailable": "Could not draw the QR code — copy the connection string instead.",
 		"nostrLogin": "Log in with Nostr",

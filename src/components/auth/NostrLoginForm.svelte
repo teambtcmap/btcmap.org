@@ -2,6 +2,8 @@
 import { onDestroy, onMount, tick } from "svelte";
 import { get } from "svelte/store";
 
+import type { EventName } from "#lib/analytics.js";
+import { trackEvent } from "#lib/analytics.js";
 import api from "#lib/axios.js";
 import { fieldBorderClasses } from "#lib/fieldStyles.js";
 import { _ } from "#lib/i18n/index.js";
@@ -16,21 +18,26 @@ import {
 	signAuthWithSecretKey,
 } from "#lib/nostr.js";
 import { fetchProfile } from "#lib/nostrProfile.js";
-import type { SignerPairing } from "#lib/nostrSigner.js";
+import type {
+	Closable,
+	SignerPairing,
+	SignerSession,
+} from "#lib/nostrSigner.js";
 import {
+	classifySignerError,
 	clearSignerPairing,
 	closeSigner,
 	connectBunkerUri,
 	connectSavedPairing,
+	hasErrorName,
 	loadSignerPairing,
-	SignerInputError,
-	SignerRelayError,
-	SignerTimeoutError,
+	pairingWithSignerKey,
 	saveSignerPairing,
 	shortNpub,
 	signWithSigner,
 	startNostrConnect,
 } from "#lib/nostrSigner.js";
+import { safeHttpUrl } from "#lib/safeUrl.js";
 import type { Session } from "#lib/session.js";
 import { session } from "#lib/session.js";
 import { errToast } from "#lib/utils.js";
@@ -48,6 +55,13 @@ let { onSuccess }: Props = $props();
 // Which signer transport is running. "qr", "open" and "copy" share one
 // nostrconnect session; the mode only decides how its URI is presented.
 type SignerRun = "saved" | "bunker" | "qr" | "open" | "copy";
+type PairMode = "qr" | "open" | "copy";
+
+const CONNECT_CLICK = {
+	qr: "login_nostr_connect_qr_click",
+	open: "login_nostr_connect_open_click",
+	copy: "login_nostr_connect_copy_click",
+} as const satisfies Record<PairMode, EventName>;
 
 const primaryButton =
 	"w-full rounded-lg bg-purple-600 px-4 py-2 font-semibold text-white transition-colors hover:bg-purple-700 disabled:opacity-50 aria-disabled:opacity-50";
@@ -77,7 +91,7 @@ let savedSignerName = $state<string | null>(null);
 let profileFor: string | null = null;
 let bunkerUri = $state("");
 let signerRun = $state<SignerRun | null>(null);
-let pairMode = $state<"qr" | "open" | "copy" | null>(null);
+let pairMode = $state<PairMode | null>(null);
 let connectUri = $state<string | null>(null);
 let copied = $state(false);
 let qrFailed = $state(false);
@@ -89,7 +103,7 @@ let noAppHint = $state(false);
 // that comes back with a stale one is dropped (and its signer closed).
 let generation = 0;
 let abortController: AbortController | null = null;
-let activeSigner: { close?: () => Promise<void> } | null = null;
+let activeSigner: Closable | null = null;
 let noAppTimer: ReturnType<typeof setTimeout> | null = null;
 let copiedTimer: ReturnType<typeof setTimeout> | null = null;
 
@@ -137,13 +151,55 @@ function showLoginError(err: unknown, logLabel: string) {
 	console.error(logLabel, status ?? err);
 }
 
-function isAbort(err: unknown): boolean {
-	return (
-		typeof err === "object" &&
-		err !== null &&
-		"name" in err &&
-		(err as { name?: unknown }).name === "AbortError"
-	);
+function isHttpStatus(err: unknown): number | undefined {
+	return (err as { response?: { status?: number } })?.response?.status;
+}
+
+function failSigner(err: unknown, run: number) {
+	if (run !== generation || hasErrorName(err, "AbortError")) return;
+	cancelSigner();
+	// An API rejection is the same failure the other transports report, so it
+	// gets the same "signature rejected" wording rather than a signer message.
+	const status = isHttpStatus(err);
+	if (status !== undefined) {
+		showLoginError(err, "Nostr signer login failed:");
+		return;
+	}
+	switch (classifySignerError(err)) {
+		case "invalid":
+			errToast($_("login.bunkerInvalid"));
+			return;
+		case "timeout":
+			errToast($_("login.signerNoAnswer"));
+			return;
+		case "relay":
+			errToast($_("login.signerNoRelay"));
+			return;
+		default: {
+			// A signer that refuses says why (Opal: "already connected", "user
+			// rejected", …); that text is the only clue the user has, so it
+			// rides along with the generic message.
+			const detail =
+				typeof err === "string" ? err : (err as Error | undefined)?.message;
+			errToast(
+				detail
+					? `${$_("login.nostrError")} (${detail})`
+					: $_("login.nostrError"),
+			);
+			console.error("Nostr signer login failed:", err);
+		}
+	}
+}
+
+// auth_url comes from the signer, so it is untrusted input on its way to a new
+// tab: only http(s) survives.
+function openAuthUrl(url: string) {
+	const safe = safeHttpUrl(url);
+	if (!safe) {
+		console.warn("nostrSigner: refused a non-http auth_url");
+		return;
+	}
+	window.open(safe, "_blank", "noopener");
 }
 
 // Abandon everything in flight: bump the generation, abort the pairing wait,
@@ -176,37 +232,8 @@ function beginSignerRun(run: SignerRun): number {
 	return generation;
 }
 
-function failSigner(err: unknown, run: number) {
-	if (run !== generation || isAbort(err)) return;
-	cancelSigner();
-	if (err instanceof SignerInputError) {
-		errToast($_("login.bunkerInvalid"));
-		return;
-	}
-	if (err instanceof SignerTimeoutError) {
-		errToast($_("login.signerNoAnswer"));
-		return;
-	}
-	if (err instanceof SignerRelayError) {
-		errToast($_("login.signerNoRelay"));
-		return;
-	}
-	// A signer that refuses says why (Opal: "already connected", "user
-	// rejected", …); that text is the only clue the user has, so it rides
-	// along with the generic message.
-	const detail =
-		typeof err === "string" ? err : (err as Error | undefined)?.message;
-	errToast(
-		detail ? `${$_("login.nostrError")} (${detail})` : $_("login.nostrError"),
-	);
-	console.error("Nostr signer login failed:", err);
-}
-
-function openAuthUrl(url: string) {
-	window.open(url, "_blank", "noopener");
-}
-
 function forgetSigner() {
+	trackEvent("login_nostr_forget_click");
 	clearSignerPairing();
 	savedPairing = null;
 	cancelSigner();
@@ -214,13 +241,15 @@ function forgetSigner() {
 
 function toggleOptions() {
 	showOptions = !showOptions;
+	trackEvent("login_nostr_options_toggle", { open: showOptions });
 	if (!showOptions) cancelSigner();
 }
 
 async function loginWithExtension() {
 	// Re-entry guard: the busy button still takes clicks (#1548). Without
 	// it, one click could open two extension-signing popups.
-	if (nostrLoading || nsecLoading || signerRun) return;
+	if (anyLoading) return;
+	trackEvent("login_nostr_extension_click");
 	// Detect at click time rather than at mount: extensions inject
 	// window.nostr at their own pace, and a user without one gets told what
 	// to install instead of never seeing the option.
@@ -232,6 +261,7 @@ async function loginWithExtension() {
 	try {
 		const signed = await signAuthWithExtension();
 		await exchangeSignedEvent(signed);
+		trackEvent("login_nostr_success", { method: "extension" });
 	} catch (err) {
 		showLoginError(err, "Nostr extension login failed:");
 	} finally {
@@ -239,56 +269,82 @@ async function loginWithExtension() {
 	}
 }
 
+// Sign the NIP-98 event, exchange it for a session, and only then persist the
+// pairing — a pairing is worth remembering once it has actually logged someone
+// in. The form stays booked (signerRun set) through the exchange, so a second
+// login cannot start mid-request; the caller's finally closes the signer.
+async function finishSignerRun(
+	run: number,
+	signer: SignerSession["signer"],
+	pairing: SignerPairing,
+	method: SignerRun,
+): Promise<void> {
+	if (run !== generation) return;
+	activeSigner = signer;
+	const signed = await signWithSigner(signer);
+	if (run !== generation) return;
+	await exchangeSignedEvent(signed);
+	trackEvent("login_nostr_success", { method });
+	if (run !== generation) return;
+	// The signed event names the user's key; the bunker pointer names the
+	// signer's, and the two differ on signers like nsec.app.
+	const verified = pairingWithSignerKey(pairing, signed.pubkey);
+	saveSignerPairing(verified);
+	savedPairing = verified;
+}
+
 async function loginWithSavedPairing() {
 	const pairing = savedPairing;
 	if (!pairing || anyLoading) return;
+	trackEvent("login_nostr_saved_click");
 	const run = beginSignerRun("saved");
+	let signer: SignerSession["signer"] | null = null;
 	try {
 		const result = await connectSavedPairing(pairing, {
 			onauth: openAuthUrl,
 		});
-		activeSigner = result.signer;
-		const signed = await signWithSigner(result.signer);
-		if (run !== generation) return;
-		await closeSigner(result.signer);
-		activeSigner = null;
-		signerRun = null;
-		await exchangeSignedEvent(signed);
+		signer = result.signer;
+		await finishSignerRun(run, signer, result.pairing, "saved");
 	} catch (err) {
-		// A pairing the signer no longer knows is worse than none: drop it so
-		// the one-click button doesn't fail forever.
-		if (err instanceof SignerInputError) forgetSigner();
 		failSigner(err, run);
+		// A pairing the signer no longer knows is worse than none: drop it so
+		// the one-click button doesn't fail forever. After the toast — forgetting
+		// bumps the generation, which would swallow it.
+		if (classifySignerError(err) === "invalid") forgetSigner();
+	} finally {
+		await closeSigner(signer);
+		activeSigner = null;
+		if (run === generation) signerRun = null;
 	}
 }
 
 async function connectWithBunker(event: SubmitEvent) {
 	event.preventDefault();
-	if (nostrLoading || nsecLoading || signerRun) return;
+	if (anyLoading) return;
 	const value = bunkerUri.trim();
 	if (!value) return;
+	trackEvent("login_nostr_bunker_click");
 	const run = beginSignerRun("bunker");
+	let signer: SignerSession["signer"] | null = null;
 	try {
 		const result = await connectBunkerUri(value, { onauth: openAuthUrl });
-		activeSigner = result.signer;
-		const signed = await signWithSigner(result.signer);
-		if (run !== generation) return;
-		saveSignerPairing(result.pairing);
-		savedPairing = result.pairing;
-		bunkerUri = "";
-		await closeSigner(result.signer);
-		activeSigner = null;
-		signerRun = null;
-		await exchangeSignedEvent(signed);
+		signer = result.signer;
+		await finishSignerRun(run, signer, result.pairing, "bunker");
+		if (run === generation) bunkerUri = "";
 	} catch (err) {
 		failSigner(err, run);
+	} finally {
+		await closeSigner(signer);
+		activeSigner = null;
+		if (run === generation) signerRun = null;
 	}
 }
 
-async function startPairing(mode: "qr" | "open" | "copy") {
+async function startPairing(mode: PairMode) {
 	// Another transport is running: the buttons are aria-disabled, and the
 	// click they still take must not start a second session.
 	if (nostrLoading || nsecLoading) return;
+	trackEvent(CONNECT_CLICK[mode]);
 	// One nostrconnect session, two presentations: switching after the URI
 	// exists must not restart the pairing the signer may be answering.
 	if (signerRun) {
@@ -300,6 +356,7 @@ async function startPairing(mode: "qr" | "open" | "copy") {
 	const controller = new AbortController();
 	abortController = controller;
 	pairMode = mode;
+	let signer: SignerSession["signer"] | null = null;
 	try {
 		const result = await startNostrConnect({
 			signal: controller.signal,
@@ -312,23 +369,23 @@ async function startPairing(mode: "qr" | "open" | "copy") {
 				else void copyConnection(uri);
 			},
 		});
-		activeSigner = result.signer;
-		const signed = await signWithSigner(result.signer);
-		if (run !== generation) return;
-		saveSignerPairing(result.pairing);
-		savedPairing = result.pairing;
-		await closeSigner(result.signer);
-		activeSigner = null;
-		signerRun = null;
-		connectUri = null;
-		pairMode = null;
-		await exchangeSignedEvent(signed);
+		signer = result.signer;
+		await finishSignerRun(run, signer, result.pairing, mode);
 	} catch (err) {
 		failSigner(err, run);
+	} finally {
+		await closeSigner(signer);
+		activeSigner = null;
+		if (run === generation) {
+			abortController = null;
+			signerRun = null;
+			connectUri = null;
+			pairMode = null;
+		}
 	}
 }
 
-function setPairMode(mode: "qr" | "open" | "copy") {
+function setPairMode(mode: PairMode) {
 	pairMode = mode;
 	noAppHint = false;
 	if (!connectUri) return;
@@ -361,13 +418,39 @@ async function renderQr(uri: string) {
 }
 
 async function copyConnection(uri: string) {
+	let ok = false;
 	try {
 		await navigator.clipboard.writeText(uri);
-		copied = true;
-		if (copiedTimer) clearTimeout(copiedTimer);
-		copiedTimer = setTimeout(() => (copied = false), 2000);
-	} catch (err) {
-		console.error("Could not copy the NostrConnect URI:", err);
+		ok = true;
+	} catch {
+		// Safari can drop the user activation across an await; a selection copy
+		// still works there.
+		ok = copyWithSelection(uri);
+	}
+	if (!ok) {
+		// The string is deliberately never shown, so the QR is the fallback.
+		errToast($_("login.connectCopyFailed"));
+		return;
+	}
+	copied = true;
+	if (copiedTimer) clearTimeout(copiedTimer);
+	copiedTimer = setTimeout(() => (copied = false), 2000);
+}
+
+function copyWithSelection(uri: string): boolean {
+	try {
+		const area = document.createElement("textarea");
+		area.value = uri;
+		area.setAttribute("readonly", "");
+		area.style.position = "fixed";
+		area.style.opacity = "0";
+		document.body.appendChild(area);
+		area.select();
+		const ok = document.execCommand("copy");
+		area.remove();
+		return ok;
+	} catch {
+		return false;
 	}
 }
 
@@ -376,8 +459,9 @@ async function loginWithNsec(event: SubmitEvent) {
 	// Re-entry guard: the busy button still takes clicks (#1548), which
 	// would decode + sign the same nsec twice and double-fire the exchange.
 	// Nor while another login runs: both would call onSuccess.
-	if (nsecLoading || nostrLoading || signerRun) return;
+	if (anyLoading) return;
 	if (!nsec.trim()) return;
+	trackEvent("login_nostr_nsec_click");
 	nsecLoading = true;
 	let secretKey: Uint8Array | null = null;
 
@@ -399,6 +483,7 @@ async function loginWithNsec(event: SubmitEvent) {
 	// so transport errors don't get mis-reported as "invalid nsec".
 	try {
 		await exchangeSignedEvent(signed);
+		trackEvent("login_nostr_success", { method: "nsec" });
 	} catch (err) {
 		showLoginError(err, "Nsec login failed:");
 		// The key was cleared before the exchange, so the empty field
@@ -579,7 +664,7 @@ onDestroy(() => {
 
 		<div class={cardClass}>
 			<p class={headingClass}>{$_("login.optionBunker")}</p>
-			<p class={hintClass}>
+			<p id="bunker-hint" class={hintClass}>
 				{$_("login.bunkerSubheading")}
 			</p>
 			<form onsubmit={connectWithBunker} class="space-y-2">
@@ -589,6 +674,7 @@ onDestroy(() => {
 					id="bunker-uri"
 					bind:value={bunkerUri}
 					aria-label={$_("login.bunkerSubheading")}
+					aria-describedby="bunker-hint"
 					placeholder="bunker://..."
 					autocomplete="off"
 					autocorrect="off"
@@ -613,7 +699,7 @@ onDestroy(() => {
 
 		<div class={cardClass}>
 			<p class={headingClass}>{$_("login.optionNsec")}</p>
-			<p class={hintClass}>
+			<p id="nsec-hint" class={hintClass}>
 				{$_("login.nsecWarning")}
 			</p>
 			<form onsubmit={loginWithNsec} class="space-y-2">
@@ -624,6 +710,7 @@ onDestroy(() => {
 					bind:this={nsecInput}
 					bind:value={nsec}
 					aria-label={$_("login.nsecLabel")}
+					aria-describedby="nsec-hint"
 					placeholder="nsec1..."
 					autocomplete="new-password"
 					autocorrect="off"
