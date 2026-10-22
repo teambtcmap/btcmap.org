@@ -44,6 +44,8 @@ let { map, suspended }: Props = $props();
 // the pin itself), and it keeps this margin from the map's top edge.
 const CARD_PIN_GAP = 52;
 const EDGE_MARGIN = 16;
+// The pin is anchored at its tip; half its height centres the whole pin
+const PIN_HEIGHT = 43;
 
 const embedded = window.self !== window.top;
 const desktop = window.matchMedia(`(min-width: ${BREAKPOINTS.md}px)`).matches;
@@ -265,7 +267,7 @@ $effect(() => {
 		framedKey = null;
 		return;
 	}
-	if (desktop && !cardHeight) return;
+	if (!cardHeight) return;
 	const key = card.mode === "view" ? `view-${card.id}` : "create";
 	if (key === framedKey) return;
 	framedKey = key;
@@ -278,7 +280,10 @@ $effect(() => {
 		);
 		map.easeTo({
 			center: [point.lon, point.lat],
-			offset: desktop ? [0, Math.max(pinY - mapHeight / 2, 0)] : [0, -140],
+			// Mobile: the middle of the map left visible above the bottom card
+			offset: desktop
+				? [0, Math.max(pinY - mapHeight / 2, 0)]
+				: [0, -cardHeight / 2 + PIN_HEIGHT / 2],
 			duration: 300,
 		});
 	});
