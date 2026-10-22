@@ -5,7 +5,7 @@ import type {
 	MapMouseEvent,
 	Marker,
 } from "maplibre-gl";
-import { onMount } from "svelte";
+import { onMount, untrack } from "svelte";
 import { get } from "svelte/store";
 
 import { trackEvent } from "#lib/analytics.js";
@@ -39,6 +39,11 @@ type Props = {
 };
 
 let { map, suspended }: Props = $props();
+
+// Desktop card: its bottom edge sits this far above the pin's tip (clears
+// the pin itself), and it keeps this margin from the map's top edge.
+const CARD_PIN_GAP = 52;
+const EDGE_MARGIN = 16;
 
 const embedded = window.self !== window.top;
 const desktop = window.matchMedia(`(min-width: ${BREAKPOINTS.md}px)`).matches;
@@ -251,6 +256,8 @@ $effect(() => {
 
 // Bring the pin into view with room for the card above it (desktop) or
 // above the bottom card (mobile). Once per opened card, not on every drag.
+// On desktop that room is the card's measured height, so it waits for it.
+let cardHeight = $state(0);
 let framedKey: string | null = null;
 $effect(() => {
 	const card = $noteCard;
@@ -258,13 +265,41 @@ $effect(() => {
 		framedKey = null;
 		return;
 	}
+	if (desktop && !cardHeight) return;
 	const key = card.mode === "view" ? `view-${card.id}` : "create";
 	if (key === framedKey) return;
 	framedKey = key;
-	map.easeTo({
-		center: [point.lon, point.lat],
-		offset: desktop ? [0, 160] : [0, -140],
-		duration: 300,
+	untrack(() => {
+		const mapHeight = map.getContainer().clientHeight;
+		// Where the pin should sit: the card fits above it, the pin stays on screen
+		const pinY = Math.min(
+			cardHeight + CARD_PIN_GAP + EDGE_MARGIN,
+			mapHeight - EDGE_MARGIN,
+		);
+		map.easeTo({
+			center: [point.lon, point.lat],
+			offset: desktop ? [0, Math.max(pinY - mapHeight / 2, 0)] : [0, -140],
+			duration: 300,
+		});
+	});
+});
+
+// A card that grows while open (read → edit) would run off the top: nudge
+// the map down by what is missing. Reacts to the height only, so it never
+// fights the user panning the map, and skips a card's first measurement,
+// which the framing above already accounts for.
+let measured: { key: string; height: number } | null = null;
+$effect(() => {
+	const height = cardHeight;
+	if (!desktop || !height) return;
+	untrack(() => {
+		const key = framedKey;
+		const grew =
+			key !== null && measured?.key === key && height > measured.height;
+		measured = key === null ? null : { key, height };
+		if (!grew || !screen) return;
+		const missing = height + CARD_PIN_GAP + EDGE_MARGIN - screen.y;
+		if (missing > 0) map.panBy([0, -missing], { duration: 300 });
 	});
 });
 </script>
@@ -278,12 +313,13 @@ $effect(() => {
 				: null}
 	{#if target}
 		<div
+			bind:clientHeight={cardHeight}
 			class="fixed inset-x-0 bottom-0 z-[1002] pb-[env(safe-area-inset-bottom)] md:absolute md:inset-x-auto md:bottom-auto md:pb-0 {desktop &&
 			!screen
 				? 'invisible'
 				: ''}"
 			style={screen
-				? `left: ${screen.x}px; top: ${screen.y}px; transform: translate(-50%, calc(-100% - 52px));`
+				? `left: ${screen.x}px; top: ${screen.y}px; transform: translate(-50%, calc(-100% - ${CARD_PIN_GAP}px));`
 				: undefined}
 		>
 			<NoteCard {token} {target} onClose={() => noteCard.close()} />
