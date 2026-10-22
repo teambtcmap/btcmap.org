@@ -3,7 +3,8 @@ import { onDestroy, onMount } from "svelte";
 import Time from "svelte-time";
 import tippy, { type Instance } from "tippy.js";
 
-import { _ } from "#lib/i18n/index.js";
+import { createTimeLocale, LOCALIZED_DATE_FORMAT } from "#lib/dayjsLocale.js";
+import { _, locale } from "#lib/i18n/index.js";
 import { DETAIL_FIELDS, hasDetailFields } from "#lib/placeDetails.js";
 import type { Place } from "#lib/types.js";
 import {
@@ -17,6 +18,8 @@ import BoostButton from "$components/BoostButton.svelte";
 import Icon from "$components/Icon.svelte";
 
 import { resolve } from "$app/paths";
+
+const timeLocale = createTimeLocale(locale);
 
 export let merchant: Place;
 
@@ -230,7 +233,7 @@ onDestroy(() => {
 			<div class="flex items-center space-x-1">
 				<p class="text-sm font-semibold text-gray-500 dark:text-gray-400">
 					Last Surveyed: <span class="text-primary dark:text-white"
-						>{formatVerifiedHuman(verifiedAt)}</span
+						>{formatVerifiedHuman(verifiedAt, $locale)}</span
 					>
 				</p>
 
@@ -251,7 +254,7 @@ onDestroy(() => {
 			<div class="flex items-center space-x-1">
 				<p class="text-sm font-semibold text-gray-500 dark:text-gray-400">
 					Boost Expires: <span class="text-primary dark:text-white"
-						><Time live={3000} relative={true} timestamp={merchant.boosted_until} /></span
+						><Time live={3000} relative={true} timestamp={merchant.boosted_until} format={LOCALIZED_DATE_FORMAT} locale={$timeLocale} /></span
 					>
 				</p>
 			</div>

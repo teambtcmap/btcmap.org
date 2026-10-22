@@ -1,5 +1,5 @@
 <script lang="ts">
-import { _ } from "svelte-i18n";
+import { _, locale } from "svelte-i18n";
 
 import {
 	isEpochSentinel,
@@ -44,13 +44,14 @@ const annotatedEvents: AnnotatedEvent[] = $derived.by(() => {
 });
 
 const formatDateRange = (event: AreaEvent): string => {
+	const appLocale = $locale ?? "en";
 	const start = parseLocalDateTime(event.starts_at);
 	if (!start || isEpochSentinel(start)) return $_("areaEvents.noDate");
 	const startDateStr = new Date(
 		start.year,
 		start.month - 1,
 		start.day,
-	).toLocaleDateString(undefined, {
+	).toLocaleDateString(appLocale, {
 		year: "numeric",
 		month: "short",
 		day: "numeric",
@@ -69,7 +70,7 @@ const formatDateRange = (event: AreaEvent): string => {
 		end.year,
 		end.month - 1,
 		end.day,
-	).toLocaleDateString(undefined, {
+	).toLocaleDateString(appLocale, {
 		year: "numeric",
 		month: "short",
 		day: "numeric",

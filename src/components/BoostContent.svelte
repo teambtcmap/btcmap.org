@@ -4,7 +4,7 @@ import { onDestroy } from "svelte";
 import { fade } from "svelte/transition";
 
 import { API_BASE } from "#lib/api-base.js";
-import { _ } from "#lib/i18n/index.js";
+import { _, locale } from "#lib/i18n/index.js";
 import IconSocials from "#lib/icons/IconSocials.svelte";
 import {
 	classifyBoostError,
@@ -303,7 +303,7 @@ const generateInvoice = () => {
 		<p class="text-body dark:text-white">
 			{$_("boost.boostedUntil")} <br />
 			<strong
-				>{selectedBoost?.expires.toLocaleDateString(undefined, {
+				>{selectedBoost?.expires.toLocaleDateString($locale ?? "en", {
 					year: 'numeric',
 					month: 'long',
 					day: 'numeric'

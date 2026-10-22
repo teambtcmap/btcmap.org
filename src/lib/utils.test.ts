@@ -1,5 +1,5 @@
 import { toast } from "svelte-sonner";
-import { describe, expect, it, vi } from "vitest";
+import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 
 import { MERCHANT_LIST_MAX_ITEMS } from "#lib/constants.js";
 import type { Area } from "#lib/types.js";
@@ -10,6 +10,7 @@ import {
 	calculateDistance,
 	formatDistance,
 	formatNearbyPillCount,
+	formatVerifiedHuman,
 	getCommunitiesAtCoordinates,
 	getGrade,
 	isValidLatitude,
@@ -822,5 +823,111 @@ describe("successToast", () => {
 			action: { label: "Undo", onClick },
 			duration: 8000,
 		});
+	});
+});
+
+describe("formatVerifiedHuman", () => {
+	// Wednesday 7 October 2026 at noon, local time
+	beforeEach(() => {
+		vi.useFakeTimers();
+		vi.setSystemTime(new Date(2026, 9, 7, 12, 0, 0));
+	});
+
+	afterEach(() => {
+		vi.useRealTimers();
+	});
+
+	const at = (year: number, month: number, day: number, hour = 0, minute = 0) =>
+		new Date(year, month, day, hour, minute).toISOString();
+	const daysAgo = (days: number) => at(2026, 9, 7 - days, 9);
+
+	it("returns an empty string without a date and the input for an invalid one", () => {
+		expect(formatVerifiedHuman(undefined)).toBe("");
+		expect(formatVerifiedHuman("")).toBe("");
+		expect(formatVerifiedHuman("not a date", "de")).toBe("not a date");
+	});
+
+	it("falls back to English when the app locale is not set yet", () => {
+		expect(formatVerifiedHuman(daysAgo(3), null)).toBe("3 days ago");
+		expect(formatVerifiedHuman(daysAgo(3), undefined)).toBe("3 days ago");
+	});
+
+	it("keeps the English wording when no locale is given", () => {
+		expect(formatVerifiedHuman(at(2026, 9, 7, 8))).toBe("Today");
+		expect(formatVerifiedHuman(daysAgo(1))).toBe("1 day ago");
+		expect(formatVerifiedHuman(daysAgo(3))).toBe("3 days ago");
+		expect(formatVerifiedHuman(at(2026, 5, 15))).toBe("15 June");
+		expect(formatVerifiedHuman(at(2025, 4, 25))).toBe("25 May 2025");
+	});
+
+	it.each([
+		["de", "Heute", "vor 1 Tag", "vor 3 Tagen", "15. Juni", "25. Mai 2025"],
+		[
+			"fr",
+			"Aujourd’hui",
+			"il y a 1 jour",
+			"il y a 3 jours",
+			"15 juin",
+			"25 mai 2025",
+		],
+		[
+			"es",
+			"Hoy",
+			"hace 1 día",
+			"hace 3 días",
+			"15 de junio",
+			"25 de mayo de 2025",
+		],
+		[
+			"pt-BR",
+			"Hoje",
+			"há 1 dia",
+			"há 3 dias",
+			"15 de junho",
+			"25 de maio de 2025",
+		],
+		[
+			"nl",
+			"Vandaag",
+			"1 dag geleden",
+			"3 dagen geleden",
+			"15 juni",
+			"25 mei 2025",
+		],
+	])(
+		"words %s dates in that language",
+		(locale, today, yesterday, recent, thisYear, otherYear) => {
+			expect(formatVerifiedHuman(at(2026, 9, 7, 8), locale)).toBe(today);
+			expect(formatVerifiedHuman(daysAgo(1), locale)).toBe(yesterday);
+			expect(formatVerifiedHuman(daysAgo(3), locale)).toBe(recent);
+			expect(formatVerifiedHuman(at(2026, 5, 15), locale)).toBe(thisYear);
+			expect(formatVerifiedHuman(at(2025, 4, 25), locale)).toBe(otherYear);
+		},
+	);
+
+	it("counts calendar days, not 24-hour periods", () => {
+		// Verified late the evening before: one calendar day, not "2 hours"
+		vi.setSystemTime(new Date(2026, 9, 7, 0, 30, 0));
+		expect(formatVerifiedHuman(at(2026, 9, 6, 22, 30), "de")).toBe("vor 1 Tag");
+		expect(formatVerifiedHuman(at(2026, 9, 6, 23, 50))).toBe("1 day ago");
+
+		// Three calendar days back at 23:00, viewed at 08:00: 2.4 days of
+		// elapsed time, but three days on the calendar
+		vi.setSystemTime(new Date(2026, 9, 7, 8, 0, 0));
+		expect(formatVerifiedHuman(at(2026, 9, 4, 23, 0), "de")).toBe(
+			"vor 3 Tagen",
+		);
+	});
+
+	it("switches from a distance to a calendar date after 30 days", () => {
+		expect(formatVerifiedHuman(daysAgo(29), "de")).toBe("vor 29 Tagen");
+		expect(formatVerifiedHuman(daysAgo(31), "de")).toBe("6. September");
+	});
+
+	it("falls back to English for a locale Intl does not know", () => {
+		expect(formatVerifiedHuman(daysAgo(3), "xx-invalid-locale!")).toBe(
+			"3 days ago",
+		);
+		expect(formatVerifiedHuman(at(2026, 5, 15), "xx")).toBe("15 June");
 	});
 });

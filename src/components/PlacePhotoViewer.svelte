@@ -8,7 +8,7 @@ import { trackEvent } from "#lib/analytics.js";
 import { lockBodyScroll, unlockBodyScroll } from "#lib/bodyScrollLock.js";
 import type { CurrentUser } from "#lib/currentUser.js";
 import { fetchCurrentUser } from "#lib/currentUser.js";
-import { createTimeLocale } from "#lib/dayjsLocale.js";
+import { createTimeLocale, LOCALIZED_DATE_FORMAT } from "#lib/dayjsLocale.js";
 import { trapTab } from "#lib/focusTrap.js";
 import { _, locale } from "#lib/i18n/index.js";
 import {
@@ -268,7 +268,7 @@ onDestroy(() => {
 				</span>
 				<span aria-hidden="true">·</span>
 				<!-- live keeps "a few seconds ago" current while the viewer is open -->
-				<Time timestamp={photo.created_at} relative live locale={$timeLocale} />
+				<Time timestamp={photo.created_at} relative live format={LOCALIZED_DATE_FORMAT} locale={$timeLocale} />
 			</p>
 		</div>
 		<span
