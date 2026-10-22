@@ -56,7 +56,8 @@
 		"countries": "Países",
 		"account": "Cuenta",
 		"signup": "Registrarse",
-		"myPhotos": "Mis fotos"
+		"myPhotos": "Mis fotos",
+		"myNotes": "Mis notas"
 	},
 	"search": {
 		"placeholderPlaces": "Buscar lugares...",
@@ -1358,5 +1359,44 @@
 			"success": "Contraseña cambiada.",
 			"error": "No se pudo cambiar tu contraseña. Inténtalo de nuevo."
 		}
+	},
+	"notes": {
+		"addNote": "Añadir una nota",
+		"addNoteHere": "Añadir nota aquí",
+		"addPlaceHere": "Añadir lugar aquí",
+		"pointMenuLabel": "Añadir en este punto",
+		"newNote": "Nueva nota",
+		"note": "Nota",
+		"textLabel": "Nota",
+		"textPlaceholder": "El cajero está dentro, pregunta en la barra",
+		"textRequired": "Escribe algo primero.",
+		"textTooLong": "Máximo {max} caracteres.",
+		"icon": "Icono",
+		"public": "Pública",
+		"publicOffHint": "Solo tú puedes ver esta nota.",
+		"publicOnHint": "Cualquiera puede ver esta nota. BTC Map todavía no muestra notas públicas a otras personas.",
+		"publicBadge": "Pública",
+		"privateBadge": "Privada",
+		"dragHint": "Arrastra el pin al lugar correcto. Una nota no se puede mover después de guardarla.",
+		"save": "Guardar nota",
+		"saving": "Guardando…",
+		"cancel": "Cancelar",
+		"edit": "Editar",
+		"delete": "Eliminar",
+		"deleteConfirm": "¿Eliminar esta nota?",
+		"deleted": "Nota eliminada",
+		"saved": "Nota guardada",
+		"saveError": "No se pudo guardar la nota. Inténtalo de nuevo.",
+		"deleteError": "No se pudo eliminar la nota. Inténtalo de nuevo.",
+		"visibilityError": "No se pudo cambiar quién puede ver la nota. Inténtalo de nuevo.",
+		"close": "Cerrar",
+		"promptTitle": "Inicia sesión para añadir notas",
+		"promptDescription": "Las notas son tus propios pines en el mapa, privados salvo que los hagas públicos. Se sincronizan con la app de BTC Map para Android.",
+		"myNotes": "Mis notas",
+		"myNotesIntro": "Tus pines en el mapa. Abre uno para verlo allí.",
+		"empty": "Aún no hay notas. Haz clic derecho o mantén pulsado el mapa para añadir una.",
+		"loadError": "No se pudieron cargar tus notas. Inténtalo más tarde.",
+		"notFound": "Esa nota ya no existe.",
+		"signInToView": "Inicia sesión para ver tus notas."
 	}
 }

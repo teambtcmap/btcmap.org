@@ -61,7 +61,8 @@
 		"login": "Aanmelden",
 		"signup": "Registreren",
 		"logout": "Afmelden",
-		"myPhotos": "Mijn foto's"
+		"myPhotos": "Mijn foto's",
+		"myNotes": "Mijn notities"
 	},
 	"saved": {
 		"title": "Mijn opgeslagen items",
@@ -1418,5 +1419,44 @@
 			"success": "Wachtwoord gewijzigd.",
 			"error": "Kan je wachtwoord niet wijzigen. Probeer het opnieuw."
 		}
+	},
+	"notes": {
+		"addNote": "Notitie toevoegen",
+		"addNoteHere": "Notitie hier toevoegen",
+		"addPlaceHere": "Plek hier toevoegen",
+		"pointMenuLabel": "Toevoegen op dit punt",
+		"newNote": "Nieuwe notitie",
+		"note": "Notitie",
+		"textLabel": "Notitie",
+		"textPlaceholder": "Geldautomaat is binnen, vraag het aan de bar",
+		"textRequired": "Schrijf eerst iets.",
+		"textTooLong": "Maximaal {max} tekens.",
+		"icon": "Pictogram",
+		"public": "Openbaar",
+		"publicOffHint": "Alleen jij kunt deze notitie zien.",
+		"publicOnHint": "Iedereen mag deze notitie zien. BTC Map toont openbare notities nog niet aan anderen.",
+		"publicBadge": "Openbaar",
+		"privateBadge": "Privé",
+		"dragHint": "Sleep de speld naar de juiste plek. Een notitie kan na het opslaan niet meer verplaatst worden.",
+		"save": "Notitie opslaan",
+		"saving": "Opslaan…",
+		"cancel": "Annuleren",
+		"edit": "Bewerken",
+		"delete": "Verwijderen",
+		"deleteConfirm": "Deze notitie verwijderen?",
+		"deleted": "Notitie verwijderd",
+		"saved": "Notitie opgeslagen",
+		"saveError": "De notitie kon niet worden opgeslagen. Probeer het opnieuw.",
+		"deleteError": "De notitie kon niet worden verwijderd. Probeer het opnieuw.",
+		"visibilityError": "Kon niet wijzigen wie de notitie kan zien. Probeer het opnieuw.",
+		"close": "Sluiten",
+		"promptTitle": "Log in om notities toe te voegen",
+		"promptDescription": "Notities zijn je eigen spelden op de kaart, privé tenzij je ze openbaar maakt. Ze synchroniseren met de BTC Map Android-app.",
+		"myNotes": "Mijn notities",
+		"myNotesIntro": "Je spelden op de kaart. Open er een om hem daar te zien.",
+		"empty": "Nog geen notities. Klik met rechts of houd de kaart ingedrukt om er een toe te voegen.",
+		"loadError": "Je notities konden niet worden geladen. Probeer het later opnieuw.",
+		"notFound": "Die notitie bestaat niet meer.",
+		"signInToView": "Log in om je notities te zien."
 	}
 }

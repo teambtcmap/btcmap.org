@@ -61,7 +61,8 @@
 		"login": "Log in",
 		"signup": "Sign up",
 		"logout": "Log out",
-		"myPhotos": "My photos"
+		"myPhotos": "My photos",
+		"myNotes": "My notes"
 	},
 	"saved": {
 		"title": "My Saved",
@@ -1418,5 +1419,44 @@
 			"success": "Password changed.",
 			"error": "Couldn't change your password. Please try again."
 		}
+	},
+	"notes": {
+		"addNote": "Add a note",
+		"addNoteHere": "Add note here",
+		"addPlaceHere": "Add place here",
+		"pointMenuLabel": "Add at this point",
+		"newNote": "New note",
+		"note": "Note",
+		"textLabel": "Note",
+		"textPlaceholder": "ATM is inside, ask at the bar",
+		"textRequired": "Write something first.",
+		"textTooLong": "Keep it to {max} characters or fewer.",
+		"icon": "Icon",
+		"public": "Public",
+		"publicOffHint": "Only you can see this note.",
+		"publicOnHint": "Anyone may see this note. BTC Map doesn't show public notes to others yet.",
+		"publicBadge": "Public",
+		"privateBadge": "Private",
+		"dragHint": "Drag the pin to the right spot. A note can't be moved once it's saved.",
+		"save": "Save note",
+		"saving": "Saving…",
+		"cancel": "Cancel",
+		"edit": "Edit",
+		"delete": "Delete",
+		"deleteConfirm": "Delete this note?",
+		"deleted": "Note deleted",
+		"saved": "Note saved",
+		"saveError": "Couldn't save the note. Please try again.",
+		"deleteError": "Couldn't delete the note. Please try again.",
+		"visibilityError": "Couldn't change who can see the note. Please try again.",
+		"close": "Close",
+		"promptTitle": "Log in to add notes",
+		"promptDescription": "Notes are your own pins on the map, private unless you make them public. They sync with the BTC Map Android app.",
+		"myNotes": "My notes",
+		"myNotesIntro": "Your pins on the map. Open one to see it there.",
+		"empty": "No notes yet. Right-click or long-press the map to add one.",
+		"loadError": "Couldn't load your notes. Please try again later.",
+		"notFound": "That note isn't there anymore.",
+		"signInToView": "Log in to see your notes."
 	}
 }

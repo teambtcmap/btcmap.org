@@ -56,7 +56,8 @@
 		"countries": "Países",
 		"account": "Conta",
 		"signup": "Cadastrar",
-		"myPhotos": "Minhas fotos"
+		"myPhotos": "Minhas fotos",
+		"myNotes": "Minhas notas"
 	},
 	"search": {
 		"placeholderPlaces": "Pesquisar lugares...",
@@ -1332,5 +1333,44 @@
 			"success": "Senha alterada.",
 			"error": "Não foi possível alterar sua senha. Tente novamente."
 		}
+	},
+	"notes": {
+		"addNote": "Adicionar uma nota",
+		"addNoteHere": "Adicionar nota aqui",
+		"addPlaceHere": "Adicionar local aqui",
+		"pointMenuLabel": "Adicionar neste ponto",
+		"newNote": "Nova nota",
+		"note": "Nota",
+		"textLabel": "Nota",
+		"textPlaceholder": "O caixa eletrônico fica lá dentro, pergunte no bar",
+		"textRequired": "Escreva algo primeiro.",
+		"textTooLong": "No máximo {max} caracteres.",
+		"icon": "Ícone",
+		"public": "Pública",
+		"publicOffHint": "Só você pode ver esta nota.",
+		"publicOnHint": "Qualquer pessoa pode ver esta nota. O BTC Map ainda não mostra notas públicas para outras pessoas.",
+		"publicBadge": "Pública",
+		"privateBadge": "Privada",
+		"dragHint": "Arraste o alfinete para o lugar certo. Uma nota não pode ser movida depois de salva.",
+		"save": "Salvar nota",
+		"saving": "Salvando…",
+		"cancel": "Cancelar",
+		"edit": "Editar",
+		"delete": "Excluir",
+		"deleteConfirm": "Excluir esta nota?",
+		"deleted": "Nota excluída",
+		"saved": "Nota salva",
+		"saveError": "Não foi possível salvar a nota. Tente novamente.",
+		"deleteError": "Não foi possível excluir a nota. Tente novamente.",
+		"visibilityError": "Não foi possível mudar quem pode ver a nota. Tente novamente.",
+		"close": "Fechar",
+		"promptTitle": "Entre para adicionar notas",
+		"promptDescription": "Notas são seus próprios alfinetes no mapa, privados a menos que você os torne públicos. Elas sincronizam com o app Android do BTC Map.",
+		"myNotes": "Minhas notas",
+		"myNotesIntro": "Seus alfinetes no mapa. Abra um para vê-lo lá.",
+		"empty": "Nenhuma nota ainda. Clique com o botão direito ou mantenha pressionado o mapa para adicionar uma.",
+		"loadError": "Não foi possível carregar suas notas. Tente novamente mais tarde.",
+		"notFound": "Essa nota não existe mais.",
+		"signInToView": "Entre para ver suas notas."
 	}
 }

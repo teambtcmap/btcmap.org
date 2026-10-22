@@ -14,6 +14,7 @@ import {
 } from "#lib/constants.js";
 import { _ } from "#lib/i18n/index.js";
 import { calculateRadiusKmFromLngLatBounds } from "#lib/map/viewport.js";
+import { noteCard } from "#lib/noteCard.js";
 import type { NearbyPlace } from "#lib/placementMode.js";
 import {
 	clampDedupeRadiusKm,
@@ -354,10 +355,71 @@ const backToConfirm = async () => {
 	confirmButtonEl?.focus();
 };
 
-// Long-press (touch) and right-click (desktop) both jump straight into
-// placement mode centered on the pressed/clicked point — they still land on
-// the confirm sheet rather than skipping it, so an accidental trigger is
-// always recoverable via Cancel.
+// Long-press (touch) and right-click (desktop) open a small menu at the
+// point (#1542): add a place there, or a note. "Add place here" enters
+// placement mode centered on the point — still on the confirm sheet rather
+// than skipping it, so an accidental trigger is always recoverable via
+// Cancel. Embeds show no notes, so there the gesture enters placement
+// directly as before.
+const embedded = window.self !== window.top;
+type PointMethod = "right_click" | "long_press";
+let pointMenu = $state<{
+	lng: number;
+	lat: number;
+	x: number;
+	y: number;
+	method: PointMethod;
+} | null>(null);
+let pointMenuFirstItem: HTMLButtonElement | undefined = $state();
+let pointMenuOpenedAt = 0;
+
+const openPointMenu = (
+	lngLat: { lng: number; lat: number },
+	x: number,
+	y: number,
+	method: PointMethod,
+) => {
+	if (embedded) {
+		enterAt(lngLat, method);
+		return;
+	}
+	pointMenu = { lng: lngLat.lng, lat: lngLat.lat, x, y, method };
+	pointMenuOpenedAt = Date.now();
+	tick().then(() => pointMenuFirstItem?.focus());
+};
+
+const addPlaceAtPoint = () => {
+	if (!pointMenu) return;
+	const { lng, lat, method } = pointMenu;
+	pointMenu = null;
+	enterAt({ lng, lat }, method);
+};
+
+const addNoteAtPoint = () => {
+	if (!pointMenu) return;
+	const { lng, lat, method } = pointMenu;
+	pointMenu = null;
+	trackEvent("note_add_click", { method });
+	noteCard.openCreate(lat, lng, method);
+};
+
+// Any map interaction dismisses the menu — except the click some mobile
+// browsers synthesize when the long-press finger lifts.
+$effect(() => {
+	if (!map || !pointMenu) return;
+	const currentMap = map;
+	const dismiss = () => {
+		if (Date.now() - pointMenuOpenedAt < 500) return;
+		pointMenu = null;
+	};
+	currentMap.on("movestart", dismiss);
+	currentMap.on("click", dismiss);
+	return () => {
+		currentMap.off("movestart", dismiss);
+		currentMap.off("click", dismiss);
+	};
+});
+
 const enterAt = (lngLat: LngLatLike, method: string) => {
 	if (!map || active) return;
 	// Point-intent entries land at detail zoom — zoom in only, never out.
@@ -401,12 +463,12 @@ $effect(() => {
 		longPressTimer = setTimeout(() => {
 			if (!touchStart) return;
 			const rect = canvas.getBoundingClientRect();
-			const point = currentMap.unproject([
-				touchStart.x - rect.left,
-				touchStart.y - rect.top,
-			]);
+			const x = touchStart.x - rect.left;
+			const y = touchStart.y - rect.top;
+			const point = currentMap.unproject([x, y]);
 			clearLongPress();
-			enterAt(point, "long_press");
+			if (active) return;
+			openPointMenu(point, x, y, "long_press");
 		}, LONG_PRESS_MS);
 	};
 
@@ -430,7 +492,7 @@ $effect(() => {
 		clearLongPress();
 		if (active) return;
 		e.originalEvent.preventDefault();
-		enterAt(e.lngLat, "right_click");
+		openPointMenu(e.lngLat, e.point.x, e.point.y, "right_click");
 	};
 
 	canvas.addEventListener("touchstart", onTouchStart, { passive: true });
@@ -464,7 +526,42 @@ $effect(() => {
 });
 </script>
 
-<svelte:window onkeydown={onKeydown} />
+<svelte:window
+	onkeydown={(event) => {
+		if (pointMenu && event.key === "Escape") {
+			pointMenu = null;
+			return;
+		}
+		onKeydown(event);
+	}}
+/>
+
+{#if pointMenu && !active}
+	<div
+		role="menu"
+		aria-label={$_("notes.pointMenuLabel")}
+		class="absolute z-[1003] min-w-44 overflow-hidden rounded-lg bg-white py-1 shadow-lg dark:bg-dark"
+		style="left: min({pointMenu.x}px, calc(100% - 12rem)); top: min({pointMenu.y}px, calc(100% - 7rem))"
+	>
+		<button
+			bind:this={pointMenuFirstItem}
+			type="button"
+			role="menuitem"
+			onclick={addPlaceAtPoint}
+			class="block w-full px-4 py-2.5 text-left text-body hover:bg-gray-100 focus-visible:bg-gray-100 focus-visible:outline-none dark:text-white dark:hover:bg-white/5 dark:focus-visible:bg-white/5"
+		>
+			{$_("notes.addPlaceHere")}
+		</button>
+		<button
+			type="button"
+			role="menuitem"
+			onclick={addNoteAtPoint}
+			class="block w-full px-4 py-2.5 text-left text-body hover:bg-gray-100 focus-visible:bg-gray-100 focus-visible:outline-none dark:text-white dark:hover:bg-white/5 dark:focus-visible:bg-white/5"
+		>
+			{$_("notes.addNoteHere")}
+		</button>
+	</div>
+{/if}
 
 {#if active}
 	{#if formOpen && !repositioning}

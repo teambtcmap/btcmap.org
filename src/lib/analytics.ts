@@ -105,7 +105,22 @@ export type EventName =
 	| "account_nostr_auth_url_click"
 	| "account_nostr_unlink_open"
 	| "account_nostr_unlink_click"
-	| "account_nostr_unlink_success";
+	| "account_nostr_unlink_success"
+	| "note_add_click"
+	| "note_add_success"
+	| "note_open"
+	| "note_edit_click"
+	| "note_edit_success"
+	| "note_visibility_change"
+	| "note_delete_click"
+	| "note_delete_success"
+	| "note_prompt_create_account_click"
+	| "note_prompt_login_click"
+	| "my_notes_click"
+	| "my_notes_row_click";
+
+// How the add-note card was opened (note_add_click breakdown).
+export type NoteAddMethod = "menu" | "right_click" | "long_press";
 
 // Where the comment flow was opened from (funnel breakdown).
 export type CommentSource = "map_drawer" | "area_drawer" | "merchant_page";

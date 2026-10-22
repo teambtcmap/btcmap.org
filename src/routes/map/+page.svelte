@@ -75,6 +75,7 @@ import {
 } from "#lib/merchantDrawerHash.js";
 import { merchantDrawer } from "#lib/merchantDrawerStore.js";
 import { merchantList } from "#lib/merchantListStore.js";
+import { noteCard } from "#lib/noteCard.js";
 import type { DerivedIssueCode } from "#lib/placeIssues.js";
 import {
 	countIssuesByCode,
@@ -109,6 +110,7 @@ import MapControls from "./components/MapControls.svelte";
 import MapSearchBar from "./components/MapSearchBar.svelte";
 import MerchantDrawerHash from "./components/MerchantDrawerHash.svelte";
 import MerchantListPanel from "./components/MerchantListPanel.svelte";
+import NotesMode from "./components/NotesMode.svelte";
 import TileLoadingIndicator from "./components/TileLoadingIndicator.svelte";
 import { browser } from "$app/env";
 import { goto } from "$app/navigation";
@@ -130,6 +132,15 @@ let placementActive = false;
 const startPlacement = () => {
 	placementActive = true;
 	trackEvent("add_place_enter", { method: "menu" });
+};
+
+// Menu entry for a note (#1542): the add card opens at the map centre with
+// a draggable pin; NotesMode asks a signed-out user to sign in first.
+const startNote = () => {
+	if (!map) return;
+	const center = map.getCenter();
+	trackEvent("note_add_click", { method: "menu" });
+	noteCard.openCreate(center.lat, center.lng, "menu");
 };
 
 // Placement mode owns the bottom sheet's z-[1002] slot; a merchant drawer
@@ -1557,10 +1568,15 @@ onDestroy(() => {
 	{globeOn}
 	onToggleGlobe={toggleGlobe}
 	onAddPlace={issuesOnly ? null : startPlacement}
+	onAddNote={issuesOnly ? null : startNote}
 />
 
 {#if styleLoaded && !issuesOnly}
 	<AddPlaceMode {map} bind:active={placementActive} />
+{/if}
+
+{#if styleLoaded && !issuesOnly && map}
+	<NotesMode {map} suspended={placementActive} />
 {/if}
 
 <style>

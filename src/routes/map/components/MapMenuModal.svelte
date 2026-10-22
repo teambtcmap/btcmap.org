@@ -13,12 +13,16 @@ type Props = {
 	// When set (/map outside issues mode), the add row starts placement mode
 	// on the map instead of linking to the standalone form.
 	onAddPlace?: (() => void) | null;
+	// When set (/map outside issues mode), adds a row that opens the add-note
+	// card at the map centre.
+	onAddNote?: (() => void) | null;
 };
 
 let {
 	open = $bindable(false),
 	variant = "main",
 	onAddPlace = null,
+	onAddNote = null,
 }: Props = $props();
 
 const loggedIn = $derived(!!$session);
@@ -60,6 +64,19 @@ const iconClass = "h-5 w-5 flex-none dark:invert";
 					<img src="/icons/marker.svg" alt="" class={iconClass} />
 					<span>{$_("mapControls.addLocation")}</span>
 				</a>
+			{/if}
+			{#if onAddNote}
+				<button
+					type="button"
+					class="{rowClass} w-full text-left"
+					onclick={() => {
+						open = false;
+						onAddNote?.();
+					}}
+				>
+					<img src="/icons/note.svg" alt="" class={iconClass} />
+					<span>{$_("notes.addNote")}</span>
+				</button>
 			{/if}
 			<!-- Full reload on purpose (data-sveltekit-reload): ?issues mode is
 				locked at page init, and a same-route client-side navigation
