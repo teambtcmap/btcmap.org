@@ -3,9 +3,10 @@
 /**
  * Delta sync payload. Every field except `id` is optional and omitted unless
  * the caller asked for it in `fields`, so a client only pays for the columns
- * it stores. Raw tags are never exposed; geometry is available through `bbox`
- * (compact, for map placement) and `geo_json` (the full polygon, only sent
- * when explicitly requested because it can be large).
+ * it stores. The raw `tags` blob is never exposed as a whole; each value is
+ * instead surfaced through a named field, and geometry is available through
+ * `bbox` (compact, for map placement) and `geo_json` (the full polygon, only
+ * sent when explicitly requested because it can be large).
  */
 export type AreaDelta = { id: number, name?: string, type?: string, url_alias?: string, icon?: string, icon_wide?: string, website_url?: string, description?: string, 
 /**
@@ -29,4 +30,10 @@ bbox?: [number, number, number, number],
  * Full GeoJSON geometry exactly as stored in the area's tags. Only sent
  * when explicitly requested via `fields` because polygons can be large.
  */
-geo_json?: Record<string, unknown>, created_at?: string, updated_at?: string, deleted_at?: string, };
+geo_json?: Record<string, unknown>, created_at?: string, updated_at?: string, deleted_at?: string, 
+/**
+ * Raw `verified:date` tag, a date-only string (`YYYY-MM-DD`) recording the
+ * last time the area was verified. Omitted when the area has never been
+ * verified.
+ */
+verified_at?: string, };
