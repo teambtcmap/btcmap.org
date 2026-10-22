@@ -101,6 +101,18 @@ const resolvePinName = (placeIcon) => {
 	return null;
 };
 
+// The note picker's curated icons (NOTE_ICONS in src/lib/noteIcons.ts),
+// parsed from that file so the list stays single-sourced. Each is bundled in
+// the outlined form noteIconCandidates tries first.
+const readNoteIcons = () => {
+	const file = readFileSync(join(SRC, "lib", "noteIcons.ts"), "utf8");
+	const block = file.match(/NOTE_ICONS = \[([\s\S]*?)\];/);
+	if (!block) throw new Error("could not locate NOTE_ICONS in noteIcons.ts");
+	return [...block[1].matchAll(/"([a-z0-9_]+)"/g)].map(
+		([, icon]) => `material-symbols:${icon.replaceAll("_", "-")}-outline`,
+	);
+};
+
 const readPinVocabulary = () => {
 	const icons = JSON.parse(readFileSync(VOCABULARY_PATH, "utf8"));
 	if (!Array.isArray(icons)) throw new Error(`${VOCABULARY_PATH} is not a JSON array`);
@@ -184,7 +196,7 @@ const main = async () => {
 
 	// Every icon the app can name ahead of time: the pin vocabulary (resolved
 	// through the same cascade the runtime uses), the saved badge, the bitcoin
-	// fallback, and every static <Icon> usage.
+	// fallback, every static <Icon> usage and the note picker's icons.
 	const names = new Set([SAVED_BADGE_ICON, BITCOIN_FALLBACK]);
 	const uncovered = [];
 	for (const placeIcon of placeIcons) {
@@ -196,6 +208,7 @@ const main = async () => {
 		console.warn(`${uncovered.length} pin icons fall back to bitcoin at runtime: ${uncovered.join(", ")}`);
 	}
 	for (const name of collectUiIconifyNames()) names.add(name);
+	for (const name of readNoteIcons()) names.add(name);
 
 	// Group local names by prefix and subset each icon set. getIcons drops any
 	// name absent from its set (reported as not_found), which is expected for a
