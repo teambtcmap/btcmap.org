@@ -137,7 +137,8 @@ const startPlacement = () => {
 // Menu entry for a note (#1542): the add card opens at the map centre with
 // a draggable pin; NotesMode asks a signed-out user to sign in first.
 const startNote = () => {
-	if (!map) return;
+	// Placement owns the map, like the right-click / long-press entry
+	if (!map || placementActive) return;
 	const center = map.getCenter();
 	trackEvent("note_add_click", { method: "menu" });
 	noteCard.openCreate(center.lat, center.lng, "menu");
