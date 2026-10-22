@@ -107,6 +107,28 @@ describe("fetchMyNotes", () => {
 		expect(notes.map((n) => n.id)).toEqual([1]);
 	});
 
+	it("keeps paging when a full page ends with a malformed row", async () => {
+		const full: unknown[] = Array.from(
+			{ length: NOTES_PAGE_SIZE - 1 },
+			(_, i) => note(i + 1, { updated_at: "2026-10-01T00:00:00.500Z" }),
+		);
+		full.push({ id: NOTES_PAGE_SIZE });
+		api.get
+			.mockResolvedValueOnce({ data: full })
+			.mockResolvedValueOnce({ data: [note(NOTES_PAGE_SIZE + 1)] });
+
+		const notes = await fetchMyNotes("tok");
+
+		expect(api.get).toHaveBeenLastCalledWith(`${API_BASE}/v4/users/me/notes`, {
+			...auth,
+			params: {
+				limit: NOTES_PAGE_SIZE,
+				updated_since: "2026-10-01T00:00:00.499Z",
+			},
+		});
+		expect(notes).toHaveLength(NOTES_PAGE_SIZE);
+	});
+
 	it("rejects a response that is not an array", async () => {
 		api.get.mockResolvedValueOnce({ data: "<html>" });
 

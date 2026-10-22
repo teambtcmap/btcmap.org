@@ -79,11 +79,13 @@ export async function fetchMyNotes(token: string): Promise<Note[]> {
 			if (isNote(row)) byId.set(row.id, row);
 		}
 
-		const last = res.data.at(-1);
+		// The cursor comes from the last valid row: a malformed one at the
+		// end of a full page must not end paging early.
+		const last = res.data.findLast(isNote);
 		if (
 			res.data.length < NOTES_PAGE_SIZE ||
 			byId.size === sizeBefore ||
-			!isNote(last)
+			!last
 		) {
 			break;
 		}
