@@ -181,6 +181,8 @@ onMount(() => {
 		const note = state.notes.find((n) => n.id === id);
 		if (note) {
 			noteCard.openView(id);
+			// A ?note link: the /user/notes rows, or a shared /map URL
+			trackEvent("note_open", { source: "link" });
 			map.jumpTo({
 				center: [note.lon, note.lat],
 				zoom: Math.max(map.getZoom(), 17),
