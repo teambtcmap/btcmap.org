@@ -10,20 +10,23 @@ type Props = {
 };
 
 let { checked, disabled = false, onchange }: Props = $props();
+
+const uid = $props.id();
+const hintId = `${uid}-hint`;
 </script>
 
 <button
 	type="button"
 	role="switch"
 	aria-checked={checked}
-	aria-describedby="note-visibility-hint"
+	aria-describedby={hintId}
 	{disabled}
 	onclick={() => onchange(!checked)}
 	class="flex w-full items-center justify-between gap-3 rounded-lg py-1 text-left text-body disabled:opacity-50 dark:text-white"
 >
 	<span>
 		<span class="block text-sm font-semibold text-primary dark:text-white">{$_("notes.public")}</span>
-		<span id="note-visibility-hint" class="block text-sm text-body dark:text-white/60">
+		<span id={hintId} class="block text-sm text-body dark:text-white/60">
 			{checked ? $_("notes.publicOnHint") : $_("notes.publicOffHint")}
 		</span>
 	</span>
