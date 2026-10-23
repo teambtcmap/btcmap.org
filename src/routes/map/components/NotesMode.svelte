@@ -22,7 +22,7 @@ import { NOTE_PIN_COLOR } from "#lib/noteIcons.js";
 import { myNotes } from "#lib/notes.js";
 import { session } from "#lib/session.js";
 import { errToast } from "#lib/utils.js";
-import NoteAuthPrompt from "$components/auth/NoteAuthPrompt.svelte";
+import HydratingAuthPrompt from "$components/auth/HydratingAuthPrompt.svelte";
 import NoteCard from "$components/notes/NoteCard.svelte";
 
 // The signed-in user's notes on /map (#1542): the pin layer, the note card
@@ -332,4 +332,11 @@ $effect(() => {
 	{/if}
 {/if}
 
-<NoteAuthPrompt bind:open={authPromptOpen} />
+<HydratingAuthPrompt
+	bind:open={authPromptOpen}
+	titleId="note-auth-prompt-title"
+	title={$_("notes.promptTitle")}
+	description={$_("notes.promptDescription")}
+	onCreateAccountClick={() => trackEvent("note_prompt_create_account_click")}
+	onLoginClick={() => trackEvent("note_prompt_login_click")}
+/>

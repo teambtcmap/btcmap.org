@@ -26,7 +26,7 @@ import {
 } from "#lib/placePhotos.js";
 import { session } from "#lib/session.js";
 import { errToast, successToast, warningToast } from "#lib/utils.js";
-import PhotoAuthPrompt from "$components/auth/PhotoAuthPrompt.svelte";
+import HydratingAuthPrompt from "$components/auth/HydratingAuthPrompt.svelte";
 import Icon from "$components/Icon.svelte";
 import PlacePhotoViewer from "$components/PlacePhotoViewer.svelte";
 import Skeleton from "$components/Skeleton.svelte";
@@ -496,5 +496,14 @@ const handleFiles = async (event: Event) => {
 {/if}
 
 {#if canAdd}
-	<PhotoAuthPrompt bind:open={showAuthPrompt} onAuthenticated={handleAuthenticated} />
+	<HydratingAuthPrompt
+		bind:open={showAuthPrompt}
+		titleId="photo-auth-prompt-title"
+		title={$_("placePhotos.promptTitle")}
+		description={$_("placePhotos.promptDescription")}
+		onCreateAccountClick={() =>
+			trackEvent("place_photo_prompt_create_account_click")}
+		onLoginClick={() => trackEvent("place_photo_prompt_login_click")}
+		onAuthenticated={handleAuthenticated}
+	/>
 {/if}

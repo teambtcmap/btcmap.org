@@ -10,8 +10,8 @@ import TextLink from "$components/TextLink.svelte";
 
 // In-place sign-in modal: a choice screen (create account / log in) that
 // switches to the signup or login forms. Callers own what happens after
-// authentication (SaveAuthPrompt saves the item, PhotoAuthPrompt opens the
-// photo picker).
+// authentication (SaveAuthPrompt saves the item, HydratingAuthPrompt resumes
+// the photo picker or the add-note card).
 type Props = {
 	open?: boolean;
 	titleId: string;
