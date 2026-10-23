@@ -15,7 +15,6 @@ import {
 import { isEmbedded } from "#lib/embed.js";
 import { _ } from "#lib/i18n/index.js";
 import { calculateRadiusKmFromLngLatBounds } from "#lib/map/viewport.js";
-import { fromLngLat, noteCard } from "#lib/noteCard.js";
 import type { NearbyPlace } from "#lib/placementMode.js";
 import {
 	clampDedupeRadiusKm,
@@ -28,6 +27,8 @@ import PlacementPinIcon from "$components/PlacementPinIcon.svelte";
 
 import AddPlaceFormPanel from "./AddPlaceFormPanel.svelte";
 import PlacementSearchBar from "./PlacementSearchBar.svelte";
+import type { MapPoint, PointGesture } from "./PointActionMenu.svelte";
+import PointActionMenu from "./PointActionMenu.svelte";
 
 type Props = {
 	map: MapLibreMap | undefined;
@@ -356,68 +357,31 @@ const backToConfirm = async () => {
 	confirmButtonEl?.focus();
 };
 
-// Long-press (touch) and right-click (desktop) open a small menu at the
+// Long-press (touch) and right-click (desktop) open PointActionMenu at the
 // point (#1542): add a place there, or a note. "Add place here" enters
 // placement mode centered on the point — still on the confirm sheet rather
 // than skipping it, so an accidental trigger is always recoverable via
 // Cancel. Embeds show no notes, so there the gesture enters placement
 // directly as before.
 const embedded = isEmbedded();
-type PointMethod = "right_click" | "long_press";
-let pointMenu = $state<{
-	lngLat: { lng: number; lat: number };
-	x: number;
-	y: number;
-	method: PointMethod;
-} | null>(null);
-let pointMenuFirstItem: HTMLButtonElement | undefined = $state();
-let pointMenuOpenedAt = 0;
+let pointMenu = $state<MapPoint | null>(null);
 
 const openPointMenu = (
 	lngLat: { lng: number; lat: number },
 	x: number,
 	y: number,
-	method: PointMethod,
+	method: PointGesture,
 ) => {
 	if (embedded) {
 		enterAt(lngLat, method);
 		return;
 	}
 	pointMenu = { lngLat: { lng: lngLat.lng, lat: lngLat.lat }, x, y, method };
-	pointMenuOpenedAt = Date.now();
-	tick().then(() => pointMenuFirstItem?.focus());
 };
 
-const addPlaceAtPoint = () => {
-	if (!pointMenu) return;
-	const { lngLat, method } = pointMenu;
-	pointMenu = null;
-	enterAt(lngLat, method);
-};
-
-const addNoteAtPoint = () => {
-	if (!pointMenu) return;
-	const { lngLat, method } = pointMenu;
-	pointMenu = null;
-	trackEvent("note_add_click", { method });
-	noteCard.openCreate(fromLngLat(lngLat), method);
-};
-
-// Any map interaction dismisses the menu — except the click some mobile
-// browsers synthesize when the long-press finger lifts.
+// Placement started another way (the map menu): drop a menu left open.
 $effect(() => {
-	if (!map || !pointMenu) return;
-	const currentMap = map;
-	const dismiss = () => {
-		if (Date.now() - pointMenuOpenedAt < 500) return;
-		pointMenu = null;
-	};
-	currentMap.on("movestart", dismiss);
-	currentMap.on("click", dismiss);
-	return () => {
-		currentMap.off("movestart", dismiss);
-		currentMap.off("click", dismiss);
-	};
+	if (active) pointMenu = null;
 });
 
 const enterAt = (lngLat: LngLatLike, method: string) => {
@@ -526,41 +490,14 @@ $effect(() => {
 });
 </script>
 
-<svelte:window
-	onkeydown={(event) => {
-		if (pointMenu && event.key === "Escape") {
-			pointMenu = null;
-			return;
-		}
-		onKeydown(event);
-	}}
-/>
+<svelte:window onkeydown={onKeydown} />
 
-{#if pointMenu && !active}
-	<div
-		role="menu"
-		aria-label={$_("notes.pointMenuLabel")}
-		class="absolute z-[1003] min-w-44 overflow-hidden rounded-lg bg-white py-1 shadow-lg dark:bg-dark"
-		style="left: min({pointMenu.x}px, calc(100% - 12rem)); top: min({pointMenu.y}px, calc(100% - 7rem))"
-	>
-		<button
-			bind:this={pointMenuFirstItem}
-			type="button"
-			role="menuitem"
-			onclick={addPlaceAtPoint}
-			class="block w-full px-4 py-2.5 text-left text-body hover:bg-gray-100 focus-visible:bg-gray-100 focus-visible:outline-none dark:text-white dark:hover:bg-white/5 dark:focus-visible:bg-white/5"
-		>
-			{$_("notes.addPlaceHere")}
-		</button>
-		<button
-			type="button"
-			role="menuitem"
-			onclick={addNoteAtPoint}
-			class="block w-full px-4 py-2.5 text-left text-body hover:bg-gray-100 focus-visible:bg-gray-100 focus-visible:outline-none dark:text-white dark:hover:bg-white/5 dark:focus-visible:bg-white/5"
-		>
-			{$_("notes.addNoteHere")}
-		</button>
-	</div>
+{#if map && !active}
+	<PointActionMenu
+		{map}
+		bind:point={pointMenu}
+		onAddPlace={(point) => enterAt(point.lngLat, point.method)}
+	/>
 {/if}
 
 {#if active}
