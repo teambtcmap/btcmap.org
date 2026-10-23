@@ -1,11 +1,11 @@
 <script lang="ts">
 import Time from "svelte-time";
 
-import type { NoteAddMethod } from "#lib/analytics.js";
 import { trackEvent } from "#lib/analytics.js";
 import { errorStatus } from "#lib/apiError.js";
 import { createTimeLocale, LOCALIZED_DATE_FORMAT } from "#lib/dayjsLocale.js";
 import { _, locale } from "#lib/i18n/index.js";
+import type { NoteDraft } from "#lib/noteCard.js";
 import { DEFAULT_NOTE_ICON, NOTE_PIN_COLOR } from "#lib/noteIcons.js";
 import { createNote, deleteNote, myNotes, updateNote } from "#lib/notes.js";
 import { errToast, successToast } from "#lib/utils.js";
@@ -21,9 +21,7 @@ import type { Note } from "$types/btcmap-api/Note";
 // it on the map and owns the pin.
 type Props = {
 	token: string;
-	target:
-		| { mode: "create"; lat: number; lon: number; method: NoteAddMethod }
-		| { mode: "view"; note: Note };
+	target: NoteDraft | { mode: "view"; note: Note };
 	onClose: () => void;
 };
 

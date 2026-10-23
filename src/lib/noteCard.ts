@@ -9,10 +9,14 @@ import type { Note } from "$types/btcmap-api/Note";
 // entry points (the right-click/long-press menu in AddPlaceMode, the map
 // menu, a note pin, the ?note deep link from /user/notes) don't have to be
 // threaded through the legacy map page.
-export type NoteCardState =
-	| { mode: "create"; lat: number; lon: number; method: NoteAddMethod }
-	| { mode: "view"; id: Note["id"] }
-	| null;
+export type NoteDraft = {
+	mode: "create";
+	lat: number;
+	lon: number;
+	method: NoteAddMethod;
+};
+
+export type NoteCardState = NoteDraft | { mode: "view"; id: Note["id"] } | null;
 
 const createNoteCardStore = () => {
 	const { subscribe, set, update } = writable<NoteCardState>(null);
