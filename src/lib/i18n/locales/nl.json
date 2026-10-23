@@ -61,7 +61,6 @@
 		"login": "Aanmelden",
 		"signup": "Registreren",
 		"logout": "Afmelden",
-		"backupAccount": "Back-up account",
 		"myPhotos": "Mijn foto's"
 	},
 	"saved": {
@@ -153,19 +152,6 @@
 		"usernameTaken": "Deze gebruikersnaam is al bezet. Probeer een andere.",
 		"haveAccount": "Heb je al een account?",
 		"signIn": "Aanmelden met een wachtwoord of Nostr"
-	},
-	"backup": {
-		"title": "Back-up account",
-		"description": "Bewaar deze gegevens om op een ander apparaat in te loggen.",
-		"username": "Gebruikersnaam",
-		"password": "Wachtwoord",
-		"copy": "Kopiëren",
-		"show": "Wachtwoord tonen",
-		"hide": "Wachtwoord verbergen",
-		"unavailable": "Niet beschikbaar (verouderd account)",
-		"warning": "Deze inloggegevens zijn de enige manier om je opgeslagen locaties te herstellen.",
-		"copied": "Gekopieerd naar klembord",
-		"copyFailed": "Kopiëren mislukt, kopieer alsjeblieft handmatig"
 	},
 	"save": {
 		"prompt": {

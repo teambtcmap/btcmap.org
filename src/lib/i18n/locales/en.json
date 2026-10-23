@@ -61,7 +61,6 @@
 		"login": "Log in",
 		"signup": "Sign up",
 		"logout": "Log out",
-		"backupAccount": "Back up account",
 		"myPhotos": "My photos"
 	},
 	"saved": {
@@ -153,19 +152,6 @@
 		"usernameTaken": "That username is already taken. Try another one.",
 		"haveAccount": "Already have an account?",
 		"signIn": "Log in with a password or Nostr"
-	},
-	"backup": {
-		"title": "Back up account",
-		"description": "Save these credentials to log in on another device.",
-		"username": "Username",
-		"password": "Password",
-		"copy": "Copy",
-		"show": "Show password",
-		"hide": "Hide password",
-		"unavailable": "Not available (old account)",
-		"warning": "These credentials are the only way to recover your saved places.",
-		"copied": "Copied to clipboard",
-		"copyFailed": "Copy failed — please copy manually"
 	},
 	"save": {
 		"prompt": {

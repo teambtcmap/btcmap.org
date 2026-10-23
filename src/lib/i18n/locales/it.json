@@ -61,7 +61,6 @@
 		"login": "Accedi",
 		"signup": "Registrati",
 		"logout": "Esci",
-		"backupAccount": "Backup dell'account",
 		"myPhotos": "Le mie foto"
 	},
 	"saved": {
@@ -153,19 +152,6 @@
 		"usernameTaken": "Questo nome utente è già in uso. Provane un altro.",
 		"haveAccount": "Hai già un account?",
 		"signIn": "Accedi con password o Nostr"
-	},
-	"backup": {
-		"title": "Backup dell'account",
-		"description": "Salva queste credenziali per accedere su un altro dispositivo.",
-		"username": "Username",
-		"password": "Password",
-		"copy": "Copia",
-		"show": "Mostra password",
-		"hide": "Nascondi password",
-		"unavailable": "Non disponibile (vecchio account)",
-		"warning": "Queste credenziali sono l'unico modo per recuperare i tuoi posti salvati.",
-		"copied": "Copiato negli appunti",
-		"copyFailed": "Copia fallita — si prega di copiare manualmente"
 	},
 	"save": {
 		"prompt": {
