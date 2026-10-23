@@ -103,6 +103,17 @@ $effect(() => {
 	}
 });
 
+// The map menu asked for an add card: it opens at the map centre, unless
+// placement holds the map.
+$effect(() => {
+	const card = $noteCard;
+	if (card?.mode !== "request") return;
+	untrack(() => {
+		if (suspended) noteCard.close();
+		else noteCard.openCreate(fromLngLat(map.getCenter()), card.method);
+	});
+});
+
 // Placement takes the map: no note card on top of it.
 $effect(() => {
 	if (suspended) noteCard.close();

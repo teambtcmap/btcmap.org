@@ -7,9 +7,9 @@ import type { Note } from "$types/btcmap-api/Note";
 
 // The /map note card (#1542): one card at a time, either adding a note at a
 // point or showing one of the user's notes. A store rather than props so the
-// entry points (the right-click/long-press menu in AddPlaceMode, the map
-// menu, a note pin, the ?note deep link from /user/notes) don't have to be
-// threaded through the legacy map page.
+// entry points (the right-click/long-press menu, the map menu, a note pin,
+// the ?note deep link from /user/notes) don't have to be threaded through
+// the legacy map page.
 // A position in the API's terms (lat/lon). MapLibre says lng: convert at
 // the map edge with fromLngLat so the two numbers can't swap.
 export type NotePoint = Pick<Note, "lat" | "lon">;
@@ -24,7 +24,13 @@ export type NoteDraft = NotePoint & {
 	icon: Note["icon"];
 };
 
-export type NoteCardState = NoteDraft | { mode: "view"; id: Note["id"] } | null;
+export type NoteCardState =
+	| NoteDraft
+	// An add card wanted at the map centre (the map menu has no map to ask):
+	// the notes layer on /map turns it into a draft, or drops it
+	| { mode: "request"; method: NoteAddMethod }
+	| { mode: "view"; id: Note["id"] }
+	| null;
 
 const createNoteCardStore = () => {
 	const { subscribe, set, update } = writable<NoteCardState>(null);
@@ -37,6 +43,7 @@ const createNoteCardStore = () => {
 			update((state) =>
 				state?.mode === "create" ? { ...state, lat, lon } : state,
 			),
+		requestCreate: (method: NoteAddMethod) => set({ mode: "request", method }),
 		setDraftIcon: (icon: Note["icon"]) =>
 			update((state) =>
 				state?.mode === "create" ? { ...state, icon } : state,

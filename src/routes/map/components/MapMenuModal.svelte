@@ -1,6 +1,8 @@
 <script lang="ts">
 import { trackEvent } from "#lib/analytics.js";
+import { isEmbedded } from "#lib/embed.js";
 import { _ } from "#lib/i18n/index.js";
+import { noteCard } from "#lib/noteCard.js";
 import { placementEntryUrl } from "#lib/placementMode.js";
 import { session } from "#lib/session.js";
 import Modal from "$components/Modal.svelte";
@@ -13,19 +15,18 @@ type Props = {
 	// When set (/map outside issues mode), the add row starts placement mode
 	// on the map instead of linking to the standalone form.
 	onAddPlace?: (() => void) | null;
-	// When set (/map outside issues mode), adds a row that opens the add-note
-	// card at the map centre.
-	onAddNote?: (() => void) | null;
 };
 
 let {
 	open = $bindable(false),
 	variant = "main",
 	onAddPlace = null,
-	onAddNote = null,
 }: Props = $props();
 
 const loggedIn = $derived(!!$session);
+// Notes live where on-map placement does (/map outside issues mode), and
+// never in an embed.
+const canAddNote = $derived(!!onAddPlace && !isEmbedded());
 
 const rowClass =
 	"flex items-center gap-3 rounded-lg px-3 py-3 text-body hover:bg-gray-100 dark:text-white dark:hover:bg-white/5";
@@ -65,13 +66,14 @@ const iconClass = "h-5 w-5 flex-none dark:invert";
 					<span>{$_("mapControls.addLocation")}</span>
 				</a>
 			{/if}
-			{#if onAddNote}
+			{#if canAddNote}
 				<button
 					type="button"
 					class="{rowClass} w-full text-left"
 					onclick={() => {
 						open = false;
-						onAddNote?.();
+						trackEvent("note_add_click", { method: "menu" });
+						noteCard.requestCreate("menu");
 					}}
 				>
 					<img src="/icons/note.svg" alt="" class={iconClass} />

@@ -46,6 +46,14 @@ describe("noteCard", () => {
 		expect(get(noteCard)).toEqual({ mode: "view", id: 7 });
 	});
 
+	it("asks for an add card at the map centre, which the map resolves", () => {
+		noteCard.requestCreate("menu");
+		expect(get(noteCard)).toEqual({ mode: "request", method: "menu" });
+
+		noteCard.openCreate({ lat: 1, lon: 2 }, "menu");
+		expect(get(noteCard)).toMatchObject({ mode: "create", lat: 1, lon: 2 });
+	});
+
 	it("opening a note replaces an unsaved add card", () => {
 		noteCard.openCreate({ lat: 1, lon: 2 }, "menu");
 		noteCard.openView(7);

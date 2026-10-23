@@ -75,7 +75,6 @@ import {
 } from "#lib/merchantDrawerHash.js";
 import { merchantDrawer } from "#lib/merchantDrawerStore.js";
 import { merchantList } from "#lib/merchantListStore.js";
-import { fromLngLat, noteCard } from "#lib/noteCard.js";
 import type { DerivedIssueCode } from "#lib/placeIssues.js";
 import {
 	countIssuesByCode,
@@ -132,15 +131,6 @@ let placementActive = false;
 const startPlacement = () => {
 	placementActive = true;
 	trackEvent("add_place_enter", { method: "menu" });
-};
-
-// Menu entry for a note (#1542): the add card opens at the map centre with
-// a draggable pin; NotesMode asks a signed-out user to sign in first.
-const startNote = () => {
-	// Placement owns the map, like the right-click / long-press entry
-	if (!map || placementActive) return;
-	trackEvent("note_add_click", { method: "menu" });
-	noteCard.openCreate(fromLngLat(map.getCenter()), "menu");
 };
 
 // Placement mode owns the bottom sheet's z-[1002] slot; a merchant drawer
@@ -1568,7 +1558,6 @@ onDestroy(() => {
 	{globeOn}
 	onToggleGlobe={toggleGlobe}
 	onAddPlace={issuesOnly ? null : startPlacement}
-	onAddNote={issuesOnly ? null : startNote}
 />
 
 {#if styleLoaded && !issuesOnly}
