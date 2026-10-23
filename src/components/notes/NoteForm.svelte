@@ -32,10 +32,19 @@ type Props = {
 	// Resolves once saved; a rejection keeps the form open with its input.
 	onSubmit: (values: NoteFormValues) => Promise<void>;
 	onCancel: () => void;
+	// The picked icon, for previews outside the form (card header, pin)
+	onIconChange?: (icon: NoteFormValues["icon"]) => void;
 };
 
-let { id, initial, showVisibility, submitLabel, onSubmit, onCancel }: Props =
-	$props();
+let {
+	id,
+	initial,
+	showVisibility,
+	submitLabel,
+	onSubmit,
+	onCancel,
+	onIconChange,
+}: Props = $props();
 
 let textInput = $state<HTMLTextAreaElement>();
 let saving = $state(false);
@@ -103,7 +112,13 @@ $effect(() => {
 			<NoteIconPicker
 				id="{id}-icon"
 				disabled={saving}
-				bind:value={() => field.state.value, (icon) => field.handleChange(icon)}
+				bind:value={
+					() => field.state.value,
+					(icon) => {
+						field.handleChange(icon);
+						onIconChange?.(icon);
+					}
+				}
 			/>
 		{/snippet}
 	</form.Field>

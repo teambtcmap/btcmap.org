@@ -6,7 +6,8 @@ import { errorStatus } from "#lib/apiError.js";
 import { createTimeLocale, LOCALIZED_DATE_FORMAT } from "#lib/dayjsLocale.js";
 import { _, locale } from "#lib/i18n/index.js";
 import type { NoteDraft } from "#lib/noteCard.js";
-import { DEFAULT_NOTE_ICON, NOTE_PIN_COLOR } from "#lib/noteIcons.js";
+import { noteCard } from "#lib/noteCard.js";
+import { NOTE_PIN_COLOR } from "#lib/noteIcons.js";
 import { createNote, deleteNote, myNotes, updateNote } from "#lib/notes.js";
 import { errToast, successToast } from "#lib/utils.js";
 import type { NoteFormValues } from "$components/notes/NoteForm.svelte";
@@ -30,6 +31,17 @@ let { token, target, onClose }: Props = $props();
 type View = "read" | "edit" | "confirmDelete";
 let view = $state<View>("read");
 let busy = $state(false);
+// The icon picked in the edit form, previewed in the header until saved;
+// cleared each time the edit form opens.
+let editIcon = $state<Note["icon"] | null>(null);
+
+const headerIcon = $derived(
+	target.mode === "create"
+		? target.icon
+		: view === "edit"
+			? (editIcon ?? target.note.icon)
+			: target.note.icon,
+);
 
 const timeLocale = createTimeLocale(locale);
 
@@ -147,10 +159,7 @@ const handleKeydown = (event: KeyboardEvent) => {
 			class="flex h-9 w-9 flex-none items-center justify-center rounded-full text-white"
 			style="background-color: {NOTE_PIN_COLOR}"
 		>
-			<NoteGlyph
-				icon={target.mode === "view" ? target.note.icon : DEFAULT_NOTE_ICON}
-				class="h-5 w-5"
-			/>
+			<NoteGlyph icon={headerIcon} class="h-5 w-5" />
 		</span>
 		<div class="min-w-0 flex-1">
 			<h2 id={titleId} class="font-semibold text-primary dark:text-white">
@@ -188,11 +197,12 @@ const handleKeydown = (event: KeyboardEvent) => {
 		<p class="mb-3 text-sm text-body dark:text-white/60">{$_("notes.dragHint")}</p>
 		<NoteForm
 			id="note-create"
-			initial={{ text: "", icon: DEFAULT_NOTE_ICON, public: false }}
+			initial={{ text: "", icon: target.icon, public: false }}
 			showVisibility
 			submitLabel={$_("notes.save")}
 			onSubmit={create}
 			onCancel={onClose}
+			onIconChange={noteCard.setDraftIcon}
 		/>
 	{:else if view === "edit"}
 		<NoteForm
@@ -206,6 +216,7 @@ const handleKeydown = (event: KeyboardEvent) => {
 			submitLabel={$_("notes.save")}
 			onSubmit={saveEdit}
 			onCancel={() => (view = "read")}
+			onIconChange={(icon) => (editIcon = icon)}
 		/>
 	{:else}
 		<p
@@ -264,6 +275,7 @@ const handleKeydown = (event: KeyboardEvent) => {
 					type="button"
 					onclick={() => {
 						trackEvent("note_edit_click");
+						editIcon = null;
 						view = "edit";
 					}}
 					class="rounded-lg bg-link px-4 py-2 text-sm font-semibold text-white hover:opacity-90"

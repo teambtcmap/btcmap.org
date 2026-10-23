@@ -1,6 +1,7 @@
 import { writable } from "svelte/store";
 
 import type { NoteAddMethod } from "#lib/analytics.js";
+import { DEFAULT_NOTE_ICON } from "#lib/noteIcons.js";
 
 import type { Note } from "$types/btcmap-api/Note";
 
@@ -19,6 +20,8 @@ export const fromLngLat = ({ lng, lat }: { lng: number; lat: number }) =>
 export type NoteDraft = NotePoint & {
 	mode: "create";
 	method: NoteAddMethod;
+	// The icon picked so far, so the card header and the pin preview it
+	icon: Note["icon"];
 };
 
 export type NoteCardState = NoteDraft | { mode: "view"; id: Note["id"] } | null;
@@ -28,11 +31,15 @@ const createNoteCardStore = () => {
 	return {
 		subscribe,
 		openCreate: ({ lat, lon }: NotePoint, method: NoteAddMethod) =>
-			set({ mode: "create", lat, lon, method }),
+			set({ mode: "create", lat, lon, method, icon: DEFAULT_NOTE_ICON }),
 		// The add card's pin was dragged; a saved note can't be moved.
 		moveDraft: ({ lat, lon }: NotePoint) =>
 			update((state) =>
 				state?.mode === "create" ? { ...state, lat, lon } : state,
+			),
+		setDraftIcon: (icon: Note["icon"]) =>
+			update((state) =>
+				state?.mode === "create" ? { ...state, icon } : state,
 			),
 		openView: (id: Note["id"]) => set({ mode: "view", id }),
 		close: () => set(null),

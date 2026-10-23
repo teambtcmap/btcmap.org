@@ -13,6 +13,7 @@ describe("noteCard", () => {
 			lat: 52.5,
 			lon: 13.4,
 			method: "right_click",
+			icon: "notes",
 		});
 
 		noteCard.close();
@@ -27,10 +28,21 @@ describe("noteCard", () => {
 			lat: 3,
 			lon: 4,
 			method: "long_press",
+			icon: "notes",
 		});
 
 		noteCard.openView(7);
 		noteCard.moveDraft({ lat: 5, lon: 6 });
+		expect(get(noteCard)).toEqual({ mode: "view", id: 7 });
+	});
+
+	it("tracks the icon picked for the add card, only there", () => {
+		noteCard.openCreate({ lat: 1, lon: 2 }, "menu");
+		noteCard.setDraftIcon("atm");
+		expect(get(noteCard)).toMatchObject({ mode: "create", icon: "atm" });
+
+		noteCard.openView(7);
+		noteCard.setDraftIcon("star");
 		expect(get(noteCard)).toEqual({ mode: "view", id: 7 });
 	});
 

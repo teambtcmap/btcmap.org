@@ -29,7 +29,6 @@ import {
 	noteCard,
 	parseNoteParam,
 } from "#lib/noteCard.js";
-import { DEFAULT_NOTE_ICON } from "#lib/noteIcons.js";
 import { myNotes } from "#lib/notes.js";
 import { session } from "#lib/session.js";
 import { errToast } from "#lib/utils.js";
@@ -202,7 +201,8 @@ onMount(() => {
 
 // The add card's pin: draggable until saved (a note can't move after).
 let draftMarker: Marker | undefined;
-// The same pin the map draws for a saved note.
+// The same pin the map draws for a saved note, showing the picked icon.
+let draftPin = $state<HTMLImageElement>();
 const pinElement = () => {
 	const el = document.createElement("img");
 	el.alt = "";
@@ -210,19 +210,31 @@ const pinElement = () => {
 	el.height = PIN_HEIGHT;
 	el.draggable = false;
 	el.style.cursor = "grab";
-	notePinDataUrl(DEFAULT_NOTE_ICON)
-		.then((src) => {
-			el.src = src;
-		})
-		.catch(() => {});
+	draftPin = el;
 	return el;
 };
+
+$effect(() => {
+	const img = draftPin;
+	const icon = $noteCard?.mode === "create" ? $noteCard.icon : null;
+	if (!img || !icon) return;
+	let stale = false;
+	notePinDataUrl(icon)
+		.then((src) => {
+			if (!stale) img.src = src;
+		})
+		.catch(() => {});
+	return () => {
+		stale = true;
+	};
+});
 
 $effect(() => {
 	const draft = $noteCard?.mode === "create" && showCard ? $noteCard : null;
 	if (!draft) {
 		draftMarker?.remove();
 		draftMarker = undefined;
+		draftPin = undefined;
 		return;
 	}
 	if (draftMarker) {
