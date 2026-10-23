@@ -57,7 +57,6 @@ const form = createForm(() => ({
 				currentInput?.focus();
 				return;
 			}
-			session.passwordChanged(token);
 			form.reset({ ...EMPTY });
 			validation.reset();
 			trackEvent("account_password_change_success");

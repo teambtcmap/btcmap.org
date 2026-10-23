@@ -36,8 +36,7 @@ async function handleSubmit(event: SubmitEvent) {
 		// the shared token mint.
 		const token = await mintToken(username.trim(), password);
 
-		// Don't store the password — the user already knows their own credentials.
-		session.login(username.trim(), "", token);
+		session.login(username.trim(), token);
 
 		// Pull the new session value so callers get a concrete Session object
 		// instead of having to subscribe.
