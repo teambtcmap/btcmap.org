@@ -18,7 +18,7 @@ import NoteVisibilitySwitch from "$components/notes/NoteVisibilitySwitch.svelte"
 import type { Note } from "$types/btcmap-api/Note";
 
 // The note card's content (#1542): add a note at a point, or read, edit,
-// re-icon, publish/unpublish and delete one. The host (NotesMode) places
+// re-icon, publish/unpublish and delete one. The host (NotesLayer) places
 // it on the map and owns the pin.
 type Props = {
 	token: string;

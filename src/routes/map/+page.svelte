@@ -109,7 +109,7 @@ import MapControls from "./components/MapControls.svelte";
 import MapSearchBar from "./components/MapSearchBar.svelte";
 import MerchantDrawerHash from "./components/MerchantDrawerHash.svelte";
 import MerchantListPanel from "./components/MerchantListPanel.svelte";
-import NotesMode from "./components/NotesMode.svelte";
+import NotesLayer from "./components/NotesLayer.svelte";
 import TileLoadingIndicator from "./components/TileLoadingIndicator.svelte";
 import { browser } from "$app/env";
 import { goto } from "$app/navigation";
@@ -1565,7 +1565,7 @@ onDestroy(() => {
 {/if}
 
 {#if styleLoaded && !issuesOnly && map}
-	<NotesMode {map} suspended={placementActive} />
+	<NotesLayer {map} suspended={placementActive} />
 {/if}
 
 <style>
