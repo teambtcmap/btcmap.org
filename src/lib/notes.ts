@@ -131,6 +131,40 @@ export type MyNotesState = {
 
 const SIGNED_OUT: MyNotesState = { status: "signed-out", notes: [] };
 
+export type NoteLookup =
+	| { note: Note }
+	| { missing: "signed-out" | "not-found" };
+
+// Calls back once the store has settled (not loading) with note `id` or why
+// it isn't there; the ?note=<id> link waits on this. Returns a cancel.
+export const whenNoteSettles = (
+	notes: Readable<MyNotesState>,
+	id: Note["id"],
+	onSettled: (lookup: NoteLookup) => void,
+): (() => void) => {
+	let settled = false;
+	let stop: (() => void) | undefined;
+	stop = notes.subscribe((state) => {
+		if (settled || state.status === "loading") return;
+		settled = true;
+		const note = state.notes.find((n) => n.id === id);
+		onSettled(
+			note
+				? { note }
+				: {
+						missing: state.status === "signed-out" ? "signed-out" : "not-found",
+					},
+		);
+		// subscribe() calls back before it returns, so `stop` may not be set
+		// yet on this first call.
+		queueMicrotask(() => stop?.());
+	});
+	return () => {
+		settled = true;
+		stop?.();
+	};
+};
+
 // Follows the session: loads the notes when a token appears or changes,
 // empties them on logout. A response for a token that is no longer current
 // is dropped, so a slow load can't resurrect notes after logout.

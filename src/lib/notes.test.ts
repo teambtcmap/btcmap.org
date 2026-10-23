@@ -4,6 +4,7 @@ import { beforeEach, describe, expect, it, vi } from "vitest";
 import { API_BASE } from "#lib/api-base.js";
 import type { Session } from "#lib/session.js";
 
+import type { MyNotesState } from "./notes";
 import {
 	createMyNotesStore,
 	createNote,
@@ -11,6 +12,7 @@ import {
 	fetchMyNotes,
 	NOTES_PAGE_SIZE,
 	updateNote,
+	whenNoteSettles,
 } from "./notes";
 import type { Note } from "$types/btcmap-api/Note";
 
@@ -279,5 +281,59 @@ describe("createMyNotesStore", () => {
 		store.remove(2);
 		expect(get(store).notes.map((n) => n.id)).toEqual([1]);
 		stop();
+	});
+});
+
+describe("whenNoteSettles", () => {
+	const state = (
+		status: MyNotesState["status"],
+		notes: Note[] = [],
+	): MyNotesState => ({ status, notes });
+
+	it("waits out loading, then hands over the note", () => {
+		const store = writable(state("loading"));
+		const onSettled = vi.fn();
+
+		whenNoteSettles(store, 2, onSettled);
+		expect(onSettled).not.toHaveBeenCalled();
+
+		store.set(state("ready", [note(1), note(2)]));
+		expect(onSettled).toHaveBeenCalledExactlyOnceWith({ note: note(2) });
+	});
+
+	it("reports why a note can't be shown", () => {
+		const signedOut = vi.fn();
+		whenNoteSettles(writable(state("signed-out")), 2, signedOut);
+		expect(signedOut).toHaveBeenCalledWith({ missing: "signed-out" });
+
+		const notFound = vi.fn();
+		whenNoteSettles(writable(state("ready", [note(1)])), 2, notFound);
+		expect(notFound).toHaveBeenCalledWith({ missing: "not-found" });
+
+		const failed = vi.fn();
+		whenNoteSettles(writable(state("error")), 2, failed);
+		expect(failed).toHaveBeenCalledWith({ missing: "not-found" });
+	});
+
+	it("settles once and stops listening", () => {
+		const store = writable(state("ready", [note(1)]));
+		const onSettled = vi.fn();
+
+		whenNoteSettles(store, 1, onSettled);
+		store.set(state("loading"));
+		store.set(state("ready", [note(1)]));
+
+		expect(onSettled).toHaveBeenCalledOnce();
+	});
+
+	it("does nothing once cancelled", () => {
+		const store = writable(state("loading"));
+		const onSettled = vi.fn();
+
+		const cancel = whenNoteSettles(store, 1, onSettled);
+		cancel();
+		store.set(state("ready", [note(1)]));
+
+		expect(onSettled).not.toHaveBeenCalled();
 	});
 });

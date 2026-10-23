@@ -18,6 +18,11 @@ import {
 	PIN_WIDTH,
 } from "#lib/map/maplibreSprites.js";
 import {
+	CARD_PIN_GAP,
+	cardOverflow,
+	frameOffset,
+} from "#lib/map/noteCardFraming.js";
+import {
 	installNoteLayer,
 	NOTE_LAYER_ID,
 	syncNotes,
@@ -29,7 +34,7 @@ import {
 	noteCard,
 	parseNoteParam,
 } from "#lib/noteCard.js";
-import { myNotes } from "#lib/notes.js";
+import { myNotes, whenNoteSettles } from "#lib/notes.js";
 import { session } from "#lib/session.js";
 import { errToast } from "#lib/utils.js";
 import HydratingAuthPrompt from "$components/auth/HydratingAuthPrompt.svelte";
@@ -49,11 +54,6 @@ type Props = {
 };
 
 let { map, suspended }: Props = $props();
-
-// Desktop card: its bottom edge sits this far above the pin's tip (clears
-// the pin itself), and it keeps this margin from the map's top edge.
-const CARD_PIN_GAP = 52;
-const EDGE_MARGIN = 16;
 
 const embedded = isEmbedded();
 const desktop = window.matchMedia(`(min-width: ${BREAKPOINTS.md}px)`).matches;
@@ -184,14 +184,10 @@ onMount(() => {
 	history.replaceState(history.state, "", url);
 	if (id === null) return;
 
-	let done = false;
-	let stop: (() => void) | undefined;
-	stop = myNotes.subscribe((state) => {
-		if (done || state.status === "loading") return;
-		done = true;
-		const note = state.notes.find((n) => n.id === id);
-		if (note) {
-			noteCard.openView(id);
+	return whenNoteSettles(myNotes, id, (lookup) => {
+		if ("note" in lookup) {
+			const { note } = lookup;
+			noteCard.openView(note.id);
 			// A ?note link: the /user/notes rows, or a shared /map URL
 			trackEvent("note_open", { source: "link" });
 			map.jumpTo({
@@ -200,16 +196,12 @@ onMount(() => {
 			});
 		} else {
 			errToast(
-				state.status === "signed-out"
+				lookup.missing === "signed-out"
 					? $_("notes.signInToView")
 					: $_("notes.notFound"),
 			);
 		}
-		// subscribe() calls back before it returns, so `stop` may not be set
-		// yet on this first call.
-		queueMicrotask(() => stop?.());
 	});
-	return () => stop?.();
 });
 
 // The add card's pin: draggable until saved (a note can't move after).
@@ -314,18 +306,13 @@ $effect(() => {
 	if (key === framedKey) return;
 	framedKey = key;
 	untrack(() => {
-		const mapHeight = map.getContainer().clientHeight;
-		// Where the pin should sit: the card fits above it, the pin stays on screen
-		const pinY = Math.min(
-			cardHeight + CARD_PIN_GAP + EDGE_MARGIN,
-			mapHeight - EDGE_MARGIN,
-		);
 		map.easeTo({
 			center: [point.lon, point.lat],
-			// Mobile: the middle of the map left visible above the bottom card
-			offset: desktop
-				? [0, Math.max(pinY - mapHeight / 2, 0)]
-				: [0, -cardHeight / 2 + PIN_HEIGHT / 2],
+			offset: frameOffset({
+				desktop,
+				cardHeight,
+				mapHeight: map.getContainer().clientHeight,
+			}),
 			duration: 300,
 		});
 	});
@@ -345,7 +332,7 @@ $effect(() => {
 			key !== null && measured?.key === key && height > measured.height;
 		measured = key === null ? null : { key, height };
 		if (!grew || !screen) return;
-		const missing = height + CARD_PIN_GAP + EDGE_MARGIN - screen.y;
+		const missing = cardOverflow({ cardHeight: height, pinY: screen.y });
 		if (missing > 0) map.panBy([0, -missing], { duration: 300 });
 	});
 });
