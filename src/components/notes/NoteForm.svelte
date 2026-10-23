@@ -14,10 +14,15 @@ import NoteIconPicker from "$components/notes/NoteIconPicker.svelte";
 import NoteVisibilitySwitch from "$components/notes/NoteVisibilitySwitch.svelte";
 import PrimaryButton from "$components/PrimaryButton.svelte";
 
+import type { PostNoteArgs } from "$types/btcmap-api/PostNoteArgs";
+
 // The note card's form (#1542): adding a note, and editing one's text and
 // icon. Visibility is part of the add form only; an existing note toggles
-// it straight from the card.
-export type NoteFormValues = { text: string; icon: string; public: boolean };
+// it straight from the card. The form always holds an icon, so the API's
+// optional `icon` is required here.
+export type NoteFormValues = Required<
+	Pick<PostNoteArgs, "text" | "icon" | "public">
+>;
 
 type Props = {
 	id: string;
