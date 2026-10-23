@@ -10,6 +10,7 @@ import { get } from "svelte/store";
 
 import { trackEvent } from "#lib/analytics.js";
 import { BREAKPOINTS } from "#lib/constants.js";
+import { isEmbedded } from "#lib/embed.js";
 import { _ } from "#lib/i18n/index.js";
 import {
 	installNoteLayer,
@@ -52,7 +53,7 @@ const EDGE_MARGIN = 16;
 // The pin is anchored at its tip; half its height centres the whole pin
 const PIN_HEIGHT = 43;
 
-const embedded = window.self !== window.top;
+const embedded = isEmbedded();
 const desktop = window.matchMedia(`(min-width: ${BREAKPOINTS.md}px)`).matches;
 
 const token = $derived($session?.token || null);

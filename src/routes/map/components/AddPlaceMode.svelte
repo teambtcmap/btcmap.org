@@ -12,6 +12,7 @@ import {
 	MERCHANT_LIST_MIN_ZOOM,
 	NEARBY_RADIUS_MULTIPLIER,
 } from "#lib/constants.js";
+import { isEmbedded } from "#lib/embed.js";
 import { _ } from "#lib/i18n/index.js";
 import { calculateRadiusKmFromLngLatBounds } from "#lib/map/viewport.js";
 import { fromLngLat, noteCard } from "#lib/noteCard.js";
@@ -361,7 +362,7 @@ const backToConfirm = async () => {
 // than skipping it, so an accidental trigger is always recoverable via
 // Cancel. Embeds show no notes, so there the gesture enters placement
 // directly as before.
-const embedded = window.self !== window.top;
+const embedded = isEmbedded();
 type PointMethod = "right_click" | "long_press";
 let pointMenu = $state<{
 	lngLat: { lng: number; lat: number };
