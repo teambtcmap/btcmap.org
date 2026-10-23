@@ -6,9 +6,14 @@ import {
 	buildCompositeSvg,
 	fetchIconInnerSvg,
 	fetchNoteIconInnerSvg,
+	notePinDataUrl,
 	PIN_FILL_BOOSTED,
 	PIN_FILL_REGULAR,
 	PIN_FILLS,
+	PIN_HEIGHT,
+	PIN_PATH,
+	PIN_RENDER_SCALE,
+	PIN_WIDTH,
 	pinVariantFor,
 	resolveIconifyName,
 	spriteName,
@@ -81,6 +86,15 @@ describe("sprite naming and fills", () => {
 	it("renders the variant fill into the composite svg", () => {
 		const svg = buildCompositeSvg("<svg></svg>", "nv");
 		expect(svg).toContain(`fill="${PIN_FILLS.nv}"`);
+	});
+
+	it("rasterizes at the sprite scale unless told otherwise", () => {
+		expect(buildCompositeSvg("", "r")).toContain(
+			`width="${PIN_WIDTH * PIN_RENDER_SCALE}"`,
+		);
+		const atSize = buildCompositeSvg("", "r", 1);
+		expect(atSize).toContain(`width="${PIN_WIDTH}"`);
+		expect(atSize).toContain(`height="${PIN_HEIGHT}"`);
 	});
 });
 
@@ -158,6 +172,27 @@ describe("fetchIconInnerSvg", () => {
 		expect(String(fetchMock.mock.calls[1]?.[0])).toContain(
 			"material-symbols/zzz-not-a-real-icon",
 		);
+	});
+});
+
+describe("notePinDataUrl", () => {
+	afterEach(() => {
+		vi.unstubAllGlobals();
+	});
+
+	it("draws the note pin with its glyph at display size, offline", async () => {
+		const fetchMock = vi.fn();
+		vi.stubGlobal("fetch", fetchMock);
+
+		const url = await notePinDataUrl("atm");
+
+		expect(url.startsWith("data:image/svg+xml,")).toBe(true);
+		const svg = decodeURIComponent(url.slice("data:image/svg+xml,".length));
+		expect(svg).toContain(PIN_PATH);
+		expect(svg).toContain(`fill="${PIN_FILLS.n}"`);
+		expect(svg).toContain(`width="${PIN_WIDTH}"`);
+		expect(svg.match(/<svg/g)).toHaveLength(2);
+		expect(fetchMock).not.toHaveBeenCalled();
 	});
 });
 

@@ -13,6 +13,11 @@ import { BREAKPOINTS } from "#lib/constants.js";
 import { isEmbedded } from "#lib/embed.js";
 import { _ } from "#lib/i18n/index.js";
 import {
+	notePinDataUrl,
+	PIN_HEIGHT,
+	PIN_WIDTH,
+} from "#lib/map/maplibreSprites.js";
+import {
 	installNoteLayer,
 	NOTE_LAYER_ID,
 	syncNotes,
@@ -24,7 +29,7 @@ import {
 	noteCard,
 	parseNoteParam,
 } from "#lib/noteCard.js";
-import { NOTE_PIN_COLOR } from "#lib/noteIcons.js";
+import { DEFAULT_NOTE_ICON } from "#lib/noteIcons.js";
 import { myNotes } from "#lib/notes.js";
 import { session } from "#lib/session.js";
 import { errToast } from "#lib/utils.js";
@@ -50,8 +55,6 @@ let { map, suspended }: Props = $props();
 // the pin itself), and it keeps this margin from the map's top edge.
 const CARD_PIN_GAP = 52;
 const EDGE_MARGIN = 16;
-// The pin is anchored at its tip; half its height centres the whole pin
-const PIN_HEIGHT = 43;
 
 const embedded = isEmbedded();
 const desktop = window.matchMedia(`(min-width: ${BREAKPOINTS.md}px)`).matches;
@@ -199,11 +202,19 @@ onMount(() => {
 
 // The add card's pin: draggable until saved (a note can't move after).
 let draftMarker: Marker | undefined;
+// The same pin the map draws for a saved note.
 const pinElement = () => {
-	const el = document.createElement("div");
-	el.setAttribute("aria-hidden", "true");
+	const el = document.createElement("img");
+	el.alt = "";
+	el.width = PIN_WIDTH;
+	el.height = PIN_HEIGHT;
+	el.draggable = false;
 	el.style.cursor = "grab";
-	el.innerHTML = `<svg width="32" height="43" viewBox="0 0 32 43"><path d="M16 42s15-15.5 15-26A15 15 0 0 0 1 16c0 10.5 15 26 15 26z" fill="${NOTE_PIN_COLOR}" stroke="#fff" stroke-width="2"/><circle cx="16" cy="16" r="5" fill="#fff"/></svg>`;
+	notePinDataUrl(DEFAULT_NOTE_ICON)
+		.then((src) => {
+			el.src = src;
+		})
+		.catch(() => {});
 	return el;
 };
 
