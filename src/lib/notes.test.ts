@@ -99,7 +99,13 @@ describe("fetchMyNotes", () => {
 
 	it("drops malformed rows instead of trusting the payload", async () => {
 		api.get.mockResolvedValueOnce({
-			data: [note(1), { id: 2 }, note(3, { lat: "x" as unknown as number })],
+			data: [
+				note(1),
+				{ id: 2 },
+				note(3, { lat: "x" as unknown as number }),
+				note(4, { author: null as unknown as Note["author"] }),
+				note(5, { author: { id: 9 } as unknown as Note["author"] }),
+			],
 		});
 
 		const notes = await fetchMyNotes("tok");

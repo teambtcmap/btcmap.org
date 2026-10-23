@@ -24,11 +24,17 @@ const MY_NOTES_URL = `${API_BASE}/v4/users/me/notes`;
 const NOTES_URL = `${API_BASE}/v4/notes`;
 
 // Trust boundary: a non-JSON or reshaped response must not reach the map
-// (the #1187 lesson), so every row is checked for the fields we read.
+// (the #1187 lesson), so every row is checked against the whole Note shape.
+const isRecord = (value: unknown): value is Record<string, unknown> =>
+	typeof value === "object" && value !== null;
+
 const isNote = (value: unknown): value is Note => {
-	if (typeof value !== "object" || value === null) return false;
-	const n = value as Record<string, unknown>;
+	if (!isRecord(value)) return false;
+	const n = value;
 	return (
+		isRecord(n.author) &&
+		typeof n.author.id === "number" &&
+		typeof n.author.name === "string" &&
 		typeof n.id === "number" &&
 		typeof n.lat === "number" &&
 		typeof n.lon === "number" &&
