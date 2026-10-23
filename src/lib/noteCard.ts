@@ -9,10 +9,15 @@ import type { Note } from "$types/btcmap-api/Note";
 // entry points (the right-click/long-press menu in AddPlaceMode, the map
 // menu, a note pin, the ?note deep link from /user/notes) don't have to be
 // threaded through the legacy map page.
-export type NoteDraft = {
+// A position in the API's terms (lat/lon). MapLibre says lng: convert at
+// the map edge with fromLngLat so the two numbers can't swap.
+export type NotePoint = Pick<Note, "lat" | "lon">;
+
+export const fromLngLat = ({ lng, lat }: { lng: number; lat: number }) =>
+	({ lat, lon: lng }) satisfies NotePoint;
+
+export type NoteDraft = NotePoint & {
 	mode: "create";
-	lat: number;
-	lon: number;
 	method: NoteAddMethod;
 };
 
@@ -22,10 +27,10 @@ const createNoteCardStore = () => {
 	const { subscribe, set, update } = writable<NoteCardState>(null);
 	return {
 		subscribe,
-		openCreate: (lat: number, lon: number, method: NoteAddMethod) =>
+		openCreate: ({ lat, lon }: NotePoint, method: NoteAddMethod) =>
 			set({ mode: "create", lat, lon, method }),
 		// The add card's pin was dragged; a saved note can't be moved.
-		moveDraft: (lat: number, lon: number) =>
+		moveDraft: ({ lat, lon }: NotePoint) =>
 			update((state) =>
 				state?.mode === "create" ? { ...state, lat, lon } : state,
 			),

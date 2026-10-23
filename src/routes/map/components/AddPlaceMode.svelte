@@ -14,7 +14,7 @@ import {
 } from "#lib/constants.js";
 import { _ } from "#lib/i18n/index.js";
 import { calculateRadiusKmFromLngLatBounds } from "#lib/map/viewport.js";
-import { noteCard } from "#lib/noteCard.js";
+import { fromLngLat, noteCard } from "#lib/noteCard.js";
 import type { NearbyPlace } from "#lib/placementMode.js";
 import {
 	clampDedupeRadiusKm,
@@ -364,8 +364,7 @@ const backToConfirm = async () => {
 const embedded = window.self !== window.top;
 type PointMethod = "right_click" | "long_press";
 let pointMenu = $state<{
-	lng: number;
-	lat: number;
+	lngLat: { lng: number; lat: number };
 	x: number;
 	y: number;
 	method: PointMethod;
@@ -383,24 +382,24 @@ const openPointMenu = (
 		enterAt(lngLat, method);
 		return;
 	}
-	pointMenu = { lng: lngLat.lng, lat: lngLat.lat, x, y, method };
+	pointMenu = { lngLat: { lng: lngLat.lng, lat: lngLat.lat }, x, y, method };
 	pointMenuOpenedAt = Date.now();
 	tick().then(() => pointMenuFirstItem?.focus());
 };
 
 const addPlaceAtPoint = () => {
 	if (!pointMenu) return;
-	const { lng, lat, method } = pointMenu;
+	const { lngLat, method } = pointMenu;
 	pointMenu = null;
-	enterAt({ lng, lat }, method);
+	enterAt(lngLat, method);
 };
 
 const addNoteAtPoint = () => {
 	if (!pointMenu) return;
-	const { lng, lat, method } = pointMenu;
+	const { lngLat, method } = pointMenu;
 	pointMenu = null;
 	trackEvent("note_add_click", { method });
-	noteCard.openCreate(lat, lng, method);
+	noteCard.openCreate(fromLngLat(lngLat), method);
 };
 
 // Any map interaction dismisses the menu — except the click some mobile

@@ -17,7 +17,12 @@ import {
 	syncNotes,
 } from "#lib/map/notePinSource.js";
 import { merchantDrawer } from "#lib/merchantDrawerStore.js";
-import { NOTE_PARAM, noteCard, parseNoteParam } from "#lib/noteCard.js";
+import {
+	fromLngLat,
+	NOTE_PARAM,
+	noteCard,
+	parseNoteParam,
+} from "#lib/noteCard.js";
 import { NOTE_PIN_COLOR } from "#lib/noteIcons.js";
 import { myNotes } from "#lib/notes.js";
 import { session } from "#lib/session.js";
@@ -224,7 +229,7 @@ $effect(() => {
 			.addTo(map);
 		draftMarker.on("dragend", () => {
 			const at = draftMarker?.getLngLat();
-			if (at) noteCard.moveDraft(at.lat, at.lng);
+			if (at) noteCard.moveDraft(fromLngLat(at));
 		});
 	});
 	return () => {

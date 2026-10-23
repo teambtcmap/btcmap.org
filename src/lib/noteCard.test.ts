@@ -1,13 +1,13 @@
 import { get } from "svelte/store";
 import { beforeEach, describe, expect, it } from "vitest";
 
-import { noteCard, parseNoteParam } from "./noteCard";
+import { fromLngLat, noteCard, parseNoteParam } from "./noteCard";
 
 beforeEach(() => noteCard.close());
 
 describe("noteCard", () => {
 	it("opens the add card at a point and closes it", () => {
-		noteCard.openCreate(52.5, 13.4, "right_click");
+		noteCard.openCreate({ lat: 52.5, lon: 13.4 }, "right_click");
 		expect(get(noteCard)).toEqual({
 			mode: "create",
 			lat: 52.5,
@@ -20,8 +20,8 @@ describe("noteCard", () => {
 	});
 
 	it("moves the add card's pin and leaves other cards alone", () => {
-		noteCard.openCreate(1, 2, "long_press");
-		noteCard.moveDraft(3, 4);
+		noteCard.openCreate({ lat: 1, lon: 2 }, "long_press");
+		noteCard.moveDraft({ lat: 3, lon: 4 });
 		expect(get(noteCard)).toEqual({
 			mode: "create",
 			lat: 3,
@@ -30,14 +30,23 @@ describe("noteCard", () => {
 		});
 
 		noteCard.openView(7);
-		noteCard.moveDraft(5, 6);
+		noteCard.moveDraft({ lat: 5, lon: 6 });
 		expect(get(noteCard)).toEqual({ mode: "view", id: 7 });
 	});
 
 	it("opening a note replaces an unsaved add card", () => {
-		noteCard.openCreate(1, 2, "menu");
+		noteCard.openCreate({ lat: 1, lon: 2 }, "menu");
 		noteCard.openView(7);
 		expect(get(noteCard)).toEqual({ mode: "view", id: 7 });
+	});
+});
+
+describe("fromLngLat", () => {
+	it("maps MapLibre's lng to the API's lon", () => {
+		expect(fromLngLat({ lng: 13.4, lat: 52.5 })).toEqual({
+			lat: 52.5,
+			lon: 13.4,
+		});
 	});
 });
 
