@@ -106,6 +106,15 @@ afterNavigate(() => {
 					</a>
 
 					<a
+						href="/user/notes"
+						on:click={() => trackEvent("my_notes_click")}
+						class="flex items-center gap-2 px-4 py-2 text-sm text-primary transition-colors hover:bg-gray-100 dark:text-white dark:hover:bg-white/10"
+					>
+						<Icon type="material" icon="sticky_note_2" w="16" h="16" />
+						{$_("nav.myNotes")}
+					</a>
+
+					<a
 						href="/user/activity"
 						class="flex items-center gap-2 px-4 py-2 text-sm text-primary transition-colors hover:bg-gray-100 dark:text-white dark:hover:bg-white/10"
 					>

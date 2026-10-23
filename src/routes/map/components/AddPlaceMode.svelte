@@ -12,6 +12,7 @@ import {
 	MERCHANT_LIST_MIN_ZOOM,
 	NEARBY_RADIUS_MULTIPLIER,
 } from "#lib/constants.js";
+import { isEmbedded } from "#lib/embed.js";
 import { _ } from "#lib/i18n/index.js";
 import { calculateRadiusKmFromLngLatBounds } from "#lib/map/viewport.js";
 import type { NearbyPlace } from "#lib/placementMode.js";
@@ -26,6 +27,8 @@ import PlacementPinIcon from "$components/PlacementPinIcon.svelte";
 
 import AddPlaceFormPanel from "./AddPlaceFormPanel.svelte";
 import PlacementSearchBar from "./PlacementSearchBar.svelte";
+import type { MapPoint, PointGesture } from "./PointActionMenu.svelte";
+import PointActionMenu from "./PointActionMenu.svelte";
 
 type Props = {
 	map: MapLibreMap | undefined;
@@ -354,10 +357,33 @@ const backToConfirm = async () => {
 	confirmButtonEl?.focus();
 };
 
-// Long-press (touch) and right-click (desktop) both jump straight into
-// placement mode centered on the pressed/clicked point — they still land on
-// the confirm sheet rather than skipping it, so an accidental trigger is
-// always recoverable via Cancel.
+// Long-press (touch) and right-click (desktop) open PointActionMenu at the
+// point (#1542): add a place there, or a note. "Add place here" enters
+// placement mode centered on the point — still on the confirm sheet rather
+// than skipping it, so an accidental trigger is always recoverable via
+// Cancel. Embeds show no notes, so there the gesture enters placement
+// directly as before.
+const embedded = isEmbedded();
+let pointMenu = $state<MapPoint | null>(null);
+
+const openPointMenu = (
+	lngLat: { lng: number; lat: number },
+	x: number,
+	y: number,
+	method: PointGesture,
+) => {
+	if (embedded) {
+		enterAt(lngLat, method);
+		return;
+	}
+	pointMenu = { lngLat: { lng: lngLat.lng, lat: lngLat.lat }, x, y, method };
+};
+
+// Placement started another way (the map menu): drop a menu left open.
+$effect(() => {
+	if (active) pointMenu = null;
+});
+
 const enterAt = (lngLat: LngLatLike, method: string) => {
 	if (!map || active) return;
 	// Point-intent entries land at detail zoom — zoom in only, never out.
@@ -401,12 +427,12 @@ $effect(() => {
 		longPressTimer = setTimeout(() => {
 			if (!touchStart) return;
 			const rect = canvas.getBoundingClientRect();
-			const point = currentMap.unproject([
-				touchStart.x - rect.left,
-				touchStart.y - rect.top,
-			]);
+			const x = touchStart.x - rect.left;
+			const y = touchStart.y - rect.top;
+			const point = currentMap.unproject([x, y]);
 			clearLongPress();
-			enterAt(point, "long_press");
+			if (active) return;
+			openPointMenu(point, x, y, "long_press");
 		}, LONG_PRESS_MS);
 	};
 
@@ -430,7 +456,7 @@ $effect(() => {
 		clearLongPress();
 		if (active) return;
 		e.originalEvent.preventDefault();
-		enterAt(e.lngLat, "right_click");
+		openPointMenu(e.lngLat, e.point.x, e.point.y, "right_click");
 	};
 
 	canvas.addEventListener("touchstart", onTouchStart, { passive: true });
@@ -465,6 +491,14 @@ $effect(() => {
 </script>
 
 <svelte:window onkeydown={onKeydown} />
+
+{#if map && !active}
+	<PointActionMenu
+		{map}
+		bind:point={pointMenu}
+		onAddPlace={(point) => enterAt(point.lngLat, point.method)}
+	/>
+{/if}
 
 {#if active}
 	{#if formOpen && !repositioning}

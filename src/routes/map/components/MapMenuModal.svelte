@@ -1,6 +1,8 @@
 <script lang="ts">
 import { trackEvent } from "#lib/analytics.js";
+import { isEmbedded } from "#lib/embed.js";
 import { _ } from "#lib/i18n/index.js";
+import { noteCard } from "#lib/noteCard.js";
 import { placementEntryUrl } from "#lib/placementMode.js";
 import { session } from "#lib/session.js";
 import Modal from "$components/Modal.svelte";
@@ -22,6 +24,9 @@ let {
 }: Props = $props();
 
 const loggedIn = $derived(!!$session);
+// Notes live where on-map placement does (/map outside issues mode), and
+// never in an embed.
+const canAddNote = $derived(!!onAddPlace && !isEmbedded());
 
 const rowClass =
 	"flex items-center gap-3 rounded-lg px-3 py-3 text-body hover:bg-gray-100 dark:text-white dark:hover:bg-white/5";
@@ -60,6 +65,20 @@ const iconClass = "h-5 w-5 flex-none dark:invert";
 					<img src="/icons/marker.svg" alt="" class={iconClass} />
 					<span>{$_("mapControls.addLocation")}</span>
 				</a>
+			{/if}
+			{#if canAddNote}
+				<button
+					type="button"
+					class="{rowClass} w-full text-left"
+					onclick={() => {
+						open = false;
+						trackEvent("note_add_click", { method: "menu" });
+						noteCard.requestCreate("menu");
+					}}
+				>
+					<img src="/icons/note.svg" alt="" class={iconClass} />
+					<span>{$_("notes.addNote")}</span>
+				</button>
 			{/if}
 			<!-- Full reload on purpose (data-sveltekit-reload): ?issues mode is
 				locked at page init, and a same-route client-side navigation

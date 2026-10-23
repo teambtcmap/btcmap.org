@@ -56,7 +56,8 @@
 		"countries": "Länder",
 		"account": "Konto",
 		"signup": "Registrieren",
-		"myPhotos": "Meine Fotos"
+		"myPhotos": "Meine Fotos",
+		"myNotes": "Meine Notizen"
 	},
 	"search": {
 		"placeholderPlaces": "Orte suchen...",
@@ -1358,5 +1359,44 @@
 			"success": "Passwort geändert.",
 			"error": "Dein Passwort konnte nicht geändert werden. Bitte versuche es erneut."
 		}
+	},
+	"notes": {
+		"addNote": "Notiz hinzufügen",
+		"addNoteHere": "Notiz hier hinzufügen",
+		"addPlaceHere": "Ort hier hinzufügen",
+		"pointMenuLabel": "An dieser Stelle hinzufügen",
+		"newNote": "Neue Notiz",
+		"note": "Notiz",
+		"textLabel": "Notiz",
+		"textPlaceholder": "Geldautomat ist drinnen, an der Bar fragen",
+		"textRequired": "Schreib zuerst etwas.",
+		"textTooLong": "Höchstens {max} Zeichen.",
+		"icon": "Symbol",
+		"public": "Öffentlich",
+		"publicOffHint": "Nur du kannst diese Notiz sehen.",
+		"publicOnHint": "Jeder darf diese Notiz sehen. BTC Map zeigt öffentliche Notizen anderen noch nicht an.",
+		"publicBadge": "Öffentlich",
+		"privateBadge": "Privat",
+		"dragHint": "Zieh die Nadel an die richtige Stelle. Nach dem Speichern lässt sich eine Notiz nicht mehr verschieben.",
+		"save": "Notiz speichern",
+		"saving": "Wird gespeichert…",
+		"cancel": "Abbrechen",
+		"edit": "Bearbeiten",
+		"delete": "Löschen",
+		"deleteConfirm": "Diese Notiz löschen?",
+		"deleted": "Notiz gelöscht",
+		"saved": "Notiz gespeichert",
+		"saveError": "Die Notiz konnte nicht gespeichert werden. Bitte versuch es noch einmal.",
+		"deleteError": "Die Notiz konnte nicht gelöscht werden. Bitte versuch es noch einmal.",
+		"visibilityError": "Die Sichtbarkeit der Notiz konnte nicht geändert werden. Bitte versuch es noch einmal.",
+		"close": "Schließen",
+		"promptTitle": "Melde dich an, um Notizen hinzuzufügen",
+		"promptDescription": "Notizen sind deine eigenen Nadeln auf der Karte, privat, solange du sie nicht öffentlich machst. Sie werden mit der BTC Map Android-App synchronisiert.",
+		"myNotes": "Meine Notizen",
+		"myNotesIntro": "Deine Nadeln auf der Karte. Öffne eine, um sie dort zu sehen.",
+		"empty": "Noch keine Notizen. Klick mit der rechten Maustaste auf die Karte oder halte sie gedrückt, um eine hinzuzufügen.",
+		"loadError": "Deine Notizen konnten nicht geladen werden. Bitte versuch es später noch einmal.",
+		"notFound": "Diese Notiz gibt es nicht mehr.",
+		"signInToView": "Melde dich an, um deine Notizen zu sehen."
 	}
 }

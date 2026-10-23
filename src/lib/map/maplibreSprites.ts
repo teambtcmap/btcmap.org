@@ -2,6 +2,7 @@ import type { ExpressionSpecification, Map as MapLibreMap } from "maplibre-gl";
 
 import { renderBundledIcon } from "#lib/icons/renderBundledIcon.js";
 import { resolveMaterialIcon } from "#lib/materialIcons.js";
+import { NOTE_PIN_COLOR, noteIconCandidates } from "#lib/noteIcons.js";
 import type { DerivedIssueCode } from "#lib/placeIssues.js";
 import { derivePlaceIssues, dominantIssue } from "#lib/placeIssues.js";
 import type { Place } from "#lib/types.js";
@@ -18,12 +19,18 @@ export const resolveIconifyName = (icon: string): string => {
 export const PIN_PATH =
 	"M0 16.0333C0 6.08 8.05161 0.131836 15.8361 0.131836C23.6205 0.131836 31.6721 6.08 31.6721 16.0333C31.6721 26.461 16.9494 41.3035 16.3229 41.9301C16.1941 42.0595 16.0185 42.1318 15.8361 42.1318C15.6536 42.1318 15.478 42.0595 15.3493 41.9301C14.7227 41.3035 0 26.461 0 16.0333Z";
 
+// The pin's logical size in px: its viewBox, and how big MapLibre draws it.
+export const PIN_WIDTH = 32;
+export const PIN_HEIGHT = 43;
+
 export const PIN_FILL_REGULAR = "#0E95AF";
 export const PIN_FILL_BOOSTED = "#F7931A";
 
-// One sprite variant per pin body color: regular teal, boosted orange, and
-// the four ?issues-worklist category colors (see #lib/placeIssues).
-export type PinVariant = "r" | "b" | "od" | "os" | "nv" | "mi";
+// One sprite variant per pin body color: regular teal, boosted orange, the
+// four ?issues-worklist category colors (see #lib/placeIssues), and the
+// signed-in user's personal notes (#lib/notes), whose glyphs resolve
+// through the note cascade instead of the place one.
+export type PinVariant = "r" | "b" | "od" | "os" | "nv" | "mi" | "n";
 
 export const ISSUE_PIN_VARIANTS: Record<DerivedIssueCode, PinVariant> = {
 	outdated: "od",
@@ -43,6 +50,8 @@ export const PIN_FILLS: Record<PinVariant, string> = {
 	os: "#CA8A04", // outdated_soon
 	nv: "#64748B", // not_verified — slate-500
 	mi: "#7C3AED", // missing_icon — violet-600
+	// Notes are hidden in ?issues mode, so the closeness to violet never shows.
+	n: NOTE_PIN_COLOR,
 };
 
 export const spriteName = (icon: string, variant: PinVariant): string =>
@@ -144,9 +153,20 @@ export const fetchIconInnerSvg = async (icon: string): Promise<string> => {
 	throw new Error(`No icon found for ${icon}`);
 };
 
+// A note's glyph: the Material Symbols cascade from noteIconCandidates, bundle
+// first per step, ending in the bundled default note glyph.
+export const fetchNoteIconInnerSvg = async (icon: string): Promise<string> => {
+	for (const name of noteIconCandidates(icon)) {
+		const svg = await innerSvgForName(name);
+		if (svg) return svg;
+	}
+	throw new Error(`No icon found for note icon ${icon}`);
+};
+
 export const buildCompositeSvg = (
 	innerSvg: string,
 	variant: PinVariant,
+	scale: number = PIN_RENDER_SCALE,
 ): string => {
 	const fill = PIN_FILLS[variant];
 	// innerSvg is a complete <svg>...</svg> document; nesting an SVG inside an
@@ -154,11 +174,20 @@ export const buildCompositeSvg = (
 	// width/height are SCALE× the viewBox dims; nested vector content (pin
 	// path, inner SVG glyph) re-rasterizes at the higher resolution → crisp
 	// on retina. addImage in ensureSprite registers with pixelRatio: SCALE
-	// so MapLibre still displays at the logical 32×43 size.
-	const w = 32 * PIN_RENDER_SCALE;
-	const h = 43 * PIN_RENDER_SCALE;
-	return `<svg xmlns="http://www.w3.org/2000/svg" width="${w}" height="${h}" viewBox="0 0 32 43"><path d="${PIN_PATH}" fill="${fill}"/><g transform="translate(6, 5.75)">${innerSvg}</g></svg>`;
+	// so MapLibre still displays at the logical PIN_WIDTH×PIN_HEIGHT size.
+	// A DOM <img> scales the vector itself, so it asks for scale 1.
+	const w = PIN_WIDTH * scale;
+	const h = PIN_HEIGHT * scale;
+	return `<svg xmlns="http://www.w3.org/2000/svg" width="${w}" height="${h}" viewBox="0 0 ${PIN_WIDTH} ${PIN_HEIGHT}"><path d="${PIN_PATH}" fill="${fill}"/><g transform="translate(6, 5.75)">${innerSvg}</g></svg>`;
 };
+
+// A note pin as an <img> source, for a DOM marker (the draggable pin of a
+// note being added). An image, not innerHTML: the glyph may come from the
+// Iconify API, and an image can't run anything it carries.
+export const notePinDataUrl = async (icon: string): Promise<string> =>
+	`data:image/svg+xml,${encodeURIComponent(
+		buildCompositeSvg(await fetchNoteIconInnerSvg(icon), "n", 1),
+	)}`;
 
 export const loadSvgImage = (svg: string): Promise<HTMLImageElement> =>
 	new Promise((resolve, reject) => {
@@ -286,7 +315,10 @@ export const ensureSprite = (
 	const existing = cache.get(name);
 	if (existing) return existing;
 	const promise = (async () => {
-		const inner = await fetchIconInnerSvg(icon);
+		const inner =
+			variant === "n"
+				? await fetchNoteIconInnerSvg(icon)
+				: await fetchIconInnerSvg(icon);
 		const composite = buildCompositeSvg(inner, variant);
 		const img = await loadSvgImage(composite);
 		if (hasRealSprite(m, name)) return;

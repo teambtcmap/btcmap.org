@@ -61,7 +61,8 @@
 		"login": "Accedi",
 		"signup": "Registrati",
 		"logout": "Esci",
-		"myPhotos": "Le mie foto"
+		"myPhotos": "Le mie foto",
+		"myNotes": "Le mie note"
 	},
 	"saved": {
 		"title": "I miei salvati",
@@ -1418,5 +1419,44 @@
 			"success": "Password cambiata.",
 			"error": "Impossibile cambiare la password. Riprova."
 		}
+	},
+	"notes": {
+		"addNote": "Aggiungi una nota",
+		"addNoteHere": "Aggiungi nota qui",
+		"addPlaceHere": "Aggiungi luogo qui",
+		"pointMenuLabel": "Aggiungi in questo punto",
+		"newNote": "Nuova nota",
+		"note": "Nota",
+		"textLabel": "Nota",
+		"textPlaceholder": "Il bancomat è dentro, chiedi al bar",
+		"textRequired": "Scrivi prima qualcosa.",
+		"textTooLong": "Al massimo {max} caratteri.",
+		"icon": "Icona",
+		"public": "Pubblica",
+		"publicOffHint": "Solo tu puoi vedere questa nota.",
+		"publicOnHint": "Chiunque può vedere questa nota. BTC Map non mostra ancora le note pubbliche agli altri.",
+		"publicBadge": "Pubblica",
+		"privateBadge": "Privata",
+		"dragHint": "Trascina il segnaposto nel punto giusto. Una nota non si può spostare dopo il salvataggio.",
+		"save": "Salva nota",
+		"saving": "Salvataggio…",
+		"cancel": "Annulla",
+		"edit": "Modifica",
+		"delete": "Elimina",
+		"deleteConfirm": "Eliminare questa nota?",
+		"deleted": "Nota eliminata",
+		"saved": "Nota salvata",
+		"saveError": "Impossibile salvare la nota. Riprova.",
+		"deleteError": "Impossibile eliminare la nota. Riprova.",
+		"visibilityError": "Impossibile cambiare chi può vedere la nota. Riprova.",
+		"close": "Chiudi",
+		"promptTitle": "Accedi per aggiungere note",
+		"promptDescription": "Le note sono i tuoi segnaposti sulla mappa, privati a meno che tu non li renda pubblici. Si sincronizzano con l'app Android di BTC Map.",
+		"myNotes": "Le mie note",
+		"myNotesIntro": "I tuoi segnaposti sulla mappa. Aprine uno per vederlo lì.",
+		"empty": "Nessuna nota per ora. Fai clic destro o tieni premuto sulla mappa per aggiungerne una.",
+		"loadError": "Impossibile caricare le tue note. Riprova più tardi.",
+		"notFound": "Quella nota non esiste più.",
+		"signInToView": "Accedi per vedere le tue note."
 	}
 }

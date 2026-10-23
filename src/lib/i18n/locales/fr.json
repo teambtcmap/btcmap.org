@@ -56,7 +56,8 @@
 		"countries": "Pays",
 		"account": "Compte",
 		"signup": "S'inscrire",
-		"myPhotos": "Mes photos"
+		"myPhotos": "Mes photos",
+		"myNotes": "Mes notes"
 	},
 	"search": {
 		"placeholderPlaces": "Rechercher des lieux...",
@@ -1358,5 +1359,44 @@
 			"success": "Mot de passe modifié.",
 			"error": "Impossible de modifier votre mot de passe. Veuillez réessayer."
 		}
+	},
+	"notes": {
+		"addNote": "Ajouter une note",
+		"addNoteHere": "Ajouter une note ici",
+		"addPlaceHere": "Ajouter un lieu ici",
+		"pointMenuLabel": "Ajouter à cet endroit",
+		"newNote": "Nouvelle note",
+		"note": "Note",
+		"textLabel": "Note",
+		"textPlaceholder": "Le distributeur est à l'intérieur, demandez au bar",
+		"textRequired": "Écrivez d'abord quelque chose.",
+		"textTooLong": "{max} caractères maximum.",
+		"icon": "Icône",
+		"public": "Publique",
+		"publicOffHint": "Vous seul pouvez voir cette note.",
+		"publicOnHint": "Tout le monde peut voir cette note. BTC Map n'affiche pas encore les notes publiques aux autres.",
+		"publicBadge": "Publique",
+		"privateBadge": "Privée",
+		"dragHint": "Faites glisser l'épingle au bon endroit. Une note ne peut plus être déplacée une fois enregistrée.",
+		"save": "Enregistrer la note",
+		"saving": "Enregistrement…",
+		"cancel": "Annuler",
+		"edit": "Modifier",
+		"delete": "Supprimer",
+		"deleteConfirm": "Supprimer cette note ?",
+		"deleted": "Note supprimée",
+		"saved": "Note enregistrée",
+		"saveError": "Impossible d'enregistrer la note. Veuillez réessayer.",
+		"deleteError": "Impossible de supprimer la note. Veuillez réessayer.",
+		"visibilityError": "Impossible de changer qui peut voir la note. Veuillez réessayer.",
+		"close": "Fermer",
+		"promptTitle": "Connectez-vous pour ajouter des notes",
+		"promptDescription": "Les notes sont vos propres épingles sur la carte, privées sauf si vous les rendez publiques. Elles se synchronisent avec l'application Android BTC Map.",
+		"myNotes": "Mes notes",
+		"myNotesIntro": "Vos épingles sur la carte. Ouvrez-en une pour la voir sur la carte.",
+		"empty": "Aucune note pour l'instant. Faites un clic droit ou un appui long sur la carte pour en ajouter une.",
+		"loadError": "Impossible de charger vos notes. Veuillez réessayer plus tard.",
+		"notFound": "Cette note n'existe plus.",
+		"signInToView": "Connectez-vous pour voir vos notes."
 	}
 }

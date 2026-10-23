@@ -5,9 +5,15 @@ import type { Place } from "#lib/types.js";
 import {
 	buildCompositeSvg,
 	fetchIconInnerSvg,
+	fetchNoteIconInnerSvg,
+	notePinDataUrl,
 	PIN_FILL_BOOSTED,
 	PIN_FILL_REGULAR,
 	PIN_FILLS,
+	PIN_HEIGHT,
+	PIN_PATH,
+	PIN_RENDER_SCALE,
+	PIN_WIDTH,
 	pinVariantFor,
 	resolveIconifyName,
 	spriteName,
@@ -80,6 +86,15 @@ describe("sprite naming and fills", () => {
 	it("renders the variant fill into the composite svg", () => {
 		const svg = buildCompositeSvg("<svg></svg>", "nv");
 		expect(svg).toContain(`fill="${PIN_FILLS.nv}"`);
+	});
+
+	it("rasterizes at the sprite scale unless told otherwise", () => {
+		expect(buildCompositeSvg("", "r")).toContain(
+			`width="${PIN_WIDTH * PIN_RENDER_SCALE}"`,
+		);
+		const atSize = buildCompositeSvg("", "r", 1);
+		expect(atSize).toContain(`width="${PIN_WIDTH}"`);
+		expect(atSize).toContain(`height="${PIN_HEIGHT}"`);
 	});
 });
 
@@ -157,5 +172,75 @@ describe("fetchIconInnerSvg", () => {
 		expect(String(fetchMock.mock.calls[1]?.[0])).toContain(
 			"material-symbols/zzz-not-a-real-icon",
 		);
+	});
+});
+
+describe("notePinDataUrl", () => {
+	afterEach(() => {
+		vi.unstubAllGlobals();
+	});
+
+	it("draws the note pin with its glyph at display size, offline", async () => {
+		const fetchMock = vi.fn();
+		vi.stubGlobal("fetch", fetchMock);
+
+		const url = await notePinDataUrl("atm");
+
+		expect(url.startsWith("data:image/svg+xml,")).toBe(true);
+		const svg = decodeURIComponent(url.slice("data:image/svg+xml,".length));
+		expect(svg).toContain(PIN_PATH);
+		expect(svg).toContain(`fill="${PIN_FILLS.n}"`);
+		expect(svg).toContain(`width="${PIN_WIDTH}"`);
+		expect(svg.match(/<svg/g)).toHaveLength(2);
+		expect(fetchMock).not.toHaveBeenCalled();
+	});
+});
+
+describe("fetchNoteIconInnerSvg", () => {
+	afterEach(() => {
+		vi.unstubAllGlobals();
+	});
+
+	it("renders a curated note icon from the bundle", async () => {
+		const fetchMock = vi.fn();
+		vi.stubGlobal("fetch", fetchMock);
+
+		const svg = await fetchNoteIconInnerSvg("local_parking");
+
+		expect(svg).toMatch(/^<svg[^>]*>/);
+		expect(fetchMock).not.toHaveBeenCalled();
+	});
+
+	it("asks material-symbols (not ic:outline) for an unbundled symbol", async () => {
+		// Android notes carry Material Symbols names; half of them don't
+		// exist in the ic set the place resolver defaults to.
+		const fetchMock = vi.fn(async (_url: string) => ({
+			ok: true,
+			text: async () => "<svg>fetched</svg>",
+		}));
+		vi.stubGlobal("fetch", fetchMock);
+
+		const svg = await fetchNoteIconInnerSvg("kayaking");
+
+		expect(svg).toBe("<svg>fetched</svg>");
+		expect(String(fetchMock.mock.calls[0]?.[0])).toContain(
+			"material-symbols/kayaking-outline",
+		);
+	});
+
+	it("cascades outlined → filled → the bundled default note glyph", async () => {
+		const fetchMock = vi.fn(async (_url: string) => ({
+			ok: false,
+			text: async () => "",
+		}));
+		vi.stubGlobal("fetch", fetchMock);
+
+		const svg = await fetchNoteIconInnerSvg("zzz_not_a_symbol");
+
+		expect(svg).toMatch(/^<svg[^>]*>/);
+		expect(fetchMock.mock.calls.map(([url]) => String(url))).toEqual([
+			expect.stringContaining("material-symbols/zzz-not-a-symbol-outline"),
+			expect.stringContaining("material-symbols/zzz-not-a-symbol.svg"),
+		]);
 	});
 });
