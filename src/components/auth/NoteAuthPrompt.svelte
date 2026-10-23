@@ -9,14 +9,16 @@ import AuthPrompt from "$components/auth/AuthPrompt.svelte";
 // waits at its point on the map and opens once the user is signed in.
 type Props = {
 	open?: boolean;
-	onAuthenticated: () => void;
+	// The add card opens on its own once a session exists, so most
+	// callers need nothing here.
+	onAuthenticated?: () => void;
 };
 
 let { open = $bindable(false), onAuthenticated }: Props = $props();
 
 const finish = () => {
 	open = false;
-	onAuthenticated();
+	onAuthenticated?.();
 };
 
 async function handleLoginSuccess(current: Session) {

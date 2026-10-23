@@ -332,4 +332,4 @@ $effect(() => {
 	{/if}
 {/if}
 
-<NoteAuthPrompt bind:open={authPromptOpen} onAuthenticated={() => {}} />
+<NoteAuthPrompt bind:open={authPromptOpen} />
