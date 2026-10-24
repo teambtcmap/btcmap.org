@@ -48,50 +48,52 @@ import { errToast } from "#lib/utils.js";
 export type SignerMode = "login" | "link";
 // Which signer transport is running. "qr", "open" and "copy" share one
 // nostrconnect session; the presentation only decides how its URI is shown.
-export type SignerRunKind = "saved" | "bunker" | "qr" | "open" | "copy";
 export type PairMode = "qr" | "open" | "copy";
+export type SignerRunKind = "saved" | "bunker" | PairMode;
 
-// Each surface owns its funnel: the transports are the same, the events not.
-const EVENTS = {
+// Each surface owns its funnel, its toast and its log label: the
+// transports are the same, the words not. Failure logs name the surface; an
+// API error object never gets logged (an Axios error carries the Bearer
+// token and the request body).
+const MODES = {
 	login: {
-		toggle: "login_nostr_options_toggle",
-		extension: "login_nostr_extension_click",
-		nsec: "login_nostr_nsec_click",
-		bunker: "login_nostr_bunker_click",
-		saved: "login_nostr_saved_click",
-		forget: "login_nostr_forget_click",
-		qr: "login_nostr_connect_qr_click",
-		open: "login_nostr_connect_open_click",
-		copy: "login_nostr_connect_copy_click",
-		authUrl: "login_nostr_auth_url_click",
-		success: "login_nostr_success",
+		events: {
+			toggle: "login_nostr_options_toggle",
+			extension: "login_nostr_extension_click",
+			nsec: "login_nostr_nsec_click",
+			bunker: "login_nostr_bunker_click",
+			saved: "login_nostr_saved_click",
+			forget: "login_nostr_forget_click",
+			qr: "login_nostr_connect_qr_click",
+			open: "login_nostr_connect_open_click",
+			copy: "login_nostr_connect_copy_click",
+			authUrl: "login_nostr_auth_url_click",
+			success: "login_nostr_success",
+		},
+		errorKey: "login.nostrError",
+		logLabel: "Nostr login failed:",
 	},
 	link: {
-		toggle: "account_nostr_options_toggle",
-		extension: "account_nostr_link_click",
-		nsec: "account_nostr_link_click",
-		bunker: "account_nostr_link_click",
-		saved: "account_nostr_link_click",
-		forget: "account_nostr_forget_click",
-		qr: "account_nostr_link_click",
-		open: "account_nostr_link_click",
-		copy: "account_nostr_link_click",
-		authUrl: "account_nostr_auth_url_click",
-		success: "account_nostr_link_success",
+		events: {
+			toggle: "account_nostr_options_toggle",
+			extension: "account_nostr_link_click",
+			nsec: "account_nostr_link_click",
+			bunker: "account_nostr_link_click",
+			saved: "account_nostr_link_click",
+			forget: "account_nostr_forget_click",
+			qr: "account_nostr_link_click",
+			open: "account_nostr_link_click",
+			copy: "account_nostr_link_click",
+			authUrl: "account_nostr_auth_url_click",
+			success: "account_nostr_link_success",
+		},
+		errorKey: "account.nostr.linkError",
+		logLabel: "Nostr key link failed:",
 	},
-} as const satisfies Record<SignerMode, Record<string, EventName>>;
-
-const ERROR_KEY = {
-	login: "login.nostrError",
-	link: "account.nostr.linkError",
-} as const;
-
-// Failure logs name the surface; an API error object never gets logged (an
-// Axios error carries the Bearer token and the request body).
-const LOG_LABEL = {
-	login: "Nostr login failed:",
-	link: "Nostr key link failed:",
-} as const;
+} as const satisfies Record<
+	SignerMode,
+	{ events: Record<string, EventName>; errorKey: string; logLabel: string }
+>;
 
 // What a failure may log: an HTTP error's status, never the error itself.
 // The login exchange's Axios error isn't scrubbed (it isn't an authedApi
@@ -164,7 +166,7 @@ export const createSignerRun = ({
 	openUrl = (url) => window.open(url, "_blank", "noopener,noreferrer"),
 	deps = nostrSignerDeps,
 }: Options) => {
-	const events = EVENTS[mode];
+	const { events, errorKey, logLabel } = MODES[mode];
 	const t = (key: string) => get(_)(key);
 
 	let nostrLoading = $state(false);
@@ -193,9 +195,7 @@ export const createSignerRun = ({
 	const showError = (err: unknown, logLabel: string) => {
 		const status = errorStatus(err);
 		errToast(
-			status === 401 || status === 403
-				? t("login.nostrFailed")
-				: t(ERROR_KEY[mode]),
+			status === 401 || status === 403 ? t("login.nostrFailed") : t(errorKey),
 		);
 		console.error(logLabel, loggable(err));
 	};
@@ -207,7 +207,7 @@ export const createSignerRun = ({
 		// it gets the same "signature rejected" wording rather than a signer
 		// message.
 		if (errorStatus(err) !== undefined) {
-			showError(err, LOG_LABEL[mode]);
+			showError(err, logLabel);
 			return;
 		}
 		switch (classifySignerError(err)) {
@@ -226,9 +226,9 @@ export const createSignerRun = ({
 				// rides along with the generic message.
 				const detail =
 					typeof err === "string" ? err : (err as Error | undefined)?.message;
-				const message = t(ERROR_KEY[mode]);
+				const message = t(errorKey);
 				errToast(detail ? `${message} (${detail})` : message);
-				console.error(LOG_LABEL[mode], loggable(err));
+				console.error(logLabel, loggable(err));
 			}
 		}
 	};
@@ -299,7 +299,7 @@ export const createSignerRun = ({
 		// unmount -> cancel bumps the generation. The signature was accepted
 		// either way, so the pairing is still worth keeping. It also carries
 		// the user's key as named by the signed event, where the bunker pointer
-		// names the signer's (they differ on signers like nsec.app).
+		// names the signer's, and the two can differ.
 		const verified = pairingWithSignerKey(pairing, signed.pubkey);
 		deps.saveSignerPairing(verified);
 		savedPairing = verified;
@@ -400,7 +400,7 @@ export const createSignerRun = ({
 				}
 			} catch (err) {
 				if (run === generation) {
-					showError(err, `${LOG_LABEL[mode]} (extension)`);
+					showError(err, `${logLabel} (extension)`);
 				}
 			} finally {
 				nostrLoading = false;
@@ -446,7 +446,7 @@ export const createSignerRun = ({
 				}
 				return true;
 			} catch (err) {
-				if (run === generation) showError(err, `${LOG_LABEL[mode]} (nsec)`);
+				if (run === generation) showError(err, `${logLabel} (nsec)`);
 				return false;
 			} finally {
 				// Best-effort zeroing. V8 may have copies elsewhere, but this
