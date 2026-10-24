@@ -1,11 +1,7 @@
 <script lang="ts">
-import Time from "svelte-time";
-
-import { createTimeLocale, LOCALIZED_DATE_FORMAT } from "#lib/dayjsLocale.js";
-import { _, locale } from "#lib/i18n/index.js";
+import { _ } from "#lib/i18n/index.js";
 import Icon from "$components/Icon.svelte";
-
-const timeLocale = createTimeLocale(locale);
+import LocalTime from "$components/LocalTime.svelte";
 
 // Shared boost CTA card, used by the merchant detail page and the map drawer.
 // The trigger differs per context, so the consumer passes `onClick`: the page
@@ -39,7 +35,7 @@ export let onClick: () => void;
 			{#if boosted && boostedUntil}
 				<p class="mt-0.5 text-xs text-amber-700 dark:text-amber-400/80">
 					{$_('boost.expires')}:
-					<Time live={3000} relative={true} timestamp={boostedUntil} format={LOCALIZED_DATE_FORMAT} locale={$timeLocale} />
+					<LocalTime live={3000} relative={true} timestamp={boostedUntil} />
 				</p>
 			{:else}
 				<p class="mt-0.5 text-xs text-amber-700 dark:text-amber-400/80">

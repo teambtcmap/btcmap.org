@@ -1,12 +1,7 @@
 <script lang="ts">
-import Time from "svelte-time";
-
 import { commentDomId } from "#lib/commentPermalink.js";
-import { createTimeLocale, LOCALIZED_DATE_FORMAT } from "#lib/dayjsLocale.js";
-import { locale } from "#lib/i18n/index.js";
 import type { MerchantPageData } from "#lib/types.js";
-
-const timeLocale = createTimeLocale(locale);
+import LocalTime from "$components/LocalTime.svelte";
 
 type Props = {
 	commentId: MerchantPageData["comments"][number]["id"];
@@ -71,7 +66,7 @@ let {
 				class:lg:inline={!compact}
 			>
 				<a href="#{commentDomId(commentId)}" class="hover:underline">
-					<Time timestamp={time} format={LOCALIZED_DATE_FORMAT} locale={$timeLocale} />
+					<LocalTime timestamp={time} />
 				</a>
 			</span>
 		</div>

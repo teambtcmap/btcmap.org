@@ -1,12 +1,10 @@
 <script lang="ts">
 import { onMount } from "svelte";
-import Time from "svelte-time";
 
 import type { PlacePhotoSource } from "#lib/analytics.js";
 import { trackEvent } from "#lib/analytics.js";
 import { errorStatus } from "#lib/apiError.js";
-import { createTimeLocale, LOCALIZED_DATE_FORMAT } from "#lib/dayjsLocale.js";
-import { _, locale } from "#lib/i18n/index.js";
+import { _ } from "#lib/i18n/index.js";
 import {
 	askPhotoDelete,
 	cancelPhotoDelete,
@@ -16,6 +14,7 @@ import { fetchMyPlacePhotos, placePhotoUrl } from "#lib/placePhotos.js";
 import { session } from "#lib/session.js";
 import { placesById } from "#lib/store.js";
 import Icon from "$components/Icon.svelte";
+import LocalTime from "$components/LocalTime.svelte";
 import PhotoDeleteConfirm from "$components/PhotoDeleteConfirm.svelte";
 import Skeleton from "$components/Skeleton.svelte";
 
@@ -38,8 +37,6 @@ let loadError = $state(false);
 // The photo whose delete is waiting for confirmation, and the one in flight
 let confirmingId = $state<number | null>(null);
 let deletingId = $state<number | null>(null);
-
-const timeLocale = createTimeLocale(locale);
 
 // Places come from the app-wide sync; a place that's gone (or not synced
 // yet) still gets a readable label
@@ -143,7 +140,7 @@ onMount(async () => {
 							{placeName(photo.place_id)}
 						</a>
 						<p class="text-xs text-body dark:text-white/70">
-							<Time timestamp={photo.created_at} relative format={LOCALIZED_DATE_FORMAT} locale={$timeLocale} />
+							<LocalTime timestamp={photo.created_at} relative />
 						</p>
 						{#if confirmingId === photo.id}
 							<div class="flex items-center gap-2">

@@ -1,16 +1,14 @@
 <script lang="ts">
 import { onDestroy, onMount, untrack } from "svelte";
 import { OutClick } from "svelte-outclick";
-import Time from "svelte-time";
 
 import type { PlacePhotoSource } from "#lib/analytics.js";
 import { trackEvent } from "#lib/analytics.js";
 import { lockBodyScroll, unlockBodyScroll } from "#lib/bodyScrollLock.js";
 import type { CurrentUser } from "#lib/currentUser.js";
 import { fetchCurrentUser } from "#lib/currentUser.js";
-import { createTimeLocale, LOCALIZED_DATE_FORMAT } from "#lib/dayjsLocale.js";
 import { trapTab } from "#lib/focusTrap.js";
-import { _, locale } from "#lib/i18n/index.js";
+import { _ } from "#lib/i18n/index.js";
 import {
 	askPhotoDelete,
 	cancelPhotoDelete,
@@ -28,6 +26,7 @@ import { portal } from "#lib/portal.js";
 import { session } from "#lib/session.js";
 import { errToast, successToast } from "#lib/utils.js";
 import Icon from "$components/Icon.svelte";
+import LocalTime from "$components/LocalTime.svelte";
 import PhotoDeleteConfirm from "$components/PhotoDeleteConfirm.svelte";
 
 import type { PlaceImage } from "$types/btcmap-api/PlaceImage";
@@ -70,9 +69,6 @@ const MAX_DOTS = 8;
 let index = $state(untrack(() => startIndex));
 const photo = $derived(photos[index]);
 const authorName = $derived(photoAuthorName(photo));
-
-// Relative date in the app's language; English until its dayjs locale loads
-const timeLocale = createTimeLocale(locale);
 
 const total = $derived(photos.length);
 
@@ -266,7 +262,7 @@ onDestroy(() => {
 				</span>
 				<span aria-hidden="true">·</span>
 				<!-- live keeps "a few seconds ago" current while the viewer is open -->
-				<Time timestamp={photo.created_at} relative live format={LOCALIZED_DATE_FORMAT} locale={$timeLocale} />
+				<LocalTime timestamp={photo.created_at} relative live />
 			</p>
 		</div>
 		<span
