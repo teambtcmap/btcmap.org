@@ -2,123 +2,163 @@
 // No cookies, no PII, GDPR compliant
 // Only enabled in production
 
+import type { BasemapId } from "#lib/map/basemaps.js";
+import type { VerifiedFilterYears } from "#lib/map/verifiedFilter.js";
+import type { MerchantListMode } from "#lib/merchantListStore.js";
+import type { AddEntryMethod } from "#lib/placementMode.js";
+import type { SavedItemType } from "#lib/savedItems.js";
+
 import { dev } from "$app/env";
 
 const ANALYTICS_HOSTNAME = "btcmap.org";
 
-export type EventName =
-	| "search_query"
-	| "search_input_focus"
-	| "search_sheet_swipe_expand"
-	| "search_sheet_swipe_collapse"
-	| "search_sheet_tap_expand"
-	| "search_bar_tap_expand"
-	| "category_filter"
-	| "verified_filter_change"
-	| "boost_layer_toggle"
-	| "heatmap_layer_toggle"
-	| "home_button_click"
-	| "show_all_on_map_click"
-	| "merchant_list_item_click"
-	| "locate_click"
-	| "add_location_click"
-	| "community_map_click"
-	| "issues_map_click"
-	| "account_button_click"
-	| "signup_button_click"
-	| "signup_create_account_success"
-	| "nav_menu_open"
-	| "layers_panel_open"
-	| "worldview_toggle"
-	| "layer_change"
-	| "drawer_swipe_expand"
-	| "drawer_swipe_collapse"
-	| "drawer_swipe_dismiss"
-	| "drawer_collapse_button_click"
-	| "language_switch"
-	| "enable_precise_distances_click"
-	| "merchant_name_click"
-	| "merchant_profile_click"
-	| "browser_language"
-	| "save_item_toggle"
-	| "save_prompt_shown"
-	| "save_prompt_create_account_click"
-	| "save_prompt_login_click"
-	| "login_create_account_click"
-	| "login_nostr_options_toggle"
-	| "login_nostr_extension_click"
-	| "login_nostr_nsec_click"
-	| "login_nostr_bunker_click"
-	| "login_nostr_saved_click"
-	| "login_nostr_forget_click"
-	| "login_nostr_connect_open_click"
-	| "login_nostr_connect_copy_click"
-	| "login_nostr_connect_qr_click"
-	| "login_nostr_success"
-	| "login_password_success"
-	| "login_nostr_auth_url_click"
-	| "backup_credentials_copied"
-	| "add_place_enter"
-	| "add_place_confirm"
-	| "add_place_nearby_shown"
-	| "add_place_nearby_continue"
-	| "add_place_nearby_candidate_click"
-	| "add_place_address_prefill"
-	| "add_place_address_jump"
-	| "add_place_details_enter"
-	| "add_place_details_back"
-	| "add_place_review_enter"
-	| "add_place_review_back"
-	| "add_place_move_pin_click"
-	| "add_place_move_pin_success"
-	| "add_place_submit_success"
-	| "add_place_osm_edit_click"
-	| "join_us_link_click"
-	| "add_place_tagger_guide_click"
-	| "add_place_review_queue_click"
-	| "comment_add_click"
-	| "comment_add_success"
-	| "place_photo_open"
-	| "place_photo_add_click"
-	| "place_photo_add_success"
-	| "place_photo_prompt_create_account_click"
-	| "place_photo_prompt_login_click"
-	| "place_photo_strip_scroll"
-	| "place_photo_view"
-	| "place_photo_link_copy"
-	| "place_photo_menu_open"
-	| "place_photo_delete_click"
-	| "place_photo_delete_success"
-	| "place_photo_upload_undo_click"
-	| "place_photo_upload_undo_success"
-	| "place_photo_delete_cancel"
-	| "my_photos_click"
-	| "my_photos_tile_click"
-	| "my_account_click"
-	| "account_username_save_click"
-	| "account_username_save_success"
-	| "account_password_change_click"
-	| "account_password_change_success"
-	| "account_nostr_link_click"
-	| "account_nostr_link_success"
-	| "account_nostr_options_toggle"
-	| "account_nostr_forget_click"
-	| "account_nostr_auth_url_click"
-	| "account_nostr_unlink_open"
-	| "account_nostr_unlink_click"
-	| "account_nostr_unlink_success"
-	| "note_add_click"
-	| "note_add_success"
-	| "note_open"
-	| "note_edit_click"
-	| "note_edit_success"
-	| "note_visibility_change"
-	| "note_delete_click"
-	| "note_delete_success"
-	| "note_prompt_create_account_click"
-	| "note_prompt_login_click"
-	| "my_notes_click"
-	| "my_notes_row_click";
+// Every event and the data it carries: `undefined` for none. trackEvent
+// takes exactly this payload, so a funnel's dimensions can't drift between
+// the sites that fire it. Keep the keys sorted; a new event goes in its
+// place, not at the end. Keys already in Umami keep their names, casing
+// included, so its reports stay continuous.
+type EventPayloads = {
+	account_button_click: { logged_in: boolean };
+	account_nostr_auth_url_click: undefined;
+	account_nostr_forget_click: undefined;
+	account_nostr_link_click: { method: NostrSignMethod };
+	account_nostr_link_success: { method: NostrSignMethod };
+	account_nostr_options_toggle: { open: boolean };
+	account_nostr_unlink_click: undefined;
+	account_nostr_unlink_open: undefined;
+	account_nostr_unlink_success: undefined;
+	account_password_change_click: undefined;
+	account_password_change_success: undefined;
+	account_username_save_click: undefined;
+	account_username_save_success: undefined;
+	add_location_click: undefined;
+	add_place_address_jump: undefined;
+	add_place_address_prefill: { outcome: "hit" | "miss" };
+	add_place_confirm: undefined;
+	add_place_details_back: undefined;
+	add_place_details_enter: undefined;
+	add_place_enter: { method: AddEntryMethod };
+	add_place_move_pin_click: undefined;
+	add_place_move_pin_success: undefined;
+	add_place_nearby_candidate_click: { placeId: number };
+	add_place_nearby_continue: undefined;
+	add_place_nearby_shown: { count: number };
+	add_place_osm_edit_click: undefined;
+	add_place_review_back: undefined;
+	add_place_review_enter: undefined;
+	add_place_review_queue_click: undefined;
+	add_place_submit_success: { attributed: boolean };
+	add_place_tagger_guide_click: undefined;
+	boost_layer_toggle: undefined;
+	browser_language: {
+		language: string;
+		language_code: string;
+		language_region?: string;
+	};
+	category_filter: { category: string; mode: MerchantListMode };
+	comment_add_click: { source: CommentSource };
+	comment_add_success: { source: CommentSource };
+	community_map_click: undefined;
+	drawer_collapse_button_click: undefined;
+	drawer_swipe_collapse: undefined;
+	drawer_swipe_dismiss: undefined;
+	drawer_swipe_expand: undefined;
+	enable_precise_distances_click: undefined;
+	heatmap_layer_toggle: { enabled: boolean };
+	home_button_click: undefined;
+	issues_map_click: undefined;
+	join_us_link_click: { target: JoinUsTarget };
+	language_switch: { language: string };
+	layer_change: { layer: BasemapId };
+	layers_panel_open: undefined;
+	locate_click: undefined;
+	login_create_account_click: undefined;
+	login_nostr_auth_url_click: undefined;
+	login_nostr_bunker_click: { method: "bunker" };
+	login_nostr_connect_copy_click: { method: "copy" };
+	login_nostr_connect_open_click: { method: "open" };
+	login_nostr_connect_qr_click: { method: "qr" };
+	login_nostr_extension_click: { method: "extension" };
+	login_nostr_forget_click: undefined;
+	login_nostr_nsec_click: { method: "nsec" };
+	login_nostr_options_toggle: { open: boolean };
+	login_nostr_saved_click: { method: "saved" };
+	login_nostr_success: { method: NostrSignMethod };
+	login_password_success: undefined;
+	merchant_list_item_click: { mode: MerchantListMode };
+	merchant_name_click: undefined;
+	merchant_profile_click: undefined;
+	my_account_click: undefined;
+	my_notes_click: undefined;
+	my_notes_row_click: undefined;
+	my_photos_click: undefined;
+	my_photos_tile_click: { link: "photo" | "place" };
+	nav_menu_open: { variant: "main" | "communities" };
+	note_add_click: { method: NoteAddMethod };
+	note_add_success: { method: NoteAddMethod; icon: string; public: boolean };
+	note_delete_click: undefined;
+	note_delete_success: undefined;
+	note_edit_click: undefined;
+	note_edit_success: { text: boolean; icon: boolean };
+	note_open: { source: "map" | "link" };
+	note_prompt_create_account_click: undefined;
+	note_prompt_login_click: undefined;
+	note_visibility_change: { public: boolean };
+	place_photo_add_click: {
+		source: PlacePhotoSource;
+		entry: "header" | "empty";
+		signedIn: boolean;
+	};
+	place_photo_add_success: { source: PlacePhotoSource; count: number };
+	place_photo_delete_cancel: { source: PlacePhotoSource };
+	place_photo_delete_click: { source: PlacePhotoSource };
+	place_photo_delete_success: { source: PlacePhotoSource };
+	place_photo_link_copy: { source: PlacePhotoSource };
+	place_photo_menu_open: { source: PlacePhotoSource };
+	place_photo_open: {
+		source: PlacePhotoSource;
+		index: number;
+		via: "tile" | "deeplink";
+	};
+	place_photo_prompt_create_account_click: undefined;
+	place_photo_prompt_login_click: undefined;
+	place_photo_strip_scroll: {
+		source: PlacePhotoSource;
+		direction: "back" | "forward";
+	};
+	place_photo_upload_undo_click: { source: PlacePhotoSource; count: number };
+	place_photo_upload_undo_success: { source: PlacePhotoSource; count: number };
+	place_photo_view: { source: PlacePhotoSource; index: number };
+	save_item_toggle: {
+		saved: boolean;
+		type: SavedItemType;
+		source: "save_button" | "save_prompt";
+	};
+	save_prompt_create_account_click: { type: SavedItemType };
+	save_prompt_login_click: { type: SavedItemType };
+	save_prompt_shown: { type: SavedItemType };
+	search_bar_tap_expand: undefined;
+	search_input_focus: { source: "panel" };
+	search_query: undefined;
+	search_sheet_swipe_collapse: undefined;
+	search_sheet_swipe_expand: undefined;
+	search_sheet_tap_expand: undefined;
+	show_all_on_map_click: undefined;
+	signup_button_click: { source: SignupEntry };
+	signup_create_account_success: { source: SignupSource };
+	verified_filter_change: {
+		years: `${NonNullable<VerifiedFilterYears>}` | "any";
+	};
+	worldview_toggle: { enabled: boolean };
+};
+
+export type EventName = keyof EventPayloads;
+
+// The events that carry no data, for code that picks a name at runtime
+// (e.g. per-gesture event tables) and fires it bare.
+export type BareEventName = {
+	[N in EventName]: EventPayloads[N] extends undefined ? N : never;
+}[EventName];
 
 // How the add-note card was opened (note_add_click breakdown).
 export type NoteAddMethod = "menu" | "right_click" | "long_press";
@@ -133,6 +173,39 @@ export type PlacePhotoSource =
 	| "area_drawer"
 	| "my_photos";
 
+// Which Nostr transport signed the login or link.
+export type NostrSignMethod =
+	| "extension"
+	| "nsec"
+	| "saved"
+	| "bunker"
+	| "qr"
+	| "open"
+	| "copy";
+
+// Where a "Sign up" link was followed from, and where the account was made.
+export type SignupEntry = "user_menu" | "map_menu" | "add_place";
+export type SignupSource = "signup_page" | "auth_prompt";
+
+// The /join-us guide's links and the home page's call to action.
+export type JoinUsTarget =
+	| "countries"
+	| "communities"
+	| "maintain-example"
+	| "osm-signup"
+	| "matrix"
+	| "osm-about"
+	| "home-cta";
+
+// The payload argument for an event: none for `undefined`, required
+// otherwise. Distributes over a union of names (e.g. a per-mode event
+// table), accepting any of their payloads.
+type PayloadArgs<N extends EventName> = N extends EventName
+	? EventPayloads[N] extends undefined
+		? []
+		: [eventData: EventPayloads[N]]
+	: never;
+
 declare global {
 	interface Window {
 		umami?: {
@@ -141,9 +214,9 @@ declare global {
 	}
 }
 
-export const trackEvent = (
-	eventName: EventName,
-	eventData?: Record<string, unknown>,
+export const trackEvent = <N extends EventName>(
+	eventName: N,
+	...[eventData]: PayloadArgs<N>
 ): void => {
 	if (dev) return;
 	if (typeof window === "undefined") return;

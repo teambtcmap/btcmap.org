@@ -25,7 +25,7 @@ function handleSuccess() {
 			{$_("signup.description")}
 		</p>
 
-		<SignupForm onSuccess={handleSuccess} />
+		<SignupForm source="signup_page" onSuccess={handleSuccess} />
 
 		<p class="text-center text-sm text-body dark:text-white/70">
 			{$_("signup.haveAccount")}

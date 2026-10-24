@@ -31,27 +31,25 @@ export const parseCoordsParams = (
 };
 
 // How placement mode was entered — the add_place_enter funnel dimension.
-// ?add's value names the entry point: nav links, the /add-location redirect
-// guard, the form's adjust-pin link, the PWA shortcut, the post-submit
-// "another" button. Anything else — a bare ?add deep link or a hand-edited
-// value — is a plain URL entry, so the dimension stays bounded.
+// ?add's value names the linked entry point: nav links, the /add-location
+// redirect guard, the PWA shortcut, the post-submit "another" button.
+// Anything else — a bare ?add deep link or a hand-edited value — is a plain
+// URL entry, so the dimension stays bounded. The map enters it in-app too:
+// its menu, and a right click or long press on a point.
+export type PlacementEntry = "nav" | "redirect" | "shortcut" | "another";
 export type AddEntryMethod =
-	| "nav"
-	| "redirect"
-	| "adjust"
-	| "shortcut"
-	| "another"
-	| "url";
-// The entry points that are linked to; "url" is what unknown values fold into.
-export type PlacementEntry = Exclude<AddEntryMethod, "url">;
+	| PlacementEntry
+	| "url"
+	| "menu"
+	| "right_click"
+	| "long_press";
 const PLACEMENT_ENTRIES: ReadonlySet<string> = new Set<PlacementEntry>([
 	"nav",
 	"redirect",
-	"adjust",
 	"shortcut",
 	"another",
 ]);
-export const addEntryMethod = (value: string | null): AddEntryMethod =>
+export const addEntryMethod = (value: string | null): PlacementEntry | "url" =>
 	value && PLACEMENT_ENTRIES.has(value) ? (value as PlacementEntry) : "url";
 
 // The one place that spells the placement-mode URL for code; the static

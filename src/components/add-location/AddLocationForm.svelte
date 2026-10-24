@@ -499,7 +499,7 @@ const submitPreview = (captchaAnswer: string) => {
 				buildPlaceSubmissionArgs(preview),
 			)
 			.then(() => {
-				trackEvent("add_place_submit_success");
+				trackEvent("add_place_submit_success", { attributed: true });
 				onsuccess({ attributed: true, name: submittedName });
 			})
 			.catch((error) => {
@@ -522,7 +522,7 @@ const submitPreview = (captchaAnswer: string) => {
 	axios
 		.post<SubmitPlaceResponse>("/api/submit-place", payload)
 		.then(() => {
-			trackEvent("add_place_submit_success");
+			trackEvent("add_place_submit_success", { attributed: false });
 			onsuccess({ attributed: false, name: submittedName });
 		})
 		.catch((error) => {
