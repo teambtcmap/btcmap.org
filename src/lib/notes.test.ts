@@ -10,8 +10,9 @@ import {
 	createMyNotesStore,
 	createNote,
 	deleteNote,
-	fetchMyNotes,
+	NOTES_CACHE_KEY,
 	NOTES_PAGE_SIZE,
+	syncMyNotes,
 	updateNote,
 	whenNoteSettles,
 } from "./notes";
@@ -47,13 +48,14 @@ const authNoRetry = { ...auth, "axios-retry": { retries: 0 } };
 
 beforeEach(() => {
 	vi.resetAllMocks();
+	localStorage.clear();
 });
 
-describe("fetchMyNotes", () => {
+describe("syncMyNotes", () => {
 	it("GETs the caller's notes with the Bearer token, newest first", async () => {
 		api.get.mockResolvedValueOnce({ data: [note(1), note(3), note(2)] });
 
-		const notes = await fetchMyNotes(authedClient("tok"));
+		const { notes } = await syncMyNotes(authedClient("tok"));
 
 		expect(api.get).toHaveBeenCalledWith(`${API_BASE}/v4/users/me/notes`, {
 			...auth,
@@ -78,7 +80,7 @@ describe("fetchMyNotes", () => {
 			],
 		});
 
-		const notes = await fetchMyNotes(authedClient("tok"));
+		const { notes } = await syncMyNotes(authedClient("tok"));
 
 		expect(api.get).toHaveBeenLastCalledWith(`${API_BASE}/v4/users/me/notes`, {
 			...auth,
@@ -96,7 +98,7 @@ describe("fetchMyNotes", () => {
 		);
 		api.get.mockResolvedValue({ data: full });
 
-		const notes = await fetchMyNotes(authedClient("tok"));
+		const { notes } = await syncMyNotes(authedClient("tok"));
 
 		expect(api.get).toHaveBeenCalledTimes(2);
 		expect(notes).toHaveLength(NOTES_PAGE_SIZE);
@@ -113,7 +115,7 @@ describe("fetchMyNotes", () => {
 			],
 		});
 
-		const notes = await fetchMyNotes(authedClient("tok"));
+		const { notes } = await syncMyNotes(authedClient("tok"));
 
 		expect(notes.map((n) => n.id)).toEqual([1]);
 	});
@@ -128,7 +130,7 @@ describe("fetchMyNotes", () => {
 			.mockResolvedValueOnce({ data: full })
 			.mockResolvedValueOnce({ data: [note(NOTES_PAGE_SIZE + 1)] });
 
-		const notes = await fetchMyNotes(authedClient("tok"));
+		const { notes } = await syncMyNotes(authedClient("tok"));
 
 		expect(api.get).toHaveBeenLastCalledWith(`${API_BASE}/v4/users/me/notes`, {
 			...auth,
@@ -143,7 +145,94 @@ describe("fetchMyNotes", () => {
 	it("rejects a response that is not an array", async () => {
 		api.get.mockResolvedValueOnce({ data: "<html>" });
 
-		await expect(fetchMyNotes(authedClient("tok"))).rejects.toThrow();
+		await expect(syncMyNotes(authedClient("tok"))).rejects.toThrow();
+	});
+
+	it("returns the latest updated_at as the cursor", async () => {
+		api.get.mockResolvedValueOnce({ data: [note(1), note(3), note(2)] });
+
+		const { cursor } = await syncMyNotes(authedClient("tok"));
+
+		expect(cursor).toBe("2026-10-03T00:00:00Z");
+	});
+
+	it("asks only for changes and tombstones since the snapshot's cursor", async () => {
+		api.get.mockResolvedValueOnce({
+			data: [
+				note(2, { text: "edited", updated_at: "2026-10-05T00:00:00Z" }),
+				note(1, {
+					updated_at: "2026-10-06T00:00:00Z",
+					deleted_at: "2026-10-06T00:00:00Z",
+				}),
+				note(4),
+			],
+		});
+
+		const snapshot = await syncMyNotes(authedClient("tok"), {
+			notes: [note(2), note(1)],
+			cursor: "2026-10-02T00:00:00Z",
+		});
+
+		expect(api.get).toHaveBeenCalledWith(`${API_BASE}/v4/users/me/notes`, {
+			...auth,
+			params: {
+				limit: NOTES_PAGE_SIZE,
+				updated_since: "2026-10-01T23:59:59.999Z",
+				include_deleted: true,
+			},
+		});
+		expect(snapshot.notes.map((n) => [n.id, n.text])).toEqual([
+			[4, "note 4"],
+			[2, "edited"],
+		]);
+		expect(snapshot.cursor).toBe("2026-10-06T00:00:00Z");
+	});
+
+	it("compares cursor timestamps as instants, not as text", async () => {
+		api.get.mockResolvedValueOnce({
+			data: [note(1, { updated_at: "2026-10-01T00:00:00.500Z" })],
+		});
+
+		const { cursor } = await syncMyNotes(authedClient("tok"), {
+			notes: [],
+			cursor: "2026-10-01T00:00:00Z",
+		});
+
+		expect(cursor).toBe("2026-10-01T00:00:00.500Z");
+	});
+
+	it("keeps the snapshot's cursor when nothing changed", async () => {
+		api.get.mockResolvedValueOnce({ data: [] });
+		const base = { notes: [note(1)], cursor: "2026-10-01T00:00:00Z" };
+
+		expect(await syncMyNotes(authedClient("tok"), base)).toEqual(base);
+	});
+
+	it("stops when a full page of changes only repeats rows it already saw", async () => {
+		const full = Array.from({ length: NOTES_PAGE_SIZE }, (_, i) =>
+			note(i + 1, { updated_at: "2026-10-01T00:00:00Z" }),
+		);
+		api.get.mockResolvedValue({ data: full });
+
+		await syncMyNotes(authedClient("tok"), {
+			notes: full,
+			cursor: "2026-09-01T00:00:00Z",
+		});
+
+		expect(api.get).toHaveBeenCalledTimes(2);
+	});
+
+	it("drops a row whose deleted_at is not a string", async () => {
+		api.get.mockResolvedValueOnce({
+			data: [note(2, { deleted_at: 1 as unknown as string })],
+		});
+
+		const { notes } = await syncMyNotes(authedClient("tok"), {
+			notes: [note(2)],
+			cursor: "2026-10-02T00:00:00Z",
+		});
+
+		expect(notes).toEqual([note(2)]);
 	});
 });
 
@@ -269,6 +358,123 @@ describe("createMyNotesStore", () => {
 		await flush();
 
 		expect(get(store)).toEqual({ status: "error", notes: [] });
+		stop();
+	});
+
+	it("shows cached notes while it fetches only what changed since", async () => {
+		localStorage.setItem(
+			NOTES_CACHE_KEY,
+			JSON.stringify({
+				username: "satoshi",
+				cursor: "2026-10-02T00:00:00Z",
+				notes: [note(2), note(1)],
+			}),
+		);
+		api.get.mockResolvedValueOnce({
+			data: [
+				note(1, {
+					updated_at: "2026-10-03T00:00:00Z",
+					deleted_at: "2026-10-03T00:00:00Z",
+				}),
+			],
+		});
+		const sessions = writable<Session | null>(session("tok"));
+		const store = createMyNotesStore(sessions);
+		const stop = store.subscribe(() => {});
+
+		expect(get(store)).toEqual({
+			status: "loading",
+			notes: [note(2), note(1)],
+		});
+		expect(api.get.mock.calls[0][1]?.params).toMatchObject({
+			include_deleted: true,
+		});
+		await flush();
+
+		expect(get(store)).toEqual({ status: "ready", notes: [note(2)] });
+		expect(JSON.parse(localStorage.getItem(NOTES_CACHE_KEY) ?? "")).toEqual({
+			username: "satoshi",
+			cursor: "2026-10-03T00:00:00Z",
+			notes: [note(2)],
+		});
+		stop();
+	});
+
+	it("ignores a cache that belongs to another account or is corrupt", async () => {
+		for (const cached of [
+			JSON.stringify({ username: "hal", cursor: "x", notes: [note(1)] }),
+			JSON.stringify({ username: "satoshi", cursor: 5, notes: [] }),
+			JSON.stringify({ username: "satoshi", cursor: "x", notes: [] }),
+			JSON.stringify({
+				username: "satoshi",
+				cursor: "2026-10-01T00:00:00Z",
+				notes: [{}],
+			}),
+			"\n",
+		]) {
+			localStorage.setItem(NOTES_CACHE_KEY, cached);
+			api.get.mockResolvedValueOnce({ data: [note(3)] });
+			const store = createMyNotesStore(writable(session("tok")));
+			const stop = store.subscribe(() => {});
+
+			expect(get(store)).toEqual({ status: "loading", notes: [] });
+			expect(api.get.mock.lastCall?.[1]?.params).toEqual({
+				limit: NOTES_PAGE_SIZE,
+			});
+			await flush();
+			expect(get(store).notes).toEqual([note(3)]);
+			stop();
+		}
+	});
+
+	it("keeps the cached notes when the refresh fails", async () => {
+		localStorage.setItem(
+			NOTES_CACHE_KEY,
+			JSON.stringify({
+				username: "satoshi",
+				cursor: "2026-10-01T00:00:00Z",
+				notes: [note(1)],
+			}),
+		);
+		api.get.mockRejectedValueOnce(new Error("offline"));
+		const store = createMyNotesStore(writable(session("tok")));
+		const stop = store.subscribe(() => {});
+		await flush();
+
+		expect(get(store)).toEqual({ status: "error", notes: [note(1)] });
+		stop();
+	});
+
+	it("clears the cache on logout", async () => {
+		api.get.mockResolvedValueOnce({ data: [note(1)] });
+		const sessions = writable<Session | null>(session("tok"));
+		const store = createMyNotesStore(sessions);
+		const stop = store.subscribe(() => {});
+		await flush();
+		expect(localStorage.getItem(NOTES_CACHE_KEY)).not.toBeNull();
+
+		sessions.set(null);
+
+		expect(localStorage.getItem(NOTES_CACHE_KEY)).toBeNull();
+		stop();
+	});
+
+	it("caches local upserts and removes without moving the cursor", async () => {
+		api.get.mockResolvedValueOnce({ data: [note(1)] });
+		const store = createMyNotesStore(writable(session("tok")));
+		const stop = store.subscribe(() => {});
+		await flush();
+
+		store.upsert(note(2, { updated_at: "2026-10-09T00:00:00Z" }));
+		store.remove(1);
+
+		// A later edit on another device sits between the cursor and the
+		// upserted note's updated_at, so the cursor must not jump forward.
+		expect(JSON.parse(localStorage.getItem(NOTES_CACHE_KEY) ?? "")).toEqual({
+			username: "satoshi",
+			cursor: "2026-10-01T00:00:00Z",
+			notes: [note(2, { updated_at: "2026-10-09T00:00:00Z" })],
+		});
 		stop();
 	});
 
