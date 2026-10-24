@@ -3,12 +3,14 @@ import { _ } from "#lib/i18n/index.js";
 import { NOTE_ICONS, normalizeNoteIcon } from "#lib/noteIcons.js";
 import NoteGlyph from "$components/notes/NoteGlyph.svelte";
 
+import type { Note } from "$types/btcmap-api/Note";
+
 // The curated note icons as a radio group (#1542). A note picked on Android
 // can carry any Material Symbols name; that icon leads the list while it's
 // the selection, so editing such a note doesn't silently drop it.
 type Props = {
 	id: string;
-	value: string;
+	value: Note["icon"];
 	disabled?: boolean;
 };
 
