@@ -19,18 +19,20 @@ import MultiPlaceMap from "$components/MultiPlaceMap.svelte";
 import { goto } from "$app/navigation";
 import { resolve } from "$app/paths";
 
-let places: SavedPlace[] = [];
-let areas: SavedArea[] = [];
-let loading = true;
-let placesError = false;
-let areasError = false;
-let removingPlaces = new Set<number>();
-let removingAreas = new Set<number>();
+// Raw state: every update replaces the list or set, and the places go on
+// to MultiPlaceMap's map library as plain objects.
+let places = $state.raw<SavedPlace[]>([]);
+let areas = $state.raw<SavedArea[]>([]);
+let loading = $state(true);
+let placesError = $state(false);
+let areasError = $state(false);
+let removingPlaces = $state.raw(new Set<number>());
+let removingAreas = $state.raw(new Set<number>());
 
 // Gate the heavy MultiPlaceMap on desktop viewports so mobile users
 // don't download Leaflet + MapLibre + plugins for a view they can't see.
 // Matches Tailwind's default `md` breakpoint (768px).
-let isDesktop = false;
+let isDesktop = $state(false);
 let desktopMql: MediaQueryList | undefined;
 const handleDesktopChange = (e: MediaQueryListEvent) => {
 	isDesktop = e.matches;
@@ -190,7 +192,7 @@ onDestroy(() => {
 								title={$_("saved.removeNamed", { values: { name: placeLabel } })}
 								class="shrink-0 rounded-full p-2 text-body/60 transition-colors hover:bg-gray-100 hover:text-body disabled:opacity-40 dark:text-white/60 dark:hover:bg-white/10 dark:hover:text-white"
 								disabled={removingPlaces.has(place.id)}
-								on:click={() => removePlace(place.id)}
+								onclick={() => removePlace(place.id)}
 							>
 								<Icon type="material" icon="close" w="18" h="18" />
 							</button>
@@ -247,7 +249,7 @@ onDestroy(() => {
 								title={$_("saved.removeNamed", { values: { name: areaLabel } })}
 								class="shrink-0 rounded-full p-2 text-body/60 transition-colors hover:bg-gray-100 hover:text-body disabled:opacity-40 dark:text-white/60 dark:hover:bg-white/10 dark:hover:text-white"
 								disabled={removingAreas.has(area.id)}
-								on:click={() => removeArea(area.id)}
+								onclick={() => removeArea(area.id)}
 							>
 								<Icon type="material" icon="close" w="18" h="18" />
 							</button>
