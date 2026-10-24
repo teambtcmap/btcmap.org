@@ -93,17 +93,15 @@ export function setTrigger(el: HTMLElement) {
 		aria-hidden="true"
 	></div>
 
-	<!-- Below 640px a bottom sheet (#1568): the full width for the content,
-	     the page still visible above it. -->
 	<div
 		bind:this={modalEl}
 		transition:fly={{ y: 200, duration: 300 }}
 		role="dialog"
 		aria-modal="true"
 		aria-labelledby={titleId}
-		class="fixed inset-x-0 bottom-0 z-[2000] flex max-h-[85dvh] flex-col overflow-hidden rounded-t-2xl border-t border-gray-300 bg-white px-5 pt-5 pb-[max(1.25rem,env(safe-area-inset-bottom))] shadow-2xl dark:border-white/95 dark:bg-dark sm:inset-auto sm:top-1/2 sm:left-1/2 sm:h-auto {wide
+		class="fixed inset-x-4 bottom-[max(1rem,env(safe-area-inset-bottom))] z-[2000] flex max-h-[85dvh] flex-col overflow-hidden rounded-2xl border border-gray-300 bg-white px-5 py-5 shadow-2xl dark:border-white/95 dark:bg-dark sm:inset-auto sm:top-1/2 sm:left-1/2 sm:h-auto {wide
 			? 'sm:w-[27.5rem]'
-			: 'sm:w-80'} sm:max-h-[90dvh] sm:translate-x-[-50%] sm:translate-y-[-50%] sm:rounded-xl sm:border sm:px-6 sm:pt-6 sm:pb-6"
+			: 'sm:w-80'} sm:max-h-[90dvh] sm:translate-x-[-50%] sm:translate-y-[-50%] sm:rounded-xl sm:px-6 sm:py-6"
 	>
 		<div class="mb-4 flex items-center justify-between">
 			<h2 id={titleId} class="text-lg font-semibold text-primary dark:text-white">
