@@ -2,6 +2,7 @@ import { derived, get, writable } from "svelte/store";
 
 import { API_BASE } from "#lib/api-base.js";
 import { errorStatus } from "#lib/apiError.js";
+import type { AuthedClient } from "#lib/authedApi.js";
 import api from "#lib/axios.js";
 
 // Session is the BTC Map account behind saved places/areas. Accounts are
@@ -24,6 +25,10 @@ export type Session = {
 	// Used to render the user's Nostr avatar/profile.
 	npub: string | null;
 };
+
+// The client a request went out with: says whether its account is still
+// the signed-in one
+type SessionBound = Pick<AuthedClient, "stillCurrent">;
 
 const STORAGE_KEY = "btcmap_session";
 
@@ -94,11 +99,6 @@ function normalizeCredentials(
 export const isUsernameTaken = (error: unknown): boolean =>
 	errorStatus(error) === 409;
 
-// Request config for an authenticated API call (axios `headers` option)
-export const authHeaders = (token: string) => ({
-	headers: { Authorization: `Bearer ${token}` },
-});
-
 // Mints a Bearer token for a user — the password authenticates the mint
 // (sent as the Bearer on this one endpoint). Shared by login and signup.
 export const mintToken = async (
@@ -125,18 +125,14 @@ function createSessionStore() {
 	const { subscribe, set, update } = writable<Session | null>(null);
 
 	// Apply a change to the active session and persist it. A function change
-	// is computed inside update(), against the session it replaces. With
-	// `token`, only that account's session is changed. Returns whether a
-	// session was there to change.
+	// is computed inside update(), against the session it replaces. Returns
+	// whether a session was there to change.
 	const patch = (
 		change: Partial<Session> | ((current: Session) => Partial<Session>),
-		token?: Session["token"],
 	): boolean => {
 		let applied = false;
 		update((current) => {
-			if (!current || (token !== undefined && current.token !== token)) {
-				return current;
-			}
+			if (!current) return current;
 			applied = true;
 			const next = {
 				...current,
@@ -241,16 +237,17 @@ function createSessionStore() {
 
 		// The account was renamed on the API (account page). Like the other
 		// account-page setters, it applies only while the session is still the
-		// account (`token`) the request was made for: a response that lands
-		// after a logout or another login must not rewrite that session.
-		setUsername: (token: Session["token"], username: Session["username"]) => {
-			patch({ username }, token);
+		// account the request was made for (`client`, authedApi.ts): a
+		// response that lands after a logout or another login must not
+		// rewrite that session.
+		setUsername: (client: SessionBound, username: Session["username"]) => {
+			if (client.stillCurrent()) patch({ username });
 		},
 
 		// A Nostr key was linked to (or unlinked from) the account on the API
 		// (account page); drives the avatar like a Nostr login does.
-		setNpub: (token: Session["token"], npub: Session["npub"]) => {
-			patch({ npub }, token);
+		setNpub: (client: SessionBound, npub: Session["npub"]) => {
+			if (client.stillCurrent()) patch({ npub });
 		},
 
 		// Replace the current session with a different account (login flow).
@@ -277,10 +274,17 @@ function createSessionStore() {
 			saveToStorage(null);
 			set(null);
 			if (!token) return;
+			// The one user Bearer built outside authedApi.ts: the session is
+			// already gone, and authedApi.ts reads its token from this store.
 			try {
-				await api.post(`${API_BASE}/v4/auth/signout`, null, authHeaders(token));
+				await api.post(`${API_BASE}/v4/auth/signout`, null, {
+					headers: { Authorization: `Bearer ${token}` },
+				});
 			} catch (err) {
-				console.warn("session: failed to revoke token on logout", err);
+				console.warn(
+					"session: failed to revoke token on logout",
+					errorStatus(err),
+				);
 			}
 		},
 	};

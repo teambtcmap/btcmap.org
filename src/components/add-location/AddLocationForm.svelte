@@ -13,6 +13,8 @@ import {
 } from "#lib/addLocationValidation.js";
 import { trackEvent } from "#lib/analytics.js";
 import { API_BASE } from "#lib/api-base.js";
+import { errorStatus } from "#lib/apiError.js";
+import { authedClient } from "#lib/authedApi.js";
 import { CATEGORIES, CATEGORY_GROUPS } from "#lib/categoryMapping.js";
 import { fieldBorderClasses } from "#lib/fieldStyles.js";
 import { reverseGeocode } from "#lib/geocoding.js";
@@ -491,11 +493,10 @@ const submitPreview = (captchaAnswer: string) => {
 	// Android form; anonymous keeps the captcha-guarded server proxy
 	// (which holds the import token).
 	if (identityAttached && $session) {
-		axios
+		authedClient()
 			.post<PostPlaceSubmissionResponse>(
 				`${API_BASE}/v4/place-submissions`,
 				buildPlaceSubmissionArgs(preview),
-				{ headers: { Authorization: `Bearer ${$session.token.trim()}` } },
 			)
 			.then(() => {
 				trackEvent("add_place_submit_success");
@@ -503,7 +504,7 @@ const submitPreview = (captchaAnswer: string) => {
 			})
 			.catch((error) => {
 				errToast(get(_)("errors.formSubmission"));
-				console.error(error);
+				console.error("place submission failed", errorStatus(error));
 				submitting = false;
 			});
 		return;

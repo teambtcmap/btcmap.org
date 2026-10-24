@@ -5,6 +5,9 @@ import Time from "svelte-time";
 
 import type { PlacePhotoSource } from "#lib/analytics.js";
 import { trackEvent } from "#lib/analytics.js";
+import { errorStatus } from "#lib/apiError.js";
+import type { AuthedClient } from "#lib/authedApi.js";
+import { authedClient } from "#lib/authedApi.js";
 import { createTimeLocale, LOCALIZED_DATE_FORMAT } from "#lib/dayjsLocale.js";
 import { _, locale } from "#lib/i18n/index.js";
 import type { StripScrollState } from "#lib/placePhotos.js";
@@ -239,7 +242,11 @@ const handleAuthenticated = async () => {
 };
 
 // "Undo" on the upload toast: an accidental upload is one tap from gone
-const undoUpload = async (id: number, stored: PlaceImage[], token: string) => {
+const undoUpload = async (
+	id: number,
+	stored: PlaceImage[],
+	client: AuthedClient,
+) => {
 	trackEvent("place_photo_upload_undo_click", { source, count: stored.length });
 	// The toast sits above the viewer: close it first so its photo list
 	// can't change underneath it
@@ -247,7 +254,7 @@ const undoUpload = async (id: number, stored: PlaceImage[], token: string) => {
 	const { removed, complete } = await undoUploads(
 		id,
 		stored.map((p) => p.id),
-		token,
+		client,
 	);
 	if (id === placeId) {
 		photos = (photos ?? []).filter((p) => !removed.includes(p.id));
@@ -282,15 +289,16 @@ const handleFiles = async (event: Event) => {
 			$_("placePhotos.tooMany", { values: { max: MAX_PHOTOS_PER_PICK } }),
 		);
 	}
-	const token = $session?.token;
-	if (!batch.length || !token) return;
+	if (!batch.length || !$session) return;
+	// Uploads and their undo go out as the account that picked the files
+	const client = authedClient();
 
 	const id = placeId;
 	uploading += batch.length;
 	showStripStart();
 	const { stored, failed } = await uploadPlacePhotos(
 		batch,
-		async (file) => uploadPlacePhoto(id, token, await prepareUpload(file)),
+		async (file) => uploadPlacePhoto(id, await prepareUpload(file), client),
 		() => {
 			uploading -= 1;
 		},
@@ -305,13 +313,13 @@ const handleFiles = async (event: Event) => {
 			$_("placePhotos.uploaded", { values: { count: stored.length } }),
 			{
 				label: $_("placePhotos.undo"),
-				onClick: () => undoUpload(id, stored, token),
+				onClick: () => undoUpload(id, stored, client),
 			},
 		);
 		trackEvent("place_photo_add_success", { source, count: stored.length });
 	}
 	if (failed.length) {
-		console.error("place photos: upload failed", failed);
+		console.error("place photos: upload failed", failed.map(errorStatus));
 		errToast(
 			$_("placePhotos.uploadFailed", { values: { count: failed.length } }),
 		);

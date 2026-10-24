@@ -1,10 +1,11 @@
 import { isAxiosError } from "axios";
 
 import { API_BASE } from "#lib/api-base.js";
+import type { AuthedClient } from "#lib/authedApi.js";
+import { authedClient } from "#lib/authedApi.js";
 import api from "#lib/axios.js";
 import type { CurrentUser, Role } from "#lib/currentUser.js";
 import { withLiteralCommas } from "#lib/literalCommas.js";
-import { authHeaders } from "#lib/session.js";
 
 import type { PlaceImage } from "$types/btcmap-api/PlaceImage";
 
@@ -81,12 +82,9 @@ export const canDeletePhoto = (
 export const deletePlacePhoto = async (
 	placeId: number,
 	imageId: number,
-	token: string,
+	client: AuthedClient = authedClient(),
 ): Promise<void> => {
-	await api.delete(
-		`${API_BASE}/v4/places/${placeId}/images/${imageId}`,
-		authHeaders(token),
-	);
+	await client.delete(`${API_BASE}/v4/places/${placeId}/images/${imageId}`);
 };
 
 // i18n key for a failed delete: 403 means the photo isn't the caller's
@@ -98,16 +96,17 @@ export const deleteErrorKey = (
 		? "placePhotos.deleteForbidden"
 		: "placePhotos.deleteFailed";
 
-// "Undo" on the upload toast: delete the photos just stored, in parallel.
-// removed lists the ids that are gone, so the strip drops only those;
-// complete says whether every one went (success vs error toast).
+// "Undo" on the upload toast: delete the photos just stored, in parallel,
+// as the account that uploaded them (`client`). removed lists the ids that
+// are gone, so the strip drops only those; complete says whether every one
+// went (success vs error toast).
 export const undoUploads = async (
 	placeId: number,
 	imageIds: number[],
-	token: string,
+	client: AuthedClient,
 ): Promise<{ removed: number[]; complete: boolean }> => {
 	const results = await Promise.allSettled(
-		imageIds.map((id) => deletePlacePhoto(placeId, id, token)),
+		imageIds.map((id) => deletePlacePhoto(placeId, id, client)),
 	);
 	// 404: already gone (e.g. deleted from the viewer before Undo)
 	const removed = imageIds.filter((_, i) => {
@@ -125,12 +124,9 @@ export const undoUploads = async (
 // out, it isn't public, its deep link wouldn't open, and reviewers rely on
 // it. Throws on an unexpected response so the page can show its error state.
 export const fetchMyPlacePhotos = async (
-	token: string,
+	client: AuthedClient = authedClient(),
 ): Promise<PlaceImage[]> => {
-	const res = await api.get<unknown>(
-		`${API_BASE}/v4/users/me/place-images`,
-		authHeaders(token),
-	);
+	const res = await client.get<unknown>(`${API_BASE}/v4/users/me/place-images`);
 	if (!Array.isArray(res.data)) {
 		throw new Error("my place images returned an unexpected response");
 	}
@@ -139,13 +135,12 @@ export const fetchMyPlacePhotos = async (
 
 export const uploadPlacePhoto = async (
 	placeId: number,
-	token: string,
 	dataBase64: string,
+	client: AuthedClient = authedClient(),
 ): Promise<PlaceImage> => {
-	const res = await api.post<unknown>(
+	const res = await client.post<unknown>(
 		`${API_BASE}/v4/places/${placeId}/images`,
 		{ data_base64: dataBase64 },
-		authHeaders(token),
 	);
 	if (!isPlaceImage(res.data)) {
 		throw new Error("place image upload returned an unexpected response");

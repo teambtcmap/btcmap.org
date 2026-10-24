@@ -1,6 +1,9 @@
+import { get } from "svelte/store";
+
 import { API_BASE } from "#lib/api-base.js";
-import api from "#lib/axios.js";
-import { authHeaders } from "#lib/session.js";
+import { errorStatus } from "#lib/apiError.js";
+import { authedClient } from "#lib/authedApi.js";
+import { session } from "#lib/session.js";
 
 // The signed-in user's id and roles. The session only keeps the username
 // and token, but ownership checks (e.g. who may delete a place photo) need
@@ -44,16 +47,17 @@ const parseCurrentUser = (data: unknown): CurrentUser | null => {
 	};
 };
 
-export const fetchCurrentUser = (
-	token: string,
-): Promise<CurrentUser | null> => {
+// The signed-in user, or null when signed out or the lookup failed
+export const fetchCurrentUser = (): Promise<CurrentUser | null> => {
+	const token = get(session)?.token;
+	if (!token) return Promise.resolve(null);
 	const cached = cache.get(token);
 	if (cached && Date.now() - cached.at < CACHE_MS) return cached.request;
-	const request = api
-		.get<unknown>(`${API_BASE}/v4/users/me`, authHeaders(token))
+	const request = authedClient(token)
+		.get<unknown>(`${API_BASE}/v4/users/me`)
 		.then((res) => parseCurrentUser(res.data))
 		.catch((error) => {
-			console.error("current user: lookup failed", error);
+			console.error("current user: lookup failed", errorStatus(error));
 			return null;
 		})
 		.then((user) => {

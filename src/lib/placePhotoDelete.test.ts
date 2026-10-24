@@ -23,7 +23,6 @@ const t = (key: string) => `t:${key}`;
 const args = {
 	placeId: 20423,
 	imageId: 12,
-	token: "tok",
 	source: "my_photos" as const,
 	t,
 };
@@ -51,7 +50,7 @@ describe("confirmPhotoDelete", () => {
 		vi.mocked(deletePlacePhoto).mockResolvedValue(undefined);
 
 		expect(await confirmPhotoDelete(args)).toBe(true);
-		expect(deletePlacePhoto).toHaveBeenCalledWith(20423, 12, "tok");
+		expect(deletePlacePhoto).toHaveBeenCalledWith(20423, 12);
 		expect(trackEvent).toHaveBeenCalledWith("place_photo_delete_success", {
 			source: "my_photos",
 		});

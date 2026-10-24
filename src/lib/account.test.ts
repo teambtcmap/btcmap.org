@@ -10,6 +10,7 @@ import {
 	linkNostr,
 	unlinkNostr,
 } from "./account";
+import { session } from "./session";
 
 vi.mock("#lib/axios.js", () => ({
 	default: { get: vi.fn(), put: vi.fn(), delete: vi.fn() },
@@ -29,6 +30,8 @@ const apiError = (status: number, message: string) =>
 
 beforeEach(() => {
 	vi.clearAllMocks();
+	localStorage.clear();
+	session.login("alice", "tok");
 });
 
 describe("changeUsername", () => {
@@ -36,7 +39,7 @@ describe("changeUsername", () => {
 		const { default: api } = await import("#lib/axios.js");
 		vi.mocked(api.put).mockResolvedValue({ data: { id: 1, name: "alice" } });
 
-		expect(await changeUsername("tok", "alice")).toEqual({
+		expect(await changeUsername("alice")).toEqual({
 			status: "changed",
 			username: "alice",
 		});
@@ -53,7 +56,7 @@ describe("changeUsername", () => {
 			apiError(409, "username already taken"),
 		);
 
-		expect(await changeUsername("tok", "bob")).toEqual({ status: "taken" });
+		expect(await changeUsername("bob")).toEqual({ status: "taken" });
 	});
 
 	// Since teambtcmap/btcmap-api#119 a taken name is a 409, so a 500 is a
@@ -64,21 +67,21 @@ describe("changeUsername", () => {
 			apiError(500, "Database query failed"),
 		);
 
-		await expect(changeUsername("tok", "bob")).rejects.toThrow();
+		await expect(changeUsername("bob")).rejects.toThrow();
 	});
 
 	it("rethrows other failures", async () => {
 		const { default: api } = await import("#lib/axios.js");
 		vi.mocked(api.put).mockRejectedValue(apiError(401, "Unauthorized"));
 
-		await expect(changeUsername("tok", "bob")).rejects.toThrow();
+		await expect(changeUsername("bob")).rejects.toThrow();
 	});
 
 	it("throws when the response carries no name", async () => {
 		const { default: api } = await import("#lib/axios.js");
 		vi.mocked(api.put).mockResolvedValue({ data: {} });
 
-		await expect(changeUsername("tok", "bob")).rejects.toThrow();
+		await expect(changeUsername("bob")).rejects.toThrow();
 	});
 });
 
@@ -87,9 +90,7 @@ describe("changePassword", () => {
 		const { default: api } = await import("#lib/axios.js");
 		vi.mocked(api.put).mockResolvedValue({ data: null });
 
-		expect(await changePassword("tok", "old pw", "new password")).toBe(
-			"changed",
-		);
+		expect(await changePassword("old pw", "new password")).toBe("changed");
 		expect(api.put).toHaveBeenCalledWith(
 			`${API_BASE}/v4/users/me/password`,
 			{ old_password: "old pw", new_password: "new password" },
@@ -101,9 +102,7 @@ describe("changePassword", () => {
 		const { default: api } = await import("#lib/axios.js");
 		vi.mocked(api.put).mockRejectedValue(apiError(400, "Invalid old password"));
 
-		expect(await changePassword("tok", "nope", "new password")).toBe(
-			"wrongPassword",
-		);
+		expect(await changePassword("nope", "new password")).toBe("wrongPassword");
 	});
 
 	it("reports an account without a password (created with Nostr)", async () => {
@@ -112,14 +111,14 @@ describe("changePassword", () => {
 			apiError(400, "Invalid password hash"),
 		);
 
-		expect(await changePassword("tok", "", "new password")).toBe("noPassword");
+		expect(await changePassword("", "new password")).toBe("noPassword");
 	});
 
 	it("rethrows other failures", async () => {
 		const { default: api } = await import("#lib/axios.js");
 		vi.mocked(api.put).mockRejectedValue(new Error("offline"));
 
-		await expect(changePassword("tok", "a", "b")).rejects.toThrow("offline");
+		await expect(changePassword("a", "b")).rejects.toThrow("offline");
 	});
 });
 
@@ -128,7 +127,7 @@ describe("fetchLinkedNpub", () => {
 		const { default: api } = await import("#lib/axios.js");
 		vi.mocked(api.get).mockResolvedValue({ data: { npub: "npub1abc" } });
 
-		expect(await fetchLinkedNpub("tok")).toBe("npub1abc");
+		expect(await fetchLinkedNpub()).toBe("npub1abc");
 		expect(api.get).toHaveBeenCalledWith(`${API_BASE}/v4/users/me/nostr`, AUTH);
 	});
 
@@ -136,7 +135,7 @@ describe("fetchLinkedNpub", () => {
 		const { default: api } = await import("#lib/axios.js");
 		vi.mocked(api.get).mockResolvedValue({ data: { npub: null } });
 
-		expect(await fetchLinkedNpub("tok")).toBeNull();
+		expect(await fetchLinkedNpub()).toBeNull();
 	});
 });
 
@@ -147,7 +146,7 @@ describe("linkNostr", () => {
 		const { default: api } = await import("#lib/axios.js");
 		vi.mocked(api.put).mockResolvedValue({ data: { npub: "npub1abc" } });
 
-		expect(await linkNostr("tok", proof)).toEqual({
+		expect(await linkNostr(proof)).toEqual({
 			status: "linked",
 			npub: "npub1abc",
 		});
@@ -169,21 +168,21 @@ describe("linkNostr", () => {
 			apiError(400, "npub already linked to another account"),
 		);
 
-		expect(await linkNostr("tok", proof)).toEqual({ status: "taken" });
+		expect(await linkNostr(proof)).toEqual({ status: "taken" });
 	});
 
 	it("rethrows a rejected proof", async () => {
 		const { default: api } = await import("#lib/axios.js");
 		vi.mocked(api.put).mockRejectedValue(apiError(401, "Unauthorized"));
 
-		await expect(linkNostr("tok", proof)).rejects.toThrow();
+		await expect(linkNostr(proof)).rejects.toThrow();
 	});
 
 	it("throws when the response carries no npub", async () => {
 		const { default: api } = await import("#lib/axios.js");
 		vi.mocked(api.put).mockResolvedValue({ data: { npub: null } });
 
-		await expect(linkNostr("tok", proof)).rejects.toThrow();
+		await expect(linkNostr(proof)).rejects.toThrow();
 	});
 });
 
@@ -192,7 +191,7 @@ describe("unlinkNostr", () => {
 		const { default: api } = await import("#lib/axios.js");
 		vi.mocked(api.delete).mockResolvedValue({ data: { npub: null } });
 
-		await unlinkNostr("tok");
+		await unlinkNostr();
 		expect(api.delete).toHaveBeenCalledWith(
 			`${API_BASE}/v4/users/me/nostr`,
 			AUTH,

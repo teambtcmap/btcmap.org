@@ -2,6 +2,7 @@
 import { get } from "svelte/store";
 
 import { trackEvent } from "#lib/analytics.js";
+import { errorStatus } from "#lib/apiError.js";
 import { _ } from "#lib/i18n/index.js";
 import type { SavedItemType } from "#lib/savedItems.js";
 import {
@@ -40,7 +41,7 @@ async function performInitialSave(current: Session) {
 
 	setSavedList(type, [...existing, id]);
 	try {
-		const serverList = await addSavedItem(type, current.token, id);
+		const serverList = await addSavedItem(type, id);
 		setSavedList(type, serverList);
 		trackEvent("save_item_toggle", {
 			saved: serverList.includes(id),
@@ -50,7 +51,7 @@ async function performInitialSave(current: Session) {
 	} catch (err) {
 		setSavedList(type, existing);
 		errToast($_("merchant.saveFailed"));
-		console.error("SaveAuthPrompt.performInitialSave failed", err);
+		console.error("SaveAuthPrompt.performInitialSave failed", errorStatus(err));
 		throw err;
 	}
 }
@@ -63,13 +64,16 @@ async function handleSignupSuccess(current: Session) {
 	try {
 		await performInitialSave(current);
 	} catch (err) {
-		console.error("SaveAuthPrompt.handleSignupSuccess failed", err);
+		console.error(
+			"SaveAuthPrompt.handleSignupSuccess failed",
+			errorStatus(err),
+		);
 	} finally {
 		open = false;
 	}
 }
 
-async function handleLoginSuccess(current: Session) {
+async function handleLoginSuccess() {
 	try {
 		// Best-effort hydrate so the local saved lists reflect the server
 		// before we attempt the save. The atomic POST in performInitialSave
@@ -77,13 +81,13 @@ async function handleLoginSuccess(current: Session) {
 		// failure won't clobber the server's saved items — it just means
 		// the short-circuit "already saved" check might miss and we pay for
 		// an extra (idempotent) POST.
-		await hydrateSavedFromServer(current.token);
+		await hydrateSavedFromServer();
 		const refreshed = get(session);
 		if (!refreshed) throw new Error("session missing after login");
 		await performInitialSave(refreshed);
 		open = false;
 	} catch (err) {
-		console.error("SaveAuthPrompt.handleLoginSuccess failed", err);
+		console.error("SaveAuthPrompt.handleLoginSuccess failed", errorStatus(err));
 	}
 }
 </script>

@@ -379,12 +379,15 @@ describe("session store", () => {
 	});
 
 	describe("setUsername / setNpub", () => {
+		const current = { stillCurrent: () => true };
+		const stale = { stillCurrent: () => false };
+
 		it("setUsername renames the session and persists it", async () => {
 			seedStorage({ username: "alice", token: "tok", savedPlaces: [1] });
 			const session = await createTestSession();
 			session.init();
 
-			session.setUsername("tok", "alice2");
+			session.setUsername(current, "alice2");
 
 			expect(get(session)?.username).toBe("alice2");
 			expect(get(session)?.savedPlaces).toEqual([1]);
@@ -397,13 +400,13 @@ describe("session store", () => {
 			const session = await createTestSession();
 			session.init();
 
-			session.setNpub("tok", "npub1example");
+			session.setNpub(current, "npub1example");
 			expect(get(session)?.npub).toBe("npub1example");
 			expect(
 				JSON.parse(localStorage.getItem("btcmap_session") ?? "{}").npub,
 			).toBe("npub1example");
 
-			session.setNpub("tok", null);
+			session.setNpub(current, null);
 			expect(get(session)?.npub).toBeNull();
 		});
 
@@ -414,8 +417,8 @@ describe("session store", () => {
 			const session = await createTestSession();
 			session.init();
 
-			session.setUsername("tok", "alice2");
-			session.setNpub("tok", "npub1example");
+			session.setUsername(stale, "alice2");
+			session.setNpub(stale, "npub1example");
 
 			expect(get(session)?.username).toBe("bob");
 			expect(get(session)?.npub).toBeNull();
@@ -424,8 +427,8 @@ describe("session store", () => {
 		it("both no-op without a session", async () => {
 			const session = await createTestSession();
 
-			session.setUsername("tok", "alice");
-			session.setNpub("tok", "npub1example");
+			session.setUsername(current, "alice");
+			session.setNpub(current, "npub1example");
 
 			expect(get(session)).toBeNull();
 			expect(localStorage.getItem("btcmap_session")).toBeNull();
@@ -455,15 +458,6 @@ describe("session store", () => {
 			expect(warnSpy).toHaveBeenCalledWith(
 				expect.stringContaining("setSavedAreas"),
 			);
-		});
-	});
-});
-
-describe("authHeaders", () => {
-	it("sends the token as a Bearer Authorization header", async () => {
-		const { authHeaders } = await import("#lib/session.js");
-		expect(authHeaders("tok")).toEqual({
-			headers: { Authorization: "Bearer tok" },
 		});
 	});
 });

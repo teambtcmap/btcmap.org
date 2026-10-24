@@ -12,7 +12,7 @@ import {
 import { API_BASE } from "#lib/api-base.js";
 import api from "#lib/axios.js";
 import { _ } from "#lib/i18n/index.js";
-import { SAVED_ITEM_ENDPOINTS } from "#lib/savedItems.js";
+import { fetchSavedList } from "#lib/savedItems.js";
 import { session } from "#lib/session.js";
 import type { SavedPlace } from "#lib/types.js";
 import ActivityCard from "$components/activity/ActivityCard.svelte";
@@ -183,10 +183,9 @@ onMount(async () => {
 	// "Area <id>" labels and the feed is unaffected. Don't await this
 	// before markActivitySeen — a slow names call would leave the nav
 	// dot showing while the user is already reading the feed.
-	const headers = { Authorization: `Bearer ${$session.token}` };
 	const namesPromise = Promise.allSettled([
-		api.get<SavedPlace[]>(SAVED_ITEM_ENDPOINTS.place, { headers }),
-		api.get<SavedArea[]>(SAVED_ITEM_ENDPOINTS.area, { headers }),
+		fetchSavedList<SavedPlace>("place"),
+		fetchSavedList<SavedArea>("area"),
 	]);
 
 	await feedPromise;
@@ -200,10 +199,10 @@ onMount(async () => {
 
 	const [placesRes, areasRes] = await namesPromise;
 	if (placesRes.status === "fulfilled") {
-		placeNames = new Map(placesRes.value.data.map((p) => [p.id, p.name]));
+		placeNames = new Map(placesRes.value.map((p) => [p.id, p.name]));
 	}
 	if (areasRes.status === "fulfilled") {
-		areaNames = new Map(areasRes.value.data.map((a) => [a.id, a.name]));
+		areaNames = new Map(areasRes.value.map((a) => [a.id, a.name]));
 	}
 });
 </script>

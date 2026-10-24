@@ -21,12 +21,11 @@ import type { Note } from "$types/btcmap-api/Note";
 // re-icon, publish/unpublish and delete one. The host (NotesLayer) places
 // it on the map and owns the pin.
 type Props = {
-	token: string;
 	target: NoteDraft | { mode: "view"; note: Note };
 	onClose: () => void;
 };
 
-let { token, target, onClose }: Props = $props();
+let { target, onClose }: Props = $props();
 
 type View = "read" | "edit" | "confirmDelete";
 let view = $state<View>("read");
@@ -56,13 +55,12 @@ $effect.pre(() => {
 });
 
 const logFailure = (what: string, err: unknown) =>
-	// The status only: the error carries the request, token included
 	console.error(`Note ${what} failed:`, errorStatus(err) ?? "unknown");
 
 async function create(values: NoteFormValues) {
 	if (target.mode !== "create") return;
 	try {
-		const note = await createNote(token, {
+		const note = await createNote({
 			lat: target.lat,
 			lon: target.lon,
 			text: values.text,
@@ -97,7 +95,7 @@ async function saveEdit(values: NoteFormValues) {
 		return;
 	}
 	try {
-		myNotes.upsert(await updateNote(token, note.id, patch));
+		myNotes.upsert(await updateNote(note.id, patch));
 		trackEvent("note_edit_success", {
 			text: "text" in patch,
 			icon: "icon" in patch,
@@ -114,7 +112,7 @@ async function setPublic(next: boolean) {
 	if (target.mode !== "view" || busy) return;
 	busy = true;
 	try {
-		myNotes.upsert(await updateNote(token, target.note.id, { public: next }));
+		myNotes.upsert(await updateNote(target.note.id, { public: next }));
 		trackEvent("note_visibility_change", { public: next });
 	} catch (err) {
 		logFailure("visibility change", err);
@@ -129,7 +127,7 @@ async function confirmDelete() {
 	const { id } = target.note;
 	busy = true;
 	try {
-		await deleteNote(token, id);
+		await deleteNote(id);
 		myNotes.remove(id);
 		trackEvent("note_delete_success");
 		successToast($_("notes.deleted"));

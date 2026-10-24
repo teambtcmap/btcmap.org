@@ -10,6 +10,7 @@ import {
 	validateUsername,
 } from "#lib/accountValidation.js";
 import { trackEvent } from "#lib/analytics.js";
+import { authedClient } from "#lib/authedApi.js";
 import { _ } from "#lib/i18n/index.js";
 import { fieldError, inputProps, ruleValidation } from "#lib/ruleValidation.js";
 import { session } from "#lib/session.js";
@@ -36,16 +37,16 @@ const form = createForm(() => ({
 	defaultValues: { username: $session?.username ?? "" } as UsernameInput,
 	...validation.options,
 	onSubmit: async ({ value }) => {
-		const token = $session?.token;
-		if (!token) return;
+		if (!$session) return;
+		const client = authedClient();
 		await save.run($_("account.username.error"), async () => {
-			const result = await changeUsername(token, value.username.trim());
+			const result = await changeUsername(value.username.trim(), client);
 			if (result.status === "taken") {
 				taken = true;
 				usernameInput?.focus();
 				return;
 			}
-			session.setUsername(token, result.username);
+			session.setUsername(client, result.username);
 			form.setFieldValue("username", result.username);
 			trackEvent("account_username_save_success");
 			successToast($_("account.username.success"));

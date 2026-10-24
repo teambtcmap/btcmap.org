@@ -48,10 +48,9 @@ const form = createForm(() => ({
 	defaultValues: { ...EMPTY },
 	...validation.options,
 	onSubmit: async ({ value }) => {
-		const token = $session?.token;
-		if (!token) return;
+		if (!$session) return;
 		await change.run($_("account.password.error"), async () => {
-			const result = await changePassword(token, value.current, value.next);
+			const result = await changePassword(value.current, value.next);
 			if (result !== "changed") {
 				refusal = result;
 				currentInput?.focus();

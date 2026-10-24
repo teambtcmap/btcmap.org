@@ -3,7 +3,6 @@ import { onMount } from "svelte";
 
 import { _ } from "#lib/i18n/index.js";
 import { hydrateSavedFromServer } from "#lib/savedItems.js";
-import type { Session } from "#lib/session.js";
 import { session } from "#lib/session.js";
 import LoginForm from "$components/auth/LoginForm.svelte";
 import NostrLoginForm from "$components/auth/NostrLoginForm.svelte";
@@ -14,8 +13,8 @@ onMount(() => {
 	session.init();
 });
 
-async function handleSuccess(current: Session) {
-	await hydrateSavedFromServer(current.token);
+async function handleSuccess() {
+	await hydrateSavedFromServer();
 	goto("/user/activity");
 }
 </script>
