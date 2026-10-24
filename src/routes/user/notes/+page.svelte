@@ -27,9 +27,7 @@ const mapUrl = (note: Note) =>
 	`/map?${NOTE_PARAM}=${note.id}#${CLUSTERING_DISABLED_ZOOM}/${note.lat.toFixed(5)}/${note.lon.toFixed(5)}`;
 
 onMount(() => {
-	// Child onMount runs before the layout's, so hydrate the session here
-	session.init();
-	if (!$session) goto("/login");
+	if (!session.init()) goto("/login");
 });
 </script>
 

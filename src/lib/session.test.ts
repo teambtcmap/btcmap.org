@@ -378,6 +378,32 @@ describe("session store", () => {
 		});
 	});
 
+	describe("init", () => {
+		it("restores the stored session and returns it", async () => {
+			seedStorage({ username: "alice", token: "tok", savedPlaces: [1] });
+			const session = await createTestSession();
+
+			expect(session.init()).toMatchObject({ username: "alice" });
+			expect(get(session)?.username).toBe("alice");
+		});
+
+		it("returns null without a stored session", async () => {
+			const session = await createTestSession();
+			expect(session.init()).toBeNull();
+		});
+
+		// A page and the root layout both call it on mount: the second call
+		// must not replace the session the first one restored or a login set
+		it("keeps a session already in the store", async () => {
+			const session = await createTestSession();
+			session.login("bob", "tok2");
+			seedStorage({ username: "alice", token: "tok", savedPlaces: [] });
+
+			expect(session.init()?.username).toBe("bob");
+			expect(get(session)?.username).toBe("bob");
+		});
+	});
+
 	describe("setUsername / setNpub", () => {
 		const current = { stillCurrent: () => true };
 		const stale = { stillCurrent: () => false };

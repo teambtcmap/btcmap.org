@@ -1,20 +1,12 @@
 <script lang="ts">
-import { onMount } from "svelte";
-
 import { _ } from "#lib/i18n/index.js";
-import { hydrateSavedFromServer } from "#lib/savedItems.js";
-import { session } from "#lib/session.js";
 import SignupForm from "$components/auth/SignupForm.svelte";
 import TextLink from "$components/TextLink.svelte";
 
 import { goto } from "$app/navigation";
 
-onMount(() => {
-	session.init();
-});
-
-async function handleSuccess() {
-	await hydrateSavedFromServer();
+// A fresh account has nothing saved to load
+function handleSuccess() {
 	goto("/user/activity");
 }
 </script>

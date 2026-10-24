@@ -1,4 +1,5 @@
 <script lang="ts">
+import type { Login } from "#lib/auth.js";
 import { _ } from "#lib/i18n/index.js";
 import type { Session } from "#lib/session.js";
 import LoginForm from "$components/auth/LoginForm.svelte";
@@ -22,7 +23,7 @@ type Props = {
 	// trackEvent), so these are required
 	onCreateAccountClick: () => void;
 	onLoginClick: () => void;
-	onLoginSuccess: (session: Session) => void | Promise<void>;
+	onLoginSuccess: (login: Login) => void | Promise<void>;
 	onSignupSuccess: (session: Session) => void | Promise<void>;
 };
 

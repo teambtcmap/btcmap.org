@@ -55,6 +55,7 @@ export type EventName =
 	| "login_nostr_connect_copy_click"
 	| "login_nostr_connect_qr_click"
 	| "login_nostr_success"
+	| "login_password_success"
 	| "login_nostr_auth_url_click"
 	| "backup_credentials_copied"
 	| "add_place_enter"
