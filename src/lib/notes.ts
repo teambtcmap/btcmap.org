@@ -186,6 +186,9 @@ export const createMyNotesStore = (sessions: Readable<Session | null>) => {
 					return;
 				}
 				set({ status: "loading", notes: [] });
+				// This store follows `sessions` (injected), not the global
+				// session the client's stillCurrent() reads, so it keeps its
+				// own token check.
 				fetchMyNotes(authedClient(token)).then(
 					(notes) => {
 						if (token === currentToken) set({ status: "ready", notes });

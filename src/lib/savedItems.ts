@@ -3,8 +3,19 @@ import type { AuthedClient } from "#lib/authedApi.js";
 import { authedClient } from "#lib/authedApi.js";
 import type { Session } from "#lib/session.js";
 import { session } from "#lib/session.js";
+import type { SavedPlace } from "#lib/types.js";
 
 export type SavedItemType = "place" | "area";
+
+// A saved area as GET /v4/areas/saved lists it
+export type SavedArea = {
+	id: number;
+	name: string;
+	type: string;
+	url_alias: string;
+	icon?: string;
+	website_url?: string;
+};
 
 // Called straight on the btcmap API as the signed-in user (authedApi.ts) —
 // it answers CORS preflights, so no server proxy is involved (#1348).
@@ -50,7 +61,15 @@ export async function removeSavedItem(
 	return res.data;
 }
 
-export function setSavedList(type: SavedItemType, ids: number[]) {
+// Replace one saved list with what the server answered (or roll back to
+// what it was) — only while the account `client` went out as is still the
+// signed-in one: a late answer must not land in another account's session.
+export function setSavedList(
+	type: SavedItemType,
+	ids: number[],
+	client: AuthedClient,
+) {
+	if (!client.stillCurrent()) return;
 	if (type === "place") {
 		session.setSavedPlaces(ids);
 	} else {
@@ -77,9 +96,9 @@ export type HydrateResult = {
 	area: boolean;
 };
 
-// The user's saved places or areas as the API lists them (whole objects,
-// for the pages that show them). Throws on an unexpected response.
-export async function fetchSavedList<T extends { id: number }>(
+// The user's saved places or areas as the API lists them. Throws on an
+// unexpected response.
+async function fetchSavedList<T extends { id: number }>(
 	type: SavedItemType,
 	client: AuthedClient = authedClient(),
 ): Promise<T[]> {
@@ -92,6 +111,14 @@ export async function fetchSavedList<T extends { id: number }>(
 	return res.data;
 }
 
+// Both saved lists as whole objects, for the pages that show them. Settled
+// separately, so one failing endpoint doesn't block the other.
+export const fetchSavedLists = (client: AuthedClient = authedClient()) =>
+	Promise.allSettled([
+		fetchSavedList<SavedPlace>("place", client),
+		fetchSavedList<SavedArea>("area", client),
+	]);
+
 // Fetches the server-side saved-places and saved-areas lists and populates
 // the session store. Uses allSettled so one failing endpoint doesn't block
 // the other; returns per-type success so callers can avoid overwriting
@@ -101,10 +128,7 @@ export async function fetchSavedList<T extends { id: number }>(
 export async function hydrateSavedFromServer(
 	client: AuthedClient = authedClient(),
 ): Promise<HydrateResult> {
-	const [placesRes, areasRes] = await Promise.allSettled([
-		fetchSavedList("place", client),
-		fetchSavedList("area", client),
-	]);
+	const [placesRes, areasRes] = await fetchSavedLists(client);
 	const current = client.stillCurrent();
 	const placeOk = placesRes.status === "fulfilled";
 	const areaOk = areasRes.status === "fulfilled";

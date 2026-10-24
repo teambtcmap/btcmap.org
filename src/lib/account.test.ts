@@ -17,6 +17,8 @@ vi.mock("#lib/axios.js", () => ({
 }));
 
 const AUTH = { headers: { Authorization: "Bearer tok" } };
+// The account PUTs carry credentials and are never retried (authedApi.ts)
+const AUTH_NO_RETRY = { ...AUTH, "axios-retry": { retries: 0 } };
 
 // What btcmap-api's RestApiError sends: { code, message } with the status
 const apiError = (status: number, message: string) =>
@@ -46,7 +48,7 @@ describe("changeUsername", () => {
 		expect(api.put).toHaveBeenCalledWith(
 			`${API_BASE}/v4/users/me/username`,
 			{ username: "alice" },
-			AUTH,
+			AUTH_NO_RETRY,
 		);
 	});
 
@@ -94,7 +96,7 @@ describe("changePassword", () => {
 		expect(api.put).toHaveBeenCalledWith(
 			`${API_BASE}/v4/users/me/password`,
 			{ old_password: "old pw", new_password: "new password" },
-			AUTH,
+			AUTH_NO_RETRY,
 		);
 	});
 
@@ -158,6 +160,7 @@ describe("linkNostr", () => {
 					Authorization: "Bearer tok",
 					"X-Nostr-Authorization": "Nostr base64-event",
 				},
+				"axios-retry": { retries: 0 },
 			},
 		);
 	});

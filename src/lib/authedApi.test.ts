@@ -1,7 +1,11 @@
 import { AxiosError, AxiosHeaders } from "axios";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 
-import { authedClient, NotSignedInError } from "#lib/authedApi.js";
+import {
+	authedClient,
+	NotSignedInError,
+	SessionChangedError,
+} from "#lib/authedApi.js";
 import { session } from "#lib/session.js";
 
 vi.mock("#lib/axios.js", () => ({
@@ -62,6 +66,7 @@ describe("authedClient", () => {
 				"X-Nostr-Authorization": "Nostr proof",
 				Authorization: "Bearer tok",
 			},
+			"axios-retry": { retries: 0 },
 		});
 	});
 
@@ -69,6 +74,8 @@ describe("authedClient", () => {
 		const { default: api } = await import("#lib/axios.js");
 		vi.mocked(api.delete).mockResolvedValue({ data: null });
 
+		// It follows its caller's own session store, not this one
+		session.login("bob", "tok2");
 		await authedClient("other").delete(URL);
 
 		expect(api.delete).toHaveBeenCalledWith(URL, {
@@ -85,30 +92,42 @@ describe("authedClient", () => {
 		expect(api.get).not.toHaveBeenCalled();
 	});
 
-	// A POST or PATCH that timed out may have landed; a retry would create a
-	// second submission, note or photo
-	it("turns retries off for POST and PATCH only", async () => {
+	// A POST or PATCH that timed out may have landed (a second note or
+	// photo); the account PUTs would resend credentials
+	it("retries only reads and deletes", async () => {
 		const { default: api } = await import("#lib/axios.js");
-		vi.mocked(api.post).mockResolvedValue({ data: {} });
-		vi.mocked(api.patch).mockResolvedValue({ data: {} });
-		vi.mocked(api.put).mockResolvedValue({ data: {} });
+		for (const method of ["get", "delete", "post", "put", "patch"] as const) {
+			vi.mocked(api[method]).mockResolvedValue({ data: {} });
+		}
 		const client = authedClient();
 
+		await client.get(URL);
+		await client.delete(URL);
 		await client.post(URL, { a: 1 });
-		await client.patch(URL, { a: 2 });
-		await client.put(URL, { a: 3 });
+		await client.put(URL, { a: 2 });
+		await client.patch(URL, { a: 3 });
 
-		const noRetry = {
-			headers: { Authorization: "Bearer tok" },
-			"axios-retry": { retries: 0 },
-		};
+		const retry = { headers: { Authorization: "Bearer tok" } };
+		const noRetry = { ...retry, "axios-retry": { retries: 0 } };
+		expect(api.get).toHaveBeenCalledWith(URL, retry);
+		expect(api.delete).toHaveBeenCalledWith(URL, retry);
 		expect(api.post).toHaveBeenCalledWith(URL, { a: 1 }, noRetry);
-		expect(api.patch).toHaveBeenCalledWith(URL, { a: 2 }, noRetry);
-		expect(api.put).toHaveBeenCalledWith(
-			URL,
-			{ a: 3 },
-			{ headers: { Authorization: "Bearer tok" } },
+		expect(api.put).toHaveBeenCalledWith(URL, { a: 2 }, noRetry);
+		expect(api.patch).toHaveBeenCalledWith(URL, { a: 3 }, noRetry);
+	});
+
+	// A logout whose revoke failed leaves the token working: a late Undo
+	// must not delete the previous user's photos
+	it("sends nothing once its session has ended", async () => {
+		const { default: api } = await import("#lib/axios.js");
+		const client = authedClient();
+		session.login("bob", "tok2");
+		vi.clearAllMocks();
+
+		await expect(client.delete(URL)).rejects.toBeInstanceOf(
+			SessionChangedError,
 		);
+		expect(api.delete).not.toHaveBeenCalled();
 	});
 
 	it("rejects with the credentials and the body scrubbed from the error", async () => {
@@ -142,6 +161,29 @@ describe("authedClient", () => {
 		expect((error as AxiosError).config?.headers.get("Accept")).toBe(
 			"application/json",
 		);
+	});
+
+	// A plain-object config (one axios hasn't normalized) can carry any
+	// casing; the transport's request object keeps raw headers in Node
+	it("scrubs any casing of the credential headers, and the request object", async () => {
+		const { default: api } = await import("#lib/axios.js");
+		const error = new AxiosError(
+			"Request failed",
+			"ERR_NETWORK",
+			{
+				headers: { authorization: "Bearer tok", Accept: "json" },
+			} as never,
+			{ _header: "GET / HTTP/1.1\r\nAuthorization: Bearer tok" },
+		);
+		vi.mocked(api.get).mockRejectedValue(error);
+
+		const caught = (await authedClient()
+			.get(URL)
+			.catch((e: unknown) => e)) as AxiosError;
+
+		expect(caught.request).toBeUndefined();
+		expect(caught.config?.headers).toEqual({ Accept: "json" });
+		expect(JSON.stringify(caught.toJSON())).not.toContain("tok");
 	});
 
 	it("passes a non-Axios failure through unchanged", async () => {

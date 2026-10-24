@@ -13,9 +13,10 @@ import type { UpdateUsernameArgs } from "$types/btcmap-api/UpdateUsernameArgs";
 
 // Account settings (#1541): straight against the API as the signed-in user
 // (authedApi.ts, #1348). Each call takes the caller's client when the flow
-// writes the result back to the session (client.stillCurrent()). The API validates nothing on these calls; the forms bring their
-// own rules (accountValidation.ts). Expected refusals come back as
-// outcomes for the form to show, anything else throws.
+// writes the result back to the session (client.stillCurrent()). The API
+// validates nothing on these calls; the forms bring their own rules
+// (accountValidation.ts). Expected refusals come back as outcomes for the
+// form to show, anything else throws.
 
 // btcmap-api answers errors with { code, message }; a few of these calls
 // only tell their refusals apart by the message.

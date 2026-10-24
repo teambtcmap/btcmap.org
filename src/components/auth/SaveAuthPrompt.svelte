@@ -3,6 +3,7 @@ import { get } from "svelte/store";
 
 import { trackEvent } from "#lib/analytics.js";
 import { errorStatus } from "#lib/apiError.js";
+import { authedClient } from "#lib/authedApi.js";
 import { _ } from "#lib/i18n/index.js";
 import type { SavedItemType } from "#lib/savedItems.js";
 import {
@@ -39,17 +40,18 @@ async function performInitialSave(current: Session) {
 	// dedupes) but we avoid the round-trip and the misleading toast.
 	if (existing.includes(id)) return;
 
-	setSavedList(type, [...existing, id]);
+	const client = authedClient();
+	setSavedList(type, [...existing, id], client);
 	try {
-		const serverList = await addSavedItem(type, id);
-		setSavedList(type, serverList);
+		const serverList = await addSavedItem(type, id, client);
+		setSavedList(type, serverList, client);
 		trackEvent("save_item_toggle", {
 			saved: serverList.includes(id),
 			type,
 			source: "save_prompt",
 		});
 	} catch (err) {
-		setSavedList(type, existing);
+		setSavedList(type, existing, client);
 		errToast($_("merchant.saveFailed"));
 		console.error("SaveAuthPrompt.performInitialSave failed", errorStatus(err));
 		throw err;

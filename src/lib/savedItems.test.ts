@@ -3,10 +3,13 @@ import { beforeEach, describe, expect, it, vi } from "vitest";
 
 import { API_BASE } from "#lib/api-base.js";
 
+import { authedClient } from "./authedApi";
 import {
 	addSavedItem,
+	fetchSavedLists,
 	hydrateSavedFromServer,
 	removeSavedItem,
+	setSavedList,
 } from "./savedItems";
 import { session } from "./session";
 
@@ -97,5 +100,46 @@ describe("hydrateSavedFromServer", () => {
 			savedPlaces: [],
 			savedAreas: [],
 		});
+	});
+});
+
+describe("setSavedList", () => {
+	it("writes the list while the client's account is signed in", () => {
+		setSavedList("place", [3], authedClient());
+		expect(get(session)?.savedPlaces).toEqual([3]);
+	});
+
+	// A save that answers after another login must not write alice's list
+	// into bob's session — the server list, or the rollback of a failure
+	it("drops a list for an account that is no longer signed in", () => {
+		const client = authedClient();
+		session.login("bob", "tok2");
+
+		setSavedList("place", [3], client);
+		setSavedList("area", [7], client);
+
+		expect(get(session)).toMatchObject({
+			username: "bob",
+			savedPlaces: [],
+			savedAreas: [],
+		});
+	});
+});
+
+describe("fetchSavedLists", () => {
+	it("settles both lists on their own", async () => {
+		const { default: api } = await import("#lib/axios.js");
+		vi.mocked(api.get).mockImplementation(async (url) => {
+			if (url.includes("areas")) throw new Error("offline");
+			return { data: [{ id: 1, name: "Cafe" }] };
+		});
+
+		const [places, areas] = await fetchSavedLists();
+
+		expect(places).toEqual({
+			status: "fulfilled",
+			value: [{ id: 1, name: "Cafe" }],
+		});
+		expect(areas.status).toBe("rejected");
 	});
 });

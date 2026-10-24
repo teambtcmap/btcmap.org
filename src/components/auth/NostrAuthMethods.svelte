@@ -1,4 +1,5 @@
 <script lang="ts">
+import { isAxiosError } from "axios";
 import type { EventTemplate } from "nostr-tools/pure";
 import { onDestroy, onMount, tick } from "svelte";
 
@@ -207,6 +208,13 @@ function httpStatus(err: unknown): number | undefined {
 	return (err as { response?: { status?: number } })?.response?.status;
 }
 
+// What a failure may log: an HTTP error's status, never the error itself.
+// The login exchange's Axios error isn't scrubbed (it isn't an authedApi
+// call) and carries the signed proof in its request config, also when no
+// response came back.
+const loggable = (err: unknown) =>
+	isAxiosError(err) ? (httpStatus(err) ?? "no response") : err;
+
 function showError(err: unknown, logLabel: string) {
 	const status = httpStatus(err);
 	errToast(
@@ -217,7 +225,7 @@ function showError(err: unknown, logLabel: string) {
 	// An Axios error carries the request config — the Bearer token and any
 	// request body — so an API failure logs its status, never the error. A
 	// transport failure (extension refused, relay dead) has nothing to leak.
-	console.error(logLabel, status ?? err);
+	console.error(logLabel, loggable(err));
 }
 
 function failSigner(err: unknown, run: number) {
@@ -247,7 +255,7 @@ function failSigner(err: unknown, run: number) {
 			const detail =
 				typeof err === "string" ? err : (err as Error | undefined)?.message;
 			errToast(detail ? `${$_(labels.error)} (${detail})` : $_(labels.error));
-			console.error(LOG_LABEL[mode], err);
+			console.error(LOG_LABEL[mode], loggable(err));
 		}
 	}
 }

@@ -3,6 +3,7 @@ import Time from "svelte-time";
 
 import { trackEvent } from "#lib/analytics.js";
 import { errorStatus } from "#lib/apiError.js";
+import { authedClient } from "#lib/authedApi.js";
 import { createTimeLocale, LOCALIZED_DATE_FORMAT } from "#lib/dayjsLocale.js";
 import { _, locale } from "#lib/i18n/index.js";
 import type { NoteDraft } from "#lib/noteCard.js";
@@ -54,20 +55,28 @@ $effect.pre(() => {
 	}
 });
 
+// The card acts for the account it was opened under: once that session
+// ends, the client sends nothing, and an answer already on its way doesn't
+// reach the next account's notes.
+const client = authedClient();
+
 const logFailure = (what: string, err: unknown) =>
 	console.error(`Note ${what} failed:`, errorStatus(err) ?? "unknown");
 
 async function create(values: NoteFormValues) {
 	if (target.mode !== "create") return;
 	try {
-		const note = await createNote({
-			lat: target.lat,
-			lon: target.lon,
-			text: values.text,
-			icon: values.icon,
-			public: values.public,
-		});
-		myNotes.upsert(note);
+		const note = await createNote(
+			{
+				lat: target.lat,
+				lon: target.lon,
+				text: values.text,
+				icon: values.icon,
+				public: values.public,
+			},
+			client,
+		);
+		if (client.stillCurrent()) myNotes.upsert(note);
 		trackEvent("note_add_success", {
 			method: target.method,
 			icon: values.icon,
@@ -95,7 +104,8 @@ async function saveEdit(values: NoteFormValues) {
 		return;
 	}
 	try {
-		myNotes.upsert(await updateNote(note.id, patch));
+		const updated = await updateNote(note.id, patch, client);
+		if (client.stillCurrent()) myNotes.upsert(updated);
 		trackEvent("note_edit_success", {
 			text: "text" in patch,
 			icon: "icon" in patch,
@@ -112,7 +122,8 @@ async function setPublic(next: boolean) {
 	if (target.mode !== "view" || busy) return;
 	busy = true;
 	try {
-		myNotes.upsert(await updateNote(target.note.id, { public: next }));
+		const updated = await updateNote(target.note.id, { public: next }, client);
+		if (client.stillCurrent()) myNotes.upsert(updated);
 		trackEvent("note_visibility_change", { public: next });
 	} catch (err) {
 		logFailure("visibility change", err);
@@ -127,8 +138,8 @@ async function confirmDelete() {
 	const { id } = target.note;
 	busy = true;
 	try {
-		await deleteNote(id);
-		myNotes.remove(id);
+		await deleteNote(id, client);
+		if (client.stillCurrent()) myNotes.remove(id);
 		trackEvent("note_delete_success");
 		successToast($_("notes.deleted"));
 		onClose();

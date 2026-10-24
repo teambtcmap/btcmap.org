@@ -2,9 +2,11 @@
 import { onDestroy, onMount } from "svelte";
 
 import { errorStatus } from "#lib/apiError.js";
+import { authedClient } from "#lib/authedApi.js";
 import { _ } from "#lib/i18n/index.js";
+import type { SavedArea } from "#lib/savedItems.js";
 import {
-	fetchSavedList,
+	fetchSavedLists,
 	removeSavedItem,
 	setSavedList,
 } from "#lib/savedItems.js";
@@ -16,15 +18,6 @@ import MultiPlaceMap from "$components/MultiPlaceMap.svelte";
 
 import { goto } from "$app/navigation";
 import { resolve } from "$app/paths";
-
-type SavedArea = {
-	id: number;
-	name: string;
-	type: string;
-	url_alias: string;
-	icon?: string;
-	website_url?: string;
-};
 
 let places: SavedPlace[] = [];
 let areas: SavedArea[] = [];
@@ -52,9 +45,10 @@ async function removePlace(id: number) {
 	removingPlaces = new Set(removingPlaces).add(id);
 	places = places.filter((p) => p.id !== id);
 
+	const client = authedClient();
 	try {
-		const serverList = await removeSavedItem("place", id);
-		setSavedList("place", serverList);
+		const serverList = await removeSavedItem("place", id, client);
+		setSavedList("place", serverList, client);
 		// Drop any cards for IDs the server no longer lists (e.g. removed
 		// from another tab/device since we loaded this page).
 		const serverIds = new Set(serverList);
@@ -79,9 +73,10 @@ async function removeArea(id: number) {
 	removingAreas = new Set(removingAreas).add(id);
 	areas = areas.filter((a) => a.id !== id);
 
+	const client = authedClient();
 	try {
-		const serverList = await removeSavedItem("area", id);
-		setSavedList("area", serverList);
+		const serverList = await removeSavedItem("area", id, client);
+		setSavedList("area", serverList, client);
 		// Drop any cards for IDs the server no longer lists (e.g. removed
 		// from another tab/device since we loaded this page).
 		const serverIds = new Set(serverList);
@@ -112,10 +107,7 @@ onMount(async () => {
 		return;
 	}
 
-	const [placesRes, areasRes] = await Promise.allSettled([
-		fetchSavedList<SavedPlace>("place"),
-		fetchSavedList<SavedArea>("area"),
-	]);
+	const [placesRes, areasRes] = await fetchSavedLists();
 
 	if (placesRes.status === "fulfilled") {
 		places = placesRes.value;
