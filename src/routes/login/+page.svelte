@@ -1,8 +1,7 @@
 <script lang="ts">
 import type { Login } from "#lib/auth.js";
 import { _ } from "#lib/i18n/index.js";
-import LoginForm from "$components/auth/LoginForm.svelte";
-import NostrLoginForm from "$components/auth/NostrLoginForm.svelte";
+import LoginMethods from "$components/auth/LoginMethods.svelte";
 
 import { goto } from "$app/navigation";
 
@@ -23,18 +22,8 @@ async function handleSuccess(login: Login) {
 			{$_("login.title")}
 		</h1>
 
-		<LoginForm onSuccess={handleSuccess} />
-
-		<!-- Our own username/password auth comes first; secondary methods
-		     (Nostr today, OSM later) sit together under one labelled divider. -->
-		<div class="flex items-center gap-3">
-			<div class="h-px flex-1 bg-gray-300 dark:bg-white/20"></div>
-			<span class="text-xs text-body dark:text-white/50">{$_("login.otherMethods")}</span>
-			<div class="h-px flex-1 bg-gray-300 dark:bg-white/20"></div>
-		</div>
-
-		<div class="space-y-3">
-			<NostrLoginForm onSuccess={handleSuccess} />
-		</div>
+		<!-- Our own username/password auth is the first tab; Nostr (and OSM
+		     later) the next. -->
+		<LoginMethods id="login-page" onSuccess={handleSuccess} />
 	</div>
 </div>

@@ -6,6 +6,18 @@ import { fieldBorderClasses } from "#lib/fieldStyles.js";
 import { _ } from "#lib/i18n/index.js";
 import type { SignedAuthEvent } from "#lib/nostr.js";
 import { getNostrExtension } from "#lib/nostr.js";
+import type {
+	NostrForm,
+	NostrMethod,
+	PanelState,
+} from "#lib/nostrMethodLayout.js";
+import {
+	methodBlocked,
+	methodOpen,
+	nostrMethodLayout,
+	pairingClick,
+	rowClick,
+} from "#lib/nostrMethodLayout.js";
 import { fetchProfile } from "#lib/nostrProfile.js";
 import { shortNpub } from "#lib/nostrSigner.js";
 import type { PairMode } from "#lib/signerRun.svelte.js";
@@ -21,6 +33,10 @@ import TextLink from "$components/TextLink.svelte";
 // the caller supplies the template and what to do with the signature. The run
 // itself (cancel, stale results, the pairing, toasts, events) is
 // signerRun.svelte.ts; this renders it and owns what is on screen.
+//
+// Laid out for the device (#1568): the likely method as the one primary
+// button, the rest as a list of rows that expand in place, and the technical
+// or risky ones (bunker, nsec) behind "More options".
 
 type Mode = "login" | "link";
 
@@ -38,24 +54,25 @@ type Props = {
 	// signature to something (the account being linked) snapshots it there,
 	// before any await can outlive it.
 	onStart?: () => void;
+	// Drop the row hints where height is scarce (the add-location drawer)
+	dense?: boolean;
 };
 
-let { mode, template, submit, onStart }: Props = $props();
+let { mode, template, submit, onStart, dense = false }: Props = $props();
+const uid = $props.id();
 
 // Copy per surface: the transports are the same, the sentence under the
 // button is not ("Log in with…" vs "Link with…"). The events are
 // signerRun.svelte.ts's.
 const LABELS = {
 	login: {
-		entry: "login.nostrLogin",
 		extensionAction: "login.optionExtensionAction",
 		bunkerAction: "login.bunkerConnect",
 		nsecAction: "login.nsecSubmit",
 		nsecHint: "login.nsecWarning",
-		savedAction: "login.submit",
+		savedAction: "login.continueAs",
 	},
 	link: {
-		entry: "account.nostr.linkEntry",
 		extensionAction: "account.nostr.linkExtension",
 		bunkerAction: "login.bunkerConnect",
 		nsecAction: "account.nostr.linkNsec",
@@ -67,29 +84,34 @@ const LABELS = {
 const labels = $derived(LABELS[mode]);
 
 const primaryButton =
-	"w-full rounded-lg bg-purple-600 px-4 py-2 font-semibold text-white transition-colors hover:bg-purple-700 disabled:opacity-50 aria-disabled:opacity-50";
+	"flex min-h-12 w-full items-center justify-center gap-2 rounded-xl bg-purple-600 px-4 py-3 font-semibold text-white transition-colors hover:bg-purple-700 aria-disabled:opacity-50";
 const outlineButton =
 	"w-full rounded-lg border border-purple-600 px-4 py-2 font-semibold text-purple-600 transition-colors hover:bg-purple-600/10 disabled:opacity-50 aria-disabled:opacity-50 dark:border-purple-400 dark:text-purple-300 dark:hover:bg-purple-400/10";
-// One card style for every transport, and one for the fields inside them: in
-// dark the cards wear the same border as the fields they hold (the app's
-// border-input token, which is what every other dark form control uses) with a
-// fainter fill, so nothing in the flow out-shouts anything else.
-const cardClass =
-	"space-y-2 rounded-2xl border-2 border-input p-4 dark:bg-white/5";
-const headingClass = "text-sm font-semibold text-primary dark:text-white";
+// One bordered group per list, rows split by a hairline: one border language
+// instead of a card around every transport.
+const listClass =
+	"divide-y divide-gray-300 overflow-hidden rounded-2xl border border-gray-300 dark:divide-white/20 dark:border-white/20";
+const rowClass =
+	"grid min-h-14 w-full grid-cols-[2rem_1fr_1rem] items-center gap-3 px-3.5 py-3 text-left transition-colors hover:bg-purple-600/5 focus-visible:ring-2 focus-visible:ring-link focus-visible:outline-none focus-visible:ring-inset aria-disabled:opacity-50 dark:hover:bg-white/5";
+const rowOpen = "bg-purple-600/5 dark:bg-white/5";
 const hintClass = "text-xs text-body dark:text-white/70";
-const statusClass = "text-xs text-body dark:text-white/50";
+const statusClass =
+	"flex items-center justify-center gap-2 text-xs text-body dark:text-white/50";
 
 let nsec = $state("");
 let nsecInput = $state<HTMLInputElement>();
+let bunkerInput = $state<HTMLInputElement>();
 // A NIP-07 extension is only detectable in the browser, and it may inject after
-// mount (or after the user installs one), so the button's state is refreshed on
-// mount, on window focus and whenever the options panel opens.
+// mount (or after the user installs one), so its row is refreshed on mount, on
+// window focus and once shortly after mount.
 let hasExtension = $state(false);
 
-// One entry point, then every transport as an equal option: the extension is
-// no longer privileged over a signer app or a QR pairing.
-let showOptions = $state(false);
+// "More options" (bunker, nsec), and which of their forms is open: their
+// fields only render once their row is picked.
+let showMore = $state(false);
+let formOpen = $state<NostrForm | null>(null);
+// A touch device most likely holds the signer app itself
+let isTouch = $state(false);
 // kind:0 name for the saved signer, when public relays have one.
 let savedSignerName = $state<string | null>(null);
 let profileFor: string | null = null;
@@ -111,9 +133,9 @@ const runner = createSignerRun({
 	onStart: () => onStart?.(),
 	present: (uri, presentation, run) => {
 		noAppHint = false;
-		if (presentation === "qr") void renderQr(uri);
-		else if (presentation === "open") handOff(uri, run);
-		else void copyConnection(uri);
+		// The QR draws itself once its canvas mounts (the $effect below)
+		if (presentation === "open") handOff(uri, run);
+		else if (presentation === "copy") void copyConnection(uri);
 	},
 	onCancel: () => {
 		if (noAppTimer) {
@@ -130,10 +152,91 @@ const runner = createSignerRun({
 	},
 });
 
-function toggleOptions() {
-	showOptions = !showOptions;
-	runner.optionsToggled(showOptions);
-	if (showOptions) refreshExtension();
+const layout = $derived(
+	nostrMethodLayout({
+		isTouch,
+		hasExtension,
+		hasSaved: runner.savedPairing !== null,
+	}),
+);
+const savedName = $derived(
+	runner.savedPairing
+		? (savedSignerName ??
+				shortNpub(runner.savedPairing.npub ?? runner.savedPairing.pubkey))
+		: "",
+);
+
+function forgetSigner() {
+	// Aria-disabled while a run is going: forgetting would cancel it
+	if (runner.anyLoading) return;
+	runner.forget();
+}
+
+function toggleMore() {
+	showMore = !showMore;
+	runner.trackOptionsToggle(showMore);
+	if (!showMore && formOpen) closeForm();
+}
+
+function closeForm() {
+	if (runner.signerRun === "bunker") runner.cancel();
+	formOpen = null;
+}
+
+async function openForm(form: NostrForm) {
+	if (formOpen === form) {
+		closeForm();
+		return;
+	}
+	// One row open at a time. Nothing is running here: a form row is
+	// blocked while any transport runs (Cancel first).
+	formOpen = form;
+	await tick();
+	if (form === "nsec") nsecInput?.focus();
+	else bunkerInput?.focus();
+}
+
+const panelState = $derived<PanelState>({
+	signerRun: runner.signerRun,
+	pairMode: runner.pairMode,
+	formOpen,
+	extensionSigning: runner.nostrLoading,
+	nsecSigning: runner.nsecLoading,
+	uriReady: runner.connectUri !== null,
+});
+const isOpen = (method: NostrMethod) => methodOpen(method, panelState);
+const isBlocked = (method: NostrMethod) => methodBlocked(method, panelState);
+
+// The primary button and the list rows run the same transports. A blocked
+// method is aria-disabled, and the click it still takes does nothing.
+function activate(method: NostrMethod) {
+	if (isBlocked(method)) return;
+	switch (method) {
+		case "saved":
+			void runner.useSavedPairing();
+			return;
+		case "extension":
+			if (formOpen) closeForm();
+			void signWithExtension();
+			return;
+		case "bunker":
+		case "nsec":
+			void openForm(method);
+			return;
+		default:
+			// The open row isn't blocked, but before the URI exists its
+			// pairing has nothing to re-present: not a counted click
+			if (pairingClick(panelState) === "ignore") return;
+			formOpen = null;
+			void runner.startPairing(method);
+	}
+}
+
+// The primary button re-runs its presentation (another hand-off); a row
+// closes the running pairing instead (rowClick).
+function toggleRow(method: NostrMethod) {
+	if (rowClick(method, panelState) === "close") runner.cancel();
+	else activate(method);
 }
 
 // The extension button is live only when a NIP-07 provider is actually there,
@@ -171,12 +274,10 @@ function handOff(uri: string, run: number) {
 	}, 1800);
 }
 
-async function renderQr(uri: string) {
-	await tick();
-	if (!qrCanvas) return;
+async function renderQr(canvas: HTMLCanvasElement, uri: string) {
 	try {
 		const QRCode = await import("qrcode");
-		await QRCode.default.toCanvas(qrCanvas, uri, { width: 200, margin: 1 });
+		await QRCode.default.toCanvas(canvas, uri, { width: 200, margin: 1 });
 		qrFailed = false;
 	} catch (err) {
 		qrFailed = true;
@@ -221,8 +322,65 @@ function copyWithSelection(uri: string): boolean {
 	}
 }
 
+function primaryLabel(method: NostrMethod): string {
+	switch (method) {
+		case "saved":
+			return runner.signerRun === "saved"
+				? $_("login.signerWaiting")
+				: rowTitle(method);
+		case "extension":
+			return runner.nostrLoading
+				? $_("login.nostrSigning")
+				: $_(labels.extensionAction);
+		default:
+			return rowTitle(method);
+	}
+}
+
+function rowTitle(method: NostrMethod): string {
+	switch (method) {
+		case "saved":
+			return $_(labels.savedAction, { values: { name: savedName } });
+		case "extension":
+			return $_("login.optionExtension");
+		case "open":
+			return $_("login.connectOpen");
+		case "qr":
+			return $_("login.connectShow");
+		case "copy":
+			return copied ? $_("login.connectCopied") : $_("login.connectCopy");
+		case "bunker":
+			return $_("login.optionBunker");
+		case "nsec":
+			return $_("login.optionNsec");
+	}
+}
+
+function rowHint(method: NostrMethod): string | null {
+	switch (method) {
+		case "extension":
+			return runner.nostrLoading
+				? $_("login.nostrSigning")
+				: $_("login.optionExtensionHint");
+		case "open":
+			return $_("login.connectOpenHint");
+		case "qr":
+			// On a computer the signer is most likely the phone in a pocket
+			return isTouch
+				? $_("login.connectShowHint")
+				: $_("login.connectShowHintPhone");
+		case "copy":
+			return $_("login.connectCopyHint");
+		case "nsec":
+			return $_("login.nsecLeastSafe");
+		default:
+			return null;
+	}
+}
+
 onMount(() => {
 	runner.restorePairing();
+	isTouch = window.matchMedia("(pointer: coarse)").matches;
 	refreshExtension();
 	// Extensions inject on their own schedule, and a user who installs one has
 	// to come back to this tab: re-probe on focus and once shortly after mount.
@@ -232,6 +390,15 @@ onMount(() => {
 		window.removeEventListener("focus", refreshExtension);
 		clearTimeout(lateProbe);
 	};
+});
+
+// Draw the QR whenever a canvas mounts for it: on the URI's arrival, on a
+// switch back to QR, and when a layout change (an extension injecting late)
+// moves the QR body from the primary button into a row.
+$effect(() => {
+	if (qrCanvas && runner.connectUri && runner.pairMode === "qr") {
+		void renderQr(qrCanvas, runner.connectUri);
+	}
 });
 
 // Name the saved signer by its kind:0 profile when one exists, and fall back
@@ -254,161 +421,86 @@ onDestroy(() => {
 });
 </script>
 
-<!-- One entry point; the transports are equals inside the panel. -->
-<button
-	type="button"
-	onclick={toggleOptions}
-	aria-expanded={showOptions}
-	class={primaryButton}
->
-	<span class="flex items-center justify-center gap-1">
-		{$_(labels.entry)}
-		<Icon
-			type="material"
-			icon="expand_more"
-			w="18"
-			h="18"
-			class={showOptions
-				? "rotate-180 transition-transform"
-				: "transition-transform"}
-		/>
-	</span>
-</button>
+{#snippet waitingDot()}
+	<span
+		class="h-2 w-2 shrink-0 rounded-full bg-purple-600 motion-safe:animate-pulse dark:bg-purple-400"
+		aria-hidden="true"
+	></span>
+{/snippet}
 
-{#if showOptions}
-	<div class="space-y-3">
-		{#if runner.savedPairing}
-			<div class={cardClass}>
-				<div class="flex items-start justify-between gap-3">
-					<div class="min-w-0">
-						<p class={headingClass}>{$_("login.signerSaved")}</p>
-						<p
-							class="truncate {hintClass}"
-							class:font-mono={savedSignerName === null}
-						>
-							{savedSignerName ??
-								shortNpub(runner.savedPairing.npub ?? runner.savedPairing.pubkey)}
-						</p>
-					</div>
-					<TextLink
-						type="button"
-						onclick={runner.forget}
-						style="shrink-0 text-xs"
-						aria-disabled={runner.anyLoading ? "true" : undefined}
-					>
-						{$_("login.signerForget")}
-					</TextLink>
-				</div>
-				<button
-					type="button"
-					onclick={runner.useSavedPairing}
-					aria-disabled={runner.anyLoading ? "true" : undefined}
-					class={outlineButton}
-				>
-					{runner.signerRun === "saved"
-						? $_("login.signerWaiting")
-						: $_(labels.savedAction)}
-				</button>
-			</div>
+{#snippet runFooter(method: NostrMethod)}
+	{#if runner.authUrl}
+		<TextLink
+			link={runner.authUrl}
+			external
+			style="block w-full truncate text-center text-sm"
+			onclick={runner.trackAuthUrlClick}
+		>
+			{$_("login.signerAuthLink")}
+		</TextLink>
+	{/if}
+	<!-- Cancel sits with the run it stops, not at the end of the panel -->
+	<div
+		class="flex text-sm font-semibold {method === 'qr' && runner.connectUri
+			? 'justify-between'
+			: 'justify-center'}"
+	>
+		{#if method === "qr" && runner.connectUri}
+			<!-- Same session, other presentation: no restart (setPairMode) -->
+			<TextLink type="button" onclick={() => activate("copy")}>
+				{$_("login.connectCopyInstead")}
+			</TextLink>
 		{/if}
+		<TextLink type="button" onclick={runner.cancel}>
+			{$_("login.signerCancel")}
+		</TextLink>
+	</div>
+{/snippet}
 
-		<!-- Equal options: same card, same button, no transport preferred. -->
-		<div class={cardClass}>
-			<p class={headingClass}>{$_("login.optionExtension")}</p>
-			<p class={hintClass}>
-				{hasExtension
-					? $_("login.optionExtensionHint")
-					: $_("login.nostrNoExtension")}
+{#snippet body(method: NostrMethod)}
+	<div class="space-y-3">
+		{#if method === "qr"}
+			{#if runner.connectUri}
+				<div class="flex justify-center">
+					<canvas bind:this={qrCanvas} class="rounded-lg bg-white p-2"></canvas>
+				</div>
+				{#if qrFailed}
+					<p class="text-center {hintClass}">{$_("login.qrUnavailable")}</p>
+				{/if}
+			{/if}
+			<p class={statusClass} role="status">
+				{@render waitingDot()}
+				{$_("login.connectWaiting")}
 			</p>
-			<button
-				type="button"
-				onclick={signWithExtension}
-				disabled={!hasExtension}
-				aria-disabled={runner.anyLoading ? "true" : undefined}
-				class={outlineButton}
-			>
-				{runner.nostrLoading ? $_("login.nostrSigning") : $_(labels.extensionAction)}
-			</button>
-		</div>
-
-		<div class={cardClass}>
-			<p class={headingClass}>{$_("login.optionConnect")}</p>
-			<p class={hintClass}>
-				{$_("login.optionConnectHint")}
+			{@render runFooter(method)}
+		{:else if method === "copy" || method === "open"}
+			<p class={statusClass} role="status">
+				{@render waitingDot()}
+				{method === "open"
+					? $_("login.signerWaiting")
+					: $_("login.connectWaiting")}
 			</p>
-			<div class="flex flex-col gap-2">
-				<button
-					type="button"
-					onclick={() => runner.startPairing("open")}
-					aria-disabled={runner.pairButtonsDisabled ? "true" : undefined}
-					class={outlineButton}
-				>
-					{$_("login.connectOpen")}
-				</button>
-				<button
-					type="button"
-					onclick={() => runner.startPairing("copy")}
-					aria-disabled={runner.pairButtonsDisabled ? "true" : undefined}
-					class={outlineButton}
-				>
-					{copied ? $_("login.connectCopied") : $_("login.connectCopy")}
-				</button>
-				<button
-					type="button"
-					onclick={() => runner.startPairing("qr")}
-					aria-disabled={runner.pairButtonsDisabled ? "true" : undefined}
-					class={outlineButton}
-				>
-					{$_("login.connectShow")}
-				</button>
-			</div>
-
 			{#if noAppHint}
-				<p class={hintClass} role="status">
+				<p class="text-center {hintClass}" role="status">
 					{$_("login.connectNoApp")}
 				</p>
 			{/if}
-
-			<!-- QR only: the connection string is a separate action, so this
-			     view holds nothing but the code to scan. -->
-			{#if runner.pairMode === "qr" && runner.connectUri}
-				<div class="space-y-2">
-					<div class="flex justify-center">
-						<canvas
-							bind:this={qrCanvas}
-							class="rounded-lg bg-white p-2"
-						></canvas>
-					</div>
-					{#if qrFailed}
-						<p class="text-center {hintClass}">
-							{$_("login.qrUnavailable")}
-						</p>
-					{/if}
-				</div>
-			{/if}
-
-			{#if runner.pairingSession}
-				<p class="text-center {statusClass}" role="status">
-					{runner.pairMode === "open"
-						? $_("login.signerWaiting")
-						: $_("login.connectWaiting")}
-				</p>
-			{/if}
-		</div>
-
-		<div class={cardClass}>
-			<p class={headingClass}>{$_("login.optionBunker")}</p>
-			<p id="{mode}-bunker-hint" class={hintClass}>
+			{@render runFooter(method)}
+		{:else if method === "saved"}
+			{@render runFooter(method)}
+		{:else if method === "bunker"}
+			<p id="{uid}-bunker-hint" class={hintClass}>
 				{$_("login.bunkerSubheading")}
 			</p>
 			<form onsubmit={connectWithBunker} class="space-y-2">
-				<!-- Hand-rolled: the subheading above already names this control, so
-				     a field label would duplicate it. Classes mirror TextField. -->
+				<!-- Hand-rolled: the hint above already names this control, so a
+				     field label would duplicate it. Classes mirror TextField. -->
 				<input
-					id="{mode}-bunker-uri"
+					id="{uid}-bunker-uri"
+					bind:this={bunkerInput}
 					bind:value={bunkerUri}
 					aria-label={$_("login.bunkerSubheading")}
-					aria-describedby="{mode}-bunker-hint"
+					aria-describedby="{uid}-bunker-hint"
 					placeholder="bunker://..."
 					autocomplete="off"
 					autocorrect="off"
@@ -429,22 +521,20 @@ onDestroy(() => {
 						: $_(labels.bunkerAction)}
 				</button>
 			</form>
-		</div>
-
-		<div class={cardClass}>
-			<p class={headingClass}>{$_("login.optionNsec")}</p>
-			<p id="{mode}-nsec-hint" class={hintClass}>
-				{$_(labels.nsecHint)}
-			</p>
+			{#if runner.signerRun === "bunker"}
+				{@render runFooter(method)}
+			{/if}
+		{:else if method === "nsec"}
+			<p id="{uid}-nsec-hint" class={hintClass}>{$_(labels.nsecHint)}</p>
 			<form onsubmit={signWithNsec} class="space-y-2">
-				<!-- Same hand-rolled shape: the subheading above describes the field. -->
+				<!-- Same hand-rolled shape: the hint above describes the field. -->
 				<input
-					id="{mode}-nsec"
+					id="{uid}-nsec"
 					type="password"
 					bind:this={nsecInput}
 					bind:value={nsec}
 					aria-label={$_("login.nsecLabel")}
-					aria-describedby="{mode}-nsec-hint"
+					aria-describedby="{uid}-nsec-hint"
 					placeholder="nsec1..."
 					autocomplete="new-password"
 					autocorrect="off"
@@ -463,26 +553,158 @@ onDestroy(() => {
 					{runner.nsecLoading ? $_("login.nostrSigning") : $_(labels.nsecAction)}
 				</button>
 			</form>
-		</div>
-
-		{#if runner.signerRun}
-			{#if runner.authUrl}
-				<TextLink
-					link={runner.authUrl}
-					external
-					style="block w-full truncate text-center text-sm"
-					onclick={runner.trackAuthUrlClick}
-				>
-					{$_("login.signerAuthLink")}
-				</TextLink>
-			{/if}
-			<TextLink
-				type="button"
-				onclick={runner.cancel}
-				style="block w-full text-center text-sm"
-			>
-				{$_("login.signerCancel")}
-			</TextLink>
 		{/if}
 	</div>
-{/if}
+{/snippet}
+
+{#snippet row(method: NostrMethod)}
+	{@const open = isOpen(method)}
+	{@const hint = rowHint(method)}
+	<div>
+		<!-- A row with a body is a disclosure; the extension row just signs -->
+		<button
+			type="button"
+			id="{uid}-row-{method}"
+			onclick={() => toggleRow(method)}
+			aria-expanded={method === "extension" ? undefined : open}
+			aria-controls={method === "extension" ? undefined : `${uid}-body-${method}`}
+			aria-disabled={isBlocked(method) ? "true" : undefined}
+			class="{rowClass} {open ? rowOpen : ''}"
+		>
+			<span
+				class="grid h-8 w-8 place-items-center rounded-lg {method === 'nsec'
+					? 'bg-amber-500/15 text-amber-700 dark:text-amber-400'
+					: 'bg-purple-600/10 text-purple-600 dark:bg-purple-400/20 dark:text-purple-300'}"
+			>
+				<!-- Literals inline, not a lookup table: pnpm icons:generate bundles
+				     only the names it can read off the <Icon> tag. -->
+				<Icon
+					type="material"
+					icon={method === "extension"
+						? "extension"
+						: method === "open"
+							? "open_in_new"
+							: method === "qr"
+								? "qr_code"
+								: method === "copy"
+									? "content_copy"
+									: method === "bunker"
+										? "link"
+										: "warning"}
+					w="18"
+					h="18"
+				/>
+			</span>
+			<span class="min-w-0">
+				<span class="block font-semibold text-primary dark:text-white">
+					{rowTitle(method)}
+				</span>
+				<!-- The nsec warning stays even in dense rows: it is the point -->
+				{#if hint && (!dense || method === "nsec")}
+					<span
+						class="block text-xs {method === 'nsec'
+							? 'text-amber-700 dark:text-amber-400'
+							: 'text-body dark:text-white/65'}"
+					>
+						{hint}
+					</span>
+				{/if}
+			</span>
+			<Icon
+				type="material"
+				icon={open ? "expand_more" : "chevron_right"}
+				w="16"
+				h="16"
+				class="text-body dark:text-white/50"
+			/>
+		</button>
+		{#if open}
+			<div
+				id="{uid}-body-{method}"
+				role="region"
+				aria-labelledby="{uid}-row-{method}"
+				class="{rowOpen} px-3.5 pb-3.5"
+			>
+				{@render body(method)}
+			</div>
+		{/if}
+	</div>
+{/snippet}
+
+<div class="space-y-3">
+	<!-- The extension signs in place; every other primary opens a body -->
+	<button
+		type="button"
+		id="{uid}-primary"
+		onclick={() => activate(layout.primary)}
+		aria-expanded={layout.primary === "extension"
+			? undefined
+			: isOpen(layout.primary)}
+		aria-controls={layout.primary === "extension"
+			? undefined
+			: `${uid}-primary-body`}
+		aria-disabled={isBlocked(layout.primary) ? "true" : undefined}
+		class={primaryButton}
+	>
+		<span class="truncate">{primaryLabel(layout.primary)}</span>
+	</button>
+
+	{#if layout.primary === "saved" && runner.savedPairing && runner.signerRun !== "saved"}
+		<div class="flex items-center justify-between gap-3 {hintClass}">
+			<span class="truncate" class:font-mono={savedSignerName === null}>
+				{$_("login.signerSaved", { values: { name: savedName } })}
+			</span>
+			<TextLink
+				type="button"
+				onclick={forgetSigner}
+				style="shrink-0 text-xs"
+				aria-disabled={runner.anyLoading ? "true" : undefined}
+			>
+				{$_("login.signerForget")}
+			</TextLink>
+		</div>
+	{/if}
+
+	{#if isOpen(layout.primary)}
+		<div
+			id="{uid}-primary-body"
+			role="region"
+			aria-labelledby="{uid}-primary"
+		>
+			{@render body(layout.primary)}
+		</div>
+	{/if}
+
+	{#if layout.rows.length > 0}
+		<div class={listClass}>
+			{#each layout.rows as method (method)}
+				{@render row(method)}
+			{/each}
+		</div>
+	{/if}
+
+	<button
+		type="button"
+		onclick={toggleMore}
+		aria-expanded={showMore}
+		aria-controls="{uid}-more"
+		class="mx-auto flex items-center gap-1 px-2 py-1.5 text-sm font-semibold text-link transition-colors hover:text-hover"
+	>
+		{$_("login.moreOptions")}
+		<Icon
+			type="material"
+			icon="expand_more"
+			w="18"
+			h="18"
+			class={showMore ? "rotate-180 transition-transform" : "transition-transform"}
+		/>
+	</button>
+
+	{#if showMore}
+		<div id="{uid}-more" class={listClass}>
+			{#each layout.more as method (method)}
+				{@render row(method)}
+			{/each}
+		</div>
+	{/if}
+</div>

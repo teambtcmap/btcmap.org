@@ -1,42 +1,62 @@
 <script lang="ts">
+import type { Snippet } from "svelte";
 import { onDestroy, tick } from "svelte";
 import { fade, fly } from "svelte/transition";
 
 import { lockBodyScroll, unlockBodyScroll } from "#lib/bodyScrollLock.js";
 import { trapTab } from "#lib/focusTrap.js";
+import { portal } from "#lib/portal.js";
 import CloseButton from "$components/CloseButton.svelte";
 
-export let open = false;
-export let title: string;
-export let titleId: string = "modal-title";
+type Props = {
+	open?: boolean;
+	title: string;
+	titleId?: string;
+	// 440px instead of 320px on wider screens, for content with its own
+	// controls (the login tabs)
+	wide?: boolean;
+	children?: Snippet;
+};
+
+let {
+	open = $bindable(false),
+	title,
+	titleId = "modal-title",
+	wide = false,
+	children,
+}: Props = $props();
 
 let triggerEl: HTMLElement | null = null;
-let modalEl: HTMLDivElement;
+let modalEl = $state<HTMLDivElement>();
 let hasBeenOpened = false;
 let scrollLocked = false;
 
-$: if (open) {
-	hasBeenOpened = true;
-	if (!triggerEl && typeof document !== "undefined") {
-		triggerEl = document.activeElement as HTMLElement | null;
+// .pre, like the legacy $: it replaces: the trigger has to be read off
+// document.activeElement before the dialog renders and takes focus.
+$effect.pre(() => {
+	if (open) {
+		hasBeenOpened = true;
+		if (!triggerEl && typeof document !== "undefined") {
+			triggerEl = document.activeElement as HTMLElement | null;
+		}
+		if (!scrollLocked) {
+			lockBodyScroll();
+			scrollLocked = true;
+		}
+		tick().then(() => {
+			modalEl?.querySelector<HTMLElement>("button, a, [tabindex]")?.focus();
+		});
+	} else if (hasBeenOpened) {
+		tick().then(() => {
+			triggerEl?.focus();
+			triggerEl = null;
+		});
+		if (scrollLocked) {
+			unlockBodyScroll();
+			scrollLocked = false;
+		}
 	}
-	if (!scrollLocked) {
-		lockBodyScroll();
-		scrollLocked = true;
-	}
-	tick().then(() => {
-		modalEl?.querySelector<HTMLElement>("button, a, [tabindex]")?.focus();
-	});
-} else if (hasBeenOpened) {
-	tick().then(() => {
-		triggerEl?.focus();
-		triggerEl = null;
-	});
-	if (scrollLocked) {
-		unlockBodyScroll();
-		scrollLocked = false;
-	}
-}
+});
 
 onDestroy(() => {
 	if (scrollLocked) unlockBodyScroll();
@@ -59,13 +79,17 @@ export function setTrigger(el: HTMLElement) {
 }
 </script>
 
-<svelte:window on:keydown|capture={handleKeydown} />
+<svelte:window onkeydowncapture={handleKeydown} />
 
 {#if open}
+	<!-- Portalled to <body>: a caller inside a stacking context (the merchant
+	     hero's Save button) would otherwise trap the overlay under its
+	     siblings. -->
+	<div use:portal>
 	<div
 		transition:fade={{ duration: 200 }}
 		class="fixed inset-0 z-[1000] bg-black/40 dark:bg-black/60"
-		on:click={() => (open = false)}
+		onclick={() => (open = false)}
 		aria-hidden="true"
 	></div>
 
@@ -75,7 +99,9 @@ export function setTrigger(el: HTMLElement) {
 		role="dialog"
 		aria-modal="true"
 		aria-labelledby={titleId}
-		class="fixed inset-x-4 bottom-[max(1rem,env(safe-area-inset-bottom))] z-[2000] flex max-h-[85dvh] flex-col overflow-hidden rounded-2xl border border-gray-300 bg-white px-5 py-5 shadow-2xl dark:border-white/95 dark:bg-dark sm:inset-auto sm:top-1/2 sm:left-1/2 sm:h-auto sm:w-80 sm:max-h-[90dvh] sm:translate-x-[-50%] sm:translate-y-[-50%] sm:rounded-xl sm:px-6 sm:py-6"
+		class="fixed inset-x-4 bottom-[max(1rem,env(safe-area-inset-bottom))] z-[2000] flex max-h-[85dvh] flex-col overflow-hidden rounded-2xl border border-gray-300 bg-white px-5 py-5 shadow-2xl dark:border-white/95 dark:bg-dark sm:inset-auto sm:top-1/2 sm:left-1/2 sm:h-auto {wide
+			? 'sm:w-[27.5rem]'
+			: 'sm:w-80'} sm:max-h-[90dvh] sm:translate-x-[-50%] sm:translate-y-[-50%] sm:rounded-xl sm:px-6 sm:py-6"
 	>
 		<div class="mb-4 flex items-center justify-between">
 			<h2 id={titleId} class="text-lg font-semibold text-primary dark:text-white">
@@ -85,7 +111,8 @@ export function setTrigger(el: HTMLElement) {
 		</div>
 
 		<div class="min-h-0 flex-1 overflow-y-auto -mx-5 px-5 sm:-mx-6 sm:px-6">
-			<slot />
+			{@render children?.()}
 		</div>
+	</div>
 	</div>
 {/if}
