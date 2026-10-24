@@ -4,10 +4,7 @@ import axios from "axios";
 import { onMount } from "svelte";
 import { _ } from "svelte-i18n";
 
-import {
-	captchaRejection,
-	createCaptchaGate,
-} from "#lib/captchaGate.svelte.js";
+import { createCaptchaGate } from "#lib/captchaGate.svelte.js";
 import { fieldError, inputProps, ruleValidation } from "#lib/ruleValidation.js";
 import { errToast } from "#lib/utils.js";
 import type { VerifyInput } from "#lib/verifyValidation.js";
@@ -96,10 +93,9 @@ const form = createForm(() => ({
 				submitted = true;
 			})
 			.catch((error) => {
-				errToast(captchaRejection(error) ?? $_(`errors.formSubmission`));
+				errToast(captcha.submitFailed(error) ?? $_(`errors.formSubmission`));
 				console.error(error);
 				submitting = false;
-				captcha.submitFailed();
 			});
 	},
 }));
