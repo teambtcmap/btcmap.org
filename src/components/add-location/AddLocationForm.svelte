@@ -15,6 +15,7 @@ import { trackEvent } from "#lib/analytics.js";
 import { API_BASE } from "#lib/api-base.js";
 import { errorStatus } from "#lib/apiError.js";
 import { authedClient } from "#lib/authedApi.js";
+import { createCaptchaGate } from "#lib/captchaGate.svelte.js";
 import { CATEGORIES, CATEGORY_GROUPS } from "#lib/categoryMapping.js";
 import { fieldBorderClasses } from "#lib/fieldStyles.js";
 import { reverseGeocode } from "#lib/geocoding.js";
@@ -110,33 +111,18 @@ $effect(() => {
 
 // The captcha is fetched when the review step opens, not on mount — the
 // edit step needs none of it, and abandoners cost no fetches.
-let captchaContent = $state("");
-let isCaptchaLoading = $state(false);
-let captchaSecret = $state<string>();
 let captchaInput = $state<HTMLInputElement>();
 let honeyInput = $state<HTMLInputElement>();
 
-const fetchCaptcha = () => {
-	isCaptchaLoading = true;
-	// A new image voids the old secret and whatever was typed for it: clear
-	// both, so Submit stays disabled until the replacement arrives.
-	captchaSecret = undefined;
-	reviewForm.reset();
-	review.reset();
-	axios
-		.get<{ captcha: string; captchaSecret: string }>("/captcha")
-		.then((response) => {
-			captchaSecret = response.data.captchaSecret;
-			captchaContent = response.data.captcha;
-		})
-		.catch((error) => {
-			errToast(get(_)("errors.captchaFetch"));
-			console.error(error);
-		})
-		.finally(() => {
-			isCaptchaLoading = false;
-		});
-};
+const captcha = createCaptchaGate({
+	onfetcherror: () => errToast(get(_)("errors.captchaFetch")),
+	// A new image voids whatever was typed for the old one; the gate clears
+	// the secret, so Submit stays disabled until the replacement arrives.
+	onnewimage: () => {
+		reviewForm.reset();
+		review.reset();
+	},
+});
 
 let nameInput = $state<HTMLInputElement>();
 let addressInput = $state<HTMLInputElement>();
@@ -287,6 +273,20 @@ const onAuthSuccess = () => {
 	submitAnonymously = false;
 };
 
+// Captcha only guards the anonymous path (#1374) — a signed-in
+// submission authenticates with the account token instead. Fetched on the
+// review step once it is anonymous: on entry, or when the identity goes
+// mid-review (detach, a logout elsewhere). Bouncing edit↔review keeps the
+// loaded one (the refresh button covers an expired image). Tracks the step
+// and the identity only, so a failed fetch waits for the refresh button
+// instead of retrying in a loop.
+$effect(() => {
+	if (identityAttached || step !== "review") return;
+	untrack(() => {
+		if (!captcha.secret && !captcha.loading) captcha.refresh();
+	});
+});
+
 // Whether the contact email is required flips with the identity (sign-in,
 // detach, undo), which isn't a field value: re-check a flagged contact
 // against it.
@@ -360,13 +360,6 @@ const detailsForm = createForm(() => ({
 		step = "review";
 		onstepchange?.("review");
 		trackEvent("add_place_review_enter");
-		// Captcha only guards the anonymous path (#1374) — a signed-in
-		// submission authenticates with the account token instead. First
-		// entry fetches; bouncing edit↔review keeps the loaded one (the
-		// refresh button covers an expired image).
-		if (!identityAttached && !captchaSecret && !isCaptchaLoading) {
-			fetchCaptcha();
-		}
 		scrollToTop();
 	},
 }));
@@ -513,7 +506,7 @@ const submitPreview = (captchaAnswer: string) => {
 	// The reviewed snapshot goes out verbatim — only the captcha answer
 	// and the honeypot are read live.
 	const payload: SubmitPlaceRequest = {
-		captchaSecret,
+		captchaSecret: captcha.secret,
 		captchaTest: captchaAnswer,
 		honey: honeyInput?.value,
 		...preview,
@@ -536,10 +529,7 @@ const submitPreview = (captchaAnswer: string) => {
 			}
 			console.error(error);
 			submitting = false;
-			// The server burns a captcha on its first correct answer, before
-			// the submission itself can fail (#1401) — resending it could only
-			// come back "already used". Hand the retry a fresh one.
-			fetchCaptcha();
+			captcha.submitFailed();
 		});
 };
 
@@ -1120,10 +1110,10 @@ onMount(() => {
 				<reviewForm.Field name="captcha">
 					{#snippet children(field)}
 						<CaptchaField
-							content={captchaContent}
-							loading={isCaptchaLoading}
-							onrefresh={fetchCaptcha}
-							disabled={!captchaSecret}
+							content={captcha.content}
+							loading={captcha.loading}
+							onrefresh={captcha.refresh}
+							disabled={!captcha.secret}
 							invalid={!!fieldError(field)}
 							{...inputProps(field)}
 							bind:element={captchaInput}
@@ -1136,8 +1126,8 @@ onMount(() => {
 			     a disabled button would drop the focus it holds (#1548). -->
 			<PrimaryButton
 				loading={submitting}
-				busy={isCaptchaLoading}
-				disabled={submitting || (!identityAttached && !captchaSecret)}
+				busy={captcha.loading}
+				disabled={submitting || (!identityAttached && !captcha.secret)}
 				style="w-full py-3 rounded-xl"
 			>
 				{$_('forms.submitLocation')}

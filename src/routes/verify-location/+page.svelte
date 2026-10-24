@@ -4,6 +4,10 @@ import axios from "axios";
 import { onMount } from "svelte";
 import { get } from "svelte/store";
 
+import {
+	captchaRejection,
+	createCaptchaGate,
+} from "#lib/captchaGate.svelte.js";
 import { _ } from "#lib/i18n/index.js";
 import { fieldError, inputProps, ruleValidation } from "#lib/ruleValidation.js";
 import { placesError } from "#lib/store.js";
@@ -35,30 +39,17 @@ const long = $derived(data?.long);
 const location = $derived(data?.location || "");
 const edit = $derived(data?.edit || "");
 
-let captchaSecret = $state<string>();
 let captchaInput = $state<HTMLInputElement>();
 let honeyInput = $state<HTMLInputElement>();
 
-let captchaContent = $state("");
-let isCaptchaLoading = $state(true);
-
-const fetchCaptcha = () => {
-	isCaptchaLoading = true;
-	axios
-		.get("/captcha")
-		.then((response) => {
-			// handle success
-			captchaSecret = response.data.captchaSecret;
-			captchaContent = response.data.captcha;
-		})
-		.catch((error) => {
-			errToast(get(_)("errors.captchaFetch"));
-			console.error(error);
-		})
-		.finally(() => {
-			isCaptchaLoading = false;
-		});
-};
+const captcha = createCaptchaGate({
+	onfetcherror: () => errToast(get(_)("errors.captchaFetch")),
+	onnewimage: () =>
+		form.setFieldValue("captcha", "", {
+			dontUpdateMeta: true,
+			dontValidate: true,
+		}),
+});
 
 let currentBox = $state<HTMLInputElement>();
 let methodInput = $state<HTMLTextAreaElement>();
@@ -99,7 +90,7 @@ const form = createForm(() => ({
 		axios
 			.post("/api/gitea/issue", {
 				type: "verify-location",
-				captchaSecret,
+				captchaSecret: captcha.secret,
 				captchaTest: value.captcha,
 				honey: honeyInput?.value,
 				name: name,
@@ -117,14 +108,10 @@ const form = createForm(() => ({
 				submitted = true;
 			})
 			.catch((error) => {
-				if (error.response.data.message.includes("Captcha")) {
-					errToast(error.response.data.message);
-				} else {
-					errToast(get(_)("errors.formSubmission"));
-				}
-
+				errToast(captchaRejection(error) ?? get(_)("errors.formSubmission"));
 				console.error(error);
 				submitting = false;
+				captcha.submitFailed();
 			});
 	},
 }));
@@ -150,8 +137,7 @@ $effect(() => {
 
 onMount(async () => {
 	if (browser) {
-		// fetch and add captcha
-		fetchCaptcha();
+		captcha.refresh();
 	}
 });
 </script>
@@ -230,7 +216,7 @@ onMount(async () => {
 							>
 							<input
 								class="h-4 w-4 accent-link"
-								disabled={!captchaSecret || !data || describesChanges(values.current.changes)}
+								disabled={!captcha.secret || !data || describesChanges(values.current.changes)}
 								required={!describesChanges(values.current.changes)}
 								type="checkbox"
 								id="current"
@@ -259,7 +245,7 @@ onMount(async () => {
 								name="outdated"
 								label={$_('verifyLocation.outdatedLabel')}
 								labelNote={$_('verifyLocation.ifApplicable')}
-								disabled={!captchaSecret || !data || field.state.value}
+								disabled={!captcha.secret || !data || field.state.value}
 								required={!field.state.value}
 								placeholder={$_('verifyLocation.outdatedPlaceholder')}
 								aria-invalid={confirmation ? 'true' : undefined}
@@ -279,7 +265,7 @@ onMount(async () => {
 						id="verify-method"
 						name="verify"
 						label={$_('verifyLocation.verifyLabel')}
-						disabled={!captchaSecret || !data}
+						disabled={!captcha.secret || !data}
 						required
 						placeholder={$_('verifyLocation.verifyPlaceholder')}
 						error={fieldError(field) && $_('verifyLocation.methodRequired')}
@@ -292,10 +278,10 @@ onMount(async () => {
 			<form.Field name="captcha">
 				{#snippet children(field)}
 					<CaptchaField
-						content={captchaContent}
-						loading={isCaptchaLoading}
-						onrefresh={fetchCaptcha}
-						disabled={!captchaSecret || !data}
+						content={captcha.content}
+						loading={captcha.loading}
+						onrefresh={captcha.refresh}
+						disabled={!captcha.secret || !data}
 						invalid={!!fieldError(field)}
 						{...inputProps(field)}
 						bind:element={captchaInput}
@@ -313,7 +299,7 @@ onMount(async () => {
 
 			<PrimaryButton
 				loading={submitting}
-				disabled={submitting || !captchaSecret || !data}
+				disabled={submitting || !captcha.secret || !data}
 				style="w-full py-3 rounded-xl"
 			>
 				{$_('verifyLocation.submitReport')}
