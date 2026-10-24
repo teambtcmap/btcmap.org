@@ -8,6 +8,10 @@ import {
 	COMMUNITY_FIELDS,
 	validateCommunity,
 } from "#lib/addCommunityValidation.js";
+import {
+	captchaRejection,
+	createCaptchaGate,
+} from "#lib/captchaGate.svelte.js";
 import { fieldBorderClasses } from "#lib/fieldStyles.js";
 import { fieldError, inputProps, ruleValidation } from "#lib/ruleValidation.js";
 import { theme } from "#lib/theme.js";
@@ -32,27 +36,17 @@ const routes = $derived([
 	{ name: t("addCommunityForm.breadcrumbAdd"), url: "/communities/add" },
 ]);
 
-let captchaContent = $state("");
-let isCaptchaLoading = $state(true);
-let captchaSecret = $state<string>();
 let honeyInput = $state<HTMLInputElement>();
 
-const fetchCaptcha = () => {
-	isCaptchaLoading = true;
-	axios
-		.get("/captcha")
-		.then((response) => {
-			captchaSecret = response.data.captchaSecret;
-			captchaContent = response.data.captcha;
-		})
-		.catch((error) => {
-			errToast(t("addCommunityForm.captchaFetchError"));
-			console.error(error);
-		})
-		.finally(() => {
-			isCaptchaLoading = false;
-		});
-};
+const captcha = createCaptchaGate({
+	loading: true,
+	onfetcherror: () => errToast(t("addCommunityForm.captchaFetchError")),
+	onnewimage: () =>
+		form.setFieldValue("captcha", "", {
+			dontUpdateMeta: true,
+			dontValidate: true,
+		}),
+});
 
 let submitted = $state(false);
 let submitting = $state(false);
@@ -124,7 +118,7 @@ const form = createForm(() => ({
 		axios
 			.post("/api/gitea/issue", {
 				type: "community",
-				captchaSecret,
+				captchaSecret: captcha.secret,
 				captchaTest: value.captcha,
 				honey: honeyInput?.value,
 				location: value.location,
@@ -140,14 +134,12 @@ const form = createForm(() => ({
 				submitted = true;
 			})
 			.catch((error) => {
-				if (error.response.data.message.includes("Captcha")) {
-					errToast(error.response.data.message);
-				} else {
-					errToast(t("addCommunityForm.formSubmitError"));
-				}
-
+				errToast(
+					captchaRejection(error) ?? t("addCommunityForm.formSubmitError"),
+				);
 				console.error(error);
 				submitting = false;
+				captcha.submitFailed();
 			});
 	},
 }));
@@ -192,13 +184,12 @@ const formReset = () => {
 	searchQuery = "";
 	searchResults = [];
 	searchLoading = false;
-	fetchCaptcha();
+	captcha.refresh();
 };
 
 onMount(async () => {
 	if (browser) {
-		// fetch and add captcha
-		fetchCaptcha();
+		captcha.refresh();
 	}
 });
 </script>
@@ -279,7 +270,7 @@ onMount(async () => {
 										searchLocation();
 									}
 								}}
-								disabled={!captchaSecret}
+								disabled={!captcha.secret}
 								type="text"
 								id="location-picker"
 								name="location"
@@ -297,7 +288,7 @@ onMount(async () => {
 								type="button"
 								onclick={searchLocation}
 								loading={searchLoading}
-								disabled={!captchaSecret || searchLoading || !searchQuery}
+								disabled={!captcha.secret || searchLoading || !searchQuery}
 								style="{!searchQuery
 									? 'opacity-50 hover:bg-link'
 									: ''} w-full md:w-[210px] py-3 rounded-xl"
@@ -338,7 +329,7 @@ onMount(async () => {
 						id="name"
 						name="name"
 						label={$_('addCommunityForm.nameLabel')}
-						disabled={!captchaSecret}
+						disabled={!captcha.secret}
 						required
 						placeholder={$_('addCommunityForm.namePlaceholder')}
 						error={fieldError(field) && $_('addCommunityForm.nameRequired')}
@@ -356,7 +347,7 @@ onMount(async () => {
 						label={$_('addCommunityForm.iconLabel')}
 						optional
 						type="url"
-						disabled={!captchaSecret}
+						disabled={!captcha.secret}
 						placeholder={$_('addCommunityForm.iconPlaceholder')}
 						error={fieldError(field) && $_('addCommunityForm.iconInvalid')}
 						{...inputProps(field)}
@@ -376,7 +367,7 @@ onMount(async () => {
 						name="lightning"
 						label={$_('addCommunityForm.lightningLabel')}
 						optional
-						disabled={!captchaSecret}
+						disabled={!captcha.secret}
 						placeholder={$_('addCommunityForm.lightningPlaceholder')}
 						{...inputProps(field)}
 					>
@@ -403,7 +394,7 @@ onMount(async () => {
 						id="socials"
 						name="socials"
 						label={$_('addCommunityForm.socialsLabel')}
-						disabled={!captchaSecret}
+						disabled={!captcha.secret}
 						required
 						placeholder={$_('addCommunityForm.socialsPlaceholder')}
 						error={fieldError(field) && $_('addCommunityForm.socialsRequired')}
@@ -423,7 +414,7 @@ onMount(async () => {
 						id="contact"
 						name="contact"
 						label={$_('addCommunityForm.contactLabel')}
-						disabled={!captchaSecret}
+						disabled={!captcha.secret}
 						required
 						placeholder={$_('addCommunityForm.contactPlaceholder')}
 						error={fieldError(field) && $_('addCommunityForm.contactRequired')}
@@ -445,7 +436,7 @@ onMount(async () => {
 						label={$_('addCommunityForm.notesLabel')}
 						optional
 						rows={2}
-						disabled={!captchaSecret}
+						disabled={!captcha.secret}
 						placeholder={$_('addCommunityForm.notesPlaceholder')}
 						{...inputProps(field)}
 					>
@@ -459,10 +450,10 @@ onMount(async () => {
 			<form.Field name="captcha">
 				{#snippet children(field)}
 					<CaptchaField
-						content={captchaContent}
-						loading={isCaptchaLoading}
-						onrefresh={fetchCaptcha}
-						disabled={!captchaSecret}
+						content={captcha.content}
+						loading={captcha.loading}
+						onrefresh={captcha.refresh}
+						disabled={!captcha.secret}
 						invalid={!!fieldError(field)}
 						{...inputProps(field)}
 						bind:element={captchaInput}
@@ -480,7 +471,7 @@ onMount(async () => {
 
 			<PrimaryButton
 				loading={submitting}
-				disabled={submitting || !captchaSecret}
+				disabled={submitting || !captcha.secret}
 				style="w-full py-3 rounded-xl"
 			>
 				{$_('addCommunityForm.submitButton')}

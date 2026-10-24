@@ -4,6 +4,10 @@ import axios from "axios";
 import { onMount } from "svelte";
 import { _ } from "svelte-i18n";
 
+import {
+	captchaRejection,
+	createCaptchaGate,
+} from "#lib/captchaGate.svelte.js";
 import { fieldError, inputProps, ruleValidation } from "#lib/ruleValidation.js";
 import { errToast } from "#lib/utils.js";
 import type { VerifyInput } from "#lib/verifyValidation.js";
@@ -25,29 +29,18 @@ type Props = {
 };
 let { communityName, communityAlias }: Props = $props();
 
-let captchaSecret = $state<string>();
 let captchaInput = $state<HTMLInputElement>();
 let honeyInput = $state<HTMLInputElement>();
 
-let captchaContent = $state("");
-let isCaptchaLoading = $state(true);
-
-const fetchCaptcha = () => {
-	isCaptchaLoading = true;
-	axios
-		.get("/captcha")
-		.then((response) => {
-			captchaSecret = response.data.captchaSecret;
-			captchaContent = response.data.captcha;
-		})
-		.catch((error) => {
-			errToast($_(`errors.captchaFetch`));
-			console.error(error);
-		})
-		.finally(() => {
-			isCaptchaLoading = false;
-		});
-};
+const captcha = createCaptchaGate({
+	loading: true,
+	onfetcherror: () => errToast($_(`errors.captchaFetch`)),
+	onnewimage: () =>
+		form.setFieldValue("captcha", "", {
+			dontUpdateMeta: true,
+			dontValidate: true,
+		}),
+});
 
 let accurateBox = $state<HTMLInputElement>();
 let methodInput = $state<HTMLTextAreaElement>();
@@ -89,7 +82,7 @@ const form = createForm(() => ({
 		axios
 			.post("/api/gitea/issue", {
 				type: "verify-community",
-				captchaSecret,
+				captchaSecret: captcha.secret,
 				captchaTest: value.captcha,
 				honey: honeyInput?.value,
 				name: communityName,
@@ -103,14 +96,10 @@ const form = createForm(() => ({
 				submitted = true;
 			})
 			.catch((error) => {
-				if (error.response?.data?.message?.includes("Captcha")) {
-					errToast(error.response.data.message);
-				} else {
-					errToast($_(`errors.formSubmission`));
-				}
-
+				errToast(captchaRejection(error) ?? $_(`errors.formSubmission`));
 				console.error(error);
 				submitting = false;
+				captcha.submitFailed();
 			});
 	},
 }));
@@ -126,12 +115,12 @@ function resetForm() {
 	validation.reset();
 	submitted = false;
 	submitting = false;
-	fetchCaptcha();
+	captcha.refresh();
 }
 
 onMount(async () => {
 	if (browser) {
-		fetchCaptcha();
+		captcha.refresh();
 	}
 });
 </script>
@@ -238,10 +227,10 @@ onMount(async () => {
 			<form.Field name="captcha">
 				{#snippet children(field)}
 					<CaptchaField
-						content={captchaContent}
-						loading={isCaptchaLoading}
-						onrefresh={fetchCaptcha}
-						disabled={!captchaSecret}
+						content={captcha.content}
+						loading={captcha.loading}
+						onrefresh={captcha.refresh}
+						disabled={!captcha.secret}
 						invalid={!!fieldError(field)}
 						{...inputProps(field)}
 						bind:element={captchaInput}
@@ -259,7 +248,7 @@ onMount(async () => {
 
 			<PrimaryButton
 				loading={submitting}
-				disabled={submitting || !captchaSecret}
+				disabled={submitting || !captcha.secret}
 				style="w-full py-3 rounded-xl"
 			>
 				{$_(`verifyCommunity.submitReport`)}
