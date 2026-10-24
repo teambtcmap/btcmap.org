@@ -1,4 +1,5 @@
 <script lang="ts">
+import type { Snippet } from "svelte";
 import { onDestroy, tick } from "svelte";
 import { fade, fly } from "svelte/transition";
 
@@ -6,37 +7,51 @@ import { lockBodyScroll, unlockBodyScroll } from "#lib/bodyScrollLock.js";
 import { trapTab } from "#lib/focusTrap.js";
 import CloseButton from "$components/CloseButton.svelte";
 
-export let open = false;
-export let title: string;
-export let titleId: string = "modal-title";
+type Props = {
+	open?: boolean;
+	title: string;
+	titleId?: string;
+	children?: Snippet;
+};
+
+let {
+	open = $bindable(false),
+	title,
+	titleId = "modal-title",
+	children,
+}: Props = $props();
 
 let triggerEl: HTMLElement | null = null;
-let modalEl: HTMLDivElement;
+let modalEl = $state<HTMLDivElement>();
 let hasBeenOpened = false;
 let scrollLocked = false;
 
-$: if (open) {
-	hasBeenOpened = true;
-	if (!triggerEl && typeof document !== "undefined") {
-		triggerEl = document.activeElement as HTMLElement | null;
+// .pre, like the legacy $: it replaces: the trigger has to be read off
+// document.activeElement before the dialog renders and takes focus.
+$effect.pre(() => {
+	if (open) {
+		hasBeenOpened = true;
+		if (!triggerEl && typeof document !== "undefined") {
+			triggerEl = document.activeElement as HTMLElement | null;
+		}
+		if (!scrollLocked) {
+			lockBodyScroll();
+			scrollLocked = true;
+		}
+		tick().then(() => {
+			modalEl?.querySelector<HTMLElement>("button, a, [tabindex]")?.focus();
+		});
+	} else if (hasBeenOpened) {
+		tick().then(() => {
+			triggerEl?.focus();
+			triggerEl = null;
+		});
+		if (scrollLocked) {
+			unlockBodyScroll();
+			scrollLocked = false;
+		}
 	}
-	if (!scrollLocked) {
-		lockBodyScroll();
-		scrollLocked = true;
-	}
-	tick().then(() => {
-		modalEl?.querySelector<HTMLElement>("button, a, [tabindex]")?.focus();
-	});
-} else if (hasBeenOpened) {
-	tick().then(() => {
-		triggerEl?.focus();
-		triggerEl = null;
-	});
-	if (scrollLocked) {
-		unlockBodyScroll();
-		scrollLocked = false;
-	}
-}
+});
 
 onDestroy(() => {
 	if (scrollLocked) unlockBodyScroll();
@@ -59,13 +74,13 @@ export function setTrigger(el: HTMLElement) {
 }
 </script>
 
-<svelte:window on:keydown|capture={handleKeydown} />
+<svelte:window onkeydowncapture={handleKeydown} />
 
 {#if open}
 	<div
 		transition:fade={{ duration: 200 }}
 		class="fixed inset-0 z-[1000] bg-black/40 dark:bg-black/60"
-		on:click={() => (open = false)}
+		onclick={() => (open = false)}
 		aria-hidden="true"
 	></div>
 
@@ -85,7 +100,7 @@ export function setTrigger(el: HTMLElement) {
 		</div>
 
 		<div class="min-h-0 flex-1 overflow-y-auto -mx-5 px-5 sm:-mx-6 sm:px-6">
-			<slot />
+			{@render children?.()}
 		</div>
 	</div>
 {/if}
