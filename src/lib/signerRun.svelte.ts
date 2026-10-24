@@ -184,8 +184,6 @@ export const createSignerRun = ({
 	let activeSigner: Closable | null = null;
 
 	const anyLoading = () => nostrLoading || nsecLoading || signerRun !== null;
-	const pairingSession = () =>
-		signerRun === "qr" || signerRun === "open" || signerRun === "copy";
 
 	// A 401/403 means the API rejected the signature, not that the
 	// transport broke. An API failure logs its status, never the error; a
@@ -342,17 +340,6 @@ export const createSignerRun = ({
 		get anyLoading() {
 			return anyLoading();
 		},
-		get pairingSession() {
-			return pairingSession();
-		},
-		// A pairing in progress still owns its three buttons (switching between
-		// QR, copy and hand-off must not restart it); everything else blocks
-		// them.
-		get pairButtonsDisabled() {
-			return (
-				nostrLoading || nsecLoading || (signerRun !== null && !pairingSession())
-			);
-		},
 
 		isCurrent: (run: number) => run === generation,
 		cancel,
@@ -368,12 +355,9 @@ export const createSignerRun = ({
 			cancel();
 		},
 
-		// The options panel opened or closed; closing abandons any run.
-		optionsToggled: (open: boolean) => {
-			trackEvent(events.toggle, { open });
-			if (!open) cancel();
-		},
-
+		// "More options" opened or closed. Not a cancel: the run may be in a
+		// row outside it.
+		trackOptionsToggle: (open: boolean) => trackEvent(events.toggle, { open }),
 		trackAuthUrlClick: () => trackEvent(events.authUrl),
 
 		// false when no NIP-07 provider is there any more (the caller

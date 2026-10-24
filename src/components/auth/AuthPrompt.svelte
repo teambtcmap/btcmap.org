@@ -2,8 +2,7 @@
 import type { Login } from "#lib/auth.js";
 import { _ } from "#lib/i18n/index.js";
 import type { Session } from "#lib/session.js";
-import LoginForm from "$components/auth/LoginForm.svelte";
-import NostrLoginForm from "$components/auth/NostrLoginForm.svelte";
+import LoginMethods from "$components/auth/LoginMethods.svelte";
 import SignupForm from "$components/auth/SignupForm.svelte";
 import Modal from "$components/Modal.svelte";
 import PrimaryButton from "$components/PrimaryButton.svelte";
@@ -58,7 +57,9 @@ $effect.pre(() => {
 });
 </script>
 
-<Modal bind:open title={modalTitle} {titleId}>
+<!-- Wide only for the login tabs: the choice and signup screens keep the
+     narrow modal. -->
+<Modal bind:open title={modalTitle} {titleId} wide={view === "login"}>
 	{#if view === "choice"}
 		<p class="mb-6 text-sm text-body dark:text-white/70">
 			{description}
@@ -86,15 +87,7 @@ $effect.pre(() => {
 			</button>
 		</div>
 	{:else if view === "login"}
-		<LoginForm compact onSuccess={onLoginSuccess} />
-		<div class="my-4 flex items-center gap-3">
-			<div class="h-px flex-1 bg-gray-300 dark:bg-white/20"></div>
-			<span class="text-xs text-body dark:text-white/50">
-				{$_("login.otherMethods")}
-			</span>
-			<div class="h-px flex-1 bg-gray-300 dark:bg-white/20"></div>
-		</div>
-		<NostrLoginForm onSuccess={onLoginSuccess} />
+		<LoginMethods id="{titleId}-login" compact onSuccess={onLoginSuccess} />
 		<TextLink
 			type="button"
 			onclick={() => (view = "choice")}

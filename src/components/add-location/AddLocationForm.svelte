@@ -29,12 +29,12 @@ import type {
 	SubmitPlaceResponse,
 } from "#lib/placeSubmission.js";
 import { buildPlaceSubmissionArgs } from "#lib/placeSubmission.js";
+import { revealInScrollParent } from "#lib/revealInScrollParent.js";
 import { fieldError, inputProps, ruleValidation } from "#lib/ruleValidation.js";
 import { session } from "#lib/session.js";
 import { theme } from "#lib/theme.js";
 import { errToast } from "#lib/utils.js";
-import LoginForm from "$components/auth/LoginForm.svelte";
-import NostrLoginForm from "$components/auth/NostrLoginForm.svelte";
+import LoginMethods from "$components/auth/LoginMethods.svelte";
 import FormHelperText from "$components/FormHelperText.svelte";
 import CaptchaField from "$components/form/CaptchaField.svelte";
 import FieldError from "$components/form/FieldError.svelte";
@@ -240,6 +240,15 @@ let showDetach = $state(false);
 // The signed-out inline sign-in (#1334): the existing auth forms expand
 // in place, so typed fields survive — no navigation.
 let showSignIn = $state(false);
+let signInBlock = $state<HTMLDivElement>();
+const toggleSignIn = async () => {
+	showSignIn = !showSignIn;
+	if (!showSignIn) return;
+	// Opened at the bottom of a long form: bring the block up inside the
+	// drawer, not by scrolling the page around it
+	await tick();
+	if (signInBlock) revealInScrollParent(signInBlock);
+};
 const identityAttached = $derived(
 	!!$session?.token.trim() && !submitAnonymously,
 );
@@ -909,7 +918,7 @@ onMount(() => {
 							<button
 								type="button"
 								aria-expanded={showSignIn}
-								onclick={() => (showSignIn = !showSignIn)}
+								onclick={toggleSignIn}
 								class="flex items-center gap-1 text-sm font-semibold text-link hover:text-hover focus:outline-link"
 							>
 								{$_('addLocation.signInPrompt')}
@@ -925,20 +934,19 @@ onMount(() => {
 								<!-- The auth forms nest inside the location <form>
 								     (client-rendered only, so no parser flattening) —
 								     their bubbling submit events must not reach
-								     submitForm. -->
+								     submitForm. A fill, not a border (#1568): the form
+								     keeps one border language, its fields. -->
 								<div
-									class="mt-3 rounded-2xl border-2 border-input p-4"
+									bind:this={signInBlock}
+									class="mt-3 rounded-2xl bg-gray-100 p-3.5 dark:bg-white/5"
 									onsubmit={(e) => e.stopPropagation()}
 								>
-									<LoginForm compact onSuccess={onAuthSuccess} />
-									<div class="my-4 flex items-center gap-3">
-										<div class="h-px flex-1 bg-gray-300 dark:bg-white/20"></div>
-										<span class="text-xs text-body dark:text-white/50">
-											{$_('login.otherMethods')}
-										</span>
-										<div class="h-px flex-1 bg-gray-300 dark:bg-white/20"></div>
-									</div>
-									<NostrLoginForm onSuccess={onAuthSuccess} />
+									<LoginMethods
+										id="add-location-sign-in"
+										compact
+										dense
+										onSuccess={onAuthSuccess}
+									/>
 								</div>
 							{/if}
 						</div>

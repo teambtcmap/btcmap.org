@@ -73,6 +73,7 @@ type EventPayloads = {
 	layers_panel_open: undefined;
 	locate_click: undefined;
 	login_create_account_click: undefined;
+	login_method_switch: { method: "username" | "nostr" };
 	login_nostr_auth_url_click: undefined;
 	login_nostr_bunker_click: { method: "bunker" };
 	login_nostr_connect_copy_click: { method: "copy" };
