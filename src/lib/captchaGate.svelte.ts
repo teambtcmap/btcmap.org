@@ -9,7 +9,8 @@ import axios, { isAxiosError } from "axios";
 // submission behind it can fail (lib/server/captcha.ts, #1401). After a
 // failed submit, whatever the reason, the secret may be spent and a retry
 // with it could only come back "already used": submitFailed() swaps in a
-// fresh one.
+// fresh one, and hands back the server's words if the captcha was what got
+// refused.
 
 type CaptchaResponse = { captcha: string; captchaSecret: string };
 
@@ -70,7 +71,12 @@ export const createCaptchaGate = ({
 			return loading;
 		},
 		refresh,
-		submitFailed: refresh,
+		// After a failed submit: the toast text for a refused captcha, else
+		// undefined and the form picks its own words
+		submitFailed: (error: unknown): string | undefined => {
+			refresh();
+			return captchaRejection(error);
+		},
 	};
 };
 

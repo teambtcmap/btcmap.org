@@ -56,12 +56,22 @@ describe("createCaptchaGate", () => {
 		gate.refresh();
 		await flush();
 
-		gate.submitFailed();
+		gate.submitFailed(new Error("offline"));
 		expect(gate.secret).toBeUndefined();
 		await flush();
 
 		expect(gate.secret).toBe("secret-2");
 		expect(onnewimage).toHaveBeenCalledTimes(2);
+	});
+
+	it("hands a failed submit back the server's words for a refused captcha", () => {
+		vi.mocked(axios.get).mockResolvedValue(image(1));
+		const gate = createCaptchaGate({ onfetcherror: vi.fn() });
+		const message = "Captcha has already been used, please try another.";
+
+		expect(gate.submitFailed(failure(400, message))).toBe(message);
+		expect(gate.submitFailed(failure(500, "Captcha"))).toBeUndefined();
+		expect(axios.get).toHaveBeenCalledTimes(2);
 	});
 
 	// The forms that fetch on mount render their placeholder until then,
