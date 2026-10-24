@@ -64,6 +64,14 @@ describe("createCaptchaGate", () => {
 		expect(onnewimage).toHaveBeenCalledTimes(2);
 	});
 
+	// The forms that fetch on mount render their placeholder until then,
+	// on the server too
+	it("can start out loading", () => {
+		const gate = createCaptchaGate({ onfetcherror: vi.fn(), loading: true });
+		expect(gate.loading).toBe(true);
+		expect(createCaptchaGate({ onfetcherror: vi.fn() }).loading).toBe(false);
+	});
+
 	it("reports a failed fetch and leaves no secret", async () => {
 		vi.mocked(axios.get).mockRejectedValueOnce(new Error("offline"));
 		const onfetcherror = vi.fn();

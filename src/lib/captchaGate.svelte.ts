@@ -18,12 +18,20 @@ type Options = {
 	onfetcherror: () => void;
 	// A new image is on its way: the answer typed for the old one is void
 	onnewimage?: () => void;
+	// A form that fetches on mount starts out loading: the field shows its
+	// placeholder until the first image is in, server render included
+	// (CaptchaField's sanitizer only runs in the browser)
+	loading?: boolean;
 };
 
-export const createCaptchaGate = ({ onfetcherror, onnewimage }: Options) => {
+export const createCaptchaGate = ({
+	onfetcherror,
+	onnewimage,
+	loading: initiallyLoading = false,
+}: Options) => {
 	let secret = $state<string>();
 	let content = $state("");
-	let loading = $state(false);
+	let loading = $state(initiallyLoading);
 	// A refresh started while another is in flight wins; the older answer
 	// is dropped
 	let generation = 0;

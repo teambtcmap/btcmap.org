@@ -39,6 +39,7 @@ const routes = $derived([
 let honeyInput = $state<HTMLInputElement>();
 
 const captcha = createCaptchaGate({
+	loading: true,
 	onfetcherror: () => errToast(t("addCommunityForm.captchaFetchError")),
 	onnewimage: () =>
 		form.setFieldValue("captcha", "", {

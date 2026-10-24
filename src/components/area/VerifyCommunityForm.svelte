@@ -33,6 +33,7 @@ let captchaInput = $state<HTMLInputElement>();
 let honeyInput = $state<HTMLInputElement>();
 
 const captcha = createCaptchaGate({
+	loading: true,
 	onfetcherror: () => errToast($_(`errors.captchaFetch`)),
 	onnewimage: () =>
 		form.setFieldValue("captcha", "", {
