@@ -5,6 +5,8 @@ import { fetchLinkedNpub, linkNostr, unlinkNostr } from "#lib/account.js";
 import { createAccountAction } from "#lib/accountAction.svelte.js";
 import { trackEvent } from "#lib/analytics.js";
 import { errorStatus } from "#lib/apiError.js";
+import type { AuthedClient } from "#lib/authedApi.js";
+import { authedClient } from "#lib/authedApi.js";
 import { _ } from "#lib/i18n/index.js";
 import type { SignedAuthEvent } from "#lib/nostr.js";
 import {
@@ -12,7 +14,6 @@ import {
 	encodeNip98Event,
 	NOSTR_LINK_URL,
 } from "#lib/nostr.js";
-import type { Session } from "#lib/session.js";
 import { session } from "#lib/session.js";
 import { errToast, successToast } from "#lib/utils.js";
 import NostrAuthMethods from "$components/auth/NostrAuthMethods.svelte";
@@ -31,7 +32,7 @@ let changedHere = false;
 // The account the signature is being made for. Signing can wait on an
 // extension prompt or a signer app, so a session that has moved on meanwhile
 // must not receive the key.
-let linkToken: Session["token"] | null = null;
+let linkClient: AuthedClient | null = null;
 
 const linkTemplate = () => buildNip98Template(NOSTR_LINK_URL, "PUT");
 
@@ -44,11 +45,11 @@ const shortNpub = $derived(
 // A link made elsewhere (e.g. the Android app) only reaches the session
 // at the next login; read the account's own state instead
 onMount(async () => {
-	const token = $session?.token;
-	if (!token) return;
+	if (!$session) return;
+	const client = authedClient();
 	try {
-		const linked = await fetchLinkedNpub(token);
-		if (!changedHere) session.setNpub(token, linked);
+		const linked = await fetchLinkedNpub(client);
+		if (!changedHere) session.setNpub(client, linked);
 	} catch (err) {
 		console.error("Nostr link lookup failed:", errorStatus(err) ?? "unknown");
 	}
@@ -57,30 +58,30 @@ onMount(async () => {
 // Both credentials: the Bearer token says which account, the signed PUT
 // proves the user controls the key.
 async function linkKey(signed: SignedAuthEvent): Promise<boolean> {
-	const token = linkToken;
-	if (!token || $session?.token !== token) return false;
+	const client = linkClient;
+	if (!client?.stillCurrent()) return false;
 	changedHere = true;
-	const result = await linkNostr(token, encodeNip98Event(signed));
+	const result = await linkNostr(encodeNip98Event(signed), client);
 	if (result.status === "taken") {
 		errToast($_("account.nostr.taken"));
 		return false;
 	}
-	session.setNpub(token, result.npub);
+	session.setNpub(client, result.npub);
 	successToast($_("account.nostr.linkSuccess"));
 	return true;
 }
 
 async function unlink() {
-	const token = $session?.token;
 	// The busy button still takes clicks (#1548)
-	if (!token || unlinkAction.pending) return;
+	if (!$session || unlinkAction.pending) return;
+	const client = authedClient();
 	await unlinkAction.run($_("account.nostr.unlinkError"), async () => {
 		// The confirmed unlink, so the click/success pair counts attempts,
 		// not opened confirmations
 		trackEvent("account_nostr_unlink_click");
 		changedHere = true;
-		await unlinkNostr(token);
-		session.setNpub(token, null);
+		await unlinkNostr(client);
+		session.setNpub(client, null);
 		confirmingUnlink = false;
 		trackEvent("account_nostr_unlink_success");
 		successToast($_("account.nostr.unlinkSuccess"));
@@ -142,6 +143,6 @@ async function unlink() {
 		mode="link"
 		template={linkTemplate}
 		submit={linkKey}
-		onStart={() => (linkToken = $session?.token ?? null)}
+		onStart={() => (linkClient = $session ? authedClient() : null)}
 	/>
 {/if}

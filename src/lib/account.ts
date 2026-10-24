@@ -2,20 +2,21 @@ import { isAxiosError } from "axios";
 
 import { API_BASE } from "#lib/api-base.js";
 import { errorStatus } from "#lib/apiError.js";
-import api from "#lib/axios.js";
+import type { AuthedClient } from "#lib/authedApi.js";
+import { authedClient } from "#lib/authedApi.js";
 import { NOSTR_LINK_URL } from "#lib/nostr.js";
-import type { Session } from "#lib/session.js";
-import { authHeaders } from "#lib/session.js";
 
 import type { ChangePasswordArgs } from "$types/btcmap-api/ChangePasswordArgs";
 import type { MeResponse } from "$types/btcmap-api/MeResponse";
 import type { NostrIdentityResponse } from "$types/btcmap-api/NostrIdentityResponse";
 import type { UpdateUsernameArgs } from "$types/btcmap-api/UpdateUsernameArgs";
 
-// Account settings (#1541): straight against the API with the Bearer token
-// (#1348). The API validates nothing on these calls; the forms bring their
-// own rules (accountValidation.ts). Expected refusals come back as
-// outcomes for the form to show, anything else throws.
+// Account settings (#1541): straight against the API as the signed-in user
+// (authedApi.ts, #1348). Each call takes the caller's client when the flow
+// writes the result back to the session (client.stillCurrent()). The API
+// validates nothing on these calls; the forms bring their own rules
+// (accountValidation.ts). Expected refusals come back as outcomes for the
+// form to show, anything else throws.
 
 // btcmap-api answers errors with { code, message }; a few of these calls
 // only tell their refusals apart by the message.
@@ -26,24 +27,19 @@ const errorMessage = (error: unknown): string | undefined => {
 	return typeof message === "string" ? message : undefined;
 };
 
-// What a failed call may log: an Axios error carries the request config,
-// so logging it whole would leak the Bearer token and any request body
-// (passwords included). Callers log errorStatus(err) instead.
-
 export type UsernameChange =
 	| { status: "changed"; username: MeResponse["name"] }
 	| { status: "taken" };
 
 export const changeUsername = async (
-	token: Session["token"],
 	username: UpdateUsernameArgs["username"],
+	client: AuthedClient = authedClient(),
 ): Promise<UsernameChange> => {
 	const body: UpdateUsernameArgs = { username };
 	try {
-		const res = await api.put<MeResponse>(
+		const res = await client.put<MeResponse>(
 			`${API_BASE}/v4/users/me/username`,
 			body,
-			authHeaders(token),
 		);
 		const name = res.data?.name;
 		if (typeof name !== "string" || !name) {
@@ -61,16 +57,16 @@ export const changeUsername = async (
 export type PasswordChange = "changed" | "wrongPassword" | "noPassword";
 
 export const changePassword = async (
-	token: Session["token"],
 	oldPassword: ChangePasswordArgs["old_password"],
 	newPassword: ChangePasswordArgs["new_password"],
+	client: AuthedClient = authedClient(),
 ): Promise<PasswordChange> => {
 	const body: ChangePasswordArgs = {
 		old_password: oldPassword,
 		new_password: newPassword,
 	};
 	try {
-		await api.put(`${API_BASE}/v4/users/me/password`, body, authHeaders(token));
+		await client.put(`${API_BASE}/v4/users/me/password`, body);
 		return "changed";
 	} catch (error) {
 		const message = errorMessage(error);
@@ -84,12 +80,9 @@ export const changePassword = async (
 };
 
 export const fetchLinkedNpub = async (
-	token: Session["token"],
+	client: AuthedClient = authedClient(),
 ): Promise<NostrIdentityResponse["npub"]> => {
-	const res = await api.get<NostrIdentityResponse>(
-		NOSTR_LINK_URL,
-		authHeaders(token),
-	);
+	const res = await client.get<NostrIdentityResponse>(NOSTR_LINK_URL);
 	return typeof res.data?.npub === "string" ? res.data.npub : null;
 };
 
@@ -101,21 +94,16 @@ export type NostrLink =
 // NOSTR_LINK_URL and PUT. Two credentials: the Bearer token says which
 // account, the proof that the user controls the key.
 export const linkNostr = async (
-	token: Session["token"],
 	proof: string,
+	client: AuthedClient = authedClient(),
 ): Promise<NostrLink> => {
 	try {
 		// undefined (not null) so axios sends no body: a body would need a
 		// payload-hash tag in the signed event
-		const res = await api.put<NostrIdentityResponse>(
+		const res = await client.put<NostrIdentityResponse>(
 			NOSTR_LINK_URL,
 			undefined,
-			{
-				headers: {
-					...authHeaders(token).headers,
-					"X-Nostr-Authorization": `Nostr ${proof}`,
-				},
-			},
+			{ headers: { "X-Nostr-Authorization": `Nostr ${proof}` } },
 		);
 		const npub = res.data?.npub;
 		if (typeof npub !== "string" || !npub) {
@@ -130,6 +118,8 @@ export const linkNostr = async (
 	}
 };
 
-export const unlinkNostr = async (token: Session["token"]): Promise<void> => {
-	await api.delete(NOSTR_LINK_URL, authHeaders(token));
+export const unlinkNostr = async (
+	client: AuthedClient = authedClient(),
+): Promise<void> => {
+	await client.delete(NOSTR_LINK_URL);
 };

@@ -1,5 +1,6 @@
 import type { PlacePhotoSource } from "#lib/analytics.js";
 import { trackEvent } from "#lib/analytics.js";
+import { errorStatus } from "#lib/apiError.js";
 import { deleteErrorKey, deletePlacePhoto } from "#lib/placePhotos.js";
 import { errToast, successToast } from "#lib/utils.js";
 
@@ -16,7 +17,6 @@ export const cancelPhotoDelete = (source: PlacePhotoSource) =>
 type ConfirmPhotoDeleteArgs = {
 	placeId: number;
 	imageId: number;
-	token: string;
 	source: PlacePhotoSource;
 	// The caller's $_, so this module stays free of the i18n store
 	t: (key: string) => string;
@@ -26,17 +26,16 @@ type ConfirmPhotoDeleteArgs = {
 export const confirmPhotoDelete = async ({
 	placeId,
 	imageId,
-	token,
 	source,
 	t,
 }: ConfirmPhotoDeleteArgs): Promise<boolean> => {
 	try {
-		await deletePlacePhoto(placeId, imageId, token);
+		await deletePlacePhoto(placeId, imageId);
 		trackEvent("place_photo_delete_success", { source });
 		successToast(t("placePhotos.deleted"));
 		return true;
 	} catch (error) {
-		console.error("place photos: delete failed", error);
+		console.error("place photos: delete failed", errorStatus(error));
 		errToast(t(deleteErrorKey(error)));
 		return false;
 	}

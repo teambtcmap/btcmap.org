@@ -2,6 +2,7 @@ import { get, writable } from "svelte/store";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 
 import { API_BASE } from "#lib/api-base.js";
+import { authedClient } from "#lib/authedApi.js";
 import type { Session } from "#lib/session.js";
 
 import type { MyNotesState } from "./notes";
@@ -41,6 +42,8 @@ const note = (id: number, over: Partial<Note> = {}): Note => ({
 });
 
 const auth = { headers: { Authorization: "Bearer tok" } };
+// POST and PATCH go out without retries (authedApi.ts)
+const authNoRetry = { ...auth, "axios-retry": { retries: 0 } };
 
 beforeEach(() => {
 	vi.resetAllMocks();
@@ -50,7 +53,7 @@ describe("fetchMyNotes", () => {
 	it("GETs the caller's notes with the Bearer token, newest first", async () => {
 		api.get.mockResolvedValueOnce({ data: [note(1), note(3), note(2)] });
 
-		const notes = await fetchMyNotes("tok");
+		const notes = await fetchMyNotes(authedClient("tok"));
 
 		expect(api.get).toHaveBeenCalledWith(`${API_BASE}/v4/users/me/notes`, {
 			...auth,
@@ -75,7 +78,7 @@ describe("fetchMyNotes", () => {
 			],
 		});
 
-		const notes = await fetchMyNotes("tok");
+		const notes = await fetchMyNotes(authedClient("tok"));
 
 		expect(api.get).toHaveBeenLastCalledWith(`${API_BASE}/v4/users/me/notes`, {
 			...auth,
@@ -93,7 +96,7 @@ describe("fetchMyNotes", () => {
 		);
 		api.get.mockResolvedValue({ data: full });
 
-		const notes = await fetchMyNotes("tok");
+		const notes = await fetchMyNotes(authedClient("tok"));
 
 		expect(api.get).toHaveBeenCalledTimes(2);
 		expect(notes).toHaveLength(NOTES_PAGE_SIZE);
@@ -110,7 +113,7 @@ describe("fetchMyNotes", () => {
 			],
 		});
 
-		const notes = await fetchMyNotes("tok");
+		const notes = await fetchMyNotes(authedClient("tok"));
 
 		expect(notes.map((n) => n.id)).toEqual([1]);
 	});
@@ -125,7 +128,7 @@ describe("fetchMyNotes", () => {
 			.mockResolvedValueOnce({ data: full })
 			.mockResolvedValueOnce({ data: [note(NOTES_PAGE_SIZE + 1)] });
 
-		const notes = await fetchMyNotes("tok");
+		const notes = await fetchMyNotes(authedClient("tok"));
 
 		expect(api.get).toHaveBeenLastCalledWith(`${API_BASE}/v4/users/me/notes`, {
 			...auth,
@@ -140,7 +143,7 @@ describe("fetchMyNotes", () => {
 	it("rejects a response that is not an array", async () => {
 		api.get.mockResolvedValueOnce({ data: "<html>" });
 
-		await expect(fetchMyNotes("tok")).rejects.toThrow();
+		await expect(fetchMyNotes(authedClient("tok"))).rejects.toThrow();
 	});
 });
 
@@ -149,9 +152,13 @@ describe("createNote", () => {
 		api.post.mockResolvedValueOnce({ data: note(4) });
 		const args = { lat: 1, lon: 2, text: "hi", icon: "atm", public: false };
 
-		const created = await createNote("tok", args);
+		const created = await createNote(args, authedClient("tok"));
 
-		expect(api.post).toHaveBeenCalledWith(`${API_BASE}/v4/notes`, args, auth);
+		expect(api.post).toHaveBeenCalledWith(
+			`${API_BASE}/v4/notes`,
+			args,
+			authNoRetry,
+		);
 		expect(created.id).toBe(4);
 	});
 
@@ -159,7 +166,10 @@ describe("createNote", () => {
 		api.post.mockResolvedValueOnce({ data: "" });
 
 		await expect(
-			createNote("tok", { lat: 1, lon: 2, text: "hi", public: false }),
+			createNote(
+				{ lat: 1, lon: 2, text: "hi", public: false },
+				authedClient("tok"),
+			),
 		).rejects.toThrow();
 	});
 });
@@ -168,12 +178,12 @@ describe("updateNote", () => {
 	it("PATCHes only the given fields", async () => {
 		api.patch.mockResolvedValueOnce({ data: note(5, { public: true }) });
 
-		const updated = await updateNote("tok", 5, { public: true });
+		const updated = await updateNote(5, { public: true }, authedClient("tok"));
 
 		expect(api.patch).toHaveBeenCalledWith(
 			`${API_BASE}/v4/notes/5`,
 			{ public: true },
-			auth,
+			authNoRetry,
 		);
 		expect(updated.public).toBe(true);
 	});
@@ -183,7 +193,7 @@ describe("deleteNote", () => {
 	it("DELETEs the note", async () => {
 		api.delete.mockResolvedValueOnce({ data: "" });
 
-		await deleteNote("tok", 6);
+		await deleteNote(6, authedClient("tok"));
 
 		expect(api.delete).toHaveBeenCalledWith(`${API_BASE}/v4/notes/6`, auth);
 	});

@@ -2,9 +2,10 @@ import type { Readable } from "svelte/store";
 import { writable } from "svelte/store";
 
 import { API_BASE } from "#lib/api-base.js";
-import api from "#lib/axios.js";
+import type { AuthedClient } from "#lib/authedApi.js";
+import { authedClient } from "#lib/authedApi.js";
 import type { Session } from "#lib/session.js";
-import { authHeaders, session } from "#lib/session.js";
+import { session } from "#lib/session.js";
 
 import type { Note } from "$types/btcmap-api/Note";
 import type { PatchNoteArgs } from "$types/btcmap-api/PatchNoteArgs";
@@ -14,8 +15,8 @@ import type { PostNoteArgs } from "$types/btcmap-api/PostNoteArgs";
 // coordinate, linked to no place. Only the owner's own notes are loaded;
 // other users' public notes are out of scope until the API can moderate them.
 //
-// Called straight on the btcmap API with the Bearer token, like the saved
-// items (#1348).
+// Called straight on the btcmap API as the signed-in user (authedApi.ts,
+// #1348), like the saved items.
 
 // The endpoint's `limit` cap.
 export const NOTES_PAGE_SIZE = 500;
@@ -62,15 +63,14 @@ const newestFirst = (notes: Note[]): Note[] =>
 const cursorBefore = (updatedAt: string): string =>
 	new Date(new Date(updatedAt).getTime() - 1).toISOString();
 
-// Every live note of the token's user, newest first. A user rarely has more
+// Every live note of the client's user, newest first. A user rarely has more
 // than one page; the loop is there so a heavy user still gets all of them.
-export async function fetchMyNotes(token: string): Promise<Note[]> {
+export async function fetchMyNotes(client: AuthedClient): Promise<Note[]> {
 	const byId = new Map<number, Note>();
 	let updatedSince: string | undefined;
 
 	for (;;) {
-		const res = await api.get<unknown>(MY_NOTES_URL, {
-			...authHeaders(token),
+		const res = await client.get<unknown>(MY_NOTES_URL, {
 			params: {
 				limit: NOTES_PAGE_SIZE,
 				...(updatedSince && { updated_since: updatedSince }),
@@ -102,26 +102,29 @@ export async function fetchMyNotes(token: string): Promise<Note[]> {
 }
 
 export async function createNote(
-	token: string,
 	args: PostNoteArgs,
+	client: AuthedClient = authedClient(),
 ): Promise<Note> {
-	const res = await api.post<unknown>(NOTES_URL, args, authHeaders(token));
+	const res = await client.post<unknown>(NOTES_URL, args);
 	return expectNote(res.data, `POST ${NOTES_URL}`);
 }
 
 export async function updateNote(
-	token: string,
 	id: Note["id"],
 	patch: PatchNoteArgs,
+	client: AuthedClient = authedClient(),
 ): Promise<Note> {
 	const url = `${NOTES_URL}/${id}`;
-	const res = await api.patch<unknown>(url, patch, authHeaders(token));
+	const res = await client.patch<unknown>(url, patch);
 	return expectNote(res.data, `PATCH ${url}`);
 }
 
 // Soft delete: the API keeps a tombstone for syncing clients.
-export async function deleteNote(token: string, id: Note["id"]): Promise<void> {
-	await api.delete(`${NOTES_URL}/${id}`, authHeaders(token));
+export async function deleteNote(
+	id: Note["id"],
+	client: AuthedClient = authedClient(),
+): Promise<void> {
+	await client.delete(`${NOTES_URL}/${id}`);
 }
 
 export type MyNotesState = {
@@ -183,7 +186,10 @@ export const createMyNotesStore = (sessions: Readable<Session | null>) => {
 					return;
 				}
 				set({ status: "loading", notes: [] });
-				fetchMyNotes(token).then(
+				// This store follows `sessions` (injected), not the global
+				// session the client's stillCurrent() reads, so it keeps its
+				// own token check.
+				fetchMyNotes(authedClient(token)).then(
 					(notes) => {
 						if (token === currentToken) set({ status: "ready", notes });
 					},

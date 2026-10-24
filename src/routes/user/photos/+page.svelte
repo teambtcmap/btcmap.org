@@ -4,6 +4,7 @@ import Time from "svelte-time";
 
 import type { PlacePhotoSource } from "#lib/analytics.js";
 import { trackEvent } from "#lib/analytics.js";
+import { errorStatus } from "#lib/apiError.js";
 import { createTimeLocale, LOCALIZED_DATE_FORMAT } from "#lib/dayjsLocale.js";
 import { _, locale } from "#lib/i18n/index.js";
 import {
@@ -57,13 +58,11 @@ const cancelDelete = () => {
 };
 
 const confirmDelete = async (photo: PlaceImage) => {
-	const token = $session?.token;
-	if (!token || deletingId !== null) return;
+	if (!$session || deletingId !== null) return;
 	deletingId = photo.id;
 	const deleted = await confirmPhotoDelete({
 		placeId: photo.place_id,
 		imageId: photo.id,
-		token,
 		source: SOURCE,
 		t: $_,
 	});
@@ -80,9 +79,9 @@ onMount(async () => {
 		return;
 	}
 	try {
-		photos = await fetchMyPlacePhotos($session.token);
+		photos = await fetchMyPlacePhotos();
 	} catch (error) {
-		console.error("my photos: load failed", error);
+		console.error("my photos: load failed", errorStatus(error));
 		loadError = true;
 	} finally {
 		loading = false;

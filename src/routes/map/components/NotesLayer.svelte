@@ -356,7 +356,7 @@ $effect(() => {
 				? `left: ${screen.x}px; top: ${screen.y}px; transform: translate(-50%, calc(-100% - ${CARD_PIN_GAP}px));`
 				: undefined}
 		>
-			<NoteCard {token} {target} onClose={() => noteCard.close()} />
+			<NoteCard {target} onClose={() => noteCard.close()} />
 		</div>
 	{/if}
 {/if}

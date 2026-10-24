@@ -10,11 +10,11 @@ import {
 	storageKeyFor,
 } from "#lib/activityNotifier.js";
 import { API_BASE } from "#lib/api-base.js";
+import { authedClient } from "#lib/authedApi.js";
 import api from "#lib/axios.js";
 import { _ } from "#lib/i18n/index.js";
-import { SAVED_ITEM_ENDPOINTS } from "#lib/savedItems.js";
+import { fetchSavedLists } from "#lib/savedItems.js";
 import { session } from "#lib/session.js";
-import type { SavedPlace } from "#lib/types.js";
 import ActivityCard from "$components/activity/ActivityCard.svelte";
 import ActivityTypeFilter from "$components/activity/ActivityTypeFilter.svelte";
 import type { FormSelectOption } from "$components/form/FormSelect.svelte";
@@ -22,8 +22,6 @@ import FormSelect from "$components/form/FormSelect.svelte";
 import Icon from "$components/Icon.svelte";
 
 import { goto } from "$app/navigation";
-
-type SavedArea = { id: number; name: string };
 
 type Filter =
 	| { kind: "all" }
@@ -174,6 +172,11 @@ onMount(async () => {
 
 	if (!hasSavedItems) return;
 
+	// The feed is read for the account signed in now; nothing it answers
+	// may be applied once another account (or none) has taken over.
+	const client = authedClient();
+	const { username } = $session;
+
 	// Kick off the feed fetch immediately using the session IDs so the
 	// user doesn't wait on the saved-lists round-trip.
 	const feedPromise = fetchFeed();
@@ -183,27 +186,23 @@ onMount(async () => {
 	// "Area <id>" labels and the feed is unaffected. Don't await this
 	// before markActivitySeen — a slow names call would leave the nav
 	// dot showing while the user is already reading the feed.
-	const headers = { Authorization: `Bearer ${$session.token}` };
-	const namesPromise = Promise.allSettled([
-		api.get<SavedPlace[]>(SAVED_ITEM_ENDPOINTS.place, { headers }),
-		api.get<SavedArea[]>(SAVED_ITEM_ENDPOINTS.area, { headers }),
-	]);
+	const namesPromise = fetchSavedLists(client);
 
 	await feedPromise;
 
 	// Mark the newest item as seen so the nav dot clears the moment the
-	// user lands on this page. Guarded on $session because it may have
-	// changed during awaits (e.g. logout).
-	if (feedItems.length > 0 && $session) {
-		markActivitySeen($session.username, feedItems[0].date);
+	// user lands on this page.
+	if (feedItems.length > 0 && client.stillCurrent()) {
+		markActivitySeen(username, feedItems[0].date);
 	}
 
 	const [placesRes, areasRes] = await namesPromise;
+	if (!client.stillCurrent()) return;
 	if (placesRes.status === "fulfilled") {
-		placeNames = new Map(placesRes.value.data.map((p) => [p.id, p.name]));
+		placeNames = new Map(placesRes.value.map((p) => [p.id, p.name]));
 	}
 	if (areasRes.status === "fulfilled") {
-		areaNames = new Map(areasRes.value.data.map((a) => [a.id, a.name]));
+		areaNames = new Map(areasRes.value.map((a) => [a.id, a.name]));
 	}
 });
 </script>

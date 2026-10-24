@@ -1,11 +1,13 @@
 <script lang="ts">
 import { onDestroy, onMount } from "svelte";
 
-import api from "#lib/axios.js";
+import { errorStatus } from "#lib/apiError.js";
+import { authedClient } from "#lib/authedApi.js";
 import { _ } from "#lib/i18n/index.js";
+import type { SavedArea } from "#lib/savedItems.js";
 import {
+	fetchSavedLists,
 	removeSavedItem,
-	SAVED_ITEM_ENDPOINTS,
 	setSavedList,
 } from "#lib/savedItems.js";
 import { session } from "#lib/session.js";
@@ -16,15 +18,6 @@ import MultiPlaceMap from "$components/MultiPlaceMap.svelte";
 
 import { goto } from "$app/navigation";
 import { resolve } from "$app/paths";
-
-type SavedArea = {
-	id: number;
-	name: string;
-	type: string;
-	url_alias: string;
-	icon?: string;
-	website_url?: string;
-};
 
 let places: SavedPlace[] = [];
 let areas: SavedArea[] = [];
@@ -45,7 +38,6 @@ const handleDesktopChange = (e: MediaQueryListEvent) => {
 
 async function removePlace(id: number) {
 	if (!$session || removingPlaces.has(id)) return;
-	const token = $session.token;
 	const index = places.findIndex((p) => p.id === id);
 	if (index === -1) return;
 	const previous = places[index];
@@ -53,15 +45,16 @@ async function removePlace(id: number) {
 	removingPlaces = new Set(removingPlaces).add(id);
 	places = places.filter((p) => p.id !== id);
 
+	const client = authedClient();
 	try {
-		const serverList = await removeSavedItem("place", token, id);
-		setSavedList("place", serverList);
+		const serverList = await removeSavedItem("place", id, client);
+		setSavedList("place", serverList, client);
 		// Drop any cards for IDs the server no longer lists (e.g. removed
 		// from another tab/device since we loaded this page).
 		const serverIds = new Set(serverList);
 		places = places.filter((p) => serverIds.has(p.id));
 	} catch (err) {
-		console.error("Failed to remove saved place", err);
+		console.error("Failed to remove saved place", errorStatus(err));
 		errToast($_("saved.removeFailed"));
 		places = [...places.slice(0, index), previous, ...places.slice(index)];
 	} finally {
@@ -73,7 +66,6 @@ async function removePlace(id: number) {
 
 async function removeArea(id: number) {
 	if (!$session || removingAreas.has(id)) return;
-	const token = $session.token;
 	const index = areas.findIndex((a) => a.id === id);
 	if (index === -1) return;
 	const previous = areas[index];
@@ -81,15 +73,16 @@ async function removeArea(id: number) {
 	removingAreas = new Set(removingAreas).add(id);
 	areas = areas.filter((a) => a.id !== id);
 
+	const client = authedClient();
 	try {
-		const serverList = await removeSavedItem("area", token, id);
-		setSavedList("area", serverList);
+		const serverList = await removeSavedItem("area", id, client);
+		setSavedList("area", serverList, client);
 		// Drop any cards for IDs the server no longer lists (e.g. removed
 		// from another tab/device since we loaded this page).
 		const serverIds = new Set(serverList);
 		areas = areas.filter((a) => serverIds.has(a.id));
 	} catch (err) {
-		console.error("Failed to remove saved area", err);
+		console.error("Failed to remove saved area", errorStatus(err));
 		errToast($_("saved.removeFailed"));
 		areas = [...areas.slice(0, index), previous, ...areas.slice(index)];
 	} finally {
@@ -114,24 +107,20 @@ onMount(async () => {
 		return;
 	}
 
-	const headers = { Authorization: `Bearer ${$session.token}` };
-	const [placesRes, areasRes] = await Promise.allSettled([
-		api.get<SavedPlace[]>(SAVED_ITEM_ENDPOINTS.place, { headers }),
-		api.get<SavedArea[]>(SAVED_ITEM_ENDPOINTS.area, { headers }),
-	]);
+	const [placesRes, areasRes] = await fetchSavedLists();
 
 	if (placesRes.status === "fulfilled") {
-		places = placesRes.value.data;
+		places = placesRes.value;
 	} else {
 		placesError = true;
-		console.error("Failed to load saved places", placesRes.reason);
+		console.error("Failed to load saved places", errorStatus(placesRes.reason));
 	}
 
 	if (areasRes.status === "fulfilled") {
-		areas = areasRes.value.data;
+		areas = areasRes.value;
 	} else {
 		areasError = true;
-		console.error("Failed to load saved areas", areasRes.reason);
+		console.error("Failed to load saved areas", errorStatus(areasRes.reason));
 	}
 
 	loading = false;

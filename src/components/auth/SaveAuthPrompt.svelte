@@ -2,6 +2,9 @@
 import { get } from "svelte/store";
 
 import { trackEvent } from "#lib/analytics.js";
+import { errorStatus } from "#lib/apiError.js";
+import type { AuthedClient } from "#lib/authedApi.js";
+import { authedClient } from "#lib/authedApi.js";
 import { _ } from "#lib/i18n/index.js";
 import type { SavedItemType } from "#lib/savedItems.js";
 import {
@@ -32,25 +35,27 @@ const promptDescriptionKey = $derived(
 		: "save.prompt.descriptionPlace",
 );
 
-async function performInitialSave(current: Session) {
+// `client` is the account that just signed up or logged in: the save, its
+// list update and its rollback all belong to it.
+async function performInitialSave(current: Session, client: AuthedClient) {
 	const existing = getSavedList(current, type);
 	// No-op if already saved — the atomic POST would still succeed (API
 	// dedupes) but we avoid the round-trip and the misleading toast.
 	if (existing.includes(id)) return;
 
-	setSavedList(type, [...existing, id]);
+	setSavedList(type, [...existing, id], client);
 	try {
-		const serverList = await addSavedItem(type, current.token, id);
-		setSavedList(type, serverList);
+		const serverList = await addSavedItem(type, id, client);
+		setSavedList(type, serverList, client);
 		trackEvent("save_item_toggle", {
 			saved: serverList.includes(id),
 			type,
 			source: "save_prompt",
 		});
 	} catch (err) {
-		setSavedList(type, existing);
+		setSavedList(type, existing, client);
 		errToast($_("merchant.saveFailed"));
-		console.error("SaveAuthPrompt.performInitialSave failed", err);
+		console.error("SaveAuthPrompt.performInitialSave failed", errorStatus(err));
 		throw err;
 	}
 }
@@ -61,15 +66,21 @@ async function performInitialSave(current: Session) {
 // toasts its own errors; the user is logged in and can press Save again.
 async function handleSignupSuccess(current: Session) {
 	try {
-		await performInitialSave(current);
+		await performInitialSave(current, authedClient());
 	} catch (err) {
-		console.error("SaveAuthPrompt.handleSignupSuccess failed", err);
+		console.error(
+			"SaveAuthPrompt.handleSignupSuccess failed",
+			errorStatus(err),
+		);
 	} finally {
 		open = false;
 	}
 }
 
-async function handleLoginSuccess(current: Session) {
+async function handleLoginSuccess() {
+	// The prompt stays open while the lists load, and Back leads to another
+	// login: a second account must not receive this account's save.
+	const client = authedClient();
 	try {
 		// Best-effort hydrate so the local saved lists reflect the server
 		// before we attempt the save. The atomic POST in performInitialSave
@@ -77,13 +88,14 @@ async function handleLoginSuccess(current: Session) {
 		// failure won't clobber the server's saved items — it just means
 		// the short-circuit "already saved" check might miss and we pay for
 		// an extra (idempotent) POST.
-		await hydrateSavedFromServer(current.token);
+		await hydrateSavedFromServer(client);
+		if (!client.stillCurrent()) return;
 		const refreshed = get(session);
 		if (!refreshed) throw new Error("session missing after login");
-		await performInitialSave(refreshed);
+		await performInitialSave(refreshed, client);
 		open = false;
 	} catch (err) {
-		console.error("SaveAuthPrompt.handleLoginSuccess failed", err);
+		console.error("SaveAuthPrompt.handleLoginSuccess failed", errorStatus(err));
 	}
 }
 </script>

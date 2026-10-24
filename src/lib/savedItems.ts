@@ -1,13 +1,24 @@
 import { API_BASE } from "#lib/api-base.js";
-import api from "#lib/axios.js";
+import type { AuthedClient } from "#lib/authedApi.js";
+import { authedClient } from "#lib/authedApi.js";
 import type { Session } from "#lib/session.js";
 import { session } from "#lib/session.js";
+import type { SavedPlace } from "#lib/types.js";
 
 export type SavedItemType = "place" | "area";
 
-// Called straight on the btcmap API with the Bearer token — it answers
-// CORS preflights, so no server proxy is involved (#1348). Exported for
-// the pages that list saved items.
+// A saved area as GET /v4/areas/saved lists it
+export type SavedArea = {
+	id: number;
+	name: string;
+	type: string;
+	url_alias: string;
+	icon?: string;
+	website_url?: string;
+};
+
+// Called straight on the btcmap API as the signed-in user (authedApi.ts) —
+// it answers CORS preflights, so no server proxy is involved (#1348).
 export const SAVED_ITEM_ENDPOINTS = {
 	place: `${API_BASE}/v4/places/saved`,
 	area: `${API_BASE}/v4/areas/saved`,
@@ -15,21 +26,16 @@ export const SAVED_ITEM_ENDPOINTS = {
 
 export async function addSavedItem(
 	type: SavedItemType,
-	token: string,
 	id: number,
+	client: AuthedClient = authedClient(),
 ): Promise<number[]> {
 	// The body is a bare integer: axios won't JSON-encode a primitive (it
 	// would fall back to form-urlencoded), so stringify it and declare the
 	// JSON content type explicitly — actix's Json<i64> accepts nothing else.
-	const res = await api.post<number[]>(
+	const res = await client.post<number[]>(
 		SAVED_ITEM_ENDPOINTS[type],
 		JSON.stringify(id),
-		{
-			headers: {
-				Authorization: `Bearer ${token}`,
-				"Content-Type": "application/json",
-			},
-		},
+		{ headers: { "Content-Type": "application/json" } },
 	);
 	if (!Array.isArray(res.data)) {
 		throw new Error(
@@ -41,14 +47,11 @@ export async function addSavedItem(
 
 export async function removeSavedItem(
 	type: SavedItemType,
-	token: string,
 	id: number,
+	client: AuthedClient = authedClient(),
 ): Promise<number[]> {
-	const res = await api.delete<number[]>(
+	const res = await client.delete<number[]>(
 		`${SAVED_ITEM_ENDPOINTS[type]}/${id}`,
-		{
-			headers: { Authorization: `Bearer ${token}` },
-		},
 	);
 	if (!Array.isArray(res.data)) {
 		throw new Error(
@@ -58,7 +61,15 @@ export async function removeSavedItem(
 	return res.data;
 }
 
-export function setSavedList(type: SavedItemType, ids: number[]) {
+// Replace one saved list with what the server answered (or roll back to
+// what it was) — only while the account `client` went out as is still the
+// signed-in one: a late answer must not land in another account's session.
+export function setSavedList(
+	type: SavedItemType,
+	ids: number[],
+	client: AuthedClient,
+) {
+	if (!client.stillCurrent()) return;
 	if (type === "place") {
 		session.setSavedPlaces(ids);
 	} else {
@@ -85,29 +96,47 @@ export type HydrateResult = {
 	area: boolean;
 };
 
+// The user's saved places or areas as the API lists them. Throws on an
+// unexpected response.
+async function fetchSavedList<T extends { id: number }>(
+	type: SavedItemType,
+	client: AuthedClient = authedClient(),
+): Promise<T[]> {
+	const res = await client.get<T[]>(SAVED_ITEM_ENDPOINTS[type]);
+	if (!Array.isArray(res.data)) {
+		throw new Error(
+			`GET ${SAVED_ITEM_ENDPOINTS[type]} returned an unexpected response`,
+		);
+	}
+	return res.data;
+}
+
+// Both saved lists as whole objects, for the pages that show them. Settled
+// separately, so one failing endpoint doesn't block the other.
+export const fetchSavedLists = (client: AuthedClient = authedClient()) =>
+	Promise.allSettled([
+		fetchSavedList<SavedPlace>("place", client),
+		fetchSavedList<SavedArea>("area", client),
+	]);
+
 // Fetches the server-side saved-places and saved-areas lists and populates
 // the session store. Uses allSettled so one failing endpoint doesn't block
 // the other; returns per-type success so callers can avoid overwriting
-// server state with a stale local list when hydration failed.
+// server state with a stale local list when hydration failed. A list that
+// lands after a logout or another login is dropped, not written into the
+// new session.
 export async function hydrateSavedFromServer(
-	token: string,
+	client: AuthedClient = authedClient(),
 ): Promise<HydrateResult> {
-	const headers = { Authorization: `Bearer ${token}` };
-	const [placesRes, areasRes] = await Promise.allSettled([
-		api.get(SAVED_ITEM_ENDPOINTS.place, { headers }),
-		api.get(SAVED_ITEM_ENDPOINTS.area, { headers }),
-	]);
-	const placeOk =
-		placesRes.status === "fulfilled" && Array.isArray(placesRes.value.data);
-	const areaOk =
-		areasRes.status === "fulfilled" && Array.isArray(areasRes.value.data);
-	if (placeOk) {
-		const ids = placesRes.value.data.map((p: { id: number }) => p.id);
-		session.setSavedPlaces(ids);
+	const [placesRes, areasRes] = await fetchSavedLists(client);
+	const current = client.stillCurrent();
+	const placeOk = placesRes.status === "fulfilled";
+	const areaOk = areasRes.status === "fulfilled";
+	if (placeOk && current) {
+		session.setSavedPlaces(placesRes.value.map((p) => p.id));
 	}
-	if (areaOk) {
-		const ids = areasRes.value.data.map((a: { id: number }) => a.id);
-		session.setSavedAreas(ids);
+	if (areaOk && current) {
+		session.setSavedAreas(areasRes.value.map((a) => a.id));
 	}
 	return { place: placeOk, area: areaOk };
 }

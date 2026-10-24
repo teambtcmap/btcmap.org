@@ -124,14 +124,12 @@ const cancelDelete = () => {
 };
 
 const confirmDelete = async () => {
-	const token = $session?.token;
-	if (!token || deleting) return;
+	if (!$session || deleting) return;
 	deleting = true;
 	const target = { id: photo.id, index };
 	const deleted = await confirmPhotoDelete({
 		placeId,
 		imageId: target.id,
-		token,
 		source,
 		t: $_,
 	});
@@ -185,7 +183,7 @@ onMount(() => {
 	lockBodyScroll();
 	closeButton?.focus();
 	if ($session) {
-		fetchCurrentUser($session.token).then((user) => {
+		fetchCurrentUser().then((user) => {
 			currentUser = user;
 		});
 	}

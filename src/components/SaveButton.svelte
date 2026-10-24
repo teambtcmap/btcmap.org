@@ -1,5 +1,7 @@
 <script lang="ts">
 import { trackEvent } from "#lib/analytics.js";
+import { errorStatus } from "#lib/apiError.js";
+import { authedClient } from "#lib/authedApi.js";
 import { _ } from "#lib/i18n/index.js";
 import type { SavedItemType } from "#lib/savedItems.js";
 import {
@@ -49,6 +51,8 @@ async function toggle() {
 	pending = true;
 	const wasSaved = saved;
 	const previousSaved = [...savedList];
+	// The answer belongs to the account that clicked
+	const client = authedClient();
 	try {
 		const nextSaved = toggleSavedLocal(type, id);
 		if (!nextSaved) throw new Error("toggle returned null (no session)");
@@ -56,18 +60,18 @@ async function toggle() {
 		// Atomic single-item POST / DELETE — avoids the PUT-whole-array race
 		// where two tabs' concurrent writes can overwrite each other.
 		const serverList = wasSaved
-			? await removeSavedItem(type, $session.token, id)
-			: await addSavedItem(type, $session.token, id);
-		setSavedList(type, serverList);
+			? await removeSavedItem(type, id, client)
+			: await addSavedItem(type, id, client);
+		setSavedList(type, serverList, client);
 		trackEvent("save_item_toggle", {
 			saved: serverList.includes(id),
 			type,
 			source: "save_button",
 		});
 	} catch (err) {
-		setSavedList(type, previousSaved);
+		setSavedList(type, previousSaved, client);
 		errToast($_(`merchant.saveFailed`));
-		console.error("SaveButton.toggle failed", err);
+		console.error("SaveButton.toggle failed", errorStatus(err));
 	} finally {
 		pending = false;
 	}

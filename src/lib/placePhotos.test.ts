@@ -3,6 +3,7 @@ import { AxiosError } from "axios";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 
 import { API_BASE } from "#lib/api-base.js";
+import { authedClient } from "#lib/authedApi.js";
 
 import {
 	canDeletePhoto,
@@ -113,12 +114,15 @@ describe("uploadPlacePhoto", () => {
 		const { default: api } = await import("#lib/axios.js");
 		vi.mocked(api.post).mockResolvedValue({ data: photo });
 
-		const stored = await uploadPlacePhoto(20423, "tok", "AAAA");
+		const stored = await uploadPlacePhoto(20423, "AAAA", authedClient("tok"));
 
 		expect(api.post).toHaveBeenCalledWith(
 			`${API_BASE}/v4/places/20423/images`,
 			{ data_base64: "AAAA" },
-			{ headers: { Authorization: "Bearer tok" } },
+			{
+				headers: { Authorization: "Bearer tok" },
+				"axios-retry": { retries: 0 },
+			},
 		);
 		expect(stored).toEqual(photo);
 	});
@@ -127,7 +131,9 @@ describe("uploadPlacePhoto", () => {
 		const { default: api } = await import("#lib/axios.js");
 		vi.mocked(api.post).mockResolvedValue({ data: {} });
 
-		await expect(uploadPlacePhoto(20423, "tok", "AAAA")).rejects.toThrow();
+		await expect(
+			uploadPlacePhoto(20423, "AAAA", authedClient("tok")),
+		).rejects.toThrow();
 	});
 });
 
@@ -330,7 +336,7 @@ describe("deletePlacePhoto", () => {
 		const { default: api } = await import("#lib/axios.js");
 		vi.mocked(api.delete).mockResolvedValue({ data: photo });
 
-		await deletePlacePhoto(20423, 12, "tok");
+		await deletePlacePhoto(20423, 12, authedClient("tok"));
 
 		expect(api.delete).toHaveBeenCalledWith(
 			`${API_BASE}/v4/places/20423/images/12`,
@@ -346,7 +352,7 @@ describe("undoUploads", () => {
 			.mockResolvedValueOnce({ data: {} })
 			.mockRejectedValueOnce(new Error("500"));
 
-		const result = await undoUploads(20423, [12, 13], "tok");
+		const result = await undoUploads(20423, [12, 13], authedClient("tok"));
 
 		expect(api.delete).toHaveBeenCalledTimes(2);
 		expect(result).toEqual({ removed: [12], complete: false });
@@ -365,7 +371,7 @@ describe("undoUploads", () => {
 		);
 		vi.mocked(api.delete).mockRejectedValueOnce(notFound);
 
-		expect(await undoUploads(20423, [12], "tok")).toEqual({
+		expect(await undoUploads(20423, [12], authedClient("tok"))).toEqual({
 			removed: [12],
 			complete: true,
 		});
@@ -395,7 +401,7 @@ describe("fetchMyPlacePhotos", () => {
 		const { default: api } = await import("#lib/axios.js");
 		vi.mocked(api.get).mockResolvedValue({ data: [photo, { id: "x" }] });
 
-		expect(await fetchMyPlacePhotos("tok")).toEqual([photo]);
+		expect(await fetchMyPlacePhotos(authedClient("tok"))).toEqual([photo]);
 		expect(api.get).toHaveBeenCalledWith(
 			`${API_BASE}/v4/users/me/place-images`,
 			{ headers: { Authorization: "Bearer tok" } },
@@ -408,14 +414,16 @@ describe("fetchMyPlacePhotos", () => {
 			data: [photo, { ...photo, id: 7, type: "report" }],
 		});
 
-		expect((await fetchMyPlacePhotos("tok")).map((p) => p.id)).toEqual([12]);
+		expect(
+			(await fetchMyPlacePhotos(authedClient("tok"))).map((p) => p.id),
+		).toEqual([12]);
 	});
 
 	it("throws on a non-array response so the page can show its error state", async () => {
 		const { default: api } = await import("#lib/axios.js");
 		vi.mocked(api.get).mockResolvedValue({ data: "<html>" });
 
-		await expect(fetchMyPlacePhotos("tok")).rejects.toThrow();
+		await expect(fetchMyPlacePhotos(authedClient("tok"))).rejects.toThrow();
 	});
 });
 
