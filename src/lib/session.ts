@@ -180,10 +180,17 @@ function createSessionStore() {
 	return {
 		subscribe,
 
-		// Initialize from localStorage. Call in +layout.svelte onMount.
-		init: () => {
+		// The session, restored from localStorage the first time. The root
+		// layout calls it on mount; a page that needs the session on its own
+		// mount calls it too, because a child's onMount runs before the
+		// layout's. Safe to call any number of times: a session already in
+		// the store is kept, not re-read.
+		init: (): Session | null => {
+			const current = get({ subscribe });
+			if (current) return current;
 			const stored = loadFromStorage();
 			if (stored) set(stored);
+			return stored;
 		},
 
 		// Create an account with user-chosen credentials via the existing REST

@@ -72,9 +72,7 @@ const confirmDelete = async (photo: PlaceImage) => {
 };
 
 onMount(async () => {
-	// Child onMount runs before the layout's, so hydrate the session here
-	session.init();
-	if (!$session) {
+	if (!session.init()) {
 		goto("/login");
 		return;
 	}

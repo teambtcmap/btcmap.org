@@ -1,16 +1,9 @@
 <script lang="ts">
-import { get } from "svelte/store";
-
-import api from "#lib/axios.js";
+import { errorStatus } from "#lib/apiError.js";
+import type { Login } from "#lib/auth.js";
+import { loginWithNostrEvent } from "#lib/auth.js";
 import type { SignedAuthEvent } from "#lib/nostr.js";
-import {
-	buildAuthTemplate,
-	encodeNip98Event,
-	NOSTR_AUTH_URL,
-	parseNostrAuthResponse,
-} from "#lib/nostr.js";
-import type { Session } from "#lib/session.js";
-import { session } from "#lib/session.js";
+import { buildAuthTemplate } from "#lib/nostr.js";
 import NostrAuthMethods from "$components/auth/NostrAuthMethods.svelte";
 
 // Logging in with a Nostr key: the transport panel is shared with the account
@@ -20,32 +13,22 @@ import NostrAuthMethods from "$components/auth/NostrAuthMethods.svelte";
 type Props = {
 	// Mirrors LoginForm's contract: caller decides what happens after a
 	// successful login (navigate, complete a pending save, etc.).
-	onSuccess: (session: Session) => void | Promise<void>;
+	onSuccess: (login: Login) => void | Promise<void>;
 };
 
 let { onSuccess }: Props = $props();
 
+// A failed exchange throws, for the panel to report; once logged in, a
+// failing follow-up is the host's, not a login error to retry.
 async function exchangeSignedEvent(
 	signedEvent: SignedAuthEvent,
 ): Promise<boolean> {
-	// Straight against the API per NIP-98 (it answers CORS preflights,
-	// #1348). NOSTR_AUTH_URL is the same constant the signed `u` tag is
-	// built from — the signature binds to the URL, so they must never
-	// diverge. undefined (not null) so axios sends no body and no
-	// content-type: a body would require a payload-hash tag in the event.
-	const res = await api.post(NOSTR_AUTH_URL, undefined, {
-		headers: { Authorization: `Nostr ${encodeNip98Event(signedEvent)}` },
-	});
-
-	const { token, username, npub } = parseNostrAuthResponse(res.data);
-
-	// The npub is persisted on the session to drive the user's Nostr avatar.
-	session.login(username, token, npub);
-
-	const current = get(session);
-	if (!current) throw new Error("session.login did not populate the store");
-
-	await onSuccess(current);
+	const login = await loginWithNostrEvent(signedEvent);
+	try {
+		await onSuccess(login);
+	} catch (err) {
+		console.error("Login follow-up failed:", errorStatus(err) ?? "unknown");
+	}
 	return true;
 }
 </script>

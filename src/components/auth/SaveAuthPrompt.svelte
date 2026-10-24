@@ -3,16 +3,12 @@ import { get } from "svelte/store";
 
 import { trackEvent } from "#lib/analytics.js";
 import { errorStatus } from "#lib/apiError.js";
+import type { Login } from "#lib/auth.js";
 import type { AuthedClient } from "#lib/authedApi.js";
 import { authedClient } from "#lib/authedApi.js";
 import { _ } from "#lib/i18n/index.js";
 import type { SavedItemType } from "#lib/savedItems.js";
-import {
-	addSavedItem,
-	getSavedList,
-	hydrateSavedFromServer,
-	setSavedList,
-} from "#lib/savedItems.js";
+import { addSavedItem, getSavedList, setSavedList } from "#lib/savedItems.js";
 import type { Session } from "#lib/session.js";
 import { session } from "#lib/session.js";
 import { errToast } from "#lib/utils.js";
@@ -77,18 +73,18 @@ async function handleSignupSuccess(current: Session) {
 	}
 }
 
-async function handleLoginSuccess() {
+async function handleLoginSuccess(login: Login) {
 	// The prompt stays open while the lists load, and Back leads to another
 	// login: a second account must not receive this account's save.
 	const client = authedClient();
 	try {
-		// Best-effort hydrate so the local saved lists reflect the server
-		// before we attempt the save. The atomic POST in performInitialSave
-		// doesn't rely on a complete local list, so a partial hydrate
-		// failure won't clobber the server's saved items — it just means
-		// the short-circuit "already saved" check might miss and we pay for
-		// an extra (idempotent) POST.
-		await hydrateSavedFromServer(client);
+		// Let the login's saved lists land before the save, so an item
+		// already saved isn't saved again. The atomic POST in
+		// performInitialSave doesn't rely on a complete local list, so a
+		// failed load won't clobber the server's saved items — it just
+		// means the short-circuit "already saved" check might miss and we
+		// pay for an extra (idempotent) POST.
+		await login.savedItems;
 		if (!client.stillCurrent()) return;
 		const refreshed = get(session);
 		if (!refreshed) throw new Error("session missing after login");

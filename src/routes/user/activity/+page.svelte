@@ -154,8 +154,8 @@ const handleFilterChange = () => {
 };
 
 onMount(async () => {
-	session.init();
-	if (!$session) {
+	const current = session.init();
+	if (!current) {
 		goto("/login");
 		return;
 	}
@@ -163,10 +163,10 @@ onMount(async () => {
 	// Validate the same way the notifier does — junk in localStorage
 	// would break the lexicographic date comparisons used for the pill
 	// count and per-card "new" tinting.
-	const rawLastSeen = localStorage.getItem(storageKeyFor($session.username));
+	const rawLastSeen = localStorage.getItem(storageKeyFor(current.username));
 	priorLastSeen = isValidLastSeen(rawLastSeen) ? rawLastSeen : null;
-	savedPlaceIds = $session.savedPlaces ?? [];
-	savedAreaIds = $session.savedAreas ?? [];
+	savedPlaceIds = current.savedPlaces ?? [];
+	savedAreaIds = current.savedAreas ?? [];
 	hasSavedItems = savedPlaceIds.length > 0 || savedAreaIds.length > 0;
 	initialLoading = false;
 
@@ -175,7 +175,7 @@ onMount(async () => {
 	// The feed is read for the account signed in now; nothing it answers
 	// may be applied once another account (or none) has taken over.
 	const client = authedClient();
-	const { username } = $session;
+	const { username } = current;
 
 	// Kick off the feed fetch immediately using the session IDs so the
 	// user doesn't wait on the saved-lists round-trip.

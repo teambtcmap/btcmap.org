@@ -15,9 +15,7 @@ import { goto } from "$app/navigation";
 let ready = $state(false);
 
 onMount(() => {
-	// Child onMount runs before the layout's, so hydrate the session here
-	session.init();
-	if (!$session) {
+	if (!session.init()) {
 		goto("/login");
 		return;
 	}

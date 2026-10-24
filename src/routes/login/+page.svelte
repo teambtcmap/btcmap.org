@@ -1,20 +1,14 @@
 <script lang="ts">
-import { onMount } from "svelte";
-
+import type { Login } from "#lib/auth.js";
 import { _ } from "#lib/i18n/index.js";
-import { hydrateSavedFromServer } from "#lib/savedItems.js";
-import { session } from "#lib/session.js";
 import LoginForm from "$components/auth/LoginForm.svelte";
 import NostrLoginForm from "$components/auth/NostrLoginForm.svelte";
 
 import { goto } from "$app/navigation";
 
-onMount(() => {
-	session.init();
-});
-
-async function handleSuccess() {
-	await hydrateSavedFromServer();
+// /user/activity reads the saved lists on mount: let them land first
+async function handleSuccess(login: Login) {
+	await login.savedItems;
 	goto("/user/activity");
 }
 </script>

@@ -1,21 +1,21 @@
 <script lang="ts">
-import { get } from "svelte/store";
-
 import { trackEvent } from "#lib/analytics.js";
+import { errorStatus } from "#lib/apiError.js";
+import type { Login } from "#lib/auth.js";
+import { isLoginRefused, loginWithPassword } from "#lib/auth.js";
 import { _ } from "#lib/i18n/index.js";
-import type { Session } from "#lib/session.js";
-import { mintToken, session } from "#lib/session.js";
 import { USERNAME_MAX_LENGTH } from "#lib/usernamePolicy.js";
 import { errToast } from "#lib/utils.js";
 import TextField from "$components/form/TextField.svelte";
 import PrimaryButton from "$components/PrimaryButton.svelte";
 import TextLink from "$components/TextLink.svelte";
 
-// Caller receives the new session after a successful login. This keeps the
-// form reusable: /login navigates, the save-flow modal completes a pending
-// save, both without baking navigation/save logic into the form.
+// Caller receives the login (session + saved items loading) after a
+// successful login. This keeps the form reusable: /login navigates, the
+// save-flow modal completes a pending save, both without baking
+// navigation/save logic into the form.
 type Props = {
-	onSuccess: (session: Session) => void | Promise<void>;
+	onSuccess: (login: Login) => void | Promise<void>;
 	// When true, render without the "Don't have an account?" link (e.g.
 	// inside a modal that already frames the login choice).
 	compact?: boolean;
@@ -31,27 +31,21 @@ async function handleSubmit(event: SubmitEvent) {
 	if (!username.trim() || !password) return;
 	loading = true;
 
+	let login: Login;
 	try {
-		// Straight against the API (it answers CORS preflights, #1348) via
-		// the shared token mint.
-		const token = await mintToken(username.trim(), password);
-
-		session.login(username.trim(), token);
-
-		// Pull the new session value so callers get a concrete Session object
-		// instead of having to subscribe.
-		const current = get(session);
-		if (!current) throw new Error("session.login did not populate the store");
-
-		await onSuccess(current);
+		login = await loginWithPassword(username, password);
 	} catch (err) {
-		const status = (err as { response?: { status?: number } })?.response
-			?.status;
-		// 401/403 both mean bad credentials at the API.
-		errToast(
-			status === 401 || status === 403 ? $_("login.failed") : $_("login.error"),
-		);
-		console.error("Login failed:", status ?? "unknown");
+		errToast(isLoginRefused(err) ? $_("login.failed") : $_("login.error"));
+		console.error("Login failed:", errorStatus(err) ?? "unknown");
+		loading = false;
+		return;
+	}
+	// Logged in from here on: a failing follow-up is the host's, not a
+	// login error to retry
+	try {
+		await onSuccess(login);
+	} catch (err) {
+		console.error("Login follow-up failed:", errorStatus(err) ?? "unknown");
 	} finally {
 		loading = false;
 	}

@@ -1,6 +1,4 @@
 <script lang="ts">
-import { errorStatus } from "#lib/apiError.js";
-import { hydrateSavedFromServer } from "#lib/savedItems.js";
 import AuthPrompt from "$components/auth/AuthPrompt.svelte";
 
 // The shared AuthPrompt for flows that resume in place once the user is
@@ -32,15 +30,9 @@ const finish = () => {
 	onAuthenticated?.();
 };
 
-async function handleLoginSuccess() {
-	// Best-effort: a failed hydrate must not block the flow that resumes
-	try {
-		await hydrateSavedFromServer();
-	} catch (err) {
-		console.error(`${titleId}: hydrate failed`, errorStatus(err));
-	}
-	finish();
-}
+// The login loads the saved items itself; the resumed flow doesn't wait
+// on them
+const handleLoginSuccess = finish;
 </script>
 
 <AuthPrompt
