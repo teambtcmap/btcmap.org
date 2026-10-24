@@ -1318,7 +1318,7 @@
 		"qrUnavailable": "QR кодът не можа да се начертае — копирайте низа за свързване.",
 		"optionExtension": "Разширение за браузър",
 		"optionExtensionHint": "Подписва с ключа, който съхранява вашето NIP-07 разширение.",
-		"optionExtensionAction": "Използвай разширението",
+		"optionExtensionAction": "Използвай разширението на браузъра",
 		"optionNsec": "Таен ключ",
 		"optionBunker": "Bunker",
 		"bunkerSubheading": "Въведете bunker:// URI от приложението за подписване.",

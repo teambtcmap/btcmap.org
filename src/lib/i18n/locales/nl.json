@@ -131,7 +131,7 @@
 		"qrUnavailable": "QR-code kon niet worden getekend — kopieer de verbindingsstring.",
 		"optionExtension": "Browserextensie",
 		"optionExtensionHint": "Ondertekent met de sleutel die je NIP-07-extensie bewaart.",
-		"optionExtensionAction": "Extensie gebruiken",
+		"optionExtensionAction": "Browserextensie gebruiken",
 		"optionNsec": "Privésleutel",
 		"optionBunker": "Bunker",
 		"bunkerSubheading": "Voer de bunker://-URI uit je signeer-app in.",

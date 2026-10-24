@@ -1244,7 +1244,7 @@
 		"qrUnavailable": "QR-Code konnte nicht gezeichnet werden — kopiere stattdessen den Verbindungsstring.",
 		"optionExtension": "Browser-Erweiterung",
 		"optionExtensionHint": "Signiert mit dem Schlüssel, den deine NIP-07-Erweiterung verwahrt.",
-		"optionExtensionAction": "Erweiterung verwenden",
+		"optionExtensionAction": "Browser-Erweiterung verwenden",
 		"optionNsec": "Geheimer Schlüssel",
 		"optionBunker": "Bunker",
 		"bunkerSubheading": "Bunker-URI aus deiner Signer-App eingeben.",

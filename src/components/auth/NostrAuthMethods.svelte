@@ -15,6 +15,8 @@ import {
 	methodBlocked,
 	methodOpen,
 	nostrMethodLayout,
+	pairingClick,
+	rowClick,
 } from "#lib/nostrMethodLayout.js";
 import { fetchProfile } from "#lib/nostrProfile.js";
 import { shortNpub } from "#lib/nostrSigner.js";
@@ -131,9 +133,9 @@ const runner = createSignerRun({
 	onStart: () => onStart?.(),
 	present: (uri, presentation, run) => {
 		noAppHint = false;
-		if (presentation === "qr") void renderQr(uri);
-		else if (presentation === "open") handOff(uri, run);
-		else void copyConnection(uri);
+		// The QR draws itself once its canvas mounts (the $effect below)
+		if (presentation === "open") handOff(uri, run);
+		else if (presentation === "copy") void copyConnection(uri);
 	},
 	onCancel: () => {
 		if (noAppTimer) {
@@ -152,7 +154,7 @@ const runner = createSignerRun({
 
 const layout = $derived(
 	nostrMethodLayout({
-		coarse: isTouch,
+		isTouch,
 		hasExtension,
 		hasSaved: runner.savedPairing !== null,
 	}),
@@ -165,6 +167,8 @@ const savedName = $derived(
 );
 
 function forgetSigner() {
+	// Aria-disabled while a run is going: forgetting would cancel it
+	if (runner.anyLoading) return;
 	runner.forget();
 }
 
@@ -184,8 +188,8 @@ async function openForm(form: NostrForm) {
 		closeForm();
 		return;
 	}
-	// One row open at a time: picking a form abandons a pairing in flight
-	runner.cancel();
+	// One row open at a time. Nothing is running here: a form row is
+	// blocked while any transport runs (Cancel first).
 	formOpen = form;
 	await tick();
 	if (form === "nsec") nsecInput?.focus();
@@ -198,6 +202,7 @@ const panelState = $derived<PanelState>({
 	formOpen,
 	extensionSigning: runner.nostrLoading,
 	nsecSigning: runner.nsecLoading,
+	uriReady: runner.connectUri !== null,
 });
 const isOpen = (method: NostrMethod) => methodOpen(method, panelState);
 const isBlocked = (method: NostrMethod) => methodBlocked(method, panelState);
@@ -219,19 +224,19 @@ function activate(method: NostrMethod) {
 			void openForm(method);
 			return;
 		default:
+			// The open row isn't blocked, but before the URI exists its
+			// pairing has nothing to re-present: not a counted click
+			if (pairingClick(panelState) === "ignore") return;
 			formOpen = null;
 			void runner.startPairing(method);
 	}
 }
 
-// A row is a disclosure, so a second tap on the running pairing closes it.
-// The primary button re-runs its presentation instead (another hand-off).
+// The primary button re-runs its presentation (another hand-off); a row
+// closes the running pairing instead (rowClick).
 function toggleRow(method: NostrMethod) {
-	if (method !== "bunker" && method !== "nsec" && isOpen(method)) {
-		runner.cancel();
-		return;
-	}
-	activate(method);
+	if (rowClick(method, panelState) === "close") runner.cancel();
+	else activate(method);
 }
 
 // The extension button is live only when a NIP-07 provider is actually there,
@@ -269,12 +274,10 @@ function handOff(uri: string, run: number) {
 	}, 1800);
 }
 
-async function renderQr(uri: string) {
-	await tick();
-	if (!qrCanvas) return;
+async function renderQr(canvas: HTMLCanvasElement, uri: string) {
 	try {
 		const QRCode = await import("qrcode");
-		await QRCode.default.toCanvas(qrCanvas, uri, { width: 200, margin: 1 });
+		await QRCode.default.toCanvas(canvas, uri, { width: 200, margin: 1 });
 		qrFailed = false;
 	} catch (err) {
 		qrFailed = true;
@@ -387,6 +390,15 @@ onMount(() => {
 		window.removeEventListener("focus", refreshExtension);
 		clearTimeout(lateProbe);
 	};
+});
+
+// Draw the QR whenever a canvas mounts for it: on the URI's arrival, on a
+// switch back to QR, and when a layout change (an extension injecting late)
+// moves the QR body from the primary button into a row.
+$effect(() => {
+	if (qrCanvas && runner.connectUri && runner.pairMode === "qr") {
+		void renderQr(qrCanvas, runner.connectUri);
+	}
 });
 
 // Name the saved signer by its kind:0 profile when one exists, and fall back

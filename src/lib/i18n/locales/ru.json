@@ -1244,7 +1244,7 @@
 		"qrUnavailable": "Не удалось нарисовать QR-код — скопируйте строку подключения.",
 		"optionExtension": "Расширение браузера",
 		"optionExtensionHint": "Подписывает ключом, который хранит ваше расширение NIP-07.",
-		"optionExtensionAction": "Использовать расширение",
+		"optionExtensionAction": "Использовать расширение браузера",
 		"optionNsec": "Секретный ключ",
 		"optionBunker": "Bunker",
 		"bunkerSubheading": "Введите bunker:// URI из приложения-подписанта.",

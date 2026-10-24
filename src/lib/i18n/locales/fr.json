@@ -1244,7 +1244,7 @@
 		"qrUnavailable": "Impossible de dessiner le QR code — copiez la chaîne de connexion.",
 		"optionExtension": "Extension de navigateur",
 		"optionExtensionHint": "Signe avec la clé détenue par votre extension NIP-07.",
-		"optionExtensionAction": "Utiliser l'extension",
+		"optionExtensionAction": "Utiliser l'extension du navigateur",
 		"optionNsec": "Clé secrète",
 		"optionBunker": "Bunker",
 		"bunkerSubheading": "Saisissez l'URI bunker:// de votre application de signature.",

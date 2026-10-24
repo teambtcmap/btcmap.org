@@ -14,6 +14,7 @@ type Props = {
 	// Mirrors LoginForm's contract: caller decides what happens after a
 	// successful login (navigate, complete a pending save, etc.).
 	onSuccess: (login: Login) => void | Promise<void>;
+	// Passed to the panel: drops the row hints where height is scarce
 	dense?: boolean;
 };
 

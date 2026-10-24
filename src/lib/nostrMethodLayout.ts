@@ -27,7 +27,7 @@ export type NostrMethodLayout = {
 
 type LayoutInput = {
 	// matchMedia("(pointer: coarse)"), not UA sniffing
-	coarse: boolean;
+	isTouch: boolean;
 	hasExtension: boolean;
 	hasSaved: boolean;
 };
@@ -37,12 +37,12 @@ const DESKTOP_ORDER: NostrMethod[] = ["extension", "qr", "open", "copy"];
 const MORE: NostrMethod[] = ["bunker", "nsec"];
 
 export function nostrMethodLayout({
-	coarse,
+	isTouch,
 	hasExtension,
 	hasSaved,
 }: LayoutInput): NostrMethodLayout {
 	// A missing extension is never offered: its only outcome is an error
-	const order = (coarse ? TOUCH_ORDER : DESKTOP_ORDER).filter(
+	const order = (isTouch ? TOUCH_ORDER : DESKTOP_ORDER).filter(
 		(method) => method !== "extension" || hasExtension,
 	);
 	if (hasSaved) return { primary: "saved", rows: order, more: MORE };
@@ -56,10 +56,16 @@ export type PanelState = {
 	formOpen: NostrForm | null;
 	extensionSigning: boolean;
 	nsecSigning: boolean;
+	// The running pairing has its nostrconnect URI (until then there is
+	// nothing to show, copy or hand off)
+	uriReady: boolean;
 };
 
-const isPairing = (run: SignerRunKind | null) =>
-	run === "qr" || run === "open" || run === "copy";
+export const isPairing = (method: NostrMethod | null): method is PairMode =>
+	method === "qr" || method === "open" || method === "copy";
+
+export const isForm = (method: NostrMethod): method is NostrForm =>
+	method === "bunker" || method === "nsec";
 
 // Whether a method's body (QR, status, form) is showing
 export function methodOpen(method: NostrMethod, state: PanelState): boolean {
@@ -81,15 +87,26 @@ export function methodOpen(method: NostrMethod, state: PanelState): boolean {
 // running pairing still owns its three presentations: switching between
 // them must not restart it.
 export function methodBlocked(method: NostrMethod, state: PanelState): boolean {
-	const signing = state.extensionSigning || state.nsecSigning;
-	switch (method) {
-		case "open":
-		case "qr":
-		case "copy":
-			return (
-				signing || (state.signerRun !== null && !isPairing(state.signerRun))
-			);
-		default:
-			return signing || state.signerRun !== null;
-	}
+	// The open row stays live: a tap on it closes it
+	if (methodOpen(method, state)) return false;
+	if (isPairing(method)) return pairingClick(state) === "ignore";
+	return (
+		state.extensionSigning || state.nsecSigning || state.signerRun !== null
+	);
+}
+
+// What a click on a nostrconnect presentation (QR, hand-off, copy) does
+export function pairingClick(state: PanelState): "start" | "switch" | "ignore" {
+	if (state.extensionSigning || state.nsecSigning) return "ignore";
+	if (state.signerRun === null) return "start";
+	return isPairing(state.signerRun) && state.uriReady ? "switch" : "ignore";
+}
+
+// A row is a disclosure: a tap on the running pairing closes it. Form rows
+// toggle their own form, so they always go through activate.
+export function rowClick(
+	method: NostrMethod,
+	state: PanelState,
+): "close" | "activate" {
+	return isPairing(method) && methodOpen(method, state) ? "close" : "activate";
 }

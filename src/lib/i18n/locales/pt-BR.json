@@ -1218,7 +1218,7 @@
 		"qrUnavailable": "Não foi possível desenhar o código QR — copie a string de conexão.",
 		"optionExtension": "Extensão do navegador",
 		"optionExtensionHint": "Assina com a chave guardada pela sua extensão NIP-07.",
-		"optionExtensionAction": "Usar extensão",
+		"optionExtensionAction": "Usar extensão do navegador",
 		"optionNsec": "Chave secreta",
 		"optionBunker": "Bunker",
 		"bunkerSubheading": "Insira a URI bunker:// do seu app de assinatura.",

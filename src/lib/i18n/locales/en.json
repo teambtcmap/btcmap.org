@@ -131,7 +131,7 @@
 		"qrUnavailable": "Could not draw the QR code — copy the connection string instead.",
 		"optionExtension": "Browser extension",
 		"optionExtensionHint": "Signs with the key your NIP-07 extension holds.",
-		"optionExtensionAction": "Use extension",
+		"optionExtensionAction": "Use browser extension",
 		"optionNsec": "Secret key",
 		"optionBunker": "Bunker",
 		"bunkerSubheading": "Enter the bunker:// URI from your signer app.",

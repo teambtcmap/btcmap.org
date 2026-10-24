@@ -1244,7 +1244,7 @@
 		"qrUnavailable": "No se pudo dibujar el código QR: copia la cadena de conexión.",
 		"optionExtension": "Extensión del navegador",
 		"optionExtensionHint": "Firma con la clave que guarda tu extensión NIP-07.",
-		"optionExtensionAction": "Usar extensión",
+		"optionExtensionAction": "Usar extensión del navegador",
 		"optionNsec": "Clave secreta",
 		"optionBunker": "Bunker",
 		"bunkerSubheading": "Introduce la URI bunker:// de tu app de firma.",
