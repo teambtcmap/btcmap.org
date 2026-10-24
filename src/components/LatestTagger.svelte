@@ -1,14 +1,9 @@
 <script lang="ts">
-import Time from "svelte-time";
-
-import { createTimeLocale, LOCALIZED_DATE_FORMAT } from "#lib/dayjsLocale.js";
-import { locale } from "#lib/i18n/index.js";
 import type { EventType, User } from "#lib/types.js";
+import LocalTime from "$components/LocalTime.svelte";
 import Tip from "$components/Tip.svelte";
 
 import { resolve } from "$app/paths";
-
-const timeLocale = createTimeLocale(locale);
 
 export let location: string;
 export let action: EventType;
@@ -104,7 +99,7 @@ $: username = profile?.display_name;
 					? 'lg:mr-5'
 					: ''}"
 			>
-				<Time live={3000} relative timestamp={time} format={LOCALIZED_DATE_FORMAT} locale={$timeLocale} />
+				<LocalTime live={3000} relative timestamp={time} />
 			</span>
 		</div>
 

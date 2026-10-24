@@ -1,10 +1,5 @@
 <script lang="ts">
-import Time from "svelte-time";
-
-import { createTimeLocale, LOCALIZED_DATE_FORMAT } from "#lib/dayjsLocale.js";
-import { locale } from "#lib/i18n/index.js";
-
-const timeLocale = createTimeLocale(locale);
+import LocalTime from "$components/LocalTime.svelte";
 
 export let text: string;
 export let time: string;
@@ -15,7 +10,7 @@ export let compact = false;
 	<div class="rounded-lg bg-gray-50 p-3 dark:bg-white/5">
 		<p class="text-sm text-primary dark:text-white">{text}</p>
 		<span class="mt-1 block text-xs text-body dark:text-white/50">
-			<Time timestamp={time} relative live={60000} format={LOCALIZED_DATE_FORMAT} locale={$timeLocale} />
+			<LocalTime timestamp={time} relative live={60000} />
 		</span>
 	</div>
 {:else}
@@ -33,7 +28,7 @@ export let compact = false;
 				<span
 					class="block text-center font-semibold text-taggerTime dark:text-white/70 lg:inline"
 				>
-					<Time timestamp={time} format={LOCALIZED_DATE_FORMAT} locale={$timeLocale} />
+					<LocalTime timestamp={time} />
 				</span>
 			</div>
 		</div>
