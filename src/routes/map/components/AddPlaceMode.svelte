@@ -15,7 +15,7 @@ import {
 import { isEmbedded } from "#lib/embed.js";
 import { _ } from "#lib/i18n/index.js";
 import { calculateRadiusKmFromLngLatBounds } from "#lib/map/viewport.js";
-import type { NearbyPlace } from "#lib/placementMode.js";
+import type { AddEntryMethod, NearbyPlace } from "#lib/placementMode.js";
 import {
 	clampDedupeRadiusKm,
 	fetchNearbyPlaceNames,
@@ -168,7 +168,7 @@ $effect(() => {
 const SHEET_CLASS =
 	"absolute bottom-0 left-0 right-0 z-[1002] rounded-t-2xl bg-white p-4 pb-6 shadow-lg md:bottom-6 md:left-1/2 md:right-auto md:w-full md:max-w-xl md:-translate-x-1/2 md:rounded-2xl md:border md:border-input md:pb-4 dark:bg-dark";
 
-const enter = (method: string) => {
+const enter = (method: AddEntryMethod) => {
 	active = true;
 	trackEvent("add_place_enter", { method });
 };
@@ -384,7 +384,7 @@ $effect(() => {
 	if (active) pointMenu = null;
 });
 
-const enterAt = (lngLat: LngLatLike, method: string) => {
+const enterAt = (lngLat: LngLatLike, method: AddEntryMethod) => {
 	if (!map || active) return;
 	// Point-intent entries land at detail zoom — zoom in only, never out.
 	map.easeTo({

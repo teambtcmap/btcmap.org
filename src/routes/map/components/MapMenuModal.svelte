@@ -119,7 +119,7 @@ const iconClass = "h-5 w-5 flex-none dark:invert";
 			<a
 				href="/signup"
 				class={rowClass}
-				onclick={() => trackEvent("signup_button_click")}
+				onclick={() => trackEvent("signup_button_click", { source: "map_menu" })}
 			>
 				<img src="/icons/account.svg" alt="" class={iconClass} />
 				<span>{$_("mapControls.signup")}</span>

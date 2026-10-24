@@ -284,7 +284,7 @@ $effect(() => {
 							<a
 								href="/signup"
 								class="font-semibold text-link hover:text-hover"
-								onclick={() => trackEvent('signup_button_click')}
+								onclick={() => trackEvent('signup_button_click', { source: 'add_place' })}
 							>
 								{$_('addLocation.successAccountCta')}
 							</a>

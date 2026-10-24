@@ -42,7 +42,12 @@ describe("addEntryMethod", () => {
 	it("passes known entry points through and folds the rest into url", () => {
 		expect(addEntryMethod("nav")).toBe("nav");
 		expect(addEntryMethod("redirect")).toBe("redirect");
-		expect(addEntryMethod("adjust")).toBe("adjust");
+		expect(addEntryMethod("shortcut")).toBe("shortcut");
+		expect(addEntryMethod("another")).toBe("another");
+		// No link sends it any more: an old bookmark counts as a URL entry
+		expect(addEntryMethod("adjust")).toBe("url");
+		// In-app entries are never read from the URL
+		expect(addEntryMethod("menu")).toBe("url");
 		expect(addEntryMethod("")).toBe("url");
 		expect(addEntryMethod(null)).toBe("url");
 		expect(addEntryMethod("<script>")).toBe("url");

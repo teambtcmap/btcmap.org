@@ -4,7 +4,7 @@
 import { spring } from "svelte/motion";
 import { derived, get, writable } from "svelte/store";
 
-import type { EventName } from "#lib/analytics.js";
+import type { BareEventName } from "#lib/analytics.js";
 import { trackEvent } from "#lib/analytics.js";
 
 import {
@@ -39,9 +39,9 @@ interface InternalGestureState {
 
 type DrawerGestureEvents = {
 	// Only fired when canDismiss is true
-	dismiss?: EventName;
-	expand: EventName;
-	collapse: EventName;
+	dismiss?: BareEventName;
+	expand: BareEventName;
+	collapse: BareEventName;
 };
 
 export type DrawerGestureOptions = {

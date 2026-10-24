@@ -91,7 +91,7 @@ const onPickBasemap = (id: BasemapId) => {
 const onPickVerified = async (years: VerifiedFilterYears) => {
 	if (!applyVerifiedFilter) return;
 	trackEvent("verified_filter_change", {
-		years: years == null ? "any" : String(years),
+		years: years == null ? "any" : `${years}`,
 	});
 	await applyVerifiedFilter(years);
 };

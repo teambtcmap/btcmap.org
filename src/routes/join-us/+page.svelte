@@ -1,4 +1,5 @@
 <script lang="ts">
+import type { JoinUsTarget } from "#lib/analytics.js";
 import { trackEvent } from "#lib/analytics.js";
 import { _ } from "#lib/i18n/index.js";
 import { theme } from "#lib/theme.js";
@@ -10,13 +11,13 @@ import { theme } from "#lib/theme.js";
 // the onboarding; the form was a gate. One analytics event with a
 // target property keeps the funnel readable without seven
 // near-identical names.
-const track = (target: string) => () =>
+const track = (target: JoinUsTarget) => () =>
 	trackEvent("join_us_link_click", { target });
 
 type StepLink = {
 	href: string;
 	label: string;
-	target: string;
+	target: JoinUsTarget;
 	external?: boolean;
 	button?: boolean;
 };

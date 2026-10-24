@@ -165,7 +165,7 @@ afterNavigate(() => {
 					</a>
 					<a
 						href="/signup"
-						on:click={() => trackEvent("signup_button_click")}
+						on:click={() => trackEvent("signup_button_click", { source: "user_menu" })}
 						class="flex items-center gap-2 px-4 py-2 text-sm text-primary transition-colors hover:bg-gray-100 dark:text-white dark:hover:bg-white/10"
 					>
 						<Icon type="material" icon="person_add" w="16" h="16" />

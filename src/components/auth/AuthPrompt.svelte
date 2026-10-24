@@ -103,7 +103,7 @@ $effect.pre(() => {
 			← {$_("authPrompt.back")}
 		</TextLink>
 	{:else if view === "signup"}
-		<SignupForm onSuccess={onSignupSuccess} />
+		<SignupForm source="auth_prompt" onSuccess={onSignupSuccess} />
 		<TextLink
 			type="button"
 			onclick={() => (view = "choice")}

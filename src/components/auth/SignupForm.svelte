@@ -1,6 +1,7 @@
 <script lang="ts">
 import { createForm } from "@tanstack/svelte-form";
 
+import type { SignupSource } from "#lib/analytics.js";
 import { trackEvent } from "#lib/analytics.js";
 import { errorStatus } from "#lib/apiError.js";
 import { _ } from "#lib/i18n/index.js";
@@ -20,9 +21,11 @@ type Props = {
 	// Caller receives the new session after a successful signup, matching the
 	// LoginForm / NostrLoginForm contract so this can be reused inside modals.
 	onSuccess: (session: Session) => void | Promise<void>;
+	// Where the account is made (signup_create_account_success breakdown)
+	source: SignupSource;
 };
 
-let { onSuccess }: Props = $props();
+let { onSuccess, source }: Props = $props();
 
 let usernameInput = $state<HTMLInputElement>();
 let passwordInput = $state<HTMLInputElement>();
@@ -71,7 +74,7 @@ const form = createForm(() => ({
 			loading = false;
 			return;
 		}
-		trackEvent("signup_create_account_success");
+		trackEvent("signup_create_account_success", { source });
 		// The account exists from here on: a failing follow-up must not ask
 		// for a retry, which would only answer that the name is taken
 		try {
