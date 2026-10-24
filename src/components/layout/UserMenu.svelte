@@ -11,14 +11,18 @@ import NostrAvatar from "$components/NostrAvatar.svelte";
 
 import { afterNavigate, goto } from "$app/navigation";
 
-export let id = "user-menu";
+type Props = {
+	id?: string;
+};
 
-let open = false;
+let { id = "user-menu" }: Props = $props();
+
+let open = $state(false);
 
 // For Nostr accounts, prefer the profile's display name over the
 // auto-generated API username in the menu label/tooltip. fetchProfile caches,
 // and the guard keeps this to a single fetch per npub.
-let nostrName: string | null = null;
+let nostrName = $state<string | null>(null);
 let loadedNpub: string | null = null;
 
 function syncNostrName(npub: string | null) {
@@ -35,15 +39,19 @@ function syncNostrName(npub: string | null) {
 	}
 }
 
-$: triggerId = `${id}-trigger`;
-$: syncNostrName($session?.npub ?? null);
-$: accountLabel = nostrName ?? $session?.username ?? $_("nav.account");
+const triggerId = $derived(`${id}-trigger`);
+$effect(() => {
+	syncNostrName($session?.npub ?? null);
+});
+const accountLabel = $derived(
+	nostrName ?? $session?.username ?? $_("nav.account"),
+);
 // Fold the new-activity state into the button's accessible name —
 // otherwise the inner dot's aria-label is shadowed by the button's
 // own aria-label and never reaches assistive tech.
-$: triggerLabel = $hasNewActivity
-	? `${accountLabel}. ${$_("aria.newActivity")}`
-	: accountLabel;
+const triggerLabel = $derived(
+	$hasNewActivity ? `${accountLabel}. ${$_("aria.newActivity")}` : accountLabel,
+);
 
 afterNavigate(() => {
 	open = false;
@@ -54,7 +62,7 @@ afterNavigate(() => {
 	<button
 		type="button"
 		id={triggerId}
-		on:click={() => (open = !open)}
+		onclick={() => (open = !open)}
 		class="relative flex h-10 w-10 items-center justify-center text-link transition-colors hover:text-hover dark:text-white dark:hover:text-link"
 		aria-label={triggerLabel}
 		title={triggerLabel}
@@ -98,7 +106,7 @@ afterNavigate(() => {
 
 					<a
 						href="/user/photos"
-						on:click={() => trackEvent("my_photos_click")}
+						onclick={() => trackEvent("my_photos_click")}
 						class="flex items-center gap-2 px-4 py-2 text-sm text-primary transition-colors hover:bg-gray-100 dark:text-white dark:hover:bg-white/10"
 					>
 						<Icon type="material" icon="photo_library" w="16" h="16" />
@@ -107,7 +115,7 @@ afterNavigate(() => {
 
 					<a
 						href="/user/notes"
-						on:click={() => trackEvent("my_notes_click")}
+						onclick={() => trackEvent("my_notes_click")}
 						class="flex items-center gap-2 px-4 py-2 text-sm text-primary transition-colors hover:bg-gray-100 dark:text-white dark:hover:bg-white/10"
 					>
 						<Icon type="material" icon="sticky_note_2" w="16" h="16" />
@@ -130,7 +138,7 @@ afterNavigate(() => {
 
 					<a
 						href="/user/account"
-						on:click={() => trackEvent("my_account_click")}
+						onclick={() => trackEvent("my_account_click")}
 						class="flex items-center gap-2 px-4 py-2 text-sm text-primary transition-colors hover:bg-gray-100 dark:text-white dark:hover:bg-white/10"
 					>
 						<Icon type="material" icon="manage_accounts" w="16" h="16" />
@@ -141,7 +149,7 @@ afterNavigate(() => {
 
 					<button
 						type="button"
-						on:click={() => {
+						onclick={() => {
 							session.logout();
 							open = false;
 							// Authenticated pages (e.g. /user/saved, /user/activity)
@@ -165,7 +173,7 @@ afterNavigate(() => {
 					</a>
 					<a
 						href="/signup"
-						on:click={() => trackEvent("signup_button_click", { source: "user_menu" })}
+						onclick={() => trackEvent("signup_button_click", { source: "user_menu" })}
 						class="flex items-center gap-2 px-4 py-2 text-sm text-primary transition-colors hover:bg-gray-100 dark:text-white dark:hover:bg-white/10"
 					>
 						<Icon type="material" icon="person_add" w="16" h="16" />

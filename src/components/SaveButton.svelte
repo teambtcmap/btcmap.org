@@ -16,26 +16,30 @@ import { errToast } from "#lib/utils.js";
 import SaveAuthPrompt from "$components/auth/SaveAuthPrompt.svelte";
 import Icon from "$components/Icon.svelte";
 
-// The numeric ID of the item to save/unsave.
-export let id: number;
+type Props = {
+	// The numeric ID of the item to save/unsave.
+	id: number;
+	// Whether this saves a place or an area.
+	type?: SavedItemType;
+	// "pill" — default labeled pill button.
+	// "icon-stack" — vertical icon-circle + label, matches the merchant drawer action row (Navigate / Edit / Share / Comments).
+	variant?: "pill" | "icon-stack";
+	// Optional className passthrough for layout-specific styling.
+	class?: string;
+};
 
-// Whether this saves a place or an area.
-export let type: SavedItemType = "place";
+let {
+	id,
+	type = "place",
+	variant = "pill",
+	class: className = undefined,
+}: Props = $props();
 
-// "pill" — default labeled pill button.
-// "icon-stack" — vertical icon-circle + label, matches the merchant drawer action row (Navigate / Edit / Share / Comments).
-export let variant: "pill" | "icon-stack" = "pill";
+let pending = $state(false);
+let showPrompt = $state(false);
 
-// Optional className passthrough for layout-specific styling.
-let className: string | undefined = undefined;
-
-export { className as class };
-
-let pending = false;
-let showPrompt = false;
-
-$: savedList = getSavedList($session, type);
-$: saved = savedList.includes(id);
+const savedList = $derived(getSavedList($session, type));
+const saved = $derived(savedList.includes(id));
 
 async function toggle() {
 	if (pending) return;
@@ -84,7 +88,7 @@ async function toggle() {
 		class="flex flex-col items-center gap-1 text-primary transition-opacity dark:text-white {pending
 			? 'opacity-50'
 			: ''} {className ?? ''}"
-		on:click={toggle}
+		onclick={toggle}
 		aria-pressed={saved}
 		aria-label={saved ? $_(`merchant.unsave`) : $_(`merchant.save`)}
 	>
@@ -111,7 +115,7 @@ async function toggle() {
 			? 'border border-link text-link hover:bg-link/10 dark:border-link dark:text-link'
 			: 'bg-link text-white hover:bg-hover'} mx-auto flex w-28 items-center justify-center rounded-lg px-3 py-1.5 text-center text-sm font-semibold transition-colors {pending ? 'opacity-50' : ''} {className ??
 			''}"
-		on:click={toggle}
+		onclick={toggle}
 		aria-pressed={saved}
 		aria-label={saved ? $_(`merchant.unsave`) : $_(`merchant.save`)}
 	>
