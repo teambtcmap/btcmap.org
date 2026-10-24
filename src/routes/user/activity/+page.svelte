@@ -175,7 +175,7 @@ onMount(async () => {
 	// The feed is read for the account signed in now; nothing it answers
 	// may be applied once another account (or none) has taken over.
 	const client = authedClient();
-	const { username } = $session;
+	const { username } = current;
 
 	// Kick off the feed fetch immediately using the session IDs so the
 	// user doesn't wait on the saved-lists round-trip.
