@@ -1,40 +1,15 @@
 <script lang="ts">
-import { isAxiosError } from "axios";
 import type { EventTemplate } from "nostr-tools/pure";
 import { onDestroy, onMount, tick } from "svelte";
 
-import type { EventName } from "#lib/analytics.js";
-import { trackEvent } from "#lib/analytics.js";
 import { fieldBorderClasses } from "#lib/fieldStyles.js";
 import { _ } from "#lib/i18n/index.js";
 import type { SignedAuthEvent } from "#lib/nostr.js";
-import {
-	decodeNsec,
-	getNostrExtension,
-	signTemplateWithExtension,
-	signTemplateWithSecretKey,
-} from "#lib/nostr.js";
+import { getNostrExtension } from "#lib/nostr.js";
 import { fetchProfile } from "#lib/nostrProfile.js";
-import type {
-	Closable,
-	SignerPairing,
-	SignerSession,
-} from "#lib/nostrSigner.js";
-import {
-	classifySignerError,
-	clearSignerPairing,
-	closeSigner,
-	connectBunkerUri,
-	connectSavedPairing,
-	hasErrorName,
-	loadSignerPairing,
-	pairingWithSignerKey,
-	saveSignerPairing,
-	shortNpub,
-	signWithSigner,
-	startNostrConnect,
-} from "#lib/nostrSigner.js";
-import { safeHttpUrl } from "#lib/safeUrl.js";
+import { shortNpub } from "#lib/nostrSigner.js";
+import type { PairMode } from "#lib/signerRun.svelte.js";
+import { createSignerRun } from "#lib/signerRun.svelte.js";
 import { errToast } from "#lib/utils.js";
 import Icon from "$components/Icon.svelte";
 import TextLink from "$components/TextLink.svelte";
@@ -43,7 +18,9 @@ import TextLink from "$components/TextLink.svelte";
 // extension, NostrConnect (QR / hand-off / copy), bunker URI, secret key, and
 // a saved signer pairing. Logging in and linking a key to an account sign the
 // same kind of event for different URLs, so the transports live here once and
-// the caller supplies the template and what to do with the signature.
+// the caller supplies the template and what to do with the signature. The run
+// itself (cancel, stale results, the pairing, toasts, events) is
+// signerRun.svelte.ts; this renders it and owns what is on screen.
 
 type Mode = "login" | "link";
 
@@ -65,14 +42,9 @@ type Props = {
 
 let { mode, template, submit, onStart }: Props = $props();
 
-// Which signer transport is running. "qr", "open" and "copy" share one
-// nostrconnect session; the mode only decides how its URI is presented.
-type SignerRun = "saved" | "bunker" | "qr" | "open" | "copy";
-type PairMode = "qr" | "open" | "copy";
-
-// Copy and events per surface: the transports are the same, the sentence
-// under the button is not ("Log in with…" vs "Link with…"), and each entry
-// point owns its funnel.
+// Copy per surface: the transports are the same, the sentence under the
+// button is not ("Log in with…" vs "Link with…"). The events are
+// signerRun.svelte.ts's.
 const LABELS = {
 	login: {
 		entry: "login.nostrLogin",
@@ -81,7 +53,6 @@ const LABELS = {
 		nsecAction: "login.nsecSubmit",
 		nsecHint: "login.nsecWarning",
 		savedAction: "login.submit",
-		error: "login.nostrError",
 	},
 	link: {
 		entry: "account.nostr.linkEntry",
@@ -90,54 +61,10 @@ const LABELS = {
 		nsecAction: "account.nostr.linkNsec",
 		nsecHint: "account.nostr.nsecWarning",
 		savedAction: "account.nostr.linkSaved",
-		error: "account.nostr.linkError",
 	},
-} as const;
-
-const EVENTS = {
-	login: {
-		toggle: "login_nostr_options_toggle",
-		extension: "login_nostr_extension_click",
-		nsec: "login_nostr_nsec_click",
-		bunker: "login_nostr_bunker_click",
-		saved: "login_nostr_saved_click",
-		forget: "login_nostr_forget_click",
-		connectOpen: "login_nostr_connect_open_click",
-		connectCopy: "login_nostr_connect_copy_click",
-		connectQr: "login_nostr_connect_qr_click",
-		authUrl: "login_nostr_auth_url_click",
-		success: "login_nostr_success",
-	},
-	link: {
-		toggle: "account_nostr_options_toggle",
-		extension: "account_nostr_link_click",
-		nsec: "account_nostr_link_click",
-		bunker: "account_nostr_link_click",
-		saved: "account_nostr_link_click",
-		forget: "account_nostr_forget_click",
-		connectOpen: "account_nostr_link_click",
-		connectCopy: "account_nostr_link_click",
-		connectQr: "account_nostr_link_click",
-		authUrl: "account_nostr_auth_url_click",
-		success: "account_nostr_link_success",
-	},
-} as const satisfies Record<Mode, Record<string, EventName>>;
-
-// Failure logs name the surface; the error object itself never gets logged
-// (an Axios error carries the Bearer token and the request body).
-const LOG_LABEL = {
-	login: "Nostr login failed:",
-	link: "Nostr key link failed:",
 } as const;
 
 const labels = $derived(LABELS[mode]);
-const events = $derived(EVENTS[mode]);
-
-const CONNECT_EVENT = {
-	qr: "connectQr",
-	open: "connectOpen",
-	copy: "connectCopy",
-} as const satisfies Record<PairMode, keyof (typeof EVENTS)["login"]>;
 
 const primaryButton =
 	"w-full rounded-lg bg-purple-600 px-4 py-2 font-semibold text-white transition-colors hover:bg-purple-700 disabled:opacity-50 aria-disabled:opacity-50";
@@ -159,164 +86,54 @@ let nsecInput = $state<HTMLInputElement>();
 // mount (or after the user installs one), so the button's state is refreshed on
 // mount, on window focus and whenever the options panel opens.
 let hasExtension = $state(false);
-let nostrLoading = $state(false);
-let nsecLoading = $state(false);
 
 // One entry point, then every transport as an equal option: the extension is
 // no longer privileged over a signer app or a QR pairing.
 let showOptions = $state(false);
-let savedPairing = $state<SignerPairing | null>(null);
 // kind:0 name for the saved signer, when public relays have one.
 let savedSignerName = $state<string | null>(null);
 let profileFor: string | null = null;
 let bunkerUri = $state("");
-let signerRun = $state<SignerRun | null>(null);
-// The signer's approval page, offered as a real link: auth_url arrives over the
-// relay long after the click that started the run, so a window.open() here is
-// outside the user-activation window and Safari (and sometimes Chromium) blocks
-// it without telling us.
-let authUrl = $state<string | null>(null);
-let pairMode = $state<PairMode | null>(null);
-let connectUri = $state<string | null>(null);
 let copied = $state(false);
 let qrFailed = $state(false);
 let qrCanvas = $state<HTMLCanvasElement | null>(null);
 let noAppHint = $state(false);
-
-// Stale results are the danger here: a signer that answers after Cancel must
-// not complete the action. Every run captures the generation, and any await
-// that comes back with a stale one is dropped (and its signer closed).
-let generation = 0;
-let abortController: AbortController | null = null;
-let activeSigner: Closable | null = null;
 let noAppTimer: ReturnType<typeof setTimeout> | null = null;
 let copiedTimer: ReturnType<typeof setTimeout> | null = null;
 
-const anyLoading = $derived(nostrLoading || nsecLoading || signerRun !== null);
-const pairingSession = $derived(
-	signerRun === "qr" || signerRun === "open" || signerRun === "copy",
-);
-// A pairing in progress still owns its three buttons (switching between QR,
-// copy and hand-off must not restart it); everything else blocks them.
-const pairButtonsDisabled = $derived(
-	nostrLoading || nsecLoading || (signerRun !== null && !pairingSession),
-);
-
-// The HTTP status of an API failure, if it was one. Shared by the toast paths:
-// a 401/403 means the API rejected the signature, not that the transport broke.
-function httpStatus(err: unknown): number | undefined {
-	return (err as { response?: { status?: number } })?.response?.status;
-}
-
-// What a failure may log: an HTTP error's status, never the error itself.
-// The login exchange's Axios error isn't scrubbed (it isn't an authedApi
-// call) and carries the signed proof in its request config, also when no
-// response came back.
-const loggable = (err: unknown) =>
-	isAxiosError(err) ? (httpStatus(err) ?? "no response") : err;
-
-function showError(err: unknown, logLabel: string) {
-	const status = httpStatus(err);
-	errToast(
-		status === 401 || status === 403
-			? $_("login.nostrFailed")
-			: $_(labels.error),
-	);
-	// An Axios error carries the request config — the Bearer token and any
-	// request body — so an API failure logs its status, never the error. A
-	// transport failure (extension refused, relay dead) has nothing to leak.
-	console.error(logLabel, loggable(err));
-}
-
-function failSigner(err: unknown, run: number) {
-	if (run !== generation || hasErrorName(err, "AbortError")) return;
-	cancelSigner();
-	// An API rejection is the same failure the other transports report, so it
-	// gets the same "signature rejected" wording rather than a signer message.
-	const status = httpStatus(err);
-	if (status !== undefined) {
-		showError(err, LOG_LABEL[mode]);
-		return;
-	}
-	switch (classifySignerError(err)) {
-		case "invalid":
-			errToast($_("login.bunkerInvalid"));
-			return;
-		case "timeout":
-			errToast($_("login.signerNoAnswer"));
-			return;
-		case "relay":
-			errToast($_("login.signerNoRelay"));
-			return;
-		default: {
-			// A signer that refuses says why ("already connected", "user rejected",
-			// …); that text is the only clue the user has, so it rides along with the
-			// generic message.
-			const detail =
-				typeof err === "string" ? err : (err as Error | undefined)?.message;
-			errToast(detail ? `${$_(labels.error)} (${detail})` : $_(labels.error));
-			console.error(LOG_LABEL[mode], loggable(err));
+// The panel's surface (login or link) is fixed for its lifetime, so the run
+// reads `mode` once; the callbacks read the live props.
+const runner = createSignerRun({
+	// svelte-ignore state_referenced_locally
+	mode,
+	template: () => template(),
+	submit: (event) => submit(event),
+	onStart: () => onStart?.(),
+	present: (uri, presentation, run) => {
+		noAppHint = false;
+		if (presentation === "qr") void renderQr(uri);
+		else if (presentation === "open") handOff(uri, run);
+		else void copyConnection(uri);
+	},
+	onCancel: () => {
+		if (noAppTimer) {
+			clearTimeout(noAppTimer);
+			noAppTimer = null;
 		}
-	}
-}
-
-// auth_url comes from the signer, so it is untrusted input on its way to a new
-// tab: only http(s) survives. The link is the reliable path — a popup opened
-// this late has usually lost the click's user activation.
-function openAuthUrl(url: string) {
-	const safe = safeHttpUrl(url);
-	if (!safe) {
-		console.warn("nostrSigner: refused a non-http auth_url");
-		return;
-	}
-	authUrl = safe;
-	window.open(safe, "_blank", "noopener,noreferrer");
-}
-
-// Abandon everything in flight: bump the generation, abort the pairing wait,
-// close the signer if one was established, and clear the pairing UI.
-function cancelSigner() {
-	generation += 1;
-	abortController?.abort();
-	abortController = null;
-	if (noAppTimer) {
-		clearTimeout(noAppTimer);
-		noAppTimer = null;
-	}
-	if (copiedTimer) {
-		clearTimeout(copiedTimer);
-		copiedTimer = null;
-	}
-	if (activeSigner) void closeSigner(activeSigner);
-	activeSigner = null;
-	signerRun = null;
-	authUrl = null;
-	connectUri = null;
-	pairMode = null;
-	copied = false;
-	qrFailed = false;
-	noAppHint = false;
-}
-
-function beginSignerRun(run: SignerRun): number {
-	cancelSigner();
-	signerRun = run;
-	onStart?.();
-	return generation;
-}
-
-function forgetSigner() {
-	trackEvent(events.forget);
-	clearSignerPairing();
-	savedPairing = null;
-	cancelSigner();
-}
+		if (copiedTimer) {
+			clearTimeout(copiedTimer);
+			copiedTimer = null;
+		}
+		copied = false;
+		qrFailed = false;
+		noAppHint = false;
+	},
+});
 
 function toggleOptions() {
 	showOptions = !showOptions;
-	trackEvent(events.toggle, { open: showOptions });
+	runner.optionsToggled(showOptions);
 	if (showOptions) refreshExtension();
-	else cancelSigner();
 }
 
 // The extension button is live only when a NIP-07 provider is actually there,
@@ -326,169 +143,22 @@ function refreshExtension() {
 }
 
 async function signWithExtension() {
-	// Re-entry guard: the busy button still takes clicks (#1548). Without
-	// it, one click could open two extension-signing popups.
-	if (anyLoading) return;
-	trackEvent(events.extension);
-	// Detect at click time rather than at mount: extensions inject
-	// window.nostr at their own pace, and the button's disabled state reflects
-	// the last probe. Re-check here in case the provider went away between
-	// render and click.
-	if (getNostrExtension() === null) {
-		refreshExtension();
-		errToast($_("login.nostrNoExtension"));
-		return;
-	}
-	nostrLoading = true;
-	onStart?.();
-	try {
-		const signed = await signTemplateWithExtension(template());
-		if (await submit(signed)) {
-			trackEvent(events.success, { method: "extension" });
-		}
-	} catch (err) {
-		showError(err, `${LOG_LABEL[mode]} (extension)`);
-	} finally {
-		nostrLoading = false;
-	}
-}
-
-// Sign the NIP-98 event, submit it, and only then persist the pairing — a
-// pairing is worth remembering once it has actually done something. The panel
-// stays booked (signerRun set) through the submit, so a second run cannot
-// start mid-request; the caller's finally closes the signer.
-async function finishSignerRun(
-	run: number,
-	signer: SignerSession["signer"],
-	pairing: SignerPairing,
-	method: SignerRun,
-): Promise<void> {
-	if (run !== generation) return;
-	activeSigner = signer;
-	const signed = await signWithSigner(signer, template);
-	if (run !== generation) return;
-	const done = await submit(signed);
-	if (!done) return;
-	trackEvent(events.success, { method });
-	// No generation check here: submit awaits the caller's success steps, and
-	// a login's add-location flow closes this panel on success — onDestroy ->
-	// cancelSigner bumps the generation. The signature was accepted either
-	// way, so the pairing is still worth keeping. It also carries the user's
-	// key as named by the signed event, where the bunker pointer names the
-	// signer's (they differ on signers like nsec.app).
-	const verified = pairingWithSignerKey(pairing, signed.pubkey);
-	saveSignerPairing(verified);
-	savedPairing = verified;
-}
-
-async function useSavedPairing() {
-	const pairing = savedPairing;
-	if (!pairing || anyLoading) return;
-	trackEvent(events.saved);
-	const run = beginSignerRun("saved");
-	let signer: SignerSession["signer"] | null = null;
-	try {
-		const result = await connectSavedPairing(pairing, {
-			onauth: openAuthUrl,
-		});
-		signer = result.signer;
-		await finishSignerRun(run, signer, result.pairing, "saved");
-	} catch (err) {
-		failSigner(err, run);
-		// A stored pairing that cannot be parsed is worse than none: drop it so
-		// the one-click button doesn't fail forever. Only when this run is still
-		// the current one — a stale failure must not cancel the newer run — and
-		// by clearing storage directly, since the user didn't click Forget.
-		if (run === generation && classifySignerError(err) === "invalid") {
-			clearSignerPairing();
-			savedPairing = null;
-		}
-	} finally {
-		await closeSigner(signer);
-		// Only this run's signer: a cancelled run that resolves late must not
-		// clear the signer a newer run is holding, or cancelling that one leaks
-		// its request until the sign timeout.
-		if (activeSigner === signer) activeSigner = null;
-		if (run === generation) signerRun = null;
-	}
+	if (!(await runner.signWithExtension())) refreshExtension();
 }
 
 async function connectWithBunker(event: SubmitEvent) {
 	event.preventDefault();
-	if (anyLoading) return;
-	const value = bunkerUri.trim();
-	if (!value) return;
-	trackEvent(events.bunker);
-	const run = beginSignerRun("bunker");
-	let signer: SignerSession["signer"] | null = null;
-	try {
-		const result = await connectBunkerUri(value, { onauth: openAuthUrl });
-		signer = result.signer;
-		await finishSignerRun(run, signer, result.pairing, "bunker");
-		if (run === generation) bunkerUri = "";
-	} catch (err) {
-		failSigner(err, run);
-	} finally {
-		await closeSigner(signer);
-		if (activeSigner === signer) activeSigner = null;
-		if (run === generation) signerRun = null;
-	}
+	if (await runner.connectBunker(bunkerUri)) bunkerUri = "";
 }
 
-async function startPairing(presentation: PairMode) {
-	// Another transport is running: the buttons are aria-disabled, and the
-	// click they still take must not start a second session. Deliberately not
-	// anyLoading — switching between QR, open and copy has to work while this
-	// pairing is running.
-	if (nostrLoading || nsecLoading) return;
-	trackEvent(events[CONNECT_EVENT[presentation]]);
-	// One nostrconnect session, two presentations: switching after the URI
-	// exists must not restart the pairing the signer may be answering.
-	if (signerRun) {
-		if (connectUri) setPairMode(presentation);
-		return;
-	}
-
-	const run = beginSignerRun(presentation);
-	const controller = new AbortController();
-	abortController = controller;
-	pairMode = presentation;
-	let signer: SignerSession["signer"] | null = null;
-	try {
-		const result = await startNostrConnect({
-			signal: controller.signal,
-			onauth: openAuthUrl,
-			onUri: (uri) => {
-				if (run !== generation) return;
-				connectUri = uri;
-				if (presentation === "qr") void renderQr(uri);
-				else if (presentation === "open") handOff(uri, run);
-				else void copyConnection(uri);
-			},
-		});
-		signer = result.signer;
-		await finishSignerRun(run, signer, result.pairing, presentation);
-	} catch (err) {
-		failSigner(err, run);
-	} finally {
-		await closeSigner(signer);
-		if (activeSigner === signer) activeSigner = null;
-		if (run === generation) {
-			abortController = null;
-			signerRun = null;
-			connectUri = null;
-			pairMode = null;
-		}
-	}
-}
-
-function setPairMode(mode: PairMode) {
-	pairMode = mode;
-	noAppHint = false;
-	if (!connectUri) return;
-	if (mode === "qr") void renderQr(connectUri);
-	else if (mode === "open") handOff(connectUri, generation);
-	else void copyConnection(connectUri);
+async function signWithNsec(event: SubmitEvent) {
+	event.preventDefault();
+	const ok = await runner.signWithNsec(nsec, () => {
+		nsec = "";
+	});
+	// The key was cleared before the submit, so the empty field disables the
+	// focused submit (#1548): retrying starts there anyway.
+	if (!ok) nsecInput?.focus();
 }
 
 // A scheme with no registered handler is ignored silently — the page just
@@ -497,7 +167,7 @@ function handOff(uri: string, run: number) {
 	window.location.href = uri;
 	if (noAppTimer) clearTimeout(noAppTimer);
 	noAppTimer = setTimeout(() => {
-		if (run === generation) noAppHint = true;
+		if (runner.isCurrent(run)) noAppHint = true;
 	}, 1800);
 }
 
@@ -551,53 +221,8 @@ function copyWithSelection(uri: string): boolean {
 	}
 }
 
-async function signWithNsec(event: SubmitEvent) {
-	event.preventDefault();
-	// Re-entry guard: the busy button still takes clicks (#1548), which
-	// would decode + sign the same nsec twice and double-fire the submit.
-	// Nor while another run is going: both would call submit.
-	if (anyLoading) return;
-	if (!nsec.trim()) return;
-	trackEvent(events.nsec);
-	nsecLoading = true;
-	onStart?.();
-	let secretKey: Uint8Array | null = null;
-
-	// Phase 1: decode + sign (sync, only fails on malformed key).
-	let signed: SignedAuthEvent;
-	try {
-		secretKey = decodeNsec(nsec);
-		signed = signTemplateWithSecretKey(template(), secretKey);
-		nsec = "";
-	} catch {
-		errToast($_("login.nsecInvalid"));
-		console.error("Nsec decode failed");
-		if (secretKey) secretKey.fill(0);
-		nsecLoading = false;
-		return;
-	}
-
-	// Phase 2: submit. Reuses the same bad-credentials classifier so transport
-	// errors don't get mis-reported as "invalid nsec".
-	try {
-		if (await submit(signed)) {
-			trackEvent(events.success, { method: "nsec" });
-		}
-	} catch (err) {
-		showError(err, `${LOG_LABEL[mode]} (nsec)`);
-		// The key was cleared before the submit, so the empty field disables
-		// the focused submit (#1548): retrying starts there anyway.
-		nsecInput?.focus();
-	} finally {
-		// Best-effort zeroing. V8 may have copies elsewhere, but this covers
-		// the primary reference.
-		if (secretKey) secretKey.fill(0);
-		nsecLoading = false;
-	}
-}
-
 onMount(() => {
-	savedPairing = loadSignerPairing();
+	runner.restorePairing();
 	refreshExtension();
 	// Extensions inject on their own schedule, and a user who installs one has
 	// to come back to this tab: re-probe on focus and once shortly after mount.
@@ -613,7 +238,7 @@ onMount(() => {
 // to the shortened npub otherwise. fetchProfile caches per key and resolves to
 // null on timeout, so a dead relay just leaves the npub on screen.
 $effect(() => {
-	const npub = savedPairing?.npub ?? null;
+	const npub = runner.savedPairing?.npub ?? null;
 	if (npub === profileFor) return;
 	profileFor = npub;
 	savedSignerName = null;
@@ -625,7 +250,7 @@ $effect(() => {
 });
 
 onDestroy(() => {
-	cancelSigner();
+	runner.cancel();
 });
 </script>
 
@@ -652,7 +277,7 @@ onDestroy(() => {
 
 {#if showOptions}
 	<div class="space-y-3">
-		{#if savedPairing}
+		{#if runner.savedPairing}
 			<div class={cardClass}>
 				<div class="flex items-start justify-between gap-3">
 					<div class="min-w-0">
@@ -662,25 +287,25 @@ onDestroy(() => {
 							class:font-mono={savedSignerName === null}
 						>
 							{savedSignerName ??
-								shortNpub(savedPairing.npub ?? savedPairing.pubkey)}
+								shortNpub(runner.savedPairing.npub ?? runner.savedPairing.pubkey)}
 						</p>
 					</div>
 					<TextLink
 						type="button"
-						onclick={forgetSigner}
+						onclick={runner.forget}
 						style="shrink-0 text-xs"
-						aria-disabled={anyLoading ? "true" : undefined}
+						aria-disabled={runner.anyLoading ? "true" : undefined}
 					>
 						{$_("login.signerForget")}
 					</TextLink>
 				</div>
 				<button
 					type="button"
-					onclick={useSavedPairing}
-					aria-disabled={anyLoading ? "true" : undefined}
+					onclick={runner.useSavedPairing}
+					aria-disabled={runner.anyLoading ? "true" : undefined}
 					class={outlineButton}
 				>
-					{signerRun === "saved"
+					{runner.signerRun === "saved"
 						? $_("login.signerWaiting")
 						: $_(labels.savedAction)}
 				</button>
@@ -699,10 +324,10 @@ onDestroy(() => {
 				type="button"
 				onclick={signWithExtension}
 				disabled={!hasExtension}
-				aria-disabled={anyLoading ? "true" : undefined}
+				aria-disabled={runner.anyLoading ? "true" : undefined}
 				class={outlineButton}
 			>
-				{nostrLoading ? $_("login.nostrSigning") : $_(labels.extensionAction)}
+				{runner.nostrLoading ? $_("login.nostrSigning") : $_(labels.extensionAction)}
 			</button>
 		</div>
 
@@ -714,24 +339,24 @@ onDestroy(() => {
 			<div class="flex flex-col gap-2">
 				<button
 					type="button"
-					onclick={() => startPairing("open")}
-					aria-disabled={pairButtonsDisabled ? "true" : undefined}
+					onclick={() => runner.startPairing("open")}
+					aria-disabled={runner.pairButtonsDisabled ? "true" : undefined}
 					class={outlineButton}
 				>
 					{$_("login.connectOpen")}
 				</button>
 				<button
 					type="button"
-					onclick={() => startPairing("copy")}
-					aria-disabled={pairButtonsDisabled ? "true" : undefined}
+					onclick={() => runner.startPairing("copy")}
+					aria-disabled={runner.pairButtonsDisabled ? "true" : undefined}
 					class={outlineButton}
 				>
 					{copied ? $_("login.connectCopied") : $_("login.connectCopy")}
 				</button>
 				<button
 					type="button"
-					onclick={() => startPairing("qr")}
-					aria-disabled={pairButtonsDisabled ? "true" : undefined}
+					onclick={() => runner.startPairing("qr")}
+					aria-disabled={runner.pairButtonsDisabled ? "true" : undefined}
 					class={outlineButton}
 				>
 					{$_("login.connectShow")}
@@ -746,7 +371,7 @@ onDestroy(() => {
 
 			<!-- QR only: the connection string is a separate action, so this
 			     view holds nothing but the code to scan. -->
-			{#if pairMode === "qr" && connectUri}
+			{#if runner.pairMode === "qr" && runner.connectUri}
 				<div class="space-y-2">
 					<div class="flex justify-center">
 						<canvas
@@ -762,9 +387,9 @@ onDestroy(() => {
 				</div>
 			{/if}
 
-			{#if pairingSession}
+			{#if runner.pairingSession}
 				<p class="text-center {statusClass}" role="status">
-					{pairMode === "open"
+					{runner.pairMode === "open"
 						? $_("login.signerWaiting")
 						: $_("login.connectWaiting")}
 				</p>
@@ -796,10 +421,10 @@ onDestroy(() => {
 				<button
 					type="submit"
 					disabled={!bunkerUri.trim()}
-					aria-disabled={anyLoading ? "true" : undefined}
+					aria-disabled={runner.anyLoading ? "true" : undefined}
 					class={outlineButton}
 				>
-					{signerRun === "bunker"
+					{runner.signerRun === "bunker"
 						? $_("login.signerWaiting")
 						: $_(labels.bunkerAction)}
 				</button>
@@ -832,28 +457,28 @@ onDestroy(() => {
 				<button
 					type="submit"
 					disabled={!nsec.trim()}
-					aria-disabled={nsecLoading || signerRun ? "true" : undefined}
+					aria-disabled={runner.nsecLoading || runner.signerRun ? "true" : undefined}
 					class={outlineButton}
 				>
-					{nsecLoading ? $_("login.nostrSigning") : $_(labels.nsecAction)}
+					{runner.nsecLoading ? $_("login.nostrSigning") : $_(labels.nsecAction)}
 				</button>
 			</form>
 		</div>
 
-		{#if signerRun}
-			{#if authUrl}
+		{#if runner.signerRun}
+			{#if runner.authUrl}
 				<TextLink
-					link={authUrl}
+					link={runner.authUrl}
 					external
 					style="block w-full truncate text-center text-sm"
-					onclick={() => trackEvent(events.authUrl)}
+					onclick={runner.trackAuthUrlClick}
 				>
 					{$_("login.signerAuthLink")}
 				</TextLink>
 			{/if}
 			<TextLink
 				type="button"
-				onclick={cancelSigner}
+				onclick={runner.cancel}
 				style="block w-full text-center text-sm"
 			>
 				{$_("login.signerCancel")}
