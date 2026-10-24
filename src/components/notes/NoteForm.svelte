@@ -3,6 +3,7 @@ import { createForm } from "@tanstack/svelte-form";
 import { untrack } from "svelte";
 
 import { _ } from "#lib/i18n/index.js";
+import type { NoteErrors } from "#lib/noteValidation.js";
 import {
 	NOTE_FIELD_ORDER,
 	NOTE_TEXT_MAX_LENGTH,
@@ -73,12 +74,16 @@ const form = createForm(() => ({
 }));
 
 // Rule codes from validateNote, as fieldError reports them
+type TextRule = NonNullable<NoteErrors["text"]>;
+const TEXT_ERRORS: Record<TextRule, () => string> = {
+	required: () => $_("notes.textRequired"),
+	tooLong: () =>
+		$_("notes.textTooLong", { values: { max: NOTE_TEXT_MAX_LENGTH } }),
+};
+const isTextRule = (code: string | undefined): code is TextRule =>
+	code !== undefined && Object.hasOwn(TEXT_ERRORS, code);
 const textError = (code: string | undefined): string | undefined =>
-	code === "required"
-		? $_("notes.textRequired")
-		: code === "tooLong"
-			? $_("notes.textTooLong", { values: { max: NOTE_TEXT_MAX_LENGTH } })
-			: undefined;
+	isTextRule(code) ? TEXT_ERRORS[code]() : undefined;
 
 function handleSubmit(event: SubmitEvent) {
 	event.preventDefault();
