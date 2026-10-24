@@ -5,6 +5,7 @@ import { fade, fly } from "svelte/transition";
 
 import { lockBodyScroll, unlockBodyScroll } from "#lib/bodyScrollLock.js";
 import { trapTab } from "#lib/focusTrap.js";
+import { portal } from "#lib/portal.js";
 import CloseButton from "$components/CloseButton.svelte";
 
 type Props = {
@@ -81,6 +82,10 @@ export function setTrigger(el: HTMLElement) {
 <svelte:window onkeydowncapture={handleKeydown} />
 
 {#if open}
+	<!-- Portalled to <body>: a caller inside a stacking context (the merchant
+	     hero's Save button) would otherwise trap the overlay under its
+	     siblings. -->
+	<div use:portal>
 	<div
 		transition:fade={{ duration: 200 }}
 		class="fixed inset-0 z-[1000] bg-black/40 dark:bg-black/60"
@@ -110,5 +115,6 @@ export function setTrigger(el: HTMLElement) {
 		<div class="min-h-0 flex-1 overflow-y-auto -mx-5 px-5 sm:-mx-6 sm:px-6">
 			{@render children?.()}
 		</div>
+	</div>
 	</div>
 {/if}
