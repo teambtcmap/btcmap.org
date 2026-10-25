@@ -49,6 +49,8 @@ const isNote = (value: unknown): value is Note => {
 		typeof n.public === "boolean" &&
 		typeof n.created_at === "string" &&
 		typeof n.updated_at === "string" &&
+		// The sync cursor is built from it
+		!Number.isNaN(Date.parse(n.updated_at)) &&
 		(n.deleted_at === undefined || typeof n.deleted_at === "string")
 	);
 };
@@ -246,6 +248,8 @@ export const whenNoteSettles = (
 	};
 };
 
+type NoteChange = (notes: Note[]) => Note[];
+
 // Follows the session: loads the notes when a token appears or changes,
 // empties them (and the cache) on logout. A response for a token that is no
 // longer current is dropped, so a slow load can't resurrect notes after
@@ -257,6 +261,9 @@ export const createMyNotesStore = (sessions: Readable<Session | null>) => {
 	// never move the cursor, so the next sync still sees edits made
 	// elsewhere in between.
 	let cache: NotesCache | null = null;
+	// Local writes made while a sync is in flight. Its answer may predate
+	// them, so they are replayed on top of it instead of being lost.
+	let syncWrites: NoteChange[] | null = null;
 
 	const { subscribe, set, update } = writable<MyNotesState>(
 		SIGNED_OUT,
@@ -267,6 +274,7 @@ export const createMyNotesStore = (sessions: Readable<Session | null>) => {
 				currentToken = token;
 				if (!s || !token) {
 					cache = null;
+					syncWrites = null;
 					clearNotesCache();
 					set(SIGNED_OUT);
 					return;
@@ -275,19 +283,28 @@ export const createMyNotesStore = (sessions: Readable<Session | null>) => {
 				const cached = readNotesCache(username);
 				cache = cached && { ...cached, username };
 				set({ status: "loading", notes: cached?.notes ?? [] });
+				const writes: NoteChange[] = [];
+				syncWrites = writes;
 				// This store follows `sessions` (injected), not the global
 				// session the client's stillCurrent() reads, so it keeps its
 				// own token check.
 				syncMyNotes(authedClient(token), cached).then(
 					(snapshot) => {
 						if (token !== currentToken) return;
-						cache = { ...snapshot, username };
+						syncWrites = null;
+						const notes = writes.reduce(
+							(n, change) => change(n),
+							snapshot.notes,
+						);
+						cache = { ...snapshot, notes, username };
 						if (snapshot.cursor !== null) writeNotesCache(cache);
-						set({ status: "ready", notes: snapshot.notes });
+						set({ status: "ready", notes });
 					},
 					() => {
 						if (token !== currentToken) return;
-						set({ status: "error", notes: cached?.notes ?? [] });
+						syncWrites = null;
+						// The cached notes, with any local writes on top
+						update((state) => ({ ...state, status: "error" }));
 					},
 				);
 			});
@@ -295,11 +312,13 @@ export const createMyNotesStore = (sessions: Readable<Session | null>) => {
 				stop();
 				currentToken = null;
 				cache = null;
+				syncWrites = null;
 			};
 		},
 	);
 
-	const updateNotes = (change: (notes: Note[]) => Note[]) => {
+	const updateNotes = (change: NoteChange) => {
+		syncWrites?.push(change);
 		update((state) => ({ ...state, notes: change(state.notes) }));
 		if (cache?.cursor != null) {
 			cache = { ...cache, notes: change(cache.notes) };

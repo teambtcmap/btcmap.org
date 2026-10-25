@@ -126,9 +126,13 @@ describe("syncMyNotes", () => {
 			(_, i) => note(i + 1, { updated_at: "2026-10-01T00:00:00.500Z" }),
 		);
 		full.push({ id: NOTES_PAGE_SIZE });
-		api.get
-			.mockResolvedValueOnce({ data: full })
-			.mockResolvedValueOnce({ data: [note(NOTES_PAGE_SIZE + 1)] });
+		api.get.mockResolvedValueOnce({ data: full }).mockResolvedValueOnce({
+			data: [
+				note(NOTES_PAGE_SIZE + 1, {
+					updated_at: "2026-10-02T00:00:00Z",
+				}),
+			],
+		});
 
 		const { notes } = await syncMyNotes(authedClient("tok"));
 
@@ -220,6 +224,19 @@ describe("syncMyNotes", () => {
 		});
 
 		expect(api.get).toHaveBeenCalledTimes(2);
+	});
+
+	it("drops a row whose updated_at is not a date", async () => {
+		api.get.mockResolvedValueOnce({
+			data: [note(1), note(2, { updated_at: "garbage" })],
+		});
+
+		const snapshot = await syncMyNotes(authedClient("tok"));
+
+		expect(snapshot).toEqual({
+			notes: [note(1)],
+			cursor: "2026-10-01T00:00:00Z",
+		});
 	});
 
 	it("drops a row whose deleted_at is not a string", async () => {
@@ -474,6 +491,61 @@ describe("createMyNotesStore", () => {
 			username: "satoshi",
 			cursor: "2026-10-01T00:00:00Z",
 			notes: [note(2, { updated_at: "2026-10-09T00:00:00Z" })],
+		});
+		stop();
+	});
+
+	it("keeps local writes made while the sync was in flight", async () => {
+		let resolve: (value: { data: Note[] }) => void = () => {};
+		api.get.mockReturnValueOnce(
+			new Promise((r) => {
+				resolve = r;
+			}),
+		);
+		const store = createMyNotesStore(writable(session("tok")));
+		const stop = store.subscribe(() => {});
+
+		// The GET was answered before these writes reached the API
+		store.upsert(note(5));
+		store.remove(2);
+		resolve({ data: [note(1), note(2)] });
+		await flush();
+
+		expect(get(store)).toEqual({
+			status: "ready",
+			notes: [note(5), note(1)],
+		});
+		expect(
+			JSON.parse(localStorage.getItem(NOTES_CACHE_KEY) ?? "").notes,
+		).toEqual([note(5), note(1)]);
+		stop();
+	});
+
+	it("keeps local writes when the refresh fails", async () => {
+		localStorage.setItem(
+			NOTES_CACHE_KEY,
+			JSON.stringify({
+				username: "satoshi",
+				cursor: "2026-10-01T00:00:00Z",
+				notes: [note(1)],
+			}),
+		);
+		let reject: (error: Error) => void = () => {};
+		api.get.mockReturnValueOnce(
+			new Promise((_r, j) => {
+				reject = j;
+			}),
+		);
+		const store = createMyNotesStore(writable(session("tok")));
+		const stop = store.subscribe(() => {});
+
+		store.upsert(note(5));
+		reject(new Error("offline"));
+		await flush();
+
+		expect(get(store)).toEqual({
+			status: "error",
+			notes: [note(5), note(1)],
 		});
 		stop();
 	});
