@@ -34,45 +34,52 @@ const PAGE_SIZE = 20;
 // IDs come from the session (always available once logged in).
 // Names are fetched from the API best-effort for the filter select —
 // if that fetch fails the feed still works.
-let savedPlaceIds: number[] = [];
-let savedAreaIds: number[] = [];
-let placeNames: Map<number, string> = new Map();
-let areaNames: Map<number, string> = new Map();
-let hasSavedItems = false;
+let savedPlaceIds = $state<number[]>([]);
+let savedAreaIds = $state<number[]>([]);
+let placeNames = $state<Map<number, string>>(new Map());
+let areaNames = $state<Map<number, string>>(new Map());
+let hasSavedItems = $state(false);
 // filterValue is the select's string value ("all" | "place:<id>" |
 // "area:<id>"); `filter` is the parsed typed view used by buildFeedUrl.
-let filterValue = "all";
-let activeTypes: Set<ActivityType> = new Set(ACTIVITY_TYPES);
-let feedItems: ActivityItem[] = [];
-let page = 0;
-let initialLoading = true;
-let feedLoading = false;
-let feedError = false;
+let filterValue = $state("all");
+let activeTypes = $state<Set<ActivityType>>(new Set(ACTIVITY_TYPES));
+let feedItems = $state<ActivityItem[]>([]);
+let page = $state(0);
+let initialLoading = $state(true);
+let feedLoading = $state(false);
+let feedError = $state(false);
 let fetchGeneration = 0;
 // Captured once at mount before markActivitySeen() runs, so the
 // "X new" pill is computed against the user's *previous* visit.
-let priorLastSeen: string | null = null;
-let pillDismissed = false;
+let priorLastSeen = $state<string | null>(null);
+let pillDismissed = $state(false);
 
-$: filter = parseFilterValue(filterValue);
-$: newCount = priorLastSeen
-	? feedItems.filter((i) => i.date > (priorLastSeen as string)).length
-	: 0;
-$: showNewPill = !pillDismissed && newCount > 0;
+// Derived on read, so the select's change handler fetches the item just
+// picked, not the one before it.
+const filter = $derived(parseFilterValue(filterValue));
+const newCount = $derived.by(() => {
+	const since = priorLastSeen;
+	return since ? feedItems.filter((i) => i.date > since).length : 0;
+});
+const showNewPill = $derived(!pillDismissed && newCount > 0);
 // Counts are over the unfiltered window so chip counts don't collapse
 // when the user toggles a type off.
-$: typeCounts = countByType(feedItems);
-$: visibleItems = feedItems.filter((i) => activeTypes.has(i.type));
-$: pagedItems = visibleItems.slice(page * PAGE_SIZE, (page + 1) * PAGE_SIZE);
-$: totalPages = Math.max(1, Math.ceil(visibleItems.length / PAGE_SIZE));
+const typeCounts = $derived(countByType(feedItems));
+const visibleItems = $derived(feedItems.filter((i) => activeTypes.has(i.type)));
+const pagedItems = $derived(
+	visibleItems.slice(page * PAGE_SIZE, (page + 1) * PAGE_SIZE),
+);
+const totalPages = $derived(
+	Math.max(1, Math.ceil(visibleItems.length / PAGE_SIZE)),
+);
 // Suppress the "(0)" suffix on every chip during the very first load,
 // where typeCounts is uniformly zero and a chipful of zeros looks like
 // "there's nothing to filter". After the initial fetch resolves we
 // always show counts, even if some are legitimately 0.
-$: showChipCounts = !(feedLoading && !feedItems.length);
+const showChipCounts = $derived(!(feedLoading && !feedItems.length));
 
 // Rebuild options when saved-id lists, hydrated names, or locale change.
-$: filterOptions = ((): FormSelectOption[] => {
+const filterOptions = $derived.by((): FormSelectOption[] => {
 	const opts: FormSelectOption[] = [
 		{ value: "all", label: $_("userActivity.filterAll") },
 	];
@@ -97,7 +104,7 @@ $: filterOptions = ((): FormSelectOption[] => {
 		});
 	}
 	return opts;
-})();
+});
 
 function parseFilterValue(v: string): Filter {
 	if (v.startsWith("place:")) {
@@ -257,7 +264,7 @@ onMount(async () => {
 				{$_("areaActivity.loadError")}
 				<button
 					class="ml-2 text-link transition-colors hover:text-hover"
-					on:click={fetchFeed}
+					onclick={fetchFeed}
 				>
 					{$_("areaActivity.retry")}
 				</button>
@@ -280,7 +287,7 @@ onMount(async () => {
 						aria-label={$_("aria.previousPage")}
 						class="rounded-full p-2 text-link transition-colors enabled:hover:bg-gray-100 disabled:opacity-40 dark:enabled:hover:bg-white/10"
 						disabled={page === 0}
-						on:click={() => goToPage(page - 1)}
+						onclick={() => goToPage(page - 1)}
 					>
 						<Icon type="material" icon="chevron_left" w="24" h="24" />
 					</button>
@@ -292,7 +299,7 @@ onMount(async () => {
 						aria-label={$_("aria.nextPage")}
 						class="rounded-full p-2 text-link transition-colors enabled:hover:bg-gray-100 disabled:opacity-40 dark:enabled:hover:bg-white/10"
 						disabled={page >= totalPages - 1}
-						on:click={() => goToPage(page + 1)}
+						onclick={() => goToPage(page + 1)}
 					>
 						<Icon type="material" icon="chevron_right" w="24" h="24" />
 					</button>
@@ -302,7 +309,7 @@ onMount(async () => {
 			{#if showNewPill}
 				<button
 					type="button"
-					on:click={() => (pillDismissed = true)}
+					onclick={() => (pillDismissed = true)}
 					class="mx-auto mb-3 block rounded-full bg-link px-4 py-1 text-sm font-medium text-white transition-colors hover:bg-hover"
 				>
 					{$_("userActivity.newSinceLastVisit", { values: { count: newCount } })}
@@ -331,7 +338,7 @@ onMount(async () => {
 						aria-label={$_("aria.previousPage")}
 						class="rounded-full p-2 text-link transition-colors enabled:hover:bg-gray-100 disabled:opacity-40 dark:enabled:hover:bg-white/10"
 						disabled={page === 0}
-						on:click={() => goToPage(page - 1)}
+						onclick={() => goToPage(page - 1)}
 					>
 						<Icon type="material" icon="chevron_left" w="24" h="24" />
 					</button>
@@ -343,7 +350,7 @@ onMount(async () => {
 						aria-label={$_("aria.nextPage")}
 						class="rounded-full p-2 text-link transition-colors enabled:hover:bg-gray-100 disabled:opacity-40 dark:enabled:hover:bg-white/10"
 						disabled={page >= totalPages - 1}
-						on:click={() => goToPage(page + 1)}
+						onclick={() => goToPage(page + 1)}
 					>
 						<Icon type="material" icon="chevron_right" w="24" h="24" />
 					</button>
