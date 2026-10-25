@@ -1,4 +1,4 @@
-import type { FailureStatus } from "#lib/analytics.js";
+import type { FailureStatus } from "#lib/apiError.js";
 import { errorStatus, failureStatus } from "#lib/apiError.js";
 import { errToast } from "#lib/utils.js";
 

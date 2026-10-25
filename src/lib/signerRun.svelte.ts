@@ -4,6 +4,7 @@ import { get } from "svelte/store";
 
 import type { EventName, NostrSignMethod } from "#lib/analytics.js";
 import { trackEvent } from "#lib/analytics.js";
+import type { FailureStatus } from "#lib/apiError.js";
 import { errorStatus, failureStatus } from "#lib/apiError.js";
 import { _ } from "#lib/i18n/index.js";
 import type { SignedAuthEvent } from "#lib/nostr.js";
@@ -49,7 +50,9 @@ export type SignerMode = "login" | "link";
 // Which signer transport is running. "qr", "open" and "copy" share one
 // nostrconnect session; the presentation only decides how its URI is shown.
 export type PairMode = "qr" | "open" | "copy";
-export type SignerRunKind = "saved" | "bunker" | PairMode;
+// The transports that book a run; the extension and the secret key sign in
+// one step outside it
+export type SignerRunKind = Exclude<NostrSignMethod, "extension" | "nsec">;
 
 // Each surface owns its funnel, its toast and its log label: the
 // transports are the same, the words not. Failure logs name the surface; an
@@ -201,14 +204,14 @@ export const createSignerRun = ({
 		console.error(logLabel, loggable(err));
 	};
 
-	// The funnel's failure event: only for a run that is still current, so
-	// a cancel or a newer run never counts as one
-	const trackFailure = (method: NostrSignMethod, err: unknown) =>
-		trackEvent(events.failure, { method, status: failureStatus(err) });
+	// The funnel's failure event. Callers fire it only for a run that is
+	// still current, so a cancel or a newer run never counts as one.
+	const trackFailure = (method: NostrSignMethod, status: FailureStatus) =>
+		trackEvent(events.failure, { method, status });
 
 	const failSigner = (err: unknown, run: number, method: SignerRunKind) => {
 		if (run !== generation || hasErrorName(err, "AbortError")) return;
-		trackFailure(method, err);
+		trackFailure(method, failureStatus(err));
 		cancel();
 		// An API rejection is the same failure the other transports report, so
 		// it gets the same "signature rejected" wording rather than a signer
@@ -380,7 +383,7 @@ export const createSignerRun = ({
 			// window.nostr at their own pace, and the button's state reflects
 			// the last probe.
 			if (deps.getNostrExtension() === null) {
-				trackEvent(events.failure, { method: "extension", status: "client" });
+				trackFailure("extension", "client");
 				errToast(t("login.nostrNoExtension"));
 				return false;
 			}
@@ -394,7 +397,7 @@ export const createSignerRun = ({
 				}
 			} catch (err) {
 				if (run === generation) {
-					trackFailure("extension", err);
+					trackFailure("extension", failureStatus(err));
 					showError(err, `${logLabel} (extension)`);
 				}
 			} finally {
@@ -425,7 +428,7 @@ export const createSignerRun = ({
 				secretKey = deps.decodeNsec(nsec);
 				signed = deps.signTemplateWithSecretKey(template(), secretKey);
 			} catch {
-				trackEvent(events.failure, { method: "nsec", status: "client" });
+				trackFailure("nsec", "client");
 				errToast(t("login.nsecInvalid"));
 				console.error("Nsec decode failed");
 				if (secretKey) secretKey.fill(0);
@@ -443,7 +446,7 @@ export const createSignerRun = ({
 				return true;
 			} catch (err) {
 				if (run === generation) {
-					trackFailure("nsec", err);
+					trackFailure("nsec", failureStatus(err));
 					showError(err, `${logLabel} (nsec)`);
 				}
 				return false;

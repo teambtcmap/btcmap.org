@@ -3,6 +3,7 @@
 // Only enabled in production
 
 import type { PasswordChange } from "#lib/account.js";
+import type { FailureStatus } from "#lib/apiError.js";
 import type { BasemapId } from "#lib/map/basemaps.js";
 import type { VerifiedFilterYears } from "#lib/map/verifiedFilter.js";
 import type { MerchantListMode } from "#lib/merchantListStore.js";
@@ -18,6 +19,10 @@ const ANALYTICS_HOSTNAME = "btcmap.org";
 // the sites that fire it. Keep the keys sorted; a new event goes in its
 // place, not at the end. Keys already in Umami keep their names, casing
 // included, so its reports stay continuous.
+// A *_failure status (failureStatus in apiError.ts), or the refusal the
+// flow names itself: the name, or the Nostr key, belongs to someone else
+type FailureOrTaken = FailureStatus | "taken";
+
 type EventPayloads = {
 	account_button_click: { logged_in: boolean };
 	account_nostr_auth_url_click: undefined;
@@ -25,7 +30,7 @@ type EventPayloads = {
 	account_nostr_link_click: { method: NostrSignMethod };
 	account_nostr_link_failure: {
 		method: NostrSignMethod;
-		status: FailureStatus | "taken";
+		status: FailureOrTaken;
 	};
 	account_nostr_link_success: { method: NostrSignMethod };
 	account_nostr_options_toggle: { open: boolean };
@@ -38,7 +43,7 @@ type EventPayloads = {
 	};
 	account_password_change_success: undefined;
 	account_username_save_click: undefined;
-	account_username_save_failure: { status: FailureStatus | "taken" };
+	account_username_save_failure: { status: FailureOrTaken };
 	account_username_save_success: undefined;
 	add_location_click: undefined;
 	add_place_address_jump: undefined;
@@ -172,7 +177,7 @@ type EventPayloads = {
 	signup_button_click: { source: SignupEntry };
 	signup_create_account_failure: {
 		source: SignupSource;
-		status: FailureStatus | "taken";
+		status: FailureOrTaken;
 	};
 	signup_create_account_success: { source: SignupSource };
 	verified_filter_change: {
@@ -188,12 +193,6 @@ export type EventName = keyof EventPayloads;
 export type BareEventName = {
 	[N in EventName]: EventPayloads[N] extends undefined ? N : never;
 }[EventName];
-
-// Why a request-backed step failed (*_failure events, #1575): the API's
-// status, "no_response" for a request that got none, "client" for a
-// failure before or without a request (failureStatus in apiError.ts). An
-// event adds the refusals its own flow names (e.g. "taken").
-export type FailureStatus = number | "no_response" | "client";
 
 // How the add-note card was opened (note_add_click breakdown).
 export type NoteAddMethod = "menu" | "right_click" | "long_press";
