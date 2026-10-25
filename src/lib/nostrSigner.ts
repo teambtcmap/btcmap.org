@@ -284,7 +284,7 @@ export async function signWithSigner(
 
 // The pairing's identity is the *user's* key, which only the signed event
 // names — the bunker pointer carries the remote signer's key instead, and the
-// two differ on signers like nsec.app.
+// two can differ.
 export function pairingWithSignerKey(
 	pairing: SignerPairing,
 	pubkey: string,
