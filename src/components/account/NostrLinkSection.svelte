@@ -80,17 +80,21 @@ async function unlink() {
 	// The busy button still takes clicks (#1548)
 	if (!$session || unlinkAction.pending) return;
 	const client = authedClient();
-	await unlinkAction.run($_("account.nostr.unlinkError"), async () => {
-		// The confirmed unlink, so the click/success pair counts attempts,
-		// not opened confirmations
-		trackEvent("account_nostr_unlink_click");
-		changedHere = true;
-		await unlinkNostr(client);
-		session.setNpub(client, null);
-		confirmingUnlink = false;
-		trackEvent("account_nostr_unlink_success");
-		successToast($_("account.nostr.unlinkSuccess"));
-	});
+	await unlinkAction.run(
+		$_("account.nostr.unlinkError"),
+		async () => {
+			// The confirmed unlink, so the click/success pair counts attempts,
+			// not opened confirmations
+			trackEvent("account_nostr_unlink_click");
+			changedHere = true;
+			await unlinkNostr(client);
+			session.setNpub(client, null);
+			confirmingUnlink = false;
+			trackEvent("account_nostr_unlink_success");
+			successToast($_("account.nostr.unlinkSuccess"));
+		},
+		(status) => trackEvent("account_nostr_unlink_failure", { status }),
+	);
 }
 </script>
 

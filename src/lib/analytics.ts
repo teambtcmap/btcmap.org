@@ -36,6 +36,7 @@ type EventPayloads = {
 	account_nostr_link_success: { method: NostrSignMethod };
 	account_nostr_options_toggle: { open: boolean };
 	account_nostr_unlink_click: undefined;
+	account_nostr_unlink_failure: { status: FailureStatus };
 	account_nostr_unlink_open: undefined;
 	account_nostr_unlink_success: undefined;
 	account_password_change_click: undefined;
