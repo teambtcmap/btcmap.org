@@ -11,7 +11,7 @@ import {
 } from "#lib/passwordPolicy.js";
 import { fieldError, inputProps, ruleValidation } from "#lib/ruleValidation.js";
 import type { Session } from "#lib/session.js";
-import { isUsernameTaken, session } from "#lib/session.js";
+import { isUsernameTaken, SignupTokenError, session } from "#lib/session.js";
 import { USERNAME_MAX_LENGTH } from "#lib/usernamePolicy.js";
 import { errToast } from "#lib/utils.js";
 import TextField from "$components/form/TextField.svelte";
@@ -58,7 +58,11 @@ const form = createForm(() => ({
 		try {
 			current = await session.signUp({ username, password: value.password });
 		} catch (err) {
-			if (isUsernameTaken(err)) {
+			if (err instanceof SignupTokenError) {
+				// The account exists; it is the login part that failed
+				trackEvent("signup_create_account_success", { source });
+				errToast($_("signup.error"));
+			} else if (isUsernameTaken(err)) {
 				trackEvent("signup_create_account_failure", {
 					source,
 					status: "taken",
@@ -75,7 +79,8 @@ const form = createForm(() => ({
 			}
 			// The status only: the error carries the request body, password
 			// included
-			console.error("Signup failed:", errorStatus(err) ?? "unknown");
+			const failed = err instanceof SignupTokenError ? err.cause : err;
+			console.error("Signup failed:", errorStatus(failed) ?? "unknown");
 			loading = false;
 			return;
 		}

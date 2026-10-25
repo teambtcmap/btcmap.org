@@ -88,6 +88,17 @@ function saveToStorage(session: Session | null) {
 	}
 }
 
+// Signup made the account but couldn't mint its token: the account exists,
+// so this is no failed signup (the original error is the `cause`)
+export class SignupTokenError extends Error {
+	constructor(cause: unknown) {
+		super("the account was created, but its token couldn't be minted", {
+			cause,
+		});
+		this.name = "SignupTokenError";
+	}
+}
+
 // Credentials chosen on /signup or inline in the save prompt.
 export type SignupCredentials = { username: string; password: string };
 
@@ -171,7 +182,12 @@ function createSessionStore() {
 			throw new BadResponseError("signup did not return a username");
 		}
 
-		const token = await mintToken(returnedUsername, credentials.password);
+		let token: string;
+		try {
+			token = await mintToken(returnedUsername, credentials.password);
+		} catch (error) {
+			throw new SignupTokenError(error);
+		}
 
 		const session: Session = {
 			username: returnedUsername,
