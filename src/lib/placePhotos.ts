@@ -1,6 +1,7 @@
 import { isAxiosError } from "axios";
 
 import { API_BASE } from "#lib/api-base.js";
+import { BadResponseError } from "#lib/apiError.js";
 import type { AuthedClient } from "#lib/authedApi.js";
 import { authedClient } from "#lib/authedApi.js";
 import api from "#lib/axios.js";
@@ -143,7 +144,9 @@ export const uploadPlacePhoto = async (
 		{ data_base64: dataBase64 },
 	);
 	if (!isPlaceImage(res.data)) {
-		throw new Error("place image upload returned an unexpected response");
+		throw new BadResponseError(
+			"place image upload returned an unexpected response",
+		);
 	}
 	return res.data;
 };

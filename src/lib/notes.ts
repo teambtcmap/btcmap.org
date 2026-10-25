@@ -2,6 +2,7 @@ import type { Readable } from "svelte/store";
 import { writable } from "svelte/store";
 
 import { API_BASE } from "#lib/api-base.js";
+import { BadResponseError } from "#lib/apiError.js";
 import type { AuthedClient } from "#lib/authedApi.js";
 import { authedClient } from "#lib/authedApi.js";
 import type { Session } from "#lib/session.js";
@@ -56,7 +57,8 @@ const isNote = (value: unknown): value is Note => {
 };
 
 const expectNote = (data: unknown, call: string): Note => {
-	if (!isNote(data)) throw new Error(`${call} returned an unexpected response`);
+	if (!isNote(data))
+		throw new BadResponseError(`${call} returned an unexpected response`);
 	return data;
 };
 

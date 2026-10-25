@@ -67,6 +67,21 @@ describe("createAccountAction", () => {
 		expect(onFailure.mock.calls).toEqual([[500], ["client"]]);
 	});
 
+	it("reports no failure for a call whose session ended", async () => {
+		const { SessionChangedError } = await import("#lib/authedApi.js");
+		vi.spyOn(console, "error").mockImplementation(() => {});
+		const onFailure = vi.fn();
+		const action = createAccountAction("Rename");
+
+		await action.run(
+			"error",
+			() => Promise.reject(new SessionChangedError()),
+			onFailure,
+		);
+
+		expect(onFailure).not.toHaveBeenCalled();
+	});
+
 	it("logs unknown for an error without a status", async () => {
 		const errorSpy = vi.spyOn(console, "error").mockImplementation(() => {});
 		const action = createAccountAction("Unlink");

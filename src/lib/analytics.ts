@@ -4,6 +4,7 @@
 
 import type { PasswordChange } from "#lib/account.js";
 import type { FailureStatus } from "#lib/apiError.js";
+import { failureStatus } from "#lib/apiError.js";
 import type { BasemapId } from "#lib/map/basemaps.js";
 import type { VerifiedFilterYears } from "#lib/map/verifiedFilter.js";
 import type { MerchantListMode } from "#lib/merchantListStore.js";
@@ -258,6 +259,33 @@ export const trackEvent = <N extends EventName>(
 	if (!window.umami) return;
 
 	window.umami.track(eventName, eventData);
+};
+
+// The events whose payload carries a failure status
+type FailureEventName = {
+	[N in EventName]: EventPayloads[N] extends { status: unknown }
+		? FailureStatus extends EventPayloads[N]["status"]
+			? N
+			: never
+		: never;
+}[EventName];
+
+// A funnel's *_failure event for `error`, with the rest of its payload.
+// Nothing fires when the session the call was made for has ended: that is
+// no failure of the user's.
+export const trackFailure = <N extends FailureEventName>(
+	eventName: N,
+	eventData: Omit<EventPayloads[N], "status">,
+	error: unknown,
+): void => {
+	const status = failureStatus(error);
+	if (status === null) return;
+	// One cast: TypeScript can't see that Omit<P, "status"> & { status }
+	// is P again for a generic P
+	trackEvent(
+		eventName,
+		...([{ ...eventData, status }] as unknown as PayloadArgs<N>),
+	);
 };
 
 export const trackBrowserLanguage = (): void => {

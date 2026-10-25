@@ -2,8 +2,8 @@
 import { createForm } from "@tanstack/svelte-form";
 
 import type { SignupSource } from "#lib/analytics.js";
-import { trackEvent } from "#lib/analytics.js";
-import { errorStatus, failureStatus } from "#lib/apiError.js";
+import { trackEvent, trackFailure } from "#lib/analytics.js";
+import { errorStatus } from "#lib/apiError.js";
 import { _ } from "#lib/i18n/index.js";
 import {
 	PASSWORD_MAX_LENGTH,
@@ -58,12 +58,11 @@ const form = createForm(() => ({
 		try {
 			current = await session.signUp({ username, password: value.password });
 		} catch (err) {
-			const taken = isUsernameTaken(err);
-			trackEvent("signup_create_account_failure", {
-				source,
-				status: taken ? "taken" : failureStatus(err),
-			});
-			if (taken) {
+			if (isUsernameTaken(err)) {
+				trackEvent("signup_create_account_failure", {
+					source,
+					status: "taken",
+				});
 				// Only for the name still in the field: an edit while the
 				// request ran already answered it
 				if (form.state.values.username.trim() === username) {
@@ -71,6 +70,7 @@ const form = createForm(() => ({
 					usernameInput?.focus();
 				}
 			} else {
+				trackFailure("signup_create_account_failure", { source }, err);
 				errToast($_("signup.error"));
 			}
 			// The status only: the error carries the request body, password

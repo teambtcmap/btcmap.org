@@ -206,8 +206,13 @@ export const createSignerRun = ({
 
 	// The funnel's failure event. Callers fire it only for a run that is
 	// still current, so a cancel or a newer run never counts as one.
-	const trackFailure = (method: NostrSignMethod, status: FailureStatus) =>
-		trackEvent(events.failure, { method, status });
+	// An ended session (null) reports nothing.
+	const trackFailure = (
+		method: NostrSignMethod,
+		status: FailureStatus | null,
+	) => {
+		if (status !== null) trackEvent(events.failure, { method, status });
+	};
 
 	const failSigner = (err: unknown, run: number, method: SignerRunKind) => {
 		if (run !== generation || hasErrorName(err, "AbortError")) return;

@@ -1,7 +1,7 @@
 import { derived, get, writable } from "svelte/store";
 
 import { API_BASE } from "#lib/api-base.js";
-import { errorStatus } from "#lib/apiError.js";
+import { BadResponseError, errorStatus } from "#lib/apiError.js";
 import type { AuthedClient } from "#lib/authedApi.js";
 import api from "#lib/axios.js";
 
@@ -120,7 +120,7 @@ export const mintToken = async (
 	);
 	const token = res.data?.token;
 	if (typeof token !== "string" || !token) {
-		throw new Error("token mint returned no token");
+		throw new BadResponseError("token mint returned no token");
 	}
 	return token;
 };
@@ -168,7 +168,7 @@ function createSessionStore() {
 		});
 		const returnedUsername = userRes.data?.name;
 		if (typeof returnedUsername !== "string" || !returnedUsername) {
-			throw new Error("signup did not return a username");
+			throw new BadResponseError("signup did not return a username");
 		}
 
 		const token = await mintToken(returnedUsername, credentials.password);

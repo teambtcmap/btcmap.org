@@ -246,6 +246,24 @@ describe("errors", () => {
 		});
 	});
 
+	it("counts no failure for a link whose session ended", async () => {
+		const { SessionChangedError } = await import("#lib/authedApi.js");
+		const { run } = setup(
+			{},
+			{
+				mode: "link",
+				submit: async () => Promise.reject(new SessionChangedError()),
+			},
+		);
+
+		await run.connectBunker("bunker://x");
+
+		expect(trackEvent).not.toHaveBeenCalledWith(
+			"account_nostr_link_failure",
+			expect.anything(),
+		);
+	});
+
 	it("counts no failure for a run that was cancelled", async () => {
 		const signing = deferred<SignedAuthEvent>();
 		const { run } = setup({ signWithSigner: vi.fn(() => signing.promise) });

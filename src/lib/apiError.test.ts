@@ -1,7 +1,9 @@
 import { AxiosError, AxiosHeaders } from "axios";
 import { describe, expect, it } from "vitest";
 
-import { errorStatus, failureStatus } from "./apiError";
+import { SessionChangedError } from "#lib/authedApi.js";
+
+import { BadResponseError, errorStatus, failureStatus } from "./apiError";
 
 const apiError = (status: number) =>
 	new AxiosError("Request failed", "ERR_BAD_REQUEST", undefined, undefined, {
@@ -34,5 +36,18 @@ describe("failureStatus", () => {
 		expect(failureStatus(new AxiosError("Network Error"))).toBe("no_response");
 		expect(failureStatus(new Error("bad file"))).toBe("client");
 		expect(failureStatus("user rejected")).toBe("client");
+	});
+
+	// A 2xx without the data the call needs is the server's fault
+	it("is bad_response for an answer of the wrong shape", () => {
+		expect(failureStatus(new BadResponseError("no token"))).toBe(
+			"bad_response",
+		);
+	});
+
+	// A logout or another login while the call ran: nothing failed for the
+	// user who started it
+	it("is null once the session the call was made for has ended", () => {
+		expect(failureStatus(new SessionChangedError())).toBeNull();
 	});
 });

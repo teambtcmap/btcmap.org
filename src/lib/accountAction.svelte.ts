@@ -26,7 +26,8 @@ export const createAccountAction = (label: string) => {
 			try {
 				await body();
 			} catch (err) {
-				onFailure?.(failureStatus(err));
+				const status = failureStatus(err);
+				if (status !== null) onFailure?.(status);
 				errToast(errorMessage);
 				console.error(`${label} failed:`, errorStatus(err) ?? "unknown");
 			} finally {

@@ -2,6 +2,7 @@ import { get, writable } from "svelte/store";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 
 import { API_BASE } from "#lib/api-base.js";
+import { BadResponseError } from "#lib/apiError.js";
 import { authedClient } from "#lib/authedApi.js";
 import type { Session } from "#lib/session.js";
 
@@ -268,7 +269,7 @@ describe("createNote", () => {
 		expect(created.id).toBe(4);
 	});
 
-	it("rejects an unexpected response", async () => {
+	it("rejects an unexpected response as a bad response", async () => {
 		api.post.mockResolvedValueOnce({ data: "" });
 
 		await expect(
@@ -276,7 +277,7 @@ describe("createNote", () => {
 				{ lat: 1, lon: 2, text: "hi", public: false },
 				authedClient("tok"),
 			),
-		).rejects.toThrow();
+		).rejects.toBeInstanceOf(BadResponseError);
 	});
 });
 
