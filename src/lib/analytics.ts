@@ -2,6 +2,7 @@
 // No cookies, no PII, GDPR compliant
 // Only enabled in production
 
+import type { PasswordChange } from "#lib/account.js";
 import type { BasemapId } from "#lib/map/basemaps.js";
 import type { VerifiedFilterYears } from "#lib/map/verifiedFilter.js";
 import type { MerchantListMode } from "#lib/merchantListStore.js";
@@ -22,14 +23,22 @@ type EventPayloads = {
 	account_nostr_auth_url_click: undefined;
 	account_nostr_forget_click: undefined;
 	account_nostr_link_click: { method: NostrSignMethod };
+	account_nostr_link_failure: {
+		method: NostrSignMethod;
+		status: FailureStatus | "taken";
+	};
 	account_nostr_link_success: { method: NostrSignMethod };
 	account_nostr_options_toggle: { open: boolean };
 	account_nostr_unlink_click: undefined;
 	account_nostr_unlink_open: undefined;
 	account_nostr_unlink_success: undefined;
 	account_password_change_click: undefined;
+	account_password_change_failure: {
+		status: FailureStatus | Exclude<PasswordChange, "changed">;
+	};
 	account_password_change_success: undefined;
 	account_username_save_click: undefined;
+	account_username_save_failure: { status: FailureStatus | "taken" };
 	account_username_save_success: undefined;
 	add_location_click: undefined;
 	add_place_address_jump: undefined;
@@ -47,6 +56,7 @@ type EventPayloads = {
 	add_place_review_back: undefined;
 	add_place_review_enter: undefined;
 	add_place_review_queue_click: undefined;
+	add_place_submit_failure: { attributed: boolean; status: FailureStatus };
 	add_place_submit_success: { attributed: boolean };
 	add_place_tagger_guide_click: undefined;
 	boost_layer_toggle: undefined;
@@ -57,6 +67,7 @@ type EventPayloads = {
 	};
 	category_filter: { category: string; mode: MerchantListMode };
 	comment_add_click: { source: CommentSource };
+	comment_add_failure: { source: CommentSource; status: FailureStatus };
 	comment_add_success: { source: CommentSource };
 	community_map_click: undefined;
 	drawer_collapse_button_click: undefined;
@@ -80,6 +91,7 @@ type EventPayloads = {
 	login_nostr_connect_open_click: { method: "open" };
 	login_nostr_connect_qr_click: { method: "qr" };
 	login_nostr_extension_click: { method: "extension" };
+	login_nostr_failure: { method: NostrSignMethod; status: FailureStatus };
 	login_nostr_forget_click: undefined;
 	login_nostr_nsec_click: { method: "nsec" };
 	login_nostr_options_toggle: { open: boolean };
@@ -96,10 +108,13 @@ type EventPayloads = {
 	my_photos_tile_click: { link: "photo" | "place" };
 	nav_menu_open: { variant: "main" | "communities" };
 	note_add_click: { method: NoteAddMethod };
+	note_add_failure: { method: NoteAddMethod; status: FailureStatus };
 	note_add_success: { method: NoteAddMethod; icon: string; public: boolean };
 	note_delete_click: undefined;
+	note_delete_failure: { status: FailureStatus };
 	note_delete_success: undefined;
 	note_edit_click: undefined;
+	note_edit_failure: { status: FailureStatus };
 	note_edit_success: { text: boolean; icon: boolean };
 	note_open: { source: "map" | "link" };
 	note_prompt_create_account_click: undefined;
@@ -110,9 +125,18 @@ type EventPayloads = {
 		entry: "header" | "empty";
 		signedIn: boolean;
 	};
+	place_photo_add_failure: {
+		source: PlacePhotoSource;
+		count: number;
+		status: FailureStatus;
+	};
 	place_photo_add_success: { source: PlacePhotoSource; count: number };
 	place_photo_delete_cancel: { source: PlacePhotoSource };
 	place_photo_delete_click: { source: PlacePhotoSource };
+	place_photo_delete_failure: {
+		source: PlacePhotoSource;
+		status: FailureStatus;
+	};
 	place_photo_delete_success: { source: PlacePhotoSource };
 	place_photo_link_copy: { source: PlacePhotoSource };
 	place_photo_menu_open: { source: PlacePhotoSource };
@@ -146,6 +170,10 @@ type EventPayloads = {
 	search_sheet_tap_expand: undefined;
 	show_all_on_map_click: undefined;
 	signup_button_click: { source: SignupEntry };
+	signup_create_account_failure: {
+		source: SignupSource;
+		status: FailureStatus | "taken";
+	};
 	signup_create_account_success: { source: SignupSource };
 	verified_filter_change: {
 		years: `${NonNullable<VerifiedFilterYears>}` | "any";
@@ -160,6 +188,12 @@ export type EventName = keyof EventPayloads;
 export type BareEventName = {
 	[N in EventName]: EventPayloads[N] extends undefined ? N : never;
 }[EventName];
+
+// Why a request-backed step failed (*_failure events, #1575): the API's
+// status, "no_response" for a request that got none, "client" for a
+// failure before or without a request (failureStatus in apiError.ts). An
+// event adds the refusals its own flow names (e.g. "taken").
+export type FailureStatus = number | "no_response" | "client";
 
 // How the add-note card was opened (note_add_click breakdown).
 export type NoteAddMethod = "menu" | "right_click" | "long_press";

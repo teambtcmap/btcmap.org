@@ -39,18 +39,23 @@ const form = createForm(() => ({
 	onSubmit: async ({ value }) => {
 		if (!$session) return;
 		const client = authedClient();
-		await save.run($_("account.username.error"), async () => {
-			const result = await changeUsername(value.username.trim(), client);
-			if (result.status === "taken") {
-				taken = true;
-				usernameInput?.focus();
-				return;
-			}
-			session.setUsername(client, result.username);
-			form.setFieldValue("username", result.username);
-			trackEvent("account_username_save_success");
-			successToast($_("account.username.success"));
-		});
+		await save.run(
+			$_("account.username.error"),
+			async () => {
+				const result = await changeUsername(value.username.trim(), client);
+				if (result.status === "taken") {
+					trackEvent("account_username_save_failure", { status: "taken" });
+					taken = true;
+					usernameInput?.focus();
+					return;
+				}
+				session.setUsername(client, result.username);
+				form.setFieldValue("username", result.username);
+				trackEvent("account_username_save_success");
+				successToast($_("account.username.success"));
+			},
+			(status) => trackEvent("account_username_save_failure", { status }),
+		);
 	},
 }));
 const values = form.useSelector((state) => state.values);

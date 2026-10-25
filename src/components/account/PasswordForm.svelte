@@ -49,18 +49,23 @@ const form = createForm(() => ({
 	...validation.options,
 	onSubmit: async ({ value }) => {
 		if (!$session) return;
-		await change.run($_("account.password.error"), async () => {
-			const result = await changePassword(value.current, value.next);
-			if (result !== "changed") {
-				refusal = result;
-				currentInput?.focus();
-				return;
-			}
-			form.reset({ ...EMPTY });
-			validation.reset();
-			trackEvent("account_password_change_success");
-			successToast($_("account.password.success"));
-		});
+		await change.run(
+			$_("account.password.error"),
+			async () => {
+				const result = await changePassword(value.current, value.next);
+				if (result !== "changed") {
+					trackEvent("account_password_change_failure", { status: result });
+					refusal = result;
+					currentInput?.focus();
+					return;
+				}
+				form.reset({ ...EMPTY });
+				validation.reset();
+				trackEvent("account_password_change_success");
+				successToast($_("account.password.success"));
+			},
+			(status) => trackEvent("account_password_change_failure", { status }),
+		);
 	},
 }));
 

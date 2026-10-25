@@ -4,7 +4,7 @@ import { SvelteSet } from "svelte/reactivity";
 
 import type { PlacePhotoSource } from "#lib/analytics.js";
 import { trackEvent } from "#lib/analytics.js";
-import { errorStatus } from "#lib/apiError.js";
+import { errorStatus, failureStatus } from "#lib/apiError.js";
 import type { AuthedClient } from "#lib/authedApi.js";
 import { authedClient } from "#lib/authedApi.js";
 import { _ } from "#lib/i18n/index.js";
@@ -317,6 +317,12 @@ const handleFiles = async (event: Event) => {
 		trackEvent("place_photo_add_success", { source, count: stored.length });
 	}
 	if (failed.length) {
+		// One event per pick, like the success: the first failure's status
+		trackEvent("place_photo_add_failure", {
+			source,
+			count: failed.length,
+			status: failureStatus(failed[0]),
+		});
 		console.error("place photos: upload failed", failed.map(errorStatus));
 		errToast(
 			$_("placePhotos.uploadFailed", { values: { count: failed.length } }),

@@ -13,7 +13,7 @@ import {
 } from "#lib/addLocationValidation.js";
 import { trackEvent } from "#lib/analytics.js";
 import { API_BASE } from "#lib/api-base.js";
-import { errorStatus } from "#lib/apiError.js";
+import { errorStatus, failureStatus } from "#lib/apiError.js";
 import { authedClient } from "#lib/authedApi.js";
 import { createCaptchaGate } from "#lib/captchaGate.svelte.js";
 import { CATEGORIES, CATEGORY_GROUPS } from "#lib/categoryMapping.js";
@@ -505,6 +505,10 @@ const submitPreview = (captchaAnswer: string) => {
 				onsuccess({ attributed: true, name: submittedName });
 			})
 			.catch((error) => {
+				trackEvent("add_place_submit_failure", {
+					attributed: true,
+					status: failureStatus(error),
+				});
 				errToast(get(_)("errors.formSubmission"));
 				console.error("place submission failed", errorStatus(error));
 				submitting = false;
@@ -528,6 +532,10 @@ const submitPreview = (captchaAnswer: string) => {
 			onsuccess({ attributed: false, name: submittedName });
 		})
 		.catch((error) => {
+			trackEvent("add_place_submit_failure", {
+				attributed: false,
+				status: failureStatus(error),
+			});
 			// Past the captcha, our endpoint's other 4xx messages are
 			// written for users too (missing contact, …) — show them.
 			const message = error.response?.data?.message;

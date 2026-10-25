@@ -67,7 +67,10 @@ describe("confirmPhotoDelete", () => {
 
 		expect(await confirmPhotoDelete(args)).toBe(false);
 		expect(errToast).toHaveBeenCalledWith("t:placePhotos.deleteForbidden");
-		expect(trackEvent).not.toHaveBeenCalled();
+		expect(trackEvent).toHaveBeenCalledExactlyOnceWith(
+			"place_photo_delete_failure",
+			{ source: "my_photos", status: 403 },
+		);
 		expect(successToast).not.toHaveBeenCalled();
 	});
 
@@ -76,5 +79,9 @@ describe("confirmPhotoDelete", () => {
 
 		expect(await confirmPhotoDelete(args)).toBe(false);
 		expect(errToast).toHaveBeenCalledWith("t:placePhotos.deleteFailed");
+		expect(trackEvent).toHaveBeenCalledWith("place_photo_delete_failure", {
+			source: "my_photos",
+			status: "client",
+		});
 	});
 });

@@ -8,6 +8,7 @@ import { OutClick } from "svelte-outclick";
 import type { CommentSource } from "#lib/analytics.js";
 import { trackEvent } from "#lib/analytics.js";
 import { API_BASE } from "#lib/api-base.js";
+import { failureStatus } from "#lib/apiError.js";
 import { trapTab } from "#lib/focusTrap.js";
 import { _ } from "#lib/i18n/index.js";
 import { portal } from "#lib/portal.js";
@@ -102,6 +103,10 @@ const form = createForm(() => ({
 			})
 			.catch((error) => {
 				if (axios.isCancel(error)) return;
+				trackEvent("comment_add_failure", {
+					source,
+					status: failureStatus(error),
+				});
 				errToast($_("errors.invoiceGenerate"));
 				console.error(error);
 				loading = false;

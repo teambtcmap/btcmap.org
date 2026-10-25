@@ -1,4 +1,5 @@
-import { errorStatus } from "#lib/apiError.js";
+import type { FailureStatus } from "#lib/analytics.js";
+import { errorStatus, failureStatus } from "#lib/apiError.js";
 import { errToast } from "#lib/utils.js";
 
 // One account-page request in flight (#1541): the shared try/toast/log/
@@ -12,13 +13,20 @@ export const createAccountAction = (label: string) => {
 		get pending() {
 			return pending;
 		},
-		run: async (errorMessage: string, body: () => Promise<void>) => {
+		// `onFailure` fires the caller's *_failure event for what the body
+		// threw; refusals the body handles itself it reports itself
+		run: async (
+			errorMessage: string,
+			body: () => Promise<void>,
+			onFailure?: (status: FailureStatus) => void,
+		) => {
 			// Re-entry guard: a disabled button lands a tick late
 			if (pending) return;
 			pending = true;
 			try {
 				await body();
 			} catch (err) {
+				onFailure?.(failureStatus(err));
 				errToast(errorMessage);
 				console.error(`${label} failed:`, errorStatus(err) ?? "unknown");
 			} finally {
