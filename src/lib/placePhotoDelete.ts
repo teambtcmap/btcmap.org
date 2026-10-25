@@ -1,5 +1,5 @@
 import type { PlacePhotoSource } from "#lib/analytics.js";
-import { trackEvent } from "#lib/analytics.js";
+import { trackEvent, trackFailure } from "#lib/analytics.js";
 import { errorStatus } from "#lib/apiError.js";
 import { deleteErrorKey, deletePlacePhoto } from "#lib/placePhotos.js";
 import { errToast, successToast } from "#lib/utils.js";
@@ -35,6 +35,7 @@ export const confirmPhotoDelete = async ({
 		successToast(t("placePhotos.deleted"));
 		return true;
 	} catch (error) {
+		trackFailure("place_photo_delete_failure", { source }, error);
 		console.error("place photos: delete failed", errorStatus(error));
 		errToast(t(deleteErrorKey(error)));
 		return false;

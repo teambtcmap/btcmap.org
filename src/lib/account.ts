@@ -1,7 +1,7 @@
 import { isAxiosError } from "axios";
 
 import { API_BASE } from "#lib/api-base.js";
-import { errorStatus } from "#lib/apiError.js";
+import { BadResponseError, errorStatus } from "#lib/apiError.js";
 import type { AuthedClient } from "#lib/authedApi.js";
 import { authedClient } from "#lib/authedApi.js";
 import { NOSTR_LINK_URL } from "#lib/nostr.js";
@@ -43,7 +43,7 @@ export const changeUsername = async (
 		);
 		const name = res.data?.name;
 		if (typeof name !== "string" || !name) {
-			throw new Error("username change returned no name");
+			throw new BadResponseError("username change returned no name");
 		}
 		return { status: "changed", username: name };
 	} catch (error) {
@@ -107,7 +107,7 @@ export const linkNostr = async (
 		);
 		const npub = res.data?.npub;
 		if (typeof npub !== "string" || !npub) {
-			throw new Error("nostr link returned no npub");
+			throw new BadResponseError("nostr link returned no npub");
 		}
 		return { status: "linked", npub };
 	} catch (error) {

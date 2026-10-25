@@ -2,6 +2,7 @@
 import type { EventTemplate } from "nostr-tools/pure";
 import { onDestroy, onMount, tick } from "svelte";
 
+import type { NostrSignMethod } from "#lib/analytics.js";
 import { fieldBorderClasses } from "#lib/fieldStyles.js";
 import { _ } from "#lib/i18n/index.js";
 import type { SignedAuthEvent } from "#lib/nostr.js";
@@ -49,7 +50,7 @@ type Props = {
 	// Submit the signed event (exchange it for a session, link the key).
 	// Resolves false when the caller already told the user why it was
 	// refused — no success event, no pairing saved.
-	submit: (event: SignedAuthEvent) => Promise<boolean>;
+	submit: (event: SignedAuthEvent, method: NostrSignMethod) => Promise<boolean>;
 	// Called before a transport starts signing: a caller that binds the
 	// signature to something (the account being linked) snapshots it there,
 	// before any await can outlive it.
@@ -129,7 +130,7 @@ const runner = createSignerRun({
 	// svelte-ignore state_referenced_locally
 	mode,
 	template: () => template(),
-	submit: (event) => submit(event),
+	submit: (event, method) => submit(event, method),
 	onStart: () => onStart?.(),
 	present: (uri, presentation, run) => {
 		noAppHint = false;

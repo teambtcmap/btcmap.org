@@ -3,6 +3,7 @@ import { onMount } from "svelte";
 
 import { fetchLinkedNpub, linkNostr, unlinkNostr } from "#lib/account.js";
 import { createAccountAction } from "#lib/accountAction.svelte.js";
+import type { NostrSignMethod } from "#lib/analytics.js";
 import { trackEvent } from "#lib/analytics.js";
 import { errorStatus } from "#lib/apiError.js";
 import type { AuthedClient } from "#lib/authedApi.js";
@@ -57,12 +58,16 @@ onMount(async () => {
 
 // Both credentials: the Bearer token says which account, the signed PUT
 // proves the user controls the key.
-async function linkKey(signed: SignedAuthEvent): Promise<boolean> {
+async function linkKey(
+	signed: SignedAuthEvent,
+	method: NostrSignMethod,
+): Promise<boolean> {
 	const client = linkClient;
 	if (!client?.stillCurrent()) return false;
 	changedHere = true;
 	const result = await linkNostr(encodeNip98Event(signed), client);
 	if (result.status === "taken") {
+		trackEvent("account_nostr_link_failure", { method, status: "taken" });
 		errToast($_("account.nostr.taken"));
 		return false;
 	}
@@ -75,17 +80,21 @@ async function unlink() {
 	// The busy button still takes clicks (#1548)
 	if (!$session || unlinkAction.pending) return;
 	const client = authedClient();
-	await unlinkAction.run($_("account.nostr.unlinkError"), async () => {
-		// The confirmed unlink, so the click/success pair counts attempts,
-		// not opened confirmations
-		trackEvent("account_nostr_unlink_click");
-		changedHere = true;
-		await unlinkNostr(client);
-		session.setNpub(client, null);
-		confirmingUnlink = false;
-		trackEvent("account_nostr_unlink_success");
-		successToast($_("account.nostr.unlinkSuccess"));
-	});
+	await unlinkAction.run(
+		$_("account.nostr.unlinkError"),
+		async () => {
+			// The confirmed unlink, so the click/success pair counts attempts,
+			// not opened confirmations
+			trackEvent("account_nostr_unlink_click");
+			changedHere = true;
+			await unlinkNostr(client);
+			session.setNpub(client, null);
+			confirmingUnlink = false;
+			trackEvent("account_nostr_unlink_success");
+			successToast($_("account.nostr.unlinkSuccess"));
+		},
+		(status) => trackEvent("account_nostr_unlink_failure", { status }),
+	);
 }
 </script>
 

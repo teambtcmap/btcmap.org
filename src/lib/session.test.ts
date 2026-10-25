@@ -290,6 +290,27 @@ describe("session store", () => {
 			});
 		});
 
+		// The account exists once the first call succeeded: the caller has
+		// to tell that apart from a signup that never happened
+		it("says so when the account was made but its token wasn't", async () => {
+			const post = await postMock();
+			const offline = new Error("offline");
+			post
+				.mockResolvedValueOnce({ data: { name: "alice" } })
+				.mockRejectedValueOnce(offline);
+			const session = await createTestSession();
+
+			const signingUp = session.signUp({
+				username: "alice",
+				password: "correct horse battery",
+			});
+
+			await expect(signingUp).rejects.toMatchObject({
+				name: "SignupTokenError",
+				cause: offline,
+			});
+		});
+
 		it("rejects a blank username", async () => {
 			const post = await postMock();
 			const session = await createTestSession();

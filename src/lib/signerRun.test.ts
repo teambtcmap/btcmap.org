@@ -5,7 +5,7 @@ import { beforeEach, describe, expect, it, vi } from "vitest";
 import { trackEvent } from "#lib/analytics.js";
 import type { SignedAuthEvent } from "#lib/nostr.js";
 import type { SignerPairing } from "#lib/nostrSigner.js";
-import { SignerInputError } from "#lib/nostrSigner.js";
+import { SignerInputError, SignerTimeoutError } from "#lib/nostrSigner.js";
 import { errToast } from "#lib/utils.js";
 
 import type { SignerDeps } from "./signerRun.svelte";
@@ -111,7 +111,7 @@ describe("saved pairing", () => {
 		await run.useSavedPairing();
 
 		expect(onStart).toHaveBeenCalledOnce();
-		expect(submit).toHaveBeenCalledWith(SIGNED);
+		expect(submit).toHaveBeenCalledWith(SIGNED, "saved");
 		expect(trackEvent).toHaveBeenCalledWith("login_nostr_saved_click", {
 			method: "saved",
 		});
@@ -222,6 +222,81 @@ describe("errors", () => {
 		await run.connectBunker("bunker://x");
 
 		expect(errToast).toHaveBeenCalledWith("t:login.nostrFailed");
+		expect(trackEvent).toHaveBeenCalledWith("login_nostr_failure", {
+			method: "bunker",
+			status: 401,
+		});
+	});
+
+	it("counts a signer that answers with an error as a signer failure of its surface", async () => {
+		const { run } = setup(
+			{
+				startNostrConnect: vi.fn(async () => {
+					throw new Error("user rejected");
+				}),
+			},
+			{ mode: "link" },
+		);
+
+		await run.startPairing("qr");
+
+		expect(trackEvent).toHaveBeenCalledWith("account_nostr_link_failure", {
+			method: "qr",
+			status: "signer",
+		});
+	});
+
+	it("names a signer that never answered", async () => {
+		const { run } = setup({
+			connectBunkerUri: vi.fn(async () => {
+				throw new SignerTimeoutError("no answer");
+			}),
+		});
+
+		await run.connectBunker("bunker://x");
+
+		expect(trackEvent).toHaveBeenCalledWith("login_nostr_failure", {
+			method: "bunker",
+			status: "timeout",
+		});
+	});
+
+	it("counts no failure for a link whose session ended", async () => {
+		const { SessionChangedError } = await import("#lib/authedApi.js");
+		const { run } = setup(
+			{},
+			{
+				mode: "link",
+				submit: async () => Promise.reject(new SessionChangedError()),
+			},
+		);
+
+		await run.connectBunker("bunker://x");
+
+		expect(trackEvent).not.toHaveBeenCalledWith(
+			"account_nostr_link_failure",
+			expect.anything(),
+		);
+	});
+
+	it("counts no failure for a run that was cancelled", async () => {
+		const signing = deferred<SignedAuthEvent>();
+		const { run, deps } = setup({
+			signWithSigner: vi.fn(() => signing.promise),
+		});
+
+		// Cancel while the signer is signing, so the run's own await is
+		// the one that sees the rejection
+		const pending = run.connectBunker("bunker://x");
+		await vi.waitFor(() => expect(deps.signWithSigner).toHaveBeenCalled());
+		run.cancel();
+		signing.reject(new Error("closed"));
+		await pending;
+
+		expect(trackEvent).not.toHaveBeenCalledWith(
+			"login_nostr_failure",
+			expect.anything(),
+		);
 	});
 
 	// The login exchange's error carries the signed proof in its config
@@ -262,6 +337,10 @@ describe("errors", () => {
 		expect(await run.signWithExtension()).toBe(false);
 		expect(errToast).toHaveBeenCalledWith("t:login.nostrNoExtension");
 		expect(submit).not.toHaveBeenCalled();
+		expect(trackEvent).toHaveBeenCalledWith("login_nostr_failure", {
+			method: "extension",
+			status: "no_extension",
+		});
 	});
 });
 
@@ -274,7 +353,7 @@ describe("secret key", () => {
 		expect(await run.signWithNsec("nsec1x", onDecoded)).toBe(true);
 
 		expect(onDecoded).toHaveBeenCalledOnce();
-		expect(submit).toHaveBeenCalledWith(SIGNED);
+		expect(submit).toHaveBeenCalledWith(SIGNED, "nsec");
 		expect([...key]).toEqual([0, 0, 0]);
 		expect(trackEvent).toHaveBeenCalledWith("login_nostr_success", {
 			method: "nsec",
@@ -294,6 +373,10 @@ describe("secret key", () => {
 		expect(errToast).toHaveBeenCalledWith("t:login.nsecInvalid");
 		expect(onDecoded).not.toHaveBeenCalled();
 		expect(submit).not.toHaveBeenCalled();
+		expect(trackEvent).toHaveBeenCalledWith("login_nostr_failure", {
+			method: "nsec",
+			status: "invalid",
+		});
 	});
 
 	it("resolves false on a failed submit, for focus to go back", async () => {
@@ -304,5 +387,9 @@ describe("secret key", () => {
 
 		expect(await run.signWithNsec("nsec1x", () => {})).toBe(false);
 		expect(errToast).toHaveBeenCalledWith("t:login.nostrError");
+		expect(trackEvent).toHaveBeenCalledWith("login_nostr_failure", {
+			method: "nsec",
+			status: 500,
+		});
 	});
 });

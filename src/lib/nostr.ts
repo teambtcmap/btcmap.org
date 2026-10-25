@@ -3,6 +3,7 @@ import type { Event, EventTemplate } from "nostr-tools/pure";
 import { finalizeEvent } from "nostr-tools/pure";
 
 import { API_BASE } from "#lib/api-base.js";
+import { BadResponseError } from "#lib/apiError.js";
 
 // URL the API verifies in the NIP-98 event's "u" tag. Must match what the
 // btcmap-api server reconstructs (its BTCMAP_API_BASE_URL + request path),
@@ -159,7 +160,7 @@ export function parseNostrAuthResponse(data: unknown): NostrAuthResult {
 		npub?: unknown;
 	};
 	if (typeof d.token !== "string" || typeof d.username !== "string") {
-		throw new Error("Nostr auth did not return a token");
+		throw new BadResponseError("Nostr auth did not return a token");
 	}
 	return {
 		token: d.token,

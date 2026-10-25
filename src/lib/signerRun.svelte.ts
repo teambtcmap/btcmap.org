@@ -2,9 +2,13 @@ import { isAxiosError } from "axios";
 import type { EventTemplate } from "nostr-tools/pure";
 import { get } from "svelte/store";
 
-import type { EventName } from "#lib/analytics.js";
+import type {
+	EventName,
+	NostrFailureStatus,
+	NostrSignMethod,
+} from "#lib/analytics.js";
 import { trackEvent } from "#lib/analytics.js";
-import { errorStatus } from "#lib/apiError.js";
+import { errorStatus, failureStatus } from "#lib/apiError.js";
 import { _ } from "#lib/i18n/index.js";
 import type { SignedAuthEvent } from "#lib/nostr.js";
 import {
@@ -49,7 +53,9 @@ export type SignerMode = "login" | "link";
 // Which signer transport is running. "qr", "open" and "copy" share one
 // nostrconnect session; the presentation only decides how its URI is shown.
 export type PairMode = "qr" | "open" | "copy";
-export type SignerRunKind = "saved" | "bunker" | PairMode;
+// The transports that book a run; the extension and the secret key sign in
+// one step outside it
+export type SignerRunKind = Exclude<NostrSignMethod, "extension" | "nsec">;
 
 // Each surface owns its funnel, its toast and its log label: the
 // transports are the same, the words not. Failure logs name the surface; an
@@ -69,6 +75,7 @@ const MODES = {
 			copy: "login_nostr_connect_copy_click",
 			authUrl: "login_nostr_auth_url_click",
 			success: "login_nostr_success",
+			failure: "login_nostr_failure",
 		},
 		errorKey: "login.nostrError",
 		logLabel: "Nostr login failed:",
@@ -86,6 +93,7 @@ const MODES = {
 			copy: "account_nostr_link_click",
 			authUrl: "account_nostr_auth_url_click",
 			success: "account_nostr_link_success",
+			failure: "account_nostr_link_failure",
 		},
 		errorKey: "account.nostr.linkError",
 		logLabel: "Nostr key link failed:",
@@ -94,6 +102,15 @@ const MODES = {
 	SignerMode,
 	{ events: Record<string, EventName>; errorKey: string; logLabel: string }
 >;
+
+// A failure's status for the funnel: the API's for an API error, else what
+// classifySignerError makes of it. null: the session ended, nothing to count.
+const signerFailureStatus = (err: unknown): NostrFailureStatus | null => {
+	const status = failureStatus(err);
+	if (status !== "client") return status;
+	const kind = classifySignerError(err);
+	return kind === "other" ? "signer" : kind;
+};
 
 // What a failure may log: an HTTP error's status, never the error itself.
 // The login exchange's Axios error isn't scrubbed (it isn't an authedApi
@@ -140,8 +157,9 @@ type Options = {
 	template: () => EventTemplate;
 	// Submit the signed event (exchange it for a session, link the key).
 	// Resolves false when the caller already told the user why it was
-	// refused — no success event, no pairing saved.
-	submit: (event: SignedAuthEvent) => Promise<boolean>;
+	// refused — no success event, no pairing saved. `method` is for the
+	// caller's own failure event on such a refusal.
+	submit: (event: SignedAuthEvent, method: NostrSignMethod) => Promise<boolean>;
 	// Called before a transport starts signing: a caller that binds the
 	// signature to something (the account being linked) snapshots it there,
 	// before any await can outlive it.
@@ -198,8 +216,19 @@ export const createSignerRun = ({
 		console.error(logLabel, loggable(err));
 	};
 
-	const failSigner = (err: unknown, run: number) => {
+	// The funnel's failure event. Callers fire it only for a run that is
+	// still current, so a cancel or a newer run never counts as one.
+	// An ended session (null) reports nothing.
+	const trackFailure = (
+		method: NostrSignMethod,
+		status: NostrFailureStatus | null,
+	) => {
+		if (status !== null) trackEvent(events.failure, { method, status });
+	};
+
+	const failSigner = (err: unknown, run: number, method: SignerRunKind) => {
 		if (run !== generation || hasErrorName(err, "AbortError")) return;
+		trackFailure(method, signerFailureStatus(err));
 		cancel();
 		// An API rejection is the same failure the other transports report, so
 		// it gets the same "signature rejected" wording rather than a signer
@@ -289,7 +318,7 @@ export const createSignerRun = ({
 		activeSigner = signer;
 		const signed = await deps.signWithSigner(signer, template);
 		if (run !== generation) return;
-		const done = await submit(signed);
+		const done = await submit(signed, method);
 		if (!done) return;
 		trackEvent(events.success, { method });
 		// No generation check here: submit awaits the caller's success steps,
@@ -371,6 +400,7 @@ export const createSignerRun = ({
 			// window.nostr at their own pace, and the button's state reflects
 			// the last probe.
 			if (deps.getNostrExtension() === null) {
+				trackFailure("extension", "no_extension");
 				errToast(t("login.nostrNoExtension"));
 				return false;
 			}
@@ -379,11 +409,12 @@ export const createSignerRun = ({
 			try {
 				const signed = await deps.signTemplateWithExtension(template());
 				if (run !== generation) return true;
-				if (await submit(signed)) {
+				if (await submit(signed, "extension")) {
 					trackEvent(events.success, { method: "extension" });
 				}
 			} catch (err) {
 				if (run === generation) {
+					trackFailure("extension", signerFailureStatus(err));
 					showError(err, `${logLabel} (extension)`);
 				}
 			} finally {
@@ -414,6 +445,7 @@ export const createSignerRun = ({
 				secretKey = deps.decodeNsec(nsec);
 				signed = deps.signTemplateWithSecretKey(template(), secretKey);
 			} catch {
+				trackFailure("nsec", "invalid");
 				errToast(t("login.nsecInvalid"));
 				console.error("Nsec decode failed");
 				if (secretKey) secretKey.fill(0);
@@ -425,12 +457,15 @@ export const createSignerRun = ({
 			// Phase 2: submit. The same bad-credentials classifier, so transport
 			// errors don't get mis-reported as "invalid nsec".
 			try {
-				if (await submit(signed)) {
+				if (await submit(signed, "nsec")) {
 					trackEvent(events.success, { method: "nsec" });
 				}
 				return true;
 			} catch (err) {
-				if (run === generation) showError(err, `${logLabel} (nsec)`);
+				if (run === generation) {
+					trackFailure("nsec", signerFailureStatus(err));
+					showError(err, `${logLabel} (nsec)`);
+				}
 				return false;
 			} finally {
 				// Best-effort zeroing. V8 may have copies elsewhere, but this
@@ -453,7 +488,7 @@ export const createSignerRun = ({
 			} catch (err) {
 				// Read before failSigner, whose cancel moves the generation on
 				const current = run === generation;
-				failSigner(err, run);
+				failSigner(err, run, "saved");
 				// A stored pairing that cannot be parsed is worse than none: drop
 				// it so the one-click button doesn't fail forever. Only when this
 				// run is still the current one — a stale failure must not cancel
@@ -483,7 +518,7 @@ export const createSignerRun = ({
 				await finish(run, signer, result.pairing, "bunker");
 				finished = run === generation;
 			} catch (err) {
-				failSigner(err, run);
+				failSigner(err, run, "bunker");
 			} finally {
 				await settle(run, signer);
 			}
@@ -526,7 +561,7 @@ export const createSignerRun = ({
 				signer = result.signer;
 				await finish(run, signer, result.pairing, presentation);
 			} catch (err) {
-				failSigner(err, run);
+				failSigner(err, run, presentation);
 			} finally {
 				await settle(run, signer);
 				if (run === generation) {

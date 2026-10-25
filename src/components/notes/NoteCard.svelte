@@ -1,5 +1,5 @@
 <script lang="ts">
-import { trackEvent } from "#lib/analytics.js";
+import { trackEvent, trackFailure } from "#lib/analytics.js";
 import { errorStatus } from "#lib/apiError.js";
 import { authedClient } from "#lib/authedApi.js";
 import { _ } from "#lib/i18n/index.js";
@@ -81,6 +81,7 @@ async function create(values: NoteFormValues) {
 		successToast($_("notes.saved"));
 		onClose();
 	} catch (err) {
+		trackFailure("note_add_failure", { method: target.method }, err);
 		logFailure("create", err);
 		errToast($_("notes.saveError"));
 		throw err;
@@ -108,6 +109,7 @@ async function saveEdit(values: NoteFormValues) {
 		});
 		view = "read";
 	} catch (err) {
+		trackFailure("note_edit_failure", {}, err);
 		logFailure("edit", err);
 		errToast($_("notes.saveError"));
 		throw err;
@@ -140,6 +142,7 @@ async function confirmDelete() {
 		successToast($_("notes.deleted"));
 		onClose();
 	} catch (err) {
+		trackFailure("note_delete_failure", {}, err);
 		logFailure("delete", err);
 		errToast($_("notes.deleteError"));
 	} finally {

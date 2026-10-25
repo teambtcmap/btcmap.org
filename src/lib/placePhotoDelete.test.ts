@@ -2,7 +2,7 @@ import type { AxiosResponse } from "axios";
 import { AxiosError } from "axios";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 
-import { trackEvent } from "#lib/analytics.js";
+import { trackEvent, trackFailure } from "#lib/analytics.js";
 import { deletePlacePhoto } from "#lib/placePhotos.js";
 import { errToast, successToast } from "#lib/utils.js";
 
@@ -12,7 +12,10 @@ import {
 	confirmPhotoDelete,
 } from "./placePhotoDelete";
 
-vi.mock("#lib/analytics.js", () => ({ trackEvent: vi.fn() }));
+vi.mock("#lib/analytics.js", () => ({
+	trackEvent: vi.fn(),
+	trackFailure: vi.fn(),
+}));
 vi.mock("#lib/utils.js", () => ({ errToast: vi.fn(), successToast: vi.fn() }));
 vi.mock("#lib/placePhotos.js", async (importOriginal) => ({
 	...(await importOriginal<typeof import("#lib/placePhotos.js")>()),
@@ -59,22 +62,36 @@ describe("confirmPhotoDelete", () => {
 	});
 
 	it("reports a 403 with its own message and no success event", async () => {
-		vi.mocked(deletePlacePhoto).mockRejectedValue(
-			new AxiosError("forbidden", "ERR_BAD_REQUEST", undefined, undefined, {
-				status: 403,
-			} as AxiosResponse),
+		const forbidden = new AxiosError(
+			"forbidden",
+			"ERR_BAD_REQUEST",
+			undefined,
+			undefined,
+			{ status: 403 } as AxiosResponse,
 		);
+		vi.mocked(deletePlacePhoto).mockRejectedValue(forbidden);
 
 		expect(await confirmPhotoDelete(args)).toBe(false);
 		expect(errToast).toHaveBeenCalledWith("t:placePhotos.deleteForbidden");
 		expect(trackEvent).not.toHaveBeenCalled();
+		expect(trackFailure).toHaveBeenCalledExactlyOnceWith(
+			"place_photo_delete_failure",
+			{ source: "my_photos" },
+			forbidden,
+		);
 		expect(successToast).not.toHaveBeenCalled();
 	});
 
 	it("reports any other failure as a retryable error", async () => {
-		vi.mocked(deletePlacePhoto).mockRejectedValue(new Error("offline"));
+		const offline = new Error("offline");
+		vi.mocked(deletePlacePhoto).mockRejectedValue(offline);
 
 		expect(await confirmPhotoDelete(args)).toBe(false);
 		expect(errToast).toHaveBeenCalledWith("t:placePhotos.deleteFailed");
+		expect(trackFailure).toHaveBeenCalledWith(
+			"place_photo_delete_failure",
+			{ source: "my_photos" },
+			offline,
+		);
 	});
 });
