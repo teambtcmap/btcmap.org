@@ -5,7 +5,7 @@ import { API_BASE } from "#lib/api-base.js";
 import type { AuthedClient } from "#lib/authedApi.js";
 import { authedClient } from "#lib/authedApi.js";
 import type { Session } from "#lib/session.js";
-import { session } from "#lib/session.js";
+import { ACCOUNT_CACHE_KEYS, session } from "#lib/session.js";
 
 import type { Note } from "$types/btcmap-api/Note";
 import type { PatchNoteArgs } from "$types/btcmap-api/PatchNoteArgs";
@@ -132,7 +132,8 @@ export async function syncMyNotes(
 	return { notes: newestFirst([...byId.values()]), cursor };
 }
 
-export const NOTES_CACHE_KEY = "btcmap_my_notes";
+// session.logout removes it too, also on pages that never load this module
+export const NOTES_CACHE_KEY = ACCOUNT_CACHE_KEYS.notes;
 
 type NotesCache = NotesSnapshot & { username: Session["username"] };
 
@@ -249,6 +250,18 @@ export const whenNoteSettles = (
 };
 
 type NoteChange = (notes: Note[]) => Note[];
+// A local write and, for an upsert, the updated_at the API gave it
+type LocalWrite = { change: NoteChange; writtenAt?: Note["updated_at"] };
+
+// The sync's answer already holds this upsert, or something newer for the
+// note (an edit or delete from another device), when its cursor reached
+// the write: replaying it would bring back the older version for good, the
+// cursor being past the newer one. Removes always replay: dropping a note
+// twice is harmless.
+const coveredBy = (write: LocalWrite, snapshot: NotesSnapshot): boolean =>
+	write.writtenAt !== undefined &&
+	snapshot.cursor !== null &&
+	Date.parse(snapshot.cursor) >= Date.parse(write.writtenAt);
 
 // Follows the session: loads the notes when a token appears or changes,
 // empties them (and the cache) on logout. A response for a token that is no
@@ -263,7 +276,7 @@ export const createMyNotesStore = (sessions: Readable<Session | null>) => {
 	let cache: NotesCache | null = null;
 	// Local writes made while a sync is in flight. Its answer may predate
 	// them, so they are replayed on top of it instead of being lost.
-	let syncWrites: NoteChange[] | null = null;
+	let syncWrites: LocalWrite[] | null = null;
 
 	const { subscribe, set, update } = writable<MyNotesState>(
 		SIGNED_OUT,
@@ -283,7 +296,7 @@ export const createMyNotesStore = (sessions: Readable<Session | null>) => {
 				const cached = readNotesCache(username);
 				cache = cached && { ...cached, username };
 				set({ status: "loading", notes: cached?.notes ?? [] });
-				const writes: NoteChange[] = [];
+				const writes: LocalWrite[] = [];
 				syncWrites = writes;
 				// This store follows `sessions` (injected), not the global
 				// session the client's stillCurrent() reads, so it keeps its
@@ -292,10 +305,9 @@ export const createMyNotesStore = (sessions: Readable<Session | null>) => {
 					(snapshot) => {
 						if (token !== currentToken) return;
 						syncWrites = null;
-						const notes = writes.reduce(
-							(n, change) => change(n),
-							snapshot.notes,
-						);
+						const notes = writes
+							.filter((write) => !coveredBy(write, snapshot))
+							.reduce((n, write) => write.change(n), snapshot.notes);
 						cache = { ...snapshot, notes, username };
 						if (snapshot.cursor !== null) writeNotesCache(cache);
 						set({ status: "ready", notes });
@@ -317,8 +329,8 @@ export const createMyNotesStore = (sessions: Readable<Session | null>) => {
 		},
 	);
 
-	const updateNotes = (change: NoteChange) => {
-		syncWrites?.push(change);
+	const updateNotes = (change: NoteChange, writtenAt?: Note["updated_at"]) => {
+		syncWrites?.push({ change, writtenAt });
 		update((state) => ({ ...state, notes: change(state.notes) }));
 		if (cache?.cursor != null) {
 			cache = { ...cache, notes: change(cache.notes) };
@@ -330,8 +342,10 @@ export const createMyNotesStore = (sessions: Readable<Session | null>) => {
 		subscribe,
 		// After a successful create or PATCH: replace the note by id or add it.
 		upsert: (note: Note) =>
-			updateNotes((notes) =>
-				newestFirst([...notes.filter((n) => n.id !== note.id), note]),
+			updateNotes(
+				(notes) =>
+					newestFirst([...notes.filter((n) => n.id !== note.id), note]),
+				note.updated_at,
 			),
 		// After a successful DELETE.
 		remove: (id: Note["id"]) =>

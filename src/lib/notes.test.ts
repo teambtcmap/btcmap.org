@@ -521,6 +521,49 @@ describe("createMyNotesStore", () => {
 		stop();
 	});
 
+	it("doesn't replay a local edit the sync's answer already covers", async () => {
+		localStorage.setItem(
+			NOTES_CACHE_KEY,
+			JSON.stringify({
+				username: "satoshi",
+				cursor: "2026-10-03T00:00:00Z",
+				notes: [note(3), note(2), note(1)],
+			}),
+		);
+		let resolve: (value: { data: Note[] }) => void = () => {};
+		api.get.mockReturnValueOnce(
+			new Promise((r) => {
+				resolve = r;
+			}),
+		);
+		const store = createMyNotesStore(writable(session("tok")));
+		const stop = store.subscribe(() => {});
+
+		// The GET was answered after these local writes, and after another
+		// device edited note 2 and deleted note 3 on top of them
+		store.upsert(note(2, { text: "here", updated_at: "2026-10-05T00:00:00Z" }));
+		store.upsert(note(3, { text: "here", updated_at: "2026-10-05T00:00:00Z" }));
+		resolve({
+			data: [
+				note(2, { text: "elsewhere", updated_at: "2026-10-06T00:00:00Z" }),
+				note(3, {
+					updated_at: "2026-10-06T00:00:00Z",
+					deleted_at: "2026-10-06T00:00:00Z",
+				}),
+			],
+		});
+		await flush();
+
+		expect(get(store).notes.map((n) => [n.id, n.text])).toEqual([
+			[2, "elsewhere"],
+			[1, "note 1"],
+		]);
+		expect(
+			JSON.parse(localStorage.getItem(NOTES_CACHE_KEY) ?? "").notes,
+		).toEqual(get(store).notes);
+		stop();
+	});
+
 	it("keeps local writes when the refresh fails", async () => {
 		localStorage.setItem(
 			NOTES_CACHE_KEY,
