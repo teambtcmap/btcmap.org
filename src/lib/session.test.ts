@@ -342,6 +342,19 @@ describe("session store", () => {
 			expect(localStorage.getItem("btcmap_session")).toBeNull();
 		});
 
+		it("removes the account's cached data with the session", async () => {
+			const post = await postMock();
+			post.mockResolvedValueOnce({ data: {} });
+			seedStorage({ username: "alice", token: "tok", savedPlaces: [] });
+			localStorage.setItem("btcmap_my_notes", "{}");
+			const session = await createTestSession();
+			session.init();
+
+			await session.logout();
+
+			expect(localStorage.getItem("btcmap_my_notes")).toBeNull();
+		});
+
 		it("revokes the logged-out token on the API", async () => {
 			const post = await postMock();
 			post.mockResolvedValueOnce({ data: { id: 1, label: "BTC Map Web" } });

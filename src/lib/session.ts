@@ -32,6 +32,11 @@ type SessionBound = Pick<AuthedClient, "stillCurrent">;
 
 const STORAGE_KEY = "btcmap_session";
 
+// Where other modules cache the signed-in account's data. Logout removes
+// them with the session: they may be private (note text), and a page that
+// never loads the owning module can't clear them itself.
+export const ACCOUNT_CACHE_KEYS = { notes: "btcmap_my_notes" } as const;
+
 function loadFromStorage(): Session | null {
 	if (typeof window === "undefined") return null;
 	try {
@@ -74,6 +79,9 @@ function saveToStorage(session: Session | null) {
 			localStorage.setItem(STORAGE_KEY, JSON.stringify(session));
 		} else {
 			localStorage.removeItem(STORAGE_KEY);
+			for (const key of Object.values(ACCOUNT_CACHE_KEYS)) {
+				localStorage.removeItem(key);
+			}
 		}
 	} catch (err) {
 		console.warn("session: failed to persist to localStorage", err);
