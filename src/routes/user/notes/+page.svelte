@@ -1,15 +1,14 @@
 <script lang="ts">
 import { onMount } from "svelte";
-import Time from "svelte-time";
 
 import { trackEvent } from "#lib/analytics.js";
 import { CLUSTERING_DISABLED_ZOOM } from "#lib/constants.js";
-import { createTimeLocale, LOCALIZED_DATE_FORMAT } from "#lib/dayjsLocale.js";
-import { _, locale } from "#lib/i18n/index.js";
+import { _ } from "#lib/i18n/index.js";
 import { NOTE_PARAM } from "#lib/noteCard.js";
 import { NOTE_PIN_COLOR } from "#lib/noteIcons.js";
 import { myNotes } from "#lib/notes.js";
 import { session } from "#lib/session.js";
+import LocalTime from "$components/LocalTime.svelte";
 import NoteGlyph from "$components/notes/NoteGlyph.svelte";
 import Skeleton from "$components/Skeleton.svelte";
 
@@ -20,8 +19,6 @@ import type { Note } from "$types/btcmap-api/Note";
 // the note on /map (?note=<id>, centred on it via the map's hash).
 
 const SKELETON_ROWS = 3;
-
-const timeLocale = createTimeLocale(locale);
 
 const mapUrl = (note: Note) =>
 	`/map?${NOTE_PARAM}=${note.id}#${CLUSTERING_DISABLED_ZOOM}/${note.lat.toFixed(5)}/${note.lon.toFixed(5)}`;
@@ -81,7 +78,7 @@ onMount(() => {
 								{note.text}
 							</span>
 							<span class="mt-1 block text-xs text-body dark:text-white/60">
-								<Time timestamp={note.created_at} format={LOCALIZED_DATE_FORMAT} locale={$timeLocale} />
+								<LocalTime timestamp={note.created_at} />
 								· {note.public ? $_("notes.publicBadge") : $_("notes.privateBadge")}
 							</span>
 						</span>

@@ -1,15 +1,13 @@
 <script lang="ts">
 import { tick } from "svelte";
 import { SvelteSet } from "svelte/reactivity";
-import Time from "svelte-time";
 
 import type { PlacePhotoSource } from "#lib/analytics.js";
 import { trackEvent } from "#lib/analytics.js";
 import { errorStatus } from "#lib/apiError.js";
 import type { AuthedClient } from "#lib/authedApi.js";
 import { authedClient } from "#lib/authedApi.js";
-import { createTimeLocale, LOCALIZED_DATE_FORMAT } from "#lib/dayjsLocale.js";
-import { _, locale } from "#lib/i18n/index.js";
+import { _ } from "#lib/i18n/index.js";
 import type { StripScrollState } from "#lib/placePhotos.js";
 import {
 	deepLinkTarget,
@@ -31,6 +29,7 @@ import { session } from "#lib/session.js";
 import { errToast, successToast, warningToast } from "#lib/utils.js";
 import HydratingAuthPrompt from "$components/auth/HydratingAuthPrompt.svelte";
 import Icon from "$components/Icon.svelte";
+import LocalTime from "$components/LocalTime.svelte";
 import PlacePhotoViewer from "$components/PlacePhotoViewer.svelte";
 import Skeleton from "$components/Skeleton.svelte";
 
@@ -80,7 +79,6 @@ let highlightAdd = $state(false);
 const HIGHLIGHT_ADD_CLASS = "animate-pulse bg-link/10 ring-2 ring-link";
 const loadedIds = new SvelteSet<number>();
 // Hover captions' relative date, in the app's language
-const timeLocale = createTimeLocale(locale);
 
 // The map drawer reuses this component across merchants, so refetch on
 // every placeId change and drop answers for a place we already left.
@@ -437,7 +435,7 @@ const handleFiles = async (event: Event) => {
 									</span>
 									{#if layout === 'page'}
 										<span class="block truncate text-white/80">
-											<Time timestamp={photo.created_at} relative format={LOCALIZED_DATE_FORMAT} locale={$timeLocale} />
+											<LocalTime timestamp={photo.created_at} relative />
 										</span>
 									{/if}
 								</span>

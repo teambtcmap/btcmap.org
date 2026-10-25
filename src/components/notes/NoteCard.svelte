@@ -1,16 +1,14 @@
 <script lang="ts">
-import Time from "svelte-time";
-
 import { trackEvent } from "#lib/analytics.js";
 import { errorStatus } from "#lib/apiError.js";
 import { authedClient } from "#lib/authedApi.js";
-import { createTimeLocale, LOCALIZED_DATE_FORMAT } from "#lib/dayjsLocale.js";
-import { _, locale } from "#lib/i18n/index.js";
+import { _ } from "#lib/i18n/index.js";
 import type { NoteDraft } from "#lib/noteCard.js";
 import { noteCard } from "#lib/noteCard.js";
 import { NOTE_PIN_COLOR } from "#lib/noteIcons.js";
 import { createNote, deleteNote, myNotes, updateNote } from "#lib/notes.js";
 import { errToast, successToast } from "#lib/utils.js";
+import LocalTime from "$components/LocalTime.svelte";
 import type { NoteFormValues } from "$components/notes/NoteForm.svelte";
 import NoteForm from "$components/notes/NoteForm.svelte";
 import NoteGlyph from "$components/notes/NoteGlyph.svelte";
@@ -42,8 +40,6 @@ const headerIcon = $derived(
 			? (editIcon ?? target.note.icon)
 			: target.note.icon,
 );
-
-const timeLocale = createTimeLocale(locale);
 
 const titleId = "note-card-title";
 
@@ -176,11 +172,7 @@ const handleKeydown = (event: KeyboardEvent) => {
 			</h2>
 			{#if target.mode === "view"}
 				<p class="text-xs text-body dark:text-white/60">
-					<Time
-						timestamp={target.note.created_at}
-						format={LOCALIZED_DATE_FORMAT}
-						locale={$timeLocale}
-					/>
+					<LocalTime timestamp={target.note.created_at} />
 					· {target.note.public ? $_("notes.publicBadge") : $_("notes.privateBadge")}
 				</p>
 			{/if}
