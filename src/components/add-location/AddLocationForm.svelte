@@ -528,17 +528,17 @@ const submitPreview = (captchaAnswer: string) => {
 			onsuccess({ attributed: false, name: submittedName });
 		})
 		.catch((error) => {
-			// Our endpoint's 4xx messages are written for users (captcha,
-			// missing contact, …) — show them.
+			// Past the captcha, our endpoint's other 4xx messages are
+			// written for users too (missing contact, …) — show them.
 			const message = error.response?.data?.message;
-			if (message && error.response.status < 500) {
-				errToast(message);
-			} else {
-				errToast(get(_)("errors.formSubmission"));
-			}
+			errToast(
+				captcha.submitFailed(error) ??
+					(message && error.response.status < 500
+						? message
+						: get(_)("errors.formSubmission")),
+			);
 			console.error(error);
 			submitting = false;
-			captcha.submitFailed();
 		});
 };
 

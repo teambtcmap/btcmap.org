@@ -8,10 +8,7 @@ import {
 	COMMUNITY_FIELDS,
 	validateCommunity,
 } from "#lib/addCommunityValidation.js";
-import {
-	captchaRejection,
-	createCaptchaGate,
-} from "#lib/captchaGate.svelte.js";
+import { createCaptchaGate } from "#lib/captchaGate.svelte.js";
 import { fieldBorderClasses } from "#lib/fieldStyles.js";
 import { fieldError, inputProps, ruleValidation } from "#lib/ruleValidation.js";
 import { theme } from "#lib/theme.js";
@@ -135,11 +132,10 @@ const form = createForm(() => ({
 			})
 			.catch((error) => {
 				errToast(
-					captchaRejection(error) ?? t("addCommunityForm.formSubmitError"),
+					captcha.submitFailed(error) ?? t("addCommunityForm.formSubmitError"),
 				);
 				console.error(error);
 				submitting = false;
-				captcha.submitFailed();
 			});
 	},
 }));
