@@ -281,10 +281,14 @@ describe("errors", () => {
 
 	it("counts no failure for a run that was cancelled", async () => {
 		const signing = deferred<SignedAuthEvent>();
-		const { run } = setup({ signWithSigner: vi.fn(() => signing.promise) });
+		const { run, deps } = setup({
+			signWithSigner: vi.fn(() => signing.promise),
+		});
 
+		// Cancel while the signer is signing, so the run's own await is
+		// the one that sees the rejection
 		const pending = run.connectBunker("bunker://x");
-		await vi.waitFor(() => expect(run.signerRun).toBe("bunker"));
+		await vi.waitFor(() => expect(deps.signWithSigner).toHaveBeenCalled());
 		run.cancel();
 		signing.reject(new Error("closed"));
 		await pending;
