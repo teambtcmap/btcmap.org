@@ -5,7 +5,7 @@ import { beforeEach, describe, expect, it, vi } from "vitest";
 import { trackEvent } from "#lib/analytics.js";
 import type { SignedAuthEvent } from "#lib/nostr.js";
 import type { SignerPairing } from "#lib/nostrSigner.js";
-import { SignerInputError } from "#lib/nostrSigner.js";
+import { SignerInputError, SignerTimeoutError } from "#lib/nostrSigner.js";
 import { errToast } from "#lib/utils.js";
 
 import type { SignerDeps } from "./signerRun.svelte";
@@ -228,7 +228,7 @@ describe("errors", () => {
 		});
 	});
 
-	it("counts a signer that refuses as a client-side failure of its surface", async () => {
+	it("counts a signer that answers with an error as a signer failure of its surface", async () => {
 		const { run } = setup(
 			{
 				startNostrConnect: vi.fn(async () => {
@@ -242,7 +242,22 @@ describe("errors", () => {
 
 		expect(trackEvent).toHaveBeenCalledWith("account_nostr_link_failure", {
 			method: "qr",
-			status: "client",
+			status: "signer",
+		});
+	});
+
+	it("names a signer that never answered", async () => {
+		const { run } = setup({
+			connectBunkerUri: vi.fn(async () => {
+				throw new SignerTimeoutError("no answer");
+			}),
+		});
+
+		await run.connectBunker("bunker://x");
+
+		expect(trackEvent).toHaveBeenCalledWith("login_nostr_failure", {
+			method: "bunker",
+			status: "timeout",
 		});
 	});
 
@@ -320,7 +335,7 @@ describe("errors", () => {
 		expect(submit).not.toHaveBeenCalled();
 		expect(trackEvent).toHaveBeenCalledWith("login_nostr_failure", {
 			method: "extension",
-			status: "client",
+			status: "no_extension",
 		});
 	});
 });
@@ -356,7 +371,7 @@ describe("secret key", () => {
 		expect(submit).not.toHaveBeenCalled();
 		expect(trackEvent).toHaveBeenCalledWith("login_nostr_failure", {
 			method: "nsec",
-			status: "client",
+			status: "invalid",
 		});
 	});
 

@@ -31,7 +31,7 @@ type EventPayloads = {
 	account_nostr_link_click: { method: NostrSignMethod };
 	account_nostr_link_failure: {
 		method: NostrSignMethod;
-		status: FailureOrTaken;
+		status: NostrFailureStatus | "taken";
 	};
 	account_nostr_link_success: { method: NostrSignMethod };
 	account_nostr_options_toggle: { open: boolean };
@@ -97,7 +97,7 @@ type EventPayloads = {
 	login_nostr_connect_open_click: { method: "open" };
 	login_nostr_connect_qr_click: { method: "qr" };
 	login_nostr_extension_click: { method: "extension" };
-	login_nostr_failure: { method: NostrSignMethod; status: FailureStatus };
+	login_nostr_failure: { method: NostrSignMethod; status: NostrFailureStatus };
 	login_nostr_forget_click: undefined;
 	login_nostr_nsec_click: { method: "nsec" };
 	login_nostr_options_toggle: { open: boolean };
@@ -217,6 +217,18 @@ export type NostrSignMethod =
 	| "qr"
 	| "open"
 	| "copy";
+
+// Why a Nostr login or link failed: an API failure, or what went wrong on
+// the signing side. "signer" is a signer that answered with an error, a
+// user's own reject included: extensions and bunkers word that freely, so
+// it can't be told apart reliably.
+export type NostrFailureStatus =
+	| Exclude<FailureStatus, "client">
+	| "no_extension"
+	| "invalid"
+	| "timeout"
+	| "relay"
+	| "signer";
 
 // Where a "Sign up" link was followed from, and where the account was made.
 export type SignupEntry = "user_menu" | "map_menu" | "add_place";

@@ -2,9 +2,12 @@ import { isAxiosError } from "axios";
 import type { EventTemplate } from "nostr-tools/pure";
 import { get } from "svelte/store";
 
-import type { EventName, NostrSignMethod } from "#lib/analytics.js";
+import type {
+	EventName,
+	NostrFailureStatus,
+	NostrSignMethod,
+} from "#lib/analytics.js";
 import { trackEvent } from "#lib/analytics.js";
-import type { FailureStatus } from "#lib/apiError.js";
 import { errorStatus, failureStatus } from "#lib/apiError.js";
 import { _ } from "#lib/i18n/index.js";
 import type { SignedAuthEvent } from "#lib/nostr.js";
@@ -99,6 +102,15 @@ const MODES = {
 	SignerMode,
 	{ events: Record<string, EventName>; errorKey: string; logLabel: string }
 >;
+
+// A failure's status for the funnel: the API's for an API error, else what
+// classifySignerError makes of it. null: the session ended, nothing to count.
+const signerFailureStatus = (err: unknown): NostrFailureStatus | null => {
+	const status = failureStatus(err);
+	if (status !== "client") return status;
+	const kind = classifySignerError(err);
+	return kind === "other" ? "signer" : kind;
+};
 
 // What a failure may log: an HTTP error's status, never the error itself.
 // The login exchange's Axios error isn't scrubbed (it isn't an authedApi
@@ -209,14 +221,14 @@ export const createSignerRun = ({
 	// An ended session (null) reports nothing.
 	const trackFailure = (
 		method: NostrSignMethod,
-		status: FailureStatus | null,
+		status: NostrFailureStatus | null,
 	) => {
 		if (status !== null) trackEvent(events.failure, { method, status });
 	};
 
 	const failSigner = (err: unknown, run: number, method: SignerRunKind) => {
 		if (run !== generation || hasErrorName(err, "AbortError")) return;
-		trackFailure(method, failureStatus(err));
+		trackFailure(method, signerFailureStatus(err));
 		cancel();
 		// An API rejection is the same failure the other transports report, so
 		// it gets the same "signature rejected" wording rather than a signer
@@ -388,7 +400,7 @@ export const createSignerRun = ({
 			// window.nostr at their own pace, and the button's state reflects
 			// the last probe.
 			if (deps.getNostrExtension() === null) {
-				trackFailure("extension", "client");
+				trackFailure("extension", "no_extension");
 				errToast(t("login.nostrNoExtension"));
 				return false;
 			}
@@ -402,7 +414,7 @@ export const createSignerRun = ({
 				}
 			} catch (err) {
 				if (run === generation) {
-					trackFailure("extension", failureStatus(err));
+					trackFailure("extension", signerFailureStatus(err));
 					showError(err, `${logLabel} (extension)`);
 				}
 			} finally {
@@ -433,7 +445,7 @@ export const createSignerRun = ({
 				secretKey = deps.decodeNsec(nsec);
 				signed = deps.signTemplateWithSecretKey(template(), secretKey);
 			} catch {
-				trackFailure("nsec", "client");
+				trackFailure("nsec", "invalid");
 				errToast(t("login.nsecInvalid"));
 				console.error("Nsec decode failed");
 				if (secretKey) secretKey.fill(0);
@@ -451,7 +463,7 @@ export const createSignerRun = ({
 				return true;
 			} catch (err) {
 				if (run === generation) {
-					trackFailure("nsec", failureStatus(err));
+					trackFailure("nsec", signerFailureStatus(err));
 					showError(err, `${logLabel} (nsec)`);
 				}
 				return false;
