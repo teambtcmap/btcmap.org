@@ -1362,7 +1362,16 @@
 		"deleteFailed": "Couldn't delete the photo. Please try again.",
 		"deleteForbidden": "You can only delete your own photos.",
 		"undo": "Undo",
-		"undone": "{count, plural, one {Photo removed} other {# photos removed}}"
+		"undone": "{count, plural, one {Photo removed} other {# photos removed}}",
+		"reorder": "Reorder",
+		"reorderTitle": "Reorder photos",
+		"reorderHint": "Drag the photos, or use the arrows. The first photo is shown first everywhere.",
+		"moveUp": "Move up",
+		"moveDown": "Move down",
+		"saveOrder": "Save order",
+		"reordered": "Photo order saved",
+		"reorderConflict": "The photos changed while you were arranging them. Here's the latest list.",
+		"reorderFailed": "Couldn't save the order. Please try again."
 	},
 	"authPrompt": {
 		"createAccount": "Create account",

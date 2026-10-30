@@ -7,11 +7,15 @@ import { trackEvent, trackFailure } from "#lib/analytics.js";
 import { errorStatus } from "#lib/apiError.js";
 import type { AuthedClient } from "#lib/authedApi.js";
 import { authedClient } from "#lib/authedApi.js";
+import type { CurrentUser } from "#lib/currentUser.js";
+import { fetchCurrentUser } from "#lib/currentUser.js";
 import { _ } from "#lib/i18n/index.js";
 import type { StripScrollState } from "#lib/placePhotos.js";
 import {
+	canReorderPhotos,
 	deepLinkTarget,
 	fetchPlacePhotos,
+	firstUnarrangedIndex,
 	MAX_PHOTOS_PER_PICK,
 	photoAuthorName,
 	photoPagePath,
@@ -30,6 +34,7 @@ import { errToast, successToast, warningToast } from "#lib/utils.js";
 import HydratingAuthPrompt from "$components/auth/HydratingAuthPrompt.svelte";
 import Icon from "$components/Icon.svelte";
 import LocalTime from "$components/LocalTime.svelte";
+import PlacePhotoReorder from "$components/PlacePhotoReorder.svelte";
 import PlacePhotoViewer from "$components/PlacePhotoViewer.svelte";
 import Skeleton from "$components/Skeleton.svelte";
 
@@ -73,6 +78,28 @@ let scrollState = $state<StripScrollState>({
 	canScrollForward: false,
 });
 let showAuthPrompt = $state(false);
+let reorderOpen = $state(false);
+// Roles decide whether to offer Reorder (admin/root); null while signed out
+let currentUser = $state<CurrentUser | null>(null);
+$effect(() => {
+	if (!$session) {
+		currentUser = null;
+		return;
+	}
+	let stale = false;
+	fetchCurrentUser().then((user) => {
+		if (!stale) currentUser = user;
+	});
+	return () => {
+		stale = true;
+	};
+});
+const showReorder = $derived(
+	canAdd && uploading === 0 && canReorderPhotos(photos, currentUser),
+);
+// Uploads land where the API will list them: after the photos an admin
+// arranged, before the rest
+const uploadSpot = $derived(firstUnarrangedIndex(photos));
 let addButton = $state<HTMLButtonElement>();
 let highlightAdd = $state(false);
 // Briefly marks whichever add control is on screen after sign-in
@@ -94,6 +121,8 @@ $effect(() => {
 	photos = undefined;
 	loadFailed = false;
 	viewerIndex = null;
+	// The dialog is per place: don't reopen it on the next place's photos
+	reorderOpen = false;
 	fetchPlacePhotos(id)
 		.then((list) => {
 			if (id !== placeId) return;
@@ -270,12 +299,36 @@ const undoUpload = async (
 	}
 };
 
-// New tiles land at the start of the strip, but scroll snapping re-snaps to
-// the tile that was already snapped and pushes them out of view: bring the
-// start back so the spinner, and then the new photo, are seen
-const showStripStart = async () => {
+// New tiles land at uploadSpot (the strip's start unless an admin arranged
+// photos), but scroll snapping re-snaps to the tile that was already snapped
+// and pushes them out of view: bring that spot back so the spinner, and then
+// the new photo, are seen
+const showUploadSpot = async () => {
 	await tick();
-	strip?.scrollTo({ left: 0 });
+	if (uploadSpot === 0) {
+		strip?.scrollTo({ left: 0 });
+		return;
+	}
+	// The spinner while uploading, the first new photo once it's in
+	const spot =
+		strip?.querySelector("[data-upload-spot]") ?? tileEls[uploadSpot];
+	spot?.scrollIntoView({ block: "nearest", inline: "nearest" });
+};
+
+const handleReorderClick = () => {
+	trackEvent("place_photo_reorder_click", { source });
+	reorderOpen = true;
+};
+
+const handleReorderConflict = () => {
+	const id = placeId;
+	fetchPlacePhotos(id)
+		.then((list) => {
+			if (id === placeId) photos = list;
+		})
+		.catch((error) => {
+			console.error("place photos: failed to reload", error);
+		});
 };
 
 const handleFiles = async (event: Event) => {
@@ -293,7 +346,7 @@ const handleFiles = async (event: Event) => {
 
 	const id = placeId;
 	uploading += batch.length;
-	showStripStart();
+	showUploadSpot();
 	const { stored, failed } = await uploadPlacePhotos(
 		batch,
 		async (file) => uploadPlacePhoto(id, await prepareUpload(file), client),
@@ -305,7 +358,7 @@ const handleFiles = async (event: Event) => {
 	if (stored.length) {
 		if (id === placeId) {
 			photos = prependUploaded(stored, photos);
-			showStripStart();
+			showUploadSpot();
 		}
 		successToast(
 			$_("placePhotos.uploaded", { values: { count: stored.length } }),
@@ -330,6 +383,22 @@ const handleFiles = async (event: Event) => {
 	}
 };
 </script>
+
+<!-- Uploads in progress, where the new photos will land (uploadSpot) -->
+{#snippet uploadPlaceholders()}
+	{#each { length: uploading } as _placeholder, i (i)}
+		<!-- The status role sits inside: the list's children stay listitems -->
+		<li class="shrink-0 snap-start" data-upload-spot={i === 0 ? '' : undefined}>
+			<div
+				class="flex size-(--tile) items-center justify-center rounded-xl bg-gray-100 dark:bg-white/5"
+				role="status"
+				aria-label={$_('placePhotos.uploading')}
+			>
+				<span class="h-6 w-6 animate-spin rounded-full border-2 border-link border-t-transparent"></span>
+			</div>
+		</li>
+	{/each}
+{/snippet}
 
 {#snippet stripChevron(direction: 'back' | 'forward')}
 	<div
@@ -368,15 +437,27 @@ const handleFiles = async (event: Event) => {
 				<span class="tabular-nums">{photos.length}</span>
 			</span>
 			{#if canAdd}
-				<button
-					bind:this={addButton}
-					type="button"
-					onclick={() => handleAddClick('header')}
-					class="-mx-2 -my-1.5 flex items-center gap-1.5 rounded-lg px-2 py-1.5 text-sm font-semibold text-link transition-colors hover:bg-link/10 {highlightAdd ? HIGHLIGHT_ADD_CLASS : ''}"
-				>
-					<Icon w="20" h="20" icon="add_a_photo" type="material" />
-					{$_('placePhotos.add')}
-				</button>
+				<div class="flex items-center gap-3">
+					{#if showReorder}
+						<button
+							type="button"
+							onclick={handleReorderClick}
+							class="-my-1.5 flex items-center gap-1.5 rounded-lg px-2 py-1.5 text-sm font-semibold text-link transition-colors hover:bg-link/10"
+						>
+							<Icon w="20" h="20" icon="swap_vert" type="material" />
+							{$_('placePhotos.reorder')}
+						</button>
+					{/if}
+					<button
+						bind:this={addButton}
+						type="button"
+						onclick={() => handleAddClick('header')}
+						class="-mx-2 -my-1.5 flex items-center gap-1.5 rounded-lg px-2 py-1.5 text-sm font-semibold text-link transition-colors hover:bg-link/10 {highlightAdd ? HIGHLIGHT_ADD_CLASS : ''}"
+					>
+						<Icon w="20" h="20" icon="add_a_photo" type="material" />
+						{$_('placePhotos.add')}
+					</button>
+				</div>
 			{/if}
 		</div>
 
@@ -389,21 +470,13 @@ const handleFiles = async (event: Event) => {
 				class="flex snap-x gap-2 overflow-x-auto pb-1 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden {layout === 'page' ? 'scroll-px-4 px-4 lg:scroll-px-0 lg:px-0' : ''}"
 				style:--tile="{tileHeight}px"
 			>
-				<!-- Uploads in progress sit first, where the new photos will land -->
-				{#each { length: uploading } as _placeholder, i (i)}
-					<div
-						class="flex size-(--tile) shrink-0 snap-start items-center justify-center rounded-xl bg-gray-100 dark:bg-white/5"
-						role="status"
-						aria-label={$_('placePhotos.uploading')}
-					>
-						<span class="h-6 w-6 animate-spin rounded-full border-2 border-link border-t-transparent"></span>
-					</div>
-				{/each}
-
 				<!-- role="list": Tailwind's list-style: none makes Safari/VoiceOver drop
 				     the implicit list role, and with it "list, 6 items" -->
 				<ul role="list" class="flex gap-2">
 					{#each photos as photo, i (photo.id)}
+						{#if i === uploadSpot}
+							{@render uploadPlaceholders()}
+						{/if}
 						<li class="shrink-0 snap-start">
 							<!-- A link: the tile has a real URL (the merchant page with this
 							     photo open), so new-tab clicks and "Copy link" just work;
@@ -448,6 +521,9 @@ const handleFiles = async (event: Event) => {
 							</a>
 						</li>
 					{/each}
+					{#if uploadSpot === photos.length}
+						{@render uploadPlaceholders()}
+					{/if}
 				</ul>
 			</div>
 
@@ -490,6 +566,20 @@ const handleFiles = async (event: Event) => {
 		multiple
 		class="hidden"
 		onchange={handleFiles}
+	/>
+{/if}
+
+{#if photos && photos.length >= 2}
+	<PlacePhotoReorder
+		bind:open={reorderOpen}
+		{placeId}
+		{photos}
+		{source}
+		onSaved={(list, id) => {
+			// A save that lands after a switch to another place is that place's
+			if (id === placeId) photos = list;
+		}}
+		onConflict={handleReorderConflict}
 	/>
 {/if}
 
