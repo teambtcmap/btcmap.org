@@ -97,6 +97,55 @@ export const deleteErrorKey = (
 		? "placePhotos.deleteForbidden"
 		: "placePhotos.deleteFailed";
 
+// Mirrors the API rule: only admin and root may set the display order. The
+// API still enforces it (403); this only decides whether to offer it.
+export const canReorderPhotos = (
+	photos: PlaceImage[] | undefined,
+	user: CurrentUser | null,
+): boolean =>
+	!!user &&
+	user.roles.some((role) => MODERATOR_ROLES.includes(role)) &&
+	(photos?.length ?? 0) >= 2;
+
+// Sends every photo of the place in display order; the API answers 409 when
+// the list no longer matches (a photo was added or deleted meanwhile) and
+// returns the place's photos in their new order otherwise.
+export const reorderPlacePhotos = async (
+	placeId: number,
+	imageIds: number[],
+	client: AuthedClient = authedClient(),
+): Promise<PlaceImage[]> => {
+	const res = await client.put<unknown>(
+		`${API_BASE}/v4/places/${placeId}/images/order`,
+		{ image_ids: imageIds },
+	);
+	if (!Array.isArray(res.data) || !res.data.every(isPlaceImage)) {
+		throw new BadResponseError(
+			"place image reorder returned an unexpected response",
+		);
+	}
+	return res.data;
+};
+
+export const reorderErrorKey = (
+	error: unknown,
+): "placePhotos.reorderConflict" | "placePhotos.reorderFailed" =>
+	isAxiosError(error) && error.response?.status === 409
+		? "placePhotos.reorderConflict"
+		: "placePhotos.reorderFailed";
+
+// A copy of items with the one at `from` moved to `to`, clamped to the ends
+export const moveItem = <T>(
+	items: readonly T[],
+	from: number,
+	to: number,
+): T[] => {
+	const next = [...items];
+	const [item] = next.splice(from, 1);
+	next.splice(Math.max(0, Math.min(to, next.length)), 0, item);
+	return next;
+};
+
 // "Undo" on the upload toast: delete the photos just stored, in parallel,
 // as the account that uploaded them (`client`). removed lists the ids that
 // are gone, so the strip drops only those; complete says whether every one
