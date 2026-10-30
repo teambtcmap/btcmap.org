@@ -121,6 +121,8 @@ $effect(() => {
 	photos = undefined;
 	loadFailed = false;
 	viewerIndex = null;
+	// The dialog is per place: don't reopen it on the next place's photos
+	reorderOpen = false;
 	fetchPlacePhotos(id)
 		.then((list) => {
 			if (id !== placeId) return;
@@ -307,9 +309,10 @@ const showUploadSpot = async () => {
 		strip?.scrollTo({ left: 0 });
 		return;
 	}
-	strip
-		?.querySelector("[data-upload-spot]")
-		?.scrollIntoView({ block: "nearest", inline: "nearest" });
+	// The spinner while uploading, the first new photo once it's in
+	const spot =
+		strip?.querySelector("[data-upload-spot]") ?? tileEls[uploadSpot];
+	spot?.scrollIntoView({ block: "nearest", inline: "nearest" });
 };
 
 const handleReorderClick = () => {
@@ -384,13 +387,15 @@ const handleFiles = async (event: Event) => {
 <!-- Uploads in progress, where the new photos will land (uploadSpot) -->
 {#snippet uploadPlaceholders()}
 	{#each { length: uploading } as _placeholder, i (i)}
-		<li
-			class="flex size-(--tile) shrink-0 snap-start items-center justify-center rounded-xl bg-gray-100 dark:bg-white/5"
-			role="status"
-			aria-label={$_('placePhotos.uploading')}
-			data-upload-spot={i === 0 ? '' : undefined}
-		>
-			<span class="h-6 w-6 animate-spin rounded-full border-2 border-link border-t-transparent"></span>
+		<!-- The status role sits inside: the list's children stay listitems -->
+		<li class="shrink-0 snap-start" data-upload-spot={i === 0 ? '' : undefined}>
+			<div
+				class="flex size-(--tile) items-center justify-center rounded-xl bg-gray-100 dark:bg-white/5"
+				role="status"
+				aria-label={$_('placePhotos.uploading')}
+			>
+				<span class="h-6 w-6 animate-spin rounded-full border-2 border-link border-t-transparent"></span>
+			</div>
 		</li>
 	{/each}
 {/snippet}
@@ -570,7 +575,10 @@ const handleFiles = async (event: Event) => {
 		{placeId}
 		{photos}
 		{source}
-		onSaved={(list) => (photos = list)}
+		onSaved={(list, id) => {
+			// A save that lands after a switch to another place is that place's
+			if (id === placeId) photos = list;
+		}}
 		onConflict={handleReorderConflict}
 	/>
 {/if}

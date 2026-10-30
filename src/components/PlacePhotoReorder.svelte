@@ -28,7 +28,8 @@ type Props = {
 	placeId: number;
 	photos: PlaceImage[];
 	source: PlacePhotoSource;
-	onSaved: (photos: PlaceImage[]) => void;
+	// With the place it saved for: the drawer may have moved on meanwhile
+	onSaved: (photos: PlaceImage[], placeId: number) => void;
 	// 409: a photo was added or deleted meanwhile; the strip refetches
 	onConflict: () => void;
 };
@@ -95,7 +96,7 @@ const save = async () => {
 		saved = true;
 		trackEvent("place_photo_reorder_success", { source, count: result.length });
 		successToast($_("placePhotos.reordered"));
-		onSaved(result);
+		onSaved(result, id);
 		open = false;
 	} catch (error) {
 		trackFailure("place_photo_reorder_failure", { source }, error);
