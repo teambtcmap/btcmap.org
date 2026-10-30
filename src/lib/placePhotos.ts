@@ -188,18 +188,30 @@ export const uploadPlacePhotos = async <T>(
 	return { stored, failed };
 };
 
-// New uploads go first. The strip may already hold them: switching places
-// and back mid-upload refetches the list, and a keyed {#each} throws on a
-// duplicate id, so the refetched copies give way to the fresh ones.
+// Where the API lists a photo that has no position yet: after the ones an
+// admin arranged (they come first, in position order), before the rest.
+export const firstUnarrangedIndex = (
+	photos: PlaceImage[] | undefined,
+): number => {
+	const index = (photos ?? []).findIndex(
+		(photo) => photo.position === undefined,
+	);
+	return index === -1 ? (photos?.length ?? 0) : index;
+};
+
+// New uploads go where a refetch would list them: after the arranged
+// photos, before the older unarranged ones. The strip may already hold
+// them: switching places and back mid-upload refetches the list, and a keyed
+// {#each} throws on a duplicate id, so the refetched copies give way to the
+// fresh ones.
 export const prependUploaded = (
 	stored: PlaceImage[],
 	current: PlaceImage[] | undefined,
 ): PlaceImage[] => {
 	const storedIds = new Set(stored.map((photo) => photo.id));
-	return [
-		...stored,
-		...(current ?? []).filter((photo) => !storedIds.has(photo.id)),
-	];
+	const rest = (current ?? []).filter((photo) => !storedIds.has(photo.id));
+	const split = firstUnarrangedIndex(rest);
+	return [...rest.slice(0, split), ...stored, ...rest.slice(split)];
 };
 
 // Which way a horizontal photo strip can still scroll, for its chevrons.

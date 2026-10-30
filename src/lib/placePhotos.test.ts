@@ -12,6 +12,7 @@ import {
 	deletePlacePhoto,
 	fetchMyPlacePhotos,
 	fetchPlacePhotos,
+	firstUnarrangedIndex,
 	fitWithin,
 	MAX_PHOTOS_PER_PICK,
 	photoAuthorName,
@@ -470,6 +471,15 @@ describe("prependUploaded", () => {
 	const b = { ...photo, id: 2 };
 	const fresh = { ...photo, id: 3 };
 
+	it("lands new uploads after an arranged order", () => {
+		const first = { ...a, position: 0 };
+		const second = { ...b, position: 1 };
+		const older = { ...photo, id: 4 };
+		expect(
+			prependUploaded([fresh], [first, second, older]).map((p) => p.id),
+		).toEqual([1, 2, 3, 4]);
+	});
+
 	it("puts the new uploads first", () => {
 		expect(prependUploaded([fresh], [a, b]).map((p) => p.id)).toEqual([
 			3, 1, 2,
@@ -486,5 +496,30 @@ describe("prependUploaded", () => {
 
 	it("starts the list when there was none yet", () => {
 		expect(prependUploaded([fresh], undefined)).toEqual([fresh]);
+	});
+});
+
+describe("firstUnarrangedIndex", () => {
+	it("is 0 when nothing is arranged", () => {
+		expect(firstUnarrangedIndex([{ ...photo, id: 1 }])).toBe(0);
+	});
+
+	it("points past the arranged photos", () => {
+		expect(
+			firstUnarrangedIndex([
+				{ ...photo, id: 1, position: 0 },
+				{ ...photo, id: 2, position: 1 },
+				{ ...photo, id: 3 },
+			]),
+		).toBe(2);
+	});
+
+	it("is the length when every photo is arranged", () => {
+		expect(firstUnarrangedIndex([{ ...photo, id: 1, position: 0 }])).toBe(1);
+	});
+
+	it("is 0 for an empty or loading strip", () => {
+		expect(firstUnarrangedIndex([])).toBe(0);
+		expect(firstUnarrangedIndex(undefined)).toBe(0);
 	});
 });
