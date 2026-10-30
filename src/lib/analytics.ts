@@ -154,6 +154,13 @@ type EventPayloads = {
 	};
 	place_photo_prompt_create_account_click: undefined;
 	place_photo_prompt_login_click: undefined;
+	place_photo_reorder_cancel: { source: PlacePhotoSource };
+	place_photo_reorder_click: { source: PlacePhotoSource };
+	place_photo_reorder_failure: {
+		source: PlacePhotoSource;
+		status: FailureStatus;
+	};
+	place_photo_reorder_success: { source: PlacePhotoSource; count: number };
 	place_photo_strip_scroll: {
 		source: PlacePhotoSource;
 		direction: "back" | "forward";
