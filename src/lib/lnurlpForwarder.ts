@@ -6,40 +6,11 @@ const CORS_HEADERS = { "Access-Control-Allow-Origin": "*" };
 type ForwardLnurlpOptions = {
 	fetch: typeof fetch;
 	upstream: string;
-	identifier: string;
-};
-
-const isMetadataEntry = (entry: unknown): entry is [string, string] =>
-	Array.isArray(entry) &&
-	entry.length === 2 &&
-	typeof entry[0] === "string" &&
-	typeof entry[1] === "string";
-
-const rewriteMetadataIdentifier = (
-	metadata: string,
-	identifier: string,
-): string => {
-	try {
-		const parsed: unknown = JSON.parse(metadata);
-
-		if (!Array.isArray(parsed) || !parsed.every(isMetadataEntry)) {
-			return metadata;
-		}
-
-		return JSON.stringify(
-			parsed.map(([type, value]) =>
-				type === "text/identifier" ? [type, identifier] : [type, value],
-			),
-		);
-	} catch {
-		return metadata;
-	}
 };
 
 export const forwardLnurlp = async ({
 	fetch,
 	upstream,
-	identifier,
 }: ForwardLnurlpOptions): Promise<Response> => {
 	const controller = new AbortController();
 	const timeout = setTimeout(() => controller.abort(), TIMEOUT_MS);
@@ -84,9 +55,11 @@ export const forwardLnurlp = async ({
 		);
 	}
 
-	if (typeof data.metadata === "string") {
-		data.metadata = rewriteMetadataIdentifier(data.metadata, identifier);
-	}
-
+	// `metadata` is forwarded byte-for-byte on purpose. The payee's invoice
+	// commits to sha256(metadata) in its `h` tag, and the payee hashes the
+	// metadata it served — not whatever we send. Editing it here (e.g.
+	// rewriting text/identifier so wallets display an @btcmap.org address)
+	// makes verifying wallets reject every invoice with:
+	// "The invoice does not match the LNURL metadata (h-tag mismatch)".
 	return json(data, { headers: CORS_HEADERS });
 };
