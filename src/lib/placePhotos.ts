@@ -119,7 +119,13 @@ export const reorderPlacePhotos = async (
 		`${API_BASE}/v4/places/${placeId}/images/order`,
 		{ image_ids: imageIds },
 	);
-	if (!Array.isArray(res.data) || !res.data.every(isPlaceImage)) {
+	// The API answers with every photo it ordered: anything shorter would
+	// empty the strip
+	if (
+		!Array.isArray(res.data) ||
+		res.data.length !== imageIds.length ||
+		!res.data.every(isPlaceImage)
+	) {
 		throw new BadResponseError(
 			"place image reorder returned an unexpected response",
 		);

@@ -31,7 +31,7 @@ type Props = {
 	// With the place it saved for: the drawer may have moved on meanwhile
 	onSaved: (photos: PlaceImage[], placeId: number) => void;
 	// 409: a photo was added or deleted meanwhile; the strip refetches
-	onConflict: () => void;
+	onConflict: (placeId: number) => void;
 };
 
 let {
@@ -47,14 +47,19 @@ const THUMB = 56;
 
 let items = $state<PlaceImage[]>([]);
 let saving = $state(false);
+// Set when a save settles the dialog, so the close doesn't count as a cancel
 let saved = false;
 let wasOpen = false;
+// Each opening gets a number: a save that lands after the dialog was closed
+// and reopened must not close (or settle) the newer one
+let opening = 0;
 const rowButtons: Record<string, HTMLButtonElement | undefined> = $state({});
 
 // Start from the strip's order each time the dialog opens; closing without
 // saving is a cancel
 $effect(() => {
 	if (open && !wasOpen) {
+		opening += 1;
 		items = untrack(() => [...photos]);
 		saved = false;
 	} else if (!open && wasOpen && !saved) {
@@ -88,23 +93,31 @@ const save = async () => {
 	if (saving || unchanged) return;
 	saving = true;
 	const id = placeId;
+	const savedOpening = opening;
+	const stillThisOpening = () => open && opening === savedOpening;
 	try {
 		const result = await reorderPlacePhotos(
 			id,
 			items.map((photo) => photo.id),
 		);
-		saved = true;
 		trackEvent("place_photo_reorder_success", { source, count: result.length });
 		successToast($_("placePhotos.reordered"));
 		onSaved(result, id);
-		open = false;
+		if (stillThisOpening()) {
+			saved = true;
+			open = false;
+		}
 	} catch (error) {
 		trackFailure("place_photo_reorder_failure", { source }, error);
 		console.error("place photos: reorder failed", errorStatus(error));
-		errToast($_(reorderErrorKey(error)));
-		if (reorderErrorKey(error) === "placePhotos.reorderConflict") {
-			open = false;
-			onConflict();
+		const errorKey = reorderErrorKey(error);
+		errToast($_(errorKey));
+		if (errorKey === "placePhotos.reorderConflict") {
+			if (stillThisOpening()) {
+				saved = true;
+				open = false;
+			}
+			onConflict(id);
 		}
 	} finally {
 		saving = false;

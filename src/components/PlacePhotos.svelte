@@ -311,8 +311,15 @@ const showUploadSpot = async () => {
 	}
 	// The spinner while uploading, the first new photo once it's in
 	const spot =
-		strip?.querySelector("[data-upload-spot]") ?? tileEls[uploadSpot];
-	spot?.scrollIntoView({ block: "nearest", inline: "nearest" });
+		strip?.querySelector<HTMLElement>("[data-upload-spot]") ??
+		tileEls[uploadSpot];
+	if (!strip || !spot) return;
+	// Sideways only: scrollIntoView would also scroll the page or drawer,
+	// pulling back someone who scrolled away while the upload ran
+	strip.scrollBy({
+		left:
+			spot.getBoundingClientRect().left - strip.getBoundingClientRect().left,
+	});
 };
 
 const handleReorderClick = () => {
@@ -320,8 +327,10 @@ const handleReorderClick = () => {
 	reorderOpen = true;
 };
 
-const handleReorderConflict = () => {
-	const id = placeId;
+// id: the place the failed save was for; after a switch there's nothing to
+// reload, the new place fetched its own photos
+const handleReorderConflict = (id: number) => {
+	if (id !== placeId) return;
 	fetchPlacePhotos(id)
 		.then((list) => {
 			if (id === placeId) photos = list;

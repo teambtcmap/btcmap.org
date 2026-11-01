@@ -556,6 +556,15 @@ describe("reorderPlacePhotos", () => {
 		expect(result.map((p) => p.id)).toEqual([3, 1, 2]);
 	});
 
+	it("throws when the API answers with fewer photos than it was sent", async () => {
+		const { default: api } = await import("#lib/axios.js");
+		vi.mocked(api.put).mockResolvedValue({ data: [] });
+
+		await expect(
+			reorderPlacePhotos(20423, [3, 1], authedClient("tok")),
+		).rejects.toThrow();
+	});
+
 	it("throws when the API answers with something that is not a photo list", async () => {
 		const { default: api } = await import("#lib/axios.js");
 		vi.mocked(api.put).mockResolvedValue({ data: "<html>" });
