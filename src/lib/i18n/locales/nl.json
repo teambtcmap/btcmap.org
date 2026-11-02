@@ -1362,7 +1362,16 @@
 		"deleteFailed": "Kan de foto niet verwijderen. Probeer het opnieuw.",
 		"deleteForbidden": "Je kunt alleen je eigen foto's verwijderen.",
 		"undo": "Ongedaan maken",
-		"undone": "{count, plural, one {Foto verwijderd} other {# foto's verwijderd}}"
+		"undone": "{count, plural, one {Foto verwijderd} other {# foto's verwijderd}}",
+		"reorder": "Ordenen",
+		"reorderTitle": "Foto's ordenen",
+		"reorderHint": "Sleep de foto's of gebruik de pijlen. De eerste foto wordt overal als eerste getoond.",
+		"moveUp": "Omhoog",
+		"moveDown": "Omlaag",
+		"saveOrder": "Volgorde opslaan",
+		"reordered": "Volgorde opgeslagen",
+		"reorderConflict": "De foto's zijn veranderd terwijl je ze ordende. Hier is de nieuwste lijst.",
+		"reorderFailed": "Kan de volgorde niet opslaan. Probeer het opnieuw."
 	},
 	"authPrompt": {
 		"createAccount": "Account aanmaken",

@@ -60,6 +60,7 @@
 		"opening_hours": "^3.15.0",
 		"photoswipe": "^5.4.4",
 		"qrcode": "^1.5.4",
+		"svelte-dnd-action": "0.9.80",
 		"svelte-i18n": "^4.0.1",
 		"svelte-outclick": "^4.2.0",
 		"svelte-sonner": "^1.2.1",

@@ -1302,7 +1302,16 @@
 		"deleteFailed": "Impossible de supprimer la photo. Veuillez réessayer.",
 		"deleteForbidden": "Vous ne pouvez supprimer que vos propres photos.",
 		"undo": "Annuler",
-		"undone": "{count, plural, one {Photo retirée} other {# photos retirées}}"
+		"undone": "{count, plural, one {Photo retirée} other {# photos retirées}}",
+		"reorder": "Réorganiser",
+		"reorderTitle": "Réorganiser les photos",
+		"reorderHint": "Faites glisser les photos ou utilisez les flèches. La première photo s'affiche en premier partout.",
+		"moveUp": "Monter",
+		"moveDown": "Descendre",
+		"saveOrder": "Enregistrer l'ordre",
+		"reordered": "Ordre des photos enregistré",
+		"reorderConflict": "Les photos ont changé pendant que vous les organisiez. Voici la liste à jour.",
+		"reorderFailed": "Impossible d'enregistrer l'ordre. Veuillez réessayer."
 	},
 	"authPrompt": {
 		"createAccount": "Créer un compte",
