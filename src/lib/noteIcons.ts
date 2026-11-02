@@ -72,3 +72,39 @@ export const noteIconCandidates = (icon: string): string[] => {
 	const own = [`${name}-outline`, name];
 	return icon === DEFAULT_NOTE_ICON ? own : [...own, DEFAULT_CANDIDATE];
 };
+
+type IconStore = {
+	loaded: (name: string) => boolean;
+	load: (name: string) => Promise<unknown>;
+};
+
+// The glyph to paint before any request: only the first candidate. A
+// bundled later one (the default always is) must not win over an earlier
+// one that hasn't had its load attempt yet, or an Android-picked icon
+// outside the bundle never renders (#1605).
+export const readyNoteIcon = (
+	candidates: string[],
+	loaded: IconStore["loaded"],
+): string | null => {
+	const [first] = candidates;
+	return first !== undefined && loaded(first) ? first : null;
+};
+
+// Walk the candidates in order, as the map's pin sprites do: a loaded name
+// answers without a request, an unloaded one gets its load attempt before the
+// walk moves on. Null only if even the default fails.
+export const resolveNoteIcon = async (
+	candidates: string[],
+	{ loaded, load }: IconStore,
+): Promise<string | null> => {
+	for (const name of candidates) {
+		if (loaded(name)) return name;
+		try {
+			await load(name);
+			return name;
+		} catch {
+			// Not in the set (or unreachable): try the next candidate
+		}
+	}
+	return null;
+};

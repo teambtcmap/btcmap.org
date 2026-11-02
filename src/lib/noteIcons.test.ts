@@ -1,10 +1,12 @@
-import { describe, expect, it } from "vitest";
+import { describe, expect, it, vi } from "vitest";
 
 import {
 	DEFAULT_NOTE_ICON,
 	NOTE_ICONS,
 	normalizeNoteIcon,
 	noteIconCandidates,
+	readyNoteIcon,
+	resolveNoteIcon,
 } from "./noteIcons";
 
 describe("normalizeNoteIcon", () => {
@@ -44,6 +46,75 @@ describe("noteIconCandidates", () => {
 			"material-symbols:notes-outline",
 			"material-symbols:notes",
 		]);
+	});
+});
+
+// A stand-in for @iconify's store: `bundled` names are loaded up front,
+// `remote` ones load on request, anything else fails to load.
+const iconStore = (bundled: string[], remote: string[] = []) => {
+	const loadedNames = new Set(bundled);
+	const load = vi.fn(async (name: string) => {
+		if (!loadedNames.has(name) && !remote.includes(name)) {
+			throw new Error(`${name} not found`);
+		}
+		loadedNames.add(name);
+	});
+	return { loaded: (name: string) => loadedNames.has(name), load };
+};
+
+const DEFAULT = "material-symbols:notes-outline";
+
+describe("readyNoteIcon", () => {
+	it("paints a bundled first candidate without waiting", () => {
+		const store = iconStore(["material-symbols:star-outline", DEFAULT]);
+		expect(readyNoteIcon(noteIconCandidates("star"), store.loaded)).toBe(
+			"material-symbols:star-outline",
+		);
+	});
+
+	it("does not jump to the bundled default past an unbundled icon", () => {
+		// #1605: the default is always bundled, so "first loaded candidate"
+		// picked it and an Android-picked icon never got its load attempt.
+		const store = iconStore([DEFAULT]);
+		expect(readyNoteIcon(noteIconCandidates("pets"), store.loaded)).toBeNull();
+	});
+});
+
+describe("resolveNoteIcon", () => {
+	it("loads an unbundled Android icon instead of settling for the default", async () => {
+		const store = iconStore([DEFAULT], ["material-symbols:pets-outline"]);
+		await expect(
+			resolveNoteIcon(noteIconCandidates("pets"), store),
+		).resolves.toBe("material-symbols:pets-outline");
+	});
+
+	it("falls through to the filled name when there is no outlined glyph", async () => {
+		const store = iconStore([DEFAULT], ["material-symbols:wc"]);
+		await expect(
+			resolveNoteIcon(noteIconCandidates("wc"), store),
+		).resolves.toBe("material-symbols:wc");
+		expect(store.load).toHaveBeenCalledWith("material-symbols:wc-outline");
+	});
+
+	it("ends on the bundled default when the icon cannot be loaded", async () => {
+		const store = iconStore([DEFAULT]);
+		await expect(
+			resolveNoteIcon(noteIconCandidates("pets"), store),
+		).resolves.toBe(DEFAULT);
+	});
+
+	it("does not request a candidate that is already loaded", async () => {
+		const store = iconStore(["material-symbols:star-outline", DEFAULT]);
+		await expect(
+			resolveNoteIcon(noteIconCandidates("star"), store),
+		).resolves.toBe("material-symbols:star-outline");
+		expect(store.load).not.toHaveBeenCalled();
+	});
+
+	it("resolves to null when nothing loads", async () => {
+		await expect(
+			resolveNoteIcon(noteIconCandidates("pets"), iconStore([])),
+		).resolves.toBeNull();
 	});
 });
 

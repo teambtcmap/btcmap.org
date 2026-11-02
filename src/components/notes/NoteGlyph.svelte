@@ -2,7 +2,11 @@
 import IconIconify from "@iconify/svelte";
 import { iconLoaded, loadIcon } from "@iconify/svelte/dist/functions";
 
-import { noteIconCandidates } from "#lib/noteIcons.js";
+import {
+	noteIconCandidates,
+	readyNoteIcon,
+	resolveNoteIcon,
+} from "#lib/noteIcons.js";
 
 import type { Note } from "$types/btcmap-api/Note";
 
@@ -18,30 +22,24 @@ type Props = {
 let { icon, class: className = "" }: Props = $props();
 
 const candidates = $derived(noteIconCandidates(icon));
-// The first bundled candidate paints immediately; otherwise start on the
-// outlined name and fall through on a failed load.
+// A bundled first candidate (every picker icon) paints immediately;
+// otherwise walk the cascade, loading each name before falling through.
 let resolved = $state<string | null>(null);
 
 $effect(() => {
 	const names = candidates;
-	const ready = names.find((name) => iconLoaded(name));
+	const ready = readyNoteIcon(names, iconLoaded);
 	if (ready) {
 		resolved = ready;
 		return;
 	}
 	let cancelled = false;
 	resolved = null;
-	(async () => {
-		for (const name of names) {
-			try {
-				await loadIcon(name);
-				if (!cancelled) resolved = name;
-				return;
-			} catch {
-				// Not in the set: try the next candidate
-			}
-		}
-	})();
+	resolveNoteIcon(names, { loaded: iconLoaded, load: loadIcon }).then(
+		(name) => {
+			if (!cancelled) resolved = name;
+		},
+	);
 	return () => {
 		cancelled = true;
 	};
