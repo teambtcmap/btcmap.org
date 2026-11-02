@@ -263,10 +263,18 @@ export const prependUploaded = (
 	stored: PlaceImage[],
 	current: PlaceImage[] | undefined,
 ): PlaceImage[] => {
-	const storedIds = new Set(stored.map((photo) => photo.id));
-	const rest = (current ?? []).filter((photo) => !storedIds.has(photo.id));
+	// A refetched copy an admin already arranged knows its slot; the upload
+	// response doesn't
+	const arrangedIds = new Set(
+		(current ?? [])
+			.filter((photo) => photo.position !== undefined)
+			.map((photo) => photo.id),
+	);
+	const fresh = stored.filter((photo) => !arrangedIds.has(photo.id));
+	const freshIds = new Set(fresh.map((photo) => photo.id));
+	const rest = (current ?? []).filter((photo) => !freshIds.has(photo.id));
 	const split = firstUnarrangedIndex(rest);
-	return [...rest.slice(0, split), ...stored, ...rest.slice(split)];
+	return [...rest.slice(0, split), ...fresh, ...rest.slice(split)];
 };
 
 // Which way a horizontal photo strip can still scroll, for its chevrons.

@@ -1,5 +1,5 @@
 <script lang="ts">
-import { tick, untrack } from "svelte";
+import { onDestroy, tick, untrack } from "svelte";
 import type { DndEvent } from "svelte-dnd-action";
 import { dndzone } from "svelte-dnd-action";
 
@@ -68,6 +68,13 @@ $effect(() => {
 	wasOpen = open;
 });
 
+// A switch to another place unmounts the dialog mid-save: retire this
+// opening, so that save can't close the next place's dialog through the
+// shared open binding
+onDestroy(() => {
+	opening += 1;
+});
+
 const unchanged = $derived(
 	items.length === photos.length &&
 		items.every((photo, i) => photo.id === photos[i].id),
@@ -131,7 +138,7 @@ const save = async () => {
 	<ol
 		role="list"
 		class="max-h-[60vh] space-y-2 overflow-y-auto"
-		use:dndzone={{ items, flipDurationMs: 150, dropTargetStyle: {}, type: 'place-photos' }}
+		use:dndzone={{ items, flipDurationMs: 150, dropTargetStyle: {}, type: 'place-photos', dragDisabled: saving }}
 		onconsider={handleDnd}
 		onfinalize={handleDnd}
 	>
@@ -163,6 +170,7 @@ const save = async () => {
 							bind:this={rowButtons[`${photo.id}-up`]}
 							type="button"
 							onclick={() => move(i, i - 1, 'up')}
+							disabled={saving}
 							class="flex h-9 w-9 items-center justify-center rounded-lg text-link hover:bg-link/10 {i === items.length - 1 ? 'mr-10' : ''}"
 							aria-label="{$_('placePhotos.moveUp')}: {$_('placePhotos.photoAlt', { values: { n: i + 1, total: items.length } })}"
 						>
@@ -174,6 +182,7 @@ const save = async () => {
 							bind:this={rowButtons[`${photo.id}-down`]}
 							type="button"
 							onclick={() => move(i, i + 1, 'down')}
+							disabled={saving}
 							class="flex h-9 w-9 items-center justify-center rounded-lg text-link hover:bg-link/10 {i === 0 ? 'ml-10' : ''}"
 							aria-label="{$_('placePhotos.moveDown')}: {$_('placePhotos.photoAlt', { values: { n: i + 1, total: items.length } })}"
 						>

@@ -327,13 +327,21 @@ const handleReorderClick = () => {
 	reorderOpen = true;
 };
 
+// A save or 409 reload can land after the dialog was closed and a photo
+// opened. The viewer keeps its slides and index, so a new list under it
+// would point Delete at another photo: close it first
+const replacePhotos = (list: PlaceImage[]) => {
+	if (viewerIndex !== null) dismissViewer();
+	photos = list;
+};
+
 // id: the place the failed save was for; after a switch there's nothing to
 // reload, the new place fetched its own photos
 const handleReorderConflict = (id: number) => {
 	if (id !== placeId) return;
 	fetchPlacePhotos(id)
 		.then((list) => {
-			if (id === placeId) photos = list;
+			if (id === placeId) replacePhotos(list);
 		})
 		.catch((error) => {
 			console.error("place photos: failed to reload", error);
@@ -586,7 +594,7 @@ const handleFiles = async (event: Event) => {
 		{source}
 		onSaved={(list, id) => {
 			// A save that lands after a switch to another place is that place's
-			if (id === placeId) photos = list;
+			if (id === placeId) replacePhotos(list);
 		}}
 		onConflict={handleReorderConflict}
 	/>
