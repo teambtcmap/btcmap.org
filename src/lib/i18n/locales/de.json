@@ -1302,7 +1302,16 @@
 		"deleteFailed": "Das Foto konnte nicht gelöscht werden. Bitte versuche es erneut.",
 		"deleteForbidden": "Du kannst nur deine eigenen Fotos löschen.",
 		"undo": "Rückgängig",
-		"undone": "{count, plural, one {Foto entfernt} other {# Fotos entfernt}}"
+		"undone": "{count, plural, one {Foto entfernt} other {# Fotos entfernt}}",
+		"reorder": "Sortieren",
+		"reorderTitle": "Fotos sortieren",
+		"reorderHint": "Ziehe die Fotos oder nutze die Pfeile. Das erste Foto wird überall zuerst gezeigt.",
+		"moveUp": "Nach oben",
+		"moveDown": "Nach unten",
+		"saveOrder": "Reihenfolge speichern",
+		"reordered": "Reihenfolge gespeichert",
+		"reorderConflict": "Die Fotos haben sich beim Sortieren geändert. Hier ist die aktuelle Liste.",
+		"reorderFailed": "Die Reihenfolge konnte nicht gespeichert werden. Bitte versuche es erneut."
 	},
 	"authPrompt": {
 		"createAccount": "Konto erstellen",

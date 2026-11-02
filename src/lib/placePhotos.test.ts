@@ -7,19 +7,24 @@ import { authedClient } from "#lib/authedApi.js";
 
 import {
 	canDeletePhoto,
+	canReorderPhotos,
 	deepLinkTarget,
 	deleteErrorKey,
 	deletePlacePhoto,
 	fetchMyPlacePhotos,
 	fetchPlacePhotos,
+	firstUnarrangedIndex,
 	fitWithin,
 	MAX_PHOTOS_PER_PICK,
+	moveItem,
 	photoAuthorName,
 	photoIdFromSearch,
 	photoPagePath,
 	photoShareUrl,
 	placePhotoUrl,
 	prependUploaded,
+	reorderErrorKey,
+	reorderPlacePhotos,
 	splitPick,
 	stripScrollState,
 	undoUploads,
@@ -33,6 +38,7 @@ vi.mock("#lib/axios.js", () => ({
 		get: vi.fn(),
 		post: vi.fn(),
 		delete: vi.fn(),
+		put: vi.fn(),
 	},
 }));
 
@@ -470,6 +476,15 @@ describe("prependUploaded", () => {
 	const b = { ...photo, id: 2 };
 	const fresh = { ...photo, id: 3 };
 
+	it("lands new uploads after an arranged order", () => {
+		const first = { ...a, position: 0 };
+		const second = { ...b, position: 1 };
+		const older = { ...photo, id: 4 };
+		expect(
+			prependUploaded([fresh], [first, second, older]).map((p) => p.id),
+		).toEqual([1, 2, 3, 4]);
+	});
+
 	it("puts the new uploads first", () => {
 		expect(prependUploaded([fresh], [a, b]).map((p) => p.id)).toEqual([
 			3, 1, 2,
@@ -486,5 +501,140 @@ describe("prependUploaded", () => {
 
 	it("starts the list when there was none yet", () => {
 		expect(prependUploaded([fresh], undefined)).toEqual([fresh]);
+	});
+});
+
+describe("firstUnarrangedIndex", () => {
+	it("is 0 when nothing is arranged", () => {
+		expect(firstUnarrangedIndex([{ ...photo, id: 1 }])).toBe(0);
+	});
+
+	it("points past the arranged photos", () => {
+		expect(
+			firstUnarrangedIndex([
+				{ ...photo, id: 1, position: 0 },
+				{ ...photo, id: 2, position: 1 },
+				{ ...photo, id: 3 },
+			]),
+		).toBe(2);
+	});
+
+	it("is the length when every photo is arranged", () => {
+		expect(firstUnarrangedIndex([{ ...photo, id: 1, position: 0 }])).toBe(1);
+	});
+
+	it("is 0 for an empty or loading strip", () => {
+		expect(firstUnarrangedIndex([])).toBe(0);
+		expect(firstUnarrangedIndex(undefined)).toBe(0);
+	});
+});
+
+describe("reorderPlacePhotos", () => {
+	it("PUTs the ids in display order with the Bearer token", async () => {
+		const { default: api } = await import("#lib/axios.js");
+		const ordered = [3, 1, 2].map((id, position) => ({
+			...photo,
+			id,
+			position,
+		}));
+		vi.mocked(api.put).mockResolvedValue({ data: ordered });
+
+		const result = await reorderPlacePhotos(
+			20423,
+			[3, 1, 2],
+			authedClient("tok"),
+		);
+
+		expect(api.put).toHaveBeenCalledWith(
+			`${API_BASE}/v4/places/20423/images/order`,
+			{ image_ids: [3, 1, 2] },
+			{
+				headers: { Authorization: "Bearer tok" },
+				"axios-retry": { retries: 0 },
+			},
+		);
+		expect(result.map((p) => p.id)).toEqual([3, 1, 2]);
+	});
+
+	it("throws when the API answers with fewer photos than it was sent", async () => {
+		const { default: api } = await import("#lib/axios.js");
+		vi.mocked(api.put).mockResolvedValue({ data: [] });
+
+		await expect(
+			reorderPlacePhotos(20423, [3, 1], authedClient("tok")),
+		).rejects.toThrow();
+	});
+
+	it("throws when the API answers with something that is not a photo list", async () => {
+		const { default: api } = await import("#lib/axios.js");
+		vi.mocked(api.put).mockResolvedValue({ data: "<html>" });
+
+		await expect(
+			reorderPlacePhotos(20423, [3, 1], authedClient("tok")),
+		).rejects.toThrow();
+	});
+});
+
+describe("reorderErrorKey", () => {
+	const httpError = (status: number) =>
+		new AxiosError("x", "ERR_BAD_REQUEST", undefined, undefined, {
+			status,
+		} as AxiosResponse);
+
+	it("explains a 409 as the photos having changed", () => {
+		expect(reorderErrorKey(httpError(409))).toBe("placePhotos.reorderConflict");
+	});
+
+	it("is the generic failure for anything else", () => {
+		expect(reorderErrorKey(httpError(500))).toBe("placePhotos.reorderFailed");
+		expect(reorderErrorKey(new Error("offline"))).toBe(
+			"placePhotos.reorderFailed",
+		);
+	});
+});
+
+describe("moveItem", () => {
+	it("moves an item forward", () => {
+		expect(moveItem(["a", "b", "c"], 0, 2)).toEqual(["b", "c", "a"]);
+	});
+
+	it("moves an item back", () => {
+		expect(moveItem(["a", "b", "c"], 2, 0)).toEqual(["c", "a", "b"]);
+	});
+
+	it("clamps a target past either end", () => {
+		expect(moveItem(["a", "b", "c"], 0, -1)).toEqual(["a", "b", "c"]);
+		expect(moveItem(["a", "b", "c"], 2, 3)).toEqual(["a", "b", "c"]);
+	});
+
+	it("leaves the input untouched", () => {
+		const items = ["a", "b"];
+		moveItem(items, 0, 1);
+		expect(items).toEqual(["a", "b"]);
+	});
+});
+
+describe("canReorderPhotos", () => {
+	const two = [
+		{ ...photo, id: 1 },
+		{ ...photo, id: 2 },
+	];
+
+	it("lets admin and root reorder two or more photos", () => {
+		expect(canReorderPhotos(two, { id: 1, roles: ["user", "admin"] })).toBe(
+			true,
+		);
+		expect(canReorderPhotos(two, { id: 1, roles: ["root"] })).toBe(true);
+	});
+
+	it("refuses regular users and signed-out visitors", () => {
+		expect(canReorderPhotos(two, { id: 668, roles: ["user"] })).toBe(false);
+		expect(canReorderPhotos(two, null)).toBe(false);
+	});
+
+	it("has nothing to reorder with fewer than two photos or while loading", () => {
+		const admin = { id: 1, roles: ["admin" as const] };
+		expect(canReorderPhotos([two[0]], admin)).toBe(false);
+		expect(canReorderPhotos(undefined, admin)).toBe(false);
 	});
 });
