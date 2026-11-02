@@ -327,9 +327,9 @@ const handleReorderClick = () => {
 	reorderOpen = true;
 };
 
-// A save or 409 reload can land after the dialog was closed and a photo
-// opened. The viewer keeps its slides and index, so a new list under it
-// would point Delete at another photo: close it first
+// A finished upload, a reorder save or a 409 reload can land while a photo
+// is open. The viewer keeps its slides and index, so a new list under it
+// would point Delete and Copy link at another photo: close it first
 const replacePhotos = (list: PlaceImage[]) => {
 	if (viewerIndex !== null) dismissViewer();
 	photos = list;
@@ -374,7 +374,7 @@ const handleFiles = async (event: Event) => {
 
 	if (stored.length) {
 		if (id === placeId) {
-			photos = prependUploaded(stored, photos);
+			replacePhotos(prependUploaded(stored, photos));
 			showUploadSpot();
 		}
 		successToast(
