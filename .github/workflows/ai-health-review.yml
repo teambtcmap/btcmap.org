@@ -147,15 +147,29 @@ jobs:
             | grep -E '\.(ts|svelte|js|yml|yaml|py|toml|json)$' \
             | grep -vE 'node_modules|src/lib/i18n/locales/|^\.github/workflows/ai-health-review\.yml$' > /tmp/context-files-unsorted.txt || true
 
-          # Prioritize: server .ts first, then other .ts, then .svelte, then
-          # everything else that passed the filter (.js and config files were
-          # previously filtered in but never copied into the ordered list)
-          > /tmp/context-files.txt
-          grep -E '\+server\.ts|\+page\.server\.ts' /tmp/context-files-unsorted.txt >> /tmp/context-files.txt || true
-          grep -v -E '\+server\.ts|\+page\.server\.ts' /tmp/context-files-unsorted.txt \
-            | grep '\.ts$' >> /tmp/context-files.txt || true
-          grep '\.svelte$' /tmp/context-files-unsorted.txt >> /tmp/context-files.txt || true
-          grep -vE '\.(ts|svelte)$' /tmp/context-files-unsorted.txt >> /tmp/context-files.txt || true
+          # Prioritize the period's own changes: files in the diff, then files
+          # only pulled in as imports, then tests. Replaying the 2026-11-01
+          # run, one merged list let alphabetically early lib files and
+          # their tests spend the budget (16 of 134 changed app files shown,
+          # authedApi/auth/captchaGate skipped); this order shows 26 with the
+          # same server-route coverage. Each group is tiered server .ts,
+          # other .ts, .svelte, then everything else that passed the filter.
+          tier() {
+            grep -E '\+server\.ts|\+page\.server\.ts' "$1" || true
+            grep -v -E '\+server\.ts|\+page\.server\.ts' "$1" | grep '\.ts$' || true
+            grep '\.svelte$' "$1" || true
+            grep -vE '\.(ts|svelte)$' "$1" || true
+          }
+          grep -E '\.(test|spec)\.' /tmp/context-files-unsorted.txt > /tmp/context-tests.txt || true
+          grep -vE '\.(test|spec)\.' /tmp/context-files-unsorted.txt \
+            | grep -Fxf /tmp/diff-files.txt > /tmp/context-changed.txt || true
+          grep -vE '\.(test|spec)\.' /tmp/context-files-unsorted.txt \
+            | grep -vFxf /tmp/diff-files.txt > /tmp/context-imported.txt || true
+          {
+            tier /tmp/context-changed.txt
+            tier /tmp/context-imported.txt
+            tier /tmp/context-tests.txt
+          } > /tmp/context-files.txt
 
           # Budgets, hotspot-first order and head/tail windows for oversized
           # hotspots live in the script (unit-tested beside it).
