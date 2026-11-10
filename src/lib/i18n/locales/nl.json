@@ -573,7 +573,6 @@
 		"notes": "Opmerkingen",
 		"contact": "Contactpersoon",
 		"captcha": "Spambeveiliging",
-		"captchaCaseSensitive": "hoofdlettergevoelig",
 		"captchaRefresh": "Nieuwe captcha laden",
 		"submitLocation": "Locatie indienen",
 		"submitReport": "Rapport indienen",

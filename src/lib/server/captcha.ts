@@ -70,7 +70,10 @@ export function validateCaptcha(
 		error(400, "Captcha test failed, please try again or contact BTC Map.");
 	}
 
-	if (captchaTest !== secret) {
+	// Case-insensitive: the glyphs come in random sizes, so c/C, o/O, s/S and
+	// x/X read alike, and a quarter of anonymous submitters needed a second
+	// try (#1617)
+	if (captchaTest.trim().toLowerCase() !== secret.toLowerCase()) {
 		error(400, "Captcha test failed, please try again or contact BTC Map.");
 	}
 

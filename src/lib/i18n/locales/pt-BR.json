@@ -460,7 +460,6 @@
 		"notes": "Notas",
 		"contact": "Contato Público",
 		"captcha": "Proteção contra robôs",
-		"captchaCaseSensitive": "diferencia maiúsculas/minúsculas",
 		"captchaRefresh": "Carregar outro captcha",
 		"submitLocation": "Enviar Local",
 		"submitReport": "Enviar Relatório",

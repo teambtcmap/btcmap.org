@@ -45,10 +45,7 @@ const errorId = $derived(`${id}-error`);
 
 <div>
 	<div class="mb-2 flex items-center space-x-2">
-		<label for={id} class="font-semibold text-primary dark:text-white"
-			>{$_('forms.captcha')}
-			<span class="font-normal">({$_('forms.captchaCaseSensitive')})</span></label
-		>
+		<label for={id} class="font-semibold text-primary dark:text-white">{$_('forms.captcha')}</label>
 		<!-- Always there — a failed first fetch must leave a retry, or the
 		     user is stranded with a disabled submit. Busy while loading, not
 		     removed: a pressed button that vanishes drops its focus to
