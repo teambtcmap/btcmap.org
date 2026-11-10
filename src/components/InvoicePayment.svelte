@@ -1,6 +1,6 @@
 <script lang="ts">
 import JSConfetti from "js-confetti";
-import { onDestroy, tick } from "svelte";
+import { tick } from "svelte";
 
 import {
 	BREAKPOINTS,
@@ -13,26 +13,34 @@ import { errToast } from "#lib/utils.js";
 
 import { refreshAll } from "$app/navigation";
 
-export let invoice = "";
-export let invoiceId = "";
-// Rejecting makes the poller check again and retry on its next paid answer
-export let onSuccess: () => void | Promise<void> = () => {};
-export let onError: (error: unknown) => void = () => {};
-export let onStatusCheckError: (error: unknown) => void = () => {};
+type Props = {
+	invoice?: string;
+	invoiceId?: string;
+	// Rejecting makes the poller check again and retry on its next paid answer
+	onSuccess?: () => void | Promise<void>;
+	onError?: (error: unknown) => void;
+	onStatusCheckError?: (error: unknown) => void;
+};
+let {
+	invoice = "",
+	invoiceId = "",
+	onSuccess = () => {},
+	onError = () => {},
+	onStatusCheckError = () => {},
+}: Props = $props();
 
-let qr: HTMLCanvasElement;
-let stopPolling = () => {};
+let qr = $state<HTMLCanvasElement>();
 
 const jsConfetti = new JSConfetti();
 
-const generateQR = async () => {
+const generateQR = async (canvas: HTMLCanvasElement, value: string) => {
 	await tick();
 
 	try {
 		const QRCode = await import("qrcode");
 		QRCode.default.toCanvas(
-			qr,
-			invoice,
+			canvas,
+			value,
 			{
 				width:
 					window.innerWidth > BREAKPOINTS.md
@@ -54,32 +62,6 @@ const generateQR = async () => {
 	}
 };
 
-// One poller per invoice: a new id replaces the previous one's
-const startPolling = (id: string) => {
-	stopPolling();
-	stopPolling = id
-		? pollUntilPaid(id, {
-				onPaid: async () => {
-					refreshAll(); // Refresh UI immediately
-					jsConfetti.addConfetti();
-					liftConfettiCanvas();
-					await onSuccess();
-				},
-				onCheckError: (error) => {
-					console.error("Error checking invoice status:", error);
-					onStatusCheckError(error);
-				},
-			})
-		: () => {};
-};
-
-// Generate QR when invoice changes
-$: if (invoice && qr) {
-	generateQR();
-}
-
-$: startPolling(invoiceId);
-
 const liftConfettiCanvas = () => {
 	const confettiCanvas =
 		document.querySelector<HTMLCanvasElement>("body > canvas");
@@ -88,9 +70,27 @@ const liftConfettiCanvas = () => {
 	}
 };
 
-// Cleanup polling on component destroy
-onDestroy(() => {
-	stopPolling();
+// Generate QR when invoice changes
+$effect(() => {
+	if (invoice && qr) generateQR(qr, invoice);
+});
+
+// One poller per invoice: a new id replaces the previous one's, and
+// unmounting stops it
+$effect(() => {
+	if (!invoiceId) return;
+	return pollUntilPaid(invoiceId, {
+		onPaid: async () => {
+			refreshAll(); // Refresh UI immediately
+			jsConfetti.addConfetti();
+			liftConfettiCanvas();
+			await onSuccess();
+		},
+		onCheckError: (error) => {
+			console.error("Error checking invoice status:", error);
+			onStatusCheckError(error);
+		},
+	});
 });
 </script>
 
