@@ -3,6 +3,7 @@ import type { AxiosError } from "axios";
 
 import { API_BASE } from "#lib/api-base.js";
 import api from "#lib/axios.js";
+import { POLLING_INTERVAL } from "#lib/constants.js";
 
 // Poll invoice status straight from the v4 API — it answers CORS
 // preflights, so no server proxy is involved (#1348).
@@ -13,6 +14,58 @@ export const pollInvoiceStatus = async (invoiceId: string) => {
 // Check if invoice is paid
 export const isInvoicePaid = (status: string) => {
 	return status === "paid";
+};
+
+type PollUntilPaidOptions = {
+	// Finishes the payment flow. Resolving ends the polling; rejecting checks
+	// again, so the next paid answer retries it (the boost flow re-verifies
+	// the payment here).
+	onPaid: () => void | Promise<void>;
+	onCheckError?: (error: unknown) => void;
+};
+
+// Checks the invoice until it's paid, one request at a time: the next check
+// is scheduled only once the previous answer is in. A timer per interval let
+// checks pile up in a tab the browser throttled while the user paid in a
+// wallet app, and on return they all answered "paid" at once, finishing the
+// flow up to 51 times (#1618). Returns stop(), after which nothing fires.
+export const pollUntilPaid = (
+	invoiceId: string,
+	{ onPaid, onCheckError = () => {} }: PollUntilPaidOptions,
+): (() => void) => {
+	let stopped = false;
+	let timer: ReturnType<typeof setTimeout> | undefined;
+
+	const scheduleCheck = () => {
+		if (!stopped) timer = setTimeout(check, POLLING_INTERVAL);
+	};
+
+	const check = async () => {
+		let paid = false;
+		try {
+			const response = await pollInvoiceStatus(invoiceId);
+			paid = isInvoicePaid(response.data?.status);
+		} catch (error) {
+			if (!stopped) onCheckError(error);
+		}
+		if (stopped) return;
+		if (!paid) {
+			scheduleCheck();
+			return;
+		}
+		try {
+			await onPaid();
+			stopped = true;
+		} catch {
+			scheduleCheck();
+		}
+	};
+
+	scheduleCheck();
+	return () => {
+		stopped = true;
+		clearTimeout(timer);
+	};
 };
 
 // Classify a failed boost request so the UI can explain the cause.

@@ -5,24 +5,23 @@ import { onDestroy, tick } from "svelte";
 import {
 	BREAKPOINTS,
 	CONFETTI_CANVAS_Z_INDEX,
-	POLLING_INTERVAL,
 	QR_CODE_SIZE,
 } from "#lib/constants.js";
 import { _ } from "#lib/i18n/index.js";
-import { isInvoicePaid, pollInvoiceStatus } from "#lib/payment.js";
+import { pollUntilPaid } from "#lib/payment.js";
 import { errToast } from "#lib/utils.js";
 
 import { refreshAll } from "$app/navigation";
 
 export let invoice = "";
 export let invoiceId = "";
-export let onSuccess: () => void = () => {};
+// Rejecting makes the poller check again and retry on its next paid answer
+export let onSuccess: () => void | Promise<void> = () => {};
 export let onError: (error: unknown) => void = () => {};
 export let onStatusCheckError: (error: unknown) => void = () => {};
 
 let qr: HTMLCanvasElement;
-let polling = false;
-let pollInterval: ReturnType<typeof setInterval>;
+let stopPolling = () => {};
 
 const jsConfetti = new JSConfetti();
 
@@ -55,35 +54,23 @@ const generateQR = async () => {
 	}
 };
 
-const checkInvoiceStatus = async () => {
-	if (!invoiceId) return;
-
-	try {
-		const response = await pollInvoiceStatus(invoiceId);
-		if (isInvoicePaid(response.data.status)) {
-			polling = false;
-			clearInterval(pollInterval);
-			refreshAll(); // Refresh UI immediately
-			jsConfetti.addConfetti();
-			liftConfettiCanvas();
-			onSuccess();
-		}
-	} catch (error) {
-		console.error("Error checking invoice status:", error);
-		onStatusCheckError(error);
-	}
-};
-
-const startPolling = () => {
-	polling = true;
-	pollInterval = setInterval(checkInvoiceStatus, POLLING_INTERVAL);
-};
-
-const stopPolling = () => {
-	if (pollInterval) {
-		clearInterval(pollInterval);
-		polling = false;
-	}
+// One poller per invoice: a new id replaces the previous one's
+const startPolling = (id: string) => {
+	stopPolling();
+	stopPolling = id
+		? pollUntilPaid(id, {
+				onPaid: async () => {
+					refreshAll(); // Refresh UI immediately
+					jsConfetti.addConfetti();
+					liftConfettiCanvas();
+					await onSuccess();
+				},
+				onCheckError: (error) => {
+					console.error("Error checking invoice status:", error);
+					onStatusCheckError(error);
+				},
+			})
+		: () => {};
 };
 
 // Generate QR when invoice changes
@@ -91,10 +78,7 @@ $: if (invoice && qr) {
 	generateQR();
 }
 
-// Start polling when invoiceId is set
-$: if (invoiceId && !polling) {
-	startPolling();
-}
+$: startPolling(invoiceId);
 
 const liftConfettiCanvas = () => {
 	const confettiCanvas =

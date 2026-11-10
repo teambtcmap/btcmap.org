@@ -78,12 +78,13 @@ const handlePaymentSuccess = async () => {
 			onComplete();
 		}
 	} catch (error) {
-		// Reset the dedup guard so a retry can finalize: the poller re-fires
-		// onSuccess every interval, and a set $boostHash would make each one
-		// return early, wedging stage 1 after a transient re-verify failure.
+		// Reset the dedup guard and rethrow: the poller then checks again and
+		// retries this on its next paid answer, which a set $boostHash would
+		// turn away, wedging stage 1 after a transient re-verify failure.
 		$boostHash = "";
 		warningToast($_("boost.finalizeError"));
 		console.error(error);
+		throw error;
 	}
 };
 

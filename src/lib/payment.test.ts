@@ -1,11 +1,14 @@
-import { describe, expect, it, vi } from "vitest";
+import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 
 import { API_BASE } from "#lib/api-base.js";
+import api from "#lib/axios.js";
+import { POLLING_INTERVAL } from "#lib/constants.js";
 
 import {
 	classifyBoostError,
 	isInvoicePaid,
 	pollInvoiceStatus,
+	pollUntilPaid,
 } from "./payment";
 
 vi.mock("#lib/axios.js", () => ({
@@ -41,5 +44,121 @@ describe("pollInvoiceStatus", () => {
 		const { default: api } = await import("#lib/axios.js");
 		await pollInvoiceStatus("abc/123");
 		expect(api.get).toHaveBeenCalledWith(`${API_BASE}/v4/invoices/abc%2F123`);
+	});
+});
+
+describe("pollUntilPaid", () => {
+	const paid = { data: { status: "paid" } };
+	const unpaid = { data: { status: "unpaid" } };
+
+	beforeEach(() => {
+		vi.useFakeTimers();
+		vi.mocked(api.get).mockReset();
+	});
+
+	afterEach(() => {
+		vi.useRealTimers();
+	});
+
+	// #1618: a phone user pays in the wallet app, the browser throttles the
+	// backgrounded tab, and on return every queued check answered "paid" at
+	// once, firing the success handler up to 51 times
+	it("keeps one check in flight: a slow answer holds back the next one", async () => {
+		vi.mocked(api.get).mockReturnValue(new Promise(() => {}));
+		const stop = pollUntilPaid("inv", { onPaid: vi.fn() });
+
+		await vi.advanceTimersByTimeAsync(POLLING_INTERVAL * 10);
+
+		expect(api.get).toHaveBeenCalledTimes(1);
+		stop();
+	});
+
+	it("calls onPaid once for a paid answer and stops checking", async () => {
+		vi.mocked(api.get).mockResolvedValue(paid);
+		const onPaid = vi.fn();
+		pollUntilPaid("inv", { onPaid });
+
+		await vi.advanceTimersByTimeAsync(POLLING_INTERVAL * 10);
+
+		expect(onPaid).toHaveBeenCalledTimes(1);
+		expect(api.get).toHaveBeenCalledTimes(1);
+	});
+
+	it("checks again an interval after an unpaid answer", async () => {
+		vi.mocked(api.get)
+			.mockResolvedValueOnce(unpaid)
+			.mockResolvedValueOnce(paid);
+		const onPaid = vi.fn();
+		pollUntilPaid("inv", { onPaid });
+
+		await vi.advanceTimersByTimeAsync(POLLING_INTERVAL);
+		expect(api.get).toHaveBeenCalledTimes(1);
+		expect(onPaid).not.toHaveBeenCalled();
+
+		await vi.advanceTimersByTimeAsync(POLLING_INTERVAL);
+		expect(api.get).toHaveBeenCalledTimes(2);
+		expect(onPaid).toHaveBeenCalledTimes(1);
+	});
+
+	it("reports a failed check and keeps checking", async () => {
+		const failure = new Error("offline");
+		vi.mocked(api.get)
+			.mockRejectedValueOnce(failure)
+			.mockResolvedValueOnce(paid);
+		const onPaid = vi.fn();
+		const onCheckError = vi.fn();
+		pollUntilPaid("inv", { onPaid, onCheckError });
+
+		await vi.advanceTimersByTimeAsync(POLLING_INTERVAL * 2);
+
+		expect(onCheckError).toHaveBeenCalledExactlyOnceWith(failure);
+		expect(onPaid).toHaveBeenCalledTimes(1);
+	});
+
+	// The boost flow re-verifies the payment in onPaid; a transient failure
+	// there must be retried on the next paid answer, not wedge the flow
+	it("checks again when onPaid rejects, so the next paid answer retries it", async () => {
+		vi.mocked(api.get).mockResolvedValue(paid);
+		const onPaid = vi
+			.fn()
+			.mockRejectedValueOnce(new Error("finalize"))
+			.mockResolvedValueOnce(undefined);
+		pollUntilPaid("inv", { onPaid });
+
+		await vi.advanceTimersByTimeAsync(POLLING_INTERVAL * 10);
+
+		expect(onPaid).toHaveBeenCalledTimes(2);
+		expect(api.get).toHaveBeenCalledTimes(2);
+	});
+
+	it("ignores an answer that arrives after stop()", async () => {
+		let answer: (value: typeof paid) => void = () => {};
+		vi.mocked(api.get).mockReturnValue(
+			new Promise((resolve) => {
+				answer = resolve;
+			}),
+		);
+		const onPaid = vi.fn();
+		const onCheckError = vi.fn();
+		const stop = pollUntilPaid("inv", { onPaid, onCheckError });
+
+		await vi.advanceTimersByTimeAsync(POLLING_INTERVAL);
+		stop();
+		answer(paid);
+		await vi.advanceTimersByTimeAsync(POLLING_INTERVAL * 10);
+
+		expect(onPaid).not.toHaveBeenCalled();
+		expect(api.get).toHaveBeenCalledTimes(1);
+	});
+
+	it("stop() cancels the next scheduled check", async () => {
+		vi.mocked(api.get).mockResolvedValue(unpaid);
+		const stop = pollUntilPaid("inv", { onPaid: vi.fn() });
+
+		await vi.advanceTimersByTimeAsync(POLLING_INTERVAL);
+		stop();
+		await vi.advanceTimersByTimeAsync(POLLING_INTERVAL * 10);
+
+		expect(api.get).toHaveBeenCalledTimes(1);
 	});
 });
