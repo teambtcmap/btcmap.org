@@ -126,7 +126,12 @@ export const POST: RequestHandler = async ({ request }) => {
 		error(400, "Invalid issue type");
 	}
 
-	validateCaptcha(captchaSecret, captchaTest);
+	// Untyped JSON: a missing or non-string field must fail as a captcha 400,
+	// not crash the answer's trim into a 500 (#1617)
+	validateCaptcha(
+		typeof captchaSecret === "string" ? captchaSecret : "",
+		typeof captchaTest === "string" ? captchaTest : "",
+	);
 
 	// type is now narrowed to IssueType after validation
 	const config = CONFIG[type];
