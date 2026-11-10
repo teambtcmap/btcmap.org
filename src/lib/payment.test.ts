@@ -118,10 +118,12 @@ describe("pollUntilPaid", () => {
 	// The boost flow re-verifies the payment in onPaid; a transient failure
 	// there must be retried on the next paid answer, not wedge the flow
 	it("checks again when onPaid rejects, so the next paid answer retries it", async () => {
+		const log = vi.spyOn(console, "error").mockImplementation(() => {});
+		const failure = new Error("finalize");
 		vi.mocked(api.get).mockResolvedValue(paid);
 		const onPaid = vi
 			.fn()
-			.mockRejectedValueOnce(new Error("finalize"))
+			.mockRejectedValueOnce(failure)
 			.mockResolvedValueOnce(undefined);
 		pollUntilPaid("inv", { onPaid });
 
@@ -129,6 +131,30 @@ describe("pollUntilPaid", () => {
 
 		expect(onPaid).toHaveBeenCalledTimes(2);
 		expect(api.get).toHaveBeenCalledTimes(2);
+		// The rejection is caught to retry, so it would vanish without the log
+		expect(log).toHaveBeenCalledWith(expect.any(String), failure);
+		log.mockRestore();
+	});
+
+	it("waits for a slow onPaid: no new check and no second call meanwhile", async () => {
+		vi.mocked(api.get).mockResolvedValue(paid);
+		let finish = () => {};
+		const onPaid = vi.fn(
+			() =>
+				new Promise<void>((resolve) => {
+					finish = resolve;
+				}),
+		);
+		pollUntilPaid("inv", { onPaid });
+
+		await vi.advanceTimersByTimeAsync(POLLING_INTERVAL * 10);
+		expect(onPaid).toHaveBeenCalledTimes(1);
+		expect(api.get).toHaveBeenCalledTimes(1);
+
+		finish();
+		await vi.advanceTimersByTimeAsync(POLLING_INTERVAL * 10);
+		expect(onPaid).toHaveBeenCalledTimes(1);
+		expect(api.get).toHaveBeenCalledTimes(1);
 	});
 
 	it("ignores an answer that arrives after stop()", async () => {

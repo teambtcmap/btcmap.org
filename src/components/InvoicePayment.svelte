@@ -76,14 +76,21 @@ $effect(() => {
 });
 
 // One poller per invoice: a new id replaces the previous one's, and
-// unmounting stops it
+// unmounting stops it. After that nothing fires, not even for a paid
+// answer still in flight when the modal closed.
 $effect(() => {
 	if (!invoiceId) return;
+	// A rejected onSuccess (the boost re-verify) retries on the next paid
+	// answer; the refresh and confetti belong to the payment, once
+	let celebrated = false;
 	return pollUntilPaid(invoiceId, {
 		onPaid: async () => {
-			refreshAll(); // Refresh UI immediately
-			jsConfetti.addConfetti();
-			liftConfettiCanvas();
+			if (!celebrated) {
+				celebrated = true;
+				refreshAll(); // Refresh UI immediately
+				jsConfetti.addConfetti();
+				liftConfettiCanvas();
+			}
 			await onSuccess();
 		},
 		onCheckError: (error) => {

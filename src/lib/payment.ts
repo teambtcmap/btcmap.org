@@ -5,10 +5,14 @@ import { API_BASE } from "#lib/api-base.js";
 import api from "#lib/axios.js";
 import { POLLING_INTERVAL } from "#lib/constants.js";
 
+import type { Invoice } from "$types/btcmap-api/Invoice";
+
 // Poll invoice status straight from the v4 API — it answers CORS
 // preflights, so no server proxy is involved (#1348).
 export const pollInvoiceStatus = async (invoiceId: string) => {
-	return api.get(`${API_BASE}/v4/invoices/${encodeURIComponent(invoiceId)}`);
+	return api.get<Invoice>(
+		`${API_BASE}/v4/invoices/${encodeURIComponent(invoiceId)}`,
+	);
 };
 
 // Check if invoice is paid
@@ -56,7 +60,12 @@ export const pollUntilPaid = (
 		try {
 			await onPaid();
 			stopped = true;
-		} catch {
+		} catch (error) {
+			// Caught to retry, so it would otherwise vanish from the console
+			console.error(
+				"Finishing the paid invoice failed, checking again:",
+				error,
+			);
 			scheduleCheck();
 		}
 	};
