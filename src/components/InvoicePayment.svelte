@@ -1,39 +1,44 @@
 <script lang="ts">
 import JSConfetti from "js-confetti";
-import { onDestroy, tick } from "svelte";
+import { tick } from "svelte";
 
 import {
 	BREAKPOINTS,
 	CONFETTI_CANVAS_Z_INDEX,
-	POLLING_INTERVAL,
 	QR_CODE_SIZE,
 } from "#lib/constants.js";
 import { _ } from "#lib/i18n/index.js";
-import { isInvoicePaid, pollInvoiceStatus } from "#lib/payment.js";
+import { pollUntilPaid } from "#lib/payment.js";
 import { errToast } from "#lib/utils.js";
 
-import { refreshAll } from "$app/navigation";
+type Props = {
+	invoice?: string;
+	invoiceId?: string;
+	// Rejecting makes the poller check again and retry on its next paid answer
+	onSuccess?: () => void | Promise<void>;
+	onError?: (error: unknown) => void;
+	onStatusCheckError?: (error: unknown) => void;
+};
+let {
+	invoice = "",
+	invoiceId = "",
+	onSuccess = () => {},
+	onError = () => {},
+	onStatusCheckError = () => {},
+}: Props = $props();
 
-export let invoice = "";
-export let invoiceId = "";
-export let onSuccess: () => void = () => {};
-export let onError: (error: unknown) => void = () => {};
-export let onStatusCheckError: (error: unknown) => void = () => {};
-
-let qr: HTMLCanvasElement;
-let polling = false;
-let pollInterval: ReturnType<typeof setInterval>;
+let qr = $state<HTMLCanvasElement>();
 
 const jsConfetti = new JSConfetti();
 
-const generateQR = async () => {
+const generateQR = async (canvas: HTMLCanvasElement, value: string) => {
 	await tick();
 
 	try {
 		const QRCode = await import("qrcode");
 		QRCode.default.toCanvas(
-			qr,
-			invoice,
+			canvas,
+			value,
 			{
 				width:
 					window.innerWidth > BREAKPOINTS.md
@@ -55,47 +60,6 @@ const generateQR = async () => {
 	}
 };
 
-const checkInvoiceStatus = async () => {
-	if (!invoiceId) return;
-
-	try {
-		const response = await pollInvoiceStatus(invoiceId);
-		if (isInvoicePaid(response.data.status)) {
-			polling = false;
-			clearInterval(pollInterval);
-			refreshAll(); // Refresh UI immediately
-			jsConfetti.addConfetti();
-			liftConfettiCanvas();
-			onSuccess();
-		}
-	} catch (error) {
-		console.error("Error checking invoice status:", error);
-		onStatusCheckError(error);
-	}
-};
-
-const startPolling = () => {
-	polling = true;
-	pollInterval = setInterval(checkInvoiceStatus, POLLING_INTERVAL);
-};
-
-const stopPolling = () => {
-	if (pollInterval) {
-		clearInterval(pollInterval);
-		polling = false;
-	}
-};
-
-// Generate QR when invoice changes
-$: if (invoice && qr) {
-	generateQR();
-}
-
-// Start polling when invoiceId is set
-$: if (invoiceId && !polling) {
-	startPolling();
-}
-
 const liftConfettiCanvas = () => {
 	const confettiCanvas =
 		document.querySelector<HTMLCanvasElement>("body > canvas");
@@ -104,9 +68,34 @@ const liftConfettiCanvas = () => {
 	}
 };
 
-// Cleanup polling on component destroy
-onDestroy(() => {
-	stopPolling();
+// Generate QR when invoice changes
+$effect(() => {
+	if (invoice && qr) generateQR(qr, invoice);
+});
+
+// One poller per invoice: a new id replaces the previous one's, and
+// unmounting stops it. After that nothing fires, not even for a paid
+// answer still in flight when the modal closed.
+$effect(() => {
+	if (!invoiceId) return;
+	// A rejected onSuccess (the boost re-verify) retries on the next paid
+	// answer; the confetti belongs to the payment, once. Refreshing the page
+	// is the host's job: each one does it once its own update has landed
+	let celebrated = false;
+	return pollUntilPaid(invoiceId, {
+		onPaid: async () => {
+			if (!celebrated) {
+				celebrated = true;
+				jsConfetti.addConfetti();
+				liftConfettiCanvas();
+			}
+			await onSuccess();
+		},
+		onCheckError: (error) => {
+			console.error("Error checking invoice status:", error);
+			onStatusCheckError(error);
+		},
+	});
 });
 </script>
 

@@ -162,14 +162,6 @@ const handlePaymentSuccess = async () => {
 	}
 	onSuccess();
 };
-
-const handlePaymentError = (error: unknown) => {
-	console.error("Payment error:", error);
-};
-
-const handleStatusCheckError = (error: unknown) => {
-	console.error("Status check error:", error);
-};
 </script>
 
 {#if open}
@@ -234,8 +226,6 @@ const handleStatusCheckError = (error: unknown) => {
 					{invoice}
 					{invoiceId}
 					onSuccess={handlePaymentSuccess}
-					onError={handlePaymentError}
-					onStatusCheckError={handleStatusCheckError}
 				>
 					<p class="rounded-md border p-1 text-sm text-body dark:text-white">
 						<Icon w="16" h="16" icon="info" class="inline-block" />

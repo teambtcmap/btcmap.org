@@ -6,8 +6,9 @@ import InvoicePayment from "$components/InvoicePayment.svelte";
 export let invoice: string;
 export let invoiceId: string;
 export let onSuccess: () => void | Promise<void>;
-export let onError: (error: unknown) => void;
-export let onStatusCheckError: (error: unknown) => void;
+// InvoicePayment logs both errors itself; pass these only to act on them
+export let onError: (error: unknown) => void = () => {};
+export let onStatusCheckError: (error: unknown) => void = () => {};
 export let description: string = "";
 
 // HTML description is controlled by the parent components (BoostContent)

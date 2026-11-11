@@ -6,11 +6,7 @@ import { fade } from "svelte/transition";
 import { API_BASE } from "#lib/api-base.js";
 import { _, locale } from "#lib/i18n/index.js";
 import IconSocials from "#lib/icons/IconSocials.svelte";
-import {
-	classifyBoostError,
-	isInvoicePaid,
-	pollInvoiceStatus,
-} from "#lib/payment.js";
+import { classifyBoostError, fetchInvoicePaid } from "#lib/payment.js";
 import { boost, boostHash } from "#lib/store.js";
 import { updateSinglePlace } from "#lib/sync/places.js";
 import { errToast, warningToast } from "#lib/utils.js";
@@ -63,8 +59,7 @@ const handlePaymentSuccess = async () => {
 	try {
 		// Re-verify against the API before celebrating — the poller said
 		// paid, but this is the cheap belt to its braces (#1348).
-		const response = await pollInvoiceStatus(invoiceId);
-		if (!isInvoicePaid(response.data?.status)) {
+		if (!(await fetchInvoicePaid(invoiceId))) {
 			throw new Error("Invoice not paid");
 		}
 
@@ -78,22 +73,18 @@ const handlePaymentSuccess = async () => {
 			onComplete();
 		}
 	} catch (error) {
-		// Reset the dedup guard so a retry can finalize: the poller re-fires
-		// onSuccess every interval, and a set $boostHash would make each one
-		// return early, wedging stage 1 after a transient re-verify failure.
+		// Reset the dedup guard and rethrow: the poller logs it, checks again
+		// and retries this on its next paid answer, which a set $boostHash
+		// would turn away, wedging stage 1 after a transient re-verify failure.
 		$boostHash = "";
 		warningToast($_("boost.finalizeError"));
-		console.error(error);
+		throw error;
 	}
 };
 
-const handlePaymentError = (error: unknown) => {
-	console.error("Payment error:", error);
-};
-
-const handleStatusCheckError = (error: unknown) => {
+// InvoicePayment already logged it
+const handleStatusCheckError = () => {
 	errToast($_("errors.invoiceStatusCheck"));
-	console.error(error);
 };
 
 const retryBoost = () => {
@@ -273,7 +264,6 @@ const generateInvoice = () => {
 		{invoice}
 		{invoiceId}
 		onSuccess={handlePaymentSuccess}
-		onError={handlePaymentError}
 		onStatusCheckError={handleStatusCheckError}
 		description={selectedBoost
 			? selectedBoost.time === 1
