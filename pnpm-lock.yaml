@@ -90,8 +90,8 @@ importers:
         specifier: ^4.2.0
         version: 4.2.0(svelte@5.57.3)
       svelte-sonner:
-        specifier: ^1.2.2
-        version: 1.2.2(svelte@5.57.3)
+        specifier: ^1.2.3
+        version: 1.2.3(svelte@5.57.3)
       svelte-time:
         specifier: ^2.3.1
         version: 2.3.1
@@ -163,8 +163,8 @@ importers:
         specifier: ^5.57.3
         version: 5.57.3
       svelte-check:
-        specifier: ^4.7.7
-        version: 4.7.7(picomatch@4.0.7)(svelte@5.57.3)(typescript@6.0.3)
+        specifier: ^4.7.8
+        version: 4.7.8(picomatch@4.0.7)(svelte@5.57.3)(typescript@6.0.3)
       tailwindcss:
         specifier: ^4.3.5
         version: 4.3.5
@@ -1827,11 +1827,6 @@ packages:
     engines: {node: ^20.19.0 || >=22.12.0}
     hasBin: true
 
-  runed@0.28.0:
-    resolution: {integrity: sha512-k2xx7RuO9hWcdd9f+8JoBeqWtYrm5CALfgpkg2YDB80ds/QE4w0qqu34A7fqiAwiBBSBQOid7TLxwxVC27ymWQ==}
-    peerDependencies:
-      svelte: ^5.7.0
-
   sade@1.8.1:
     resolution: {integrity: sha512-xal3CZX1Xlo/k4ApwCFrHVACi9fBqJ7V+mwhBsuf/1IOKbBy098Fex+Wa/5QMubw09pSZ/u8EY8PWgevJsXp1A==}
     engines: {node: '>=6'}
@@ -1869,8 +1864,8 @@ packages:
   suncalc@2.0.2:
     resolution: {integrity: sha512-cedP91TuhxggoERke/jLkUVr/VMUifEMz1OkxfBZezvOFQdk8LSe9CFv7/Ov0Frn2tc2YUs+44oSrXeNEyTyGQ==}
 
-  svelte-check@4.7.7:
-    resolution: {integrity: sha512-Ge2IMdeTpbJuzNFGRiiMg0RWgbScysKQu7xwcyFJ22+DU9F5nPX51+Q3gHmGqRxYQMx2knreVWt5oCtfe0vf2g==}
+  svelte-check@4.7.8:
+    resolution: {integrity: sha512-laZ49GFHZ3b0z2PWinJWL0syehc/PTR8aHaUaTiBkWJ+4Y38nhxjmXsSz7CbGa3VdKopViVbrBH3bGNqIAI0bQ==}
     engines: {node: '>= 18.0.0'}
     hasBin: true
     peerDependencies:
@@ -1894,8 +1889,8 @@ packages:
     peerDependencies:
       svelte: '>= 5'
 
-  svelte-sonner@1.2.2:
-    resolution: {integrity: sha512-sHAvdhf9PNC7LMBmUSWRGPdxZn17HrW5ITsUKmF4SP9C3IZBE7B3rBw8BEztIiSDcTpEdZcKgmnN+BAhH4M8qQ==}
+  svelte-sonner@1.2.3:
+    resolution: {integrity: sha512-SjQaDI/k6L/ordD2w84XOkGv3kaZwyGRsJzR+lHW097/aJCaydvp63VblMTFsrakm58BxRjUSySK/BWH9jdY1Q==}
     peerDependencies:
       svelte: ^5.0.0
 
@@ -3512,11 +3507,6 @@ snapshots:
       '@rolldown/binding-win32-arm64-msvc': 1.2.16
       '@rolldown/binding-win32-x64-msvc': 1.2.16
 
-  runed@0.28.0(svelte@5.57.3):
-    dependencies:
-      esm-env: 1.2.2
-      svelte: 5.57.3
-
   sade@1.8.1:
     dependencies:
       mri: 1.2.0
@@ -3551,7 +3541,7 @@ snapshots:
 
   suncalc@2.0.2: {}
 
-  svelte-check@4.7.7(picomatch@4.0.7)(svelte@5.57.3)(typescript@6.0.3):
+  svelte-check@4.7.8(picomatch@4.0.7)(svelte@5.57.3)(typescript@6.0.3):
     dependencies:
       '@jridgewell/trace-mapping': 0.3.31
       '@sveltejs/load-config': 0.2.3
@@ -3583,9 +3573,8 @@ snapshots:
     dependencies:
       svelte: 5.57.3
 
-  svelte-sonner@1.2.2(svelte@5.57.3):
+  svelte-sonner@1.2.3(svelte@5.57.3):
     dependencies:
-      runed: 0.28.0(svelte@5.57.3)
       svelte: 5.57.3
 
   svelte-time@2.3.1:
