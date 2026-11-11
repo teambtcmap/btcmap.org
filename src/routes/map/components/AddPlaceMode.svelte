@@ -22,6 +22,7 @@ import {
 	findNearbyPlaces,
 } from "#lib/placementMode.js";
 import { places } from "#lib/store.js";
+import { verifyLocationHref } from "#lib/verifyLocation.js";
 import Icon from "$components/Icon.svelte";
 import PlacementPinIcon from "$components/PlacementPinIcon.svelte";
 
@@ -643,11 +644,13 @@ $effect(() => {
 							     point of the interrupt is updating the existing place
 							     instead of filing a duplicate. -->
 							<a
-								href="/verify-location?id={place.id}"
-								onclick={() =>
+								href={verifyLocationHref(String(place.id))}
+								onclick={() => {
 									trackEvent("add_place_nearby_candidate_click", {
 										placeId: place.id,
-									})}
+									});
+									trackEvent("verify_location_click", { source: "add_place" });
+								}}
 								class="flex items-baseline justify-between gap-3 rounded-lg px-2 py-1.5 hover:underline"
 							>
 								<span class="font-semibold text-link"
