@@ -4,9 +4,8 @@ import { _, locale } from "#lib/i18n/index.js";
 import type { MerchantPageData } from "#lib/types.js";
 import { formatVerifiedHuman } from "#lib/utils.js";
 import { isRecentlyVerified } from "#lib/verification.js";
+import { verifyLocationHref } from "#lib/verifyLocation.js";
 import Icon from "$components/Icon.svelte";
-
-import { resolve } from "$app/paths";
 
 // Survey-date + inline "Verify Location" link, matching the map drawer
 // (MerchantDetailsContent). Neutral styling — the verify link is always
@@ -19,7 +18,7 @@ type Props = {
 let { id, verifiedAt }: Props = $props();
 
 const upToDate = $derived(isRecentlyVerified(verifiedAt));
-const href = $derived(resolve(`verify-location?id=${encodeURIComponent(id)}`));
+const href = $derived(verifyLocationHref(id));
 </script>
 
 <div class="flex items-center gap-2">

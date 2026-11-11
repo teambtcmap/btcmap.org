@@ -4,9 +4,8 @@ import { _ } from "#lib/i18n/index.js";
 import { ISSUE_PIN_VARIANTS, PIN_FILLS } from "#lib/map/maplibreSprites.js";
 import { derivePlaceIssues } from "#lib/placeIssues.js";
 import type { Place } from "#lib/types.js";
+import { verifyLocationHref } from "#lib/verifyLocation.js";
 import Icon from "$components/Icon.svelte";
-
-import { resolve } from "$app/paths";
 
 // Collapsed disclosure for a place's derived issues (?issues worklist,
 // #921): one quiet line until tapped, then plain-language explanations —
@@ -71,7 +70,7 @@ const codes = $derived(derivePlaceIssues(merchant));
 				verify is the primary path, the OSM edit the tagger one. -->
 			<div class="mt-3 flex gap-2">
 				<a
-					href={`${resolve('/verify-location')}?id=${merchant.id}`}
+					href={verifyLocationHref(String(merchant.id))}
 					onclick={() => trackEvent('verify_location_click', { source: 'issues_row' })}
 					class="flex h-11 flex-1 items-center justify-center gap-1.5 rounded-lg bg-link text-xs font-semibold text-white transition-colors hover:bg-hover"
 				>

@@ -17,6 +17,7 @@ import { displayCommentCount, planCommentsSync } from "#lib/drawerComments.js";
 import { _, getDisplayLang, locale } from "#lib/i18n/index.js";
 import type { Place } from "#lib/types.js";
 import { formatVerifiedHuman, sanitizeUrl, shareMerchant } from "#lib/utils.js";
+import { verifyLocationHref } from "#lib/verifyLocation.js";
 import BoostCard from "$components/BoostCard.svelte";
 import CompanionAppPill from "$components/CompanionAppPill.svelte";
 import CopyButton from "$components/CopyButton.svelte";
@@ -414,7 +415,7 @@ async function fetchComments(placeId: number) {
 			{#if !isLoading}
 				<span class="text-body dark:text-white/50">·</span>
 				<a
-					href={`${resolve('/verify-location')}?id=${merchant.id}`}
+					href={verifyLocationHref(String(merchant.id))}
 					onclick={() => trackEvent('verify_location_click', { source: verifySource })}
 					class="text-xs text-link transition-colors hover:text-hover"
 					title={$_('verification.helpImprove')}
