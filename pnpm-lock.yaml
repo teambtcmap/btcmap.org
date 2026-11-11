@@ -115,11 +115,11 @@ importers:
         specifier: ^1.2.4
         version: 1.2.4
       '@iconify-json/material-symbols':
-        specifier: ^1.2.97
-        version: 1.2.97
+        specifier: ^1.2.98
+        version: 1.2.98
       '@iconify/svelte':
-        specifier: ^5.2.3
-        version: 5.2.3(svelte@5.57.3)
+        specifier: ^5.2.4
+        version: 5.2.4(svelte@5.57.3)
       '@playwright/test':
         specifier: ^1.64.1
         version: 1.64.1
@@ -631,11 +631,11 @@ packages:
   '@iconify-json/ic@1.2.4':
     resolution: {integrity: sha512-pzPMmrZrBQuwT7nmtrYdkttun8KalRGgZPIL1Ny9KpF2zjRGIUPN+npTfuD3lrgO/OnSwAoJWuekQwBpt/Cqrw==}
 
-  '@iconify-json/material-symbols@1.2.97':
-    resolution: {integrity: sha512-MbE4QHrH4Z4eoerBFrzFSPqHw2NwVGwwOwGZdJym5l5N5loqEUThimlQpK9VJA6mvgWvj5jl43b8bZnqzOxNRQ==}
+  '@iconify-json/material-symbols@1.2.98':
+    resolution: {integrity: sha512-ycgn080/EGstyYcJFu+HN0TYI+ts/KFPb+An0dzpwZit4M/BoFO9U54BwBmrS2Qo/3g9NYV4Y/g1BT425tNgEw==}
 
-  '@iconify/svelte@5.2.3':
-    resolution: {integrity: sha512-RV08FAHSsUW3/4WJsfoMYGbNt413Eh+4thU864pmX2QGFaem2P7zTcANYwkSOnApGlpYhMXJM813tN1tfk68ug==}
+  '@iconify/svelte@5.2.4':
+    resolution: {integrity: sha512-rKIsZikeLb2D30WaOoA/B5ggwm9KelOu0gXizmPHCjcwBNNm6+AGi+16gQ9HNEfm6MvMQqEuGKcp068ZeAsiNw==}
     peerDependencies:
       svelte: '>5.0.0'
 
@@ -1192,6 +1192,7 @@ packages:
 
   axios-retry@4.5.0:
     resolution: {integrity: sha512-aR99oXhpEDGo0UuAlYcn2iGRds30k366Zfa05XWScR9QaQD4JYiP3/1Qt1u7YlefUOK+cn0CcwoL1oefavQUlQ==}
+    deprecated: axios-retry is no longer maintained. See https://github.com/softonic/axios-retry for alternatives.
     peerDependencies:
       axios: 0.x || 1.x
 
@@ -2529,11 +2530,11 @@ snapshots:
     dependencies:
       '@iconify/types': 2.0.0
 
-  '@iconify-json/material-symbols@1.2.97':
+  '@iconify-json/material-symbols@1.2.98':
     dependencies:
       '@iconify/types': 2.0.0
 
-  '@iconify/svelte@5.2.3(svelte@5.57.3)':
+  '@iconify/svelte@5.2.4(svelte@5.57.3)':
     dependencies:
       '@iconify/types': 2.0.0
       svelte: 5.57.3
