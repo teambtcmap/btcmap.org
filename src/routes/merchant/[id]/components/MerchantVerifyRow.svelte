@@ -16,7 +16,7 @@ type Props = {
 	verifiedAt?: string | null;
 };
 
-let { id, verifiedAt = undefined }: Props = $props();
+let { id, verifiedAt }: Props = $props();
 
 const upToDate = $derived(isRecentlyVerified(verifiedAt));
 const href = $derived(resolve(`verify-location?id=${encodeURIComponent(id)}`));
