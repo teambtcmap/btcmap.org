@@ -9,11 +9,17 @@ import { resolve } from "$app/paths";
 // Survey-date + inline "Verify Location" link, matching the map drawer
 // (MerchantDetailsContent). Neutral styling — the verify link is always
 // present so a user can verify in any state.
-export let id: string | number;
-export let verifiedAt: string | undefined | null = undefined;
+type Props = {
+	id: string | number;
+	verifiedAt?: string | null;
+};
 
-$: upToDate = isRecentlyVerified(verifiedAt);
-$: href = resolve(`verify-location?id=${encodeURIComponent(String(id))}`);
+let { id, verifiedAt = undefined }: Props = $props();
+
+const upToDate = $derived(isRecentlyVerified(verifiedAt));
+const href = $derived(
+	resolve(`verify-location?id=${encodeURIComponent(String(id))}`),
+);
 </script>
 
 <div class="flex items-center gap-2">
