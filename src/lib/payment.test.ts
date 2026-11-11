@@ -115,6 +115,25 @@ describe("pollUntilPaid", () => {
 		expect(onPaid).toHaveBeenCalledTimes(1);
 	});
 
+	it("keeps checking when onCheckError throws", async () => {
+		const log = vi.spyOn(console, "error").mockImplementation(() => {});
+		const thrown = new Error("toast failed");
+		vi.mocked(api.get)
+			.mockRejectedValueOnce(new Error("offline"))
+			.mockResolvedValueOnce(paid);
+		const onPaid = vi.fn();
+		const onCheckError = vi.fn(() => {
+			throw thrown;
+		});
+		pollUntilPaid("inv", { onPaid, onCheckError });
+
+		await vi.advanceTimersByTimeAsync(POLLING_INTERVAL * 2);
+
+		expect(onPaid).toHaveBeenCalledTimes(1);
+		expect(log).toHaveBeenCalledWith(expect.any(String), thrown);
+		log.mockRestore();
+	});
+
 	// The boost flow re-verifies the payment in onPaid; a transient failure
 	// there must be retried on the next paid answer, not wedge the flow
 	it("checks again when onPaid rejects, so the next paid answer retries it", async () => {

@@ -44,13 +44,23 @@ export const pollUntilPaid = (
 		if (!stopped) timer = setTimeout(check, POLLING_INTERVAL);
 	};
 
+	// A throwing handler must not end the polling: the next check never
+	// gets scheduled and the error escapes as an unhandled rejection
+	const reportCheckError = (error: unknown) => {
+		try {
+			onCheckError(error);
+		} catch (handlerError) {
+			console.error("Reporting a failed invoice check failed:", handlerError);
+		}
+	};
+
 	const check = async () => {
 		let paid = false;
 		try {
 			const response = await pollInvoiceStatus(invoiceId);
 			paid = isInvoicePaid(response.data?.status);
 		} catch (error) {
-			if (!stopped) onCheckError(error);
+			if (!stopped) reportCheckError(error);
 		}
 		if (stopped) return;
 		if (!paid) {
