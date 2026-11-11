@@ -192,7 +192,7 @@ type EventPayloads = {
 	verified_filter_change: {
 		years: `${NonNullable<VerifiedFilterYears>}` | "any";
 	};
-	verify_location_click: { source: VerifySource };
+	verify_location_click: { source: VerifyLocationSource };
 	verify_location_submit_failure: { status: FailureStatus };
 	verify_location_submit_success: undefined;
 	worldview_toggle: { enabled: boolean };
@@ -215,7 +215,7 @@ export type CommentSource = "map_drawer" | "area_drawer" | "merchant_page";
 // Which link opened /verify-location (verify_location_click breakdown).
 // Arrivals without a click (Android app, shared links, the PWA shortcut)
 // only show up as submits.
-export type VerifySource =
+export type VerifyLocationSource =
 	| "map_drawer"
 	| "area_drawer"
 	| "issues_row"

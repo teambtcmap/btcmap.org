@@ -5,7 +5,7 @@ import { onDestroy, untrack } from "svelte";
 import type {
 	CommentSource,
 	PlacePhotoSource,
-	VerifySource,
+	VerifyLocationSource,
 } from "#lib/analytics.js";
 import { trackEvent } from "#lib/analytics.js";
 import { API_BASE } from "#lib/api-base.js";
@@ -50,7 +50,7 @@ type Props = {
 	// the two funnels only share values by coincidence.
 	commentSource?: Extract<CommentSource, "map_drawer" | "area_drawer">;
 	// Analytics source for the verify-location funnel, same split
-	verifySource?: Extract<VerifySource, "map_drawer" | "area_drawer">;
+	verifySource?: Extract<VerifyLocationSource, "map_drawer" | "area_drawer">;
 };
 let {
 	merchant,
