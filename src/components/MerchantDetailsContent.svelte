@@ -2,7 +2,11 @@
 import axios from "axios";
 import { onDestroy, untrack } from "svelte";
 
-import type { CommentSource, PlacePhotoSource } from "#lib/analytics.js";
+import type {
+	CommentSource,
+	PlacePhotoSource,
+	VerifySource,
+} from "#lib/analytics.js";
 import { trackEvent } from "#lib/analytics.js";
 import { API_BASE } from "#lib/api-base.js";
 import {
@@ -45,6 +49,8 @@ type Props = {
 	// Analytics source for the comment funnel. Its own prop, not photoSource:
 	// the two funnels only share values by coincidence.
 	commentSource?: Extract<CommentSource, "map_drawer" | "area_drawer">;
+	// Analytics source for the verify-location funnel, same split
+	verifySource?: Extract<VerifySource, "map_drawer" | "area_drawer">;
 };
 let {
 	merchant,
@@ -56,6 +62,7 @@ let {
 	photoSource = "map_drawer",
 	showIssues = false,
 	commentSource = "map_drawer",
+	verifySource = "map_drawer",
 }: Props = $props();
 
 const displayName = $derived(
@@ -408,6 +415,7 @@ async function fetchComments(placeId: number) {
 				<span class="text-body dark:text-white/50">·</span>
 				<a
 					href={`${resolve('/verify-location')}?id=${merchant.id}`}
+					onclick={() => trackEvent('verify_location_click', { source: verifySource })}
 					class="text-xs text-link transition-colors hover:text-hover"
 					title={$_('verification.helpImprove')}
 				>

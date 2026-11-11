@@ -1,4 +1,5 @@
 <script lang="ts">
+import { trackEvent } from "#lib/analytics.js";
 import { _, locale } from "#lib/i18n/index.js";
 import { formatVerifiedHuman } from "#lib/utils.js";
 import { isRecentlyVerified } from "#lib/verification.js";
@@ -46,6 +47,7 @@ const href = $derived(
 	<span class="text-body dark:text-white/50">·</span>
 	<a
 		href={href}
+		onclick={() => trackEvent('verify_location_click', { source: 'merchant_page' })}
 		class="text-sm font-semibold text-link transition-colors hover:text-hover"
 		title={$_('verification.helpImprove')}
 	>

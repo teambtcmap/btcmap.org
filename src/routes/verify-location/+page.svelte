@@ -4,6 +4,7 @@ import axios from "axios";
 import { onMount } from "svelte";
 import { get } from "svelte/store";
 
+import { trackEvent, trackFailure } from "#lib/analytics.js";
 import { createCaptchaGate } from "#lib/captchaGate.svelte.js";
 import { _ } from "#lib/i18n/index.js";
 import { fieldError, inputProps, ruleValidation } from "#lib/ruleValidation.js";
@@ -104,8 +105,10 @@ const form = createForm(() => ({
 			.then((response) => {
 				submissionIssueNumber = response.data.number;
 				submitted = true;
+				trackEvent("verify_location_submit_success");
 			})
 			.catch((error) => {
+				trackFailure("verify_location_submit_failure", {}, error);
 				errToast(
 					captcha.submitFailed(error) ?? get(_)("errors.formSubmission"),
 				);

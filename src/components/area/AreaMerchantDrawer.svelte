@@ -126,6 +126,7 @@ function handleKeydown(event: KeyboardEvent) {
 						{merchant}
 						photoSource="area_drawer"
 						commentSource="area_drawer"
+						verifySource="area_drawer"
 						{isUpToDate}
 						{isBoosted}
 						{boostLoading}
