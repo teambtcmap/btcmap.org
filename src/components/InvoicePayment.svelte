@@ -11,8 +11,6 @@ import { _ } from "#lib/i18n/index.js";
 import { pollUntilPaid } from "#lib/payment.js";
 import { errToast } from "#lib/utils.js";
 
-import { refreshAll } from "$app/navigation";
-
 type Props = {
 	invoice?: string;
 	invoiceId?: string;
@@ -81,13 +79,13 @@ $effect(() => {
 $effect(() => {
 	if (!invoiceId) return;
 	// A rejected onSuccess (the boost re-verify) retries on the next paid
-	// answer; the refresh and confetti belong to the payment, once
+	// answer; the confetti belongs to the payment, once. Refreshing the page
+	// is the host's job: each one does it once its own update has landed
 	let celebrated = false;
 	return pollUntilPaid(invoiceId, {
 		onPaid: async () => {
 			if (!celebrated) {
 				celebrated = true;
-				refreshAll(); // Refresh UI immediately
 				jsConfetti.addConfetti();
 				liftConfettiCanvas();
 			}
