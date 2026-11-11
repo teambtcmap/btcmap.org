@@ -1,6 +1,7 @@
 <script lang="ts">
 import { trackEvent } from "#lib/analytics.js";
 import { _, locale } from "#lib/i18n/index.js";
+import type { MerchantPageData } from "#lib/types.js";
 import { formatVerifiedHuman } from "#lib/utils.js";
 import { isRecentlyVerified } from "#lib/verification.js";
 import Icon from "$components/Icon.svelte";
@@ -11,16 +12,14 @@ import { resolve } from "$app/paths";
 // (MerchantDetailsContent). Neutral styling — the verify link is always
 // present so a user can verify in any state.
 type Props = {
-	id: string | number;
+	id: MerchantPageData["id"];
 	verifiedAt?: string | null;
 };
 
 let { id, verifiedAt = undefined }: Props = $props();
 
 const upToDate = $derived(isRecentlyVerified(verifiedAt));
-const href = $derived(
-	resolve(`verify-location?id=${encodeURIComponent(String(id))}`),
-);
+const href = $derived(resolve(`verify-location?id=${encodeURIComponent(id)}`));
 </script>
 
 <div class="flex items-center gap-2">
