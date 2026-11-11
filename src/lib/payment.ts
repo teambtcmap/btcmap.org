@@ -20,6 +20,12 @@ export const isInvoicePaid = (status: string) => {
 	return status === "paid";
 };
 
+// One status check; a body without a status (non-JSON) counts as unpaid
+export const fetchInvoicePaid = async (invoiceId: string): Promise<boolean> => {
+	const response = await pollInvoiceStatus(invoiceId);
+	return isInvoicePaid(response.data?.status);
+};
+
 type PollUntilPaidOptions = {
 	// Finishes the payment flow. Resolving ends the polling; rejecting checks
 	// again, so the next paid answer retries it (the boost flow re-verifies
@@ -57,8 +63,7 @@ export const pollUntilPaid = (
 	const check = async () => {
 		let paid = false;
 		try {
-			const response = await pollInvoiceStatus(invoiceId);
-			paid = isInvoicePaid(response.data?.status);
+			paid = await fetchInvoicePaid(invoiceId);
 		} catch (error) {
 			if (!stopped) reportCheckError(error);
 		}

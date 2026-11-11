@@ -6,6 +6,7 @@ import { POLLING_INTERVAL } from "#lib/constants.js";
 
 import {
 	classifyBoostError,
+	fetchInvoicePaid,
 	isInvoicePaid,
 	pollInvoiceStatus,
 	pollUntilPaid,
@@ -44,6 +45,30 @@ describe("pollInvoiceStatus", () => {
 		const { default: api } = await import("#lib/axios.js");
 		await pollInvoiceStatus("abc/123");
 		expect(api.get).toHaveBeenCalledWith(`${API_BASE}/v4/invoices/abc%2F123`);
+	});
+});
+
+describe("fetchInvoicePaid", () => {
+	it("is true for a paid invoice", async () => {
+		vi.mocked(api.get).mockResolvedValueOnce({ data: { status: "paid" } });
+		await expect(fetchInvoicePaid("inv")).resolves.toBe(true);
+	});
+
+	it("is false for an unpaid invoice", async () => {
+		vi.mocked(api.get).mockResolvedValueOnce({ data: { status: "unpaid" } });
+		await expect(fetchInvoicePaid("inv")).resolves.toBe(false);
+	});
+
+	// A non-JSON body (an HTML error page, a stray "\n") has no status
+	it("is false for a body without a status", async () => {
+		vi.mocked(api.get).mockResolvedValueOnce({ data: "\n" });
+		await expect(fetchInvoicePaid("inv")).resolves.toBe(false);
+	});
+
+	it("rejects when the request fails", async () => {
+		const failure = new Error("offline");
+		vi.mocked(api.get).mockRejectedValueOnce(failure);
+		await expect(fetchInvoicePaid("inv")).rejects.toBe(failure);
 	});
 });
 

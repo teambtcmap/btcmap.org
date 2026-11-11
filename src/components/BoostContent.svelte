@@ -6,11 +6,7 @@ import { fade } from "svelte/transition";
 import { API_BASE } from "#lib/api-base.js";
 import { _, locale } from "#lib/i18n/index.js";
 import IconSocials from "#lib/icons/IconSocials.svelte";
-import {
-	classifyBoostError,
-	isInvoicePaid,
-	pollInvoiceStatus,
-} from "#lib/payment.js";
+import { classifyBoostError, fetchInvoicePaid } from "#lib/payment.js";
 import { boost, boostHash } from "#lib/store.js";
 import { updateSinglePlace } from "#lib/sync/places.js";
 import { errToast, warningToast } from "#lib/utils.js";
@@ -63,8 +59,7 @@ const handlePaymentSuccess = async () => {
 	try {
 		// Re-verify against the API before celebrating — the poller said
 		// paid, but this is the cheap belt to its braces (#1348).
-		const response = await pollInvoiceStatus(invoiceId);
-		if (!isInvoicePaid(response.data?.status)) {
+		if (!(await fetchInvoicePaid(invoiceId))) {
 			throw new Error("Invoice not paid");
 		}
 
