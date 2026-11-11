@@ -6,9 +6,9 @@ import { POLLING_INTERVAL } from "#lib/constants.js";
 
 import {
 	classifyBoostError,
+	fetchInvoice,
 	fetchInvoicePaid,
 	isInvoicePaid,
-	pollInvoiceStatus,
 	pollUntilPaid,
 } from "./payment";
 
@@ -40,10 +40,10 @@ describe("isInvoicePaid", () => {
 	});
 });
 
-describe("pollInvoiceStatus", () => {
+describe("fetchInvoice", () => {
 	it("queries the invoice straight on the v4 API, id encoded", async () => {
 		const { default: api } = await import("#lib/axios.js");
-		await pollInvoiceStatus("abc/123");
+		await fetchInvoice("abc/123");
 		expect(api.get).toHaveBeenCalledWith(`${API_BASE}/v4/invoices/abc%2F123`);
 	});
 });

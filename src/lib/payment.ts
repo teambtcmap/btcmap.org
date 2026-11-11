@@ -7,9 +7,9 @@ import { POLLING_INTERVAL } from "#lib/constants.js";
 
 import type { Invoice } from "$types/btcmap-api/Invoice";
 
-// Poll invoice status straight from the v4 API — it answers CORS
+// Fetch the invoice straight from the v4 API — it answers CORS
 // preflights, so no server proxy is involved (#1348).
-export const pollInvoiceStatus = async (invoiceId: string) => {
+export const fetchInvoice = async (invoiceId: string) => {
 	return api.get<Invoice>(
 		`${API_BASE}/v4/invoices/${encodeURIComponent(invoiceId)}`,
 	);
@@ -22,7 +22,7 @@ export const isInvoicePaid = (status: string) => {
 
 // One status check; a body without a status (non-JSON) counts as unpaid
 export const fetchInvoicePaid = async (invoiceId: string): Promise<boolean> => {
-	const response = await pollInvoiceStatus(invoiceId);
+	const response = await fetchInvoice(invoiceId);
 	return isInvoicePaid(response.data?.status);
 };
 
