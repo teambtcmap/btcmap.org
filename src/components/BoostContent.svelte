@@ -87,13 +87,9 @@ const handlePaymentSuccess = async () => {
 	}
 };
 
-const handlePaymentError = (error: unknown) => {
-	console.error("Payment error:", error);
-};
-
-const handleStatusCheckError = (error: unknown) => {
+// InvoicePayment already logged it
+const handleStatusCheckError = () => {
 	errToast($_("errors.invoiceStatusCheck"));
-	console.error(error);
 };
 
 const retryBoost = () => {
@@ -273,7 +269,6 @@ const generateInvoice = () => {
 		{invoice}
 		{invoiceId}
 		onSuccess={handlePaymentSuccess}
-		onError={handlePaymentError}
 		onStatusCheckError={handleStatusCheckError}
 		description={selectedBoost
 			? selectedBoost.time === 1
