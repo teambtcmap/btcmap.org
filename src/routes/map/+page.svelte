@@ -123,6 +123,7 @@ const isMobileLayout = browser && window.innerWidth < BREAKPOINTS.md;
 
 // Lets the floating search bar hand focus to the panel's input as it unmounts
 let merchantListPanel: MerchantListPanel;
+let addPlaceMode: ReturnType<typeof AddPlaceMode> | undefined;
 
 let placementActive = false;
 // The name the add form opens with, bound into AddPlaceMode (which clears
@@ -137,6 +138,8 @@ const startPlacement = (method: "menu" | "search", name = "") => {
 	prefillName = name;
 	placementActive = true;
 	trackEvent("add_place_enter", { method });
+	// The search offer's button hides with the panel; don't strand focus
+	if (method === "search") tick().then(() => addPlaceMode?.focusSheet());
 };
 
 // Placement mode owns the bottom sheet's z-[1002] slot; a merchant drawer
@@ -1572,6 +1575,7 @@ onDestroy(() => {
 	     search would offer it again on return: hide that offer (#1621).
 	     prefillName is set only for placements the offer started. -->
 	<AddPlaceMode
+		bind:this={addPlaceMode}
 		{map}
 		bind:active={placementActive}
 		bind:prefillName

@@ -68,6 +68,14 @@ let namesLoaded = $state(false);
 // instead of it falling back to <body>.
 let backButtonEl: HTMLButtonElement | undefined = $state();
 let confirmButtonEl: HTMLButtonElement | undefined = $state();
+let zoomButtonEl: HTMLButtonElement | undefined = $state();
+
+// For an entry whose trigger hides as placement starts (the search
+// panel's add offer, #1621): focus would fall to <body>, so hand it to the
+// sheet's main action instead. Call after the sheet has rendered (tick).
+export function focusSheet() {
+	(confirmButtonEl ?? zoomButtonEl)?.focus();
+}
 
 // The in-map form host (#1134): confirming hands the pin to the form
 // panel instead of navigating to /add-location. From then on the pin is
@@ -631,6 +639,7 @@ $effect(() => {
 					</button>
 					{#if zoomTooLow}
 						<button
+							bind:this={zoomButtonEl}
 							type="button"
 							onclick={zoomToPlace}
 							class="h-12 flex-1 rounded-xl bg-bitcoin font-semibold text-white hover:bg-bitcoinHover"
