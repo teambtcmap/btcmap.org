@@ -61,6 +61,10 @@ export type MerchantListState = {
 	// exceed searchResults.length; the panel surfaces the gap rather than
 	// presenting a truncated slice as the whole result set.
 	searchTotal: number;
+	// The query searchResults answer ("" when none). searchQuery is what the
+	// input shows, written per keystroke, so the two differ while a newer
+	// query waits on the debounce or after its request failed.
+	resultsQuery: string;
 	isSearching: boolean;
 	// Category filter
 	selectedCategory: CategoryKey;
@@ -92,6 +96,7 @@ const initialState: MerchantListState = {
 	searchQuery: "",
 	searchResults: [],
 	searchTotal: 0,
+	resultsQuery: "",
 	isSearching: false,
 	selectedCategory: "all",
 	categoryCounts: createEmptyCategoryCounts(),
@@ -248,6 +253,7 @@ function createMerchantListStore() {
 			// Total matches on the server, which can exceed what it returned —
 			// the panel shows "N of TOTAL" so truncation isn't silent.
 			searchTotal: total,
+			resultsQuery: query,
 			isSearching: false,
 			categoryCounts,
 			unknownPaymentCount: 0,
@@ -344,6 +350,7 @@ function createMerchantListStore() {
 			// rewrite the input mid-word and reset the caret.
 			if (get(store).searchQuery !== query) return;
 			applySearchResults(query, results, total);
+			if (results.length === 0) trackEvent("search_no_results");
 		} catch (error) {
 			if (error instanceof Error && error.name === "AbortError") return;
 			// Same staleness check as the success path. The user has typed
@@ -398,6 +405,7 @@ function createMerchantListStore() {
 				searchQuery: "",
 				searchResults: [],
 				searchTotal: 0,
+				resultsQuery: "",
 				isSearching: false,
 			}));
 		},
@@ -763,6 +771,7 @@ function createMerchantListStore() {
 				searchQuery: "",
 				searchResults: [],
 				searchTotal: 0,
+				resultsQuery: "",
 				isSearching: false,
 			}));
 		},
@@ -776,6 +785,7 @@ function createMerchantListStore() {
 				searchQuery: "",
 				searchResults: [],
 				searchTotal: 0,
+				resultsQuery: "",
 				isSearching: false,
 			}));
 		},
@@ -872,5 +882,18 @@ function createMerchantListStore() {
 		},
 	};
 }
+
+// The name to offer adding to the map (#1621): set only once a search has
+// come back empty for the query on screen. Not while a newer query waits on
+// the debounce, and not after a failed request, whose empty list proves
+// nothing.
+export const addFromSearchName = (state: MerchantListState): string | null =>
+	state.mode === "search" &&
+	!state.isSearching &&
+	state.searchResults.length === 0 &&
+	state.resultsQuery !== "" &&
+	state.resultsQuery === state.searchQuery
+		? state.resultsQuery.trim()
+		: null;
 
 export const merchantList = createMerchantListStore();
