@@ -127,14 +127,14 @@ let merchantListPanel: MerchantListPanel;
 let placementActive = false;
 // The name the add form opens with, bound into AddPlaceMode (which clears
 // it when placement ends)
-let placementName = "";
+let prefillName = "";
 
 // The in-app entry points: the menu modal, and a map search that found
 // nothing, which hands over its query as the name (#1621). AddPlaceMode's
 // URL-sync effect picks up the bind:active flip, so this only has to set
 // state and report the method.
 const startPlacement = (method: "menu" | "search", name = "") => {
-	placementName = name;
+	prefillName = name;
 	placementActive = true;
 	trackEvent("add_place_enter", { method });
 };
@@ -1570,13 +1570,13 @@ onDestroy(() => {
 {#if styleLoaded && !issuesOnly}
 	<!-- A place submitted from the search offer waits on review, so the
 	     search would offer it again on return: hide that offer (#1621).
-	     placementName is set only for placements the offer started. -->
+	     prefillName is set only for placements the offer started. -->
 	<AddPlaceMode
 		{map}
 		bind:active={placementActive}
-		bind:name={placementName}
+		bind:prefillName
 		onsubmitted={() => {
-			if (placementName) merchantList.dismissAddOffer(placementName);
+			if (prefillName) merchantList.dismissAddOffer(prefillName);
 		}}
 	/>
 {/if}

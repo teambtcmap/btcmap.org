@@ -37,7 +37,7 @@ type Props = {
 	// The name the next form opens with: a search that found nothing
 	// (#1621). Cleared when placement ends, and on Add another, since the
 	// second place is a different place.
-	name?: string;
+	prefillName?: string;
 	// A place was submitted from the form
 	onsubmitted?: () => void;
 };
@@ -45,12 +45,12 @@ type Props = {
 let {
 	map,
 	active = $bindable(false),
-	name = $bindable(""),
+	prefillName = $bindable(""),
 	onsubmitted,
 }: Props = $props();
 
 $effect(() => {
-	if (!active) name = "";
+	if (!active) prefillName = "";
 });
 
 // Raw (non-deep-proxying) state: `nearby` is always reassigned wholesale
@@ -268,7 +268,7 @@ const closeForm = () => {
 };
 
 const addAnother = () => {
-	name = "";
+	prefillName = "";
 	trackEvent("add_place_enter", { method: "another" });
 	if (formEntryPushed) history.back();
 	else closeFormLocally();
@@ -560,7 +560,7 @@ $effect(() => {
 		<div class={repositioning ? 'hidden' : 'contents'}>
 			<AddPlaceFormPanel
 				coords={formCoords}
-				initialName={name}
+				{prefillName}
 				hidden={repositioning}
 				onclose={closeForm}
 				onmovepin={startMovePin}

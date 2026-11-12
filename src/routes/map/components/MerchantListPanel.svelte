@@ -333,7 +333,7 @@ $: searchResults = $merchantList.searchResults;
 $: searchTotal = $merchantList.searchTotal;
 $: isSearching = $merchantList.isSearching;
 $: searchQuery = $merchantList.searchQuery;
-$: addFromSearch = onAddFromSearch ? addFromSearchName($merchantList) : null;
+$: prefillName = onAddFromSearch ? addFromSearchName($merchantList) : null;
 $: selectedCategory = $merchantList.selectedCategory;
 $: categoryCounts = $merchantList.categoryCounts;
 $: verifiedWithinYears = $merchantList.verifiedWithinYears;
@@ -801,7 +801,7 @@ onDestroy(() => {
 								{$_('search.prompt')}
 							{/if}
 						</p>
-						{#if addFromSearch}
+						{#if prefillName}
 							<!-- Whoever searched for a shop the map lacks is the likeliest
 							     to add it (#1621); the query becomes the form's name. -->
 							<p class="mt-2 text-sm text-body dark:text-white/70">
@@ -809,7 +809,7 @@ onDestroy(() => {
 							</p>
 							<button
 								type="button"
-								on:click={() => addFromSearch && onAddFromSearch?.(addFromSearch)}
+								on:click={() => prefillName && onAddFromSearch?.(prefillName)}
 								class="rounded-full border border-link px-4 py-1.5 text-sm font-semibold text-link transition-colors hover:bg-link hover:text-white focus:outline-link"
 							>
 								{$_('search.addPlaceButton')}
