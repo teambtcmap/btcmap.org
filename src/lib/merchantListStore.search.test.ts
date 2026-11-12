@@ -414,6 +414,18 @@ describe("merchantListStore — searchSession", () => {
 		expect(addFromSearchName(get(merchantList))).toBeNull();
 	});
 
+	it("dismissAddOffer() hides the offer and keeps the search", async () => {
+		merchantList.search("Kiosk Hamburg");
+		await dispatch();
+
+		merchantList.dismissAddOffer();
+
+		const state = get(merchantList);
+		expect(addFromSearchName(state)).toBeNull();
+		expect(state.searchQuery).toBe("Kiosk Hamburg");
+		expect(state.mode).toBe("search");
+	});
+
 	it("close() drops the offer", async () => {
 		merchantList.search("Kiosk Hamburg");
 		await dispatch();

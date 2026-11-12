@@ -38,9 +38,16 @@ type Props = {
 	// (#1621). Cleared when placement ends, and on Add another, since the
 	// second place is a different place.
 	name?: string;
+	// A place was submitted from the form
+	onsubmitted?: () => void;
 };
 
-let { map, active = $bindable(false), name = $bindable("") }: Props = $props();
+let {
+	map,
+	active = $bindable(false),
+	name = $bindable(""),
+	onsubmitted,
+}: Props = $props();
 
 $effect(() => {
 	if (!active) name = "";
@@ -559,6 +566,7 @@ $effect(() => {
 				onmovepin={startMovePin}
 				onaddanother={addAnother}
 				onexit={exitToMap}
+				{onsubmitted}
 			/>
 		</div>
 	{/if}

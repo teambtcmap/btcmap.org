@@ -762,6 +762,14 @@ function createMerchantListStore() {
 			cancelSearchSession();
 		},
 
+		// The place the offer named was just submitted (#1621): drop the
+		// offer, keep the search on screen. The submission waits on review,
+		// so the empty result is still true, and the nearby-duplicate check
+		// can't see it either.
+		dismissAddOffer() {
+			update((state) => ({ ...state, resultsQuery: "" }));
+		},
+
 		// Clear search input and results, but stay in search mode
 		// Use when: user clears the search input (e.g., clicking X button)
 		// Markers reset because searchResultIds becomes empty, triggering normal marker reload

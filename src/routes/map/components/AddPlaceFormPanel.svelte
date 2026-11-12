@@ -28,6 +28,8 @@ type Props = {
 	onexit: () => void;
 	// The form's starting name (AddLocationForm's initialName)
 	initialName?: string;
+	// A submission went through (before the success screen's actions)
+	onsubmitted?: () => void;
 };
 let {
 	coords,
@@ -37,6 +39,7 @@ let {
 	onmovepin,
 	onaddanother,
 	onexit,
+	onsubmitted,
 }: Props = $props();
 
 let submitted = $state(false);
@@ -170,6 +173,7 @@ $effect(() => {
 					submitted = true;
 					submittedName = name;
 					submittedAnonymously = !attributed;
+					onsubmitted?.();
 				}}
 			/>
 		</div>

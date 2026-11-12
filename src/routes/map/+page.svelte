@@ -1568,7 +1568,14 @@ onDestroy(() => {
 />
 
 {#if styleLoaded && !issuesOnly}
-	<AddPlaceMode {map} bind:active={placementActive} bind:name={placementName} />
+	<!-- A submitted place waits on review, so the search that offered it
+	     would offer it again on return: drop that offer (#1621) -->
+	<AddPlaceMode
+		{map}
+		bind:active={placementActive}
+		bind:name={placementName}
+		onsubmitted={() => merchantList.dismissAddOffer()}
+	/>
 {/if}
 
 {#if styleLoaded && !issuesOnly && map}
