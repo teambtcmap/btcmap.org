@@ -125,12 +125,18 @@ const isMobileLayout = browser && window.innerWidth < BREAKPOINTS.md;
 let merchantListPanel: MerchantListPanel;
 
 let placementActive = false;
+// The name the add form opens with, bound into AddPlaceMode (which clears
+// it when placement ends)
+let placementName = "";
 
-// Menu-modal entry point; AddPlaceMode's URL-sync effect picks up the
-// bind:active flip, so this only has to set state and report the method.
-const startPlacement = () => {
+// The in-app entry points: the menu modal, and a map search that found
+// nothing, which hands over its query as the name (#1621). AddPlaceMode's
+// URL-sync effect picks up the bind:active flip, so this only has to set
+// state and report the method.
+const startPlacement = (method: "menu" | "search", name = "") => {
+	placementName = name;
 	placementActive = true;
-	trackEvent("add_place_enter", { method: "menu" });
+	trackEvent("add_place_enter", { method });
 };
 
 // Placement mode owns the bottom sheet's z-[1002] slot; a merchant drawer
@@ -1523,6 +1529,7 @@ onDestroy(() => {
 			// See onHoverStart above.
 		}}
 		onSearch={(query) => merchantList.search(query, { getCenter: readSearchCenter })}
+		onAddFromSearch={issuesOnly ? null : (name) => startPlacement('search', name)}
 		onRefresh={() => updateMerchantList({ force: true })}
 		behavior={listBehavior}
 		mapReady={styleLoaded}
@@ -1557,11 +1564,11 @@ onDestroy(() => {
 	enableGlobe
 	{globeOn}
 	onToggleGlobe={toggleGlobe}
-	onAddPlace={issuesOnly ? null : startPlacement}
+	onAddPlace={issuesOnly ? null : () => startPlacement('menu')}
 />
 
 {#if styleLoaded && !issuesOnly}
-	<AddPlaceMode {map} bind:active={placementActive} />
+	<AddPlaceMode {map} bind:active={placementActive} bind:name={placementName} />
 {/if}
 
 {#if styleLoaded && !issuesOnly && map}

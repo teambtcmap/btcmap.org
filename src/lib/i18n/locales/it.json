@@ -172,6 +172,8 @@
 		"searching": "Ricerca in corso...",
 		"noResults": "Nessun risultato trovato",
 		"noResultsFor": "Nessun risultato trovato per \"{query}\"",
+		"addPlacePrompt": "Non lo trovi?",
+		"addPlaceButton": "Aggiungilo alla mappa",
 		"prompt": "Cerca commercianti per nome",
 		"resultsCount": "{count} risultati",
 		"resultsCountOf": "{shown} di {total} risultati",

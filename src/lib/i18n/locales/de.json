@@ -64,6 +64,8 @@
 		"searching": "Suche...",
 		"noResults": "Keine Ergebnisse gefunden",
 		"noResultsFor": "Keine Ergebnisse für \"{query}\"",
+		"addPlacePrompt": "Nicht gefunden?",
+		"addPlaceButton": "Füge es zur Karte hinzu",
 		"prompt": "Suche nach Händlern bei Namen",
 		"resultsCount": "{count} Ergebnis(se)",
 		"resultsCountOf": "{shown} von {total} Ergebnis(se)",
