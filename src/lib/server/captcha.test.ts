@@ -38,6 +38,18 @@ describe("validateCaptcha", () => {
 		expect(caughtStatus(() => validateCaptcha(secret, "ABC12"))).toBeNull();
 	});
 
+	// #1617: glyphs come in random sizes, so c/C, o/O, s/S, x/X read alike;
+	// a quarter of anonymous submitters needed a second try
+	it("accepts the answer in any letter case", () => {
+		const secret = encryptSecret("AbCx12k");
+		expect(caughtStatus(() => validateCaptcha(secret, "aBcX12K"))).toBeNull();
+	});
+
+	it("accepts the answer with surrounding whitespace", () => {
+		const secret = encryptSecret("ABC16");
+		expect(caughtStatus(() => validateCaptcha(secret, " ABC16 "))).toBeNull();
+	});
+
 	it("rejects a wrong answer with 400", () => {
 		const secret = encryptSecret("ABC13");
 		expect(caughtStatus(() => validateCaptcha(secret, "nope"))).toBe(400);

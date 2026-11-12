@@ -18,7 +18,14 @@ export function GET() {
 	svgCaptcha.options.height = 100;
 	svgCaptcha.options.fontSize = 100;
 
-	const captcha = svgCaptcha.create({ size: 7, noise: 2, color: true });
+	// No look-alikes: with case ignored (#1617), 0/O/o and 1/l/I/i would
+	// still be guesses
+	const captcha = svgCaptcha.create({
+		size: 7,
+		noise: 2,
+		color: true,
+		ignoreChars: "0oO1lIi",
+	});
 
 	if (!captcha.data) {
 		error(

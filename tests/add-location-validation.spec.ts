@@ -306,10 +306,10 @@ test.describe('Add Location — inline validation', () => {
 		await goToReview(page);
 		await expect(page.getByText("Here's what will be published")).toBeVisible();
 
-		// The label reads its hint once: the strings used to carry their own
-		// parentheses inside the template's.
+		// The label is the field's name alone: the answer is case-insensitive
+		// since #1617, so there's no hint to carry.
 		await expect(page.locator('label[for="captcha"]')).toHaveText(
-			'Bot protection (case-sensitive)'
+			'Bot protection'
 		);
 
 		const captcha = page.locator('#captcha');

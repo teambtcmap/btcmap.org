@@ -458,7 +458,6 @@
 		"notes": "Заметки",
 		"contact": "Публичный контакт",
 		"captcha": "Защита от ботов",
-		"captchaCaseSensitive": "с учётом регистра",
 		"captchaRefresh": "Загрузить новую капчу",
 		"submitLocation": "Отправить место",
 		"submitReport": "Отправить отчёт",

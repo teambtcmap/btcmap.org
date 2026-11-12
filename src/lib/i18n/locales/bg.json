@@ -404,7 +404,6 @@
 	"forms": {
 		"address": "Адрес",
 		"captcha": "Защита от ботове",
-		"captchaCaseSensitive": "различава главни/малки букви",
 		"captchaRefresh": "Зареди нова captcha",
 		"category": "Категория",
 		"contact": "Публичен контакт",

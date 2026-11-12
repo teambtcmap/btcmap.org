@@ -573,7 +573,6 @@
 		"notes": "Note",
 		"contact": "Contatto Pubblico",
 		"captcha": "Protezione bot",
-		"captchaCaseSensitive": "case-sensitive",
 		"captchaRefresh": "Carica un nuovo captcha",
 		"submitLocation": "Invia posizione",
 		"submitReport": "Invia segnalazione",
