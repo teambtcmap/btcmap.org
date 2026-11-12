@@ -426,6 +426,32 @@ describe("merchantListStore — searchSession", () => {
 		expect(state.mode).toBe("search");
 	});
 
+	it("after clearSearchInput(), a failed search for the same query shows no offer", async () => {
+		merchantList.search("Kiosk Hamburg");
+		await dispatch();
+		merchantList.clearSearchInput();
+
+		(fetch as Mock).mockResolvedValue(new Response("", { status: 500 }));
+		merchantList.search("Kiosk Hamburg");
+		await dispatch();
+
+		expect(get(merchantList).mode).toBe("search");
+		expect(addFromSearchName(get(merchantList))).toBeNull();
+	});
+
+	it("after exitSearchMode(), a failed search for the same query shows no offer", async () => {
+		merchantList.search("Kiosk Hamburg");
+		await dispatch();
+		merchantList.exitSearchMode();
+
+		(fetch as Mock).mockResolvedValue(new Response("", { status: 500 }));
+		merchantList.search("Kiosk Hamburg");
+		await dispatch();
+
+		expect(get(merchantList).mode).toBe("search");
+		expect(addFromSearchName(get(merchantList))).toBeNull();
+	});
+
 	it("close() drops the offer", async () => {
 		merchantList.search("Kiosk Hamburg");
 		await dispatch();
