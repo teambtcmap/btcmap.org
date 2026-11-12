@@ -61,9 +61,10 @@ export type MerchantListState = {
 	// exceed searchResults.length; the panel surfaces the gap rather than
 	// presenting a truncated slice as the whole result set.
 	searchTotal: number;
-	// The query searchResults answer ("" when none). searchQuery is what the
-	// input shows, written per keystroke, so the two differ while a newer
-	// query waits on the debounce or after its request failed.
+	// The query searchResults answer: set when results land, "" from the
+	// next keystroke on (and when none). searchQuery is what the input
+	// shows, so the two differ while a query waits on the debounce or after
+	// its request failed.
 	resultsQuery: string;
 	isSearching: boolean;
 	// Category filter
@@ -738,7 +739,9 @@ function createMerchantListStore() {
 		// trimming here would silently drop results for queries typed with
 		// leading whitespace.
 		search(query: string, opts: { getCenter?: SearchCenterGetter } = {}) {
-			update((state) => ({ ...state, searchQuery: query }));
+			// A new query on screen: the results no longer answer it until
+			// it's searched (resultsQuery), even if it reads like the last one
+			update((state) => ({ ...state, searchQuery: query, resultsQuery: "" }));
 			if (query.trim().length >= 3) {
 				debouncedExecuteSearch(query, opts.getCenter);
 				return;

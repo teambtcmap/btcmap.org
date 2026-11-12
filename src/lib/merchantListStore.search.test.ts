@@ -404,6 +404,29 @@ describe("merchantListStore — searchSession", () => {
 		expect(addFromSearchName(get(merchantList))).toBeNull();
 	});
 
+	it("typing back to an empty query hides the offer until it's searched again", async () => {
+		merchantList.search("Kiosk");
+		await dispatch();
+
+		merchantList.search("Kiosk H");
+		merchantList.search("Kiosk");
+
+		expect(addFromSearchName(get(merchantList))).toBeNull();
+	});
+
+	it("a failed retry of an empty query shows no offer", async () => {
+		merchantList.search("Kiosk");
+		await dispatch();
+
+		(fetch as Mock).mockResolvedValue(new Response("", { status: 500 }));
+		merchantList.search("Kiosk H");
+		merchantList.search("Kiosk");
+		await dispatch();
+
+		expect(get(merchantList).mode).toBe("search");
+		expect(addFromSearchName(get(merchantList))).toBeNull();
+	});
+
 	it("a failed search shows no offer", async () => {
 		(fetch as Mock).mockResolvedValue(new Response("", { status: 500 }));
 
