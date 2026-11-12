@@ -34,9 +34,17 @@ import PointActionMenu from "./PointActionMenu.svelte";
 type Props = {
 	map: MapLibreMap | undefined;
 	active?: boolean;
+	// The name the next form opens with: a search that found nothing
+	// (#1621). Cleared when placement ends, and on Add another, since the
+	// second place is a different place.
+	name?: string;
 };
 
-let { map, active = $bindable(false) }: Props = $props();
+let { map, active = $bindable(false), name = $bindable("") }: Props = $props();
+
+$effect(() => {
+	if (!active) name = "";
+});
 
 // Raw (non-deep-proxying) state: `nearby` is always reassigned wholesale
 // (never mutated in place), and the confirm() identity guard below relies on
@@ -253,6 +261,7 @@ const closeForm = () => {
 };
 
 const addAnother = () => {
+	name = "";
 	trackEvent("add_place_enter", { method: "another" });
 	if (formEntryPushed) history.back();
 	else closeFormLocally();
@@ -544,6 +553,7 @@ $effect(() => {
 		<div class={repositioning ? 'hidden' : 'contents'}>
 			<AddPlaceFormPanel
 				coords={formCoords}
+				initialName={name}
 				hidden={repositioning}
 				onclose={closeForm}
 				onmovepin={startMovePin}

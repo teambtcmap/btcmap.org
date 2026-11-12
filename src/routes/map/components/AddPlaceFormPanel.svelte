@@ -26,10 +26,13 @@ type Props = {
 	// Success-screen actions: restart placement, or leave add mode.
 	onaddanother: () => void;
 	onexit: () => void;
+	// The form's starting name (AddLocationForm's initialName)
+	initialName?: string;
 };
 let {
 	coords,
 	hidden = false,
+	initialName = "",
 	onclose,
 	onmovepin,
 	onaddanother,
@@ -158,6 +161,7 @@ $effect(() => {
 			<AddLocationForm
 				{coords}
 				{hidden}
+				{initialName}
 				{onmovepin}
 				onstepchange={(next) => {
 					step = next;
