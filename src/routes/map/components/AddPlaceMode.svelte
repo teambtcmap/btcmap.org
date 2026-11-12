@@ -34,9 +34,24 @@ import PointActionMenu from "./PointActionMenu.svelte";
 type Props = {
 	map: MapLibreMap | undefined;
 	active?: boolean;
+	// The name the next form opens with: a search that found nothing
+	// (#1621). Cleared when placement ends, and on Add another, since the
+	// second place is a different place.
+	prefillName?: string;
+	// A place was submitted from the form
+	onsubmitted?: () => void;
 };
 
-let { map, active = $bindable(false) }: Props = $props();
+let {
+	map,
+	active = $bindable(false),
+	prefillName = $bindable(""),
+	onsubmitted,
+}: Props = $props();
+
+$effect(() => {
+	if (!active) prefillName = "";
+});
 
 // Raw (non-deep-proxying) state: `nearby` is always reassigned wholesale
 // (never mutated in place), and the confirm() identity guard below relies on
@@ -53,6 +68,14 @@ let namesLoaded = $state(false);
 // instead of it falling back to <body>.
 let backButtonEl: HTMLButtonElement | undefined = $state();
 let confirmButtonEl: HTMLButtonElement | undefined = $state();
+let zoomButtonEl: HTMLButtonElement | undefined = $state();
+
+// For an entry whose trigger hides as placement starts (the search
+// panel's add offer, #1621): focus would fall to <body>, so hand it to the
+// sheet's main action instead. Call after the sheet has rendered (tick).
+export function focusSheet() {
+	(confirmButtonEl ?? zoomButtonEl)?.focus();
+}
 
 // The in-map form host (#1134): confirming hands the pin to the form
 // panel instead of navigating to /add-location. From then on the pin is
@@ -253,6 +276,7 @@ const closeForm = () => {
 };
 
 const addAnother = () => {
+	prefillName = "";
 	trackEvent("add_place_enter", { method: "another" });
 	if (formEntryPushed) history.back();
 	else closeFormLocally();
@@ -544,11 +568,13 @@ $effect(() => {
 		<div class={repositioning ? 'hidden' : 'contents'}>
 			<AddPlaceFormPanel
 				coords={formCoords}
+				{prefillName}
 				hidden={repositioning}
 				onclose={closeForm}
 				onmovepin={startMovePin}
 				onaddanother={addAnother}
 				onexit={exitToMap}
+				{onsubmitted}
 			/>
 		</div>
 	{/if}
@@ -613,6 +639,7 @@ $effect(() => {
 					</button>
 					{#if zoomTooLow}
 						<button
+							bind:this={zoomButtonEl}
 							type="button"
 							onclick={zoomToPlace}
 							class="h-12 flex-1 rounded-xl bg-bitcoin font-semibold text-white hover:bg-bitcoinHover"

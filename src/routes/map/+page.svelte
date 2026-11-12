@@ -123,14 +123,23 @@ const isMobileLayout = browser && window.innerWidth < BREAKPOINTS.md;
 
 // Lets the floating search bar hand focus to the panel's input as it unmounts
 let merchantListPanel: MerchantListPanel;
+let addPlaceMode: ReturnType<typeof AddPlaceMode> | undefined;
 
 let placementActive = false;
+// The name the add form opens with, bound into AddPlaceMode (which clears
+// it when placement ends)
+let prefillName = "";
 
-// Menu-modal entry point; AddPlaceMode's URL-sync effect picks up the
-// bind:active flip, so this only has to set state and report the method.
-const startPlacement = () => {
+// The in-app entry points: the menu modal, and a map search that found
+// nothing, which hands over its query as the name (#1621). AddPlaceMode's
+// URL-sync effect picks up the bind:active flip, so this only has to set
+// state and report the method.
+const startPlacement = (method: "menu" | "search", name = "") => {
+	prefillName = name;
 	placementActive = true;
-	trackEvent("add_place_enter", { method: "menu" });
+	trackEvent("add_place_enter", { method });
+	// The search offer's button hides with the panel; don't strand focus
+	if (method === "search") tick().then(() => addPlaceMode?.focusSheet());
 };
 
 // Placement mode owns the bottom sheet's z-[1002] slot; a merchant drawer
@@ -1523,6 +1532,7 @@ onDestroy(() => {
 			// See onHoverStart above.
 		}}
 		onSearch={(query) => merchantList.search(query, { getCenter: readSearchCenter })}
+		onAddFromSearch={issuesOnly ? null : (name) => startPlacement('search', name)}
 		onRefresh={() => updateMerchantList({ force: true })}
 		behavior={listBehavior}
 		mapReady={styleLoaded}
@@ -1557,11 +1567,22 @@ onDestroy(() => {
 	enableGlobe
 	{globeOn}
 	onToggleGlobe={toggleGlobe}
-	onAddPlace={issuesOnly ? null : startPlacement}
+	onAddPlace={issuesOnly ? null : () => startPlacement('menu')}
 />
 
 {#if styleLoaded && !issuesOnly}
-	<AddPlaceMode {map} bind:active={placementActive} />
+	<!-- A place submitted from the search offer waits on review, so the
+	     search would offer it again on return: hide that offer (#1621).
+	     prefillName is set only for placements the offer started. -->
+	<AddPlaceMode
+		bind:this={addPlaceMode}
+		{map}
+		bind:active={placementActive}
+		bind:prefillName
+		onsubmitted={() => {
+			if (prefillName) merchantList.dismissAddOffer(prefillName);
+		}}
+	/>
 {/if}
 
 {#if styleLoaded && !issuesOnly && map}

@@ -26,14 +26,20 @@ type Props = {
 	// Success-screen actions: restart placement, or leave add mode.
 	onaddanother: () => void;
 	onexit: () => void;
+	// The form's starting name (AddLocationForm's prefillName)
+	prefillName?: string;
+	// A submission went through (before the success screen's actions)
+	onsubmitted?: () => void;
 };
 let {
 	coords,
 	hidden = false,
+	prefillName = "",
 	onclose,
 	onmovepin,
 	onaddanother,
 	onexit,
+	onsubmitted,
 }: Props = $props();
 
 let submitted = $state(false);
@@ -158,6 +164,7 @@ $effect(() => {
 			<AddLocationForm
 				{coords}
 				{hidden}
+				{prefillName}
 				{onmovepin}
 				onstepchange={(next) => {
 					step = next;
@@ -166,6 +173,7 @@ $effect(() => {
 					submitted = true;
 					submittedName = name;
 					submittedAnonymously = !attributed;
+					onsubmitted?.();
 				}}
 			/>
 		</div>

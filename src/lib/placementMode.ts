@@ -35,12 +35,14 @@ export const parseCoordsParams = (
 // redirect guard, the PWA shortcut, the post-submit "another" button.
 // Anything else — a bare ?add deep link or a hand-edited value — is a plain
 // URL entry, so the dimension stays bounded. The map enters it in-app too:
-// its menu, and a right click or long press on a point.
+// its menu, a search that found nothing (#1621), and a right click or long
+// press on a point.
 export type PlacementEntry = "nav" | "redirect" | "shortcut" | "another";
 export type AddEntryMethod =
 	| PlacementEntry
 	| "url"
 	| "menu"
+	| "search"
 	| "right_click"
 	| "long_press";
 const PLACEMENT_ENTRIES: ReadonlySet<string> = new Set<PlacementEntry>([

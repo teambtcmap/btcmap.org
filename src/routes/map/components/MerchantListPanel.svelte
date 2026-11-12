@@ -14,7 +14,7 @@ import { deriveNearbyListStatus } from "#lib/map/nearbyListStatus.js";
 import type { ZoomBehavior } from "#lib/map/viewport.js";
 import { selectVisiblePlaces } from "#lib/map/visiblePlaces.js";
 import { merchantDrawer } from "#lib/merchantDrawerStore.js";
-import { merchantList } from "#lib/merchantListStore.js";
+import { addFromSearchName, merchantList } from "#lib/merchantListStore.js";
 import type { Place } from "#lib/types.js";
 import { userLocation } from "#lib/userLocationStore.js";
 import { errToast, formatNearbyPillCount } from "#lib/utils.js";
@@ -68,6 +68,9 @@ export let onRefresh: (() => void) | undefined = undefined;
 // set — deriving it page-side from raw searchResults is how it drifted.
 export let onFitSearchResultBounds: ((places: Place[]) => void) | undefined =
 	undefined;
+// Start the add flow with a search's query as the place name (#1621). null
+// where adding isn't available (?issues), which hides the offer.
+export let onAddFromSearch: ((name: string) => void) | null = null;
 // Map style readiness — gates the mobile peek sheet so it doesn't show over the loading screen
 export let mapReady = false;
 // ?issues worklist (#921): the issues bar is the mode's filter control, so
@@ -330,6 +333,7 @@ $: searchResults = $merchantList.searchResults;
 $: searchTotal = $merchantList.searchTotal;
 $: isSearching = $merchantList.isSearching;
 $: searchQuery = $merchantList.searchQuery;
+$: prefillName = onAddFromSearch ? addFromSearchName($merchantList) : null;
 $: selectedCategory = $merchantList.selectedCategory;
 $: categoryCounts = $merchantList.categoryCounts;
 $: verifiedWithinYears = $merchantList.verifiedWithinYears;
@@ -797,6 +801,20 @@ onDestroy(() => {
 								{$_('search.prompt')}
 							{/if}
 						</p>
+						{#if prefillName}
+							<!-- Whoever searched for a shop the map lacks is the likeliest
+							     to add it (#1621); the query becomes the form's name. -->
+							<p class="mt-2 text-sm text-body dark:text-white/70">
+								{$_('search.addPlacePrompt')}
+							</p>
+							<button
+								type="button"
+								on:click={() => prefillName && onAddFromSearch?.(prefillName)}
+								class="rounded-full border border-link px-4 py-1.5 text-sm font-semibold text-link transition-colors hover:bg-link hover:text-white focus:outline-link"
+							>
+								{$_('search.addPlaceButton')}
+							</button>
+						{/if}
 					</div>
 				{:else if filteredSearchResults.length === 0}
 					<!-- Has results, but a client-side filter removed them all -->

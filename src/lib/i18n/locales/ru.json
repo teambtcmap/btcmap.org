@@ -64,6 +64,8 @@
 		"searching": "Поиск...",
 		"noResults": "Результатов не найдено",
 		"noResultsFor": "Результатов не найдено по запросу \"{query}\"",
+		"addPlacePrompt": "Не нашли?",
+		"addPlaceButton": "Добавьте на карту",
 		"prompt": "Поиск торговцев по названию",
 		"resultsCount": "{count} результат(ов)",
 		"resultsCountOf": "{shown} из {total} результат(ов)",

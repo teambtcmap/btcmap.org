@@ -172,6 +172,8 @@
 		"searching": "Aan het zoeken...",
 		"noResults": "Geen resultaten gevonden",
 		"noResultsFor": "Er zijn geen resultaten gevonden voor \"{query}\"",
+		"addPlacePrompt": "Niet gevonden?",
+		"addPlaceButton": "Voeg het toe aan de kaart",
 		"prompt": "Zoek ondernemers op naam",
 		"resultsCount": "{count} resulta(a)t(en)",
 		"resultsCountOf": "{shown} van {total} resulta(a)t(en)",

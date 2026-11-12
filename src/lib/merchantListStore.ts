@@ -61,6 +61,16 @@ export type MerchantListState = {
 	// exceed searchResults.length; the panel surfaces the gap rather than
 	// presenting a truncated slice as the whole result set.
 	searchTotal: number;
+	// The query searchResults answer: set when results land, "" from the
+	// next keystroke on (and when none). searchQuery is what the input
+	// shows, so the two differ while a query waits on the debounce or after
+	// its request failed.
+	resultsQuery: string;
+	// The name of the last place submitted from the add offer ("" none). Its
+	// offer stays hidden for the session: the submission waits on review, so
+	// a new search still comes back empty and the nearby-duplicate check
+	// can't see it either.
+	dismissedOfferName: string;
 	isSearching: boolean;
 	// Category filter
 	selectedCategory: CategoryKey;
@@ -80,6 +90,23 @@ export type MerchantListState = {
 	unknownPaymentCount: number;
 };
 
+// What every path that clears the search resets: the input, its results
+// and the request in flight. dismissedOfferName outlives it on purpose.
+const EMPTY_SEARCH: Pick<
+	MerchantListState,
+	| "searchQuery"
+	| "searchResults"
+	| "searchTotal"
+	| "resultsQuery"
+	| "isSearching"
+> = {
+	searchQuery: "",
+	searchResults: [],
+	searchTotal: 0,
+	resultsQuery: "",
+	isSearching: false,
+};
+
 const initialState: MerchantListState = {
 	isOpen: false,
 	merchants: [],
@@ -89,10 +116,8 @@ const initialState: MerchantListState = {
 	isEnrichingDetails: false,
 	listError: false,
 	mode: "nearby",
-	searchQuery: "",
-	searchResults: [],
-	searchTotal: 0,
-	isSearching: false,
+	...EMPTY_SEARCH,
+	dismissedOfferName: "",
 	selectedCategory: "all",
 	categoryCounts: createEmptyCategoryCounts(),
 	verifiedWithinYears: getStoredVerifiedFilter(),
@@ -248,6 +273,7 @@ function createMerchantListStore() {
 			// Total matches on the server, which can exceed what it returned —
 			// the panel shows "N of TOTAL" so truncation isn't silent.
 			searchTotal: total,
+			resultsQuery: query,
 			isSearching: false,
 			categoryCounts,
 			unknownPaymentCount: 0,
@@ -344,6 +370,7 @@ function createMerchantListStore() {
 			// rewrite the input mid-word and reset the caret.
 			if (get(store).searchQuery !== query) return;
 			applySearchResults(query, results, total);
+			if (results.length === 0) trackEvent("search_no_results");
 		} catch (error) {
 			if (error instanceof Error && error.name === "AbortError") return;
 			// Same staleness check as the success path. The user has typed
@@ -395,10 +422,7 @@ function createMerchantListStore() {
 				...resetCategoryState(state),
 				isOpen: false,
 				mode: "nearby",
-				searchQuery: "",
-				searchResults: [],
-				searchTotal: 0,
-				isSearching: false,
+				...EMPTY_SEARCH,
 			}));
 		},
 
@@ -730,7 +754,9 @@ function createMerchantListStore() {
 		// trimming here would silently drop results for queries typed with
 		// leading whitespace.
 		search(query: string, opts: { getCenter?: SearchCenterGetter } = {}) {
-			update((state) => ({ ...state, searchQuery: query }));
+			// A new query on screen: the results no longer answer it until
+			// it's searched (resultsQuery), even if it reads like the last one
+			update((state) => ({ ...state, searchQuery: query, resultsQuery: "" }));
 			if (query.trim().length >= 3) {
 				debouncedExecuteSearch(query, opts.getCenter);
 				return;
@@ -754,16 +780,19 @@ function createMerchantListStore() {
 			cancelSearchSession();
 		},
 
+		// The place the offer named was just submitted (#1621): hide its
+		// offer (see dismissedOfferName), keep the search on screen.
+		dismissAddOffer(name: string) {
+			update((state) => ({ ...state, dismissedOfferName: name }));
+		},
+
 		// Clear search input and results, but stay in search mode
 		// Use when: user clears the search input (e.g., clicking X button)
 		// Markers reset because searchResultIds becomes empty, triggering normal marker reload
 		clearSearchInput() {
 			update((state) => ({
 				...resetCategoryState(state),
-				searchQuery: "",
-				searchResults: [],
-				searchTotal: 0,
-				isSearching: false,
+				...EMPTY_SEARCH,
 			}));
 		},
 
@@ -773,10 +802,7 @@ function createMerchantListStore() {
 			update((state) => ({
 				...resetCategoryState(state),
 				mode: "nearby",
-				searchQuery: "",
-				searchResults: [],
-				searchTotal: 0,
-				isSearching: false,
+				...EMPTY_SEARCH,
 			}));
 		},
 
@@ -872,5 +898,23 @@ function createMerchantListStore() {
 		},
 	};
 }
+
+// The name to offer adding to the map (#1621): set only once a search has
+// come back empty for the query on screen. Not while a newer query waits on
+// the debounce, not after a failed request, whose empty list proves
+// nothing, and not for a place just submitted from the offer.
+export const addFromSearchName = (state: MerchantListState): string | null => {
+	if (
+		state.mode !== "search" ||
+		state.isSearching ||
+		state.searchResults.length > 0 ||
+		state.resultsQuery === "" ||
+		state.resultsQuery !== state.searchQuery
+	) {
+		return null;
+	}
+	const name = state.resultsQuery.trim();
+	return name === state.dismissedOfferName ? null : name;
+};
 
 export const merchantList = createMerchantListStore();

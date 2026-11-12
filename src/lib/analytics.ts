@@ -178,6 +178,7 @@ type EventPayloads = {
 	save_prompt_shown: { type: SavedItemType };
 	search_bar_tap_expand: undefined;
 	search_input_focus: { source: "panel" };
+	search_no_results: undefined;
 	search_query: undefined;
 	search_sheet_swipe_collapse: undefined;
 	search_sheet_swipe_expand: undefined;

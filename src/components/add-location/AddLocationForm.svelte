@@ -85,6 +85,10 @@ type Props = {
 	// unmounted, which is what lets the "keeps your answers" clause be
 	// true. Focus returns to Move pin when it clears.
 	hidden?: boolean;
+	// The name field's starting value, for an entry that already knows the
+	// place: a search that found nothing (#1621). Read once at mount; the
+	// field is the user's from then on.
+	prefillName?: string;
 };
 let {
 	coords,
@@ -92,6 +96,7 @@ let {
 	onstepchange,
 	onmovepin,
 	hidden = false,
+	prefillName = "",
 }: Props = $props();
 
 type FormStep = "place" | "details" | "review";
@@ -343,7 +348,7 @@ const details = ruleValidation({
 
 const detailsForm = createForm(() => ({
 	defaultValues: {
-		name: "",
+		name: untrack(() => prefillName),
 		nameEn: "",
 		address: "",
 		category: "",

@@ -64,6 +64,8 @@
 		"searching": "Recherche en cours...",
 		"noResults": "Aucun résultat trouvé",
 		"noResultsFor": "Aucun résultat trouvé pour « {query} »",
+		"addPlacePrompt": "Vous ne le trouvez pas ?",
+		"addPlaceButton": "Ajoutez-le à la carte",
 		"prompt": "Rechercher des commerces par nom",
 		"resultsCount": "{count} résultat(s)",
 		"resultsCountOf": "{shown} sur {total} résultat(s)",

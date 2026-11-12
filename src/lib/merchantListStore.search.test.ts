@@ -73,7 +73,7 @@ import { merchantDrawer } from "#lib/merchantDrawerStore.js";
 import { errToast } from "#lib/utils.js";
 
 // Import after mocks are set up
-import { merchantList } from "./merchantListStore";
+import { addFromSearchName, merchantList } from "./merchantListStore";
 
 const okResponse = (places: unknown[], total = places.length) =>
 	new Response(JSON.stringify({ places, total }), { status: 200 });
@@ -147,6 +147,8 @@ describe("merchantListStore — searchSession", () => {
 	});
 
 	it("dispatch-time side effects fire at dispatch, not at the keystroke", async () => {
+		// Results, so search_no_results doesn't join the one search_query call
+		(fetch as Mock).mockResolvedValue(okResponse([place(1)]));
 		merchantList.search("El Zonte");
 
 		expect(trackEvent).not.toHaveBeenCalled();
@@ -357,5 +359,155 @@ describe("merchantListStore — searchSession", () => {
 
 		await dispatch();
 		expect(fetch).not.toHaveBeenCalled();
+	});
+	it("an empty search fires search_no_results once", async () => {
+		merchantList.search("Kiosk Hamburg");
+		await dispatch();
+
+		const noResults = vi
+			.mocked(trackEvent)
+			.mock.calls.filter(([name]) => name === "search_no_results");
+		expect(noResults).toHaveLength(1);
+	});
+
+	it("a search with results fires no search_no_results", async () => {
+		(fetch as Mock).mockResolvedValue(okResponse([place(1)]));
+
+		merchantList.search("El Zonte");
+		await dispatch();
+
+		expect(trackEvent).not.toHaveBeenCalledWith("search_no_results");
+	});
+
+	it("the offer carries the trimmed query", async () => {
+		merchantList.search("  Kiosk Hamburg ");
+		await dispatch();
+
+		expect(addFromSearchName(get(merchantList))).toBe("Kiosk Hamburg");
+	});
+
+	it("results mean no offer", async () => {
+		(fetch as Mock).mockResolvedValue(okResponse([place(1)]));
+
+		merchantList.search("El Zonte");
+		await dispatch();
+
+		expect(addFromSearchName(get(merchantList))).toBeNull();
+	});
+
+	it("typing past an empty search hides the offer", async () => {
+		merchantList.search("Kiosk");
+		await dispatch();
+
+		merchantList.search("Kiosk H");
+
+		expect(addFromSearchName(get(merchantList))).toBeNull();
+	});
+
+	it("typing back to an empty query hides the offer until it's searched again", async () => {
+		merchantList.search("Kiosk");
+		await dispatch();
+
+		merchantList.search("Kiosk H");
+		merchantList.search("Kiosk");
+
+		expect(addFromSearchName(get(merchantList))).toBeNull();
+	});
+
+	it("a failed retry of an empty query shows no offer", async () => {
+		merchantList.search("Kiosk");
+		await dispatch();
+
+		(fetch as Mock).mockResolvedValue(new Response("", { status: 500 }));
+		merchantList.search("Kiosk H");
+		merchantList.search("Kiosk");
+		await dispatch();
+
+		expect(get(merchantList).mode).toBe("search");
+		expect(addFromSearchName(get(merchantList))).toBeNull();
+	});
+
+	it("a failed search shows no offer", async () => {
+		(fetch as Mock).mockResolvedValue(new Response("", { status: 500 }));
+
+		merchantList.search("Kiosk Hamburg");
+		await dispatch();
+
+		expect(get(merchantList).mode).toBe("search");
+		expect(addFromSearchName(get(merchantList))).toBeNull();
+	});
+
+	it("dismissAddOffer(name) hides that offer and keeps the search", async () => {
+		merchantList.search("Kiosk Hamburg");
+		await dispatch();
+
+		merchantList.dismissAddOffer("Kiosk Hamburg");
+
+		const state = get(merchantList);
+		expect(addFromSearchName(state)).toBeNull();
+		expect(state.searchQuery).toBe("Kiosk Hamburg");
+		expect(state.resultsQuery).toBe("Kiosk Hamburg");
+		expect(state.mode).toBe("search");
+	});
+
+	it("a dismissed offer stays hidden when its query is searched again", async () => {
+		// Two searches: each needs its own Response (a body reads once)
+		(fetch as Mock).mockImplementation(async () => okResponse([]));
+		merchantList.search("Kiosk Hamburg");
+		await dispatch();
+		merchantList.dismissAddOffer("Kiosk Hamburg");
+
+		merchantList.search(" Kiosk Hamburg");
+		await dispatch();
+
+		expect(addFromSearchName(get(merchantList))).toBeNull();
+	});
+
+	it("a dismissed offer doesn't hide another query's offer", async () => {
+		// Two searches: each needs its own Response (a body reads once)
+		(fetch as Mock).mockImplementation(async () => okResponse([]));
+		merchantList.search("Kiosk Hamburg");
+		await dispatch();
+		merchantList.dismissAddOffer("Kiosk Hamburg");
+
+		merchantList.search("Other shop");
+		await dispatch();
+
+		expect(addFromSearchName(get(merchantList))).toBe("Other shop");
+	});
+
+	it("after clearSearchInput(), a failed search for the same query shows no offer", async () => {
+		merchantList.search("Kiosk Hamburg");
+		await dispatch();
+		merchantList.clearSearchInput();
+
+		(fetch as Mock).mockResolvedValue(new Response("", { status: 500 }));
+		merchantList.search("Kiosk Hamburg");
+		await dispatch();
+
+		expect(get(merchantList).mode).toBe("search");
+		expect(addFromSearchName(get(merchantList))).toBeNull();
+	});
+
+	it("after exitSearchMode(), a failed search for the same query shows no offer", async () => {
+		merchantList.search("Kiosk Hamburg");
+		await dispatch();
+		merchantList.exitSearchMode();
+
+		(fetch as Mock).mockResolvedValue(new Response("", { status: 500 }));
+		merchantList.search("Kiosk Hamburg");
+		await dispatch();
+
+		expect(get(merchantList).mode).toBe("search");
+		expect(addFromSearchName(get(merchantList))).toBeNull();
+	});
+
+	it("close() drops the offer", async () => {
+		merchantList.search("Kiosk Hamburg");
+		await dispatch();
+
+		merchantList.close();
+
+		expect(addFromSearchName(get(merchantList))).toBeNull();
 	});
 });
