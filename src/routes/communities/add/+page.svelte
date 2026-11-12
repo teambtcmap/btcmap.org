@@ -10,6 +10,7 @@ import {
 } from "#lib/addCommunityValidation.js";
 import { createCaptchaGate } from "#lib/captchaGate.svelte.js";
 import { fieldBorderClasses } from "#lib/fieldStyles.js";
+import { searchAreas } from "#lib/geocoding.js";
 import { fieldError, inputProps, ruleValidation } from "#lib/ruleValidation.js";
 import { theme } from "#lib/theme.js";
 import type { NominatimResponse } from "#lib/types.js";
@@ -140,21 +141,21 @@ const form = createForm(() => ({
 	},
 }));
 
+// The Search button and Enter share this: a blank query or a second search
+// while one runs would wipe the picked area for nothing (#1422)
+const searchDisabled = $derived(
+	!captcha.secret || searchLoading || !searchQuery.trim(),
+);
+
 const searchLocation = () => {
+	if (searchDisabled) return;
 	searchLoading = true;
 	searchResults = [];
 	form.setFieldValue("location", "");
 
-	axios
-		.get<NominatimResponse[]>(
-			`https://nominatim.openstreetmap.org/search?q=${searchQuery}&format=json&polygon_geojson=1&email=hello@btcmap.org`,
-		)
-		.then((response) => {
-			searchResults = response.data.filter(
-				(area) =>
-					area.geojson?.type === "Polygon" ||
-					area.geojson?.type === "MultiPolygon",
-			);
+	searchAreas(searchQuery)
+		.then((areas) => {
+			searchResults = areas;
 			if (!searchResults.length) {
 				warningToast(t("addCommunityForm.noLocationsWarning"));
 			}
@@ -284,8 +285,8 @@ onMount(async () => {
 								type="button"
 								onclick={searchLocation}
 								loading={searchLoading}
-								disabled={!captcha.secret || searchLoading || !searchQuery}
-								style="{!searchQuery
+								disabled={searchDisabled}
+								style="{!searchQuery.trim()
 									? 'opacity-50 hover:bg-link'
 									: ''} w-full md:w-[210px] py-3 rounded-xl"
 							>

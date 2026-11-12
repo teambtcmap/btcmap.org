@@ -1,5 +1,7 @@
 import axios from "axios";
 
+import type { NominatimResponse } from "#lib/types.js";
+
 type NominatimAddress = {
 	house_number?: string;
 	road?: string;
@@ -122,4 +124,25 @@ export const searchAddress = async (
 		}
 	}
 	return results;
+};
+
+// The community form's area picker (/communities/add): areas only, since a
+// community's location is a boundary, not a point. The query travels as an
+// axios param so `&`, `#` or `?` in it stay part of the search (#1422).
+// Failures throw: the form reports them.
+export const searchAreas = async (
+	query: string,
+): Promise<NominatimResponse[]> => {
+	const response = await axios.get<NominatimResponse[]>(NOMINATIM_SEARCH_URL, {
+		params: {
+			q: query,
+			format: "json",
+			polygon_geojson: 1,
+			email: "hello@btcmap.org",
+		},
+	});
+	return response.data.filter(
+		(area) =>
+			area.geojson?.type === "Polygon" || area.geojson?.type === "MultiPolygon",
+	);
 };

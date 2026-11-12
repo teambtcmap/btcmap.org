@@ -1,7 +1,7 @@
 import axios from "axios";
 import { afterEach, describe, expect, it, vi } from "vitest";
 
-import { reverseGeocode, searchAddress } from "./geocoding";
+import { reverseGeocode, searchAddress, searchAreas } from "./geocoding";
 
 vi.mock("axios");
 const mockedAxios = vi.mocked(axios, true);
@@ -140,5 +140,55 @@ describe("searchAddress", () => {
 		mockedAxios.get.mockRejectedValueOnce(new Error("timeout"));
 
 		await expect(searchAddress("tor", "en")).rejects.toThrow("timeout");
+	});
+});
+
+describe("searchAreas", () => {
+	it("sends the query as one URL-encoded parameter (#1422)", async () => {
+		mockedAxios.get.mockResolvedValueOnce({ data: [] });
+
+		await searchAreas("Bars & Cafés #1?");
+
+		const [url, config] = mockedAxios.get.mock.calls[0];
+		// Build the URL with the real axios: the mock records the call, the
+		// real serializer shows what reaches Nominatim.
+		const { default: realAxios } =
+			await vi.importActual<typeof import("axios")>("axios");
+		const sent = new URL(realAxios.getUri({ url, params: config?.params }));
+		expect(`${sent.origin}${sent.pathname}`).toBe(
+			"https://nominatim.openstreetmap.org/search",
+		);
+		expect(sent.searchParams.get("q")).toBe("Bars & Cafés #1?");
+		expect(sent.searchParams.get("format")).toBe("json");
+		expect(sent.searchParams.get("polygon_geojson")).toBe("1");
+		expect(sent.hash).toBe("");
+	});
+
+	it("keeps only results with a polygon boundary", async () => {
+		const area = (type: string, display_name: string) => ({
+			display_name,
+			geojson: { type, coordinates: [] },
+		});
+		mockedAxios.get.mockResolvedValueOnce({
+			data: [
+				area("Polygon", "Sofia"),
+				area("Point", "Sofia bus stop"),
+				area("MultiPolygon", "Sofia Province"),
+				{ display_name: "No geometry" },
+			],
+		});
+
+		const results = await searchAreas("Sofia");
+
+		expect(results.map((result) => result.display_name)).toEqual([
+			"Sofia",
+			"Sofia Province",
+		]);
+	});
+
+	it("rejects on request failure so the form can report it", async () => {
+		mockedAxios.get.mockRejectedValueOnce(new Error("timeout"));
+
+		await expect(searchAreas("Sofia")).rejects.toThrow("timeout");
 	});
 });

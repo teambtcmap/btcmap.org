@@ -1,4 +1,4 @@
-import type { Page } from '@playwright/test';
+import type { Page, Route } from '@playwright/test';
 import { expect, test } from '@playwright/test';
 
 import {
@@ -23,22 +23,24 @@ const CAPTCHA = 'Enter the characters from the image.';
 
 type SubmitProbe = { __formEvents?: string[] };
 
+const isAreaSearch = (u: URL) =>
+	u.hostname === 'nominatim.openstreetmap.org' && u.pathname === '/search';
+
+const fulfillSofia = (route: Route) =>
+	route.fulfill({
+		status: 200,
+		contentType: 'application/json',
+		body: JSON.stringify([
+			{
+				display_name: 'Sofia, Bulgaria',
+				geojson: { type: 'Polygon', coordinates: [] }
+			}
+		])
+	});
+
 const openForm = async (page: Page) => {
 	await stubCaptcha(page);
-	await page.route(
-		(u) => u.hostname === 'nominatim.openstreetmap.org' && u.pathname === '/search',
-		(route) =>
-			route.fulfill({
-				status: 200,
-				contentType: 'application/json',
-				body: JSON.stringify([
-					{
-						display_name: 'Sofia, Bulgaria',
-						geojson: { type: 'Polygon', coordinates: [] }
-					}
-				])
-			})
-	);
+	await page.route(isAreaSearch, fulfillSofia);
 	const sent: Record<string, unknown>[] = [];
 	await page.route('**/api/gitea/issue', async (route) => {
 		sent.push(route.request().postDataJSON());
@@ -183,5 +185,80 @@ test.describe('Add Community — inline validation', () => {
 			captchaTest: 'abc123'
 		});
 		await expect(page.getByRole('link', { name: 'Issue #42' })).toBeVisible();
+	});
+});
+
+// The area search (#1422): Enter does what the Search button does (nothing
+// for a blank query or while a search runs), and the query reaches
+// Nominatim whole.
+test.describe('Add Community — area search', () => {
+	test.use({ serviceWorkers: 'block' });
+
+	// Lets the keydown handler and Svelte's flush run before a one-shot
+	// check: a retrying assertion would pass before a late wipe.
+	const settle = (page: Page) =>
+		page.evaluate(() => new Promise((resolve) => requestAnimationFrame(resolve)));
+
+	for (const [label, blank] of [
+		['an empty', ''],
+		['a whitespace-only', '   ']
+	]) {
+		test(`Enter on ${label} query keeps the picked area`, async ({ page }) => {
+			await openForm(page);
+			const searches: string[] = [];
+			page.on('request', (r) => {
+				if (isAreaSearch(new URL(r.url()))) searches.push(r.url());
+			});
+			await pickLocation(page);
+			const form = page.locator('#add-community');
+			// The picked area, not a result button a stray search re-lists
+			const picked = form.locator('p', { hasText: 'Sofia, Bulgaria' });
+			const selected = form.getByText('Location selected!', { exact: true });
+			await expect(picked).toBeVisible();
+			expect(searches).toHaveLength(1);
+
+			const search = page.getByLabel('Select Location');
+			await search.fill(blank);
+			await search.press('Enter');
+			await settle(page);
+
+			expect(await picked.count()).toBe(1);
+			expect(await selected.count()).toBe(1);
+			expect(searches).toHaveLength(1);
+		});
+	}
+
+	test('Enter while a search runs sends no second one', async ({ page }) => {
+		await openForm(page);
+		let release = () => {};
+		const held = new Promise<void>((resolve) => (release = resolve));
+		const searches: string[] = [];
+		await page.route(isAreaSearch, async (route) => {
+			searches.push(route.request().url());
+			await held;
+			await fulfillSofia(route);
+		});
+
+		const search = page.getByLabel('Select Location');
+		await search.fill('Sofia');
+		await search.press('Enter');
+		await expect.poll(() => searches.length).toBe(1);
+		await search.press('Enter');
+		await settle(page);
+		release();
+
+		await expect(page.getByRole('button', { name: 'Sofia, Bulgaria' })).toBeVisible();
+		expect(searches).toHaveLength(1);
+	});
+
+	test('Enter sends the whole query, URL-encoded', async ({ page }) => {
+		await openForm(page);
+		const search = page.getByLabel('Select Location');
+		await search.fill('Bars & Cafés #1?');
+		const request = page.waitForRequest((r) => isAreaSearch(new URL(r.url())));
+		await search.press('Enter');
+
+		expect(new URL((await request).url()).searchParams.get('q')).toBe('Bars & Cafés #1?');
+		await expect(page.getByRole('button', { name: 'Sofia, Bulgaria' })).toBeVisible();
 	});
 });
