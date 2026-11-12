@@ -1568,13 +1568,16 @@ onDestroy(() => {
 />
 
 {#if styleLoaded && !issuesOnly}
-	<!-- A submitted place waits on review, so the search that offered it
-	     would offer it again on return: drop that offer (#1621) -->
+	<!-- A place submitted from the search offer waits on review, so the
+	     search would offer it again on return: hide that offer (#1621).
+	     placementName is set only for placements the offer started. -->
 	<AddPlaceMode
 		{map}
 		bind:active={placementActive}
 		bind:name={placementName}
-		onsubmitted={() => merchantList.dismissAddOffer()}
+		onsubmitted={() => {
+			if (placementName) merchantList.dismissAddOffer(placementName);
+		}}
 	/>
 {/if}
 

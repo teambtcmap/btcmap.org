@@ -437,16 +437,43 @@ describe("merchantListStore — searchSession", () => {
 		expect(addFromSearchName(get(merchantList))).toBeNull();
 	});
 
-	it("dismissAddOffer() hides the offer and keeps the search", async () => {
+	it("dismissAddOffer(name) hides that offer and keeps the search", async () => {
 		merchantList.search("Kiosk Hamburg");
 		await dispatch();
 
-		merchantList.dismissAddOffer();
+		merchantList.dismissAddOffer("Kiosk Hamburg");
 
 		const state = get(merchantList);
 		expect(addFromSearchName(state)).toBeNull();
 		expect(state.searchQuery).toBe("Kiosk Hamburg");
+		expect(state.resultsQuery).toBe("Kiosk Hamburg");
 		expect(state.mode).toBe("search");
+	});
+
+	it("a dismissed offer stays hidden when its query is searched again", async () => {
+		// Two searches: each needs its own Response (a body reads once)
+		(fetch as Mock).mockImplementation(async () => okResponse([]));
+		merchantList.search("Kiosk Hamburg");
+		await dispatch();
+		merchantList.dismissAddOffer("Kiosk Hamburg");
+
+		merchantList.search(" Kiosk Hamburg");
+		await dispatch();
+
+		expect(addFromSearchName(get(merchantList))).toBeNull();
+	});
+
+	it("a dismissed offer doesn't hide another query's offer", async () => {
+		// Two searches: each needs its own Response (a body reads once)
+		(fetch as Mock).mockImplementation(async () => okResponse([]));
+		merchantList.search("Kiosk Hamburg");
+		await dispatch();
+		merchantList.dismissAddOffer("Kiosk Hamburg");
+
+		merchantList.search("Other shop");
+		await dispatch();
+
+		expect(addFromSearchName(get(merchantList))).toBe("Other shop");
 	});
 
 	it("after clearSearchInput(), a failed search for the same query shows no offer", async () => {

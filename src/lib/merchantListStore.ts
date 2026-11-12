@@ -66,6 +66,11 @@ export type MerchantListState = {
 	// shows, so the two differ while a query waits on the debounce or after
 	// its request failed.
 	resultsQuery: string;
+	// The name of the last place submitted from the add offer ("" none). Its
+	// offer stays hidden for the session: the submission waits on review, so
+	// a new search still comes back empty and the nearby-duplicate check
+	// can't see it either.
+	dismissedOfferName: string;
 	isSearching: boolean;
 	// Category filter
 	selectedCategory: CategoryKey;
@@ -98,6 +103,7 @@ const initialState: MerchantListState = {
 	searchResults: [],
 	searchTotal: 0,
 	resultsQuery: "",
+	dismissedOfferName: "",
 	isSearching: false,
 	selectedCategory: "all",
 	categoryCounts: createEmptyCategoryCounts(),
@@ -765,12 +771,10 @@ function createMerchantListStore() {
 			cancelSearchSession();
 		},
 
-		// The place the offer named was just submitted (#1621): drop the
-		// offer, keep the search on screen. The submission waits on review,
-		// so the empty result is still true, and the nearby-duplicate check
-		// can't see it either.
-		dismissAddOffer() {
-			update((state) => ({ ...state, resultsQuery: "" }));
+		// The place the offer named was just submitted (#1621): hide its
+		// offer (see dismissedOfferName), keep the search on screen.
+		dismissAddOffer(name: string) {
+			update((state) => ({ ...state, dismissedOfferName: name }));
 		},
 
 		// Clear search input and results, but stay in search mode
@@ -896,15 +900,20 @@ function createMerchantListStore() {
 
 // The name to offer adding to the map (#1621): set only once a search has
 // come back empty for the query on screen. Not while a newer query waits on
-// the debounce, and not after a failed request, whose empty list proves
-// nothing.
-export const addFromSearchName = (state: MerchantListState): string | null =>
-	state.mode === "search" &&
-	!state.isSearching &&
-	state.searchResults.length === 0 &&
-	state.resultsQuery !== "" &&
-	state.resultsQuery === state.searchQuery
-		? state.resultsQuery.trim()
-		: null;
+// the debounce, not after a failed request, whose empty list proves
+// nothing, and not for a place just submitted from the offer.
+export const addFromSearchName = (state: MerchantListState): string | null => {
+	if (
+		state.mode !== "search" ||
+		state.isSearching ||
+		state.searchResults.length > 0 ||
+		state.resultsQuery === "" ||
+		state.resultsQuery !== state.searchQuery
+	) {
+		return null;
+	}
+	const name = state.resultsQuery.trim();
+	return name === state.dismissedOfferName ? null : name;
+};
 
 export const merchantList = createMerchantListStore();
