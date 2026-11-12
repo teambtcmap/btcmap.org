@@ -90,6 +90,23 @@ export type MerchantListState = {
 	unknownPaymentCount: number;
 };
 
+// What every path that clears the search resets: the input, its results
+// and the request in flight. dismissedOfferName outlives it on purpose.
+const EMPTY_SEARCH: Pick<
+	MerchantListState,
+	| "searchQuery"
+	| "searchResults"
+	| "searchTotal"
+	| "resultsQuery"
+	| "isSearching"
+> = {
+	searchQuery: "",
+	searchResults: [],
+	searchTotal: 0,
+	resultsQuery: "",
+	isSearching: false,
+};
+
 const initialState: MerchantListState = {
 	isOpen: false,
 	merchants: [],
@@ -99,12 +116,8 @@ const initialState: MerchantListState = {
 	isEnrichingDetails: false,
 	listError: false,
 	mode: "nearby",
-	searchQuery: "",
-	searchResults: [],
-	searchTotal: 0,
-	resultsQuery: "",
+	...EMPTY_SEARCH,
 	dismissedOfferName: "",
-	isSearching: false,
 	selectedCategory: "all",
 	categoryCounts: createEmptyCategoryCounts(),
 	verifiedWithinYears: getStoredVerifiedFilter(),
@@ -409,11 +422,7 @@ function createMerchantListStore() {
 				...resetCategoryState(state),
 				isOpen: false,
 				mode: "nearby",
-				searchQuery: "",
-				searchResults: [],
-				searchTotal: 0,
-				resultsQuery: "",
-				isSearching: false,
+				...EMPTY_SEARCH,
 			}));
 		},
 
@@ -783,11 +792,7 @@ function createMerchantListStore() {
 		clearSearchInput() {
 			update((state) => ({
 				...resetCategoryState(state),
-				searchQuery: "",
-				searchResults: [],
-				searchTotal: 0,
-				resultsQuery: "",
-				isSearching: false,
+				...EMPTY_SEARCH,
 			}));
 		},
 
@@ -797,11 +802,7 @@ function createMerchantListStore() {
 			update((state) => ({
 				...resetCategoryState(state),
 				mode: "nearby",
-				searchQuery: "",
-				searchResults: [],
-				searchTotal: 0,
-				resultsQuery: "",
-				isSearching: false,
+				...EMPTY_SEARCH,
 			}));
 		},
 
