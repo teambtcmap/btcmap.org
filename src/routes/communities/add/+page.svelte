@@ -141,14 +141,13 @@ const form = createForm(() => ({
 	},
 }));
 
+const queryBlank = $derived(!searchQuery.trim());
 // The Search button and Enter share this: a blank query or a second search
 // while one runs would wipe the picked area for nothing (#1422)
-const searchDisabled = $derived(
-	!captcha.secret || searchLoading || !searchQuery.trim(),
-);
+const canSearch = $derived(!!captcha.secret && !searchLoading && !queryBlank);
 
 const searchLocation = () => {
-	if (searchDisabled) return;
+	if (!canSearch) return;
 	searchLoading = true;
 	searchResults = [];
 	form.setFieldValue("location", "");
@@ -285,8 +284,8 @@ onMount(async () => {
 								type="button"
 								onclick={searchLocation}
 								loading={searchLoading}
-								disabled={searchDisabled}
-								style="{!searchQuery.trim()
+								disabled={!canSearch}
+								style="{queryBlank
 									? 'opacity-50 hover:bg-link'
 									: ''} w-full md:w-[210px] py-3 rounded-xl"
 							>

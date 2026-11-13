@@ -219,6 +219,8 @@ test.describe('Add Community — area search', () => {
 
 			const search = page.getByLabel('Select Location');
 			await search.fill(blank);
+			// The button refuses the same queries Enter does
+			await expect(page.getByRole('button', { name: 'Search 🔍' })).toBeDisabled();
 			await search.press('Enter');
 			await settle(page);
 
