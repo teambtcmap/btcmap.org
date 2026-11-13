@@ -13,7 +13,7 @@ import { fieldBorderClasses } from "#lib/fieldStyles.js";
 import { searchAreas } from "#lib/geocoding.js";
 import { fieldError, inputProps, ruleValidation } from "#lib/ruleValidation.js";
 import { theme } from "#lib/theme.js";
-import type { NominatimResponse } from "#lib/types.js";
+import type { NominatimArea } from "#lib/types.js";
 import { errToast, successToast, warningToast } from "#lib/utils.js";
 import Breadcrumbs from "$components/Breadcrumbs.svelte";
 import FormHelperText from "$components/FormHelperText.svelte";
@@ -51,7 +51,7 @@ let submitting = $state(false);
 let submissionIssueNumber = $state<number>();
 
 let searchQuery = $state("");
-let searchResults = $state<NominatimResponse[]>([]);
+let searchResults = $state<NominatimArea[]>([]);
 let searchLoading = $state(false);
 
 let searchInput = $state<HTMLInputElement>();

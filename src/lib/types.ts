@@ -1,4 +1,4 @@
-import type { GeoJSON, MultiPolygon, Polygon } from "geojson";
+import type { GeoJSON, Geometry, MultiPolygon, Polygon } from "geojson";
 
 import type { MobileNavIconName } from "#lib/icons/types.js";
 
@@ -9,7 +9,9 @@ import type { Event as ApiEvent } from "$types/btcmap-api/Event";
 // nominatim.openstreetmap.org API
 // https://nominatim.org/release-docs/latest/api/Search
 
-export interface NominatimResponse {
+// One /search result. With polygon_geojson=1, geojson is the result's own
+// geometry: a point or a line for anything without a boundary.
+export type NominatimResponse = {
 	place_id: number;
 	licence: string;
 	osm_type: string;
@@ -24,8 +26,13 @@ export interface NominatimResponse {
 	name?: string;
 	display_name: string;
 	boundingbox: [string, string, string, string];
-	geojson?: Polygon | MultiPolygon; // Use GeoJSON types here
-}
+	geojson?: Geometry;
+};
+
+// A result with a boundary: what a community's area can be.
+export type NominatimArea = NominatimResponse & {
+	geojson: Polygon | MultiPolygon;
+};
 
 // BACKEND
 
