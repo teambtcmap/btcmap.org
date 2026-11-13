@@ -88,6 +88,10 @@ type NominatimSearchResult = {
 };
 
 const NOMINATIM_SEARCH_URL = "https://nominatim.openstreetmap.org/search";
+// Area searches return whole boundaries (polygon_geojson), which can take
+// 20+ s on a slow link, hence the longer limit. Without one a hung request
+// keeps the form's search locked: it allows one search at a time (#1422).
+const AREA_SEARCH_TIMEOUT_MS = 30_000;
 
 // Forward geocoding for placement mode's "type an address to jump there"
 // (#1134) — explicit-submit only, so request volume is one per search the
@@ -140,6 +144,7 @@ export const searchAreas = async (
 			polygon_geojson: 1,
 			email: "hello@btcmap.org",
 		},
+		timeout: AREA_SEARCH_TIMEOUT_MS,
 	});
 	return response.data.filter(
 		(area) =>

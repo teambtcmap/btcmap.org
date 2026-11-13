@@ -164,6 +164,14 @@ describe("searchAreas", () => {
 		expect(sent.hash).toBe("");
 	});
 
+	it("gives up on a hung search after 30 s so the form can retry", async () => {
+		mockedAxios.get.mockResolvedValueOnce({ data: [] });
+
+		await searchAreas("Sofia");
+
+		expect(mockedAxios.get.mock.calls[0][1]?.timeout).toBe(30_000);
+	});
+
 	it("keeps only results with a polygon boundary", async () => {
 		const area = (type: string, display_name: string) => ({
 			display_name,
