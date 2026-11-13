@@ -230,6 +230,30 @@ test.describe('Add Community — area search', () => {
 		});
 	}
 
+	for (const [outcome, answer, toast] of [
+		['fails', { status: 500, body: '' }, 'Could not search for locations'],
+		['finds nothing', { status: 200, body: '[]' }, 'No locations found']
+	] as const) {
+		test(`a search that ${outcome} keeps the picked area`, async ({ page }) => {
+			await openForm(page);
+			await pickLocation(page);
+			const form = page.locator('#add-community');
+			const picked = form.locator('p', { hasText: 'Sofia, Bulgaria' });
+			await expect(picked).toBeVisible();
+
+			await page.route(isAreaSearch, (route) =>
+				route.fulfill({ ...answer, contentType: 'application/json' })
+			);
+			const search = page.getByLabel('Select Location');
+			await search.fill('Plovdiv');
+			await search.press('Enter');
+			await expect(page.getByText(toast)).toBeVisible();
+
+			expect(await picked.count()).toBe(1);
+			expect(await form.getByText('Location selected!', { exact: true }).count()).toBe(1);
+		});
+	}
+
 	test('Enter while a search runs sends no second one', async ({ page }) => {
 		await openForm(page);
 		let release = () => {};

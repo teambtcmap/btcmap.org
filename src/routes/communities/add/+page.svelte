@@ -142,28 +142,31 @@ const form = createForm(() => ({
 }));
 
 const queryBlank = $derived(!searchQuery.trim());
-// The Search button and Enter share this: a blank query or a second search
-// while one runs would wipe the picked area for nothing (#1422)
+// The Search button and Enter share this: no request for a blank query,
+// and one search at a time (#1422)
 const canSearch = $derived(!!captcha.secret && !searchLoading && !queryBlank);
 
 const searchLocation = () => {
 	if (!canSearch) return;
 	searchLoading = true;
-	searchResults = [];
-	form.setFieldValue("location", "");
 
 	searchAreas(searchQuery)
 		.then((areas) => {
-			searchResults = areas;
-			if (!searchResults.length) {
+			if (!areas.length) {
 				warningToast(t("addCommunityForm.noLocationsWarning"));
+				return;
 			}
-			searchLoading = false;
+			// The picked area and the list stay until there are new areas to
+			// pick from: a failed or empty search mustn't cost them (#1422)
+			searchResults = areas;
+			form.setFieldValue("location", "");
 		})
 		.catch((error) => {
 			errToast(t("addCommunityForm.searchError"));
-			searchLoading = false;
 			console.error(error);
+		})
+		.finally(() => {
+			searchLoading = false;
 		});
 };
 
@@ -301,9 +304,11 @@ onMount(async () => {
 							>
 								{#if !field.state.value}
 									{#each searchResults as area, index (area.display_name)}
-										<!-- type="button": picking a result mustn't submit. -->
+										<!-- type="button": picking a result mustn't submit.
+									     Disabled while a search runs: its answer replaces this list. -->
 										<button
 											type="button"
+											disabled={searchLoading}
 											onclick={() => setLocation(area)}
 											class="{index !== searchResults.length - 1
 												? 'border-b'
