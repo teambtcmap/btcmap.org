@@ -10,9 +10,10 @@ import {
 } from "#lib/addCommunityValidation.js";
 import { createCaptchaGate } from "#lib/captchaGate.svelte.js";
 import { fieldBorderClasses } from "#lib/fieldStyles.js";
+import { searchAreas } from "#lib/geocoding.js";
 import { fieldError, inputProps, ruleValidation } from "#lib/ruleValidation.js";
 import { theme } from "#lib/theme.js";
-import type { NominatimResponse } from "#lib/types.js";
+import type { NominatimArea } from "#lib/types.js";
 import { errToast, successToast, warningToast } from "#lib/utils.js";
 import Breadcrumbs from "$components/Breadcrumbs.svelte";
 import FormHelperText from "$components/FormHelperText.svelte";
@@ -50,7 +51,7 @@ let submitting = $state(false);
 let submissionIssueNumber = $state<number>();
 
 let searchQuery = $state("");
-let searchResults = $state<NominatimResponse[]>([]);
+let searchResults = $state<NominatimArea[]>([]);
 let searchLoading = $state(false);
 
 let searchInput = $state<HTMLInputElement>();
@@ -140,30 +141,32 @@ const form = createForm(() => ({
 	},
 }));
 
-const searchLocation = () => {
-	searchLoading = true;
-	searchResults = [];
-	form.setFieldValue("location", "");
+const queryBlank = $derived(!searchQuery.trim());
+// The Search button and Enter share this: no request for a blank query,
+// and one search at a time (#1422)
+const canSearch = $derived(!!captcha.secret && !searchLoading && !queryBlank);
 
-	axios
-		.get<NominatimResponse[]>(
-			`https://nominatim.openstreetmap.org/search?q=${searchQuery}&format=json&polygon_geojson=1&email=hello@btcmap.org`,
-		)
-		.then((response) => {
-			searchResults = response.data.filter(
-				(area) =>
-					area.geojson?.type === "Polygon" ||
-					area.geojson?.type === "MultiPolygon",
-			);
-			if (!searchResults.length) {
+const searchLocation = () => {
+	if (!canSearch) return;
+	searchLoading = true;
+
+	searchAreas(searchQuery)
+		.then((areas) => {
+			if (!areas.length) {
 				warningToast(t("addCommunityForm.noLocationsWarning"));
+				return;
 			}
-			searchLoading = false;
+			// The picked area and the list stay until there are new areas to
+			// pick from: a failed or empty search mustn't cost them (#1422)
+			searchResults = areas;
+			form.setFieldValue("location", "");
 		})
 		.catch((error) => {
 			errToast(t("addCommunityForm.searchError"));
-			searchLoading = false;
 			console.error(error);
+		})
+		.finally(() => {
+			searchLoading = false;
 		});
 };
 
@@ -284,8 +287,8 @@ onMount(async () => {
 								type="button"
 								onclick={searchLocation}
 								loading={searchLoading}
-								disabled={!captcha.secret || searchLoading || !searchQuery}
-								style="{!searchQuery
+								disabled={!canSearch}
+								style="{queryBlank
 									? 'opacity-50 hover:bg-link'
 									: ''} w-full md:w-[210px] py-3 rounded-xl"
 							>
@@ -301,9 +304,11 @@ onMount(async () => {
 							>
 								{#if !field.state.value}
 									{#each searchResults as area, index (area.display_name)}
-										<!-- type="button": picking a result mustn't submit. -->
+										<!-- type="button": picking a result mustn't submit.
+									     Disabled while a search runs: its answer replaces this list. -->
 										<button
 											type="button"
+											disabled={searchLoading}
 											onclick={() => setLocation(area)}
 											class="{index !== searchResults.length - 1
 												? 'border-b'

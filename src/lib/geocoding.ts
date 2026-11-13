@@ -1,5 +1,7 @@
 import axios from "axios";
 
+import type { NominatimArea, NominatimResponse } from "#lib/types.js";
+
 type NominatimAddress = {
 	house_number?: string;
 	road?: string;
@@ -86,6 +88,10 @@ type NominatimSearchResult = {
 };
 
 const NOMINATIM_SEARCH_URL = "https://nominatim.openstreetmap.org/search";
+// Area searches return whole boundaries (polygon_geojson), which can take
+// 20+ s on a slow link, hence the longer limit. Without one a hung request
+// keeps the form's search locked: it allows one search at a time (#1422).
+const AREA_SEARCH_TIMEOUT_MS = 30_000;
 
 // Forward geocoding for placement mode's "type an address to jump there"
 // (#1134) — explicit-submit only, so request volume is one per search the
@@ -122,4 +128,24 @@ export const searchAddress = async (
 		}
 	}
 	return results;
+};
+
+const isArea = (result: NominatimResponse): result is NominatimArea =>
+	result.geojson?.type === "Polygon" || result.geojson?.type === "MultiPolygon";
+
+// The community form's area picker (/communities/add): areas only, since a
+// community's location is a boundary, not a point. The query travels as an
+// axios param so `&`, `#` or `?` in it stay part of the search (#1422).
+// Failures throw: the form reports them.
+export const searchAreas = async (query: string): Promise<NominatimArea[]> => {
+	const response = await axios.get<NominatimResponse[]>(NOMINATIM_SEARCH_URL, {
+		params: {
+			q: query,
+			format: "json",
+			polygon_geojson: 1,
+			email: "hello@btcmap.org",
+		},
+		timeout: AREA_SEARCH_TIMEOUT_MS,
+	});
+	return response.data.filter(isArea);
 };
