@@ -4,19 +4,26 @@ import tippy from "tippy.js";
 import Icon from "$components/Icon.svelte";
 import Skeleton from "$components/Skeleton.svelte";
 
-export let title: string;
-export let stat: number | undefined;
-export let percent: string | undefined = undefined;
-export let border: string | undefined = undefined;
-export let tooltip: undefined | string = undefined;
+type Props = {
+	title: string;
+	stat: number | undefined;
+	percent?: string;
+	border?: string;
+	tooltip?: string;
+};
 
-let tooltipElement: HTMLButtonElement;
+let { title, stat, percent, border, tooltip }: Props = $props();
 
-$: tooltipElement &&
-	tippy([tooltipElement], {
+let tooltipElement = $state<HTMLButtonElement>();
+
+$effect(() => {
+	if (!tooltipElement) return;
+	const instance = tippy(tooltipElement, {
 		content: tooltip,
 		allowHTML: true,
 	});
+	return () => instance.destroy();
+});
 </script>
 
 <div class="space-y-5 p-5 {border}">
