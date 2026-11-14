@@ -1,31 +1,50 @@
 <script lang="ts">
-import tippy from "tippy.js";
+import {
+	Tooltip,
+	TooltipArrow,
+	TooltipContent,
+	TooltipTrigger,
+} from "@ui-sdk/svelte/tooltip";
 
 import Icon from "$components/Icon.svelte";
 import Skeleton from "$components/Skeleton.svelte";
 
-export let title: string;
-export let stat: number | undefined;
-export let percent: string | undefined = undefined;
-export let border: string | undefined = undefined;
-export let tooltip: undefined | string = undefined;
+type Props = {
+	title: string;
+	stat: number | undefined;
+	percent?: string;
+	border?: string;
+	tooltip?: string;
+};
 
-let tooltipElement: HTMLButtonElement;
+let { title, stat, percent, border, tooltip }: Props = $props();
 
-$: tooltipElement &&
-	tippy([tooltipElement], {
-		content: tooltip,
-		allowHTML: true,
-	});
+// Rendered into <body>, where tippy put it: in place, the tooltip's <div>
+// would sit inside the <h3> and join the heading's name while open
+const tooltipContainer =
+	typeof document === "undefined" ? undefined : document.body;
 </script>
 
 <div class="space-y-5 p-5 {border}">
 	<h3 class="text-center text-lg font-semibold text-primary md:text-left dark:text-white">
 		{title}
 		{#if tooltip}
-			<button bind:this={tooltipElement}>
-				<Icon type="fa" icon="circle-info" w="16" h="16" class="text-base" />
-			</button>
+			<!-- toggleable: a tap opens it too, touch screens have no hover -->
+			<Tooltip toggleable delay={0} container={tooltipContainer}>
+				<TooltipTrigger>
+					<Icon type="fa" icon="circle-info" w="16" h="16" class="text-base" aria-hidden="true" />
+				</TooltipTrigger>
+				<!-- tippy.js's default theme: #333 box, 10px gap, 300ms fade -->
+				<TooltipContent
+					sideOffset={10}
+					class="w-max max-w-[350px] rounded bg-[#333] px-[9px] py-[5px] text-sm leading-[1.4] text-white transition-opacity duration-300 data-ending-style:opacity-0 data-starting-style:opacity-0 motion-reduce:transition-none"
+				>
+					<TooltipArrow
+						class="size-[11px] rotate-45 bg-[#333] data-[side=bottom]:-top-[5.5px] data-[side=left]:-right-[5.5px] data-[side=right]:-left-[5.5px] data-[side=top]:-bottom-[5.5px]"
+					/>
+					{tooltip}
+				</TooltipContent>
+			</Tooltip>
 		{/if}
 	</h3>
 

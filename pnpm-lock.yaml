@@ -26,6 +26,12 @@ importers:
       '@tanstack/svelte-table':
         specifier: ^9.3.1
         version: 9.3.1(svelte@5.57.3)
+      '@ui-sdk/core':
+        specifier: 0.1.0-beta.1
+        version: 0.1.0-beta.1
+      '@ui-sdk/svelte':
+        specifier: 0.1.0-beta.1
+        version: 0.1.0-beta.1(@ui-sdk/core@0.1.0-beta.1)(svelte@5.57.3)
       axios:
         specifier: ^1.21.0
         version: 1.21.0(debug@4.4.3)
@@ -1095,6 +1101,15 @@ packages:
 
   '@types/trusted-types@2.0.7':
     resolution: {integrity: sha512-ScaPdn1dQczgbl0QFTeTOmVHFULt394XJgOQNoyVhZ6r2vLnMLJfBPd53SB52T/3G36VI1/g2MZaX0cwDuXsfw==}
+
+  '@ui-sdk/core@0.1.0-beta.1':
+    resolution: {integrity: sha512-sWsZW8RN6Gviir7REQYuDIafm9hierHQE31OJ+2g+1Pp3lDVKp/dk0+0dxFvqOQRmBveRvlE9FiARgNlQ9dMFw==}
+
+  '@ui-sdk/svelte@0.1.0-beta.1':
+    resolution: {integrity: sha512-nQQaFKn7e/M87yj/ax7JgZc3uYjiacmKs05ljCIrdOiPbkiROGcbKHgngVZUF7x0GJWhGTDg67Yc28kirKUoLA==}
+    peerDependencies:
+      '@ui-sdk/core': ^0.1.0-beta.1
+      svelte: '>=5.33'
 
   '@vitest/mocker@5.1.0':
     resolution: {integrity: sha512-5umB9/jlWcqVS6fsrFmv5Gdnpu6wAUio/lEOwAmvB7v+lFo/IW2B9FhAD0p19GCULTgMzLCdUmuCDCnAzWgppQ==}
@@ -2757,6 +2772,13 @@ snapshots:
 
   '@types/trusted-types@2.0.7':
     optional: true
+
+  '@ui-sdk/core@0.1.0-beta.1': {}
+
+  '@ui-sdk/svelte@0.1.0-beta.1(@ui-sdk/core@0.1.0-beta.1)(svelte@5.57.3)':
+    dependencies:
+      '@ui-sdk/core': 0.1.0-beta.1
+      svelte: 5.57.3
 
   '@vitest/mocker@5.1.0(vite@8.3.6(@types/node@24.19.2)(esbuild@0.27.4)(jiti@2.7.0)(yaml@2.9.1))':
     dependencies:

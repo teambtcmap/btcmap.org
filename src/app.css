@@ -1,3 +1,6 @@
+/* Declared first so it ranks lowest: our styles win over the few rules
+   UI SDK (@ui-sdk/svelte) adds to the page, like hiding a closed popup */
+@layer ui-sdk;
 @import "tailwindcss";
 @config "../tailwind.config.js";
 
