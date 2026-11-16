@@ -5,10 +5,11 @@ import { BadResponseError } from "#lib/apiError.js";
 import type { AuthedClient } from "#lib/authedApi.js";
 import { authedClient } from "#lib/authedApi.js";
 import api from "#lib/axios.js";
-import type { CurrentUser, Role } from "#lib/currentUser.js";
+import type { CurrentUser } from "#lib/currentUser.js";
 import { withLiteralCommas } from "#lib/literalCommas.js";
 
 import type { PlaceImage } from "$types/btcmap-api/PlaceImage";
+import type { Role } from "$types/btcmap-api/Role";
 
 // Community photos of a place (btcmap-api place images, #1469). The list
 // call returns metadata only, so the UI can lay out exact-ratio boxes and
