@@ -5,26 +5,28 @@ import { errorStatus } from "#lib/apiError.js";
 import { authedClient } from "#lib/authedApi.js";
 import { session } from "#lib/session.js";
 
+import type { Role } from "$types/btcmap-api/Role";
+
 // The signed-in user's id and roles. The session only keeps the username
 // and token, but ownership checks (e.g. who may delete a place photo) need
 // the numeric id that the API attributes content to.
 export type CurrentUser = { id: number; roles: Role[] };
 
-// btcmap-api's Role enum as it serializes; it isn't in bindings/ts, so it
-// lives here. Unknown values are dropped rather than trusted.
-const ROLES = [
-	"user",
-	"admin",
-	"root",
-	"places_source",
-	"event_manager",
-	"area_manager",
-	"dashboard",
-] as const;
-export type Role = (typeof ROLES)[number];
+// Every role of the generated Role type, as a value to filter with: a role
+// the API adds fails the typecheck here until it's listed. A role from a
+// newer API than these bindings is dropped rather than trusted.
+const KNOWN_ROLES: Record<Role, true> = {
+	user: true,
+	admin: true,
+	root: true,
+	places_source: true,
+	event_manager: true,
+	area_manager: true,
+	dashboard: true,
+};
 
 const isRole = (value: unknown): value is Role =>
-	(ROLES as readonly unknown[]).includes(value);
+	typeof value === "string" && Object.hasOwn(KNOWN_ROLES, value);
 
 // One request per token for a few minutes, so a role change (e.g. a new
 // admin, or a revoked one) applies without a reload; failures aren't

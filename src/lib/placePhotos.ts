@@ -5,10 +5,11 @@ import { BadResponseError } from "#lib/apiError.js";
 import type { AuthedClient } from "#lib/authedApi.js";
 import { authedClient } from "#lib/authedApi.js";
 import api from "#lib/axios.js";
-import type { CurrentUser, Role } from "#lib/currentUser.js";
+import type { CurrentUser } from "#lib/currentUser.js";
 import { withLiteralCommas } from "#lib/literalCommas.js";
 
 import type { PlaceImage } from "$types/btcmap-api/PlaceImage";
+import type { Role } from "$types/btcmap-api/Role";
 
 // Community photos of a place (btcmap-api place images, #1469). The list
 // call returns metadata only, so the UI can lay out exact-ratio boxes and
@@ -65,17 +66,21 @@ export const fetchPlacePhotos = async (
 	return res.data.filter(isPlaceImage);
 };
 
+// Admin and root may delete and reorder any place's photos
+const MODERATOR_ROLES: readonly Role[] = ["admin", "root"];
+
+const isModerator = (user: CurrentUser): boolean =>
+	user.roles.some((role) => MODERATOR_ROLES.includes(role));
+
 // Mirrors the API rule: the uploader may delete their own photo, admin and
 // root any photo. The API still enforces it (403); this only decides
 // whether to offer the action.
-const MODERATOR_ROLES: readonly Role[] = ["admin", "root"];
-
 export const canDeletePhoto = (
 	photo: PlaceImage,
 	user: CurrentUser | null,
 ): boolean => {
 	if (!user) return false;
-	if (user.roles.some((role) => MODERATOR_ROLES.includes(role))) return true;
+	if (isModerator(user)) return true;
 	const uploaderId = photo.author?.id ?? photo.created_by;
 	return uploaderId !== undefined && uploaderId === user.id;
 };
@@ -102,10 +107,7 @@ export const deleteErrorKey = (
 export const canReorderPhotos = (
 	photos: PlaceImage[] | undefined,
 	user: CurrentUser | null,
-): boolean =>
-	!!user &&
-	user.roles.some((role) => MODERATOR_ROLES.includes(role)) &&
-	(photos?.length ?? 0) >= 2;
+): boolean => !!user && isModerator(user) && (photos?.length ?? 0) >= 2;
 
 // Sends every photo of the place in display order; the API answers 409 when
 // the list no longer matches (a photo was added or deleted meanwhile) and

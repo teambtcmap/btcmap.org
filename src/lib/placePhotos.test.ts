@@ -490,17 +490,24 @@ describe("prependUploaded", () => {
 		]);
 	});
 
-	it("keeps the arranged copy when a refetch already placed the upload", () => {
-		// Switch away and back mid-upload, and an admin had already arranged
-		// the new photo: its upload response must not undo that slot
+	it("keeps the slot of an upload a refetch arranged and lands the rest after the arranged photos", () => {
+		// The admin arranged one upload of the batch before its response came
+		// back; the other is still new and lands after the arranged photos
 		const first = { ...a, position: 0 };
 		const placed = { ...fresh, position: 1 };
 		const second = { ...b, position: 2 };
-		const result = prependUploaded([fresh], [first, placed, second]);
+		const older = { ...photo, id: 4 };
+		const unarranged = { ...photo, id: 5 };
+		const result = prependUploaded(
+			[fresh, unarranged],
+			[first, placed, second, older],
+		);
 		expect(result.map((p) => [p.id, p.position])).toEqual([
 			[1, 0],
 			[3, 1],
 			[2, 2],
+			[5, undefined],
+			[4, undefined],
 		]);
 	});
 

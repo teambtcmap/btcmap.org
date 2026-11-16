@@ -4,6 +4,7 @@ import { API_BASE } from "#lib/api-base.js";
 
 import { fetchCurrentUser, resetCurrentUserCache } from "./currentUser";
 import { session } from "./session";
+import type { Role } from "$types/btcmap-api/Role";
 
 vi.mock("#lib/axios.js", () => ({ default: { get: vi.fn(), post: vi.fn() } }));
 
@@ -85,17 +86,36 @@ describe("fetchCurrentUser", () => {
 		expect(await fetchCurrentUser()).toEqual({ id: 1, roles: ["admin"] });
 	});
 
+	it("drops role names every object inherits", async () => {
+		const { default: api } = await import("#lib/axios.js");
+		vi.mocked(api.get).mockResolvedValue({
+			data: {
+				id: 1,
+				roles: [
+					"constructor",
+					"toString",
+					"__proto__",
+					"hasOwnProperty",
+					"admin",
+				],
+			},
+		});
+		expect(await fetchCurrentUser()).toEqual({ id: 1, roles: ["admin"] });
+	});
+
 	it("keeps every role the API defines", async () => {
 		const { default: api } = await import("#lib/axios.js");
-		const all = [
-			"user",
-			"admin",
-			"root",
-			"places_source",
-			"event_manager",
-			"area_manager",
-			"dashboard",
-		];
+		// Checked against the generated Role: a role the API adds fails the
+		// typecheck here until this list has it too
+		const all = Object.keys({
+			user: true,
+			admin: true,
+			root: true,
+			places_source: true,
+			event_manager: true,
+			area_manager: true,
+			dashboard: true,
+		} satisfies Record<Role, true>);
 		vi.mocked(api.get).mockResolvedValue({ data: { id: 1, roles: all } });
 		expect(await fetchCurrentUser()).toEqual({ id: 1, roles: all });
 	});
