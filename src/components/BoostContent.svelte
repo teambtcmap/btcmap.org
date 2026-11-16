@@ -50,6 +50,9 @@ onDestroy(() => {
 	boostError = null;
 });
 
+// The invoice whose failed finish already showed a warning
+let finalizeWarnedFor = "";
+
 const handlePaymentSuccess = async () => {
 	if ($boostHash === invoiceId) {
 		return;
@@ -77,7 +80,12 @@ const handlePaymentSuccess = async () => {
 		// and retries this on its next paid answer, which a set $boostHash
 		// would turn away, wedging stage 1 after a transient re-verify failure.
 		$boostHash = "";
-		warningToast($_("boost.finalizeError"));
+		// The retry has no end while the modal is open: warn once per invoice,
+		// not every polling interval
+		if (finalizeWarnedFor !== invoiceId) {
+			finalizeWarnedFor = invoiceId;
+			warningToast($_("boost.finalizeError"));
+		}
 		throw error;
 	}
 };
