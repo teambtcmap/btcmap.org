@@ -490,7 +490,7 @@ describe("prependUploaded", () => {
 		]);
 	});
 
-	it("handles a batch where a refetch arranged only some uploads", () => {
+	it("keeps the slot of an upload a refetch arranged and lands the rest after the arranged photos", () => {
 		// The admin arranged one upload of the batch before its response came
 		// back; the other is still new and lands after the arranged photos
 		const first = { ...a, position: 0 };
