@@ -497,9 +497,9 @@ describe("prependUploaded", () => {
 		const placed = { ...fresh, position: 1 };
 		const second = { ...b, position: 2 };
 		const older = { ...photo, id: 4 };
-		const another = { ...photo, id: 5 };
+		const unarranged = { ...photo, id: 5 };
 		const result = prependUploaded(
-			[fresh, another],
+			[fresh, unarranged],
 			[first, placed, second, older],
 		);
 		expect(result.map((p) => [p.id, p.position])).toEqual([
