@@ -65,17 +65,21 @@ export const fetchPlacePhotos = async (
 	return res.data.filter(isPlaceImage);
 };
 
+// Admin and root may delete and reorder any place's photos
+const MODERATOR_ROLES: readonly Role[] = ["admin", "root"];
+
+const isModerator = (user: CurrentUser): boolean =>
+	user.roles.some((role) => MODERATOR_ROLES.includes(role));
+
 // Mirrors the API rule: the uploader may delete their own photo, admin and
 // root any photo. The API still enforces it (403); this only decides
 // whether to offer the action.
-const MODERATOR_ROLES: readonly Role[] = ["admin", "root"];
-
 export const canDeletePhoto = (
 	photo: PlaceImage,
 	user: CurrentUser | null,
 ): boolean => {
 	if (!user) return false;
-	if (user.roles.some((role) => MODERATOR_ROLES.includes(role))) return true;
+	if (isModerator(user)) return true;
 	const uploaderId = photo.author?.id ?? photo.created_by;
 	return uploaderId !== undefined && uploaderId === user.id;
 };
@@ -102,10 +106,7 @@ export const deleteErrorKey = (
 export const canReorderPhotos = (
 	photos: PlaceImage[] | undefined,
 	user: CurrentUser | null,
-): boolean =>
-	!!user &&
-	user.roles.some((role) => MODERATOR_ROLES.includes(role)) &&
-	(photos?.length ?? 0) >= 2;
+): boolean => !!user && isModerator(user) && (photos?.length ?? 0) >= 2;
 
 // Sends every photo of the place in display order; the API answers 409 when
 // the list no longer matches (a photo was added or deleted meanwhile) and
