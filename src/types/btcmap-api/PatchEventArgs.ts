@@ -8,9 +8,10 @@
 export type PatchEventArgs = { area_id?: number | null, lat?: number, lon?: number, name?: string, website?: string, 
 /**
  * RFC 3339 with an offset, or a floating local datetime that needs
- * `timezone` to be placed on the timeline. Cannot be cleared.
+ * `timezone` to be placed on the timeline. `null` is rejected: an event
+ * cannot lose its start time.
  */
-starts_at?: string | null, ends_at?: string | null, 
+starts_at?: string, ends_at?: string | null, 
 /**
  * Either `"auto"` (infer from newly supplied lat/lon) or an IANA zone
  * name. Only needed when a timestamp in this request has no offset.
