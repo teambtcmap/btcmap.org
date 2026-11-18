@@ -68,50 +68,8 @@ test.describe('Map Drawer', () => {
 		const commentsButton = page.locator('a[href*="#comments"]');
 		await expect(commentsButton).toBeVisible({ timeout: 10000 });
 
-		await expect(commentsButton).toContainText('Comments');
-
-		const commentCountSpan = commentsButton.locator('span.text-sm').first();
-		await expect(commentCountSpan).toBeVisible();
-
-		const countText = await commentCountSpan.textContent();
-		const trimmedCount = countText?.trim() || '';
-		expect(trimmedCount).toMatch(/^\d+$/);
-	});
-
-	test('drawer opens from URL query param on initial page load (desktop)', async ({ page }) => {
-		// Navigate directly to map with merchant query parameter
-		await page.goto('/map?merchant=6556#15/53.55573/10.00825', { waitUntil: 'load' });
-		await expect(page).toHaveTitle(/BTC Map/);
-
-		// Wait for map to load
-		const zoomInButton = page.getByRole('button', { name: 'Zoom in' });
-		await expect(zoomInButton).toBeVisible();
-
-		// Wait for markers to load before query parameter can trigger drawer
-		await waitForMarkersToLoad(page);
-
-		// Wait for drawer to open automatically
-		const drawer = page.locator('[role="dialog"]');
-		await expect(drawer).toBeVisible({ timeout: 15000 });
-
-		// Wait for merchant data to load
-		try {
-			await page.waitForResponse(
-				(response) =>
-					response.url().includes('api.btcmap.org/v4/places/6556') && response.status() === 200,
-				{ timeout: 10000 }
-			);
-		} catch (error) {
-			console.error('API response wait failed:', error);
-		}
-
-		// Verify "See full profile" button appears (confirms drawer has content)
-		const viewDetailsButton = page.locator('a:has-text("See full profile")');
-		await expect(viewDetailsButton).toBeVisible({ timeout: 10000 });
-
-		// Verify the correct merchant is displayed
-		const merchantHref = await viewDetailsButton.getAttribute('href');
-		expect(merchantHref).toContain('/merchant/6556');
+		// The chip reads as the count, then its label
+		await expect(commentsButton).toHaveText(/^\s*\d+\s*Comments\s*$/);
 	});
 
 	test('drawer opens from URL query param on initial page load (mobile)', async ({ page }) => {

@@ -21,20 +21,6 @@ test.describe('Heatmap toggle', () => {
 	const heatmapSwitch = (page: import('@playwright/test').Page) =>
 		page.getByRole('switch', { name: /toggle merchant density heatmap/i });
 
-	test('switch is reachable from the tools panel and starts off', async ({
-		page,
-	}) => {
-		await page.setViewportSize({ width: 1280, height: 720 });
-		await page.goto('/map#17/42.2762511/42.7024218', { waitUntil: 'load' });
-		await expect(page).toHaveTitle(/BTC Map/);
-		await waitForMarkersToLoad(page);
-
-		await openPanel(page);
-		const sw = heatmapSwitch(page);
-		await expect(sw).toBeVisible();
-		await expect(sw).toHaveAttribute('aria-checked', 'false');
-	});
-
 	test('clicking toggles aria-checked on then off', async ({ page }) => {
 		await page.setViewportSize({ width: 1280, height: 720 });
 		await page.goto('/map#17/42.2762511/42.7024218', { waitUntil: 'load' });

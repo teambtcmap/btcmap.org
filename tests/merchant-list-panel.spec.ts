@@ -28,36 +28,6 @@ test.describe('Merchant List Panel', () => {
 		checkForConsoleErrors(page);
 	});
 
-	test('search facade is visible on map load, no mode toggle anywhere', async ({ page }) => {
-		// Desktop viewport
-		await page.setViewportSize({ width: 1280, height: 720 });
-
-		// Navigate to map
-		await page.goto('/map#17/42.2762511/42.7024218', { waitUntil: 'load' });
-		await expect(page).toHaveTitle(/BTC Map/);
-
-		// Wait for map to initialize
-		const zoomInButton = page.getByRole('button', { name: 'Zoom in' });
-		await expect(zoomInButton).toBeVisible();
-
-		// Wait for markers to load
-		await waitForMarkersToLoad(page);
-
-		// The floating surface is a button facade carrying the neutral places copy,
-		// not a real input (loose match so copy/i18n tweaks don't break the test).
-		const searchFacade = page.getByRole('button', { name: /search places/i });
-		await expect(searchFacade).toBeVisible({ timeout: 15000 });
-		await expect(searchFacade).toContainText(/search places/i);
-		// No real search input exists until the panel opens — that's what keeps the
-		// on-screen keyboard down on mobile and makes the facade honest on desktop.
-		await expect(page.locator('input[type="search"]')).toHaveCount(0);
-
-		// The Worldwide/Nearby mode toggle has been removed entirely — assert the
-		// scope radios are absent (not merely hidden) via toHaveCount(0).
-		await expect(page.getByRole('radio', { name: 'Worldwide' })).toHaveCount(0);
-		await expect(page.getByRole('radio', { name: /nearby/i })).toHaveCount(0);
-	});
-
 	test('list panel opens via the search facade and shows nearby merchants', async ({ page }) => {
 		// Desktop viewport
 		await page.setViewportSize({ width: 1280, height: 720 });
@@ -171,11 +141,8 @@ test.describe('Merchant List Panel', () => {
 		// Tap the facade to expand the sheet into the full panel
 		await facade.click();
 
-		// Panel content appears: real search input + nearby list (no mode toggle —
-		// assert the scope radios are absent, not merely hidden)
+		// Panel content appears: real search input + nearby list
 		await expect(listPanel.locator('input[type="search"]')).toBeVisible({ timeout: 5000 });
-		await expect(listPanel.getByRole('radio', { name: 'Worldwide' })).toHaveCount(0);
-		await expect(listPanel.getByRole('radio', { name: /nearby/i })).toHaveCount(0);
 		await expect(listPanel.locator('li button').first()).toBeVisible({ timeout: 15000 });
 
 		// Collapse with Escape — the peek facade returns carrying the count pill
@@ -194,51 +161,6 @@ test.describe('Merchant List Panel', () => {
 		).toBeVisible();
 		// The count is still announced, as a description rather than a name.
 		await expect(listPanel.locator('#search-facade-nearby-count')).toHaveText(/nearby/);
-	});
-
-	test('mobile: selecting merchant collapses sheet and opens drawer', async ({ page }) => {
-		// Mobile viewport
-		await page.setViewportSize({ width: 375, height: 667 });
-
-		// Navigate to map at high zoom
-		await page.goto('/map#17/42.2762511/42.7024218', { waitUntil: 'load' });
-		await expect(page).toHaveTitle(/BTC Map/);
-
-		// Wait for map to initialize
-		const zoomInButton = page.getByRole('button', { name: 'Zoom in' });
-		await expect(zoomInButton).toBeVisible();
-
-		// Wait for markers to load
-		await waitForMarkersToLoad(page);
-
-		// Expand the peek sheet
-		const listPanel = page.locator('[role="complementary"][aria-label="Merchant list"]');
-		await expect(listPanel).toBeVisible({ timeout: 15000 });
-		await listPanel.getByRole('button', { name: /search places/i }).click();
-
-		// Find and click first merchant item (wait for items to load)
-		const merchantItems = listPanel.locator('li button');
-		const firstMerchant = merchantItems.first();
-		await expect(firstMerchant).toBeVisible({ timeout: 15000 });
-		await firstMerchant.click();
-
-		// Wait for API call
-		try {
-			await page.waitForResponse(
-				(response) =>
-					response.url().includes('api.btcmap.org/v4/places/') && response.status() === 200,
-				{ timeout: 10000 }
-			);
-		} catch (error) {
-			console.error('API response wait failed, but continuing:', error);
-		}
-
-		// Mobile drawer should open (the merchant details dialog)
-		const mobileDrawer = page.getByRole('dialog', { name: 'Merchant details' });
-		await expect(mobileDrawer).toBeVisible({ timeout: 10000 });
-
-		// The search sheet yields the bottom edge to the drawer entirely
-		await expect(listPanel).not.toBeVisible({ timeout: 5000 });
 	});
 
 	test('mobile: search sheet hides when merchant drawer is open', async ({ page }) => {

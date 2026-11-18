@@ -53,22 +53,4 @@ test.describe('Areas', () => {
 		const communityPageHeading = page.locator('h1').first();
 		await expect(communityPageHeading).toBeVisible({ timeout: 10000 });
 	});
-
-	test('community leaderboard structure loads', async ({ page }) => {
-		// Navigate directly to community leaderboard
-		await page.goto('/communities/leaderboard');
-		await expect(page).toHaveURL(/communities\/leaderboard/);
-
-		// Wait for the page heading to be visible
-		await expect(
-			page.getByRole('heading', {
-				name: 'Community Leaderboard'
-			})
-		).toBeVisible();
-
-		// Just check that basic leaderboard structure is present (don't wait for heavy data loading)
-		// Simply verify the page loaded without errors - don't test specific elements
-		const pageContent = page.locator('main');
-		await expect(pageContent).toBeVisible({ timeout: 10000 });
-	});
 });

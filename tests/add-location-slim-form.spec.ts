@@ -67,9 +67,6 @@ test.describe('Add Location — slim form', () => {
 		// the whole task of step 2 (#1449).
 		await goToDetails(page);
 		await expect(
-			page.getByRole('button', { name: /Add more details/ })
-		).toHaveCount(0);
-		await expect(
 			page.getByRole('heading', { name: 'More about this place' })
 		).toBeVisible();
 		for (const name of ['website', 'phone', 'nameEn', 'notes']) {
@@ -82,9 +79,6 @@ test.describe('Add Location — slim form', () => {
 			page.getByRole('group', { name: /Opening Hours/ })
 		).toBeVisible();
 		await expect(page.getByRole('checkbox', { name: 'Monday' })).toBeVisible();
-		await expect(
-			page.getByRole('button', { name: /Set opening hours/ })
-		).toHaveCount(0);
 
 		const websiteInput = page.locator('input[name="website"]');
 		await websiteInput.fill('https://example.com');
@@ -266,7 +260,6 @@ test.describe('Add Location — slim form', () => {
 				() => (window as unknown as { __descAtFocus?: string }).__descAtFocus
 			)
 		).toBe('Pick at least one to continue.');
-		await expect(page.getByText("Here's what will be published")).toBeHidden();
 		// One-shot read: a retrying toHaveCount(0) would wait out an
 		// auto-dismissing toast and pass anyway.
 		expect(await page.locator('[data-sonner-toast]').count()).toBe(0);

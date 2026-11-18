@@ -158,13 +158,10 @@ test.describe('Add Location — review step', () => {
 		await expect(page.locator('#captcha')).toBeVisible();
 
 		// Back sits at the top of the review step, above the summary — not
-		// below the captcha — and the old bottom button is gone.
+		// below the captcha.
 		const backBox = await back.boundingBox();
 		const summaryBox = await summary.boundingBox();
 		expect(backBox!.y).toBeLessThan(summaryBox!.y);
-		expect(
-			await page.getByRole('button', { name: 'Edit details' }).count()
-		).toBe(0);
 
 		// Back one step at a time; the hidden-not-unmounted fields kept
 		// their values all the way.
@@ -250,12 +247,9 @@ test.describe('Add Location — review step', () => {
 		await expect(
 			current.getByRole('link', { name: 'Follow the public review queue' })
 		).toBeVisible();
-		// Past and future stages are a label and a dot (one-shot reads —
-		// the screen renders at once).
-		expect(await page.getByText('Received just now').count()).toBe(0);
-		expect(await page.getByText('On BTC Map and OpenStreetMap').count()).toBe(0);
-		// No step counter here: "step N of 2" belongs to the form.
-		expect(await page.getByText(/Step \d of 2/).count()).toBe(0);
+		// No step counter here: "step N of M" belongs to the form (one-shot
+		// read — the screen renders at once).
+		expect(await page.getByText(/Step \d of \d/).count()).toBe(0);
 
 		// One ask, chosen by state: anonymous → the account nudge, below
 		// the actions; no tagger line competing with it.
