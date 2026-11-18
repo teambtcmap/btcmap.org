@@ -3,7 +3,6 @@ import { get } from "svelte/store";
 import type { Mock } from "vitest";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 
-import { CATEGORIES, placeMatchesCategory } from "#lib/categoryMapping.js";
 import {
 	MERCHANT_LIST_FETCH_CEILING,
 	MERCHANT_LIST_MAX_ITEMS,
@@ -11,7 +10,6 @@ import {
 import { VERIFIED_FILTER_STORAGE_KEY } from "#lib/map/verifiedFilter.js";
 import { paymentTagsLoaded } from "#lib/store.js";
 import type { Place } from "#lib/types.js";
-import { filterPlacesByRecency } from "#lib/verification.js";
 
 // Mock the centralized axios instance
 vi.mock("#lib/axios.js", () => ({
@@ -161,33 +159,14 @@ describe("merchantListStore", () => {
 			expect(state.totalCount).toBe(300);
 		});
 
-		it("should update totalCount with full array length", () => {
-			const merchants = Array.from({ length: 75 }, (_, i) =>
-				createMockPlace({ id: i }),
-			);
+		it("should clear isLoadingList left over from a pending fetch", () => {
+			(api.get as Mock).mockImplementationOnce(() => new Promise(() => {}));
+			void merchantList.fetchAndReplaceList({ lat: 0, lon: 0 }, 10);
+			expect(get(merchantList).isLoadingList).toBe(true);
 
-			merchantList.setMerchants(merchants, 0, 0);
-			const state = get(merchantList);
-
-			expect(state.totalCount).toBe(75);
-		});
-
-		it("should set isLoadingList to false", () => {
 			merchantList.setMerchants([createMockPlace()], 0, 0);
-			const state = get(merchantList);
-			expect(state.isLoadingList).toBe(false);
-		});
 
-		it("should respect custom limit parameter", () => {
-			const merchants = Array.from({ length: 20 }, (_, i) =>
-				createMockPlace({ id: i }),
-			);
-
-			merchantList.setMerchants(merchants, 0, 0, 5);
-			const state = get(merchantList);
-
-			expect(state.merchants.length).toBe(5);
-			expect(state.totalCount).toBe(20);
+			expect(get(merchantList).isLoadingList).toBe(false);
 		});
 
 		it("should clear listError left over from a failed fetch", async () => {
@@ -264,20 +243,20 @@ describe("merchantListStore", () => {
 			const near = createMockPlace({ id: 1, lat: 0.001, lon: 0.001 });
 			const far = createMockPlace({ id: 2, lat: 10, lon: 10 });
 
-			// Load merchants sorted by map center (0,0) — both near but far is slightly further
+			// Load merchants sorted by map center (0,0) — near first
 			merchantList.setMerchants([far, near], 0, 0);
 
-			// Simulate user location becoming available close to near merchant
+			// Simulate user location becoming available next to the far merchant
 			mockUserLocationStore.set({
-				location: { lat: 0.001, lon: 0.001 },
+				location: { lat: 10, lon: 10 },
 				lastUpdated: Date.now(),
 				usesMetricSystem: true,
 			});
 			merchantList.reSortByUserLocation();
 
 			const state = get(merchantList);
-			expect(state.merchants[0].id).toBe(1); // near first
-			expect(state.merchants[1].id).toBe(2);
+			expect(state.merchants[0].id).toBe(2); // closest to the user first
+			expect(state.merchants[1].id).toBe(1);
 		});
 
 		it("should keep boosted merchants first after re-sort", () => {
@@ -303,18 +282,6 @@ describe("merchantListStore", () => {
 			const state = get(merchantList);
 			expect(state.merchants[0].id).toBe(1); // boosted first despite distance
 			expect(state.merchants[1].id).toBe(2);
-		});
-
-		it("should do nothing when merchant list is empty", () => {
-			mockUserLocationStore.set({
-				location: { lat: 1, lon: 1 },
-				lastUpdated: Date.now(),
-				usesMetricSystem: true,
-			});
-			merchantList.reSortByUserLocation();
-
-			const state = get(merchantList);
-			expect(state.merchants).toEqual([]);
 		});
 
 		it("should do nothing when user location is not set", () => {
@@ -484,21 +451,6 @@ describe("merchantListStore", () => {
 			expect(state.placeDetailsCache.has(456)).toBe(true);
 		});
 
-		it("should clear merchants when hideIfExceeds triggered", async () => {
-			const mockPlaces = Array.from({ length: 60 }, (_, i) =>
-				createMockPlace({ id: i }),
-			);
-			(api.get as Mock).mockResolvedValueOnce({ data: mockPlaces });
-
-			await merchantList.fetchAndReplaceList({ lat: 0, lon: 0 }, 10, {
-				hideIfExceeds: 50,
-			});
-			const state = get(merchantList);
-
-			expect(state.merchants).toEqual([]);
-			expect(state.totalCount).toBe(60);
-		});
-
 		it("shows nearest items when matches are under the fetch ceiling", async () => {
 			const mockPlaces = Array.from({ length: 300 }, (_, i) =>
 				createMockPlace({ id: i }),
@@ -528,20 +480,6 @@ describe("merchantListStore", () => {
 
 			expect(state.merchants).toEqual([]);
 			expect(state.totalCount).toBe(MERCHANT_LIST_FETCH_CEILING + 1);
-		});
-
-		it("should store totalCount even when hiding results", async () => {
-			const mockPlaces = Array.from({ length: 100 }, (_, i) =>
-				createMockPlace({ id: i }),
-			);
-			(api.get as Mock).mockResolvedValueOnce({ data: mockPlaces });
-
-			await merchantList.fetchAndReplaceList({ lat: 0, lon: 0 }, 10, {
-				hideIfExceeds: 50,
-			});
-			const state = get(merchantList);
-
-			expect(state.totalCount).toBe(100);
 		});
 
 		it("should show error toast on failure", async () => {
@@ -673,42 +611,6 @@ describe("merchantListStore", () => {
 			);
 		});
 
-		it("should count only recently verified places when a year window is active", async () => {
-			merchantList.setVerifiedFilter(1, { persist: false });
-			const recent = new Date(Date.now() - 30 * 86400000).toISOString();
-			const old = new Date(Date.now() - 2 * 365 * 86400000).toISOString();
-			(api.get as Mock).mockResolvedValueOnce({
-				data: [
-					{ id: 1, verified_at: recent },
-					{ id: 2, verified_at: old },
-					{ id: 3 },
-				],
-			});
-
-			await merchantList.fetchCountOnly({ lat: 0, lon: 0 }, 10);
-			const state = get(merchantList);
-
-			expect(state.totalCount).toBe(1);
-			expect(state.merchants).toEqual([]);
-		});
-
-		it("should count stale and never-verified places in outdated mode", async () => {
-			merchantList.setVerifiedFilter("outdated", { persist: false });
-			const recent = new Date(Date.now() - 30 * 86400000).toISOString();
-			const old = new Date(Date.now() - 2 * 365 * 86400000).toISOString();
-			(api.get as Mock).mockResolvedValueOnce({
-				data: [
-					{ id: 1, verified_at: recent },
-					{ id: 2, verified_at: old },
-					{ id: 3 },
-				],
-			});
-
-			await merchantList.fetchCountOnly({ lat: 0, lon: 0 }, 10);
-
-			expect(get(merchantList).totalCount).toBe(2);
-		});
-
 		// Consistency guard for the open/close boundary: the closed-panel badge
 		// and the open panel's list must report the same total for the same
 		// rows under every filter mode, so the count never jumps on open.
@@ -757,16 +659,6 @@ describe("merchantListStore", () => {
 				).toBe(closedPanelCount);
 			}
 			expect(errToast).not.toHaveBeenCalled();
-		});
-
-		it("should set totalCount from response length", async () => {
-			const mockIds = [{ id: 1 }, { id: 2 }, { id: 3 }];
-			(api.get as Mock).mockResolvedValueOnce({ data: mockIds });
-
-			await merchantList.fetchCountOnly({ lat: 0, lon: 0 }, 10);
-			const state = get(merchantList);
-
-			expect(state.totalCount).toBe(3);
 		});
 
 		it("should leave merchants empty", async () => {
@@ -990,64 +882,9 @@ describe("merchantListStore", () => {
 			expect(listAborted).toBe(true);
 			expect(detailsAborted).toBe(true);
 		});
-
-		it("close() should NOT cancel requests (just hide panel)", async () => {
-			let requestAborted = false;
-
-			(api.get as Mock).mockImplementationOnce(
-				(_url: string, config: { signal: AbortSignal }) =>
-					new Promise((resolve) => {
-						config.signal.addEventListener("abort", () => {
-							requestAborted = true;
-						});
-						// Resolve after a short delay
-						setTimeout(() => resolve({ data: [] }), 50);
-					}),
-			);
-
-			// Start a request
-			const list = merchantList.fetchAndReplaceList({ lat: 0, lon: 0 }, 10);
-
-			// Close should NOT cancel the request
-			merchantList.close();
-
-			await list;
-
-			expect(requestAborted).toBe(false);
-		});
 	});
 
 	describe("search state", () => {
-		it("openSearchMode() should open panel in search mode with optional spinner", () => {
-			merchantList.openSearchMode(true);
-			const state = get(merchantList);
-
-			expect(state.isSearching).toBe(true);
-			expect(state.mode).toBe("search");
-			expect(state.isOpen).toBe(true);
-		});
-
-		it("openSearchMode() without argument should not show spinner", () => {
-			merchantList.openSearchMode();
-			const state = get(merchantList);
-
-			expect(state.isSearching).toBe(false);
-			expect(state.mode).toBe("search");
-			expect(state.isOpen).toBe(true);
-		});
-
-		it("openWithSearchResults() should set mode, query, and results", () => {
-			const results = [createMockPlace({ id: 1 }), createMockPlace({ id: 2 })];
-			merchantList.openWithSearchResults("pizza", results);
-			const state = get(merchantList);
-
-			expect(state.mode).toBe("search");
-			expect(state.searchQuery).toBe("pizza");
-			expect(state.searchResults.length).toBe(2);
-			expect(state.isSearching).toBe(false);
-			expect(state.isOpen).toBe(true);
-		});
-
 		it("openWithSearchResults() should sort boosted merchants first", () => {
 			const futureDate = new Date(Date.now() + 86400000).toISOString();
 			const boosted = createMockPlace({
@@ -1080,48 +917,6 @@ describe("merchantListStore", () => {
 			expect(state.categoryCounts.coffee).toBe(1);
 			expect(state.categoryCounts.atms).toBe(1);
 			expect(state.categoryCounts.shopping).toBe(0);
-		});
-
-		it("clearSearchInput() should clear results but keep search mode", () => {
-			merchantList.openWithSearchResults("test", [createMockPlace()]);
-			merchantList.clearSearchInput();
-			const state = get(merchantList);
-
-			expect(state.mode).toBe("search"); // Mode preserved
-			expect(state.searchQuery).toBe("");
-			expect(state.searchResults).toEqual([]);
-			expect(state.isSearching).toBe(false);
-		});
-
-		it("exitSearchMode() should switch to nearby mode and clear search state", () => {
-			merchantList.openWithSearchResults("test", [createMockPlace()]);
-			merchantList.exitSearchMode();
-			const state = get(merchantList);
-
-			expect(state.mode).toBe("nearby");
-			expect(state.searchQuery).toBe("");
-			expect(state.searchResults).toEqual([]);
-			expect(state.isSearching).toBe(false);
-		});
-
-		it("setMode() should switch to search mode", () => {
-			merchantList.setMode("search");
-			const state = get(merchantList);
-
-			expect(state.mode).toBe("search");
-		});
-
-		it("setMode() should switch to nearby mode without clearing search state", () => {
-			// Set up search state first
-			merchantList.openWithSearchResults("pizza", [createMockPlace()]);
-
-			merchantList.setMode("nearby");
-			const state = get(merchantList);
-
-			// Mode changes but search state is preserved (no side effects)
-			expect(state.mode).toBe("nearby");
-			expect(state.searchQuery).toBe("pizza");
-			expect(state.searchResults.length).toBe(1);
 		});
 	});
 
@@ -1212,15 +1007,29 @@ describe("merchantListStore", () => {
 			expect(state.categoryCounts.all).toBe(1);
 		});
 
-		it("does not touch counts when the search has no results", () => {
-			merchantList.openWithSearchResults("test query", [
-				createMockPlace({ id: 1, icon: "restaurant", verified_at: old() }),
-			]);
-			merchantList.clearSearchInput();
+		it("does not touch counts when the search has no results", async () => {
+			// A first search in flight: search mode, no results yet, the
+			// nearby counts still on the chips
+			vi.useFakeTimers();
+			vi.stubGlobal(
+				"fetch",
+				vi.fn(() => new Promise(() => {})),
+			);
+			try {
+				merchantList.setMerchants([
+					createMockPlace({ id: 1, icon: "restaurant", verified_at: old() }),
+				]);
+				merchantList.search("test query");
+				await vi.advanceTimersByTimeAsync(300);
+				expect(get(merchantList).mode).toBe("search");
 
-			merchantList.setVerifiedFilter(1, { persist: false });
+				merchantList.setVerifiedFilter(1, { persist: false });
 
-			expect(get(merchantList).categoryCounts.all).toBe(1);
+				expect(get(merchantList).categoryCounts.all).toBe(1);
+			} finally {
+				vi.useRealTimers();
+				vi.unstubAllGlobals();
+			}
 		});
 
 		it("persist option still controls storage", () => {
@@ -1231,45 +1040,6 @@ describe("merchantListStore", () => {
 			expect(localStorage.getItem(VERIFIED_FILTER_STORAGE_KEY)).toBe("2");
 
 			localStorage.removeItem(VERIFIED_FILTER_STORAGE_KEY);
-		});
-
-		// Consistency oracle: whatever the filter mode, the chip counts must
-		// describe exactly the selection the panel renders — its
-		// filteredSearchResults rule (recency window, then per-category via
-		// placeMatchesCategory) replicated here as the reference.
-		it("counts always describe the selection the panel renders", () => {
-			const recent = new Date(Date.now() - 30 * 86400000).toISOString();
-			const old = new Date(Date.now() - 2 * 365 * 86400000).toISOString();
-			merchantList.openWithSearchResults("test query", [
-				createMockPlace({ id: 1, icon: "restaurant", verified_at: recent }),
-				createMockPlace({ id: 2, icon: "restaurant", verified_at: old }),
-				createMockPlace({ id: 3, icon: "local_cafe", verified_at: recent }),
-				createMockPlace({ id: 4, icon: "local_cafe" }),
-				createMockPlace({ id: 5, icon: "local_atm", verified_at: old }),
-				createMockPlace({ id: 6, icon: "storefront", verified_at: recent }),
-				createMockPlace({ id: 7, icon: "hotel", verified_at: old }),
-				createMockPlace({ id: 8, icon: "some_unknown", verified_at: recent }),
-				createMockPlace({ id: 9, verified_at: old }),
-			]);
-
-			for (const filter of [null, 1, 2, 3, "outdated"] as const) {
-				merchantList.setVerifiedFilter(filter, { persist: false });
-				const { categoryCounts, searchResults } = get(merchantList);
-				const rendered = filterPlacesByRecency(searchResults, filter);
-
-				expect(categoryCounts.all, `filter ${String(filter)}`).toBe(
-					rendered.length,
-				);
-				for (const category of CATEGORIES) {
-					if (category === "all") continue;
-					expect(
-						categoryCounts[category],
-						`filter ${String(filter)} / category ${category}`,
-					).toBe(
-						rendered.filter((p) => placeMatchesCategory(p, category)).length,
-					);
-				}
-			}
 		});
 	});
 
@@ -1282,49 +1052,15 @@ describe("merchantListStore", () => {
 			return createMockPlace({ icon, ...overrides });
 		}
 
-		describe("setSelectedCategory and resetCategory", () => {
+		describe("setSelectedCategory", () => {
 			it("setSelectedCategory() should update selectedCategory in state", () => {
 				merchantList.setSelectedCategory("restaurants");
 				const state = get(merchantList);
 				expect(state.selectedCategory).toBe("restaurants");
 			});
-
-			it("setSelectedCategory() should allow setting any valid category", () => {
-				const categories = [
-					"all",
-					"restaurants",
-					"shopping",
-					"groceries",
-					"coffee",
-					"atms",
-					"hotels",
-					"beauty",
-				] as const;
-
-				for (const category of categories) {
-					merchantList.setSelectedCategory(category);
-					const state = get(merchantList);
-					expect(state.selectedCategory).toBe(category);
-				}
-			});
-
-			it("resetCategory() should reset selectedCategory to all", () => {
-				merchantList.setSelectedCategory("coffee");
-				merchantList.resetCategory();
-				const state = get(merchantList);
-				expect(state.selectedCategory).toBe("all");
-			});
 		});
 
 		describe("category state reset on close", () => {
-			it("close() should reset category to all", () => {
-				merchantList.open();
-				merchantList.setSelectedCategory("restaurants");
-				merchantList.close();
-				const state = get(merchantList);
-				expect(state.selectedCategory).toBe("all");
-			});
-
 			it("close() should preserve merchants while resetting category", () => {
 				const merchants = [createPlaceWithIcon("restaurant", { id: 1 })];
 				merchantList.setMerchants(merchants, 0, 0);
@@ -1367,22 +1103,6 @@ describe("merchantListStore", () => {
 			it("openWithSearchResults() should reset category to all", () => {
 				merchantList.setSelectedCategory("coffee");
 				merchantList.openWithSearchResults("test", [createMockPlace()]);
-				const state = get(merchantList);
-				expect(state.selectedCategory).toBe("all");
-			});
-
-			it("clearSearchInput() should reset category to all", () => {
-				merchantList.openSearchMode();
-				merchantList.setSelectedCategory("atms");
-				merchantList.clearSearchInput();
-				const state = get(merchantList);
-				expect(state.selectedCategory).toBe("all");
-			});
-
-			it("exitSearchMode() should reset category to all", () => {
-				merchantList.openSearchMode();
-				merchantList.setSelectedCategory("hotels");
-				merchantList.exitSearchMode();
 				const state = get(merchantList);
 				expect(state.selectedCategory).toBe("all");
 			});

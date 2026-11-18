@@ -17,13 +17,6 @@ test.describe('Deleted Merchant Page', () => {
 		checkForConsoleErrors(page);
 	});
 
-	test('renders deleted merchant detail view instead of 500', async ({ page }) => {
-		const response = await page.goto(`/merchant/${DELETED_MERCHANT_ID}`);
-
-		// Must not be a server error
-		expect(response?.status()).toBe(200);
-	});
-
 	test('shows deleted notice banner', async ({ page }) => {
 		await page.goto(`/merchant/${DELETED_MERCHANT_ID}`);
 

@@ -9,15 +9,10 @@ vi.mock("#lib/server/captcha.js", () => ({
 
 import { POST } from "./+server";
 
-const call = (
-	body: unknown,
-	fetchImpl: unknown,
-	headers: Record<string, string> = {},
-) =>
+const call = (body: unknown, fetchImpl: unknown) =>
 	(POST as unknown as (event: unknown) => Promise<Response>)({
 		request: new Request("http://localhost/api/submit-place", {
 			method: "POST",
-			headers,
 			body: JSON.stringify(body),
 		}),
 		fetch: fetchImpl,
@@ -58,16 +53,6 @@ describe("POST /api/submit-place", () => {
 		const rpc = JSON.parse(init.body as string);
 		expect(rpc.method).toBe("submit_place");
 		expect(rpc.params.extra_fields.contact).toBe("owner@example.com");
-		expect("submitted_by" in rpc.params.extra_fields).toBe(false);
-	});
-
-	it("ignores a Bearer token: no identity verification happens", async () => {
-		// Signed-in clients never reach this proxy (#1374); a stray token
-		// must not trigger the retired /v4/users/me round trip.
-		const fetchImpl = rpcOk();
-		await call(validBody, fetchImpl, { Authorization: "Bearer user-token" });
-		expect(fetchImpl).toHaveBeenCalledTimes(1);
-		expect(fetchImpl.mock.calls[0][0]).toMatch(/\/rpc$/);
 	});
 
 	it("rejects a missing contact", async () => {

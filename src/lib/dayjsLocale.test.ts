@@ -52,13 +52,14 @@ describe("createTimeLocale", () => {
 	});
 
 	it("ignores a slower, older locale load", async () => {
+		// "en" loads no locale file, so it settles before the older "ru" load
 		const appLocale = writable<string | null>("ru");
 		const timeLocale = createTimeLocale(appLocale);
 		const unsubscribe = timeLocale.subscribe(() => {});
-		appLocale.set("de");
+		appLocale.set("en");
 		await settle();
 		await settle();
-		expect(get(timeLocale)).toBe("de");
+		expect(get(timeLocale)).toBe("en");
 		unsubscribe();
 	});
 });

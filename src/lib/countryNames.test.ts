@@ -35,10 +35,6 @@ describe("getCountryName", () => {
 			expect(await getCountryName("XX", "pt-BR", "Unknown")).toBe("Unknown");
 		});
 
-		it("returns fallback when translation unavailable", async () => {
-			expect(await getCountryName("ZZ", "bg", "Fallback")).toBe("Fallback");
-		});
-
 		it("returns fallback on error (e.g. invalid code)", async () => {
 			expect(await getCountryName("", "pt-BR", "Default")).toBe("Default");
 		});

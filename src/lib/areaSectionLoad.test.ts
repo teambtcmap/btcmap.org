@@ -1,6 +1,7 @@
 import { isHttpError, isRedirect } from "@sveltejs/kit";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 
+import { communityAreaConfig } from "#lib/area/routeConfigs.js";
 import type { AreaEvent, AreaTags } from "#lib/types.js";
 
 import type { AreaSectionConfig } from "./areaSectionLoad";
@@ -174,7 +175,7 @@ describe("loadAreaSection", () => {
 
 		const result = await loadAreaSection(
 			{ params: { area: "日本" }, fetch },
-			communityConfig,
+			communityAreaConfig,
 			"merchants",
 		);
 
@@ -528,18 +529,6 @@ describe("loadAreaSection", () => {
 		if (isHttpError(err)) {
 			expect(err.status).toBe(502);
 		}
-	});
-
-	it("treats a 404 from the events endpoint as no events on every section", async () => {
-		const fetch = makeFetch({ events: { ok: false, status: 404 } });
-
-		const result = await loadAreaSection(
-			{ params: { area: "some-area" }, fetch },
-			communityConfig,
-			"stats",
-		);
-
-		expect(result.data.events).toEqual([]);
 	});
 
 	it("fetches the area's reports newest-first for the stats and merchants sections", async () => {

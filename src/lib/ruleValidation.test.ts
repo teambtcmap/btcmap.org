@@ -170,19 +170,18 @@ describe("inputProps", () => {
 		expect(handleChange).toHaveBeenCalledWith("Ada L");
 	});
 
-	it("runs onEdit before the change, so a server error clears on edit", () => {
-		const calls: string[] = [];
-		const field = {
-			state: { value: "" },
-			handleChange: (value: string) => calls.push(`change:${value}`),
-		};
-		const props = inputProps(field as unknown as AnyFieldApi, {
-			onEdit: () => calls.push("edit"),
-		});
+	it("runs onEdit on every edit, so a server error clears on edit", () => {
+		const onEdit = vi.fn();
+		const handleChange = vi.fn();
+		const field = { state: { value: "" }, handleChange };
+		const props = inputProps(field as unknown as AnyFieldApi, { onEdit });
 		const input = document.createElement("input");
-		input.value = "Ada";
 		input.addEventListener("input", props.oninput);
+		input.value = "A";
 		input.dispatchEvent(new Event("input"));
-		expect(calls).toEqual(["edit", "change:Ada"]);
+		input.value = "Ad";
+		input.dispatchEvent(new Event("input"));
+		expect(onEdit).toHaveBeenCalledTimes(2);
+		expect(handleChange).toHaveBeenLastCalledWith("Ad");
 	});
 });

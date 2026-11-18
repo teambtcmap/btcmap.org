@@ -47,11 +47,6 @@ describe("activityNotifier — pure helpers and stores", () => {
 		vi.restoreAllMocks();
 	});
 
-	it("storageKeyFor returns a per-username key", async () => {
-		const m = await freshModule();
-		expect(m.storageKeyFor("alice")).toBe("btcmap_activity_lastseen:alice");
-	});
-
 	it("hasNewActivity is false when latest is null", async () => {
 		const m = await freshModule();
 		expect(get(m.hasNewActivity)).toBe(false);
@@ -109,23 +104,6 @@ describe("activityNotifier — pure helpers and stores", () => {
 		const m = await freshModule();
 		m.loadLastSeen("alice");
 		expect(get(m.lastSeenActivityDate)).toBeNull();
-	});
-
-	it("loadLastSeen treats an empty string as null", async () => {
-		localStorage.setItem("btcmap_activity_lastseen:alice", "");
-		const m = await freshModule();
-		m.loadLastSeen("alice");
-		expect(get(m.lastSeenActivityDate)).toBeNull();
-	});
-
-	it("loadLastSeen accepts a well-formed ISO-8601 value", async () => {
-		localStorage.setItem(
-			"btcmap_activity_lastseen:alice",
-			"2026-05-06T08:00:00Z",
-		);
-		const m = await freshModule();
-		m.loadLastSeen("alice");
-		expect(get(m.lastSeenActivityDate)).toBe("2026-05-06T08:00:00Z");
 	});
 });
 
@@ -329,44 +307,6 @@ describe("activityNotifier — polling", () => {
 		expect(get(m.latestActivityDate)).toBeNull();
 		expect(get(m.lastSeenActivityDate)).toBeNull();
 		expect(localStorage.getItem("btcmap_activity_lastseen:alice")).toBeNull();
-		stop();
-	});
-
-	it("ignores a fetch that resolves after an account switch", async () => {
-		// Bob's fetch resolves *after* the user switches to a new account
-		// "carol" — Bob's response must not write into carol's state.
-		let resolveFetch!: (value: { data: unknown }) => void;
-		(api as unknown as ApiMock).get.mockImplementationOnce(
-			() =>
-				new Promise((r) => {
-					resolveFetch = r;
-				}),
-		);
-		(api as unknown as ApiMock).get.mockResolvedValue({ data: [] });
-
-		const m = await freshModule();
-		const sessionStore = writable<Session | null>(
-			makeSession({ username: "bob" }),
-		);
-		const stop = m.startActivityPolling(sessionStore);
-		await flushMicrotasks();
-
-		// Switch to carol while bob's fetch is still in flight.
-		sessionStore.set(makeSession({ username: "carol", savedPlaces: [9] }));
-		await flushMicrotasks();
-
-		// Resolve bob's fetch with a "newest item".
-		resolveFetch({
-			data: [
-				{ type: "place_added", place_id: 1, date: "2026-05-06T10:00:00Z" },
-			],
-		});
-		await flushMicrotasks();
-
-		// carol's state must not contain bob's date and bob's lastSeen
-		// must not have been bootstrapped from a stale response.
-		expect(get(m.latestActivityDate)).not.toBe("2026-05-06T10:00:00Z");
-		expect(localStorage.getItem("btcmap_activity_lastseen:bob")).toBeNull();
 		stop();
 	});
 

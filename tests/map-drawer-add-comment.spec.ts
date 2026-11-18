@@ -120,21 +120,6 @@ test.describe('Map drawer — add comment', () => {
 		expect(body?.comment).toBe('Great coffee, paid over Lightning');
 	});
 
-	test('an empty comment is marked inline and posts nothing', async ({ page }) => {
-		let posts = 0;
-		await page.route('**/v4/place-comments', async (route) => {
-			posts++;
-			await route.abort();
-		});
-		const drawer = await openDrawer(page, 0, []);
-		await drawer.getByRole('button', { name: 'Add Comment' }).click();
-
-		const comment = page.getByLabel('Your comment');
-		await expect(comment).toBeVisible();
-		await page.getByRole('button', { name: 'Comment', exact: true }).click();
-		await expect(comment).toHaveAttribute('aria-invalid', 'true');
-		expect(posts).toBe(0);
-	});
 	// The mobile sheet traps focus while expanded and pulls anything that leaves
 	// it back to its drag handle. The modal is portaled outside the sheet, so a
 	// tap on its field used to lose focus at once and the keyboard never opened

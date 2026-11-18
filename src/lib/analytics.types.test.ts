@@ -1,4 +1,4 @@
-import { describe, expect, it, vi } from "vitest";
+import { describe, it, vi } from "vitest";
 
 import { trackEvent } from "./analytics";
 
@@ -20,9 +20,5 @@ describe("trackEvent payload types", () => {
 		trackEvent("comment_add_click", { source: "somewhere" });
 		// @ts-expect-error a key the event doesn't carry
 		trackEvent("note_open", { source: "map", extra: 1 });
-		// @ts-expect-error retired events are gone from the map
-		trackEvent("backup_credentials_copied");
-
-		expect(true).toBe(true);
 	});
 });

@@ -2,8 +2,6 @@ import { describe, expect, it } from "vitest";
 
 import type { PanelState } from "./nostrMethodLayout";
 import {
-	isForm,
-	isPairing,
 	methodBlocked,
 	methodOpen,
 	nostrMethodLayout,
@@ -196,17 +194,5 @@ describe("rowClick", () => {
 		expect(rowClick("bunker", { ...idle, signerRun: "bunker" })).toBe(
 			"activate",
 		);
-	});
-});
-
-describe("isPairing / isForm", () => {
-	it("tells the nostrconnect presentations and the form rows apart", () => {
-		expect(["qr", "open", "copy"].every((m) => isPairing(m as never))).toBe(
-			true,
-		);
-		expect(isPairing("bunker")).toBe(false);
-		expect(isPairing(null)).toBe(false);
-		expect(isForm("nsec")).toBe(true);
-		expect(isForm("qr")).toBe(false);
 	});
 });

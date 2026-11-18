@@ -9,7 +9,6 @@ import {
 	CATEGORY_GROUPS,
 	countMerchantsByCategory,
 	createEmptyCategoryCounts,
-	filterMerchantsByCategory,
 	getIconColor,
 	getIconColorWithFallback,
 	placeMatchesCategory,
@@ -28,11 +27,6 @@ function createMockPlace(overrides: Partial<Place> = {}): Place {
 
 describe("categoryMapping", () => {
 	describe("CATEGORY_GROUPS", () => {
-		it('should have "all" category with empty icons array', () => {
-			expect(CATEGORY_GROUPS.all.icons).toEqual([]);
-			expect(CATEGORY_GROUPS.all.label).toBe("All");
-		});
-
 		it("should have expected categories", () => {
 			const expectedCategories = [
 				"all",
@@ -62,19 +56,6 @@ describe("categoryMapping", () => {
 		it("should match CATEGORY_GROUPS keys in order", () => {
 			expect(CATEGORIES).toEqual(Object.keys(CATEGORY_GROUPS));
 		});
-
-		it('should have "all" as the first category', () => {
-			expect(CATEGORIES[0]).toBe("all");
-		});
-	});
-
-	describe("CATEGORY_ENTRIES", () => {
-		it("should have correctly typed entries", () => {
-			expect(CATEGORY_ENTRIES.length).toBe(Object.keys(CATEGORY_GROUPS).length);
-			for (const [key, value] of CATEGORY_ENTRIES) {
-				expect(CATEGORY_GROUPS[key]).toBe(value);
-			}
-		});
 	});
 
 	describe("createEmptyCategoryCounts", () => {
@@ -102,18 +83,6 @@ describe("categoryMapping", () => {
 			for (const category of CATEGORIES) {
 				expect(counts[category]).toBe(0);
 			}
-		});
-
-		it('should count "all" as total merchants', () => {
-			const merchants = [
-				createMockPlace({ icon: "restaurant" }),
-				createMockPlace({ icon: "local_cafe" }),
-				createMockPlace({ icon: "unknown_icon" }),
-			];
-
-			const counts = countMerchantsByCategory(merchants);
-
-			expect(counts.all).toBe(3);
 		});
 
 		it("should count restaurants correctly", () => {
@@ -183,106 +152,6 @@ describe("categoryMapping", () => {
 				0,
 			);
 			expect(sumOfCategories).toBe(1);
-		});
-
-		it("should handle multiple icons mapping to same category", () => {
-			const merchants = [
-				createMockPlace({ icon: "storefront" }), // shopping
-				createMockPlace({ icon: "local_mall" }), // also shopping
-			];
-
-			const counts = countMerchantsByCategory(merchants);
-
-			expect(counts.shopping).toBe(2);
-		});
-	});
-
-	describe("filterMerchantsByCategory", () => {
-		const merchants = [
-			createMockPlace({ id: 1, icon: "restaurant" }),
-			createMockPlace({ id: 2, icon: "local_pizza" }),
-			createMockPlace({ id: 3, icon: "local_cafe" }),
-			createMockPlace({ id: 4, icon: "storefront" }),
-			createMockPlace({ id: 5, icon: "unknown" }),
-			createMockPlace({ id: 6 }), // no icon
-		];
-
-		it('should return all merchants for "all" category', () => {
-			const filtered = filterMerchantsByCategory(merchants, "all");
-
-			expect(filtered).toBe(merchants); // Same reference
-			expect(filtered.length).toBe(6);
-		});
-
-		it("should filter restaurants correctly", () => {
-			const filtered = filterMerchantsByCategory(merchants, "restaurants");
-
-			expect(filtered.length).toBe(2);
-			expect(filtered.map((m) => m.id)).toEqual([1, 2]);
-		});
-
-		it("should filter coffee correctly", () => {
-			const filtered = filterMerchantsByCategory(merchants, "coffee");
-
-			expect(filtered.length).toBe(1);
-			expect(filtered[0].id).toBe(3);
-		});
-
-		it("should filter shopping correctly", () => {
-			const filtered = filterMerchantsByCategory(merchants, "shopping");
-
-			expect(filtered.length).toBe(1);
-			expect(filtered[0].id).toBe(4);
-		});
-
-		it("should return empty array when no matches", () => {
-			const filtered = filterMerchantsByCategory(merchants, "atms");
-
-			expect(filtered).toEqual([]);
-		});
-
-		it("should return empty array for empty input", () => {
-			const filtered = filterMerchantsByCategory([], "restaurants");
-
-			expect(filtered).toEqual([]);
-		});
-
-		it("should not modify original array", () => {
-			const original = [...merchants];
-			filterMerchantsByCategory(merchants, "restaurants");
-
-			expect(merchants).toEqual(original);
-		});
-
-		it("should filter correctly for each category", () => {
-			const testMerchants = [
-				createMockPlace({ icon: "restaurant" }),
-				createMockPlace({ icon: "local_pizza" }),
-				createMockPlace({ icon: "lunch_dining" }),
-				createMockPlace({ icon: "storefront" }),
-				createMockPlace({ icon: "local_mall" }),
-				createMockPlace({ icon: "local_grocery_store" }),
-				createMockPlace({ icon: "local_cafe" }),
-				createMockPlace({ icon: "local_atm" }),
-				createMockPlace({ icon: "hotel" }),
-				createMockPlace({ icon: "content_cut" }),
-			];
-
-			const categoryTests: [CategoryKey, number][] = [
-				["all", 10],
-				["restaurants", 3],
-				["shopping", 2],
-				["groceries", 1],
-				["coffee", 1],
-				["atms", 1],
-				["hotels", 1],
-				["beauty", 1],
-			];
-
-			for (const [category, expectedCount] of categoryTests) {
-				const filtered = filterMerchantsByCategory(testMerchants, category);
-				expect(filtered.length).toBe(expectedCount);
-			}
 		});
 	});
 
@@ -409,27 +278,11 @@ describe("categoryMapping", () => {
 			// charCodeAt(0) of 'u' (117) => 117 % 6 = 3 => 'purple'
 			expect(getIconColorWithFallback("unknown_icon")).toBe("purple");
 		});
-
-		it("should return a consistent value for the same icon across calls", () => {
-			const first = getIconColorWithFallback("some_icon");
-			const second = getIconColorWithFallback("some_icon");
-			expect(first).toBe(second);
-		});
-
-		it("should not return empty string for an unknown icon", () => {
-			expect(getIconColorWithFallback("some_unknown_icon")).not.toBe("");
-		});
 	});
 
-	// The map pins (search branch), the panel's filteredSearchResults, and the
-	// store's applyCategoryFilter split between filterMerchantsByCategory
-	// (group icon-list membership) and placeMatchesCategory (last-write-wins
-	// icon→category lookup). They are extensionally equal only while every
-	// configured icon is truthy AND no icon appears in two groups (a falsy
-	// icon would match `=== ""` in one predicate and early-return in the
-	// other) — the moment either breaks, pins and list silently diverge again
-	// (the #1159 bug class). These tests make that divergence loud instead of
-	// silent.
+	// Chip counts (countMerchantsByCategory) and the places a chip selects
+	// (placeMatchesCategory) must agree for every configured icon, or the chips
+	// promise places the map then hides (the #1159 bug class).
 	describe("category predicate equivalence", () => {
 		// Every mapped icon, plus the shapes callers actually see: unknown,
 		// empty, and missing icons.
@@ -442,57 +295,29 @@ describe("categoryMapping", () => {
 			createMockPlace({}),
 		];
 
-		it("every icon is truthy and belongs to exactly one category group", () => {
+		it("every icon belongs to exactly one category group", () => {
 			const seen = new Map<string, CategoryKey>();
 			for (const [key, group] of CATEGORY_ENTRIES) {
 				for (const icon of group.icons) {
-					expect(
-						icon,
-						`falsy icon in group "${key}" — placeMatchesCategory early-returns on falsy icons while filterMerchantsByCategory matches them`,
-					).toBeTruthy();
 					const previous = seen.get(icon);
-					// Distinguish the repeat cases: a duplicate WITHIN a group is
-					// harmless to predicate equivalence but still a config mistake;
-					// a repeat ACROSS groups is the divergence hazard itself.
+					// The icon→category lookup is last-write-wins: an icon listed in
+					// two groups silently drops out of the earlier one.
 					expect(
 						previous,
 						previous === key
 							? `icon "${icon}" is listed twice in group "${key}" — remove the duplicate`
-							: `icon "${icon}" is in both "${previous}" and "${key}" — filterMerchantsByCategory and placeMatchesCategory now disagree; consolidate to one predicate (#1168) before shipping this`,
+							: `icon "${icon}" is in both "${previous}" and "${key}" — only "${key}" will ever match it`,
 					).toBeUndefined();
 					seen.set(icon, key);
 				}
 			}
 		});
 
-		it("filterMerchantsByCategory and placeMatchesCategory select the same set for every category", () => {
-			// Compare by icon, not id: a divergence failure then names the
-			// offending icon directly instead of printing random mock ids.
-			// Sorted so the claim is literally about the SET — a reimplementation
-			// that reorders while selecting the same places must not fail this.
-			for (const category of CATEGORIES) {
-				const viaGroupFilter = filterMerchantsByCategory(corpus, category)
-					.map((p) => p.icon ?? "<missing>")
-					.sort();
-				const viaPlacePredicate = corpus
-					.filter((p) => placeMatchesCategory(p, category))
-					.map((p) => p.icon ?? "<missing>")
-					.sort();
-				expect(viaGroupFilter, `category "${category}"`).toEqual(
-					viaPlacePredicate,
-				);
-			}
-		});
-
-		it("countMerchantsByCategory agrees with both predicates for every category", () => {
+		it("countMerchantsByCategory agrees with placeMatchesCategory for every category", () => {
 			const counts = countMerchantsByCategory(corpus);
 			for (const category of CATEGORIES) {
-				if (category === "all") {
-					expect(counts.all).toBe(corpus.length);
-					continue;
-				}
 				expect(counts[category], `category "${category}"`).toBe(
-					filterMerchantsByCategory(corpus, category).length,
+					corpus.filter((p) => placeMatchesCategory(p, category)).length,
 				);
 			}
 		});

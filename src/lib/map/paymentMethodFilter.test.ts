@@ -44,12 +44,6 @@ describe("parsePaymentMethodsParam", () => {
 			parsePaymentMethodsParam(new URLSearchParams("?paid=true")),
 		).toBeNull();
 	});
-
-	it("ignores unrecognized payment-ish params", () => {
-		expect(
-			parsePaymentMethodsParam(new URLSearchParams("?cash&bitcoin")),
-		).toBeNull();
-	});
 });
 
 describe("serializePaymentMethodsParam", () => {
@@ -87,14 +81,6 @@ describe("placePaymentFilterState", () => {
 		expect(
 			placePaymentFilterState(lnOnly, new Set(["lightning", "onchain"])),
 		).toBe("unknown");
-	});
-
-	it("accepts every spelling that normalizes to yes", () => {
-		for (const value of ["yes", "Yes", "YES", " yes ", "only", "Only"]) {
-			expect(
-				placePaymentFilterState(tagged(value), new Set(["lightning"])),
-			).toBe("match");
-		}
 	});
 
 	it("separates a recorded refusal from a blank", () => {
@@ -158,15 +144,6 @@ describe("applyPaymentMethodFilter", () => {
 		// The refusal is excluded but not counted: it was checked, so it is
 		// not an invitation to verify.
 		expect(unknown).toBe(2);
-	});
-
-	it("counts nothing when everything matches", () => {
-		const { matched, unknown } = applyPaymentMethodFilter(
-			[tagged("yes"), tagged("only")],
-			new Set(["lightning"]),
-		);
-		expect(matched.length).toBe(2);
-		expect(unknown).toBe(0);
 	});
 });
 

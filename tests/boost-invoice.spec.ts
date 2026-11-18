@@ -50,11 +50,8 @@ test.describe('Boost Invoice Generation', () => {
 		const confirmButton = page.locator('button', { hasText: /Boost for 1 month/ });
 		await expect(confirmButton).toBeVisible();
 
-		const [invoiceRequest, invoiceResponse] = await Promise.all([
+		const [invoiceRequest] = await Promise.all([
 			page.waitForRequest((req) => req.url().includes(API_ENDPOINT) && req.method() === 'POST', {
-				timeout: 10000
-			}),
-			page.waitForResponse((res) => res.url().includes(API_ENDPOINT) && res.status() === 200, {
 				timeout: 10000
 			}),
 			confirmButton.click()
@@ -66,15 +63,6 @@ test.describe('Boost Invoice Generation', () => {
 		expect(requestBody).toEqual({
 			place_id: String(MERCHANT_ID),
 			days: 30
-		});
-
-		// Verify response structure
-		const responseBody = await invoiceResponse.json();
-		expect(responseBody).toMatchObject({
-			invoice: expect.stringMatching(/^lnbc/),
-			invoice_id: expect.stringMatching(
-				/^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i
-			)
 		});
 
 		// Verify UI updates

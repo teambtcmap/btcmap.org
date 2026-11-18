@@ -2,10 +2,8 @@ import { describe, expect, it } from "vitest";
 
 import { PEEK_HEIGHT } from "./drawerConfig";
 import {
-	calculateDragHeight,
 	createVelocityState,
 	determineSnapState,
-	resetVelocityState,
 	updateVelocity,
 } from "./drawerGestureUtils";
 
@@ -51,11 +49,11 @@ describe("determineSnapState", () => {
 
 	it("handles edge case at exact threshold", () => {
 		// At exactly the velocity threshold
-		const result = determineSnapState(0.5, 0, 300, EXPANDED);
+		const result = determineSnapState(0.5, 0, 200, EXPANDED);
 		// 0.5 is not > 0.5, so it falls through to distance check
 		// Distance is 0, which is not > 80 or < -80
-		// Falls through to position check: 300 > 298.1 → expanded
-		expect(result).toEqual({ expanded: true, height: EXPANDED });
+		// Falls through to position check: 200 < 277.1 → peek
+		expect(result).toEqual({ expanded: false, height: PEEK_HEIGHT });
 	});
 
 	it("snaps to a custom peek height when provided (search sheet)", () => {
@@ -96,12 +94,14 @@ describe("updateVelocity", () => {
 	});
 
 	it("maintains rolling average of samples", () => {
-		let state = createVelocityState(100, 1000);
-		for (let i = 1; i <= 6; i++) {
-			state = updateVelocity(100 - i * 10, 1000 + i * 10, state);
+		let state = createVelocityState(200, 1000);
+		// One fast move (10 px/ms), then five slow ones (1 px/ms)
+		state = updateVelocity(100, 1010, state);
+		for (let i = 1; i <= 5; i++) {
+			state = updateVelocity(100 - i * 10, 1010 + i * 10, state);
 		}
-		// Should only keep last 5 samples
-		expect(state.samples.length).toBe(5);
+		// Only the last 5 samples count: the fast one has dropped out
+		expect(state.velocity).toBe(1);
 	});
 
 	it("does not update velocity if time delta is zero", () => {
@@ -145,42 +145,5 @@ describe("createVelocityState", () => {
 		expect(state.lastTime).toBe(12345);
 		expect(state.samples).toEqual([]);
 		expect(state.velocity).toBe(0);
-	});
-});
-
-describe("resetVelocityState", () => {
-	it("creates zeroed state", () => {
-		const state = resetVelocityState();
-
-		expect(state.lastY).toBe(0);
-		expect(state.lastTime).toBe(0);
-		expect(state.samples).toEqual([]);
-		expect(state.velocity).toBe(0);
-	});
-});
-
-describe("calculateDragHeight", () => {
-	it("calculates height within bounds", () => {
-		// Dragging up 100px from 200px height
-		expect(calculateDragHeight(500, 400, 200, 140, 667)).toBe(300);
-	});
-
-	it("clamps to minimum", () => {
-		// Trying to drag below minimum
-		expect(calculateDragHeight(500, 700, 200, 140, 667)).toBe(140);
-	});
-
-	it("clamps to maximum", () => {
-		// Trying to drag above maximum
-		expect(calculateDragHeight(500, 100, 200, 140, 667)).toBe(600);
-	});
-
-	it("handles negative delta (dragging down)", () => {
-		// Dragging down 50px from 300px height
-		expect(calculateDragHeight(500, 550, 300, 140, 667)).toBe(250);
-	});
-
-	it("handles zero delta", () => {
-		expect(calculateDragHeight(500, 500, 300, 140, 667)).toBe(300);
 	});
 });

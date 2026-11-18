@@ -3,7 +3,6 @@ import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import type { Place } from "#lib/types.js";
 
 import {
-	calcVerifiedDate,
 	filterPlacesByRecency,
 	isRecentlyVerified,
 	isUpToDate,
@@ -24,33 +23,22 @@ afterEach(() => {
 	vi.useRealTimers();
 });
 
-describe("calcVerifiedDate", () => {
-	it("returns exactly one year before now", () => {
-		const result = calcVerifiedDate();
-		const oneYearAgo = new Date(FIXED_NOW);
-		oneYearAgo.setFullYear(oneYearAgo.getFullYear() - 1);
-		expect(result).toBe(oneYearAgo.getTime());
-	});
-
-	// Regression: an earlier version cached the result keyed on
+describe("isRecentlyVerified", () => {
+	// Regression: an earlier version cached the cutoff keyed on
 	// Date.getDate() (day-of-month, 1-31), so May 15 and Jun 15 collided
 	// and a process spanning a month boundary on the same day number
-	// returned a stale value. Verify the result tracks the current date
+	// returned a stale verdict. Verify the verdict tracks the current date
 	// across consecutive calls under a moving clock.
-	it("does not return a stale value across month boundaries", () => {
+	it("does not return a stale verdict across month boundaries", () => {
+		const verifiedAt = "2025-06-01T00:00:00Z";
+
 		vi.setSystemTime(new Date("2026-05-15T12:00:00Z"));
-		const may = calcVerifiedDate();
+		expect(isRecentlyVerified(verifiedAt)).toBe(true);
 
 		vi.setSystemTime(new Date("2026-06-15T12:00:00Z"));
-		const june = calcVerifiedDate();
-
-		expect(june).toBeGreaterThan(may);
-		const expectedJune = new Date("2025-06-15T12:00:00Z").getTime();
-		expect(june).toBe(expectedJune);
+		expect(isRecentlyVerified(verifiedAt)).toBe(false);
 	});
-});
 
-describe("isRecentlyVerified", () => {
 	it("returns true for a date well within the 12-month window", () => {
 		expect(isRecentlyVerified(daysAgo(30))).toBe(true);
 		expect(isRecentlyVerified(daysAgo(180))).toBe(true);
@@ -147,19 +135,9 @@ describe("filterPlacesByRecency", () => {
 		expect(filterPlacesByRecency(list, 3).map((p) => p.id)).toEqual([1, 2, 3]);
 	});
 
-	it("excludes places without a verified_at when a filter is active", () => {
-		expect(filterPlacesByRecency(list, 3).some((p) => p.id === 5)).toBe(false);
-	});
-
 	it("keeps only places outside the 12-month window in outdated mode", () => {
 		expect(filterPlacesByRecency(list, "outdated").map((p) => p.id)).toEqual([
 			2, 3, 4, 5,
 		]);
-	});
-
-	it("includes never-verified places in outdated mode", () => {
-		expect(
-			filterPlacesByRecency(list, "outdated").some((p) => p.id === 5),
-		).toBe(true);
 	});
 });

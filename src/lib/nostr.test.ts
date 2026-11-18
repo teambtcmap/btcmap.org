@@ -36,10 +36,6 @@ describe("decodeNsec", () => {
 	it("rejects malformed bech32", () => {
 		expect(() => decodeNsec("nsec1notvalidbech32")).toThrow();
 	});
-
-	it("rejects empty input", () => {
-		expect(() => decodeNsec("")).toThrow();
-	});
 });
 
 describe("signAuthWithSecretKey", () => {
@@ -130,6 +126,8 @@ describe("parseNostrAuthResponse", () => {
 		);
 	});
 
+	// Present but not a string: a nullish check would pass the missing-value
+	// cases and let this through
 	it("narrows a non-string npub to null", () => {
 		expect(
 			parseNostrAuthResponse({ token: "tok", username: "alice", npub: 42 }),

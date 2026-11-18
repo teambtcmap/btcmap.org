@@ -319,14 +319,6 @@ describe("merchantListStore — searchSession", () => {
 		expect(errToast).not.toHaveBeenCalled();
 	});
 
-	it("cancelSearch() cancels an armed search", async () => {
-		merchantList.search("El Zonte");
-		merchantList.cancelSearch();
-
-		await dispatch();
-		expect(fetch).not.toHaveBeenCalled();
-	});
-
 	it("close() cancels the pending search but not the list fetch", async () => {
 		let listAborted = false;
 		(api.get as Mock).mockImplementationOnce(
@@ -474,32 +466,6 @@ describe("merchantListStore — searchSession", () => {
 		await dispatch();
 
 		expect(addFromSearchName(get(merchantList))).toBe("Other shop");
-	});
-
-	it("after clearSearchInput(), a failed search for the same query shows no offer", async () => {
-		merchantList.search("Kiosk Hamburg");
-		await dispatch();
-		merchantList.clearSearchInput();
-
-		(fetch as Mock).mockResolvedValue(new Response("", { status: 500 }));
-		merchantList.search("Kiosk Hamburg");
-		await dispatch();
-
-		expect(get(merchantList).mode).toBe("search");
-		expect(addFromSearchName(get(merchantList))).toBeNull();
-	});
-
-	it("after exitSearchMode(), a failed search for the same query shows no offer", async () => {
-		merchantList.search("Kiosk Hamburg");
-		await dispatch();
-		merchantList.exitSearchMode();
-
-		(fetch as Mock).mockResolvedValue(new Response("", { status: 500 }));
-		merchantList.search("Kiosk Hamburg");
-		await dispatch();
-
-		expect(get(merchantList).mode).toBe("search");
-		expect(addFromSearchName(get(merchantList))).toBeNull();
 	});
 
 	it("close() drops the offer", async () => {

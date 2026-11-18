@@ -39,8 +39,8 @@ describe("isBasemapId", () => {
 		}
 	});
 
-	it("rejects unknown ids, including the retired migration-era ones", () => {
-		for (const id of ["openfreemap", "carto-light", "carto-dark", "", "OSM"]) {
+	it("rejects unknown ids", () => {
+		for (const id of ["", "OSM"]) {
 			expect(isBasemapId(id)).toBe(false);
 		}
 	});
@@ -103,11 +103,5 @@ describe("buildRasterStyle", () => {
 		expect(src.type).toBe("raster");
 		expect(src.maxzoom).toBe(19);
 		expect(src.attribution).toContain("OpenStreetMap");
-	});
-
-	it("does not bake the supporter link into tile attribution (it is a customAttribution now)", () => {
-		const style = buildRasterStyle();
-		const src = style.sources.osm as { attribution?: string };
-		expect(src.attribution ?? "").not.toContain("Support BTC Map");
 	});
 });

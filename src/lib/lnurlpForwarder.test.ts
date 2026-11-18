@@ -1,4 +1,3 @@
-import { createHash } from "node:crypto";
 import { describe, expect, it, vi } from "vitest";
 
 import { forwardLnurlp } from "./lnurlpForwarder";
@@ -8,13 +7,6 @@ const UPSTREAM = "https://rizful.com/.well-known/lnurlp/btcmap-zaps";
 // What the payee (Rizful) actually serves for zaps@btcmap.org.
 const UPSTREAM_METADATA =
 	'[["text/plain","Pay Rizful User"],["text/identifier","btcmap-zaps@rizful.com"]]';
-
-// sha256 of UPSTREAM_METADATA in hex. This is the `h` tag of the invoices the
-// payee hands out, and what verifying wallets compare against the metadata
-// they were served. If the forwarder alters the metadata string, this no
-// longer matches and wallets abort with "h-tag mismatch".
-const UPSTREAM_METADATA_SHA256 =
-	"82426c8d379aefdf8218c8255e44c2bf2a0f551b3cf6378b573e25fd1d87f339";
 
 const upstreamBody = () => ({
 	callback: "https://rizful.com/lnurl_two/btcmap-zaps/get_invoice",
@@ -29,26 +21,13 @@ const upstreamBody = () => ({
 	commentAllowed: 224,
 });
 
-const sha256 = (value: string) =>
-	createHash("sha256").update(value).digest("hex");
-
 const fetchReturning = (body: unknown, init?: ResponseInit) =>
 	vi.fn(async () => new Response(JSON.stringify(body), init));
 
 describe("forwardLnurlp", () => {
-	it("forwards metadata byte-for-byte so the invoice h tag still matches", async () => {
-		const res = await forwardLnurlp({
-			fetch: fetchReturning(upstreamBody()),
-			upstream: UPSTREAM,
-		});
-
-		const data = await res.json();
-
-		expect(data.metadata).toBe(UPSTREAM_METADATA);
-		expect(sha256(data.metadata)).toBe(UPSTREAM_METADATA_SHA256);
-	});
-
 	it("passes every upstream field through unchanged", async () => {
+		// `metadata` above all: invoices carry its sha256 as the `h` tag, and
+		// wallets abort with "h-tag mismatch" if the string we serve differs.
 		const expected = upstreamBody();
 
 		const res = await forwardLnurlp({

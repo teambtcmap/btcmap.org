@@ -7,8 +7,6 @@ import {
 	fetchIconInnerSvg,
 	fetchNoteIconInnerSvg,
 	notePinDataUrl,
-	PIN_FILL_BOOSTED,
-	PIN_FILL_REGULAR,
 	PIN_FILLS,
 	PIN_HEIGHT,
 	PIN_PATH,
@@ -75,9 +73,13 @@ describe("sprite naming and fills", () => {
 		expect(spriteName("cafe", "od")).toBe("pin-od-cafe");
 	});
 
-	it("keeps the legacy fills stable and gives issue variants distinct hues", () => {
-		expect(PIN_FILLS.r).toBe(PIN_FILL_REGULAR);
-		expect(PIN_FILLS.b).toBe(PIN_FILL_BOOSTED);
+	it("keeps regular pins brand teal and boosted pins bitcoin orange", () => {
+		// The selected-pin pulse fallback in app.css mirrors the teal
+		expect(PIN_FILLS.r).toBe("#0E95AF");
+		expect(PIN_FILLS.b).toBe("#F7931A");
+	});
+
+	it("gives every variant a distinct hue", () => {
 		expect(new Set(Object.values(PIN_FILLS)).size).toBe(
 			Object.keys(PIN_FILLS).length,
 		);

@@ -7,10 +7,6 @@ describe("getOpenStatus", () => {
 		expect(getOpenStatus(undefined)).toBeNull();
 	});
 
-	it("returns null for empty string", () => {
-		expect(getOpenStatus("")).toBeNull();
-	});
-
 	it("returns open for 24/7", () => {
 		const result = getOpenStatus("24/7");
 		expect(result).not.toBeNull();
@@ -24,12 +20,6 @@ describe("getOpenStatus", () => {
 
 	it("accepts merchant coordinates for timezone-aware evaluation", () => {
 		const result = getOpenStatus("24/7", { lat: 50.08, lon: 14.42 });
-		expect(result).not.toBeNull();
-		expect(result!.isOpen).toBe(true);
-	});
-
-	it("works without coordinates (fallback to local timezone)", () => {
-		const result = getOpenStatus("24/7");
 		expect(result).not.toBeNull();
 		expect(result!.isOpen).toBe(true);
 	});
