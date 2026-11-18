@@ -73,7 +73,7 @@
 		"@iconify-json/fa6-brands": "^1.2.6",
 		"@iconify-json/fa6-solid": "^1.2.4",
 		"@iconify-json/ic": "^1.2.4",
-		"@iconify-json/material-symbols": "^1.2.98",
+		"@iconify-json/material-symbols": "^1.2.100",
 		"@iconify/svelte": "^5.2.4",
 		"@playwright/test": "^1.65.1",
 		"@sveltejs/adapter-netlify": "^7.0.1",
