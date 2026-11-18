@@ -160,18 +160,6 @@ export const countMerchantsByCategory = (
 	return counts;
 };
 
-export const filterMerchantsByCategory = (
-	merchants: Place[],
-	category: CategoryKey,
-): Place[] => {
-	if (category === "all") return merchants;
-
-	const categoryIcons = CATEGORY_GROUPS[category].icons;
-	return merchants.filter((merchant) =>
-		categoryIcons.some((icon) => merchant.icon === icon),
-	);
-};
-
 // Check if a single place matches a category (used for map marker filtering)
 export const placeMatchesCategory = (
 	place: Place,

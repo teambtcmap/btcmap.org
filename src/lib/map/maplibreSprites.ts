@@ -23,8 +23,8 @@ export const PIN_PATH =
 export const PIN_WIDTH = 32;
 export const PIN_HEIGHT = 43;
 
-export const PIN_FILL_REGULAR = "#0E95AF";
-export const PIN_FILL_BOOSTED = "#F7931A";
+const PIN_FILL_REGULAR = "#0E95AF";
+const PIN_FILL_BOOSTED = "#F7931A";
 
 // One sprite variant per pin body color: regular teal, boosted orange, the
 // four ?issues-worklist category colors (see #lib/placeIssues), and the

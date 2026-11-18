@@ -24,9 +24,7 @@ import { filterPlacesByRecency } from "#lib/verification.js";
 // The single decision pipeline for "which places are visible" (#1168). Every
 // consumer — map pins, nearby list, search list, chip counts — derives from
 // selectVisiblePlaces so no pair of sites can disagree again (the #1158-#1162
-// bug class). The category predicate is placeMatchesCategory everywhere; the
-// categoryMapping equivalence tests guard the legacy filterMerchantsByCategory
-// until its remaining callers migrate.
+// bug class). The category predicate is placeMatchesCategory everywhere.
 
 export type VisibleSelectionInputs = {
 	// Candidate rows: the bulk $places, the search results, or API radius rows.

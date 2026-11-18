@@ -12,12 +12,6 @@ export function calcVerifiedCutoff(years: number): number {
 	return d.getTime();
 }
 
-// Timestamp 12 months before now — the "recently verified" window used by
-// the merchant summary/detail badges.
-export function calcVerifiedDate(): number {
-	return calcVerifiedCutoff(1);
-}
-
 // True if the verification date is within `years` of now. A missing or
 // unparseable date is never "within".
 export function isVerifiedWithinYears(

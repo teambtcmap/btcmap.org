@@ -96,25 +96,3 @@ export function createVelocityState(
 		lastTime: initialTime,
 	};
 }
-
-// Resets velocity tracking state (for reuse without allocation)
-export function resetVelocityState(): VelocityState {
-	return {
-		samples: [],
-		velocity: 0,
-		lastY: 0,
-		lastTime: 0,
-	};
-}
-
-// Calculates new drawer height during drag
-export function calculateDragHeight(
-	startY: number,
-	currentY: number,
-	initialHeight: number,
-	minHeight: number,
-	maxHeight: number,
-): number {
-	const deltaY = startY - currentY;
-	return Math.max(minHeight, Math.min(maxHeight, initialHeight + deltaY));
-}

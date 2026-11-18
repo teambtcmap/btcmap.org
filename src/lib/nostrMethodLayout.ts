@@ -61,11 +61,8 @@ export type PanelState = {
 	uriReady: boolean;
 };
 
-export const isPairing = (method: NostrMethod | null): method is PairMode =>
+const isPairing = (method: NostrMethod | null): method is PairMode =>
 	method === "qr" || method === "open" || method === "copy";
-
-export const isForm = (method: NostrMethod): method is NostrForm =>
-	method === "bunker" || method === "nsec";
 
 // Whether a method's body (QR, status, form) is showing
 export function methodOpen(method: NostrMethod, state: PanelState): boolean {

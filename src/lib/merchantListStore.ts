@@ -297,9 +297,9 @@ function createMerchantListStore() {
 	// abort, and every staleness/open guard. search() is the single entry
 	// point and the sole LIVE writer of searchQuery (the PR #1126
 	// input-clobber class this extraction exists to prevent). The legacy
-	// public writers — openWithSearchResults, clearSearchInput,
-	// exitSearchMode — have no production callers and bypass the session's
-	// cancellation; route new code through search() instead.
+	// public writer openWithSearchResults has no production callers (tests
+	// seed results through it) and bypasses the session's cancellation;
+	// route new code through search() instead.
 	let searchAbortController: AbortController | null = null;
 
 	function cancelSearchRequest() {
@@ -430,12 +430,7 @@ function createMerchantListStore() {
 		// Callers hand over rows NOT narrowed by payment: this pipeline applies
 		// that filter and counts the unknowns it drops (#1423), and it can only
 		// count what it is given.
-		setMerchants(
-			merchants: Place[],
-			centerLat?: number,
-			centerLon?: number,
-			limit: number = MERCHANT_LIST_MAX_ITEMS,
-		) {
+		setMerchants(merchants: Place[], centerLat?: number, centerLon?: number) {
 			const { selectedCategory, verifiedWithinYears, paymentMethods } =
 				get(store);
 			// The shared pipeline applies the recency window (gated on the lazy
@@ -464,7 +459,7 @@ function createMerchantListStore() {
 				centerLon,
 				get(userLocation).location,
 			);
-			const limited = sorted.slice(0, limit);
+			const limited = sorted.slice(0, MERCHANT_LIST_MAX_ITEMS);
 
 			update((state) => ({
 				...state,
@@ -741,13 +736,6 @@ function createMerchantListStore() {
 			applySearchResults(query, results, total);
 		},
 
-		// Open panel in search mode, optionally showing spinner
-		// Use openSearchMode() to open panel ready for input (no spinner)
-		// Use openSearchMode(true) when a search is in progress (shows spinner)
-		openSearchMode(isSearching: boolean = false) {
-			setSearchModeOpen(isSearching);
-		},
-
 		// Single entry point for the search input (#1173) — and the sole
 		// live writer of searchQuery (see the searchSession note above).
 		// Writes the RAW query: the staleness guards compare verbatim, so
@@ -772,43 +760,10 @@ function createMerchantListStore() {
 			}
 		},
 
-		// Discard any pending or in-flight worldwide search without touching
-		// list/details requests. Escape hatch for teardown paths outside the
-		// session; close() and reset() cancel internally, so today only
-		// tests exercise this directly.
-		cancelSearch() {
-			cancelSearchSession();
-		},
-
 		// The place the offer named was just submitted (#1621): hide its
 		// offer (see dismissedOfferName), keep the search on screen.
 		dismissAddOffer(name: string) {
 			update((state) => ({ ...state, dismissedOfferName: name }));
-		},
-
-		// Clear search input and results, but stay in search mode
-		// Use when: user clears the search input (e.g., clicking X button)
-		// Markers reset because searchResultIds becomes empty, triggering normal marker reload
-		clearSearchInput() {
-			update((state) => ({
-				...resetCategoryState(state),
-				...EMPTY_SEARCH,
-			}));
-		},
-
-		// Exit search mode and return to nearby mode
-		// Use when: user explicitly switches away from search (e.g., clicking "Nearby" tab)
-		exitSearchMode() {
-			update((state) => ({
-				...resetCategoryState(state),
-				mode: "nearby",
-				...EMPTY_SEARCH,
-			}));
-		},
-
-		// Switch between modes (no side effects - just sets mode)
-		setMode(mode: MerchantListMode) {
-			update((state) => ({ ...state, mode }));
 		},
 
 		// Set the selected category filter
@@ -862,11 +817,6 @@ function createMerchantListStore() {
 				}
 				return { ...state, verifiedWithinYears: years };
 			});
-		},
-
-		// Reset the selected category to 'all'
-		resetCategory() {
-			update((state) => resetCategoryState(state));
 		},
 
 		// Seed the ?onchain&lightning&nfc embed filter (#1269). Session-only:
