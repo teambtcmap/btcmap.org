@@ -116,6 +116,7 @@
 		"merchantMap": "Mapa de comercios",
 		"zoomIn": "Acercar",
 		"zoomOut": "Alejar",
+		"compass": "Arrastra para girar el mapa, haz clic para volver al norte",
 		"basemapTitle": "Mapa base",
 		"verifiedFilterTitle": "Mostrar solo lugares verificados",
 		"heatmap": "Activar mapa de calor de densidad de comercios",

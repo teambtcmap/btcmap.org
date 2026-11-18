@@ -1,4 +1,4 @@
-import { _, init, locale, register } from "svelte-i18n";
+import { _, init, locale, register, waitLocale } from "svelte-i18n";
 
 // Register locales with lazy loading
 register("en", () => import("./locales/en.json"));
@@ -68,7 +68,7 @@ init({
 });
 
 // Export locale store and translation function for components
-export { _, locale };
+export { _, locale, waitLocale };
 
 // Returns the best language code to use for localized name lookups.
 // Uses the app locale when non-English (e.g. pt-BR, bg, ru).

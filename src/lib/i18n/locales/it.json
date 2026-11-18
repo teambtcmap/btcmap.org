@@ -222,6 +222,7 @@
 		"signup": "Registrati",
 		"zoomIn": "Ingrandisci",
 		"zoomOut": "Rimpicciolisci",
+		"compass": "Trascina per ruotare la mappa, fai clic per tornare a nord",
 		"basemapTitle": "Basemap",
 		"verifiedFilterTitle": "Mostra solo luoghi verificati",
 		"heatmap": "Attiva mappa di calore della densità dei commercianti",

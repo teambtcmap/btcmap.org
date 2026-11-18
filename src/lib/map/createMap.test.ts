@@ -1,8 +1,20 @@
 import { beforeEach, describe, expect, it, vi } from "vitest";
 
-const { hasWebGLMock } = vi.hoisted(() => ({ hasWebGLMock: vi.fn() }));
+const { hasWebGLMock, waitLocaleMock } = vi.hoisted(() => ({
+	hasWebGLMock: vi.fn(),
+	waitLocaleMock: vi.fn(),
+}));
 
 vi.mock("#lib/map/webgl.js", () => ({ hasWebGL: hasWebGLMock }));
+// The translator echoes the key, so a test can see which i18n key fed
+// which maplibre string.
+vi.mock("#lib/i18n/index.js", async () => {
+	const { readable } = await import("svelte/store");
+	return {
+		_: readable((key: string) => `t(${key})`),
+		waitLocale: waitLocaleMock,
+	};
+});
 vi.mock("#lib/map/worker.js", () => ({ ensureMapLibreWorkerUrl: vi.fn() }));
 vi.mock("#lib/map/maplibreSprites.js", () => ({
 	installPlaceholderHandler: vi.fn(),
@@ -94,6 +106,7 @@ const readyOutcome = async (
 beforeEach(() => {
 	FakeMap.instances = [];
 	hasWebGLMock.mockReturnValue(true);
+	waitLocaleMock.mockResolvedValue(undefined);
 });
 
 describe("styleUrlForTheme", () => {
@@ -281,6 +294,43 @@ describe("createBtcmapMap", () => {
 		expect(fake.ctorOptions.zoom).toBe(15);
 		// Defaults survive underneath the overrides
 		expect(fake.ctorOptions.maxZoom).toBe(21);
+	});
+
+	it("passes the control tooltips to maplibre in the app language", async () => {
+		const { fake } = await readyOutcome();
+		expect(fake.ctorOptions.locale).toEqual({
+			"NavigationControl.ZoomIn": "t(mapControls.zoomIn)",
+			"NavigationControl.ZoomOut": "t(mapControls.zoomOut)",
+			"NavigationControl.ResetBearing": "t(mapControls.compass)",
+			"GeolocateControl.FindMyLocation": "t(mapControls.locate)",
+		});
+	});
+
+	it("builds the Map only after the app locale has loaded", async () => {
+		// Locales load lazily: strings read before that are the raw keys
+		let releaseLocale: () => void = () => {};
+		waitLocaleMock.mockReturnValueOnce(
+			new Promise<void>((resolve) => {
+				releaseLocale = resolve;
+			}),
+		);
+		const outcome = createBtcmapMap({
+			container,
+			theme: "light",
+			registerOverlays: vi.fn(),
+		});
+		await new Promise((resolve) => setTimeout(resolve, 0));
+		expect(FakeMap.instances.length).toBe(0);
+
+		releaseLocale();
+		expect((await outcome).status).toBe("ready");
+		expect(FakeMap.instances.length).toBe(1);
+	});
+
+	it("still builds the Map, with maplibre's own tooltips, when the locale fails to load", async () => {
+		waitLocaleMock.mockRejectedValueOnce(new Error("locale chunk offline"));
+		const { fake } = await readyOutcome();
+		expect(fake.ctorOptions.locale).toBeUndefined();
 	});
 
 	it("a rejecting registerOverlays does not wedge the handle", async () => {

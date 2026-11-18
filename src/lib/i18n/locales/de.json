@@ -116,6 +116,7 @@
 		"merchantMap": "Händlerkarte",
 		"zoomIn": "Vergrößern",
 		"zoomOut": "Verkleinern",
+		"compass": "Ziehen zum Drehen der Karte, klicken zum Ausrichten nach Norden",
 		"basemapTitle": "Hintergrundkarte",
 		"verifiedFilterTitle": "Nur verifizierte Orte anzeigen",
 		"heatmap": "Wärmebild der Händlerdichte ein-/ausblenden",

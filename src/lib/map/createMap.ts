@@ -3,7 +3,9 @@ import type {
 	MapOptions,
 	StyleSpecification,
 } from "maplibre-gl";
+import { get } from "svelte/store";
 
+import { _, waitLocale } from "#lib/i18n/index.js";
 import { styleForBasemap } from "#lib/map/basemaps.js";
 import { installPlaceholderHandler } from "#lib/map/maplibreSprites.js";
 import { hasWebGL } from "#lib/map/webgl.js";
@@ -17,6 +19,19 @@ export type MapStyleInput = string | StyleSpecification;
 // picker exposes — basemaps.ts stays the single source of truth for the URLs.
 export const styleUrlForTheme = (t: MapThemeName) =>
 	styleForBasemap(t === "dark" ? "ofm-dark" : "liberty");
+
+// maplibre's built-in controls read their tooltips from the Map's `locale`
+// option once, when the Map is built (there is no setter): a language switch
+// while a map is open shows up on the next map.
+const controlsLocale = (): Record<string, string> => {
+	const t = get(_);
+	return {
+		"NavigationControl.ZoomIn": t("mapControls.zoomIn"),
+		"NavigationControl.ZoomOut": t("mapControls.zoomOut"),
+		"NavigationControl.ResetBearing": t("mapControls.compass"),
+		"GeolocateControl.FindMyLocation": t("mapControls.locate"),
+	};
+};
 
 export type BtcmapMapHandle = {
 	map: MapLibreMap;
@@ -90,7 +105,16 @@ export const createBtcmapMap = async (opts: {
 }): Promise<CreateBtcmapMapOutcome> => {
 	if (!hasWebGL()) return { status: "unsupported" };
 
-	const maplibre = await import("maplibre-gl");
+	// Locales load lazily: until the current one is in, the tooltips would
+	// be the raw i18n keys. A locale that fails to load must not take the map
+	// down with it; maplibre's English tooltips stay in that case.
+	const [maplibre, localeLoaded] = await Promise.all([
+		import("maplibre-gl"),
+		waitLocale().then(
+			() => true,
+			() => false,
+		),
+	]);
 	ensureMapLibreWorkerUrl(maplibre);
 	if (opts.isCancelled?.()) return { status: "cancelled" };
 
@@ -121,6 +145,7 @@ export const createBtcmapMap = async (opts: {
 		touchZoomRotate: true,
 		pitchWithRotate: false,
 		attributionControl: { compact: true },
+		locale: localeLoaded ? controlsLocale() : undefined,
 		...opts.mapOptions,
 		container: opts.container,
 	});

@@ -222,6 +222,7 @@
 		"signup": "Sign up",
 		"zoomIn": "Zoom in",
 		"zoomOut": "Zoom out",
+		"compass": "Drag to rotate map, click to reset north",
 		"basemapTitle": "Basemap",
 		"verifiedFilterTitle": "Only show verified places",
 		"heatmap": "Toggle merchant density heatmap",

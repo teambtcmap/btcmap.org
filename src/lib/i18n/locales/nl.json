@@ -222,6 +222,7 @@
 		"signup": "Registreren",
 		"zoomIn": "Inzoomen",
 		"zoomOut": "Uitzoomen",
+		"compass": "Sleep om de kaart te draaien, klik om naar het noorden te richten",
 		"basemapTitle": "Achtergrondkaart",
 		"verifiedFilterTitle": "Alleen geverifieerde locaties tonen",
 		"heatmap": "Heatmap ondernemersdichtheid in-/uitschakelen",
