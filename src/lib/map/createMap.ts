@@ -106,15 +106,8 @@ export const createBtcmapMap = async (opts: {
 	if (!hasWebGL()) return { status: "unsupported" };
 
 	// Locales load lazily: until the current one is in, the tooltips would
-	// be the raw i18n keys. A locale that fails to load must not take the map
-	// down with it; maplibre's English tooltips stay in that case.
-	const [maplibre, localeLoaded] = await Promise.all([
-		import("maplibre-gl"),
-		waitLocale().then(
-			() => true,
-			() => false,
-		),
-	]);
+	// be the raw i18n keys.
+	const [maplibre] = await Promise.all([import("maplibre-gl"), waitLocale()]);
 	ensureMapLibreWorkerUrl(maplibre);
 	if (opts.isCancelled?.()) return { status: "cancelled" };
 
@@ -145,7 +138,7 @@ export const createBtcmapMap = async (opts: {
 		touchZoomRotate: true,
 		pitchWithRotate: false,
 		attributionControl: { compact: true },
-		locale: localeLoaded ? controlsLocale() : undefined,
+		locale: controlsLocale(),
 		...opts.mapOptions,
 		container: opts.container,
 	});

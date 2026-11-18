@@ -326,13 +326,6 @@ describe("createBtcmapMap", () => {
 		expect((await outcome).status).toBe("ready");
 		expect(FakeMap.instances.length).toBe(1);
 	});
-
-	it("still builds the Map, with maplibre's own tooltips, when the locale fails to load", async () => {
-		waitLocaleMock.mockRejectedValueOnce(new Error("locale chunk offline"));
-		const { fake } = await readyOutcome();
-		expect(fake.ctorOptions.locale).toBeUndefined();
-	});
-
 	it("a rejecting registerOverlays does not wedge the handle", async () => {
 		const errorSpy = vi.spyOn(console, "error").mockImplementation(() => {});
 		try {
