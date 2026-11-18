@@ -32,6 +32,9 @@ const controlsLocale = (): NonNullable<MapOptions["locale"]> => {
 		"NavigationControl.ZoomOut": t("mapControls.zoomOut"),
 		"NavigationControl.ResetBearing": t("mapControls.compass"),
 		"GeolocateControl.FindMyLocation": t("mapControls.locate"),
+		"GeolocateControl.LocationNotAvailable": t(
+			"mapControls.locationNotAvailable",
+		),
 	};
 };
 

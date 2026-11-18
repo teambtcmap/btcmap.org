@@ -121,6 +121,7 @@
 		"verifiedFilterTitle": "Afficher seulement les lieux vérifiés",
 		"heatmap": "Activer la carte de chaleur de densité des commerces",
 		"locate": "Afficher ma position",
+		"locationNotAvailable": "Position non disponible",
 		"boostAlt": "Boost",
 		"locateAlt": "Afficher ma position",
 		"goToHomeAlt": "Aller à la page d'accueil",

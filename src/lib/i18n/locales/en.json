@@ -227,6 +227,7 @@
 		"verifiedFilterTitle": "Only show verified places",
 		"heatmap": "Toggle merchant density heatmap",
 		"locate": "Show me where I am",
+		"locationNotAvailable": "Location not available",
 		"boostAlt": "Boost",
 		"locateAlt": "Show me where I am",
 		"goToHomeAlt": "Go to home page",
