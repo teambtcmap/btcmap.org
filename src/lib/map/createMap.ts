@@ -5,7 +5,7 @@ import type {
 } from "maplibre-gl";
 import { get } from "svelte/store";
 
-import { _, waitLocale } from "#lib/i18n/index.js";
+import { _ } from "#lib/i18n/index.js";
 import { styleForBasemap } from "#lib/map/basemaps.js";
 import { installPlaceholderHandler } from "#lib/map/maplibreSprites.js";
 import { hasWebGL } from "#lib/map/webgl.js";
@@ -21,9 +21,11 @@ export const styleUrlForTheme = (t: MapThemeName) =>
 	styleForBasemap(t === "dark" ? "ofm-dark" : "liberty");
 
 // maplibre's built-in controls read their tooltips from the Map's `locale`
-// option once, when the Map is built (there is no setter): a language switch
-// while a map is open shows up on the next map.
-const controlsLocale = (): Record<string, string> => {
+// option once, when the Map is built (there is no setter). The layout mounts
+// pages only after the first locale has loaded, so `_` is ready here. A
+// language switch that doesn't remount the page leaves an open map on the
+// old tooltips until the next map.
+const controlsLocale = (): NonNullable<MapOptions["locale"]> => {
 	const t = get(_);
 	return {
 		"NavigationControl.ZoomIn": t("mapControls.zoomIn"),
@@ -105,9 +107,7 @@ export const createBtcmapMap = async (opts: {
 }): Promise<CreateBtcmapMapOutcome> => {
 	if (!hasWebGL()) return { status: "unsupported" };
 
-	// Locales load lazily: until the current one is in, the tooltips would
-	// be the raw i18n keys.
-	const [maplibre] = await Promise.all([import("maplibre-gl"), waitLocale()]);
+	const maplibre = await import("maplibre-gl");
 	ensureMapLibreWorkerUrl(maplibre);
 	if (opts.isCancelled?.()) return { status: "cancelled" };
 
