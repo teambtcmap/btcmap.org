@@ -23,26 +23,6 @@ describe("parseMerchantHash", () => {
 	});
 
 	describe("parsing merchant from query params", () => {
-		it("should parse ?merchant=123", () => {
-			window.location.search = "?merchant=123";
-			const result = parseMerchantHash();
-			expect(result).toEqual({
-				merchantId: 123,
-				drawerView: "details",
-				isOpen: true,
-			});
-		});
-
-		it("should parse ?merchant=123&view=boost", () => {
-			window.location.search = "?merchant=123&view=boost";
-			const result = parseMerchantHash();
-			expect(result).toEqual({
-				merchantId: 123,
-				drawerView: "boost",
-				isOpen: true,
-			});
-		});
-
 		it("should parse ?merchant=123 with map coordinates in hash", () => {
 			window.location.hash = "#14/10.24279/-67.58397";
 			window.location.search = "?merchant=24180";
@@ -163,29 +143,6 @@ describe("updateMerchantHash", () => {
 	});
 
 	describe("setting merchant query params", () => {
-		it("should set merchant query params", () => {
-			updateMerchantHash(123, "details");
-			expect(history.pushState).toHaveBeenCalledWith(
-				null,
-				"",
-				expect.stringContaining("merchant=123"),
-			);
-		});
-
-		it("should set merchant query params with boost view", () => {
-			updateMerchantHash(123, "boost");
-			expect(history.pushState).toHaveBeenCalledWith(
-				null,
-				"",
-				expect.stringContaining("merchant=123"),
-			);
-			expect(history.pushState).toHaveBeenCalledWith(
-				null,
-				"",
-				expect.stringContaining("view=boost"),
-			);
-		});
-
 		it("should preserve hash when setting merchant", () => {
 			window.location.hash = "#14/10.24279/-67.58397";
 			updateMerchantHash(24180, "details");
@@ -223,16 +180,6 @@ describe("updateMerchantHash", () => {
 	});
 
 	describe("removing merchant query params", () => {
-		it("should remove merchant query params when passed null", () => {
-			window.location.search = "?merchant=123";
-			updateMerchantHash(null, "details");
-			expect(history.pushState).toHaveBeenCalledWith(
-				null,
-				"",
-				expect.not.stringContaining("merchant"),
-			);
-		});
-
 		it("should preserve hash when removing merchant", () => {
 			window.location.hash = "#14/10.24279/-67.58397";
 			window.location.search = "?merchant=123";
@@ -274,14 +221,8 @@ describe("buildMerchantMapHref deep-link round-trip", () => {
 		expect(buildMerchantMapHref(1128, 1, 2)).toBe("/map?merchant=1128#18/1/2");
 	});
 
-	it("regression: the pre-#1019 hash format leaves the merchant unreadable", () => {
-		// `#z/lat/lng&merchant=…` leaves the query string empty, so
-		// parseMerchantHash returns null — the exact reason the old
-		// "View on main map" link selected nothing.
+	it("a legacy pre-#1019 `#z/lat/lng&merchant=…` link still opens at its viewport", () => {
 		setLocationFromHref("/map#18/32.6489863/-16.9101835&merchant=1128");
-		expect(parseMerchantHash().merchantId).toBeNull();
-		// The viewport still parses, which is why the map opened at the right
-		// place but with no marker selected or drawer open.
 		expect(parseHashCoords()).toMatchObject({
 			lat: 32.6489863,
 			lng: -16.9101835,

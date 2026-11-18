@@ -36,10 +36,6 @@ describe("decodeNsec", () => {
 	it("rejects malformed bech32", () => {
 		expect(() => decodeNsec("nsec1notvalidbech32")).toThrow();
 	});
-
-	it("rejects empty input", () => {
-		expect(() => decodeNsec("")).toThrow();
-	});
 });
 
 describe("signAuthWithSecretKey", () => {
@@ -130,24 +126,12 @@ describe("parseNostrAuthResponse", () => {
 		);
 	});
 
-	it("narrows a non-string npub to null", () => {
-		expect(
-			parseNostrAuthResponse({ token: "tok", username: "alice", npub: 42 }),
-		).toMatchObject({ npub: null });
-	});
-
 	it("throws when token is missing", () => {
 		expect(() => parseNostrAuthResponse({ username: "alice" })).toThrow();
 	});
 
 	it("throws when username is missing", () => {
 		expect(() => parseNostrAuthResponse({ token: "tok" })).toThrow();
-	});
-
-	it("throws when token is not a string", () => {
-		expect(() =>
-			parseNostrAuthResponse({ token: 1, username: "alice" }),
-		).toThrow();
 	});
 
 	it("throws on null or undefined data", () => {

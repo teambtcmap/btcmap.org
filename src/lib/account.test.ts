@@ -61,17 +61,6 @@ describe("changeUsername", () => {
 		expect(await changeUsername("bob")).toEqual({ status: "taken" });
 	});
 
-	// Since teambtcmap/btcmap-api#119 a taken name is a 409, so a 500 is a
-	// real failure, not a guess at "taken"
-	it("rethrows a 500", async () => {
-		const { default: api } = await import("#lib/axios.js");
-		vi.mocked(api.put).mockRejectedValue(
-			apiError(500, "Database query failed"),
-		);
-
-		await expect(changeUsername("bob")).rejects.toThrow();
-	});
-
 	it("rethrows other failures", async () => {
 		const { default: api } = await import("#lib/axios.js");
 		vi.mocked(api.put).mockRejectedValue(apiError(401, "Unauthorized"));

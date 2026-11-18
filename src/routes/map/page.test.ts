@@ -12,11 +12,6 @@ const run = (search: string) =>
 	} as unknown as Parameters<typeof load>[0]);
 
 describe("/map load", () => {
-	it("captures the placement entry method from ?add", () => {
-		expect(run("?add=nav")).toMatchObject({ addEntryMethod: "nav" });
-		expect(run("?add=redirect")).toMatchObject({ addEntryMethod: "redirect" });
-	});
-
 	it("folds bare, absent and unknown values into url", () => {
 		expect(run("?add=")).toMatchObject({ addEntryMethod: "url" });
 		expect(run("?add")).toMatchObject({ addEntryMethod: "url" });

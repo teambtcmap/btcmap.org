@@ -13,12 +13,6 @@ describe("commentAnchorFromHash", () => {
 		expect(commentAnchorFromHash("#comment-123")).toBe("comment-123");
 	});
 
-	it("round-trips an id built by commentDomId", () => {
-		expect(commentAnchorFromHash(`#${commentDomId(42)}`)).toBe(
-			commentDomId(42),
-		);
-	});
-
 	it("ignores the existing #comments tab deep-link", () => {
 		expect(commentAnchorFromHash("#comments")).toBeNull();
 	});

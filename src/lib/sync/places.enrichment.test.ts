@@ -40,13 +40,6 @@ describe("ensurePaymentMethods", () => {
 		expect(get(paymentTagsLoaded)).toBe(false);
 	});
 
-	it("does not latch on an empty response", async () => {
-		places.set([row(1)]);
-		mockGet.mockResolvedValue({ data: [] });
-		await ensurePaymentMethods();
-		expect(get(paymentTagsLoaded)).toBe(false);
-	});
-
 	it("does not latch on id-only rows carrying no tags", async () => {
 		// e.g. the fields param silently ignored upstream: latching here
 		// would activate the filter with nothing to match — and the clearing

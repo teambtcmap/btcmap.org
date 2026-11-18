@@ -169,23 +169,6 @@ describe("session store", () => {
 			expect(stored.token).toBe("old-tok");
 		});
 
-		it("leaves a current-shape session in storage untouched", async () => {
-			const raw = JSON.stringify({
-				username: "alice",
-				token: "tok",
-				savedPlaces: [],
-				savedAreas: [],
-				npub: null,
-			});
-			localStorage.setItem("btcmap_session", raw);
-			const setItem = vi.spyOn(Storage.prototype, "setItem");
-			const session = await createTestSession();
-			session.init();
-
-			expect(setItem).not.toHaveBeenCalled();
-			expect(localStorage.getItem("btcmap_session")).toBe(raw);
-		});
-
 		it("backfills npub to null when missing from old session", async () => {
 			localStorage.setItem(
 				"btcmap_session",

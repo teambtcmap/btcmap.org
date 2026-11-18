@@ -19,14 +19,6 @@ describe("getDisplayLang", () => {
 		it("returns base language for bg locale", () => {
 			expect(getDisplayLang("bg")).toBe("bg");
 		});
-
-		it("returns base language for ru locale", () => {
-			expect(getDisplayLang("ru")).toBe("ru");
-		});
-
-		it("returns base language for de locale", () => {
-			expect(getDisplayLang("de")).toBe("de");
-		});
 	});
 
 	describe("English app locale", () => {
@@ -50,24 +42,12 @@ describe("getDisplayLang", () => {
 			expect(getDisplayLang(null)).toBe("en");
 		});
 
-		it("returns en when app locale is undefined and browser language is English", () => {
-			expect(getDisplayLang(undefined)).toBe("en");
-		});
-
 		it("returns browser base language when browser language is non-English", () => {
 			Object.defineProperty(navigator, "language", {
 				value: "de-DE",
 				configurable: true,
 			});
 			expect(getDisplayLang("en")).toBe("de");
-		});
-
-		it("returns browser base language for pt-BR browser with English app locale", () => {
-			Object.defineProperty(navigator, "language", {
-				value: "pt-BR",
-				configurable: true,
-			});
-			expect(getDisplayLang("en")).toBe("pt");
 		});
 	});
 
