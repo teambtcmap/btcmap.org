@@ -126,12 +126,26 @@ describe("parseNostrAuthResponse", () => {
 		);
 	});
 
+	// Present but not a string: a nullish check would pass the missing-value
+	// cases and let this through
+	it("narrows a non-string npub to null", () => {
+		expect(
+			parseNostrAuthResponse({ token: "tok", username: "alice", npub: 42 }),
+		).toMatchObject({ npub: null });
+	});
+
 	it("throws when token is missing", () => {
 		expect(() => parseNostrAuthResponse({ username: "alice" })).toThrow();
 	});
 
 	it("throws when username is missing", () => {
 		expect(() => parseNostrAuthResponse({ token: "tok" })).toThrow();
+	});
+
+	it("throws when token is not a string", () => {
+		expect(() =>
+			parseNostrAuthResponse({ token: 1, username: "alice" }),
+		).toThrow();
 	});
 
 	it("throws on null or undefined data", () => {
