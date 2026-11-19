@@ -783,6 +783,7 @@
 		"checkingUpdates": "Проверка за актуализации...",
 		"complete": "Готово!",
 		"downloading": "Изтегляне на данните за местата...",
+		"downloadingProgress": "Изтегляне на данните за местата: {loaded} МБ / {total} МБ...",
 		"loadingTiles": "Зареждане на плочките...",
 		"finalizing": "Финализиране...",
 		"initializing": "Инициализация...",
@@ -790,7 +791,9 @@
 		"loadingMap": "Зареждане на картата...",
 		"merging": "Обединяване на актуализациите...",
 		"preparing": "Подготовка...",
-		"processing": "Обработка на данните..."
+		"processing": "Обработка на данните...",
+		"processingCount": "Обработка на местата: {count}...",
+		"loadingFromCache": "Зареждане от кеша..."
 	},
 	"mapDrawer": {
 		"back": "Назад",
