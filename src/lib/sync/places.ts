@@ -9,6 +9,7 @@ import {
 	evictPlaceDetails,
 	primePlaceDetails,
 } from "#lib/placeDetails.js";
+import type { PlacesLoadingStatus } from "#lib/store.js";
 import {
 	paymentTagsLoaded,
 	places,
@@ -47,6 +48,11 @@ const PROGRESS_RANGES = {
 	FINALIZE: 95,
 	COMPLETE: 100,
 } as const;
+
+const setLoadingStatus = (
+	key: PlacesLoadingStatus["key"],
+	values?: PlacesLoadingStatus["values"],
+) => placesLoadingStatus.set({ key, values });
 
 // Helper function to get date 2 weeks ago (fallback)
 const getTwoWeeksAgoDate = (): string => {
@@ -296,7 +302,7 @@ export const elementsSync = async () => {
 
 		// Initialize progress to 1 to show loader immediately
 		placesLoadingProgress.set(1);
-		placesLoadingStatus.set("Initializing...");
+		setLoadingStatus("status.initializing");
 
 		// get places and sync timestamp from local storage
 		// readPlaceCache sanitizes at the trust boundary: a corrupt blob (the
@@ -311,7 +317,7 @@ export const elementsSync = async () => {
 				// Step 1: Get base data from static CDN if no cache exists
 				if (!cachedPlaces) {
 					try {
-						placesLoadingStatus.set("Downloading places data...");
+						setLoadingStatus("status.downloading");
 						placesLoadingProgress.set(PROGRESS_RANGES.DOWNLOAD_START);
 
 						// Fetch as text to parse in worker
@@ -332,23 +338,16 @@ export const elementsSync = async () => {
 											(downloadPercent / 100) * downloadRange;
 										placesLoadingProgress.set(Math.round(scaledProgress));
 
-										const loadedMB = (
-											progressEvent.loaded /
-											(1024 * 1024)
-										).toFixed(1);
-										const totalMB = (
-											progressEvent.total /
-											(1024 * 1024)
-										).toFixed(1);
-										placesLoadingStatus.set(
-											`Downloading ${loadedMB} MB / ${totalMB} MB...`,
-										);
+										setLoadingStatus("status.downloadingProgress", {
+											loaded: progressEvent.loaded / (1024 * 1024),
+											total: progressEvent.total / (1024 * 1024),
+										});
 									}
 								},
 							},
 						);
 
-						placesLoadingStatus.set("Processing places data...");
+						setLoadingStatus("status.processing");
 						placesLoadingProgress.set(PROGRESS_RANGES.PARSE_START);
 
 						// Parse JSON in worker thread to avoid blocking main thread
@@ -365,9 +364,9 @@ export const elementsSync = async () => {
 								placesLoadingProgress.set(Math.round(scaledProgress));
 
 								if (progress.itemsParsed) {
-									placesLoadingStatus.set(
-										`Processing ${progress.itemsParsed.toLocaleString()} places...`,
-									);
+									setLoadingStatus("status.processingCount", {
+										count: progress.itemsParsed,
+									});
 								}
 							},
 						);
@@ -390,7 +389,7 @@ export const elementsSync = async () => {
 						placesError.set(
 							"Could not load places from static CDN, please try again or contact BTC Map.",
 						);
-						placesLoadingStatus.set("");
+						placesLoadingStatus.set(null);
 						placesLoadingProgress.set(0);
 						console.error(error);
 						return;
@@ -398,14 +397,14 @@ export const elementsSync = async () => {
 				} else {
 					// Use cached data as base
 					placesData = [...cachedPlaces];
-					placesLoadingStatus.set("Loading from cache...");
+					setLoadingStatus("status.loadingFromCache");
 					placesLoadingProgress.set(PROGRESS_RANGES.CACHE_LOAD);
 				}
 
 				// Step 2: Get recent updates from API
 				// Prefer cached sync timestamp if available and valid (not in future, not older than
 				// MAX_CACHE_AGE_DAYS); otherwise use static file date
-				placesLoadingStatus.set("Checking for updates...");
+				setLoadingStatus("status.checkingUpdates");
 				placesLoadingProgress.set(
 					cachedPlaces
 						? PROGRESS_RANGES.UPDATE_CHECK
@@ -460,7 +459,7 @@ export const elementsSync = async () => {
 
 					if (recentUpdates.length > 0) {
 						mergedUpdateCount = recentUpdates.length;
-						placesLoadingStatus.set("Merging updates...");
+						setLoadingStatus("status.merging");
 						placesLoadingProgress.set(
 							cachedPlaces
 								? PROGRESS_RANGES.MERGE_START
@@ -494,7 +493,7 @@ export const elementsSync = async () => {
 				}
 
 				// Step 3: Save to local storage and update store
-				placesLoadingStatus.set("Finalizing...");
+				setLoadingStatus("status.finalizing");
 				placesLoadingProgress.set(PROGRESS_RANGES.FINALIZE);
 
 				// A periodic re-sync that merged nothing must NOT republish:
@@ -521,7 +520,7 @@ export const elementsSync = async () => {
 							console.warn("Could not save sync timestamp:", err),
 						);
 					}
-					placesLoadingStatus.set("Complete!");
+					setLoadingStatus("status.complete");
 					placesLoadingProgress.set(PROGRESS_RANGES.COMPLETE);
 				} else if (placesData.length > 0) {
 					// publishPlaces always updates the store (the session keeps
@@ -542,7 +541,7 @@ export const elementsSync = async () => {
 								console.warn("Could not save sync timestamp:", err),
 							);
 						}
-						placesLoadingStatus.set("Complete!");
+						setLoadingStatus("status.complete");
 						placesLoadingProgress.set(PROGRESS_RANGES.COMPLETE);
 						// Keep progress at 100% - don't reset to avoid confusing
 						// loading states. The map component handles hiding the
@@ -551,7 +550,7 @@ export const elementsSync = async () => {
 						placesError.set(
 							"Could not store places locally, please try again or contact BTC Map.",
 						);
-						placesLoadingStatus.set("");
+						placesLoadingStatus.set(null);
 						placesLoadingProgress.set(0);
 					}
 				} else {
@@ -561,7 +560,7 @@ export const elementsSync = async () => {
 					// unlatched — but never persist an empty blob over whatever is
 					// on disk; a healthy next sync re-downloads the baseline.
 					await publishPlaces(placesData, { persist: false });
-					placesLoadingStatus.set("Complete!");
+					setLoadingStatus("status.complete");
 					placesLoadingProgress.set(PROGRESS_RANGES.COMPLETE);
 				}
 			})
