@@ -1,7 +1,14 @@
+import { get } from "svelte/store";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 
-import { places, placesLoadingStatus } from "#lib/store.js";
-import type { Place } from "#lib/types.js";
+import type { PlacesLoadingStatus } from "#lib/store.js";
+import {
+	places,
+	placesError,
+	placesLoadingProgress,
+	placesLoadingStatus,
+} from "#lib/store.js";
+import type { Place, ProgressUpdate } from "#lib/types.js";
 
 vi.mock("#lib/axios.js", () => ({
 	default: { get: vi.fn(), head: vi.fn() },
@@ -17,18 +24,17 @@ vi.mock("#lib/workers/sync-worker-manager.js", () => ({
 	filterPlaces: vi.fn(),
 	parseJSON: vi.fn(),
 }));
-// The translator echoes the key and its values, so a test can see which
-// i18n key fed which status.
+// The root layout starts the sync in onMount, before the first locale has
+// loaded. svelte-i18n throws on any message lookup then, so the sync must
+// not translate: every test here runs with a locale that is not ready.
 vi.mock("#lib/i18n/index.js", async () => {
 	const { readable } = await import("svelte/store");
-	return {
-		_: readable(
-			(key: string, options?: { values?: Record<string, unknown> }) =>
-				options?.values
-					? `t(${key}, ${JSON.stringify(options.values)})`
-					: `t(${key})`,
-		),
+	const notReady = () => {
+		throw new Error(
+			"[svelte-i18n] Cannot format a message without first setting the initial locale.",
+		);
 	};
+	return { _: readable(notReady), locale: readable(undefined) };
 });
 
 import api from "#lib/axios.js";
@@ -44,9 +50,9 @@ import { elementsSync } from "./places";
 
 const row = (id: number): Place => ({ id, lat: 0, lon: 0 }) as Place;
 
-// Every non-empty status the loading box would show, in order.
+// Every status the loading box would show, in order.
 const recordStatuses = () => {
-	const seen: string[] = [];
+	const seen: PlacesLoadingStatus[] = [];
 	const unsubscribe = placesLoadingStatus.subscribe((status) => {
 		if (status) seen.push(status);
 	});
@@ -61,10 +67,25 @@ describe("elementsSync loading status", () => {
 		vi.mocked(writePlacesSyncedAt).mockImplementation(async (iso) => iso);
 		vi.mocked(publishPlaces).mockResolvedValue({ persisted: true });
 		places.set([]);
-		placesLoadingStatus.set("");
+		placesError.set("");
+		placesLoadingProgress.set(0);
+		placesLoadingStatus.set(null);
 	});
 
-	it("shows the cached-sync steps in the app language", async () => {
+	it("runs to the end before the app locale has loaded", async () => {
+		places.set([row(1)]);
+		vi.mocked(readPlaceCache).mockResolvedValue([row(1)]);
+		vi.mocked(readPlacesSyncedAt).mockResolvedValue(new Date().toISOString());
+		vi.mocked(api.get).mockResolvedValue({ data: [] });
+
+		await elementsSync();
+
+		expect(get(placesError)).toBe("");
+		expect(get(placesLoadingProgress)).toBe(100);
+		expect(get(placesLoadingStatus)).toEqual({ key: "status.complete" });
+	});
+
+	it("reports the cached-sync steps as i18n keys", async () => {
 		places.set([row(1)]);
 		vi.mocked(readPlaceCache).mockResolvedValue([row(1)]);
 		vi.mocked(readPlacesSyncedAt).mockResolvedValue(new Date().toISOString());
@@ -75,15 +96,15 @@ describe("elementsSync loading status", () => {
 		unsubscribe();
 
 		expect(seen).toEqual([
-			"t(status.initializing)",
-			"t(status.loadingFromCache)",
-			"t(status.checkingUpdates)",
-			"t(status.finalizing)",
-			"t(status.complete)",
+			{ key: "status.initializing" },
+			{ key: "status.loadingFromCache" },
+			{ key: "status.checkingUpdates" },
+			{ key: "status.finalizing" },
+			{ key: "status.complete" },
 		]);
 	});
 
-	it("shows the download and parse progress in the app language", async () => {
+	it("reports the download and parse progress with raw numbers", async () => {
 		vi.mocked(readPlaceCache).mockResolvedValue(null);
 		vi.mocked(readPlacesSyncedAt).mockResolvedValue(null);
 		vi.mocked(api.head).mockResolvedValue({
@@ -100,9 +121,14 @@ describe("elementsSync loading status", () => {
 			})
 			// The updates since the baseline
 			.mockResolvedValueOnce({ data: [] });
+		const parsing: ProgressUpdate = {
+			percent: 50,
+			itemsParsed: 1234,
+			status: "parsing",
+		};
 		vi.mocked(parseJSON).mockImplementation(
 			async (_text, _kind, onProgress) => {
-				onProgress?.({ percent: 50, itemsParsed: 1234 } as never);
+				onProgress?.(parsing);
 				return [row(1)] as never;
 			},
 		);
@@ -112,14 +138,14 @@ describe("elementsSync loading status", () => {
 		unsubscribe();
 
 		expect(seen).toEqual([
-			"t(status.initializing)",
-			"t(status.downloading)",
-			't(status.downloadingProgress, {"loaded":"1.5","total":"3.0"})',
-			"t(status.processing)",
-			`t(status.processingCount, {"count":"${(1234).toLocaleString()}"})`,
-			"t(status.checkingUpdates)",
-			"t(status.finalizing)",
-			"t(status.complete)",
+			{ key: "status.initializing" },
+			{ key: "status.downloading" },
+			{ key: "status.downloadingProgress", values: { loaded: 1.5, total: 3 } },
+			{ key: "status.processing" },
+			{ key: "status.processingCount", values: { count: 1234 } },
+			{ key: "status.checkingUpdates" },
+			{ key: "status.finalizing" },
+			{ key: "status.complete" },
 		]);
 	});
 });

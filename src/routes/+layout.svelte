@@ -6,6 +6,7 @@ import { Toaster } from "svelte-sonner";
 import { startActivityPolling } from "#lib/activityNotifier.js";
 import { trackBrowserLanguage } from "#lib/analytics.js";
 import { session } from "#lib/session.js";
+import type { PlacesLoadingStatus } from "#lib/store.js";
 import {
 	placesLoadingProgress,
 	placesLoadingStatus,
@@ -21,7 +22,7 @@ import "#lib/icons/registerOfflineIcons.js";
 import "tippy.js/dist/tippy.css";
 import "../app.css";
 
-import { isLoading, locale } from "svelte-i18n";
+import { _, isLoading, locale } from "svelte-i18n";
 
 import { isSupportedLocale } from "#lib/i18n/index.js";
 import Footer from "$components/layout/Footer.svelte";
@@ -48,7 +49,7 @@ $: if (browser && $locale) {
 }
 
 let layoutSyncVisible = false;
-let layoutLoadingStatus = "";
+let layoutLoadingStatus: PlacesLoadingStatus | null = null;
 
 $: {
 	// Show sync progress only while actively loading (1-99%), hide when complete (100%)
@@ -57,7 +58,7 @@ $: {
 		layoutLoadingStatus = $placesLoadingStatus;
 	} else {
 		layoutSyncVisible = false;
-		layoutLoadingStatus = "";
+		layoutLoadingStatus = null;
 	}
 }
 
@@ -148,7 +149,11 @@ export let data;
 		<div class="bg-teal dark:bg-dark">
 			<Header />
 			<main class="mx-auto w-full px-4 xl:w-[1200px] xl:px-0">
-				<LoadingIndicator visible={layoutSyncVisible} status={layoutLoadingStatus} progress={$placesLoadingProgress} />
+				<LoadingIndicator
+					visible={layoutSyncVisible}
+					status={layoutLoadingStatus ? $_(layoutLoadingStatus.key, { values: layoutLoadingStatus.values }) : ""}
+					progress={$placesLoadingProgress}
+				/>
 				<slot />
 				<Footer />
 			</main>

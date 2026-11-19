@@ -444,13 +444,19 @@ let mapTilesLoaded = false;
 let mapLoading = 1;
 let mapLoadingStatus = "";
 
+// The places sync reports an i18n key; it is translated here, where the
+// locale has loaded, and follows a language switch.
+$: placesStatusText = $placesLoadingStatus
+	? $_($placesLoadingStatus.key, { values: $placesLoadingStatus.values })
+	: "";
+
 $: {
 	if ($placesLoadingProgress > 0 && $placesLoadingProgress < 100) {
 		mapLoading = $placesLoadingProgress;
-		mapLoadingStatus = $placesLoadingStatus;
+		mapLoadingStatus = placesStatusText;
 	} else if ($placesLoadingProgress === 100 && !elementsLoaded) {
 		mapLoading = 100;
-		mapLoadingStatus = $placesLoadingStatus;
+		mapLoadingStatus = placesStatusText;
 	} else if (elementsLoaded && !mapTilesLoaded) {
 		mapLoading = 100;
 		mapLoadingStatus = $_("status.preparing");
@@ -1445,7 +1451,7 @@ onDestroy(() => {
 	// percentage from a previous sync can flash before the next sync
 	// tick advances or clears it.
 	placesLoadingProgress.set(0);
-	placesLoadingStatus.set("");
+	placesLoadingStatus.set(null);
 });
 </script>
 

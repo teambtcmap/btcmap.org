@@ -4,12 +4,12 @@ import { get } from "svelte/store";
 import { API_BASE } from "#lib/api-base.js";
 import { buildFieldsParam, PLACE_FIELD_SETS } from "#lib/api-fields.js";
 import api from "#lib/axios.js";
-import { _ } from "#lib/i18n/index.js";
 import {
 	completePlaceUrl,
 	evictPlaceDetails,
 	primePlaceDetails,
 } from "#lib/placeDetails.js";
+import type { PlacesLoadingStatus } from "#lib/store.js";
 import {
 	paymentTagsLoaded,
 	places,
@@ -49,10 +49,10 @@ const PROGRESS_RANGES = {
 	COMPLETE: 100,
 } as const;
 
-// The loading box shows the status text as is, so it is translated here,
-// when it is set.
-const setLoadingStatus = (key: string, values?: Record<string, string>) =>
-	placesLoadingStatus.set(get(_)(key, { values }));
+const setLoadingStatus = (
+	key: PlacesLoadingStatus["key"],
+	values?: PlacesLoadingStatus["values"],
+) => placesLoadingStatus.set({ key, values });
 
 // Helper function to get date 2 weeks ago (fallback)
 const getTwoWeeksAgoDate = (): string => {
@@ -338,17 +338,9 @@ export const elementsSync = async () => {
 											(downloadPercent / 100) * downloadRange;
 										placesLoadingProgress.set(Math.round(scaledProgress));
 
-										const loadedMB = (
-											progressEvent.loaded /
-											(1024 * 1024)
-										).toFixed(1);
-										const totalMB = (
-											progressEvent.total /
-											(1024 * 1024)
-										).toFixed(1);
 										setLoadingStatus("status.downloadingProgress", {
-											loaded: loadedMB,
-											total: totalMB,
+											loaded: progressEvent.loaded / (1024 * 1024),
+											total: progressEvent.total / (1024 * 1024),
 										});
 									}
 								},
@@ -373,7 +365,7 @@ export const elementsSync = async () => {
 
 								if (progress.itemsParsed) {
 									setLoadingStatus("status.processingCount", {
-										count: progress.itemsParsed.toLocaleString(),
+										count: progress.itemsParsed,
 									});
 								}
 							},
@@ -397,7 +389,7 @@ export const elementsSync = async () => {
 						placesError.set(
 							"Could not load places from static CDN, please try again or contact BTC Map.",
 						);
-						placesLoadingStatus.set("");
+						placesLoadingStatus.set(null);
 						placesLoadingProgress.set(0);
 						console.error(error);
 						return;
@@ -558,7 +550,7 @@ export const elementsSync = async () => {
 						placesError.set(
 							"Could not store places locally, please try again or contact BTC Map.",
 						);
-						placesLoadingStatus.set("");
+						placesLoadingStatus.set(null);
 						placesLoadingProgress.set(0);
 					}
 				} else {

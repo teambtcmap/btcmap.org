@@ -28,8 +28,14 @@ export const placesById = derived(
 );
 export const placesError = writable("");
 
-// Progress tracking for places sync
-export const placesLoadingStatus = writable<string>(""); // e.g. "Downloading places...", "Processing data..."
+// Progress tracking for places sync. The status is an i18n key with its
+// values, not text: the root layout starts the sync before the first locale
+// has loaded, so the templates translate it, not the sync.
+export type PlacesLoadingStatus = {
+	key: `status.${string}`;
+	values?: Record<string, number>;
+};
+export const placesLoadingStatus = writable<PlacesLoadingStatus | null>(null);
 export const placesLoadingProgress = writable<number>(0); // 0-100 percentage
 
 // True once the lazy verified_at enrichment has loaded. The dates are only
