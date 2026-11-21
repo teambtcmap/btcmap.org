@@ -1,15 +1,4 @@
-import { _, init, locale, register } from "svelte-i18n";
-
-// Register locales with lazy loading
-register("en", () => import("./locales/en.json"));
-register("de", () => import("./locales/de.json"));
-register("pt-BR", () => import("./locales/pt-BR.json"));
-register("bg", () => import("./locales/bg.json"));
-register("ru", () => import("./locales/ru.json"));
-register("nl", () => import("./locales/nl.json"));
-register("fr", () => import("./locales/fr.json"));
-register("es", () => import("./locales/es.json"));
-register("it", () => import("./locales/it.json"));
+import { _, addMessages, init, locale, register } from "svelte-i18n";
 
 export const SUPPORTED_LOCALES = [
 	"en",
@@ -23,13 +12,43 @@ export const SUPPORTED_LOCALES = [
 	"it",
 ] as const;
 
-export function isSupportedLocale(
-	lang: string,
-): lang is (typeof SUPPORTED_LOCALES)[number] {
+type SupportedLocale = (typeof SUPPORTED_LOCALES)[number];
+
+export function isSupportedLocale(lang: string): lang is SupportedLocale {
 	return (SUPPORTED_LOCALES as readonly string[]).includes(lang);
 }
 
-const BROWSER_LOCALE_MAP: Record<string, string> = {
+type LocaleMessages = Parameters<typeof addMessages>[1];
+
+// The locale files load lazily, one request each
+export const localeLoaders: Record<
+	SupportedLocale,
+	() => Promise<{ default: LocaleMessages }>
+> = {
+	en: () => import("./locales/en.json"),
+	de: () => import("./locales/de.json"),
+	"pt-BR": () => import("./locales/pt-BR.json"),
+	bg: () => import("./locales/bg.json"),
+	ru: () => import("./locales/ru.json"),
+	nl: () => import("./locales/nl.json"),
+	fr: () => import("./locales/fr.json"),
+	es: () => import("./locales/es.json"),
+	it: () => import("./locales/it.json"),
+};
+
+// svelte-i18n drops a loader from its queue before it runs, so a file that
+// failed to load (on a bad network, for example) would never be fetched
+// again. Put the loader back on failure: the next switch to it retries.
+const registerLocale = (code: SupportedLocale) =>
+	register(code, () =>
+		localeLoaders[code]().catch((error: unknown) => {
+			registerLocale(code);
+			throw error;
+		}),
+	);
+for (const code of SUPPORTED_LOCALES) registerLocale(code);
+
+const BROWSER_LOCALE_MAP: Record<string, SupportedLocale> = {
 	de: "de",
 	bg: "bg",
 	pt: "pt-BR",
@@ -41,7 +60,7 @@ const BROWSER_LOCALE_MAP: Record<string, string> = {
 };
 
 // Smart locale detection (mirrors theme detection pattern)
-function getInitialLocale(): string {
+function getInitialLocale(): SupportedLocale {
 	if (typeof window !== "undefined") {
 		// 1. Check localStorage for saved preference (highest priority)
 		const saved = localStorage.getItem("language");
@@ -61,11 +80,36 @@ function getInitialLocale(): string {
 	return "en";
 }
 
+// When the first locale fails to load, svelte-i18n leaves the locale unset
+// and every $_ throws, which blanks the page (#1658). Fall back to English
+// then. The saved choice stays, so the next visit tries it again.
+export const fallBackToEnglish = async (
+	loading: Promise<void> | void,
+): Promise<void> => {
+	try {
+		await loading;
+	} catch (error) {
+		console.warn("Could not load the locale, falling back to English:", error);
+		try {
+			// svelte-i18n loads English along with the chosen locale, so it can
+			// still be on its way: wait for its texts first, or the page shows
+			// the raw keys until they arrive.
+			const english = await localeLoaders.en();
+			addMessages("en", english.default);
+			await locale.set("en");
+		} catch (englishError) {
+			console.warn("Could not load English either:", englishError);
+		}
+	}
+};
+
 // Initialize with smart detection
-init({
-	fallbackLocale: "en",
-	initialLocale: getInitialLocale(),
-});
+fallBackToEnglish(
+	init({
+		fallbackLocale: "en",
+		initialLocale: getInitialLocale(),
+	}),
+);
 
 // Export locale store and translation function for components
 export { _, locale };
