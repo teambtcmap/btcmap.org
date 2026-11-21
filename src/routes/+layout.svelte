@@ -142,8 +142,9 @@ export let data;
 	{/if}
 </svelte:head>
 
-{#if $isLoading}
-	<LoadingIndicator visible={$isLoading} status="Loading..." />
+<!-- No locale yet (a failed locale load, until the English fallback is in): any $_ would throw -->
+{#if $isLoading || !$locale}
+	<LoadingIndicator visible status="Loading..." />
 {:else}
 	{#if !['/', '/map', '/communities/map', '/communities', '/countries'].includes(data.pathname)}
 		<div class="bg-teal dark:bg-dark">

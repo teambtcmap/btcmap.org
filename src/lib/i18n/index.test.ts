@@ -21,6 +21,30 @@ describe("locale loading", () => {
 		expect(get(_)("mapControls.zoomIn")).toBe("Zoom in");
 	});
 
+	it("switches to English only once the English texts are in", async () => {
+		// English loads along with the chosen locale, so it can still be on
+		// its way when that one fails: hold it back here
+		const english = await import("./locales/en.json");
+		let finishEnglish: () => void = () => {};
+		const loadEnglish = vi.spyOn(localeLoaders, "en").mockImplementationOnce(
+			() =>
+				new Promise((resolve) => {
+					finishEnglish = () => resolve(english);
+				}),
+		);
+		vi.spyOn(localeLoaders, "de").mockRejectedValueOnce(new Error("offline"));
+		locale.set(null);
+
+		const fallingBack = fallBackToEnglish(locale.set("de"));
+		await vi.waitFor(() => expect(loadEnglish).toHaveBeenCalled());
+		// No locale yet, rather than English with its texts missing
+		expect(get(locale)).toBeFalsy();
+
+		finishEnglish();
+		await fallingBack;
+		expect(get(locale)).toBe("en");
+	});
+
 	it("fetches a locale again on the next switch after it failed to load", async () => {
 		const loadDutch = vi
 			.spyOn(localeLoaders, "nl")

@@ -1,4 +1,4 @@
-import { _, init, locale, register } from "svelte-i18n";
+import { _, addMessages, init, locale, register } from "svelte-i18n";
 
 export const SUPPORTED_LOCALES = [
 	"en",
@@ -18,8 +18,13 @@ export function isSupportedLocale(lang: string): lang is SupportedLocale {
 	return (SUPPORTED_LOCALES as readonly string[]).includes(lang);
 }
 
+type LocaleMessages = Parameters<typeof addMessages>[1];
+
 // The locale files load lazily, one request each
-export const localeLoaders: Record<SupportedLocale, () => Promise<unknown>> = {
+export const localeLoaders: Record<
+	SupportedLocale,
+	() => Promise<{ default: LocaleMessages }>
+> = {
 	en: () => import("./locales/en.json"),
 	de: () => import("./locales/de.json"),
 	"pt-BR": () => import("./locales/pt-BR.json"),
@@ -86,6 +91,11 @@ export const fallBackToEnglish = async (
 	} catch (error) {
 		console.warn("Could not load the locale, falling back to English:", error);
 		try {
+			// svelte-i18n loads English along with the chosen locale, so it can
+			// still be on its way: wait for its texts first, or the page shows
+			// the raw keys until they arrive.
+			const english = await localeLoaders.en();
+			addMessages("en", english.default);
 			await locale.set("en");
 		} catch (englishError) {
 			console.warn("Could not load English either:", englishError);
