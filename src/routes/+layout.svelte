@@ -22,9 +22,9 @@ import "#lib/icons/registerOfflineIcons.js";
 import "tippy.js/dist/tippy.css";
 import "../app.css";
 
-import { _, isLoading, locale } from "svelte-i18n";
+import { _, isLoading } from "svelte-i18n";
 
-import { isSupportedLocale, localeFailed } from "#lib/i18n/index.js";
+import { isSupportedLocale, locale, localeFailed } from "#lib/i18n/index.js";
 import Footer from "$components/layout/Footer.svelte";
 
 import { afterNavigate } from "$app/navigation";
