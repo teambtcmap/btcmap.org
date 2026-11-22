@@ -65,6 +65,18 @@ describe("starting the locale", () => {
 		expect(get(i18n.locale)).toBeFalsy();
 	});
 
+	it("drops the failure once a later switch loads a locale", async () => {
+		// A ?language= link can still load its locale when the start failed
+		vi.doMock("./locales/en.json", offline);
+		const i18n = await startWith("en");
+		await vi.waitFor(() => expect(get(i18n.localeFailed)).toBe(true));
+
+		await i18n.locale.set("de");
+
+		expect(get(i18n.locale)).toBe("de");
+		expect(get(i18n.localeFailed)).toBe(false);
+	});
+
 	it("switches to English only once the English texts are in", async () => {
 		// English loads along with the chosen locale, so it can still be on
 		// its way when that one fails: hold it back

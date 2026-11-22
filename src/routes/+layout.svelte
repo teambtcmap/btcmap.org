@@ -142,10 +142,9 @@ export let data;
 	{/if}
 </svelte:head>
 
-<!-- No locale file could load at start, and no locale is set (a ?language= switch can
-     still load one): no $_ either, so plain English and a reload button.
+<!-- No locale file could load: no $_ either, so plain English and a reload button.
      No locale yet (a failed load, until the fallback texts are in): any $_ would throw. -->
-{#if $localeFailed && !$locale}
+{#if $localeFailed}
 	<div class="min-h-screen bg-teal dark:bg-dark">
 		<div class="mx-auto w-10/12 space-y-6 py-20 text-center xl:w-[1200px]">
 			<img src="/images/logo.svg" alt="BTC Map" class="mx-auto w-32" />

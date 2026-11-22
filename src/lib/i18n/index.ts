@@ -1,4 +1,4 @@
-import { get, writable } from "svelte/store";
+import { derived, get, writable } from "svelte/store";
 import {
 	_,
 	addMessages,
@@ -98,9 +98,14 @@ function getInitialLocale(): SupportedLocale {
 	return "en";
 }
 
-// True when no locale file could load at start. The root layout then shows
-// a reload screen that does not use $_.
-export const localeFailed = writable(false);
+// True when no locale file could load at start and no locale is set. The
+// root layout then shows a reload screen that does not use $_. A later
+// switch can still load a locale (a ?language= link): that clears it.
+const startFailed = writable(false);
+export const localeFailed = derived(
+	[startFailed, i18nLocale],
+	([failed, current]) => failed && !current,
+);
 
 // Loads a locale's texts straight from its file: the same request when
 // svelte-i18n is still loading it, a second try when that load failed.
@@ -136,7 +141,7 @@ const startLocale = async (
 			return;
 		}
 	}
-	localeFailed.set(true);
+	startFailed.set(true);
 };
 
 // Initialize with smart detection
