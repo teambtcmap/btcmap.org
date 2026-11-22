@@ -99,6 +99,25 @@ describe("starting the locale", () => {
 		expect(get(i18n._)("mapControls.zoomIn")).toBe("Zoom in");
 	});
 
+	it("keeps a ?language= switch made while the fallback loads English", async () => {
+		let releaseEnglish: () => void = () => {};
+		const held = new Promise<void>((resolve) => {
+			releaseEnglish = resolve;
+		});
+		vi.doMock("./locales/de.json", offline);
+		vi.doMock("./locales/en.json", async () => {
+			await held;
+			return vi.importActual("./locales/en.json");
+		});
+		const i18n = await startWith("de");
+		// What +layout.svelte's afterNavigate calls on a ?language= link
+		await i18n.locale.set("bg");
+
+		releaseEnglish();
+		await new Promise((resolve) => setTimeout(resolve, 100));
+		expect(get(i18n.locale)).toBe("bg");
+	});
+
 	it("fetches a locale again on the next switch after it failed to load", async () => {
 		let attempts = 0;
 		vi.doMock("./locales/nl.json", async () => {

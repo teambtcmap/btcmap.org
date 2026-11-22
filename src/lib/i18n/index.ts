@@ -124,6 +124,7 @@ const loadTexts = async (code: SupportedLocale): Promise<boolean> => {
 // then stays unset and every $_ throws, which blanked the page (#1658).
 // Keep the chosen locale when its texts are in, else fall back to English,
 // and switch only once the texts are in: before, the page showed raw keys.
+// A ?language= link can set a locale while these texts load: keep that one.
 // The saved choice stays, so the next visit tries it again.
 const startLocale = async (
 	loading: Promise<void> | void,
@@ -137,7 +138,7 @@ const startLocale = async (
 	}
 	for (const code of new Set<SupportedLocale>([chosen, "en"])) {
 		if (await loadTexts(code)) {
-			await i18nLocale.set(code);
+			if (!get(i18nLocale)) await i18nLocale.set(code);
 			return;
 		}
 	}
