@@ -6,7 +6,6 @@ import { Toaster } from "svelte-sonner";
 import { startActivityPolling } from "#lib/activityNotifier.js";
 import { trackBrowserLanguage } from "#lib/analytics.js";
 import { session } from "#lib/session.js";
-import type { PlacesLoadingStatus } from "#lib/store.js";
 import {
 	placesLoadingProgress,
 	placesLoadingStatus,
@@ -17,18 +16,21 @@ import { theme } from "#lib/theme.js";
 import LoadingIndicator from "$components/LoadingIndicator.svelte";
 import Header from "$components/layout/Header.svelte";
 
-import { browser, dev } from "$app/env";
+import { dev } from "$app/env";
 import "#lib/icons/registerOfflineIcons.js";
 import "tippy.js/dist/tippy.css";
 import "../app.css";
 
-import { _, isLoading, locale } from "svelte-i18n";
+import { _, isLoading } from "svelte-i18n";
 
-import { isSupportedLocale } from "#lib/i18n/index.js";
+import { isSupportedLocale, locale, localeFailed } from "#lib/i18n/index.js";
 import Footer from "$components/layout/Footer.svelte";
 
+import type { LayoutProps } from "./$types";
 import { afterNavigate } from "$app/navigation";
 import { page } from "$app/state";
+
+let { data, children }: LayoutProps = $props();
 
 // Apply language from URL param site-wide (e.g. /map?language=bg for embedded maps).
 // On /communities/map, ?communityLang= filters communities; ?language= sets UI locale.
@@ -43,24 +45,19 @@ afterNavigate(() => {
 	}
 });
 
-// Update HTML lang attribute dynamically when locale changes
-$: if (browser && $locale) {
-	document.documentElement.lang = $locale;
-}
+// Update HTML lang attribute dynamically when locale changes. Effects never
+// run during SSR, so the old `browser &&` guard is dropped.
+$effect(() => {
+	if ($locale) document.documentElement.lang = $locale;
+});
 
-let layoutSyncVisible = false;
-let layoutLoadingStatus: PlacesLoadingStatus | null = null;
-
-$: {
-	// Show sync progress only while actively loading (1-99%), hide when complete (100%)
-	if ($placesLoadingProgress > 0 && $placesLoadingProgress < 100) {
-		layoutSyncVisible = true;
-		layoutLoadingStatus = $placesLoadingStatus;
-	} else {
-		layoutSyncVisible = false;
-		layoutLoadingStatus = null;
-	}
-}
+// Show sync progress only while actively loading (1-99%), hide when complete (100%)
+const layoutSyncVisible = $derived(
+	$placesLoadingProgress > 0 && $placesLoadingProgress < 100,
+);
+const layoutLoadingStatus = $derived(
+	layoutSyncVisible ? $placesLoadingStatus : null,
+);
 
 let dataSyncInterval: ReturnType<typeof setInterval>;
 let stopActivityPolling: (() => void) | null = null;
@@ -103,8 +100,6 @@ onDestroy(() => {
 	clearInterval(dataSyncInterval);
 	stopActivityPolling?.();
 });
-
-export let data;
 </script>
 
 <svelte:head>
@@ -142,8 +137,23 @@ export let data;
 	{/if}
 </svelte:head>
 
-{#if $isLoading}
-	<LoadingIndicator visible={$isLoading} status="Loading..." />
+<!-- No locale file could load: no $_ either, so plain English and a reload button.
+     No locale yet (a failed load, until the fallback texts are in): any $_ would throw. -->
+{#if $localeFailed}
+	<div class="min-h-screen bg-teal dark:bg-dark">
+		<div class="mx-auto w-10/12 space-y-6 py-20 text-center xl:w-[1200px]">
+			<img src="/images/logo.svg" alt="BTC Map" class="mx-auto w-32" />
+			<h1 class="text-2xl font-semibold text-primary dark:text-white">BTC Map could not load its texts</h1>
+			<p class="text-primary dark:text-white">Please check your connection and reload the page.</p>
+			<button
+				type="button"
+				class="text-xl font-semibold text-link transition-colors hover:text-hover"
+				onclick={() => location.reload()}>Reload</button
+			>
+		</div>
+	</div>
+{:else if $isLoading || !$locale}
+	<LoadingIndicator visible status="Loading..." />
 {:else}
 	{#if !['/', '/map', '/communities/map', '/communities', '/countries'].includes(data.pathname)}
 		<div class="bg-teal dark:bg-dark">
@@ -154,13 +164,13 @@ export let data;
 					status={layoutLoadingStatus ? $_(layoutLoadingStatus.key, { values: layoutLoadingStatus.values }) : ""}
 					progress={$placesLoadingProgress}
 				/>
-				<slot />
+				{@render children()}
 				<Footer />
 			</main>
 		</div>
 	{:else}
 		<main>
-			<slot />
+			{@render children()}
 		</main>
 	{/if}
 
