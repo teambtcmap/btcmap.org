@@ -6,7 +6,6 @@ import { Toaster } from "svelte-sonner";
 import { startActivityPolling } from "#lib/activityNotifier.js";
 import { trackBrowserLanguage } from "#lib/analytics.js";
 import { session } from "#lib/session.js";
-import type { PlacesLoadingStatus } from "#lib/store.js";
 import {
 	placesLoadingProgress,
 	placesLoadingStatus,
@@ -17,7 +16,7 @@ import { theme } from "#lib/theme.js";
 import LoadingIndicator from "$components/LoadingIndicator.svelte";
 import Header from "$components/layout/Header.svelte";
 
-import { browser, dev } from "$app/env";
+import { dev } from "$app/env";
 import "#lib/icons/registerOfflineIcons.js";
 import "tippy.js/dist/tippy.css";
 import "../app.css";
@@ -27,8 +26,11 @@ import { _, isLoading } from "svelte-i18n";
 import { isSupportedLocale, locale, localeFailed } from "#lib/i18n/index.js";
 import Footer from "$components/layout/Footer.svelte";
 
+import type { LayoutProps } from "./$types";
 import { afterNavigate } from "$app/navigation";
 import { page } from "$app/state";
+
+let { data, children }: LayoutProps = $props();
 
 // Apply language from URL param site-wide (e.g. /map?language=bg for embedded maps).
 // On /communities/map, ?communityLang= filters communities; ?language= sets UI locale.
@@ -43,24 +45,19 @@ afterNavigate(() => {
 	}
 });
 
-// Update HTML lang attribute dynamically when locale changes
-$: if (browser && $locale) {
-	document.documentElement.lang = $locale;
-}
+// Update HTML lang attribute dynamically when locale changes. Effects never
+// run during SSR, so the old `browser &&` guard is dropped.
+$effect(() => {
+	if ($locale) document.documentElement.lang = $locale;
+});
 
-let layoutSyncVisible = false;
-let layoutLoadingStatus: PlacesLoadingStatus | null = null;
-
-$: {
-	// Show sync progress only while actively loading (1-99%), hide when complete (100%)
-	if ($placesLoadingProgress > 0 && $placesLoadingProgress < 100) {
-		layoutSyncVisible = true;
-		layoutLoadingStatus = $placesLoadingStatus;
-	} else {
-		layoutSyncVisible = false;
-		layoutLoadingStatus = null;
-	}
-}
+// Show sync progress only while actively loading (1-99%), hide when complete (100%)
+const layoutSyncVisible = $derived(
+	$placesLoadingProgress > 0 && $placesLoadingProgress < 100,
+);
+const layoutLoadingStatus = $derived(
+	layoutSyncVisible ? $placesLoadingStatus : null,
+);
 
 let dataSyncInterval: ReturnType<typeof setInterval>;
 let stopActivityPolling: (() => void) | null = null;
@@ -103,8 +100,6 @@ onDestroy(() => {
 	clearInterval(dataSyncInterval);
 	stopActivityPolling?.();
 });
-
-export let data;
 </script>
 
 <svelte:head>
@@ -153,7 +148,7 @@ export let data;
 			<button
 				type="button"
 				class="text-xl font-semibold text-link transition-colors hover:text-hover"
-				on:click={() => location.reload()}>Reload</button
+				onclick={() => location.reload()}>Reload</button
 			>
 		</div>
 	</div>
@@ -169,13 +164,13 @@ export let data;
 					status={layoutLoadingStatus ? $_(layoutLoadingStatus.key, { values: layoutLoadingStatus.values }) : ""}
 					progress={$placesLoadingProgress}
 				/>
-				<slot />
+				{@render children()}
 				<Footer />
 			</main>
 		</div>
 	{:else}
 		<main>
-			<slot />
+			{@render children()}
 		</main>
 	{/if}
 
