@@ -24,7 +24,7 @@ import "../app.css";
 
 import { _, isLoading, locale } from "svelte-i18n";
 
-import { isSupportedLocale } from "#lib/i18n/index.js";
+import { isSupportedLocale, localeFailed } from "#lib/i18n/index.js";
 import Footer from "$components/layout/Footer.svelte";
 
 import { afterNavigate } from "$app/navigation";
@@ -142,8 +142,22 @@ export let data;
 	{/if}
 </svelte:head>
 
-<!-- No locale yet (a failed locale load, until the English fallback is in): any $_ would throw -->
-{#if $isLoading || !$locale}
+<!-- No locale file could load: no $_ either, so plain English and a reload button.
+     No locale yet (a failed load, until the fallback texts are in): any $_ would throw. -->
+{#if $localeFailed}
+	<div class="min-h-screen bg-teal dark:bg-dark">
+		<div class="mx-auto w-10/12 space-y-6 py-20 text-center xl:w-[1200px]">
+			<img src="/images/logo.svg" alt="BTC Map" class="mx-auto w-32" />
+			<h1 class="text-2xl font-semibold text-primary dark:text-white">BTC Map could not load its texts</h1>
+			<p class="text-primary dark:text-white">Please check your connection and reload the page.</p>
+			<button
+				type="button"
+				class="text-xl font-semibold text-link transition-colors hover:text-hover"
+				on:click={() => location.reload()}>Reload</button
+			>
+		</div>
+	</div>
+{:else if $isLoading || !$locale}
 	<LoadingIndicator visible status="Loading..." />
 {:else}
 	{#if !['/', '/map', '/communities/map', '/communities', '/countries'].includes(data.pathname)}

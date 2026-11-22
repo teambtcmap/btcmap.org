@@ -1,63 +1,110 @@
 import { get } from "svelte/store";
-import { beforeEach, describe, expect, it, vi } from "vitest";
+import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 
-import { _, fallBackToEnglish, locale, localeLoaders } from "./index";
+const offline = () => {
+	throw new Error("offline");
+};
 
-describe("locale loading", () => {
-	beforeEach(async () => {
-		vi.restoreAllMocks();
+// Each case loads the module from scratch, like a page load: a fresh
+// svelte-i18n, the given language saved, and the mocked locale files.
+const startWith = async (language: string) => {
+	localStorage.setItem("language", language);
+	return import("./index");
+};
+
+describe("starting the locale", () => {
+	beforeEach(() => {
+		vi.resetModules();
 		vi.spyOn(console, "warn").mockImplementation(() => {});
-		await locale.set("en");
 	});
 
-	it("falls back to English when the first locale fails to load", async () => {
-		vi.spyOn(localeLoaders, "de").mockRejectedValueOnce(new Error("offline"));
-		// As on the first load: no locale is set yet
-		locale.set(null);
+	afterEach(() => {
+		for (const code of ["de", "en", "nl"])
+			vi.doUnmock(`./locales/${code}.json`);
+		localStorage.clear();
+		vi.restoreAllMocks();
+	});
 
-		await fallBackToEnglish(locale.set("de"));
+	it("starts in English when the chosen locale fails to load", async () => {
+		vi.doMock("./locales/de.json", offline);
+		const i18n = await startWith("de");
 
-		expect(get(locale)).toBe("en");
-		expect(get(_)("mapControls.zoomIn")).toBe("Zoom in");
+		await vi.waitFor(() => expect(get(i18n.locale)).toBe("en"));
+		expect(get(i18n._)("mapControls.zoomIn")).toBe("Zoom in");
+		expect(get(i18n.localeFailed)).toBe(false);
+	});
+
+	it("keeps the chosen locale when only English fails to load", async () => {
+		vi.doMock("./locales/en.json", offline);
+		const i18n = await startWith("de");
+
+		await vi.waitFor(() => expect(get(i18n.locale)).toBe("de"));
+		expect(get(i18n._)("mapControls.zoomIn")).toBe("Vergrößern");
+		expect(get(i18n.localeFailed)).toBe(false);
+	});
+
+	it("keeps the chosen locale when English fails once and loads on the next try", async () => {
+		let englishAttempts = 0;
+		vi.doMock("./locales/en.json", async () => {
+			englishAttempts += 1;
+			if (englishAttempts === 1) offline();
+			return vi.importActual("./locales/en.json");
+		});
+		const i18n = await startWith("de");
+
+		await vi.waitFor(() => expect(get(i18n.locale)).toBe("de"));
+		expect(get(i18n._)("mapControls.zoomIn")).toBe("Vergrößern");
+	});
+
+	it("reports the failure when no locale file loads", async () => {
+		vi.doMock("./locales/de.json", offline);
+		vi.doMock("./locales/en.json", offline);
+		const i18n = await startWith("de");
+
+		await vi.waitFor(() => expect(get(i18n.localeFailed)).toBe(true));
+		expect(get(i18n.locale)).toBeFalsy();
 	});
 
 	it("switches to English only once the English texts are in", async () => {
 		// English loads along with the chosen locale, so it can still be on
-		// its way when that one fails: hold it back here
-		const english = await import("./locales/en.json");
-		let finishEnglish: () => void = () => {};
-		const loadEnglish = vi.spyOn(localeLoaders, "en").mockImplementationOnce(
-			() =>
-				new Promise((resolve) => {
-					finishEnglish = () => resolve(english);
-				}),
-		);
-		vi.spyOn(localeLoaders, "de").mockRejectedValueOnce(new Error("offline"));
-		locale.set(null);
+		// its way when that one fails: hold it back
+		let releaseEnglish: () => void = () => {};
+		const held = new Promise<void>((resolve) => {
+			releaseEnglish = resolve;
+		});
+		vi.doMock("./locales/de.json", offline);
+		vi.doMock("./locales/en.json", async () => {
+			await held;
+			return vi.importActual("./locales/en.json");
+		});
+		const i18n = await startWith("de");
 
-		const fallingBack = fallBackToEnglish(locale.set("de"));
-		await vi.waitFor(() => expect(loadEnglish).toHaveBeenCalled());
-		// No locale yet, rather than English with its texts missing
-		expect(get(locale)).toBeFalsy();
+		await new Promise((resolve) => setTimeout(resolve, 50));
+		expect(get(i18n.locale)).toBeFalsy();
 
-		finishEnglish();
-		await fallingBack;
-		expect(get(locale)).toBe("en");
+		releaseEnglish();
+		await vi.waitFor(() => expect(get(i18n.locale)).toBe("en"));
+		expect(get(i18n._)("mapControls.zoomIn")).toBe("Zoom in");
 	});
 
 	it("fetches a locale again on the next switch after it failed to load", async () => {
-		const loadDutch = vi
-			.spyOn(localeLoaders, "nl")
-			.mockRejectedValueOnce(new Error("offline"));
+		let attempts = 0;
+		vi.doMock("./locales/nl.json", async () => {
+			attempts += 1;
+			if (attempts === 1) offline();
+			return vi.importActual("./locales/nl.json");
+		});
+		const i18n = await startWith("en");
+		await vi.waitFor(() => expect(get(i18n.locale)).toBe("en"));
 
-		await expect(locale.set("nl")).rejects.toThrow("offline");
+		await expect(i18n.locale.set("nl")).rejects.toThrow();
 		// svelte-i18n keeps the locale it had
-		expect(get(locale)).toBe("en");
+		expect(get(i18n.locale)).toBe("en");
 
-		await locale.set("nl");
+		await i18n.locale.set("nl");
 
-		expect(loadDutch).toHaveBeenCalledTimes(2);
-		expect(get(locale)).toBe("nl");
-		expect(get(_)("mapControls.zoomIn")).toBe("Inzoomen");
+		expect(attempts).toBe(2);
+		expect(get(i18n.locale)).toBe("nl");
+		expect(get(i18n._)("mapControls.zoomIn")).toBe("Inzoomen");
 	});
 });

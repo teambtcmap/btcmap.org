@@ -1,4 +1,12 @@
-import { _, addMessages, init, locale, register } from "svelte-i18n";
+import { get, writable } from "svelte/store";
+import {
+	_,
+	addMessages,
+	dictionary,
+	locale as i18nLocale,
+	init,
+	register,
+} from "svelte-i18n";
 
 export const SUPPORTED_LOCALES = [
 	"en",
@@ -21,7 +29,7 @@ export function isSupportedLocale(lang: string): lang is SupportedLocale {
 type LocaleMessages = Parameters<typeof addMessages>[1];
 
 // The locale files load lazily, one request each
-export const localeLoaders: Record<
+const localeLoaders: Record<
 	SupportedLocale,
 	() => Promise<{ default: LocaleMessages }>
 > = {
@@ -36,17 +44,27 @@ export const localeLoaders: Record<
 	it: () => import("./locales/it.json"),
 };
 
-// svelte-i18n drops a loader from its queue before it runs, so a file that
-// failed to load (on a bad network, for example) would never be fetched
-// again. Put the loader back on failure: the next switch to it retries.
 const registerLocale = (code: SupportedLocale) =>
-	register(code, () =>
-		localeLoaders[code]().catch((error: unknown) => {
-			registerLocale(code);
-			throw error;
-		}),
-	);
+	register(code, () => localeLoaders[code]());
 for (const code of SUPPORTED_LOCALES) registerLocale(code);
+
+// svelte-i18n drops a loader from its queue before it runs, so a file that
+// failed to load (on a bad network, for example) is never fetched again.
+// Before a switch to a locale whose texts are not in, register its loader
+// again, so the language switcher retries the download. Only that locale:
+// English, the fallback, loads along with every switch while it is queued.
+// (svelte-i18n keeps an empty dictionary entry for every registered locale.)
+const hasTexts = (code: SupportedLocale) =>
+	Object.keys(get(dictionary)[code] ?? {}).length > 0;
+const locale: typeof i18nLocale = {
+	...i18nLocale,
+	set: (code) => {
+		if (code && isSupportedLocale(code) && !hasTexts(code)) {
+			registerLocale(code);
+		}
+		return i18nLocale.set(code);
+	},
+};
 
 const BROWSER_LOCALE_MAP: Record<string, SupportedLocale> = {
 	de: "de",
@@ -80,36 +98,50 @@ function getInitialLocale(): SupportedLocale {
 	return "en";
 }
 
-// When the first locale fails to load, svelte-i18n leaves the locale unset
-// and every $_ throws, which blanks the page (#1658). Fall back to English
-// then. The saved choice stays, so the next visit tries it again.
-export const fallBackToEnglish = async (
-	loading: Promise<void> | void,
-): Promise<void> => {
+// True when no locale file could load at start. The root layout then shows
+// a reload screen that does not use $_.
+export const localeFailed = writable(false);
+
+// Loads a locale's texts straight from its file: the same request when
+// svelte-i18n is still loading it, a second try when that load failed.
+const loadTexts = async (code: SupportedLocale): Promise<boolean> => {
 	try {
-		await loading;
-	} catch (error) {
-		console.warn("Could not load the locale, falling back to English:", error);
-		try {
-			// svelte-i18n loads English along with the chosen locale, so it can
-			// still be on its way: wait for its texts first, or the page shows
-			// the raw keys until they arrive.
-			const english = await localeLoaders.en();
-			addMessages("en", english.default);
-			await locale.set("en");
-		} catch (englishError) {
-			console.warn("Could not load English either:", englishError);
-		}
+		const texts = await localeLoaders[code]();
+		addMessages(code, texts.default);
+		return true;
+	} catch {
+		return false;
 	}
 };
 
+// svelte-i18n loads the chosen locale and English, the fallback, in one
+// Promise.all, so init() rejects when either file fails to load. The locale
+// then stays unset and every $_ throws, which blanked the page (#1658).
+// Keep the chosen locale when its texts are in, else fall back to English,
+// and switch only once the texts are in: before, the page showed raw keys.
+// The saved choice stays, so the next visit tries it again.
+const startLocale = async (
+	loading: Promise<void> | void,
+	chosen: SupportedLocale,
+): Promise<void> => {
+	try {
+		await loading;
+		return;
+	} catch (error) {
+		console.warn("Could not load the locale:", error);
+	}
+	for (const code of new Set<SupportedLocale>([chosen, "en"])) {
+		if (await loadTexts(code)) {
+			await i18nLocale.set(code);
+			return;
+		}
+	}
+	localeFailed.set(true);
+};
+
 // Initialize with smart detection
-fallBackToEnglish(
-	init({
-		fallbackLocale: "en",
-		initialLocale: getInitialLocale(),
-	}),
-);
+const initialLocale = getInitialLocale();
+startLocale(init({ fallbackLocale: "en", initialLocale }), initialLocale);
 
 // Export locale store and translation function for components
 export { _, locale };
