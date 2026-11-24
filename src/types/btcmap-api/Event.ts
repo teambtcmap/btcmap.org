@@ -11,4 +11,13 @@ status: string,
  * Submitter of the event, when known. Omitted for events created before
  * submissions were attributed and for RPC-created events.
  */
-submitted_by?: EventAuthor, starts_at: string, ends_at?: string, updated_at?: string, deleted_at?: string, };
+submitted_by?: EventAuthor, 
+/**
+ * OpenStreetMap place the event takes place at, when linked. Stored in
+ * `<type>/<id>` form, e.g. `node/14385962692`.
+ */
+place_osm_id?: string, 
+/**
+ * Free-form description of the event, when provided.
+ */
+description?: string, starts_at: string, ends_at?: string, updated_at?: string, deleted_at?: string, };

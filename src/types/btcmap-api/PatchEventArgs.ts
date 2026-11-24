@@ -2,8 +2,8 @@
 
 /**
  * Request body for `PATCH /v4/events/{id}`. Every field is optional: omitted
- * fields are left unchanged, `null` clears `area_id` or `ends_at`, and
- * `starts_at` cannot be cleared.
+ * fields are left unchanged, `null` clears `area_id`, `ends_at`,
+ * `place_osm_id` or `description`, and `starts_at` cannot be cleared.
  */
 export type PatchEventArgs = { area_id?: number | null, lat?: number, lon?: number, name?: string, website?: string, 
 /**
@@ -16,4 +16,13 @@ starts_at?: string, ends_at?: string | null,
  * Either `"auto"` (infer from newly supplied lat/lon) or an IANA zone
  * name. Only needed when a timestamp in this request has no offset.
  */
-timezone?: string, };
+timezone?: string, 
+/**
+ * OpenStreetMap place the event takes place at, in `<type>/<id>` form,
+ * e.g. `node/14385962692`. `null` unlinks the event from its place.
+ */
+place_osm_id?: string | null, 
+/**
+ * Free-form description of the event. `null` clears it.
+ */
+description?: string | null, };
