@@ -112,7 +112,7 @@ const initializeData = async () => {
 	};
 	populateLeaderboard();
 
-	const badges = [
+	const badges: (EarnedBadge & { check: boolean })[] = [
 		{
 			check: [
 				10396321, 17441326, 17199501, 668096, 17462838, 17221642, 5432507,
@@ -121,19 +121,19 @@ const initializeData = async () => {
 				19768735, 17573979, 2929493, 19714509, 1851550, 18244560, 19756689,
 				527105, 2339960, 17322349, 17300693, 1236325, 1787080,
 			].includes(user.id),
-			title: "Geyser Tournament",
+			key: "geyserTournament",
 			icon: "geyser",
 			type: BadgeType.Achievement,
 		},
 		{
 			check: supporter,
-			title: "Supporter",
+			key: "supporter",
 			icon: "supporter",
 			type: BadgeType.Achievement,
 		},
 		{
 			check: leaderboard[0].id === user.id,
-			title: "Top Tagger",
+			key: "topTagger",
 			icon: "top-tagger",
 			type: BadgeType.Achievement,
 		},
@@ -141,13 +141,13 @@ const initializeData = async () => {
 			check: Boolean(
 				leaderboard.slice(0, 3).find((item) => item.id === user.id),
 			),
-			title: "Podium",
+			key: "podium",
 			icon: "podium",
 			type: BadgeType.Achievement,
 		},
 		{
 			check: Boolean(leaderboard.find((item) => item.id === user.id)),
-			title: "High Rank",
+			key: "highRank",
 			icon: "high-rank",
 			type: BadgeType.Achievement,
 		},
@@ -155,164 +155,159 @@ const initializeData = async () => {
 			check:
 				Date.parse(userCreated) <
 				new Date("December 26, 2022 00:00:00").getTime(),
-			title: "OG Supertagger",
+			key: "ogSupertagger",
 			icon: "og-supertagger",
 			type: BadgeType.Achievement,
 		},
 		{
 			check: Boolean(lightning),
-			title: "Lightning Junkie",
+			key: "lightningJunkie",
 			icon: "lightning-junkie",
 			type: BadgeType.Achievement,
 		},
 		{
 			check: Boolean(user.img),
-			title: "Hello World",
+			key: "helloWorld",
 			icon: "hello-world",
 			type: BadgeType.Achievement,
 		},
 		{
 			check: created > updated && created > deleted,
-			title: "Creator",
+			key: "creator",
 			icon: "creator",
 			type: BadgeType.Achievement,
 		},
 		{
 			check: updated > created && updated > deleted,
-			title: "Update Maxi",
+			key: "updateMaxi",
 			icon: "update-maxi",
 			type: BadgeType.Achievement,
 		},
 		{
 			check: deleted > created && deleted > updated,
-			title: "Demolition Specialist",
+			key: "demolitionSpecialist",
 			icon: "demolition-specialist",
 			type: BadgeType.Achievement,
 		},
 		{
 			check: total >= 21000000,
-			title: "Hyperbitcoinisation",
+			key: "hyperbitcoinisation",
 			icon: "hyperbitcoinisation",
 			type: BadgeType.Contribution,
 		},
 		{
 			check: total >= 10000,
-			title: "Pizza Time",
+			key: "pizzaTime",
 			icon: "pizza-time",
 			type: BadgeType.Contribution,
 		},
 		{
 			check: total >= 7777,
-			title: "Godly",
+			key: "godly",
 			icon: "godly",
 			type: BadgeType.Contribution,
 		},
 		{
 			check: total >= 5000,
-			title: "Shadow",
+			key: "shadow",
 			icon: "shadow",
 			type: BadgeType.Contribution,
 		},
 		{
 			check: total >= 3110,
-			title: "Whitepaper",
+			key: "whitepaper",
 			icon: "whitepaper",
 			type: BadgeType.Contribution,
 		},
 		{
 			check: total >= 1984,
-			title: "Winston",
+			key: "winston",
 			icon: "winston",
 			type: BadgeType.Contribution,
 		},
 		{
 			check: total >= 1000,
-			title: "Whale",
+			key: "whale",
 			icon: "whale",
 			type: BadgeType.Contribution,
 		},
 		{
 			check: total >= 821,
-			title: "Infinity",
+			key: "infinity",
 			icon: "infinity",
 			type: BadgeType.Contribution,
 		},
 		{
 			check: total >= 500,
-			title: "Legend",
+			key: "legend",
 			icon: "legend",
 			type: BadgeType.Contribution,
 		},
 		{
 			check: total >= 301,
-			title: "Chancellor",
+			key: "chancellor",
 			icon: "chancellor",
 			type: BadgeType.Contribution,
 		},
 		{
 			check: total >= 256,
-			title: "SHA",
+			key: "sha",
 			icon: "sha",
 			type: BadgeType.Contribution,
 		},
 		{
 			check: total >= 210,
-			title: "No Bailouts",
+			key: "noBailouts",
 			icon: "no-bailouts",
 			type: BadgeType.Contribution,
 		},
 		{
 			check: total >= 100,
-			title: "Supertagger",
+			key: "supertagger",
 			icon: "supertagger",
 			type: BadgeType.Contribution,
 		},
 		{
 			check: total >= 69,
-			title: "ATH",
+			key: "ath",
 			icon: "ath",
 			type: BadgeType.Contribution,
 		},
 		{
 			check: total >= 51,
-			title: "Longest Chain",
+			key: "longestChain",
 			icon: "longest-chain",
 			type: BadgeType.Contribution,
 		},
 		{
 			check: total >= 21,
-			title: "Satoshi",
+			key: "satoshi",
 			icon: "satoshi",
 			type: BadgeType.Contribution,
 		},
 		{
 			check: total >= 10,
-			title: "Heartbeat",
+			key: "heartbeat",
 			icon: "heartbeat",
 			type: BadgeType.Contribution,
 		},
 		{
 			check: total >= 4,
-			title: "Segwit",
+			key: "segwit",
 			icon: "segwit",
 			type: BadgeType.Contribution,
 		},
 		{
 			check: total >= 1,
-			title: "Whole Tagger",
+			key: "wholeTagger",
 			icon: "whole-tagger",
 			type: BadgeType.Contribution,
 		},
 	];
 
-	const addBadge = (
-		check: boolean,
-		title: string,
-		icon: string,
-		type: BadgeType,
-	) => {
+	const addBadge = ({ check, ...badge }: (typeof badges)[number]) => {
 		if (check) {
-			earnedBadges.push({ title, icon, type });
+			earnedBadges.push(badge);
 		}
 	};
 
@@ -320,7 +315,7 @@ const initializeData = async () => {
 		if (earnedBadges.find((badge) => badge.type === BadgeType.Contribution)) {
 			return true;
 		}
-		addBadge(Boolean(badge.check), badge.title, badge.icon, badge.type);
+		addBadge(badge);
 	});
 
 	createdPercent = new Intl.NumberFormat("en-US").format(
@@ -560,15 +555,16 @@ onDestroy(() => {
 	<section id="badges" class="mt-16">
 		<div class="flex flex-wrap items-center justify-center">
 			{#if dataInitialized}
-				{#each earnedBadges as badge (badge.title)}
+				{#each earnedBadges as badge (badge.key)}
+					{@const title = $_(`badges.${badge.type}.${badge.key}.title`)}
 					<a href="/badges#{badge.icon}" class="transition-transform hover:scale-110">
 						<div class="mx-3 mb-6">
 							<img
 								src="/icons/badges/{badge.icon}.svg"
-								alt={badge.title}
+								alt={title}
 								class="mx-auto mb-1 h-24 w-24"
 							/>
-							<p class="text-center text-sm dark:text-white">{badge.title}</p>
+							<p class="text-center text-sm dark:text-white">{title}</p>
 						</div>
 					</a>
 				{/each}

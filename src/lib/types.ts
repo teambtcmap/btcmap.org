@@ -1,5 +1,6 @@
 import type { GeoJSON, Geometry, MultiPolygon, Polygon } from "geojson";
 
+import type en from "#lib/i18n/locales/en.json";
 import type { MobileNavIconName } from "#lib/icons/types.js";
 
 // Aliased: this module also exports its own v2 activity `Event` type.
@@ -305,7 +306,20 @@ export enum BadgeType {
 	Achievement = "achievement",
 }
 
-export type EarnedBadge = { title: string; icon: string; type: BadgeType };
+// The key names the badge's texts in the locale files:
+// badges.<type>.<key>.title, the same keys the /badges page uses
+type BadgeTexts = (typeof en)["badges"];
+export type EarnedBadge =
+	| {
+			key: keyof BadgeTexts["achievement"];
+			icon: string;
+			type: BadgeType.Achievement;
+	  }
+	| {
+			key: keyof BadgeTexts["contribution"];
+			icon: string;
+			type: BadgeType.Contribution;
+	  };
 
 export enum TipType {
 	Address = "address",
