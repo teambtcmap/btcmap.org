@@ -1,6 +1,6 @@
 import { readFileSync } from 'node:fs';
 
-import type { Page } from '@playwright/test';
+import type { Locator, Page } from '@playwright/test';
 import { expect, test } from '@playwright/test';
 
 import { stubMapData } from './helpers';
@@ -51,12 +51,18 @@ const EVENTS = Array.from({ length: 10 }, (_, i) => ({
 	deleted_at: ''
 }));
 
-const badgeTitles = (language: string) => {
-	const { badges } = JSON.parse(
+const locale = (language: string) =>
+	JSON.parse(
 		readFileSync(new URL(`../src/lib/i18n/locales/${language}.json`, import.meta.url), 'utf8')
 	);
+
+const badgeTitles = (language: string) => {
+	const { badges } = locale(language);
 	return EARNED.map(([type, key]) => badges[type][key].title);
 };
+
+const altTexts = (badges: Locator) =>
+	badges.getByRole('img').evaluateAll((images) => images.map((image) => image.getAttribute('alt')));
 
 const json = (body: unknown) => ({
 	status: 200,
@@ -100,10 +106,29 @@ test.describe('Tagger profile', () => {
 
 			const badges = page.locator('#badges').getByRole('link');
 			await expect(badges).toHaveText(titles, { timeout: 30000 });
-			const alts = await badges
-				.getByRole('img')
-				.evaluateAll((images) => images.map((image) => image.getAttribute('alt')));
-			expect(alts).toEqual(titles);
+			expect(await altTexts(badges)).toEqual(titles);
 		});
 	}
+
+	test('updates the badge titles when the language changes on the open page', async ({
+		page
+	}) => {
+		await stubTaggerData(page);
+		await page.goto(`/tagger/${TAGGER_ID}?language=de`);
+
+		const section = page.locator('#badges');
+		const badges = section.getByRole('link');
+		await expect(badges).toHaveText(badgeTitles('de'), { timeout: 30000 });
+
+		// English is loaded already, as the fallback, so the switch does not
+		// remount the page; the mark shows the same section is updated
+		await section.evaluate((element) => element.setAttribute('data-test-mark', 'before-switch'));
+		await page.getByRole('button', { name: locale('de').footer.language }).click();
+		await page.getByRole('dialog').getByRole('button', { name: /^English/ }).click();
+
+		const titles = badgeTitles('en');
+		await expect(badges).toHaveText(titles);
+		expect(await altTexts(badges)).toEqual(titles);
+		await expect(section).toHaveAttribute('data-test-mark', 'before-switch');
+	});
 });
