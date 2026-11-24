@@ -1,19 +1,13 @@
 <script lang="ts">
-import { get } from "svelte/store";
-
-import { _ } from "#lib/i18n/index.js";
-import Skeleton from "$components/Skeleton.svelte";
-
-import type { PageData } from "./$types";
-export let data: PageData;
-
 import Chart from "chart.js/auto";
 import { format } from "date-fns/format";
 import DOMPurify from "dompurify";
 import { marked } from "marked";
-import { onDestroy, onMount } from "svelte";
+import { onDestroy, onMount, untrack } from "svelte";
+import { get } from "svelte/store";
 
 import { API_BASE } from "#lib/api-base.js";
+import { _ } from "#lib/i18n/index.js";
 import {
 	eventError,
 	events,
@@ -34,23 +28,31 @@ import { BadgeType } from "#lib/types.js";
 import { errToast, formatElementID } from "#lib/utils.js";
 import Icon from "$components/Icon.svelte";
 import ProfileStat from "$components/ProfileStat.svelte";
+import Skeleton from "$components/Skeleton.svelte";
 import Tip from "$components/Tip.svelte";
 
+import type { PageProps } from "./$types";
 import ProfileActivity from "./components/ProfileActivity.svelte";
-import { browser } from "$app/env";
+
+let { data }: PageProps = $props();
 
 // alert for user errors
-$: $userError && errToast($userError);
+$effect(() => {
+	if ($userError) errToast($userError);
+});
 // alert for event errors
-$: $eventError && errToast($eventError);
+$effect(() => {
+	if ($eventError) errToast($eventError);
+});
 // alert for element errors
-$: $placesError && errToast($placesError);
+$effect(() => {
+	if ($placesError) errToast($placesError);
+});
 
-let dataInitialized = false;
-let initialRenderComplete = false;
+let dataInitialized = $state(false);
 
 let filteredDesc: string | undefined;
-let sanitizedMarkdown: string = "";
+let sanitizedMarkdown = $state("");
 
 const initializeData = async () => {
 	if (dataInitialized) return;
@@ -391,40 +393,50 @@ const initializeData = async () => {
 	dataInitialized = true;
 };
 
-$: $users?.length &&
-	$events?.length &&
-	$places?.length &&
-	initialRenderComplete &&
-	!dataInitialized &&
-	initializeData();
+// Effects run only in the browser, after mount, so the canvas is bound and
+// the old initialRenderComplete flag set in onMount is no longer needed.
+// untrack: initializeData reads and writes state the effect must not
+// depend on; dataInitialized stops a second run.
+$effect(() => {
+	if (
+		$users?.length &&
+		$events?.length &&
+		$places?.length &&
+		!dataInitialized
+	) {
+		untrack(() => initializeData());
+	}
+});
 
 let userCreated: string | undefined;
 let supporter: boolean | undefined;
-let avatar: string | undefined;
-let mappingSince: string | undefined;
-let username = data.username;
+let avatar = $state<string>();
+let mappingSince = $state<string>();
+const username = $derived(data.username);
 
-let lightning: string | null;
+let lightning = $state<string | null>(null);
 
-let created: number | undefined;
-let updated: number | undefined;
-let deleted: number | undefined;
-let total: number | undefined;
+let created = $state<number>();
+let updated = $state<number>();
+let deleted = $state<number>();
+let total = $state<number>();
 
 let leaderboard: ProfileLeaderboard[] = [];
 
-let earnedBadges: EarnedBadge[] = [];
+// Filled once by initializeData, shown when dataInitialized turns true
+const earnedBadges: EarnedBadge[] = [];
 
-let createdPercent: string | undefined;
-let updatedPercent: string | undefined;
-let deletedPercent: string | undefined;
+let createdPercent = $state<string>();
+let updatedPercent = $state<string>();
+let deletedPercent = $state<string>();
 
 let tagTypeChartCanvas: HTMLCanvasElement;
 let tagTypeChart: Chart<"pie", (number | undefined)[], string>;
 
-let eventElements: ActivityEvent[] = [];
+// Replaced as a whole (names fetched on demand), never mutated in place
+let eventElements = $state.raw<ActivityEvent[]>([]);
 
-let loadingNames = false;
+let loadingNames = $state(false);
 let nameCache: Record<string, string> = {};
 
 // Fetch place names for current page
@@ -471,10 +483,6 @@ const handleFetchNames = (data: { events: ActivityEvent[] }) => {
 
 onMount(async () => {
 	batchSync([eventsSync, usersSync]);
-
-	if (browser) {
-		initialRenderComplete = true;
-	}
 });
 
 onDestroy(() => {
@@ -499,8 +507,8 @@ onDestroy(() => {
 				src={avatar}
 				alt={$_('aria.avatarAlt')}
 				class="mx-auto h-32 w-32 rounded-full object-cover"
-				on:error={function () {
-					this.src = '/images/satoshi-nakamoto.png';
+				onerror={(event) => {
+					(event.currentTarget as HTMLImageElement).src = '/images/satoshi-nakamoto.png';
 				}}
 			/>
 		{:else}
