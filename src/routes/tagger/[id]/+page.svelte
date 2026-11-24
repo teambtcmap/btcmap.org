@@ -412,7 +412,9 @@ let userCreated: string | undefined;
 let supporter: boolean | undefined;
 let avatar = $state<string>();
 let mappingSince = $state<string>();
-const username = $derived(data.username);
+// initializeData builds the profile once per mount, so read the name once
+// too: on a move to another tagger page the name stays with its profile
+const username = untrack(() => data.username);
 
 let lightning = $state<string | null>(null);
 
