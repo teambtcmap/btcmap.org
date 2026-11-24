@@ -9,4 +9,13 @@ starts_at: string, ends_at?: string,
 /**
  * Either `"auto"` (infer from lat/lon) or an IANA zone name.
  */
-timezone: string | null, area_id: number | null, };
+timezone: string | null, area_id: number | null, 
+/**
+ * OpenStreetMap place the event takes place at, in `<type>/<id>` form,
+ * e.g. `node/14385962692`.
+ */
+place_osm_id?: string, 
+/**
+ * Free-form description of the event.
+ */
+description?: string, };
