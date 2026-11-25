@@ -12,8 +12,8 @@ importers:
         specifier: ^3.1.7
         version: 3.1.7
       '@mapbox/geojson-rewind':
-        specifier: ^0.5.2
-        version: 0.5.2
+        specifier: ^0.6.0
+        version: 0.6.0
       '@nazka/map-gl-js-spiderfy':
         specifier: ^2.0.0
         version: 2.0.0
@@ -625,8 +625,8 @@ packages:
   '@kurkle/color@0.3.4':
     resolution: {integrity: sha512-M5UknZPHRu3DEDWoipU6sE8PdkZ6Z/S+v4dD+Ke8IaNlpdSQah50lz1KtcFBa2vsdOnwbbnxJwVM4wty6udA5w==}
 
-  '@mapbox/geojson-rewind@0.5.2':
-    resolution: {integrity: sha512-tJaT+RbYGJYStt7wI3cq4Nl4SXxG8W7JDG5DMJu97V25RnbNg3QtQtf+KD+VLjNpWKYsRvXDNmNrBgEETr1ifA==}
+  '@mapbox/geojson-rewind@0.6.0':
+    resolution: {integrity: sha512-Czl20jh8AqLKKVZ4nQ5B6sJV3P6NntOhz2MfAjVeNB1oKcAip6EygjD6u8KE+JtwlShU5JO8AE0PjLetKOR+kg==}
     hasBin: true
 
   '@mapbox/jsonlint-lines-primitives@2.0.3':
@@ -2463,7 +2463,7 @@ snapshots:
 
   '@kurkle/color@0.3.4': {}
 
-  '@mapbox/geojson-rewind@0.5.2':
+  '@mapbox/geojson-rewind@0.6.0':
     dependencies:
       get-stream: 6.0.1
       minimist: 1.2.8

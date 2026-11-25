@@ -37,7 +37,7 @@
 	},
 	"dependencies": {
 		"@iconify/utils": "^3.1.7",
-		"@mapbox/geojson-rewind": "^0.5.2",
+		"@mapbox/geojson-rewind": "^0.6.0",
 		"@nazka/map-gl-js-spiderfy": "^2.0.0",
 		"@tanstack/match-sorter-utils": "^9.2.6",
 		"@tanstack/svelte-form": "^1.33.5",
