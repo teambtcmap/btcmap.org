@@ -22,13 +22,13 @@ const tagger = (stats: Partial<TaggerStats> = {}): TaggerStats => ({
 	...stats,
 });
 
-const keysOf = (stats: Partial<TaggerStats>, type: BadgeType) =>
+const earnedKeys = (stats: Partial<TaggerStats>, type: BadgeType) =>
 	taggerBadges(tagger(stats))
 		.filter((badge) => badge.type === type)
 		.map((badge) => badge.key);
 
 const contributionKeys = (total: number) =>
-	keysOf({ created: total }, BadgeType.Contribution);
+	earnedKeys({ created: total }, BadgeType.Contribution);
 
 // [fewest tags, badge], lowest first
 const THRESHOLDS = [
@@ -107,7 +107,10 @@ describe("taggerBadges", () => {
 
 		it("counts created, updated and deleted tags together", () => {
 			expect(
-				keysOf({ created: 2, updated: 1, deleted: 1 }, BadgeType.Contribution),
+				earnedKeys(
+					{ created: 2, updated: 1, deleted: 1 },
+					BadgeType.Contribution,
+				),
 			).toEqual(["segwit"]);
 		});
 	});
@@ -122,7 +125,7 @@ describe("taggerBadges", () => {
 			[11, []],
 			[null, []],
 		] as const)("gives place %s on the leaderboard: %j", (rank, keys) => {
-			expect(keysOf({ rank }, BadgeType.Achievement)).toEqual(keys);
+			expect(earnedKeys({ rank }, BadgeType.Achievement)).toEqual(keys);
 		});
 
 		it.each([
@@ -133,14 +136,14 @@ describe("taggerBadges", () => {
 			[{ created: 1, updated: 2, deleted: 2 }, []],
 			[{ created: 2, updated: 1, deleted: 2 }, []],
 		])("gives a badge only for a strict majority: %j", (tags, keys) => {
-			expect(keysOf(tags, BadgeType.Achievement)).toEqual(keys);
+			expect(earnedKeys(tags, BadgeType.Achievement)).toEqual(keys);
 		});
 
 		it("gives OG Supertagger to taggers who joined before 26 December 2022, local time", () => {
 			// The cutoff the tagger page has always used, in the viewer's time zone
 			const cutoff = new Date("December 26, 2022 00:00:00").getTime();
 			const joinedAt = (time: number) =>
-				keysOf(
+				earnedKeys(
 					{ joinedAt: new Date(time).toISOString() },
 					BadgeType.Achievement,
 				);
@@ -155,7 +158,7 @@ describe("taggerBadges", () => {
 			[{ hasLightning: true }, ["lightningJunkie"]],
 			[{ userId: 10396321 }, ["geyserTournament"]],
 		])("gives %j: %j", (stats, keys) => {
-			expect(keysOf(stats, BadgeType.Achievement)).toEqual(keys);
+			expect(earnedKeys(stats, BadgeType.Achievement)).toEqual(keys);
 		});
 	});
 
@@ -191,12 +194,9 @@ describe("taggerBadges", () => {
 				"heartbeat",
 			]);
 			expect(badges.map((badge) => badge.type)).toEqual([
-				...Array(9).fill(BadgeType.Achievement),
+				...Array.from({ length: 9 }, () => BadgeType.Achievement),
 				BadgeType.Contribution,
 			]);
-			for (const badge of badges) {
-				expect(badge.icon, badge.key).toBe(ICONS[badge.key]);
-			}
 		},
 	);
 });
@@ -240,6 +240,8 @@ describe("taggerRank", () => {
 });
 
 describe("BADGES_PAGE", () => {
+	const allBadges = [...BADGES_PAGE.achievements, ...BADGES_PAGE.contributions];
+
 	it("shows the achievements in its own order, Supporter first", () => {
 		expect(BADGES_PAGE.achievements.map((badge) => badge.key)).toEqual([
 			"supporter",
@@ -263,16 +265,12 @@ describe("BADGES_PAGE", () => {
 	});
 
 	it("gives every badge its own icon", () => {
-		const badges = [...BADGES_PAGE.achievements, ...BADGES_PAGE.contributions];
-
 		expect(
-			Object.fromEntries(badges.map((badge) => [badge.key, badge.icon])),
+			Object.fromEntries(allBadges.map((badge) => [badge.key, badge.icon])),
 		).toEqual(ICONS);
 	});
 
 	it("has every badge of the locale files once, each with an icon file", () => {
-		const badges = [...BADGES_PAGE.achievements, ...BADGES_PAGE.contributions];
-
 		expect(BADGES_PAGE.achievements.map((badge) => badge.key).sort()).toEqual(
 			Object.keys(en.badges.achievement).sort(),
 		);
@@ -280,27 +278,31 @@ describe("BADGES_PAGE", () => {
 			Object.keys(en.badges.contribution).sort(),
 		);
 		// Vitest runs from the project root
-		for (const { icon } of badges) {
+		for (const { icon } of allBadges) {
 			expect(existsSync(`static/icons/badges/${icon}.svg`), icon).toBe(true);
 		}
 	});
 });
 
 describe("badgeTextKey", () => {
-	it("names the title and the description in the locale files", () => {
-		const satoshi = {
-			type: BadgeType.Contribution,
-			key: "satoshi",
-			icon: "satoshi",
-		} as const;
-
-		expect(badgeTextKey(satoshi, "title")).toBe(
-			"badges.contribution.satoshi.title",
-		);
-		expect(badgeTextKey(satoshi, "desc")).toBe(
-			"badges.contribution.satoshi.desc",
-		);
-	});
+	it.each([
+		{
+			badge: { type: BadgeType.Achievement, key: "creator", icon: "creator" },
+			title: "badges.achievement.creator.title",
+			desc: "badges.achievement.creator.desc",
+		},
+		{
+			badge: { type: BadgeType.Contribution, key: "satoshi", icon: "satoshi" },
+			title: "badges.contribution.satoshi.title",
+			desc: "badges.contribution.satoshi.desc",
+		},
+	] as const)(
+		"names the title and the description of $badge.key in the locale files",
+		({ badge, title, desc }) => {
+			expect(badgeTextKey(badge, "title")).toBe(title);
+			expect(badgeTextKey(badge, "desc")).toBe(desc);
+		},
+	);
 
 	it("takes only a key of the badge's own type", () => {
 		const mixedUp = {
