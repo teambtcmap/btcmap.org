@@ -7,7 +7,7 @@ import { onDestroy, onMount, untrack } from "svelte";
 import { get } from "svelte/store";
 
 import { API_BASE } from "#lib/api-base.js";
-import { badgeTextKey, taggerBadges } from "#lib/badges.js";
+import { badgeTextKey, taggerBadges, taggerRank } from "#lib/badges.js";
 import { _ } from "#lib/i18n/index.js";
 import {
 	eventError,
@@ -110,11 +110,9 @@ const initializeData = async () => {
 		});
 
 		leaderboard.sort((a, b) => b.total - a.total);
-		leaderboard = leaderboard.slice(0, 10);
 	};
 	populateLeaderboard();
 
-	const place = leaderboard.findIndex((item) => item.id === user.id);
 	earnedBadges.push(
 		...taggerBadges({
 			userId: user.id,
@@ -122,7 +120,7 @@ const initializeData = async () => {
 			supporter,
 			hasAvatar: Boolean(user.img),
 			hasLightning: Boolean(lightning),
-			rank: place === -1 ? null : place + 1,
+			rank: taggerRank(leaderboard, user.id),
 			created,
 			updated,
 			deleted,

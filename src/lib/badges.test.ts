@@ -2,7 +2,7 @@ import { existsSync } from "node:fs";
 import { describe, expect, it } from "vitest";
 
 import type { TaggerStats } from "./badges";
-import { BADGES_PAGE, badgeTextKey, taggerBadges } from "./badges";
+import { BADGES_PAGE, badgeTextKey, taggerBadges, taggerRank } from "./badges";
 import en from "./i18n/locales/en.json";
 import { BadgeType } from "./types";
 
@@ -83,8 +83,9 @@ describe("taggerBadges", () => {
 			[3, ["podium", "highRank"]],
 			[4, ["highRank"]],
 			[10, ["highRank"]],
+			[11, []],
 			[null, []],
-		] as const)("gives place %s in the top 10: %j", (rank, keys) => {
+		] as const)("gives place %s on the leaderboard: %j", (rank, keys) => {
 			expect(keysOf({ rank }, BadgeType.Achievement)).toEqual(keys);
 		});
 
@@ -151,6 +152,24 @@ describe("taggerBadges", () => {
 			{ type: BadgeType.Achievement, key: "creator", icon: "creator" },
 			{ type: BadgeType.Contribution, key: "heartbeat", icon: "heartbeat" },
 		]);
+	});
+});
+
+describe("taggerRank", () => {
+	// Best first, as the tagger page sorts it
+	const leaderboard = Array.from({ length: 12 }, (_, i) => ({
+		id: i + 1,
+		total: 100 - i,
+	}));
+
+	it("gives the place on the leaderboard", () => {
+		expect(taggerRank(leaderboard, 1)).toBe(1);
+		expect(taggerRank(leaderboard, 11)).toBe(11);
+	});
+
+	it("gives null to a tagger who is not on it", () => {
+		expect(taggerRank(leaderboard, 99)).toBeNull();
+		expect(taggerRank([], 1)).toBeNull();
 	});
 });
 

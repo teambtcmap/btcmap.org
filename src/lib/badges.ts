@@ -1,4 +1,4 @@
-import type { EarnedBadge } from "#lib/types.js";
+import type { EarnedBadge, ProfileLeaderboard } from "#lib/types.js";
 import { BadgeType } from "#lib/types.js";
 
 type Achievement = Extract<EarnedBadge, { type: BadgeType.Achievement }>;
@@ -11,7 +11,7 @@ export type TaggerStats = {
 	supporter: boolean;
 	hasAvatar: boolean;
 	hasLightning: boolean;
-	// Place among the top 10 taggers, null outside them
+	// Place on the leaderboard (see taggerRank), null when not on it
 	rank: number | null;
 	created: number;
 	updated: number;
@@ -40,7 +40,10 @@ const ACHIEVEMENTS = {
 		icon: "podium",
 		earned: ({ rank }) => rank !== null && rank <= 3,
 	},
-	highRank: { icon: "high-rank", earned: ({ rank }) => rank !== null },
+	highRank: {
+		icon: "high-rank",
+		earned: ({ rank }) => rank !== null && rank <= 10,
+	},
 	ogSupertagger: {
 		icon: "og-supertagger",
 		earned: ({ joinedAt }) => Date.parse(joinedAt) < OG_SUPERTAGGER_BEFORE,
@@ -155,6 +158,15 @@ export const badgeTextKey = (
 	badge: Pick<EarnedBadge, "type" | "key">,
 	text: "title" | "desc",
 ) => `badges.${badge.type}.${badge.key}.${text}` as const;
+
+// A tagger's place on the leaderboard (best first), null when not on it
+export const taggerRank = (
+	leaderboard: ProfileLeaderboard[],
+	userId: number,
+): number | null => {
+	const index = leaderboard.findIndex((entry) => entry.id === userId);
+	return index === -1 ? null : index + 1;
+};
 
 // The badges a tagger earned, in the tagger page's order
 export const taggerBadges = (stats: TaggerStats): EarnedBadge[] => {
