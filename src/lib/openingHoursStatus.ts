@@ -14,13 +14,14 @@ export function getOpenStatus(
 	if (!hoursString) return null;
 
 	try {
-		// Coordinates enable timezone-aware evaluation for the merchant's location.
-		// Empty country_code/state means no public-holiday awareness — the library
-		// needs a full nominatim response for that, which we don't have.
+		// Coordinates give sunrise/sunset rules the merchant's sun times. The
+		// library reads lat/lon as strings, as Nominatim sends them, and ignores
+		// numbers. Empty country_code/state means no public-holiday awareness:
+		// the library needs a full nominatim response for that, which we don't have.
 		const nominatim = coords
 			? {
-					lat: coords.lat,
-					lon: coords.lon,
+					lat: String(coords.lat),
+					lon: String(coords.lon),
 					address: { country_code: "", state: "" },
 				}
 			: null;

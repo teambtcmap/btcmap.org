@@ -18,12 +18,6 @@ describe("getOpenStatus", () => {
 		expect(getOpenStatus("garbage text")).toBeNull();
 	});
 
-	it("accepts merchant coordinates for timezone-aware evaluation", () => {
-		const result = getOpenStatus("24/7", { lat: 50.08, lon: 14.42 });
-		expect(result).not.toBeNull();
-		expect(result!.isOpen).toBe(true);
-	});
-
 	describe("with frozen time", () => {
 		beforeEach(() => {
 			vi.useFakeTimers();
@@ -31,6 +25,22 @@ describe("getOpenStatus", () => {
 
 		afterEach(() => {
 			vi.useRealTimers();
+			vi.unstubAllEnvs();
+		});
+
+		it("uses the merchant's coordinates for sunrise and sunset", () => {
+			// Reykjavik (UTC+0) in mid-December: the sun rises around 11:16.
+			// Without the coordinates the library assumes 06:00-18:00 and says open.
+			vi.stubEnv("TZ", "UTC");
+			vi.setSystemTime(new Date("2026-12-15T10:00:00Z"));
+
+			const result = getOpenStatus("sunrise-sunset", {
+				lat: 64.15,
+				lon: -21.94,
+			});
+			expect(result).not.toBeNull();
+			expect(result!.isOpen).toBe(false);
+			expect(result!.nextChange?.getUTCHours()).toBe(11);
 		});
 
 		it("returns open with a nextChange Date on a weekday during business hours", () => {

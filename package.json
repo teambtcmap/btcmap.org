@@ -57,7 +57,7 @@
 		"maplibre-gl": "^6.19.0",
 		"marked": "^18.2.1",
 		"nostr-tools": "^2.26.1",
-		"opening_hours": "^3.15.0",
+		"opening_hours": "^3.16.0",
 		"photoswipe": "^5.4.4",
 		"qrcode": "^1.5.4",
 		"svelte-dnd-action": "0.9.80",
