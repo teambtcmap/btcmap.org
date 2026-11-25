@@ -15,7 +15,7 @@ type BadgeRef<B = EarnedBadge> = B extends EarnedBadge ? [`${B['type']}`, B['key
 // from the live API; every request the browser makes is stubbed below.
 const TAGGER_ID = 6794624;
 
-const at = '2024-01-01T00:00:00.000Z';
+const FIXTURE_TIME = '2024-01-01T00:00:00.000Z';
 
 // A supporter with 10 created places and no other tagger earns these badges,
 // in the page's order: Supporter, Top Tagger, Podium, High Rank, Creator and
@@ -37,11 +37,11 @@ const USERS = [
 			display_name: 'Comino',
 			description: '',
 			img: null,
-			account_created: at
+			account_created: FIXTURE_TIME
 		},
 		tags: { 'supporter:expires': '2099-01-01T00:00:00.000Z' },
-		created_at: at,
-		updated_at: at,
+		created_at: FIXTURE_TIME,
+		updated_at: FIXTURE_TIME,
 		deleted_at: ''
 	}
 ];
@@ -52,8 +52,8 @@ const EVENTS = Array.from({ length: 10 }, (_, i) => ({
 	element_id: `node:${i + 1}`,
 	type: 'create',
 	tags: {},
-	created_at: at,
-	updated_at: at,
+	created_at: FIXTURE_TIME,
+	updated_at: FIXTURE_TIME,
 	deleted_at: ''
 }));
 
@@ -74,33 +74,27 @@ const badgeTitles = (language: string) => {
 const altTexts = (badges: Locator) =>
 	badges.getByRole('img').evaluateAll((images) => images.map((image) => image.getAttribute('alt')));
 
-const json = (body: unknown) => ({
-	status: 200,
-	contentType: 'application/json',
-	body: JSON.stringify(body)
-});
+// Serves body as JSON for one api.btcmap.org path; a path that ends in "/"
+// covers everything under it
+const routeApi = (page: Page, path: string, body: unknown) =>
+	page.route(
+		(u) =>
+			u.hostname === 'api.btcmap.org' &&
+			(path.endsWith('/') ? u.pathname.startsWith(path) : u.pathname === path),
+		(route) =>
+			route.fulfill({ status: 200, contentType: 'application/json', body: JSON.stringify(body) })
+	);
 
 // The page waits for the full users and events syncs, which take minutes
 // against the live API on a cold start. Serve a small fixed set instead.
 async function stubTaggerData(page: Page) {
 	await stubMapData(page);
-	await page.route(
-		(u) => u.hostname === 'api.btcmap.org' && u.pathname.startsWith('/v2/'),
-		(route) => route.fulfill(json([]))
-	);
-	await page.route(
-		(u) => u.hostname === 'api.btcmap.org' && u.pathname === '/v2/users',
-		(route) => route.fulfill(json(USERS))
-	);
-	await page.route(
-		(u) => u.hostname === 'api.btcmap.org' && u.pathname === '/v2/events',
-		(route) => route.fulfill(json(EVENTS))
-	);
+	// Registered first: Playwright tries the routes below before this one
+	await routeApi(page, '/v2/', []);
+	await routeApi(page, '/v2/users', USERS);
+	await routeApi(page, '/v2/events', EVENTS);
 	// The page's universal load runs again in the browser on hydration
-	await page.route(
-		(u) => u.hostname === 'api.btcmap.org' && u.pathname === `/v2/users/${TAGGER_ID}`,
-		(route) => route.fulfill(json(USERS[0]))
-	);
+	await routeApi(page, `/v2/users/${TAGGER_ID}`, USERS[0]);
 }
 
 test.describe('Tagger profile', () => {
