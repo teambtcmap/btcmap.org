@@ -96,6 +96,7 @@ const initializeData = async () => {
 	deleted = userEvents.filter((event) => event.type === "delete").length;
 	total = created + updated + deleted;
 
+	const leaderboard: ProfileLeaderboard[] = [];
 	const populateLeaderboard = () => {
 		$users.forEach((user) => {
 			let userEvents = $events.filter((event) => event.user_id === user.id);
@@ -226,8 +227,6 @@ let created = $state<number>();
 let updated = $state<number>();
 let deleted = $state<number>();
 let total = $state<number>();
-
-let leaderboard: ProfileLeaderboard[] = [];
 
 // Filled once by initializeData, shown when dataInitialized turns true
 const earnedBadges: EarnedBadge[] = [];
