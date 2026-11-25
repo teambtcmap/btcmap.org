@@ -7,6 +7,7 @@ import { onDestroy, onMount, untrack } from "svelte";
 import { get } from "svelte/store";
 
 import { API_BASE } from "#lib/api-base.js";
+import { badgeTextKey, taggerBadges, taggerRank } from "#lib/badges.js";
 import { _ } from "#lib/i18n/index.js";
 import {
 	eventError,
@@ -24,7 +25,6 @@ import type {
 	EarnedBadge,
 	ProfileLeaderboard,
 } from "#lib/types.js";
-import { BadgeType } from "#lib/types.js";
 import { errToast, formatElementID } from "#lib/utils.js";
 import Icon from "$components/Icon.svelte";
 import ProfileStat from "$components/ProfileStat.svelte";
@@ -96,6 +96,7 @@ const initializeData = async () => {
 	deleted = userEvents.filter((event) => event.type === "delete").length;
 	total = created + updated + deleted;
 
+	const leaderboard: ProfileLeaderboard[] = [];
 	const populateLeaderboard = () => {
 		$users.forEach((user) => {
 			let userEvents = $events.filter((event) => event.user_id === user.id);
@@ -108,213 +109,22 @@ const initializeData = async () => {
 				});
 			}
 		});
-
-		leaderboard.sort((a, b) => b.total - a.total);
-		leaderboard = leaderboard.slice(0, 10);
 	};
 	populateLeaderboard();
 
-	const badges: (EarnedBadge & { check: boolean })[] = [
-		{
-			check: [
-				10396321, 17441326, 17199501, 668096, 17462838, 17221642, 5432507,
-				17354902, 18452174, 18360665, 616774, 18062435, 7522075, 18380975,
-				1697546, 19288099, 11903494, 18552145, 1836965, 19795869, 17872,
-				19768735, 17573979, 2929493, 19714509, 1851550, 18244560, 19756689,
-				527105, 2339960, 17322349, 17300693, 1236325, 1787080,
-			].includes(user.id),
-			key: "geyserTournament",
-			icon: "geyser",
-			type: BadgeType.Achievement,
-		},
-		{
-			check: supporter,
-			key: "supporter",
-			icon: "supporter",
-			type: BadgeType.Achievement,
-		},
-		{
-			check: leaderboard[0].id === user.id,
-			key: "topTagger",
-			icon: "top-tagger",
-			type: BadgeType.Achievement,
-		},
-		{
-			check: Boolean(
-				leaderboard.slice(0, 3).find((item) => item.id === user.id),
-			),
-			key: "podium",
-			icon: "podium",
-			type: BadgeType.Achievement,
-		},
-		{
-			check: Boolean(leaderboard.find((item) => item.id === user.id)),
-			key: "highRank",
-			icon: "high-rank",
-			type: BadgeType.Achievement,
-		},
-		{
-			check:
-				Date.parse(userCreated) <
-				new Date("December 26, 2022 00:00:00").getTime(),
-			key: "ogSupertagger",
-			icon: "og-supertagger",
-			type: BadgeType.Achievement,
-		},
-		{
-			check: Boolean(lightning),
-			key: "lightningJunkie",
-			icon: "lightning-junkie",
-			type: BadgeType.Achievement,
-		},
-		{
-			check: Boolean(user.img),
-			key: "helloWorld",
-			icon: "hello-world",
-			type: BadgeType.Achievement,
-		},
-		{
-			check: created > updated && created > deleted,
-			key: "creator",
-			icon: "creator",
-			type: BadgeType.Achievement,
-		},
-		{
-			check: updated > created && updated > deleted,
-			key: "updateMaxi",
-			icon: "update-maxi",
-			type: BadgeType.Achievement,
-		},
-		{
-			check: deleted > created && deleted > updated,
-			key: "demolitionSpecialist",
-			icon: "demolition-specialist",
-			type: BadgeType.Achievement,
-		},
-		{
-			check: total >= 21000000,
-			key: "hyperbitcoinisation",
-			icon: "hyperbitcoinisation",
-			type: BadgeType.Contribution,
-		},
-		{
-			check: total >= 10000,
-			key: "pizzaTime",
-			icon: "pizza-time",
-			type: BadgeType.Contribution,
-		},
-		{
-			check: total >= 7777,
-			key: "godly",
-			icon: "godly",
-			type: BadgeType.Contribution,
-		},
-		{
-			check: total >= 5000,
-			key: "shadow",
-			icon: "shadow",
-			type: BadgeType.Contribution,
-		},
-		{
-			check: total >= 3110,
-			key: "whitepaper",
-			icon: "whitepaper",
-			type: BadgeType.Contribution,
-		},
-		{
-			check: total >= 1984,
-			key: "winston",
-			icon: "winston",
-			type: BadgeType.Contribution,
-		},
-		{
-			check: total >= 1000,
-			key: "whale",
-			icon: "whale",
-			type: BadgeType.Contribution,
-		},
-		{
-			check: total >= 821,
-			key: "infinity",
-			icon: "infinity",
-			type: BadgeType.Contribution,
-		},
-		{
-			check: total >= 500,
-			key: "legend",
-			icon: "legend",
-			type: BadgeType.Contribution,
-		},
-		{
-			check: total >= 301,
-			key: "chancellor",
-			icon: "chancellor",
-			type: BadgeType.Contribution,
-		},
-		{
-			check: total >= 256,
-			key: "sha",
-			icon: "sha",
-			type: BadgeType.Contribution,
-		},
-		{
-			check: total >= 210,
-			key: "noBailouts",
-			icon: "no-bailouts",
-			type: BadgeType.Contribution,
-		},
-		{
-			check: total >= 100,
-			key: "supertagger",
-			icon: "supertagger",
-			type: BadgeType.Contribution,
-		},
-		{
-			check: total >= 69,
-			key: "ath",
-			icon: "ath",
-			type: BadgeType.Contribution,
-		},
-		{
-			check: total >= 51,
-			key: "longestChain",
-			icon: "longest-chain",
-			type: BadgeType.Contribution,
-		},
-		{
-			check: total >= 21,
-			key: "satoshi",
-			icon: "satoshi",
-			type: BadgeType.Contribution,
-		},
-		{
-			check: total >= 10,
-			key: "heartbeat",
-			icon: "heartbeat",
-			type: BadgeType.Contribution,
-		},
-		{
-			check: total >= 4,
-			key: "segwit",
-			icon: "segwit",
-			type: BadgeType.Contribution,
-		},
-		{
-			check: total >= 1,
-			key: "wholeTagger",
-			icon: "whole-tagger",
-			type: BadgeType.Contribution,
-		},
-	];
-
-	badges.some(({ check, ...badge }) => {
-		if (earnedBadges.find((earned) => earned.type === BadgeType.Contribution)) {
-			return true;
-		}
-		if (check) {
-			earnedBadges.push(badge);
-		}
-	});
+	earnedBadges.push(
+		...taggerBadges({
+			userId: user.id,
+			joinedAt: userCreated,
+			supporter,
+			hasAvatar: Boolean(user.img),
+			hasLightning: Boolean(lightning),
+			rank: taggerRank(leaderboard, user.id),
+			created,
+			updated,
+			deleted,
+		}),
+	);
 
 	createdPercent = new Intl.NumberFormat("en-US").format(
 		Number((created / (total / 100)).toFixed(0)),
@@ -417,8 +227,6 @@ let created = $state<number>();
 let updated = $state<number>();
 let deleted = $state<number>();
 let total = $state<number>();
-
-let leaderboard: ProfileLeaderboard[] = [];
 
 // Filled once by initializeData, shown when dataInitialized turns true
 const earnedBadges: EarnedBadge[] = [];
@@ -561,7 +369,7 @@ onDestroy(() => {
 		<div class="flex flex-wrap items-center justify-center">
 			{#if dataInitialized}
 				{#each earnedBadges as badge (badge.key)}
-					{@const title = $_(`badges.${badge.type}.${badge.key}.title`)}
+					{@const title = $_(badgeTextKey(badge, "title"))}
 					<a href="/badges#{badge.icon}" class="transition-transform hover:scale-110">
 						<div class="mx-3 mb-6">
 							<img
