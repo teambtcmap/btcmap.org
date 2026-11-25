@@ -101,36 +101,40 @@ const BADGES_PAGE_ORDER: Achievement["key"][] = [
 	"geyserTournament",
 ];
 
+type ContributionRule = { icon: string; minTags: number };
+
+// Every contribution once, with the fewest tags that earn it
+const CONTRIBUTIONS = {
+	hyperbitcoinisation: { icon: "hyperbitcoinisation", minTags: 21000000 },
+	pizzaTime: { icon: "pizza-time", minTags: 10000 },
+	godly: { icon: "godly", minTags: 7777 },
+	shadow: { icon: "shadow", minTags: 5000 },
+	whitepaper: { icon: "whitepaper", minTags: 3110 },
+	winston: { icon: "winston", minTags: 1984 },
+	whale: { icon: "whale", minTags: 1000 },
+	infinity: { icon: "infinity", minTags: 821 },
+	legend: { icon: "legend", minTags: 500 },
+	chancellor: { icon: "chancellor", minTags: 301 },
+	sha: { icon: "sha", minTags: 256 },
+	noBailouts: { icon: "no-bailouts", minTags: 210 },
+	supertagger: { icon: "supertagger", minTags: 100 },
+	ath: { icon: "ath", minTags: 69 },
+	longestChain: { icon: "longest-chain", minTags: 51 },
+	satoshi: { icon: "satoshi", minTags: 21 },
+	heartbeat: { icon: "heartbeat", minTags: 10 },
+	segwit: { icon: "segwit", minTags: 4 },
+	wholeTagger: { icon: "whole-tagger", minTags: 1 },
+} satisfies Record<Contribution["key"], ContributionRule>;
+
+// Object.keys() types its result as string[]. The satisfies checks above
+// make the keys of these records exactly K, so the cast is safe.
+const keysOf = <K extends string>(record: Record<K, unknown>) =>
+	Object.keys(record) as K[];
+
 // Highest first: a tagger gets only the highest one reached
-const CONTRIBUTIONS: {
-	key: Contribution["key"];
-	icon: string;
-	minTags: number;
-}[] = [
-	{
-		key: "hyperbitcoinisation",
-		icon: "hyperbitcoinisation",
-		minTags: 21000000,
-	},
-	{ key: "pizzaTime", icon: "pizza-time", minTags: 10000 },
-	{ key: "godly", icon: "godly", minTags: 7777 },
-	{ key: "shadow", icon: "shadow", minTags: 5000 },
-	{ key: "whitepaper", icon: "whitepaper", minTags: 3110 },
-	{ key: "winston", icon: "winston", minTags: 1984 },
-	{ key: "whale", icon: "whale", minTags: 1000 },
-	{ key: "infinity", icon: "infinity", minTags: 821 },
-	{ key: "legend", icon: "legend", minTags: 500 },
-	{ key: "chancellor", icon: "chancellor", minTags: 301 },
-	{ key: "sha", icon: "sha", minTags: 256 },
-	{ key: "noBailouts", icon: "no-bailouts", minTags: 210 },
-	{ key: "supertagger", icon: "supertagger", minTags: 100 },
-	{ key: "ath", icon: "ath", minTags: 69 },
-	{ key: "longestChain", icon: "longest-chain", minTags: 51 },
-	{ key: "satoshi", icon: "satoshi", minTags: 21 },
-	{ key: "heartbeat", icon: "heartbeat", minTags: 10 },
-	{ key: "segwit", icon: "segwit", minTags: 4 },
-	{ key: "wholeTagger", icon: "whole-tagger", minTags: 1 },
-];
+const CONTRIBUTIONS_HIGHEST_FIRST = keysOf(CONTRIBUTIONS).sort(
+	(a, b) => CONTRIBUTIONS[b].minTags - CONTRIBUTIONS[a].minTags,
+);
 
 const achievement = (key: Achievement["key"]): Achievement => ({
 	type: BadgeType.Achievement,
@@ -138,26 +142,21 @@ const achievement = (key: Achievement["key"]): Achievement => ({
 	icon: ACHIEVEMENTS[key].icon,
 });
 
-const contribution = ({
-	key,
-	icon,
-}: (typeof CONTRIBUTIONS)[number]): Contribution => ({
+const contribution = (key: Contribution["key"]): Contribution => ({
 	type: BadgeType.Contribution,
 	key,
-	icon,
+	icon: CONTRIBUTIONS[key].icon,
 });
 
 // What /badges shows, in its order: contributions from 1 tag up
 export const BADGES_PAGE = {
 	achievements: BADGES_PAGE_ORDER.map(achievement),
-	contributions: [...CONTRIBUTIONS].reverse().map(contribution),
+	contributions: [...CONTRIBUTIONS_HIGHEST_FIRST].reverse().map(contribution),
 };
 
 // The badge's title or description key in the locale files
-export const badgeTextKey = (
-	badge: Pick<EarnedBadge, "type" | "key">,
-	text: "title" | "desc",
-) => `badges.${badge.type}.${badge.key}.${text}` as const;
+export const badgeTextKey = (badge: EarnedBadge, text: "title" | "desc") =>
+	`badges.${badge.type}.${badge.key}.${text}` as const;
 
 // A tagger's place on the leaderboard (best first), null when not on it
 export const taggerRank = (
@@ -171,7 +170,9 @@ export const taggerRank = (
 // The badges a tagger earned, in the tagger page's order
 export const taggerBadges = (stats: TaggerStats): EarnedBadge[] => {
 	const total = stats.created + stats.updated + stats.deleted;
-	const reached = CONTRIBUTIONS.find(({ minTags }) => total >= minTags);
+	const reached = CONTRIBUTIONS_HIGHEST_FIRST.find(
+		(key) => total >= CONTRIBUTIONS[key].minTags,
+	);
 
 	return [
 		...TAGGER_PAGE_ORDER.filter((key) => ACHIEVEMENTS[key].earned(stats)).map(

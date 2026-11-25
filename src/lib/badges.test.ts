@@ -214,7 +214,11 @@ describe("BADGES_PAGE", () => {
 
 describe("badgeTextKey", () => {
 	it("names the title and the description in the locale files", () => {
-		const satoshi = { type: BadgeType.Contribution, key: "satoshi" } as const;
+		const satoshi = {
+			type: BadgeType.Contribution,
+			key: "satoshi",
+			icon: "satoshi",
+		} as const;
 
 		expect(badgeTextKey(satoshi, "title")).toBe(
 			"badges.contribution.satoshi.title",
@@ -222,5 +226,16 @@ describe("badgeTextKey", () => {
 		expect(badgeTextKey(satoshi, "desc")).toBe(
 			"badges.contribution.satoshi.desc",
 		);
+	});
+
+	it("takes only a key of the badge's own type", () => {
+		const mixedUp = {
+			type: BadgeType.Contribution,
+			key: "creator",
+			icon: "creator",
+		} as const;
+
+		// @ts-expect-error: creator is an achievement, not a contribution
+		badgeTextKey(mixedUp, "title");
 	});
 });
