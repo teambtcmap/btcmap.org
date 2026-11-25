@@ -34,14 +34,17 @@ const OG_SUPERTAGGER_BEFORE = new Date("December 26, 2022 00:00:00").getTime();
 const keysOf = <K extends string>(record: Record<K, unknown>) =>
 	Object.keys(record) as K[];
 
+const TAG_KINDS = ["created", "updated", "deleted"] as const;
+type TagKind = (typeof TAG_KINDS)[number];
+
 // More tags of this kind than of each of the other two
-const strictMajority = (
-	stats: TaggerStats,
-	kind: "created" | "updated" | "deleted",
-) =>
-	(["created", "updated", "deleted"] as const).every(
-		(other) => other === kind || stats[kind] > stats[other],
-	);
+const strictMajority = (stats: TaggerStats, kind: TagKind) =>
+	TAG_KINDS.every((other) => other === kind || stats[kind] > stats[other]);
+
+type AchievementRule = {
+	icon: string;
+	earned: (stats: TaggerStats) => boolean;
+};
 
 // Every achievement once, in the order the tagger page lists them
 const ACHIEVEMENTS = {
@@ -80,10 +83,7 @@ const ACHIEVEMENTS = {
 		icon: "demolition-specialist",
 		earned: (stats) => strictMajority(stats, "deleted"),
 	},
-} satisfies Record<
-	Achievement["key"],
-	{ icon: string; earned: (stats: TaggerStats) => boolean }
->;
+} satisfies Record<Achievement["key"], AchievementRule>;
 
 // /badges lists the achievements in its own order, Supporter first
 const BADGES_PAGE_ORDER: Achievement["key"][] = [
