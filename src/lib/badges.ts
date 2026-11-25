@@ -29,6 +29,21 @@ const GEYSER_TOURNAMENT_TAGGERS = [
 // In the viewer's local time, as the tagger page has always compared it
 const OG_SUPERTAGGER_BEFORE = new Date("December 26, 2022 00:00:00").getTime();
 
+// Object.keys() types its result as string[]. The satisfies checks below
+// make the keys of these records exactly K, so the cast is safe.
+const keysOf = <K extends string>(record: Record<K, unknown>) =>
+	Object.keys(record) as K[];
+
+// More tags of this kind than of each of the other two
+const strictMajority = (
+	stats: TaggerStats,
+	kind: "created" | "updated" | "deleted",
+) =>
+	(["created", "updated", "deleted"] as const).every(
+		(other) => other === kind || stats[kind] > stats[other],
+	);
+
+// Every achievement once, in the order the tagger page lists them
 const ACHIEVEMENTS = {
 	geyserTournament: {
 		icon: "geyser",
@@ -55,38 +70,22 @@ const ACHIEVEMENTS = {
 	helloWorld: { icon: "hello-world", earned: ({ hasAvatar }) => hasAvatar },
 	creator: {
 		icon: "creator",
-		earned: ({ created, updated, deleted }) =>
-			created > updated && created > deleted,
+		earned: (stats) => strictMajority(stats, "created"),
 	},
 	updateMaxi: {
 		icon: "update-maxi",
-		earned: ({ created, updated, deleted }) =>
-			updated > created && updated > deleted,
+		earned: (stats) => strictMajority(stats, "updated"),
 	},
 	demolitionSpecialist: {
 		icon: "demolition-specialist",
-		earned: ({ created, updated, deleted }) =>
-			deleted > created && deleted > updated,
+		earned: (stats) => strictMajority(stats, "deleted"),
 	},
 } satisfies Record<
 	Achievement["key"],
 	{ icon: string; earned: (stats: TaggerStats) => boolean }
 >;
 
-// The two pages list the achievements in different orders
-const TAGGER_PAGE_ORDER: Achievement["key"][] = [
-	"geyserTournament",
-	"supporter",
-	"topTagger",
-	"podium",
-	"highRank",
-	"ogSupertagger",
-	"lightningJunkie",
-	"helloWorld",
-	"creator",
-	"updateMaxi",
-	"demolitionSpecialist",
-];
+// /badges lists the achievements in its own order, Supporter first
 const BADGES_PAGE_ORDER: Achievement["key"][] = [
 	"supporter",
 	"creator",
@@ -125,11 +124,6 @@ const CONTRIBUTIONS = {
 	segwit: { icon: "segwit", minTags: 4 },
 	wholeTagger: { icon: "whole-tagger", minTags: 1 },
 } satisfies Record<Contribution["key"], ContributionRule>;
-
-// Object.keys() types its result as string[]. The satisfies checks above
-// make the keys of these records exactly K, so the cast is safe.
-const keysOf = <K extends string>(record: Record<K, unknown>) =>
-	Object.keys(record) as K[];
 
 // Highest first: a tagger gets only the highest one reached
 const CONTRIBUTIONS_HIGHEST_FIRST = keysOf(CONTRIBUTIONS).sort(
@@ -175,9 +169,9 @@ export const taggerBadges = (stats: TaggerStats): EarnedBadge[] => {
 	);
 
 	return [
-		...TAGGER_PAGE_ORDER.filter((key) => ACHIEVEMENTS[key].earned(stats)).map(
-			achievement,
-		),
+		...keysOf(ACHIEVEMENTS)
+			.filter((key) => ACHIEVEMENTS[key].earned(stats))
+			.map(achievement),
 		...(reached ? [contribution(reached)] : []),
 	];
 };
