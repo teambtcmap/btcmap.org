@@ -1,0 +1,170 @@
+import type { EarnedBadge } from "#lib/types.js";
+import { BadgeType } from "#lib/types.js";
+
+type Achievement = Extract<EarnedBadge, { type: BadgeType.Achievement }>;
+type Contribution = Extract<EarnedBadge, { type: BadgeType.Contribution }>;
+
+export type TaggerStats = {
+	userId: number;
+	// When the BTC Map account was created
+	joinedAt: string;
+	supporter: boolean;
+	hasAvatar: boolean;
+	hasLightning: boolean;
+	// Place among the top 10 taggers, null outside them
+	rank: number | null;
+	created: number;
+	updated: number;
+	deleted: number;
+};
+
+const GEYSER_TOURNAMENT_TAGGERS = [
+	10396321, 17441326, 17199501, 668096, 17462838, 17221642, 5432507, 17354902,
+	18452174, 18360665, 616774, 18062435, 7522075, 18380975, 1697546, 19288099,
+	11903494, 18552145, 1836965, 19795869, 17872, 19768735, 17573979, 2929493,
+	19714509, 1851550, 18244560, 19756689, 527105, 2339960, 17322349, 17300693,
+	1236325, 1787080,
+];
+
+// In the viewer's local time, as the tagger page has always compared it
+const OG_SUPERTAGGER_BEFORE = new Date("December 26, 2022 00:00:00").getTime();
+
+const ACHIEVEMENTS = {
+	geyserTournament: {
+		icon: "geyser",
+		earned: ({ userId }) => GEYSER_TOURNAMENT_TAGGERS.includes(userId),
+	},
+	supporter: { icon: "supporter", earned: ({ supporter }) => supporter },
+	topTagger: { icon: "top-tagger", earned: ({ rank }) => rank === 1 },
+	podium: {
+		icon: "podium",
+		earned: ({ rank }) => rank !== null && rank <= 3,
+	},
+	highRank: { icon: "high-rank", earned: ({ rank }) => rank !== null },
+	ogSupertagger: {
+		icon: "og-supertagger",
+		earned: ({ joinedAt }) => Date.parse(joinedAt) < OG_SUPERTAGGER_BEFORE,
+	},
+	lightningJunkie: {
+		icon: "lightning-junkie",
+		earned: ({ hasLightning }) => hasLightning,
+	},
+	helloWorld: { icon: "hello-world", earned: ({ hasAvatar }) => hasAvatar },
+	creator: {
+		icon: "creator",
+		earned: ({ created, updated, deleted }) =>
+			created > updated && created > deleted,
+	},
+	updateMaxi: {
+		icon: "update-maxi",
+		earned: ({ created, updated, deleted }) =>
+			updated > created && updated > deleted,
+	},
+	demolitionSpecialist: {
+		icon: "demolition-specialist",
+		earned: ({ created, updated, deleted }) =>
+			deleted > created && deleted > updated,
+	},
+} satisfies Record<
+	Achievement["key"],
+	{ icon: string; earned: (stats: TaggerStats) => boolean }
+>;
+
+// The two pages list the achievements in different orders
+const TAGGER_PAGE_ORDER: Achievement["key"][] = [
+	"geyserTournament",
+	"supporter",
+	"topTagger",
+	"podium",
+	"highRank",
+	"ogSupertagger",
+	"lightningJunkie",
+	"helloWorld",
+	"creator",
+	"updateMaxi",
+	"demolitionSpecialist",
+];
+const BADGES_PAGE_ORDER: Achievement["key"][] = [
+	"supporter",
+	"creator",
+	"updateMaxi",
+	"demolitionSpecialist",
+	"helloWorld",
+	"lightningJunkie",
+	"ogSupertagger",
+	"highRank",
+	"podium",
+	"topTagger",
+	"geyserTournament",
+];
+
+// Highest first: a tagger gets only the highest one reached
+const CONTRIBUTIONS: {
+	key: Contribution["key"];
+	icon: string;
+	minTags: number;
+}[] = [
+	{
+		key: "hyperbitcoinisation",
+		icon: "hyperbitcoinisation",
+		minTags: 21000000,
+	},
+	{ key: "pizzaTime", icon: "pizza-time", minTags: 10000 },
+	{ key: "godly", icon: "godly", minTags: 7777 },
+	{ key: "shadow", icon: "shadow", minTags: 5000 },
+	{ key: "whitepaper", icon: "whitepaper", minTags: 3110 },
+	{ key: "winston", icon: "winston", minTags: 1984 },
+	{ key: "whale", icon: "whale", minTags: 1000 },
+	{ key: "infinity", icon: "infinity", minTags: 821 },
+	{ key: "legend", icon: "legend", minTags: 500 },
+	{ key: "chancellor", icon: "chancellor", minTags: 301 },
+	{ key: "sha", icon: "sha", minTags: 256 },
+	{ key: "noBailouts", icon: "no-bailouts", minTags: 210 },
+	{ key: "supertagger", icon: "supertagger", minTags: 100 },
+	{ key: "ath", icon: "ath", minTags: 69 },
+	{ key: "longestChain", icon: "longest-chain", minTags: 51 },
+	{ key: "satoshi", icon: "satoshi", minTags: 21 },
+	{ key: "heartbeat", icon: "heartbeat", minTags: 10 },
+	{ key: "segwit", icon: "segwit", minTags: 4 },
+	{ key: "wholeTagger", icon: "whole-tagger", minTags: 1 },
+];
+
+const achievement = (key: Achievement["key"]): Achievement => ({
+	type: BadgeType.Achievement,
+	key,
+	icon: ACHIEVEMENTS[key].icon,
+});
+
+const contribution = ({
+	key,
+	icon,
+}: (typeof CONTRIBUTIONS)[number]): Contribution => ({
+	type: BadgeType.Contribution,
+	key,
+	icon,
+});
+
+// What /badges shows, in its order: contributions from 1 tag up
+export const BADGES_PAGE = {
+	achievements: BADGES_PAGE_ORDER.map(achievement),
+	contributions: [...CONTRIBUTIONS].reverse().map(contribution),
+};
+
+// The badge's title or description key in the locale files
+export const badgeTextKey = (
+	badge: Pick<EarnedBadge, "type" | "key">,
+	text: "title" | "desc",
+) => `badges.${badge.type}.${badge.key}.${text}` as const;
+
+// The badges a tagger earned, in the tagger page's order
+export const taggerBadges = (stats: TaggerStats): EarnedBadge[] => {
+	const total = stats.created + stats.updated + stats.deleted;
+	const reached = CONTRIBUTIONS.find(({ minTags }) => total >= minTags);
+
+	return [
+		...TAGGER_PAGE_ORDER.filter((key) => ACHIEVEMENTS[key].earned(stats)).map(
+			achievement,
+		),
+		...(reached ? [contribution(reached)] : []),
+	];
+};
