@@ -1,5 +1,5 @@
 <script lang="ts">
-import { BADGES_PAGE, badgeTextKey } from "#lib/badges.js";
+import { BADGE_CATALOG, badgeTextKey } from "#lib/badges.js";
 import { _ } from "#lib/i18n/index.js";
 import { theme } from "#lib/theme.js";
 import type { EarnedBadge } from "#lib/types.js";
@@ -48,12 +48,12 @@ import BadgeCard from "./components/BadgeCard.svelte";
 	<section id="achievements" class="mt-16 mb-20 space-y-8">
 		<h2 class="text-center text-3xl font-semibold text-primary dark:text-white">{$_("badges.achievements")}</h2>
 
-		{@render badgeGrid(BADGES_PAGE.achievements)}
+		{@render badgeGrid(BADGE_CATALOG.achievements)}
 	</section>
 
 	<section id="contributions" class="space-y-8">
 		<h2 class="text-center text-3xl font-semibold text-primary dark:text-white">{$_("badges.contributions")}</h2>
 
-		{@render badgeGrid(BADGES_PAGE.contributions)}
+		{@render badgeGrid(BADGE_CATALOG.contributions)}
 	</section>
 </div>

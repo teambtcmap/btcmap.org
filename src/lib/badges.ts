@@ -4,7 +4,7 @@ import { BadgeType } from "#lib/types.js";
 type Achievement = Extract<EarnedBadge, { type: BadgeType.Achievement }>;
 type Contribution = Extract<EarnedBadge, { type: BadgeType.Contribution }>;
 
-export type TaggerStats = {
+export type BadgeInputs = {
 	userId: number;
 	// When the BTC Map account was created
 	joinedAt: string;
@@ -38,12 +38,12 @@ const TAG_KINDS = ["created", "updated", "deleted"] as const;
 type TagKind = (typeof TAG_KINDS)[number];
 
 // More tags of this kind than of each of the other two
-const strictMajority = (stats: TaggerStats, kind: TagKind) =>
-	TAG_KINDS.every((other) => other === kind || stats[kind] > stats[other]);
+const strictMajority = (inputs: BadgeInputs, kind: TagKind) =>
+	TAG_KINDS.every((other) => other === kind || inputs[kind] > inputs[other]);
 
 type AchievementRule = {
 	icon: string;
-	earned: (stats: TaggerStats) => boolean;
+	earned: (inputs: BadgeInputs) => boolean;
 };
 
 // Every achievement once, in the order the tagger page lists them
@@ -73,15 +73,15 @@ const ACHIEVEMENTS = {
 	helloWorld: { icon: "hello-world", earned: ({ hasAvatar }) => hasAvatar },
 	creator: {
 		icon: "creator",
-		earned: (stats) => strictMajority(stats, "created"),
+		earned: (inputs) => strictMajority(inputs, "created"),
 	},
 	updateMaxi: {
 		icon: "update-maxi",
-		earned: (stats) => strictMajority(stats, "updated"),
+		earned: (inputs) => strictMajority(inputs, "updated"),
 	},
 	demolitionSpecialist: {
 		icon: "demolition-specialist",
-		earned: (stats) => strictMajority(stats, "deleted"),
+		earned: (inputs) => strictMajority(inputs, "deleted"),
 	},
 } satisfies Record<Achievement["key"], AchievementRule>;
 
@@ -142,8 +142,8 @@ const contribution = (key: Contribution["key"]): Contribution => ({
 	icon: CONTRIBUTIONS[key].icon,
 });
 
-// What /badges shows, in its order: contributions from 1 tag up
-export const BADGES_PAGE = {
+// Every badge, in the order /badges shows them: contributions from 1 tag up
+export const BADGE_CATALOG = {
 	achievements: BADGES_PAGE_ORDER.map(achievement),
 	contributions: [...CONTRIBUTIONS_HIGHEST_FIRST].reverse().map(contribution),
 };
@@ -165,15 +165,15 @@ export const taggerRank = (
 };
 
 // The badges a tagger earned, in the tagger page's order
-export const taggerBadges = (stats: TaggerStats): EarnedBadge[] => {
-	const total = stats.created + stats.updated + stats.deleted;
+export const taggerBadges = (inputs: BadgeInputs): EarnedBadge[] => {
+	const total = inputs.created + inputs.updated + inputs.deleted;
 	const reached = CONTRIBUTIONS_HIGHEST_FIRST.find(
 		(key) => total >= CONTRIBUTIONS[key].minTags,
 	);
 
 	return [
 		...keysOf(ACHIEVEMENTS)
-			.filter((key) => ACHIEVEMENTS[key].earned(stats))
+			.filter((key) => ACHIEVEMENTS[key].earned(inputs))
 			.map(achievement),
 		...(reached ? [contribution(reached)] : []),
 	];

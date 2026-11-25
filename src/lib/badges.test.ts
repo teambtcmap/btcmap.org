@@ -5,11 +5,16 @@ import en from "#lib/i18n/locales/en.json";
 import type { EarnedBadge } from "#lib/types.js";
 import { BadgeType } from "#lib/types.js";
 
-import type { TaggerStats } from "./badges";
-import { BADGES_PAGE, badgeTextKey, taggerBadges, taggerRank } from "./badges";
+import type { BadgeInputs } from "./badges";
+import {
+	BADGE_CATALOG,
+	badgeTextKey,
+	taggerBadges,
+	taggerRank,
+} from "./badges";
 
 // A tagger who earns nothing until a test says otherwise
-const tagger = (stats: Partial<TaggerStats> = {}): TaggerStats => ({
+const tagger = (inputs: Partial<BadgeInputs> = {}): BadgeInputs => ({
 	userId: 1,
 	joinedAt: "2024-06-01T00:00:00.000Z",
 	supporter: false,
@@ -19,11 +24,11 @@ const tagger = (stats: Partial<TaggerStats> = {}): TaggerStats => ({
 	created: 0,
 	updated: 0,
 	deleted: 0,
-	...stats,
+	...inputs,
 });
 
-const earnedKeys = (stats: Partial<TaggerStats>, type: BadgeType) =>
-	taggerBadges(tagger(stats))
+const earnedKeys = (inputs: Partial<BadgeInputs>, type: BadgeType) =>
+	taggerBadges(tagger(inputs))
 		.filter((badge) => badge.type === type)
 		.map((badge) => badge.key);
 
@@ -142,14 +147,14 @@ describe("taggerBadges", () => {
 		it("gives OG Supertagger to taggers who joined before 26 December 2022, local time", () => {
 			// The cutoff the tagger page has always used, in the viewer's time zone
 			const cutoff = new Date("December 26, 2022 00:00:00").getTime();
-			const joinedAt = (time: number) =>
+			const earnedIfJoinedAt = (time: number) =>
 				earnedKeys(
 					{ joinedAt: new Date(time).toISOString() },
 					BadgeType.Achievement,
 				);
 
-			expect(joinedAt(cutoff - 1)).toEqual(["ogSupertagger"]);
-			expect(joinedAt(cutoff)).toEqual([]);
+			expect(earnedIfJoinedAt(cutoff - 1)).toEqual(["ogSupertagger"]);
+			expect(earnedIfJoinedAt(cutoff)).toEqual([]);
 		});
 
 		it.each([
@@ -157,8 +162,8 @@ describe("taggerBadges", () => {
 			[{ hasAvatar: true }, ["helloWorld"]],
 			[{ hasLightning: true }, ["lightningJunkie"]],
 			[{ userId: 10396321 }, ["geyserTournament"]],
-		])("gives %j: %j", (stats, keys) => {
-			expect(earnedKeys(stats, BadgeType.Achievement)).toEqual(keys);
+		])("gives %j: %j", (inputs, keys) => {
+			expect(earnedKeys(inputs, BadgeType.Achievement)).toEqual(keys);
 		});
 	});
 
@@ -239,11 +244,14 @@ describe("taggerRank", () => {
 	});
 });
 
-describe("BADGES_PAGE", () => {
-	const allBadges = [...BADGES_PAGE.achievements, ...BADGES_PAGE.contributions];
+describe("BADGE_CATALOG", () => {
+	const allBadges = [
+		...BADGE_CATALOG.achievements,
+		...BADGE_CATALOG.contributions,
+	];
 
-	it("shows the achievements in its own order, Supporter first", () => {
-		expect(BADGES_PAGE.achievements.map((badge) => badge.key)).toEqual([
+	it("lists the achievements in the /badges order, Supporter first", () => {
+		expect(BADGE_CATALOG.achievements.map((badge) => badge.key)).toEqual([
 			"supporter",
 			"creator",
 			"updateMaxi",
@@ -258,8 +266,8 @@ describe("BADGES_PAGE", () => {
 		]);
 	});
 
-	it("shows the contributions from 1 tag up", () => {
-		expect(BADGES_PAGE.contributions.map((badge) => badge.key)).toEqual(
+	it("lists the contributions from 1 tag up", () => {
+		expect(BADGE_CATALOG.contributions.map((badge) => badge.key)).toEqual(
 			THRESHOLDS.map(([, key]) => key),
 		);
 	});
@@ -271,12 +279,12 @@ describe("BADGES_PAGE", () => {
 	});
 
 	it("has every badge of the locale files once, each with an icon file", () => {
-		expect(BADGES_PAGE.achievements.map((badge) => badge.key).sort()).toEqual(
+		expect(BADGE_CATALOG.achievements.map((badge) => badge.key).sort()).toEqual(
 			Object.keys(en.badges.achievement).sort(),
 		);
-		expect(BADGES_PAGE.contributions.map((badge) => badge.key).sort()).toEqual(
-			Object.keys(en.badges.contribution).sort(),
-		);
+		expect(
+			BADGE_CATALOG.contributions.map((badge) => badge.key).sort(),
+		).toEqual(Object.keys(en.badges.contribution).sort());
 		// Vitest runs from the project root
 		for (const { icon } of allBadges) {
 			expect(existsSync(`static/icons/badges/${icon}.svg`), icon).toBe(true);
