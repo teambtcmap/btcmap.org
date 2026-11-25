@@ -2,6 +2,7 @@
 import { BADGES_PAGE, badgeTextKey } from "#lib/badges.js";
 import { _ } from "#lib/i18n/index.js";
 import { theme } from "#lib/theme.js";
+import type { EarnedBadge } from "#lib/types.js";
 import HeaderPlaceholder from "$components/layout/HeaderPlaceholder.svelte";
 
 import BadgeCard from "./components/BadgeCard.svelte";
@@ -13,6 +14,19 @@ import BadgeCard from "./components/BadgeCard.svelte";
 	<meta name="twitter:title" content="BTC Map - {$_("badges.title")}" />
 	<meta name="twitter:image" content="https://btcmap.org/images/og/badges.png" />
 </svelte:head>
+
+{#snippet badgeGrid(badges: EarnedBadge[])}
+	<div class="grid gap-5 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
+		{#each badges as badge (badge.key)}
+			<BadgeCard
+				icon={badge.icon}
+				titleKey={badgeTextKey(badge, 'title')}
+				descKey={badgeTextKey(badge, 'desc')}
+				type={badge.type}
+			/>
+		{/each}
+	</div>
+{/snippet}
 
 <div class="my-10 text-center md:my-20">
 	{#if typeof window !== 'undefined'}
@@ -34,30 +48,12 @@ import BadgeCard from "./components/BadgeCard.svelte";
 	<section id="achievements" class="mt-16 mb-20 space-y-8">
 		<h2 class="text-center text-3xl font-semibold text-primary dark:text-white">{$_("badges.achievements")}</h2>
 
-		<div class="grid gap-5 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
-			{#each BADGES_PAGE.achievements as badge (badge.key)}
-				<BadgeCard
-					icon={badge.icon}
-					titleKey={badgeTextKey(badge, 'title')}
-					descKey={badgeTextKey(badge, 'desc')}
-					type={badge.type}
-				/>
-			{/each}
-		</div>
+		{@render badgeGrid(BADGES_PAGE.achievements)}
 	</section>
 
 	<section id="contributions" class="space-y-8">
 		<h2 class="text-center text-3xl font-semibold text-primary dark:text-white">{$_("badges.contributions")}</h2>
 
-		<div class="grid gap-5 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
-			{#each BADGES_PAGE.contributions as badge (badge.key)}
-				<BadgeCard
-					icon={badge.icon}
-					titleKey={badgeTextKey(badge, 'title')}
-					descKey={badgeTextKey(badge, 'desc')}
-					type={badge.type}
-				/>
-			{/each}
-		</div>
+		{@render badgeGrid(BADGES_PAGE.contributions)}
 	</section>
 </div>
