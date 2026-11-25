@@ -152,12 +152,15 @@ export const BADGES_PAGE = {
 export const badgeTextKey = (badge: EarnedBadge, text: "title" | "desc") =>
 	`badges.${badge.type}.${badge.key}.${text}` as const;
 
-// A tagger's place on the leaderboard (best first), null when not on it
+// A tagger's place on the leaderboard, most tags first, null when not on
+// it. sort() is stable, so taggers with the same total keep their order.
 export const taggerRank = (
 	leaderboard: ProfileLeaderboard[],
 	userId: number,
 ): number | null => {
-	const index = leaderboard.findIndex((entry) => entry.id === userId);
+	const index = [...leaderboard]
+		.sort((a, b) => b.total - a.total)
+		.findIndex((entry) => entry.id === userId);
 	return index === -1 ? null : index + 1;
 };
 

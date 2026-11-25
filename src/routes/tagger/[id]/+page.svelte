@@ -108,8 +108,6 @@ const initializeData = async () => {
 				});
 			}
 		});
-
-		leaderboard.sort((a, b) => b.total - a.total);
 	};
 	populateLeaderboard();
 

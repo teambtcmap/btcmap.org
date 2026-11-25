@@ -202,7 +202,7 @@ describe("taggerBadges", () => {
 });
 
 describe("taggerRank", () => {
-	// Best first, as the tagger page sorts it
+	// Tagger 1 has the most tags, tagger 12 the fewest
 	const leaderboard = Array.from({ length: 12 }, (_, i) => ({
 		id: i + 1,
 		total: 100 - i,
@@ -211,6 +211,26 @@ describe("taggerRank", () => {
 	it("gives the place on the leaderboard", () => {
 		expect(taggerRank(leaderboard, 1)).toBe(1);
 		expect(taggerRank(leaderboard, 11)).toBe(11);
+	});
+
+	it("sorts the leaderboard itself, most tags first", () => {
+		const unsorted = [...leaderboard].reverse();
+
+		expect(taggerRank(unsorted, 1)).toBe(1);
+		expect(taggerRank(unsorted, 11)).toBe(11);
+		expect(unsorted).toEqual([...leaderboard].reverse());
+	});
+
+	it("keeps the leaderboard's order for the same number of tags", () => {
+		const tied = [
+			{ id: 5, total: 10 },
+			{ id: 3, total: 20 },
+			{ id: 7, total: 10 },
+		];
+
+		expect(taggerRank(tied, 3)).toBe(1);
+		expect(taggerRank(tied, 5)).toBe(2);
+		expect(taggerRank(tied, 7)).toBe(3);
 	});
 
 	it("gives null to a tagger who is not on it", () => {
