@@ -3,7 +3,13 @@ import { readFileSync } from 'node:fs';
 import type { Locator, Page } from '@playwright/test';
 import { expect, test } from '@playwright/test';
 
+import type en from '#lib/i18n/locales/en.json';
+import type { EarnedBadge } from '#lib/types.js';
+
 import { stubMapData } from './helpers';
+
+// [type, key] of a badge; the key has to be one of its type's keys in en.json
+type BadgeRef<B = EarnedBadge> = B extends EarnedBadge ? [`${B['type']}`, B['key']] : never;
 
 // The tagger from the #1099 report. The server render still reads this user
 // from the live API; every request the browser makes is stubbed below.
@@ -14,7 +20,7 @@ const at = '2024-01-01T00:00:00.000Z';
 // A supporter with 10 created places and no other tagger earns these badges,
 // in the page's order: Supporter, Top Tagger, Podium, High Rank, Creator and
 // Heartbeat (10 or more). Four of the six German titles differ from English.
-const EARNED = [
+const EARNED: BadgeRef[] = [
 	['achievement', 'supporter'],
 	['achievement', 'topTagger'],
 	['achievement', 'podium'],
@@ -51,14 +57,18 @@ const EVENTS = Array.from({ length: 10 }, (_, i) => ({
 	deleted_at: ''
 }));
 
-const locale = (language: string) =>
+// Typed as en.json: the badges.* and footer.language keys this spec reads
+// are in every locale file
+const locale = (language: string): typeof en =>
 	JSON.parse(
 		readFileSync(new URL(`../src/lib/i18n/locales/${language}.json`, import.meta.url), 'utf8')
 	);
 
 const badgeTitles = (language: string) => {
 	const { badges } = locale(language);
-	return EARNED.map(([type, key]) => badges[type][key].title);
+	return EARNED.map(([type, key]) =>
+		type === 'achievement' ? badges.achievement[key].title : badges.contribution[key].title
+	);
 };
 
 const altTexts = (badges: Locator) =>
