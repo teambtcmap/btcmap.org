@@ -393,8 +393,7 @@ const initializeData = async () => {
 	dataInitialized = true;
 };
 
-// Effects run only in the browser, after mount, so the canvas is bound and
-// the old initialRenderComplete flag set in onMount is no longer needed.
+// Effects run only in the browser, after mount, so the canvas is bound.
 // untrack: initializeData reads and writes state the effect must not
 // depend on; dataInitialized stops a second run.
 $effect(() => {
