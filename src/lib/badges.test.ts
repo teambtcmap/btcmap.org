@@ -1,10 +1,12 @@
 import { existsSync } from "node:fs";
 import { describe, expect, it } from "vitest";
 
+import en from "#lib/i18n/locales/en.json";
+import type { EarnedBadge } from "#lib/types.js";
+import { BadgeType } from "#lib/types.js";
+
 import type { TaggerStats } from "./badges";
 import { BADGES_PAGE, badgeTextKey, taggerBadges, taggerRank } from "./badges";
-import en from "./i18n/locales/en.json";
-import { BadgeType } from "./types";
 
 // A tagger who earns nothing until a test says otherwise
 const tagger = (stats: Partial<TaggerStats> = {}): TaggerStats => ({
@@ -50,6 +52,40 @@ const THRESHOLDS = [
 	[10000, "pizzaTime"],
 	[21000000, "hyperbitcoinisation"],
 ] as const;
+
+// The icon of every badge, as the files in static/icons/badges are named
+const ICONS = {
+	geyserTournament: "geyser",
+	supporter: "supporter",
+	topTagger: "top-tagger",
+	podium: "podium",
+	highRank: "high-rank",
+	ogSupertagger: "og-supertagger",
+	lightningJunkie: "lightning-junkie",
+	helloWorld: "hello-world",
+	creator: "creator",
+	updateMaxi: "update-maxi",
+	demolitionSpecialist: "demolition-specialist",
+	hyperbitcoinisation: "hyperbitcoinisation",
+	pizzaTime: "pizza-time",
+	godly: "godly",
+	shadow: "shadow",
+	whitepaper: "whitepaper",
+	winston: "winston",
+	whale: "whale",
+	infinity: "infinity",
+	legend: "legend",
+	chancellor: "chancellor",
+	sha: "sha",
+	noBailouts: "no-bailouts",
+	supertagger: "supertagger",
+	ath: "ath",
+	longestChain: "longest-chain",
+	satoshi: "satoshi",
+	heartbeat: "heartbeat",
+	segwit: "segwit",
+	wholeTagger: "whole-tagger",
+} satisfies Record<EarnedBadge["key"], string>;
 
 describe("taggerBadges", () => {
 	describe("contribution badge", () => {
@@ -100,13 +136,17 @@ describe("taggerBadges", () => {
 			expect(keysOf(tags, BadgeType.Achievement)).toEqual(keys);
 		});
 
-		it("gives OG Supertagger to taggers who joined before 26 December 2022", () => {
-			expect(
-				keysOf({ joinedAt: "2022-06-01T00:00:00.000Z" }, BadgeType.Achievement),
-			).toEqual(["ogSupertagger"]);
-			expect(
-				keysOf({ joinedAt: "2023-06-01T00:00:00.000Z" }, BadgeType.Achievement),
-			).toEqual([]);
+		it("gives OG Supertagger to taggers who joined before 26 December 2022, local time", () => {
+			// The cutoff the tagger page has always used, in the viewer's time zone
+			const cutoff = new Date("December 26, 2022 00:00:00").getTime();
+			const joinedAt = (time: number) =>
+				keysOf(
+					{ joinedAt: new Date(time).toISOString() },
+					BadgeType.Achievement,
+				);
+
+			expect(joinedAt(cutoff - 1)).toEqual(["ogSupertagger"]);
+			expect(joinedAt(cutoff)).toEqual([]);
 		});
 
 		it.each([
@@ -119,40 +159,46 @@ describe("taggerBadges", () => {
 		});
 	});
 
-	it("lists the badges in the tagger page's order, the contribution last", () => {
-		const badges = taggerBadges(
-			tagger({
-				userId: 10396321,
-				joinedAt: "2022-06-01T00:00:00.000Z",
-				supporter: true,
-				hasAvatar: true,
-				hasLightning: true,
-				rank: 1,
-				created: 10,
-			}),
-		);
+	// Earns every achievement but the three for a majority
+	const decorated = {
+		userId: 10396321,
+		joinedAt: "2022-06-01T00:00:00.000Z",
+		supporter: true,
+		hasAvatar: true,
+		hasLightning: true,
+		rank: 1,
+	};
 
-		expect(badges).toEqual([
-			{ type: BadgeType.Achievement, key: "geyserTournament", icon: "geyser" },
-			{ type: BadgeType.Achievement, key: "supporter", icon: "supporter" },
-			{ type: BadgeType.Achievement, key: "topTagger", icon: "top-tagger" },
-			{ type: BadgeType.Achievement, key: "podium", icon: "podium" },
-			{ type: BadgeType.Achievement, key: "highRank", icon: "high-rank" },
-			{
-				type: BadgeType.Achievement,
-				key: "ogSupertagger",
-				icon: "og-supertagger",
-			},
-			{
-				type: BadgeType.Achievement,
-				key: "lightningJunkie",
-				icon: "lightning-junkie",
-			},
-			{ type: BadgeType.Achievement, key: "helloWorld", icon: "hello-world" },
-			{ type: BadgeType.Achievement, key: "creator", icon: "creator" },
-			{ type: BadgeType.Contribution, key: "heartbeat", icon: "heartbeat" },
-		]);
-	});
+	it.each([
+		[{ created: 10 }, "creator"],
+		[{ updated: 10 }, "updateMaxi"],
+		[{ deleted: 10 }, "demolitionSpecialist"],
+	] as const)(
+		"lists the badges in the tagger page's order, the contribution last: %j",
+		(tags, majority) => {
+			const badges = taggerBadges(tagger({ ...decorated, ...tags }));
+
+			expect(badges.map((badge) => badge.key)).toEqual([
+				"geyserTournament",
+				"supporter",
+				"topTagger",
+				"podium",
+				"highRank",
+				"ogSupertagger",
+				"lightningJunkie",
+				"helloWorld",
+				majority,
+				"heartbeat",
+			]);
+			expect(badges.map((badge) => badge.type)).toEqual([
+				...Array(9).fill(BadgeType.Achievement),
+				BadgeType.Contribution,
+			]);
+			for (const badge of badges) {
+				expect(badge.icon, badge.key).toBe(ICONS[badge.key]);
+			}
+		},
+	);
 });
 
 describe("taggerRank", () => {
@@ -194,6 +240,14 @@ describe("BADGES_PAGE", () => {
 		expect(BADGES_PAGE.contributions.map((badge) => badge.key)).toEqual(
 			THRESHOLDS.map(([, key]) => key),
 		);
+	});
+
+	it("gives every badge its own icon", () => {
+		const badges = [...BADGES_PAGE.achievements, ...BADGES_PAGE.contributions];
+
+		expect(
+			Object.fromEntries(badges.map((badge) => [badge.key, badge.icon])),
+		).toEqual(ICONS);
 	});
 
 	it("has every badge of the locale files once, each with an icon file", () => {
