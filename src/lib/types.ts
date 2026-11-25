@@ -309,17 +309,9 @@ export enum BadgeType {
 // The key names the badge's texts in the locale files:
 // badges.<type>.<key>.title, the same keys the /badges page uses
 type BadgeTexts = (typeof en)["badges"];
-export type EarnedBadge =
-	| {
-			key: keyof BadgeTexts["achievement"];
-			icon: string;
-			type: BadgeType.Achievement;
-	  }
-	| {
-			key: keyof BadgeTexts["contribution"];
-			icon: string;
-			type: BadgeType.Contribution;
-	  };
+export type EarnedBadge = {
+	[T in BadgeType]: { key: keyof BadgeTexts[T]; icon: string; type: T };
+}[BadgeType];
 
 export enum TipType {
 	Address = "address",

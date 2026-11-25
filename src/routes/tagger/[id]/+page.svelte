@@ -307,17 +307,13 @@ const initializeData = async () => {
 		},
 	];
 
-	const addBadge = ({ check, ...badge }: (typeof badges)[number]) => {
+	badges.some(({ check, ...badge }) => {
+		if (earnedBadges.find((earned) => earned.type === BadgeType.Contribution)) {
+			return true;
+		}
 		if (check) {
 			earnedBadges.push(badge);
 		}
-	};
-
-	badges.some((badge) => {
-		if (earnedBadges.find((badge) => badge.type === BadgeType.Contribution)) {
-			return true;
-		}
-		addBadge(badge);
 	});
 
 	createdPercent = new Intl.NumberFormat("en-US").format(
