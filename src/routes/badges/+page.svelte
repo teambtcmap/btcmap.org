@@ -1,46 +1,10 @@
 <script lang="ts">
+import { BADGES_PAGE, badgeTextKey } from "#lib/badges.js";
 import { _ } from "#lib/i18n/index.js";
 import { theme } from "#lib/theme.js";
-import { BadgeType } from "#lib/types.js";
 import HeaderPlaceholder from "$components/layout/HeaderPlaceholder.svelte";
 
 import BadgeCard from "./components/BadgeCard.svelte";
-
-const achievements = [
-	{ key: "geyserTournament", icon: "geyser" },
-	{ key: "topTagger", icon: "top-tagger" },
-	{ key: "podium", icon: "podium" },
-	{ key: "highRank", icon: "high-rank" },
-	{ key: "ogSupertagger", icon: "og-supertagger" },
-	{ key: "lightningJunkie", icon: "lightning-junkie" },
-	{ key: "helloWorld", icon: "hello-world" },
-	{ key: "demolitionSpecialist", icon: "demolition-specialist" },
-	{ key: "updateMaxi", icon: "update-maxi" },
-	{ key: "creator", icon: "creator" },
-	{ key: "supporter", icon: "supporter" },
-];
-
-const contributions = [
-	{ key: "hyperbitcoinisation", icon: "hyperbitcoinisation" },
-	{ key: "pizzaTime", icon: "pizza-time" },
-	{ key: "godly", icon: "godly" },
-	{ key: "shadow", icon: "shadow" },
-	{ key: "whitepaper", icon: "whitepaper" },
-	{ key: "winston", icon: "winston" },
-	{ key: "whale", icon: "whale" },
-	{ key: "infinity", icon: "infinity" },
-	{ key: "legend", icon: "legend" },
-	{ key: "chancellor", icon: "chancellor" },
-	{ key: "sha", icon: "sha" },
-	{ key: "noBailouts", icon: "no-bailouts" },
-	{ key: "supertagger", icon: "supertagger" },
-	{ key: "ath", icon: "ath" },
-	{ key: "longestChain", icon: "longest-chain" },
-	{ key: "satoshi", icon: "satoshi" },
-	{ key: "heartbeat", icon: "heartbeat" },
-	{ key: "segwit", icon: "segwit" },
-	{ key: "wholeTagger", icon: "whole-tagger" },
-];
 </script>
 
 <svelte:head>
@@ -71,12 +35,12 @@ const contributions = [
 		<h2 class="text-center text-3xl font-semibold text-primary dark:text-white">{$_("badges.achievements")}</h2>
 
 		<div class="grid gap-5 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
-			{#each [...achievements].reverse() as achievement (achievement.key)}
+			{#each BADGES_PAGE.achievements as badge (badge.key)}
 				<BadgeCard
-					icon={achievement.icon}
-					titleKey={`badges.achievement.${achievement.key}.title`}
-					descKey={`badges.achievement.${achievement.key}.desc`}
-					type={BadgeType.Achievement}
+					icon={badge.icon}
+					titleKey={badgeTextKey(badge, 'title')}
+					descKey={badgeTextKey(badge, 'desc')}
+					type={badge.type}
 				/>
 			{/each}
 		</div>
@@ -86,12 +50,12 @@ const contributions = [
 		<h2 class="text-center text-3xl font-semibold text-primary dark:text-white">{$_("badges.contributions")}</h2>
 
 		<div class="grid gap-5 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
-			{#each [...contributions].reverse() as contribution (contribution.key)}
+			{#each BADGES_PAGE.contributions as badge (badge.key)}
 				<BadgeCard
-					icon={contribution.icon}
-					titleKey={`badges.contribution.${contribution.key}.title`}
-					descKey={`badges.contribution.${contribution.key}.desc`}
-					type={BadgeType.Contribution}
+					icon={badge.icon}
+					titleKey={badgeTextKey(badge, 'title')}
+					descKey={badgeTextKey(badge, 'desc')}
+					type={badge.type}
 				/>
 			{/each}
 		</div>
