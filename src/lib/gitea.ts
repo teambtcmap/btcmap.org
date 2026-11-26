@@ -106,6 +106,8 @@ export async function getIssues(
 	};
 }
 
+// A failed fetch rejects: read as "no labels", it had createLabel make an
+// existing label a second time (#1681)
 async function getLabels(
 	repo: GiteaRepo = "btcmap-data",
 ): Promise<GiteaLabel[]> {
@@ -113,16 +115,11 @@ async function getLabels(
 		Authorization: `token ${env.GITEA_API_KEY}`,
 	};
 
-	try {
-		const response = await api.get(
-			`${env.GITEA_API_URL}/api/v1/repos/teambtcmap/${repo}/labels`,
-			{ headers },
-		);
-		return response.data;
-	} catch (error) {
-		console.error("Failed to fetch labels:", error);
-		return [];
-	}
+	const response = await api.get(
+		`${env.GITEA_API_URL}/api/v1/repos/teambtcmap/${repo}/labels`,
+		{ headers },
+	);
+	return response.data;
 }
 
 async function createLabel(

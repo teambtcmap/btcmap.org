@@ -1,4 +1,7 @@
 import crypto from "node:crypto";
+import { isHttpError } from "@sveltejs/kit";
+import type { AxiosResponse } from "axios";
+import { AxiosError } from "axios";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 
 // The real captcha validator runs: the keys below let the test mint secrets
@@ -42,7 +45,7 @@ const statusOf = async (body: unknown): Promise<number> => {
 		});
 		return response.status;
 	} catch (e) {
-		return (e as { status?: number }).status ?? 500;
+		return isHttpError(e) ? e.status : 500;
 	}
 };
 
@@ -119,5 +122,47 @@ describe("POST /api/gitea/issue", () => {
 			"btcmap-data",
 			[],
 		);
+	});
+
+	// #1681: Gitea refusing connections for a minute or two came out as a
+	// bare 500, and people gave up instead of trying again
+	describe("when Gitea fails", () => {
+		const submit = (captcha: string) =>
+			statusOf({
+				...community,
+				captchaSecret: encryptSecret(captcha),
+				captchaTest: captcha,
+			});
+
+		const answered = (status: number) =>
+			new AxiosError(
+				`Request failed with status code ${status}`,
+				"ERR_BAD_RESPONSE",
+				undefined,
+				undefined,
+				{ status } as AxiosResponse,
+			);
+
+		it("answers 503 when Gitea can't be reached", async () => {
+			vi.mocked(createIssueWithLabels).mockRejectedValue(
+				new AxiosError("connect ECONNREFUSED", "ECONNREFUSED"),
+			);
+			expect(await submit("Refused")).toBe(503);
+		});
+
+		it("answers 503 when Gitea answers with a server error", async () => {
+			vi.mocked(createIssueWithLabels).mockRejectedValue(answered(502));
+			expect(await submit("BadGate")).toBe(503);
+		});
+
+		it("keeps a 500 when Gitea refuses the request itself", async () => {
+			vi.mocked(createIssueWithLabels).mockRejectedValue(answered(422));
+			expect(await submit("Refuses")).toBe(500);
+		});
+
+		it("keeps a 500 for a failure that isn't Gitea's", async () => {
+			vi.mocked(createIssueWithLabels).mockRejectedValue(new Error("bug"));
+			expect(await submit("OurBug1")).toBe(500);
+		});
 	});
 });

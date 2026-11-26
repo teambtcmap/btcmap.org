@@ -8,6 +8,7 @@ import {
 	COMMUNITY_FIELDS,
 	validateCommunity,
 } from "#lib/addCommunityValidation.js";
+import { errorStatus } from "#lib/apiError.js";
 import { createCaptchaGate } from "#lib/captchaGate.svelte.js";
 import { fieldBorderClasses } from "#lib/fieldStyles.js";
 import { searchAreas } from "#lib/geocoding.js";
@@ -133,7 +134,12 @@ const form = createForm(() => ({
 			})
 			.catch((error) => {
 				errToast(
-					captcha.submitFailed(error) ?? t("addCommunityForm.formSubmitError"),
+					captcha.submitFailed(error) ??
+						t(
+							errorStatus(error) === 503
+								? "errors.submissionUnavailable"
+								: "addCommunityForm.formSubmitError",
+						),
 				);
 				console.error(error);
 				submitting = false;

@@ -1,4 +1,5 @@
 import { error } from "@sveltejs/kit";
+import { isAxiosError } from "axios";
 import { get } from "svelte/store";
 
 import { GITEA_LABELS } from "#lib/constants.js";
@@ -38,6 +39,13 @@ type IssueType = keyof typeof CONFIG;
 
 function isValidIssueType(type: unknown): type is IssueType {
 	return typeof type === "string" && type in CONFIG;
+}
+
+// Gitea unreachable (refused, timed out) or answering 5xx: an outage of a
+// minute or two, when a retry soon will go through (#1681)
+function giteaUnavailable(e: unknown): boolean {
+	if (!isAxiosError(e)) return false;
+	return !e.response || e.response.status >= 500;
 }
 
 async function getAreaLabelsFromCoordinates(
@@ -160,13 +168,21 @@ export const POST: RequestHandler = async ({ request }) => {
 		title,
 	});
 
-	const response = await createIssueWithLabels(
-		title,
-		body,
-		[config.labelId],
-		config.repo,
-		areaLabels,
-	);
+	let response: Awaited<ReturnType<typeof createIssueWithLabels>>;
+	try {
+		response = await createIssueWithLabels(
+			title,
+			body,
+			[config.labelId],
+			config.repo,
+			areaLabels,
+		);
+	} catch (e) {
+		if (giteaUnavailable(e)) {
+			error(503, "The ticket system is unavailable, try again in a minute");
+		}
+		throw e;
+	}
 
 	console.debug("[gitea/issue] Issue created", {
 		issueNumber: response.data.number,

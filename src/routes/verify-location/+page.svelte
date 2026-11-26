@@ -5,6 +5,7 @@ import { onMount } from "svelte";
 import { get } from "svelte/store";
 
 import { trackEvent, trackFailure } from "#lib/analytics.js";
+import { errorStatus } from "#lib/apiError.js";
 import { createCaptchaGate } from "#lib/captchaGate.svelte.js";
 import { _ } from "#lib/i18n/index.js";
 import { fieldError, inputProps, ruleValidation } from "#lib/ruleValidation.js";
@@ -110,7 +111,12 @@ const form = createForm(() => ({
 			.catch((error) => {
 				trackFailure("verify_location_submit_failure", {}, error);
 				errToast(
-					captcha.submitFailed(error) ?? get(_)("errors.formSubmission"),
+					captcha.submitFailed(error) ??
+						get(_)(
+							errorStatus(error) === 503
+								? "errors.submissionUnavailable"
+								: "errors.formSubmission",
+						),
 				);
 				console.error(error);
 				submitting = false;

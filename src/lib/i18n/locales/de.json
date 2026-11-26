@@ -352,6 +352,7 @@
 	},
 	"errors": {
 		"searchUnavailable": "Suche vorübergehend nicht verfügbar",
+		"submissionUnavailable": "Unser Einreichungsdienst ist gerade kurz nicht erreichbar. Deine Angaben bleiben erhalten: bitte versuche es in einer Minute erneut.",
 		"loadFailed": "Laden der Händler in der Nähe fehlgeschlagen",
 		"notFound": "Händler nicht gefunden",
 		"loadError": "Orte konnten nicht vom statischen CDN geladen werden, bitte versuche es erneut oder kontaktiere BTC Map.",

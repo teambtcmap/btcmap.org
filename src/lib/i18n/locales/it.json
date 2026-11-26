@@ -465,6 +465,7 @@
 	},
 	"errors": {
 		"searchUnavailable": "Ricerca temporaneamente non disponibile",
+		"submissionUnavailable": "Il nostro servizio di invio è momentaneamente non disponibile. Le tue risposte sono ancora qui: riprova tra un minuto.",
 		"loadFailed": "Impossibile caricare i commercianti nelle vicinanze",
 		"notFound": "Commerciante non trovato",
 		"loadError": "Impossibile caricare i posti dal CDN statico, riprova o contatta BTC Map.",
