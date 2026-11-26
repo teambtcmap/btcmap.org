@@ -100,8 +100,10 @@ $: organizationSections = uniqueOrganizations.map((orgId) => ({
 		communities?.filter((community) => hasOrganization(community, orgId)) || [],
 }));
 
-// Validate organization sections and redirect if invalid
-$: if (data.isOrganization && organizationSections.length > 0) {
+// Validate organization sections and redirect if invalid. In the browser
+// only: goto() throws on the server, which can hold $areas too (the
+// verify-location route syncs them into the module store there)
+$: if (browser && data.isOrganization && organizationSections.length > 0) {
 	const isValidOrganization = organizationSections.some(
 		(org) => org.id === data.section,
 	);
