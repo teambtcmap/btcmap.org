@@ -465,7 +465,7 @@
 	},
 	"errors": {
 		"searchUnavailable": "Zoeken tijdelijk niet beschikbaar",
-		"submissionUnavailable": "Onze inzenddienst is even niet bereikbaar. Je antwoorden staan er nog: probeer het over een minuut opnieuw.",
+		"submissionUnavailable": "Onze inzenddienst is even niet bereikbaar. Je antwoorden staan er nog: vul over een minuut de nieuwe captchatekst in en probeer het opnieuw.",
 		"loadFailed": "Laden van nabijgelegen ondernemers mislukt",
 		"notFound": "Ondernemer niet gevonden",
 		"loadError": "Kan locaties niet laden vanaf statische CDN, probeer het opnieuw of neem contact op met BTC Map.",

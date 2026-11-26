@@ -5,8 +5,8 @@ import { onMount } from "svelte";
 import { get } from "svelte/store";
 
 import { trackEvent, trackFailure } from "#lib/analytics.js";
-import { errorStatus } from "#lib/apiError.js";
 import { createCaptchaGate } from "#lib/captchaGate.svelte.js";
+import { isSubmissionUnavailable } from "#lib/giteaOutage.js";
 import { _ } from "#lib/i18n/index.js";
 import { fieldError, inputProps, ruleValidation } from "#lib/ruleValidation.js";
 import { placesError } from "#lib/store.js";
@@ -113,7 +113,7 @@ const form = createForm(() => ({
 				errToast(
 					captcha.submitFailed(error) ??
 						get(_)(
-							errorStatus(error) === 503
+							isSubmissionUnavailable(error)
 								? "errors.submissionUnavailable"
 								: "errors.formSubmission",
 						),

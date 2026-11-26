@@ -8,10 +8,10 @@ import {
 	COMMUNITY_FIELDS,
 	validateCommunity,
 } from "#lib/addCommunityValidation.js";
-import { errorStatus } from "#lib/apiError.js";
 import { createCaptchaGate } from "#lib/captchaGate.svelte.js";
 import { fieldBorderClasses } from "#lib/fieldStyles.js";
 import { searchAreas } from "#lib/geocoding.js";
+import { isSubmissionUnavailable } from "#lib/giteaOutage.js";
 import { fieldError, inputProps, ruleValidation } from "#lib/ruleValidation.js";
 import { theme } from "#lib/theme.js";
 import type { NominatimArea } from "#lib/types.js";
@@ -136,7 +136,7 @@ const form = createForm(() => ({
 				errToast(
 					captcha.submitFailed(error) ??
 						t(
-							errorStatus(error) === 503
+							isSubmissionUnavailable(error)
 								? "errors.submissionUnavailable"
 								: "addCommunityForm.formSubmitError",
 						),

@@ -22,6 +22,7 @@ vi.mock("#lib/utils.js", () => ({
 
 import { GITEA_LABELS } from "#lib/constants.js";
 import { createIssueWithLabels } from "#lib/gitea.js";
+import { GITEA_UNAVAILABLE_MESSAGE } from "#lib/giteaOutage.js";
 
 import { POST } from "./+server";
 
@@ -134,7 +135,7 @@ describe("POST /api/gitea/issue", () => {
 				captchaTest: captcha,
 			});
 
-		const answered = (status: number) =>
+		const giteaAnswered = (status: number) =>
 			new AxiosError(
 				`Request failed with status code ${status}`,
 				"ERR_BAD_RESPONSE",
@@ -150,13 +151,42 @@ describe("POST /api/gitea/issue", () => {
 			expect(await submit("Refused")).toBe(503);
 		});
 
-		it("answers 503 when Gitea answers with a server error", async () => {
-			vi.mocked(createIssueWithLabels).mockRejectedValue(answered(502));
+		// The forms tell this 503 from the captcha's own by the message
+		it("says so in the message the forms look for", async () => {
+			vi.mocked(createIssueWithLabels).mockRejectedValue(
+				new AxiosError("connect ECONNREFUSED", "ECONNREFUSED"),
+			);
+			const captcha = "Message";
+			await expect(
+				(POST as unknown as (event: unknown) => Promise<Response>)({
+					request: new Request("http://localhost/api/gitea/issue", {
+						method: "POST",
+						body: JSON.stringify({
+							...community,
+							captchaSecret: encryptSecret(captcha),
+							captchaTest: captcha,
+						}),
+					}),
+				}),
+			).rejects.toMatchObject({
+				status: 503,
+				body: { message: GITEA_UNAVAILABLE_MESSAGE },
+			});
+		});
+
+		it("answers 503 for a proxy's 502 in front of a Gitea that isn't up", async () => {
+			vi.mocked(createIssueWithLabels).mockRejectedValue(giteaAnswered(502));
 			expect(await submit("BadGate")).toBe(503);
 		});
 
+		// Gitea may have saved the issue before a 504: a retry could file it twice
+		it("keeps a 500 for a Gitea 504", async () => {
+			vi.mocked(createIssueWithLabels).mockRejectedValue(giteaAnswered(504));
+			expect(await submit("Timeout")).toBe(500);
+		});
+
 		it("keeps a 500 when Gitea refuses the request itself", async () => {
-			vi.mocked(createIssueWithLabels).mockRejectedValue(answered(422));
+			vi.mocked(createIssueWithLabels).mockRejectedValue(giteaAnswered(422));
 			expect(await submit("Refuses")).toBe(500);
 		});
 

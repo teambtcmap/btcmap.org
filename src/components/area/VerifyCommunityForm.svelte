@@ -4,8 +4,8 @@ import axios from "axios";
 import { onMount } from "svelte";
 import { _ } from "svelte-i18n";
 
-import { errorStatus } from "#lib/apiError.js";
 import { createCaptchaGate } from "#lib/captchaGate.svelte.js";
+import { isSubmissionUnavailable } from "#lib/giteaOutage.js";
 import { fieldError, inputProps, ruleValidation } from "#lib/ruleValidation.js";
 import { errToast } from "#lib/utils.js";
 import type { VerifyInput } from "#lib/verifyValidation.js";
@@ -97,7 +97,7 @@ const form = createForm(() => ({
 				errToast(
 					captcha.submitFailed(error) ??
 						$_(
-							errorStatus(error) === 503
+							isSubmissionUnavailable(error)
 								? "errors.submissionUnavailable"
 								: "errors.formSubmission",
 						),

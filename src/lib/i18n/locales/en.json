@@ -465,7 +465,7 @@
 	},
 	"errors": {
 		"searchUnavailable": "Search temporarily unavailable",
-		"submissionUnavailable": "Our submission service is briefly unavailable. Your answers are still here: please try again in a minute.",
+		"submissionUnavailable": "Our submission service is briefly unavailable. Your answers are still here: in a minute, enter the new captcha text and try again.",
 		"loadFailed": "Failed to load nearby merchants",
 		"notFound": "Merchant Not Found",
 		"loadError": "Could not load places from static CDN, please try again or contact BTC Map.",

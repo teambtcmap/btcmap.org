@@ -352,7 +352,7 @@
 	},
 	"errors": {
 		"searchUnavailable": "Búsqueda temporalmente no disponible",
-		"submissionUnavailable": "Nuestro servicio de envíos no está disponible por un momento. Tus respuestas siguen aquí: inténtalo de nuevo en un minuto.",
+		"submissionUnavailable": "El servicio de envío de formularios no está disponible por un momento. Tus respuestas siguen aquí: en un minuto, escribe el nuevo texto del captcha e inténtalo de nuevo.",
 		"loadFailed": "Error al cargar comercios cercanos",
 		"notFound": "Comercio No Encontrado",
 		"loadError": "No se pudieron cargar los lugares desde el CDN estático, por favor inténtalo de nuevo o contacta a BTC Map.",
