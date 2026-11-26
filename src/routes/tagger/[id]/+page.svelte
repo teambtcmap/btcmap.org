@@ -7,7 +7,15 @@ import { onDestroy, onMount, untrack } from "svelte";
 import { get } from "svelte/store";
 
 import { API_BASE } from "#lib/api-base.js";
-import { badgeTextKey, taggerBadges, taggerRank } from "#lib/badges.js";
+import {
+	badgeTextKey,
+	isSupporter,
+	lightningAddress,
+	tagCounts,
+	taggerBadges,
+	taggerLeaderboard,
+	taggerRank,
+} from "#lib/badges.js";
 import { _ } from "#lib/i18n/index.js";
 import {
 	eventError,
@@ -20,11 +28,7 @@ import {
 import { batchSync } from "#lib/sync/batchSync.js";
 import { eventsSync } from "#lib/sync/events.js";
 import { usersSync } from "#lib/sync/users.js";
-import type {
-	ActivityEvent,
-	EarnedBadge,
-	ProfileLeaderboard,
-} from "#lib/types.js";
+import type { ActivityEvent, EarnedBadge } from "#lib/types.js";
 import { errToast, formatElementID } from "#lib/utils.js";
 import Icon from "$components/Icon.svelte";
 import ProfileStat from "$components/ProfileStat.svelte";
@@ -66,10 +70,7 @@ const initializeData = async () => {
 		return;
 	}
 	userCreated = userFound.created_at;
-	supporter = Boolean(
-		userFound.tags["supporter:expires"] &&
-			Date.parse(userFound.tags["supporter:expires"]) > Date.now(),
-	);
+	supporter = isSupporter(userFound.tags, Date.now());
 	const user = userFound.osm_json;
 	avatar = user.img ? user.img.href : "/images/satoshi-nakamoto.png";
 	mappingSince = user.account_created;
@@ -78,39 +79,19 @@ const initializeData = async () => {
 	filteredDesc = removeLightning?.length
 		? description.replaceAll(removeLightning[0], "")
 		: description;
-	const regexMatch = description.match("(lightning:[^)]+)");
-	lightning = regexMatch?.[0].slice(10) ?? null;
+	lightning = lightningAddress(description);
 
 	const userEvents = $events.filter((event) => event.user_id === user.id);
 	userEvents.sort(
 		(a, b) => Date.parse(b.created_at) - Date.parse(a.created_at),
 	);
-	created =
-		user.id === 17221642
-			? userEvents.filter((event) => event.type === "create").length + 100
-			: userEvents.filter((event) => event.type === "create").length;
-	updated =
-		user.id === 17221642
-			? userEvents.filter((event) => event.type === "update").length + 20
-			: userEvents.filter((event) => event.type === "update").length;
-	deleted = userEvents.filter((event) => event.type === "delete").length;
+	const counts = tagCounts(userEvents, user.id);
+	created = counts.created;
+	updated = counts.updated;
+	deleted = counts.deleted;
 	total = created + updated + deleted;
 
-	const leaderboard: ProfileLeaderboard[] = [];
-	const populateLeaderboard = () => {
-		$users.forEach((user) => {
-			let userEvents = $events.filter((event) => event.user_id === user.id);
-
-			if (userEvents.length) {
-				leaderboard.push({
-					id: user.id,
-					total:
-						user.id === 17221642 ? userEvents.length + 120 : userEvents.length,
-				});
-			}
-		});
-	};
-	populateLeaderboard();
+	const leaderboard = taggerLeaderboard($users, $events);
 
 	earnedBadges.push(
 		...taggerBadges({
