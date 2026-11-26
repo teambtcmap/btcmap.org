@@ -1,4 +1,10 @@
-import type { EarnedBadge, ProfileLeaderboard } from "#lib/types.js";
+import type {
+	EarnedBadge,
+	Event,
+	EventType,
+	ProfileLeaderboard,
+	User,
+} from "#lib/types.js";
 import { BadgeType } from "#lib/types.js";
 
 type Achievement = Extract<EarnedBadge, { type: BadgeType.Achievement }>;
@@ -152,11 +158,62 @@ export const BADGE_CATALOG = {
 export const badgeTextKey = (badge: EarnedBadge, text: "title" | "desc") =>
 	`badges.${badge.type}.${badge.key}.${text}` as const;
 
+// A supporter until the date in the user's supporter:expires tag
+export const isSupporter = (tags: User["tags"], now: number) => {
+	const expires = tags["supporter:expires"];
+	return Boolean(expires && Date.parse(expires) > now);
+};
+
+// Tags one tagger gets on top of their events, as the tagger page has
+// always added them
+const EXTRA_TAGS_USER_ID = 17221642;
+const EXTRA_TAGS = { created: 100, updated: 20 };
+const NO_EXTRA_TAGS = { created: 0, updated: 0 };
+
+const extraTags = (userId: Event["user_id"]) =>
+	userId === EXTRA_TAGS_USER_ID ? EXTRA_TAGS : NO_EXTRA_TAGS;
+
+// A tagger's created, updated and deleted tags, extra tags included
+export const tagCounts = (
+	events: Pick<Event, "user_id" | "type">[],
+	userId: Event["user_id"],
+): Pick<BadgeInputs, TagKind> => {
+	const own = events.filter((event) => event.user_id === userId);
+	const count = (type: EventType) =>
+		own.filter((event) => event.type === type).length;
+	const extra = extraTags(userId);
+
+	return {
+		created: count("create") + extra.created,
+		updated: count("update") + extra.updated,
+		deleted: count("delete"),
+	};
+};
+
+// Every user with events, in the users' order. The total is all their
+// events plus their extra tags.
+export const taggerLeaderboard = (
+	users: Pick<User, "id">[],
+	events: Pick<Event, "user_id">[],
+): ProfileLeaderboard[] => {
+	const eventCounts = new Map<number, number>();
+	for (const event of events) {
+		eventCounts.set(event.user_id, (eventCounts.get(event.user_id) ?? 0) + 1);
+	}
+
+	return users.flatMap(({ id }) => {
+		const count = eventCounts.get(id);
+		if (!count) return [];
+		const extra = extraTags(id);
+		return [{ id, total: count + extra.created + extra.updated }];
+	});
+};
+
 // A tagger's place on the leaderboard, most tags first, null when not on
 // it. sort() is stable, so taggers with the same total keep their order.
 export const taggerRank = (
 	leaderboard: ProfileLeaderboard[],
-	userId: number,
+	userId: ProfileLeaderboard["id"],
 ): number | null => {
 	const index = [...leaderboard]
 		.sort((a, b) => b.total - a.total)

@@ -2,14 +2,17 @@ import { existsSync } from "node:fs";
 import { describe, expect, it } from "vitest";
 
 import en from "#lib/i18n/locales/en.json";
-import type { EarnedBadge } from "#lib/types.js";
+import type { EarnedBadge, EventType } from "#lib/types.js";
 import { BadgeType } from "#lib/types.js";
 
 import type { BadgeInputs } from "./badges";
 import {
 	BADGE_CATALOG,
 	badgeTextKey,
+	isSupporter,
+	tagCounts,
 	taggerBadges,
+	taggerLeaderboard,
 	taggerRank,
 } from "./badges";
 
@@ -241,6 +244,79 @@ describe("taggerRank", () => {
 	it("gives null to a tagger who is not on it", () => {
 		expect(taggerRank(leaderboard, 99)).toBeNull();
 		expect(taggerRank([], 1)).toBeNull();
+	});
+});
+
+describe("isSupporter", () => {
+	const now = Date.parse("2026-06-01T00:00:00.000Z");
+
+	it.each([
+		["2026-06-01T00:00:00.001Z", true],
+		["2099-01-01T00:00:00.000Z", true],
+		["2026-06-01T00:00:00.000Z", false],
+		["2026-05-31T23:59:59.999Z", false],
+		["", false],
+		["not a date", false],
+	])("gives supporter:expires %j: %s", (expires, expected) => {
+		expect(isSupporter({ "supporter:expires": expires }, now)).toBe(expected);
+	});
+
+	it("gives false without supporter:expires", () => {
+		expect(isSupporter({}, now)).toBe(false);
+	});
+});
+
+const events = (userId: number, type: EventType, count: number) =>
+	Array.from({ length: count }, () => ({ user_id: userId, type }));
+
+describe("tagCounts", () => {
+	const all = [
+		...events(1, "create", 3),
+		...events(2, "create", 5),
+		...events(1, "update", 2),
+		...events(1, "delete", 1),
+		...events(17221642, "create", 1),
+		...events(17221642, "update", 1),
+		...events(17221642, "delete", 1),
+	];
+
+	it("counts the tagger's own events by type", () => {
+		expect(tagCounts(all, 1)).toEqual({ created: 3, updated: 2, deleted: 1 });
+		expect(tagCounts(all, 99)).toEqual({ created: 0, updated: 0, deleted: 0 });
+	});
+
+	it("adds 100 created and 20 updated tags to the events of 17221642", () => {
+		expect(tagCounts(all, 17221642)).toEqual({
+			created: 101,
+			updated: 21,
+			deleted: 1,
+		});
+	});
+});
+
+describe("taggerLeaderboard", () => {
+	it("lists the users with events in the users' order, with all their events", () => {
+		const users = [{ id: 3 }, { id: 2 }, { id: 1 }];
+		const all = [
+			...events(1, "create", 2),
+			...events(2, "update", 1),
+			...events(1, "delete", 1),
+			...events(99, "create", 5),
+		];
+
+		expect(taggerLeaderboard(users, all)).toEqual([
+			{ id: 2, total: 1 },
+			{ id: 1, total: 3 },
+		]);
+	});
+
+	it("gives 17221642 120 extra tags, only when they have events", () => {
+		const users = [{ id: 17221642 }];
+
+		expect(taggerLeaderboard(users, events(17221642, "create", 1))).toEqual([
+			{ id: 17221642, total: 121 },
+		]);
+		expect(taggerLeaderboard(users, [])).toEqual([]);
 	});
 });
 
