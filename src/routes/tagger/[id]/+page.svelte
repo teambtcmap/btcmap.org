@@ -10,7 +10,6 @@ import { API_BASE } from "#lib/api-base.js";
 import {
 	badgeTextKey,
 	isSupporter,
-	lightningAddress,
 	tagCounts,
 	taggerBadges,
 	taggerLeaderboard,
@@ -29,7 +28,7 @@ import { batchSync } from "#lib/sync/batchSync.js";
 import { eventsSync } from "#lib/sync/events.js";
 import { usersSync } from "#lib/sync/users.js";
 import type { ActivityEvent, EarnedBadge } from "#lib/types.js";
-import { errToast, formatElementID } from "#lib/utils.js";
+import { errToast, formatElementID, lightningAddress } from "#lib/utils.js";
 import Icon from "$components/Icon.svelte";
 import ProfileStat from "$components/ProfileStat.svelte";
 import Skeleton from "$components/Skeleton.svelte";

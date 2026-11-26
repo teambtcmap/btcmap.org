@@ -10,7 +10,6 @@ import {
 	BADGE_CATALOG,
 	badgeTextKey,
 	isSupporter,
-	lightningAddress,
 	tagCounts,
 	taggerBadges,
 	taggerLeaderboard,
@@ -264,17 +263,6 @@ describe("isSupporter", () => {
 
 	it("gives false without supporter:expires", () => {
 		expect(isSupporter({}, now)).toBe(false);
-	});
-});
-
-describe("lightningAddress", () => {
-	it.each([
-		["Hi [⚡](lightning:sats@example.com)", "sats@example.com"],
-		["Tips: lightning:sats@example.com", "sats@example.com"],
-		["[⚡](lightning:)", null],
-		["No tips here", null],
-	])("finds the address in %j: %j", (description, expected) => {
-		expect(lightningAddress(description)).toBe(expected);
 	});
 });
 

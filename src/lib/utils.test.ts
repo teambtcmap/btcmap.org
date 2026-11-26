@@ -16,6 +16,7 @@ import {
 	isValidLatitude,
 	isValidLightningTip,
 	isValidLongitude,
+	lightningAddress,
 	sanitizeUrl,
 	stripLightningScheme,
 	successToast,
@@ -482,6 +483,17 @@ describe("isValidLightningTip", () => {
 
 	it("rejects an address containing whitespace", () => {
 		expect(isValidLightningTip("alice @getalby.com")).toBe(false);
+	});
+});
+
+describe("lightningAddress", () => {
+	it.each([
+		["Hi [⚡](lightning:sats@example.com)", "sats@example.com"],
+		["Tips: lightning:sats@example.com", "sats@example.com"],
+		["[⚡](lightning:)", null],
+		["No tips here", null],
+	])("finds the address in %j: %j", (description, expected) => {
+		expect(lightningAddress(description)).toBe(expected);
 	});
 });
 

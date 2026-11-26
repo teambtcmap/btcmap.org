@@ -164,10 +164,6 @@ export const isSupporter = (tags: User["tags"], now: number) => {
 	return Boolean(expires && Date.parse(expires) > now);
 };
 
-// The Lightning address of a lightning: link in a profile description
-export const lightningAddress = (description: string) =>
-	description.match(/lightning:[^)]+/)?.[0].slice("lightning:".length) ?? null;
-
 // Tags one tagger gets on top of their events, as the tagger page has
 // always added them
 const EXTRA_TAGS_USER_ID = 17221642;

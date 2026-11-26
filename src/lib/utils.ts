@@ -372,6 +372,10 @@ export const isValidLightningTip = (value: string | undefined): boolean => {
 	return localPart !== "undefined" && localPart !== "null";
 };
 
+// The Lightning address of a lightning: link in a profile description
+export const lightningAddress = (description: string) =>
+	description.match(/lightning:[^)]+/)?.[0].slice("lightning:".length) ?? null;
+
 // Escapes HTML special characters to prevent XSS in text content
 // Use this for plain text inserted into innerHTML contexts (e.g., Leaflet tooltips)
 export function escapeHtml(text: string): string {
