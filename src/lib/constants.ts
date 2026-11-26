@@ -10,6 +10,10 @@ export const GITEA_LABELS = {
 } as const;
 
 export const POLLING_INTERVAL = 2500;
+// How long one invoice check may take before the poller gives up on it and
+// checks afresh. The status request settles the invoice with the Lightning
+// backend, so allow it a few seconds.
+export const INVOICE_CHECK_TIMEOUT = 10_000;
 export const QR_CODE_SIZE = { mobile: 200, desktop: 275 };
 
 // Tailwind breakpoints (must match tailwind.config.js default breakpoints)

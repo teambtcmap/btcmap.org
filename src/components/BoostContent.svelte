@@ -4,6 +4,7 @@ import { onDestroy } from "svelte";
 import { fade } from "svelte/transition";
 
 import { API_BASE } from "#lib/api-base.js";
+import { INVOICE_CHECK_TIMEOUT } from "#lib/constants.js";
 import { _, locale } from "#lib/i18n/index.js";
 import IconSocials from "#lib/icons/IconSocials.svelte";
 import { classifyBoostError, fetchInvoicePaid } from "#lib/payment.js";
@@ -61,8 +62,15 @@ const handlePaymentSuccess = async () => {
 
 	try {
 		// Re-verify against the API before celebrating — the poller said
-		// paid, but this is the cheap belt to its braces (#1348).
-		if (!(await fetchInvoicePaid(invoiceId))) {
+		// paid, but this is the cheap belt to its braces (#1348). Bounded
+		// like the poller's checks: the poller waits on this, and a stalled
+		// request would hold it here (#1677).
+		if (
+			!(await fetchInvoicePaid(
+				invoiceId,
+				AbortSignal.timeout(INVOICE_CHECK_TIMEOUT),
+			))
+		) {
 			throw new Error("Invoice not paid");
 		}
 

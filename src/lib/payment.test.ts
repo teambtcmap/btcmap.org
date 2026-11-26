@@ -1,8 +1,10 @@
+import type { GenericAbortSignal } from "axios";
+import { CanceledError } from "axios";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 
 import { API_BASE } from "#lib/api-base.js";
 import api from "#lib/axios.js";
-import { POLLING_INTERVAL } from "#lib/constants.js";
+import { INVOICE_CHECK_TIMEOUT, POLLING_INTERVAL } from "#lib/constants.js";
 
 import {
 	classifyBoostError,
@@ -44,7 +46,10 @@ describe("fetchInvoice", () => {
 	it("queries the invoice straight on the v4 API, id encoded", async () => {
 		const { default: api } = await import("#lib/axios.js");
 		await fetchInvoice("abc/123");
-		expect(api.get).toHaveBeenCalledWith(`${API_BASE}/v4/invoices/abc%2F123`);
+		expect(api.get).toHaveBeenCalledWith(
+			`${API_BASE}/v4/invoices/abc%2F123`,
+			expect.anything(),
+		);
 	});
 });
 
@@ -70,32 +75,217 @@ describe("fetchInvoicePaid", () => {
 		vi.mocked(api.get).mockRejectedValueOnce(failure);
 		await expect(fetchInvoicePaid("inv")).rejects.toBe(failure);
 	});
+
+	it("hands the abort signal to the request", async () => {
+		vi.mocked(api.get).mockResolvedValueOnce({ data: { status: "paid" } });
+		const { signal } = new AbortController();
+		await fetchInvoicePaid("inv", signal);
+		expect(api.get).toHaveBeenLastCalledWith(expect.any(String), { signal });
+	});
 });
 
 describe("pollUntilPaid", () => {
 	const paid = { data: { status: "paid" } };
 	const unpaid = { data: { status: "unpaid" } };
+	// A request that never answers, but rejects once aborted, like axios
+	const hanging = (_url: string, config?: { signal?: GenericAbortSignal }) =>
+		new Promise<never>((_resolve, reject) => {
+			config?.signal?.addEventListener?.("abort", () =>
+				reject(new CanceledError()),
+			);
+		});
+	const signalOf = (call: number) =>
+		vi.mocked(api.get).mock.calls[call]?.[1]?.signal;
+
+	const setVisibilityState = (state: "visible" | "hidden") =>
+		Object.defineProperty(document, "visibilityState", {
+			value: state,
+			configurable: true,
+		});
+	const setVisibility = (state: "visible" | "hidden") => {
+		setVisibilityState(state);
+		document.dispatchEvent(new Event("visibilitychange"));
+	};
 
 	beforeEach(() => {
 		vi.useFakeTimers();
 		vi.mocked(api.get).mockReset();
+		setVisibilityState("visible");
 	});
 
 	afterEach(() => {
 		vi.useRealTimers();
+		setVisibilityState("visible");
 	});
 
 	// #1618: a phone user pays in the wallet app, the browser throttles the
 	// backgrounded tab, and on return every queued check answered "paid" at
 	// once, firing the success handler up to 51 times
 	it("keeps one check in flight: a slow answer holds back the next one", async () => {
-		vi.mocked(api.get).mockReturnValue(new Promise(() => {}));
+		vi.mocked(api.get).mockImplementation(hanging);
 		const stop = pollUntilPaid("inv", { onPaid: vi.fn() });
 
-		await vi.advanceTimersByTimeAsync(POLLING_INTERVAL * 10);
+		await vi.advanceTimersByTimeAsync(
+			POLLING_INTERVAL + INVOICE_CHECK_TIMEOUT - 1,
+		);
 
 		expect(api.get).toHaveBeenCalledTimes(1);
 		stop();
+	});
+
+	// #1677: a check in flight when the phone switched to the wallet app can
+	// stall for good, and with one check at a time it blocked every later one
+	it("gives up on a check that hangs and checks afresh, one at a time", async () => {
+		vi.mocked(api.get)
+			.mockImplementationOnce(hanging)
+			.mockResolvedValueOnce(paid);
+		const onPaid = vi.fn();
+		const stop = pollUntilPaid("inv", { onPaid });
+
+		await vi.advanceTimersByTimeAsync(POLLING_INTERVAL + INVOICE_CHECK_TIMEOUT);
+
+		expect(api.get).toHaveBeenCalledTimes(2);
+		expect(signalOf(0)?.aborted).toBe(true);
+		expect(onPaid).toHaveBeenCalledTimes(1);
+		stop();
+	});
+
+	// An API slower than the timeout would otherwise keep the flow waiting
+	// without a word; the aborted request's own rejection isn't reported
+	it("reports a check that times out in a tab that stayed visible, once", async () => {
+		vi.mocked(api.get)
+			.mockImplementationOnce(hanging)
+			.mockResolvedValueOnce(unpaid);
+		const onCheckError = vi.fn();
+		const stop = pollUntilPaid("inv", { onPaid: vi.fn(), onCheckError });
+
+		await vi.advanceTimersByTimeAsync(POLLING_INTERVAL + INVOICE_CHECK_TIMEOUT);
+
+		expect(onCheckError).toHaveBeenCalledExactlyOnceWith(
+			expect.objectContaining({
+				message: expect.stringContaining("timed out"),
+			}),
+		);
+		stop();
+	});
+
+	// The frozen tab, not the API, is the likely cause then
+	it("doesn't report a timeout when the tab was hidden during the check", async () => {
+		vi.mocked(api.get)
+			.mockImplementationOnce(hanging)
+			.mockResolvedValueOnce(unpaid);
+		const onCheckError = vi.fn();
+		const stop = pollUntilPaid("inv", { onPaid: vi.fn(), onCheckError });
+
+		await vi.advanceTimersByTimeAsync(POLLING_INTERVAL);
+		setVisibility("hidden");
+		await vi.advanceTimersByTimeAsync(INVOICE_CHECK_TIMEOUT);
+
+		expect(api.get).toHaveBeenCalledTimes(2);
+		expect(onCheckError).not.toHaveBeenCalled();
+		stop();
+	});
+
+	it("drops a late answer from a check it gave up on", async () => {
+		let lateAnswer: (value: typeof paid) => void = () => {};
+		vi.mocked(api.get)
+			.mockReturnValueOnce(
+				new Promise((resolve) => {
+					lateAnswer = resolve;
+				}),
+			)
+			.mockResolvedValue(unpaid);
+		const onPaid = vi.fn();
+		const stop = pollUntilPaid("inv", { onPaid });
+
+		await vi.advanceTimersByTimeAsync(POLLING_INTERVAL + INVOICE_CHECK_TIMEOUT);
+		lateAnswer(paid);
+		await vi.advanceTimersByTimeAsync(0);
+
+		expect(onPaid).not.toHaveBeenCalled();
+		stop();
+	});
+
+	// Two requests at once could both settle the invoice at the API (it
+	// publishes the comment or extends the boost while answering), so the
+	// check in flight is left to its give-up timer: after a long freeze
+	// that timer is overdue and fires as soon as the tab runs again
+	it("leaves a check in flight to its give-up timer when the tab is visible again", async () => {
+		vi.mocked(api.get)
+			.mockImplementationOnce(hanging)
+			.mockResolvedValueOnce(paid);
+		const onPaid = vi.fn();
+		const stop = pollUntilPaid("inv", { onPaid });
+
+		await vi.advanceTimersByTimeAsync(POLLING_INTERVAL);
+		setVisibility("hidden");
+		await vi.advanceTimersByTimeAsync(1000);
+		setVisibility("visible");
+		await vi.advanceTimersByTimeAsync(0);
+
+		expect(api.get).toHaveBeenCalledTimes(1);
+		expect(signalOf(0)?.aborted).toBe(false);
+
+		await vi.advanceTimersByTimeAsync(INVOICE_CHECK_TIMEOUT - 1000);
+		expect(api.get).toHaveBeenCalledTimes(2);
+		expect(onPaid).toHaveBeenCalledTimes(1);
+		stop();
+	});
+
+	it("checks at once when the tab is visible again, instead of on the timer", async () => {
+		vi.mocked(api.get).mockResolvedValue(unpaid);
+		const stop = pollUntilPaid("inv", { onPaid: vi.fn() });
+
+		await vi.advanceTimersByTimeAsync(POLLING_INTERVAL);
+		expect(api.get).toHaveBeenCalledTimes(1);
+
+		setVisibility("visible");
+		await vi.advanceTimersByTimeAsync(0);
+		expect(api.get).toHaveBeenCalledTimes(2);
+
+		// The timer the first answer set is gone: the next check is an
+		// interval after the visible one, not after the first
+		await vi.advanceTimersByTimeAsync(POLLING_INTERVAL - 1);
+		expect(api.get).toHaveBeenCalledTimes(2);
+		await vi.advanceTimersByTimeAsync(1);
+		expect(api.get).toHaveBeenCalledTimes(3);
+		stop();
+	});
+
+	it("doesn't check when the tab is hidden", async () => {
+		vi.mocked(api.get).mockResolvedValue(unpaid);
+		const stop = pollUntilPaid("inv", { onPaid: vi.fn() });
+
+		setVisibility("hidden");
+		await vi.advanceTimersByTimeAsync(0);
+
+		expect(api.get).not.toHaveBeenCalled();
+		stop();
+	});
+
+	it("doesn't check or finish again when the tab is visible while onPaid runs", async () => {
+		vi.mocked(api.get).mockResolvedValue(paid);
+		const onPaid = vi.fn(() => new Promise<void>(() => {}));
+		const stop = pollUntilPaid("inv", { onPaid });
+
+		await vi.advanceTimersByTimeAsync(POLLING_INTERVAL);
+		setVisibility("visible");
+		await vi.advanceTimersByTimeAsync(0);
+
+		expect(api.get).toHaveBeenCalledTimes(1);
+		expect(onPaid).toHaveBeenCalledTimes(1);
+		stop();
+	});
+
+	it("doesn't check when the tab is visible after the flow finished", async () => {
+		vi.mocked(api.get).mockResolvedValue(paid);
+		pollUntilPaid("inv", { onPaid: vi.fn() });
+
+		await vi.advanceTimersByTimeAsync(POLLING_INTERVAL);
+		setVisibility("visible");
+		await vi.advanceTimersByTimeAsync(0);
+
+		expect(api.get).toHaveBeenCalledTimes(1);
 	});
 
 	it("calls onPaid once for a paid answer and stops checking", async () => {
@@ -229,6 +419,19 @@ describe("pollUntilPaid", () => {
 		stop();
 		await vi.advanceTimersByTimeAsync(POLLING_INTERVAL * 10);
 
+		expect(api.get).toHaveBeenCalledTimes(1);
+	});
+
+	it("stop() aborts the check in flight and stops listening to the tab", async () => {
+		vi.mocked(api.get).mockImplementation(hanging);
+		const stop = pollUntilPaid("inv", { onPaid: vi.fn() });
+
+		await vi.advanceTimersByTimeAsync(POLLING_INTERVAL);
+		stop();
+		setVisibility("visible");
+		await vi.advanceTimersByTimeAsync(INVOICE_CHECK_TIMEOUT * 2);
+
+		expect(signalOf(0)?.aborted).toBe(true);
 		expect(api.get).toHaveBeenCalledTimes(1);
 	});
 });
