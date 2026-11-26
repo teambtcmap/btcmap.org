@@ -1,3 +1,6 @@
+import type { AppLinkSource } from "#lib/analytics.js";
+import { trackEvent } from "#lib/analytics.js";
+
 export type Platform = "android" | "ios" | "web" | "linux" | "windows" | "mac";
 
 export type StoreKey =
@@ -490,3 +493,20 @@ export const appConfigs: AppConfig[] = [
 		],
 	},
 ];
+
+// The visitor left for one of an app's stores, an APK or its web app (#1678)
+export const trackAppStoreClick = (
+	app: AppConfig,
+	store: StoreKey,
+	source: AppLinkSource,
+) => trackEvent("app_store_click", { app: app.id, store, source });
+
+// An app's button was pressed. A single-store app leaves for its store
+// straight away, so that's its store click too; the others open the
+// download modal, whose links report theirs.
+export const trackAppClick = (app: AppConfig, source: AppLinkSource) => {
+	trackEvent("app_click", { app: app.id, source });
+	if (app.stores.length === 1) {
+		trackAppStoreClick(app, app.stores[0].store, source);
+	}
+};

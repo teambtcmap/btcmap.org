@@ -1,10 +1,17 @@
 <script lang="ts">
+import type { AppLinkSource } from "#lib/analytics.js";
 import type { AppConfig, StoreKey } from "#lib/apps.js";
+import { trackAppStoreClick } from "#lib/apps.js";
 import IconApps from "#lib/icons/IconApps.svelte";
 import Modal from "$components/Modal.svelte";
 
-export let app: AppConfig | null;
-export let open = false;
+type Props = {
+	app: AppConfig | null;
+	open?: boolean;
+	// The page the modal was opened from, reported with app_store_click
+	source: AppLinkSource;
+};
+let { app, open = $bindable(false), source }: Props = $props();
 
 const platformLabels: Record<string, string> = {
 	android: "Android",
@@ -15,11 +22,13 @@ const platformLabels: Record<string, string> = {
 	mac: "macOS",
 };
 
-$: modalTitle = app
-	? app.tag === "btcmap"
-		? (platformLabels[app.stores[0]?.platform] ?? app.name)
-		: app.name
-	: "";
+const modalTitle = $derived(
+	app
+		? app.tag === "btcmap"
+			? (platformLabels[app.stores[0]?.platform] ?? app.name)
+			: app.name
+		: "",
+);
 
 const storeLabels: Record<StoreKey, string> = {
 	"app-store": "App Store",
@@ -32,6 +41,10 @@ const storeLabels: Record<StoreKey, string> = {
 	web: "Web App",
 	zapstore: "Zapstore",
 };
+
+const trackStoreClick = (store: StoreKey) => {
+	if (app) trackAppStoreClick(app, store, source);
+};
 </script>
 
 <Modal bind:open title={modalTitle} titleId="app-download-modal-title">
@@ -43,6 +56,7 @@ const storeLabels: Record<StoreKey, string> = {
 						href={entry.url}
 						target={entry.store === 'web' ? null : '_blank'}
 						rel={entry.store === 'web' ? null : 'noopener noreferrer'}
+						onclick={() => trackStoreClick(entry.store)}
 						class="flex w-full items-center gap-3 rounded-lg px-4 py-3 text-left transition-colors hover:bg-gray-100 text-body dark:hover:bg-white/5 dark:text-white"
 					>
 						<IconApps icon={entry.store} w="20" h="20" />
