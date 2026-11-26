@@ -101,9 +101,8 @@ $: organizationSections = uniqueOrganizations.map((orgId) => ({
 }));
 
 // Validate organization sections and redirect if invalid. In the browser
-// only: goto() throws on the server, which does have $areas once a
-// verify-location submission synced them there, and an unknown section
-// then answered 500 instead of rendering (~50 a day in the function logs)
+// only: goto() throws on the server, which can hold $areas too (the
+// verify-location route syncs them into the module store there)
 $: if (browser && data.isOrganization && organizationSections.length > 0) {
 	const isValidOrganization = organizationSections.some(
 		(org) => org.id === data.section,
