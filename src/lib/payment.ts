@@ -45,10 +45,10 @@ type PollUntilPaidOptions = {
 // flow up to 51 times (#1618).
 // One at a time, a check that never answers would block every later one: a
 // request in flight when the phone switched to the wallet app can stall once
-// the browser freezes the tab. So a check that hasn't answered within
-// INVOICE_CHECK_TIMEOUT is given up for a fresh one, and coming back to the
-// tab checks at once (#1677). A check given up on is aborted, and its answer
-// dropped. Returns stop(), after which nothing fires.
+// the browser freezes the tab (#1677). So a check that hasn't answered within
+// INVOICE_CHECK_TIMEOUT is aborted, its answer dropped, and a fresh one
+// starts; and coming back to the tab checks at once when no check is in
+// flight. Returns stop(), after which nothing fires.
 export const pollUntilPaid = (
 	invoiceId: string,
 	{ onPaid, onCheckError = () => {} }: PollUntilPaidOptions,
@@ -58,11 +58,14 @@ export const pollUntilPaid = (
 	let finishing = false;
 	let timer: ReturnType<typeof setTimeout> | undefined;
 	// The check in flight; only its answer counts
-	let current: AbortController | undefined;
+	let inFlight: AbortController | undefined;
+	// The tab was hidden while the check in flight ran: if it times out, the
+	// frozen tab is the likely cause, not the API, and it isn't reported
+	let hiddenDuringCheck = false;
 
-	const dropCurrent = () => {
-		current?.abort();
-		current = undefined;
+	const dropInFlight = () => {
+		inFlight?.abort();
+		inFlight = undefined;
 	};
 
 	const scheduleCheck = () => {
@@ -81,23 +84,29 @@ export const pollUntilPaid = (
 	};
 
 	const check = async () => {
-		dropCurrent();
+		dropInFlight();
 		const controller = new AbortController();
-		current = controller;
-		const giveUp = setTimeout(() => {
-			if (current === controller) check();
+		inFlight = controller;
+		hiddenDuringCheck = document.visibilityState === "hidden";
+		const giveUpTimer = setTimeout(() => {
+			if (inFlight !== controller) return;
+			if (!hiddenDuringCheck) {
+				reportCheckError(new Error("The invoice check timed out"));
+			}
+			check();
 		}, INVOICE_CHECK_TIMEOUT);
 
 		let paid = false;
 		try {
 			paid = await fetchInvoicePaid(invoiceId, controller.signal);
 		} catch (error) {
-			if (!stopped && current === controller) reportCheckError(error);
+			// A check given up on or stopped rejects as aborted: not news
+			if (!stopped && inFlight === controller) reportCheckError(error);
 		} finally {
-			clearTimeout(giveUp);
+			clearTimeout(giveUpTimer);
 		}
-		if (stopped || current !== controller) return;
-		current = undefined;
+		if (stopped || inFlight !== controller) return;
+		inFlight = undefined;
 		if (!paid) {
 			scheduleCheck();
 			return;
@@ -118,10 +127,18 @@ export const pollUntilPaid = (
 		}
 	};
 
-	// Back from the wallet app: the timer may have been throttled and the
-	// check in flight frozen with the tab, so check now
+	// Back from the wallet app, the timer may have been throttled: check now.
+	// A check still in flight is left to its give-up timer, which a long
+	// freeze leaves overdue, so it fires as soon as the tab runs again: a
+	// second request while the first may still be at the API could settle
+	// the invoice twice there (it publishes the comment, or extends the
+	// boost, while answering).
 	const onVisibilityChange = () => {
-		if (document.visibilityState !== "visible" || stopped || finishing) return;
+		if (document.visibilityState === "hidden") {
+			hiddenDuringCheck = true;
+			return;
+		}
+		if (stopped || finishing || inFlight) return;
 		clearTimeout(timer);
 		check();
 	};
@@ -129,7 +146,7 @@ export const pollUntilPaid = (
 	const stop = () => {
 		stopped = true;
 		clearTimeout(timer);
-		dropCurrent();
+		dropInFlight();
 		document.removeEventListener("visibilitychange", onVisibilityChange);
 	};
 
