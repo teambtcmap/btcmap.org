@@ -352,6 +352,7 @@
 	},
 	"errors": {
 		"searchUnavailable": "Recherche temporairement indisponible",
+		"submissionUnavailable": "Notre service d'envoi est momentanément indisponible. Vos réponses sont conservées : dans une minute, saisissez le nouveau texte du captcha et réessayez.",
 		"loadFailed": "Échec du chargement des commerces à proximité",
 		"notFound": "Commerce introuvable",
 		"loadError": "Impossible de charger les lieux depuis le CDN statique, veuillez réessayer ou contacter BTC Map.",

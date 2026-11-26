@@ -348,6 +348,7 @@
 	},
 	"errors": {
 		"searchUnavailable": "Pesquisa temporariamente indisponível",
+		"submissionUnavailable": "Nosso serviço de envio está temporariamente indisponível. Suas respostas continuam aqui: em um minuto, digite o novo texto do captcha e tente novamente.",
 		"loadFailed": "Falha ao carregar comerciantes próximos",
 		"notFound": "Comerciante Não Encontrado",
 		"loadError": "Não foi possível carregar locais do CDN estático, por favor tente novamente ou entre em contato com o BTC Map.",

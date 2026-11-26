@@ -11,6 +11,7 @@ import {
 import { createCaptchaGate } from "#lib/captchaGate.svelte.js";
 import { fieldBorderClasses } from "#lib/fieldStyles.js";
 import { searchAreas } from "#lib/geocoding.js";
+import { isSubmissionUnavailable } from "#lib/giteaOutage.js";
 import { fieldError, inputProps, ruleValidation } from "#lib/ruleValidation.js";
 import { theme } from "#lib/theme.js";
 import type { NominatimArea } from "#lib/types.js";
@@ -133,7 +134,12 @@ const form = createForm(() => ({
 			})
 			.catch((error) => {
 				errToast(
-					captcha.submitFailed(error) ?? t("addCommunityForm.formSubmitError"),
+					captcha.submitFailed(error) ??
+						t(
+							isSubmissionUnavailable(error)
+								? "errors.submissionUnavailable"
+								: "addCommunityForm.formSubmitError",
+						),
 				);
 				console.error(error);
 				submitting = false;

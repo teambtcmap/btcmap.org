@@ -4,6 +4,7 @@ import { get } from "svelte/store";
 import { GITEA_LABELS } from "#lib/constants.js";
 import type { GiteaRepo } from "#lib/gitea.js";
 import { createIssueWithLabels } from "#lib/gitea.js";
+import { GITEA_UNAVAILABLE_MESSAGE, isGiteaOutage } from "#lib/giteaOutage.js";
 import { validateCaptcha } from "#lib/server/captcha.js";
 import { areas } from "#lib/store.js";
 import { getAreaIdsByCoordinates } from "#lib/utils.js";
@@ -160,13 +161,20 @@ export const POST: RequestHandler = async ({ request }) => {
 		title,
 	});
 
-	const response = await createIssueWithLabels(
-		title,
-		body,
-		[config.labelId],
-		config.repo,
-		areaLabels,
-	);
+	let response: Awaited<ReturnType<typeof createIssueWithLabels>>;
+	try {
+		response = await createIssueWithLabels(
+			title,
+			body,
+			[config.labelId],
+			config.repo,
+			areaLabels,
+		);
+	} catch (e) {
+		// Down for a minute or two: the forms ask for a retry (#1681)
+		if (isGiteaOutage(e)) error(503, GITEA_UNAVAILABLE_MESSAGE);
+		throw e;
+	}
 
 	console.debug("[gitea/issue] Issue created", {
 		issueNumber: response.data.number,
