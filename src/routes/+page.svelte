@@ -3,7 +3,7 @@ import { _ } from "svelte-i18n";
 
 import { trackEvent } from "#lib/analytics.js";
 import type { AppConfig } from "#lib/apps.js";
-import { appConfigs } from "#lib/apps.js";
+import { appConfigs, trackAppClick } from "#lib/apps.js";
 import IconApps from "#lib/icons/IconApps.svelte";
 import type { AppIconName } from "#lib/icons/types.js";
 import { placementEntryUrl } from "#lib/placementMode.js";
@@ -50,14 +50,9 @@ function handleModalOpenChange(open: boolean) {
 }
 
 function openAppModal(app: AppConfig) {
-	trackEvent("app_click", { app: app.id, source: "home" });
+	trackAppClick(app, "home");
 	if (app.stores.length === 1) {
 		const store = app.stores[0];
-		trackEvent("app_store_click", {
-			app: app.id,
-			store: store.store,
-			source: "home",
-		});
 		if (store.store === "web") {
 			goto(store.url);
 		} else {

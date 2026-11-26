@@ -1,7 +1,7 @@
 <script lang="ts">
 import type { AppLinkSource } from "#lib/analytics.js";
-import { trackEvent } from "#lib/analytics.js";
 import type { AppConfig, StoreKey } from "#lib/apps.js";
+import { trackAppStoreClick } from "#lib/apps.js";
 import IconApps from "#lib/icons/IconApps.svelte";
 import Modal from "$components/Modal.svelte";
 
@@ -38,7 +38,7 @@ const storeLabels: Record<StoreKey, string> = {
 };
 
 const trackStoreClick = (store: StoreKey) => {
-	if (app) trackEvent("app_store_click", { app: app.id, store, source });
+	if (app) trackAppStoreClick(app, store, source);
 };
 </script>
 

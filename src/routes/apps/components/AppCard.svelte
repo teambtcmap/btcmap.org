@@ -1,6 +1,6 @@
 <script lang="ts">
-import { trackEvent } from "#lib/analytics.js";
 import type { AppConfig } from "#lib/apps.js";
+import { trackAppClick } from "#lib/apps.js";
 import { _ } from "#lib/i18n/index.js";
 import IconApps from "#lib/icons/IconApps.svelte";
 import type { AppIconName } from "#lib/icons/types.js";
@@ -41,14 +41,9 @@ $: platformsLabel = [...new Set(app.stores.map((s) => s.platform))]
 $: isWebOnly = app.stores.length === 1 && app.stores[0].store === "web";
 
 function handleClick() {
-	trackEvent("app_click", { app: app.id, source: "apps" });
+	trackAppClick(app, "apps");
 	if (app.stores.length === 1) {
 		const store = app.stores[0];
-		trackEvent("app_store_click", {
-			app: app.id,
-			store: store.store,
-			source: "apps",
-		});
 		if (
 			store.store === "web" &&
 			!store.url.startsWith("http://") &&
