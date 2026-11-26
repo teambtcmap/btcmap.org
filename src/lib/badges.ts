@@ -174,13 +174,13 @@ const EXTRA_TAGS_USER_ID = 17221642;
 const EXTRA_TAGS = { created: 100, updated: 20 };
 const NO_EXTRA_TAGS = { created: 0, updated: 0 };
 
-const extraTags = (userId: number) =>
+const extraTags = (userId: Event["user_id"]) =>
 	userId === EXTRA_TAGS_USER_ID ? EXTRA_TAGS : NO_EXTRA_TAGS;
 
 // A tagger's created, updated and deleted tags, extra tags included
 export const tagCounts = (
 	events: Pick<Event, "user_id" | "type">[],
-	userId: number,
+	userId: Event["user_id"],
 ): Pick<BadgeInputs, TagKind> => {
 	const own = events.filter((event) => event.user_id === userId);
 	const count = (type: EventType) =>
@@ -217,7 +217,7 @@ export const taggerLeaderboard = (
 // it. sort() is stable, so taggers with the same total keep their order.
 export const taggerRank = (
 	leaderboard: ProfileLeaderboard[],
-	userId: number,
+	userId: ProfileLeaderboard["id"],
 ): number | null => {
 	const index = [...leaderboard]
 		.sort((a, b) => b.total - a.total)
