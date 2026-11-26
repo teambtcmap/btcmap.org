@@ -14,32 +14,37 @@ vi.mock("#lib/store.js", async () => {
 vi.mock("#lib/utils.js", () => ({ getRandomColor: () => "#123456" }));
 
 import type * as Gitea from "#lib/gitea.js";
+import type { GiteaLabel } from "#lib/types.js";
 
 const LABELS_URL =
 	"https://gitea.test/api/v1/repos/teambtcmap/btcmap-data/labels";
 const ISSUES_URL =
 	"https://gitea.test/api/v1/repos/teambtcmap/btcmap-data/issues";
 
-type Label = { id: number; name: string };
-type GetConfig = { params?: { page?: number; limit?: number } };
+type Label = Pick<GiteaLabel, "id" | "name">;
+type ListParams = { params?: { page?: number; limit?: number } };
 
 // The label list is cached per module, like it is per warm function
 let api: typeof import("#lib/axios.js").default;
 let createIssueWithLabels: typeof Gitea.createIssueWithLabels;
 
-// Gitea's label list: 50 a page at most, the total in X-Total-Count
-const serveLabels = (labels: Label[], pageSize = 50) =>
+// Gitea's label list: `pageSize` a page (50 at most), the total in
+// X-Total-Count unless `total` is false
+const serveLabels = (
+	labels: Label[],
+	{ pageSize = 50, total = true }: { pageSize?: number; total?: boolean } = {},
+) =>
 	vi.mocked(api.get).mockImplementation(async (_url, config) => {
-		const page = (config as GetConfig | undefined)?.params?.page ?? 1;
+		const page = (config as ListParams | undefined)?.params?.page ?? 1;
 		return {
 			data: labels.slice((page - 1) * pageSize, page * pageSize),
-			headers: { "x-total-count": String(labels.length) },
+			headers: total ? { "x-total-count": String(labels.length) } : {},
 		};
 	});
 
-const filler = (count: number, from = 1000): Label[] =>
+const filler = (count: number): Label[] =>
 	Array.from({ length: count }, (_, i) => ({
-		id: from + i,
+		id: 1000 + i,
 		name: `area-${i}`,
 	}));
 
@@ -47,9 +52,15 @@ const labelPagesFetched = () =>
 	vi
 		.mocked(api.get)
 		.mock.calls.filter(([url]) => url === LABELS_URL)
-		.map(([, config]) => (config as GetConfig).params?.page);
+		.map(([, config]) => (config as ListParams).params?.page);
 
-const issuePost = () =>
+const labelsCreated = () =>
+	vi
+		.mocked(api.post)
+		.mock.calls.filter(([url]) => url === LABELS_URL)
+		.map(([, payload]) => (payload as { name: string }).name);
+
+const lastIssuePayload = () =>
 	vi.mocked(api.post).mock.calls.findLast(([url]) => url === ISSUES_URL)?.[1];
 
 describe("createIssueWithLabels", () => {
@@ -57,8 +68,11 @@ describe("createIssueWithLabels", () => {
 		vi.resetModules();
 		api = (await import("#lib/axios.js")).default;
 		({ createIssueWithLabels } = await import("#lib/gitea.js"));
+		let nextLabelId = 900;
 		vi.mocked(api.post).mockImplementation(async (url) =>
-			url === LABELS_URL ? { data: { id: 900 } } : { data: { number: 1 } },
+			url === LABELS_URL
+				? { data: { id: nextLabelId++ } }
+				: { data: { number: 1 } },
 		);
 		vi.spyOn(console, "error").mockImplementation(() => {});
 	});
@@ -68,7 +82,7 @@ describe("createIssueWithLabels", () => {
 	});
 
 	it("files the issue with the area's existing label", async () => {
-		vi.mocked(api.get).mockResolvedValue({ data: [{ id: 7, name: "us" }] });
+		serveLabels([{ id: 7, name: "us" }]);
 
 		await createIssueWithLabels("Cafe", "body", [3], "btcmap-data", ["us"]);
 
@@ -91,25 +105,94 @@ describe("createIssueWithLabels", () => {
 			headers: expect.anything(),
 			params: { page: 1, limit: 50 },
 		});
-		expect(issuePost()).toEqual({
+		expect(lastIssuePayload()).toEqual({
 			title: "Cafe",
 			body: "body",
 			labels: [3, 7],
 		});
-		expect(api.post).toHaveBeenCalledTimes(1);
+		expect(labelsCreated()).toEqual([]);
+	});
+
+	it("asks for the remaining pages at once", async () => {
+		const labels = [...filler(120), { id: 7, name: "us" }];
+		const held: (() => void)[] = [];
+		vi.mocked(api.get).mockImplementation(async (_url, config) => {
+			const page = (config as ListParams).params?.page ?? 1;
+			if (page > 1) await new Promise<void>((resolve) => held.push(resolve));
+			return {
+				data: labels.slice((page - 1) * 50, page * 50),
+				headers: { "x-total-count": String(labels.length) },
+			};
+		});
+
+		const filing = createIssueWithLabels("Cafe", "body", [3], "btcmap-data", [
+			"us",
+		]);
+		// Pages 2 and 3 both asked for before either answers
+		await vi.waitFor(() => expect(held).toHaveLength(2));
+		for (const release of held) release();
+		await filing;
+
+		expect(lastIssuePayload()).toMatchObject({ labels: [3, 7] });
+	});
+
+	it("finds a label when Gitea serves smaller pages than asked for", async () => {
+		serveLabels([...filler(40), { id: 7, name: "us" }], { pageSize: 30 });
+
+		await createIssueWithLabels("Cafe", "body", [3], "btcmap-data", ["us"]);
+
+		expect(lastIssuePayload()).toMatchObject({ labels: [3, 7] });
+		expect(labelsCreated()).toEqual([]);
 	});
 
 	it("reads on page by page when Gitea sends no total", async () => {
-		const labels = [...filler(60), { id: 7, name: "us" }];
-		vi.mocked(api.get).mockImplementation(async (_url, config) => {
-			const page = (config as GetConfig).params?.page ?? 1;
-			return { data: labels.slice((page - 1) * 50, page * 50) };
+		serveLabels([...filler(60), { id: 7, name: "us" }], { total: false });
+
+		await createIssueWithLabels("Cafe", "body", [3], "btcmap-data", ["us"]);
+
+		expect(lastIssuePayload()).toMatchObject({ labels: [3, 7] });
+		expect(labelsCreated()).toEqual([]);
+	});
+
+	it("reads on page by page when Gitea serves smaller pages and no total", async () => {
+		serveLabels([...filler(40), { id: 7, name: "us" }], {
+			pageSize: 30,
+			total: false,
 		});
 
 		await createIssueWithLabels("Cafe", "body", [3], "btcmap-data", ["us"]);
 
-		expect(issuePost()).toMatchObject({ labels: [3, 7] });
-		expect(api.post).toHaveBeenCalledTimes(1);
+		expect(lastIssuePayload()).toMatchObject({ labels: [3, 7] });
+		expect(labelsCreated()).toEqual([]);
+	});
+
+	// Number("") is 0: an empty header must not read as "no labels past page 1"
+	it("treats an empty total as no total", async () => {
+		const labels = [...filler(60), { id: 7, name: "us" }];
+		vi.mocked(api.get).mockImplementation(async (_url, config) => {
+			const page = (config as ListParams).params?.page ?? 1;
+			return {
+				data: labels.slice((page - 1) * 50, page * 50),
+				headers: { "x-total-count": "" },
+			};
+		});
+
+		await createIssueWithLabels("Cafe", "body", [3], "btcmap-data", ["us"]);
+
+		expect(lastIssuePayload()).toMatchObject({ labels: [3, 7] });
+	});
+
+	it("stops at 100 pages, and says so", async () => {
+		const warn = vi.spyOn(console, "warn").mockImplementation(() => {});
+		vi.mocked(api.get).mockImplementation(async () => ({
+			data: filler(50),
+			headers: { "x-total-count": "1000000" },
+		}));
+
+		await createIssueWithLabels("Cafe", "body", [3], "btcmap-data", ["area-1"]);
+
+		expect(labelPagesFetched()).toHaveLength(100);
+		expect(warn).toHaveBeenCalledWith(expect.stringContaining("100 pages"));
 	});
 
 	// Earlier submissions left duplicates; the oldest is the one to keep
@@ -122,7 +205,7 @@ describe("createIssueWithLabels", () => {
 
 		await createIssueWithLabels("Cafe", "body", [3], "btcmap-data", ["us"]);
 
-		expect(issuePost()).toMatchObject({ labels: [3, 12] });
+		expect(lastIssuePayload()).toMatchObject({ labels: [3, 12] });
 	});
 
 	it("reuses the list for the next submission", async () => {
@@ -142,25 +225,33 @@ describe("createIssueWithLabels", () => {
 		await createIssueWithLabels("Cafe", "body", [3], "btcmap-data", ["new"]);
 
 		expect(labelPagesFetched()).toHaveLength(4);
-		expect(api.post).toHaveBeenCalledWith(
-			LABELS_URL,
-			expect.objectContaining({ name: "new" }),
-			expect.anything(),
-		);
-		expect(issuePost()).toMatchObject({ labels: [3, 900] });
+		expect(labelsCreated()).toEqual(["new"]);
+		expect(lastIssuePayload()).toMatchObject({ labels: [3, 900] });
 	});
 
-	it("creates a missing label only once across submissions", async () => {
-		serveLabels(filler(70));
+	// One submission's area labels: one list read, one fresh read for all
+	// the missing ones, and the labels made land in the cached list
+	it("reads the list once for several area labels, and keeps the labels it makes", async () => {
+		serveLabels([...filler(70), { id: 7, name: "us" }]);
 
-		await createIssueWithLabels("A", "body", [3], "btcmap-data", ["new"]);
-		await createIssueWithLabels("B", "body", [3], "btcmap-data", ["new"]);
+		await createIssueWithLabels("A", "body", [3], "btcmap-data", [
+			"us",
+			"new-a",
+			"new-b",
+		]);
 
-		const labelPosts = vi
-			.mocked(api.post)
-			.mock.calls.filter(([url]) => url === LABELS_URL);
-		expect(labelPosts).toHaveLength(1);
-		expect(issuePost()).toMatchObject({ labels: [3, 900] });
+		expect(labelPagesFetched()).toHaveLength(4);
+		expect(labelsCreated().sort()).toEqual(["new-a", "new-b"]);
+		expect(lastIssuePayload()).toMatchObject({
+			labels: [3, 7, expect.any(Number), expect.any(Number)],
+		});
+
+		await createIssueWithLabels("B", "body", [3], "btcmap-data", [
+			"new-a",
+			"new-b",
+		]);
+		expect(labelPagesFetched()).toHaveLength(4);
+		expect(labelsCreated()).toHaveLength(2);
 	});
 
 	// #1681: a label list that couldn't be fetched read as "no labels", so
@@ -187,6 +278,21 @@ describe("createIssueWithLabels", () => {
 		serveLabels([{ id: 7, name: "us" }]);
 		await createIssueWithLabels("B", "body", [3], "btcmap-data", ["us"]);
 
-		expect(issuePost()).toMatchObject({ labels: [3, 7] });
+		expect(lastIssuePayload()).toMatchObject({ labels: [3, 7] });
+	});
+
+	it("keeps the cached list when a fresh read fails", async () => {
+		serveLabels([{ id: 7, name: "us" }]);
+		await createIssueWithLabels("A", "body", [3], "btcmap-data", ["us"]);
+
+		vi.mocked(api.get).mockRejectedValueOnce(new Error("refused"));
+		await expect(
+			createIssueWithLabels("B", "body", [3], "btcmap-data", ["new"]),
+		).rejects.toThrow("refused");
+
+		await createIssueWithLabels("C", "body", [3], "btcmap-data", ["us"]);
+		// One read for A, the failed fresh one for B, none for C
+		expect(labelPagesFetched()).toHaveLength(2);
+		expect(lastIssuePayload()).toMatchObject({ labels: [3, 7] });
 	});
 });

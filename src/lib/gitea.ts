@@ -108,8 +108,10 @@ export async function getIssues(
 
 // Gitea serves at most this many items per page (its max_response_items)
 const LABEL_PAGE_SIZE = 50;
-// A bound on the pages read, whatever the server claims: 5,000 labels
+// A bound on the pages read, whatever the server claims
 const MAX_LABEL_PAGES = 100;
+
+type LabelIds = Map<GiteaLabel["name"], GiteaLabel["id"]>;
 
 // Every label of a repo by name. The list runs to ~950 labels over many
 // pages; reading only the first page (30 by default) missed most area
@@ -117,7 +119,7 @@ const MAX_LABEL_PAGES = 100;
 // "bitcoin-beach". Of duplicates already there, the oldest (lowest id)
 // counts. A failed fetch rejects: read as "no labels", it had createLabel
 // make an existing label a second time (#1681).
-async function fetchLabelIds(repo: GiteaRepo): Promise<Map<string, number>> {
+async function fetchLabelIds(repo: GiteaRepo): Promise<LabelIds> {
 	const url = `${env.GITEA_API_URL}/api/v1/repos/teambtcmap/${repo}/labels`;
 	const headers = {
 		Authorization: `token ${env.GITEA_API_KEY}`,
@@ -127,33 +129,43 @@ async function fetchLabelIds(repo: GiteaRepo): Promise<Map<string, number>> {
 			headers,
 			params: { page, limit: LABEL_PAGE_SIZE },
 		});
+	const warnCut = () =>
+		console.warn(
+			`[gitea] Read only the first ${MAX_LABEL_PAGES} pages of the ${repo} labels: labels past them will be made again`,
+		);
 
 	const first = await fetchPage(1);
 	const labels = [...first.data];
 	// What Gitea actually served, should it cap pages below the size asked
 	const pageSize = first.data.length;
-	const total = Number(first.headers?.["x-total-count"]);
+	// An empty header is no total (Number("") is 0)
+	const totalHeader = first.headers?.["x-total-count"];
+	const total = totalHeader ? Number(totalHeader) : Number.NaN;
+
 	if (Number.isInteger(total) && pageSize > 0) {
 		// The rest at once: one after another, ~20 pages took seconds
-		const pageCount = Math.min(Math.ceil(total / pageSize), MAX_LABEL_PAGES);
+		const pageCount = Math.ceil(total / pageSize);
+		if (pageCount > MAX_LABEL_PAGES) warnCut();
 		const rest = await Promise.all(
-			Array.from({ length: pageCount - 1 }, (_, i) => fetchPage(i + 2)),
+			Array.from({ length: Math.min(pageCount, MAX_LABEL_PAGES) - 1 }, (_, i) =>
+				fetchPage(i + 2),
+			),
 		);
 		for (const page of rest) labels.push(...page.data);
 	} else {
-		// No total: read on until a page comes back short of a full one
+		// No total: read on until a page comes back shorter than the first
 		let last = first.data;
-		for (
-			let page = 2;
-			last.length >= LABEL_PAGE_SIZE && page <= MAX_LABEL_PAGES;
-			page++
-		) {
+		for (let page = 2; pageSize > 0 && last.length === pageSize; page++) {
+			if (page > MAX_LABEL_PAGES) {
+				warnCut();
+				break;
+			}
 			last = (await fetchPage(page)).data;
 			labels.push(...last);
 		}
 	}
 
-	const ids = new Map<string, number>();
+	const ids: LabelIds = new Map();
 	for (const { id, name } of labels) {
 		const known = ids.get(name);
 		if (known === undefined || id < known) ids.set(name, id);
@@ -161,47 +173,65 @@ async function fetchLabelIds(repo: GiteaRepo): Promise<Map<string, number>> {
 	return ids;
 }
 
+type LabelIdsCacheEntry = { timestamp: number; ids: Promise<LabelIds> };
+
 // The label list, kept for the warm function like the issues. A fetch in
-// flight is shared, so the area labels of one submission (looked up at
-// once) read it once; a failed one isn't kept.
-const labelIdsCache = new Map<
-	GiteaRepo,
-	{ timestamp: number; ids: Promise<Map<string, number>> }
->();
+// flight is shared; a failed one isn't kept, and the list it was to
+// replace stays.
+const labelIdsCache = new Map<GiteaRepo, LabelIdsCacheEntry>();
 
 function getLabelIds(
 	repo: GiteaRepo,
 	{ fresh = false } = {},
-): Promise<Map<string, number>> {
+): Promise<LabelIds> {
 	const cached = labelIdsCache.get(repo);
 	if (!fresh && cached && Date.now() - cached.timestamp < CACHE_DURATION) {
 		return cached.ids;
 	}
-	const ids = fetchLabelIds(repo);
-	labelIdsCache.set(repo, { timestamp: Date.now(), ids });
-	ids.catch(() => {
-		if (labelIdsCache.get(repo)?.ids === ids) labelIdsCache.delete(repo);
+	const entry: LabelIdsCacheEntry = {
+		timestamp: Date.now(),
+		ids: fetchLabelIds(repo),
+	};
+	labelIdsCache.set(repo, entry);
+	entry.ids.catch(() => {
+		if (labelIdsCache.get(repo) !== entry) return;
+		if (cached) labelIdsCache.set(repo, cached);
+		else labelIdsCache.delete(repo);
 	});
-	return ids;
+	return entry.ids;
+}
+
+// The ids of an issue's area labels, making the ones Gitea doesn't have.
+// One read of the list for all of them, and one fresh read when any is
+// missing: another function may have made it since this one read the list.
+// The labels made go into that fresh list, which is the cached one now.
+async function resolveAreaLabelIds(
+	names: string[],
+	repo: GiteaRepo,
+): Promise<number[]> {
+	if (names.length === 0) return [];
+	let ids = await getLabelIds(repo);
+	if (names.some((name) => !ids.has(name))) {
+		ids = await getLabelIds(repo, { fresh: true });
+	}
+	const knownIds = ids;
+	return Promise.all(
+		names.map(
+			(name) => knownIds.get(name) ?? createLabel(name, repo, knownIds),
+		),
+	);
 }
 
 async function createLabel(
 	name: string,
-	repo: GiteaRepo = "btcmap-data",
-): Promise<number | null> {
+	repo: GiteaRepo,
+	ids: LabelIds,
+): Promise<number> {
 	const headers = {
 		Authorization: `token ${env.GITEA_API_KEY}`,
 	};
 
 	try {
-		const cachedId = (await getLabelIds(repo)).get(name);
-		if (cachedId !== undefined) return cachedId;
-
-		// Another function may have made it since this one read the list
-		const labelIds = await getLabelIds(repo, { fresh: true });
-		const existingId = labelIds.get(name);
-		if (existingId !== undefined) return existingId;
-
 		const areaDetails = get(areas).find((area) => area.id === name);
 		const areaType = areaDetails?.tags?.type;
 		const areaName = areaDetails?.tags?.name || name;
@@ -224,10 +254,10 @@ async function createLabel(
 			},
 			{ headers },
 		);
-		labelIds.set(name, response.data.id);
+		ids.set(name, response.data.id);
 		return response.data.id;
 	} catch (error) {
-		console.error(`Failed to create/get label ${name}:`, error);
+		console.error(`Failed to create label ${name}:`, error);
 		throw error;
 	}
 }
@@ -245,14 +275,8 @@ export async function createIssueWithLabels(
 
 	try {
 		// Get IDs for area labels (create if they don't exist)
-		const areaLabelIds = await Promise.all(
-			areaLabels.map((name) => createLabel(name, repo)),
-		);
-		const validAreaLabelIds = areaLabelIds.filter(
-			(id): id is number => id !== null,
-		);
-
-		const allLabelIds = [...labelIds, ...validAreaLabelIds];
+		const areaLabelIds = await resolveAreaLabelIds(areaLabels, repo);
+		const allLabelIds = [...labelIds, ...areaLabelIds];
 
 		const response = await api.post(
 			`${env.GITEA_API_URL}/api/v1/repos/teambtcmap/${repo}/issues`,
