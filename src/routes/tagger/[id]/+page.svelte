@@ -85,7 +85,7 @@ const initializeData = async () => {
 	userEvents.sort(
 		(a, b) => Date.parse(b.created_at) - Date.parse(a.created_at),
 	);
-	const counts = tagCounts(userEvents, user.id);
+	const counts = tagCounts($events, user.id);
 	created = counts.created;
 	updated = counts.updated;
 	deleted = counts.deleted;
