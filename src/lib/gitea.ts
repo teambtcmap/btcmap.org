@@ -106,20 +106,83 @@ export async function getIssues(
 	};
 }
 
-// A failed fetch rejects: read as "no labels", it had createLabel make an
-// existing label a second time (#1681)
-async function getLabels(
-	repo: GiteaRepo = "btcmap-data",
-): Promise<GiteaLabel[]> {
+// Gitea serves at most this many items per page (its max_response_items)
+const LABEL_PAGE_SIZE = 50;
+// A bound on the pages read, whatever the server claims: 5,000 labels
+const MAX_LABEL_PAGES = 100;
+
+// Every label of a repo by name. The list runs to ~950 labels over many
+// pages; reading only the first page (30 by default) missed most area
+// labels, and createLabel made them again: duplicates such as eleven
+// "bitcoin-beach". Of duplicates already there, the oldest (lowest id)
+// counts. A failed fetch rejects: read as "no labels", it had createLabel
+// make an existing label a second time (#1681).
+async function fetchLabelIds(repo: GiteaRepo): Promise<Map<string, number>> {
+	const url = `${env.GITEA_API_URL}/api/v1/repos/teambtcmap/${repo}/labels`;
 	const headers = {
 		Authorization: `token ${env.GITEA_API_KEY}`,
 	};
+	const fetchPage = async (page: number) =>
+		api.get<GiteaLabel[]>(url, {
+			headers,
+			params: { page, limit: LABEL_PAGE_SIZE },
+		});
 
-	const response = await api.get(
-		`${env.GITEA_API_URL}/api/v1/repos/teambtcmap/${repo}/labels`,
-		{ headers },
-	);
-	return response.data;
+	const first = await fetchPage(1);
+	const labels = [...first.data];
+	// What Gitea actually served, should it cap pages below the size asked
+	const pageSize = first.data.length;
+	const total = Number(first.headers?.["x-total-count"]);
+	if (Number.isInteger(total) && pageSize > 0) {
+		// The rest at once: one after another, ~20 pages took seconds
+		const pageCount = Math.min(Math.ceil(total / pageSize), MAX_LABEL_PAGES);
+		const rest = await Promise.all(
+			Array.from({ length: pageCount - 1 }, (_, i) => fetchPage(i + 2)),
+		);
+		for (const page of rest) labels.push(...page.data);
+	} else {
+		// No total: read on until a page comes back short of a full one
+		let last = first.data;
+		for (
+			let page = 2;
+			last.length >= LABEL_PAGE_SIZE && page <= MAX_LABEL_PAGES;
+			page++
+		) {
+			last = (await fetchPage(page)).data;
+			labels.push(...last);
+		}
+	}
+
+	const ids = new Map<string, number>();
+	for (const { id, name } of labels) {
+		const known = ids.get(name);
+		if (known === undefined || id < known) ids.set(name, id);
+	}
+	return ids;
+}
+
+// The label list, kept for the warm function like the issues. A fetch in
+// flight is shared, so the area labels of one submission (looked up at
+// once) read it once; a failed one isn't kept.
+const labelIdsCache = new Map<
+	GiteaRepo,
+	{ timestamp: number; ids: Promise<Map<string, number>> }
+>();
+
+function getLabelIds(
+	repo: GiteaRepo,
+	{ fresh = false } = {},
+): Promise<Map<string, number>> {
+	const cached = labelIdsCache.get(repo);
+	if (!fresh && cached && Date.now() - cached.timestamp < CACHE_DURATION) {
+		return cached.ids;
+	}
+	const ids = fetchLabelIds(repo);
+	labelIdsCache.set(repo, { timestamp: Date.now(), ids });
+	ids.catch(() => {
+		if (labelIdsCache.get(repo)?.ids === ids) labelIdsCache.delete(repo);
+	});
+	return ids;
 }
 
 async function createLabel(
@@ -131,11 +194,13 @@ async function createLabel(
 	};
 
 	try {
-		const existingLabels = await getLabels(repo);
-		const existingLabel = existingLabels.find((l) => l.name === name);
-		if (existingLabel) {
-			return existingLabel.id;
-		}
+		const cachedId = (await getLabelIds(repo)).get(name);
+		if (cachedId !== undefined) return cachedId;
+
+		// Another function may have made it since this one read the list
+		const labelIds = await getLabelIds(repo, { fresh: true });
+		const existingId = labelIds.get(name);
+		if (existingId !== undefined) return existingId;
 
 		const areaDetails = get(areas).find((area) => area.id === name);
 		const areaType = areaDetails?.tags?.type;
@@ -159,6 +224,7 @@ async function createLabel(
 			},
 			{ headers },
 		);
+		labelIds.set(name, response.data.id);
 		return response.data.id;
 	} catch (error) {
 		console.error(`Failed to create/get label ${name}:`, error);
