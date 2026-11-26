@@ -50,8 +50,14 @@ function handleModalOpenChange(open: boolean) {
 }
 
 function openAppModal(app: AppConfig) {
+	trackEvent("app_click", { app: app.id, source: "home" });
 	if (app.stores.length === 1) {
 		const store = app.stores[0];
+		trackEvent("app_store_click", {
+			app: app.id,
+			store: store.store,
+			source: "home",
+		});
 		if (store.store === "web") {
 			goto(store.url);
 		} else {
@@ -78,7 +84,7 @@ function openAppModal(app: AppConfig) {
 		class="absolute top-0 right-0 xl:hidden dark:opacity-10"
 	/>
 	<Header />
-	<AppDownloadModal app={activeApp} bind:open={modalOpen} />
+	<AppDownloadModal app={activeApp} bind:open={modalOpen} source="home" />
 
 	<div class="relative mx-auto w-10/12 xl:w-[1200px]">
 		<section id="hero" class="items-center justify-between pt-10 pb-20 xl:flex xl:pt-0">

@@ -5,6 +5,7 @@
 import type { PasswordChange } from "#lib/account.js";
 import type { FailureStatus } from "#lib/apiError.js";
 import { failureStatus } from "#lib/apiError.js";
+import type { AppConfig, StoreKey } from "#lib/apps.js";
 import type { BasemapId } from "#lib/map/basemaps.js";
 import type { VerifiedFilterYears } from "#lib/map/verifiedFilter.js";
 import type { MerchantListMode } from "#lib/merchantListStore.js";
@@ -66,6 +67,12 @@ type EventPayloads = {
 	add_place_submit_failure: { attributed: boolean; status: FailureStatus };
 	add_place_submit_success: { attributed: boolean };
 	add_place_tagger_guide_click: undefined;
+	app_click: { app: AppConfig["id"]; source: AppLinkSource };
+	app_store_click: {
+		app: AppConfig["id"];
+		store: StoreKey;
+		source: AppLinkSource;
+	};
 	boost_layer_toggle: undefined;
 	browser_language: {
 		language: string;
@@ -251,6 +258,10 @@ export type NostrFailureStatus =
 	| "timeout"
 	| "relay"
 	| "signer";
+
+// Which page's app buttons were used: the home page's or /apps (app_click
+// and app_store_click breakdown).
+export type AppLinkSource = "home" | "apps";
 
 // Where a "Sign up" link was followed from, and where the account was made.
 export type SignupEntry = "user_menu" | "map_menu" | "add_place";

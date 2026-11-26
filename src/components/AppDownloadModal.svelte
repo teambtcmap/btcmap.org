@@ -1,10 +1,14 @@
 <script lang="ts">
+import type { AppLinkSource } from "#lib/analytics.js";
+import { trackEvent } from "#lib/analytics.js";
 import type { AppConfig, StoreKey } from "#lib/apps.js";
 import IconApps from "#lib/icons/IconApps.svelte";
 import Modal from "$components/Modal.svelte";
 
 export let app: AppConfig | null;
 export let open = false;
+// The page the modal was opened from, reported with app_store_click
+export let source: AppLinkSource;
 
 const platformLabels: Record<string, string> = {
 	android: "Android",
@@ -32,6 +36,10 @@ const storeLabels: Record<StoreKey, string> = {
 	web: "Web App",
 	zapstore: "Zapstore",
 };
+
+const trackStoreClick = (store: StoreKey) => {
+	if (app) trackEvent("app_store_click", { app: app.id, store, source });
+};
 </script>
 
 <Modal bind:open title={modalTitle} titleId="app-download-modal-title">
@@ -43,6 +51,7 @@ const storeLabels: Record<StoreKey, string> = {
 						href={entry.url}
 						target={entry.store === 'web' ? null : '_blank'}
 						rel={entry.store === 'web' ? null : 'noopener noreferrer'}
+						on:click={() => trackStoreClick(entry.store)}
 						class="flex w-full items-center gap-3 rounded-lg px-4 py-3 text-left transition-colors hover:bg-gray-100 text-body dark:hover:bg-white/5 dark:text-white"
 					>
 						<IconApps icon={entry.store} w="20" h="20" />
