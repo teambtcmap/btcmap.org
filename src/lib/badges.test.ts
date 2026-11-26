@@ -287,6 +287,8 @@ describe("tagCounts", () => {
 		...events(2, "create", 5),
 		...events(1, "update", 2),
 		...events(1, "delete", 1),
+		...events(17221642, "create", 1),
+		...events(17221642, "update", 1),
 		...events(17221642, "delete", 1),
 	];
 
@@ -295,10 +297,10 @@ describe("tagCounts", () => {
 		expect(tagCounts(all, 99)).toEqual({ created: 0, updated: 0, deleted: 0 });
 	});
 
-	it("gives 17221642 100 extra created and 20 extra updated tags", () => {
+	it("adds 100 created and 20 updated tags to the events of 17221642", () => {
 		expect(tagCounts(all, 17221642)).toEqual({
-			created: 100,
-			updated: 20,
+			created: 101,
+			updated: 21,
 			deleted: 1,
 		});
 	});
