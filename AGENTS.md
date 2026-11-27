@@ -10,12 +10,13 @@ Guidelines for coding agents working on this codebase (`CLAUDE.md` is a symlink 
 2. **🔍 Svelte check:** Run `pnpm run check`
 3. **🔎 TS type check:** Run `pnpm run typecheck`
 4. **🧹 Lint:** Run `pnpm run lint`
-5. **🧪 Unit tests:** Run `pnpm run test --run`
-6. **📝 Commit format:** Use [Conventional Commits](https://www.conventionalcommits.org/) format with issue number
+5. **🗑️ Unused code:** Run `pnpm run knip` and delete the files, exports and dependencies it lists. Something used in a way knip can't see goes into `knip.jsonc`
+6. **🧪 Unit tests:** Run `pnpm run test --run`
+7. **📝 Commit format:** Use [Conventional Commits](https://www.conventionalcommits.org/) format with issue number
 
 A husky pre-commit hook (lint-staged) runs `biome check --write --no-errors-on-unmatched` on staged `*.{js,ts,svelte,json,css}` files: formatting, safe lint fixes and import sorting land at commit time either way. Running `pnpm run lint:fix` (the same `biome check --write`) before staging keeps the hook a no-op and the diff predictable; `format:fix` alone covers only formatting. Biome formats only the `<script>` block of a `.svelte` file; template and style whitespace stay yours to keep consistent.
 
-`pnpm run check` runs `svelte-kit sync` before `svelte-check`. If `pnpm run typecheck` reports errors in files you never touched right after adding a route, the generated types are stale: run `pnpm run check` first.
+`pnpm run check` runs `svelte-kit sync` before `svelte-check`. If `pnpm run typecheck` reports errors in files you never touched right after adding a route, the generated types are stale: run `pnpm run check` first. The same goes for `pnpm run knip` reporting most of `src` as unused or unresolved: it resolves `$components` and `$types` through those generated files.
 
 ## Code Quality Commands
 

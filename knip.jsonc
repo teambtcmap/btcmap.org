@@ -1,0 +1,13 @@
+{
+	"$schema": "https://unpkg.com/knip@6/schema.json",
+	// Kit 3 loads src/env.ts by convention; knip's SvelteKit plugin doesn't
+	// know it yet
+	"entry": ["src/env.ts"],
+	// Generated from btcmap-api: kept whole, used or not
+	"ignore": ["src/types/btcmap-api/**"],
+	// knip reads only the import lines of .svelte files, so an enum member
+	// used in a component (TipType.Address) looks unused
+	"exclude": ["enumMembers"],
+	// An export also used in its own file isn't dead code
+	"ignoreExportsUsedInFile": true
+}

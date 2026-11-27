@@ -6,7 +6,7 @@ If you are taking on an open issue please comment on the issue stating that you 
 
 ## Fork the repo and submit a pull request
 
-Please run `pnpm run format:fix && pnpm run lint && pnpm run check` after making any changes and before submitting a PR.
+Please run `pnpm run format:fix && pnpm run lint && pnpm run check && pnpm run knip` after making any changes and before submitting a PR.
 
 If your PR changes anything users see, add before/after screenshots of each affected view to the PR description (the template has a table for it), taken with the same page, screen size and theme so they can be compared side by side.
 
