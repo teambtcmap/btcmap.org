@@ -47,12 +47,6 @@ importers:
       dompurify:
         specifier: ^3.4.18
         version: 3.4.18
-      globals:
-        specifier: ^17.14.0
-        version: 17.14.0
-      husky:
-        specifier: ^9.1.7
-        version: 9.1.7
       i18n-iso-countries:
         specifier: ^7.14.0
         version: 7.14.0
@@ -150,6 +144,9 @@ importers:
       '@types/qrcode':
         specifier: ^1.5.6
         version: 1.5.6
+      husky:
+        specifier: ^9.1.7
+        version: 9.1.7
       jsdom:
         specifier: ^31.0.1
         version: 31.0.1(@noble/hashes@2.0.1)
@@ -1439,10 +1436,6 @@ packages:
 
   gl-matrix@3.4.4:
     resolution: {integrity: sha512-latSnyDNt/8zYUB6VIJ6PCh2jBjJX6gnDsoCZ7LyW7GkqrD51EWwa9qCoGixj8YqBtETQK/xY7OmpTF8xz1DdQ==}
-
-  globals@17.14.0:
-    resolution: {integrity: sha512-UtdkTVyAJePQv0J2M9Xe4L0ruNSDV314XiIJsADI2Zf40bcdAonE/D/OhAU8AT99oij9mhLByb+NvA3QWZYgCg==}
-    engines: {node: '>=18'}
 
   globalyzer@0.1.0:
     resolution: {integrity: sha512-40oNTM9UfG6aBmuKxk/giHn5nQ8RVz/SS4Ir6zgzOv9/qC3kKZ9v4etGTcJbEl/NyVQH7FGU7d+X1egr57Md2Q==}
@@ -3188,8 +3181,6 @@ snapshots:
   get-stream@6.0.1: {}
 
   gl-matrix@3.4.4: {}
-
-  globals@17.14.0: {}
 
   globalyzer@0.1.0: {}
 
