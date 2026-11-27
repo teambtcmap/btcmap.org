@@ -4,11 +4,7 @@ import { get } from "svelte/store";
 
 import { _ } from "#lib/i18n/index.js";
 import { updateMerchantHash } from "#lib/merchantDrawerHash.js";
-import {
-	DETAIL_FIELDS,
-	getPlaceDetails,
-	hasDetailFields,
-} from "#lib/placeDetails.js";
+import { getPlaceDetails } from "#lib/placeDetails.js";
 import { boost } from "#lib/store.js";
 import type { Boost, Place } from "#lib/types.js";
 import { errToast } from "#lib/utils.js";
@@ -61,10 +57,6 @@ export async function fetchMerchantDetails(
 	}
 }
 
-export function hasCompleteData(place: Place | undefined): place is Place {
-	return hasDetailFields(place, DETAIL_FIELDS.drawer);
-}
-
 export async function handleBoost(
 	merchant: Place | null,
 	merchantId: number | null,
@@ -104,32 +96,6 @@ export async function handleBoostComplete(
 		const currentValue = get(resetBoostStore) as number;
 		resetBoostStore.set(currentValue + 1);
 	}
-
-	if (merchantId) {
-		updateMerchantHash(merchantId, "details");
-	}
-}
-
-export function handleCloseDrawer(
-	setBoostLoading: (loading: boolean) => void,
-	additionalCleanup?: () => void,
-): void {
-	clearBoostState();
-	setBoostLoading(false);
-
-	if (additionalCleanup) {
-		additionalCleanup();
-	}
-
-	updateMerchantHash(null);
-}
-
-export function handleGoBack(
-	merchantId: number | null,
-	setBoostLoading: (loading: boolean) => void,
-): void {
-	clearBoostState();
-	setBoostLoading(false);
 
 	if (merchantId) {
 		updateMerchantHash(merchantId, "details");

@@ -33,9 +33,6 @@ export const MAP_PANEL_MARGIN = 12;
 // Gap between list panel and detail drawer (Tailwind spacing-4: 1rem = 16px)
 export const PANEL_DRAWER_GAP = 16;
 
-// Base padding (px) for fitBounds - visual buffer from viewport edges
-export const MAP_FIT_BOUNDS_PADDING = 50;
-
 // MERCHANT LIST ZOOM BEHAVIOR:
 // ┌─────────────────────────────────────────────────────────────────────────┐
 // │ Zoom < 10  │ No data shown - "zoom in" message                          │
@@ -82,10 +79,7 @@ export const MERCHANT_LIST_FETCH_CEILING = 750;
 export const NEARBY_RADIUS_MULTIPLIER = 1.5;
 
 // Map viewport marker loading
-export const VIEWPORT_BATCH_SIZE = 25;
-export const VIEWPORT_BUFFER_PERCENT = 0.2;
 export const MAP_DEBOUNCE_DELAY = 300;
-export const MARKER_CLICK_THROTTLE = 100;
 
 // Default map position (Curaçao)
 export const DEFAULT_MAP_LAT = 12.11209;

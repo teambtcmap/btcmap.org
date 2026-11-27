@@ -174,12 +174,3 @@ export async function filterPlaces(
 		return merged;
 	}
 }
-
-export function terminate() {
-	if (worker) {
-		worker.terminate();
-		worker = null;
-	}
-	pendingRequests.clear();
-	workerInitialized = false;
-}

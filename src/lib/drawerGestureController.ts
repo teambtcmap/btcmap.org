@@ -22,12 +22,6 @@ import {
 	updateVelocity,
 } from "./drawerGestureUtils";
 
-export interface DrawerGestureState {
-	expanded: boolean;
-	isDragging: boolean;
-	expandedHeight: number;
-}
-
 interface InternalGestureState {
 	activePointerId: number | null;
 	startY: number;
@@ -363,8 +357,3 @@ export function createDrawerGestureController(
 
 // Export singleton instance
 export const drawerGesture = createDrawerGestureController();
-
-// Export type for component usage
-export type DrawerGestureController = ReturnType<
-	typeof createDrawerGestureController
->;

@@ -136,8 +136,6 @@ export type PlacePinSourceDeps = {
 	onRendered?: (count: number) => void;
 };
 
-export type PlacePinSource = ReturnType<typeof createPlacePinSource>;
-
 // The pin/cluster/badge/label/heatmap rendering facade for the main /map.
 // Owns: the three GeoJSON sources and fifteen layers, the badge sprites, the
 // Place → feature-collection build (with lazy name resolution), the

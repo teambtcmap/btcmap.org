@@ -61,12 +61,9 @@ export const areaError = writable("");
 
 export const syncStatus: Writable<boolean> = writable();
 
-export const selectedMerchant: Writable<Place | null> = writable(null);
-
 export const boost: Writable<Boost> = writable();
 export const resetBoost = writable(0);
 export const boostHash: Writable<string> = writable();
 
 export const showTags: Writable<OSMTags | undefined> = writable();
 export const taggingIssues: Writable<Issue[] | undefined> = writable();
-export const showMore = writable(false);

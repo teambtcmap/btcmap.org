@@ -111,12 +111,6 @@ export function signTemplateWithSecretKey(
 
 // The NIP-98 helpers bound to a URL and method. Login signs POST
 // /v4/auth/nostr; linking a key signs PUT /v4/users/me/nostr.
-export const signNip98WithExtension = (
-	url: string,
-	method: Nip98Method,
-): Promise<SignedAuthEvent> =>
-	signTemplateWithExtension(buildNip98Template(url, method));
-
 export const signNip98WithSecretKey = (
 	secretKey: Uint8Array,
 	url: string,
@@ -125,9 +119,6 @@ export const signNip98WithSecretKey = (
 	signTemplateWithSecretKey(buildNip98Template(url, method), secretKey);
 
 // The login request, POST /v4/auth/nostr.
-export const signAuthWithExtension = (): Promise<SignedAuthEvent> =>
-	signNip98WithExtension(NOSTR_AUTH_URL, "POST");
-
 export const signAuthWithSecretKey = (secretKey: Uint8Array): SignedAuthEvent =>
 	signNip98WithSecretKey(secretKey, NOSTR_AUTH_URL, "POST");
 

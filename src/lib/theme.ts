@@ -109,19 +109,3 @@ function createThemeStore() {
 // Use theme.toggle() for theme toggle button.
 // Use theme.current for non-reactive reads (e.g., chart initialization).
 export const theme = createThemeStore();
-
-// Utility to check if current theme is dark.
-// Reactive: Use $isDark in components.
-export const isDark = {
-	subscribe: (fn: (value: boolean) => void) => {
-		return theme.subscribe((t) => fn(t === "dark"));
-	},
-};
-
-// Utility to check if current theme is light.
-// Reactive: Use $isLight in components.
-export const isLight = {
-	subscribe: (fn: (value: boolean) => void) => {
-		return theme.subscribe((t) => fn(t === "light"));
-	},
-};
