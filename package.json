@@ -20,7 +20,7 @@
 		"icons:generate": "node scripts/generate-icons.mjs",
 		"icons:refresh": "node scripts/generate-icons.mjs --refresh",
 		"knip": "knip",
-		"lint":"biome check src",
+		"lint": "biome check src",
 		"lint:fix": "biome check --write src",
 		"prepare": "husky",
 		"preview": "vite preview",

@@ -5,9 +5,15 @@
 	"entry": ["src/env.ts"],
 	// Generated from btcmap-api: kept whole, used or not
 	"ignore": ["src/types/btcmap-api/**"],
-	// knip reads only the import lines of .svelte files, so an enum member
-	// used in a component (TipType.Address) looks unused
-	"exclude": ["enumMembers"],
+	// knip reads only the import lines of .svelte files, so enum members that
+	// only components use look unused: TipType.Address and TipType.Url
+	"ignoreMembers": ["Address", "Url"],
+	"ignoreIssues": {
+		// getIssues feeds /tickets, parked since #649 with its call commented
+		// out. knip has no per-export setting besides JSDoc tags, so this
+		// covers the file's other exported functions too
+		"src/lib/gitea.ts": ["exports"]
+	},
 	// An export also used in its own file isn't dead code
 	"ignoreExportsUsedInFile": true
 }

@@ -16,7 +16,7 @@ Guidelines for coding agents working on this codebase (`CLAUDE.md` is a symlink 
 
 A husky pre-commit hook (lint-staged) runs `biome check --write --no-errors-on-unmatched` on staged `*.{js,ts,svelte,json,css}` files: formatting, safe lint fixes and import sorting land at commit time either way. Running `pnpm run lint:fix` (the same `biome check --write`) before staging keeps the hook a no-op and the diff predictable; `format:fix` alone covers only formatting. Biome formats only the `<script>` block of a `.svelte` file; template and style whitespace stay yours to keep consistent.
 
-`pnpm run check` runs `svelte-kit sync` before `svelte-check`. If `pnpm run typecheck` reports errors in files you never touched right after adding a route, the generated types are stale: run `pnpm run check` first. The same goes for `pnpm run knip` reporting most of `src` as unused or unresolved: it resolves `$components` and `$types` through those generated files.
+`pnpm run check` runs `svelte-kit sync` before `svelte-check`. If `pnpm run typecheck` reports errors in files you never touched right after adding a route, the generated types are stale: run `pnpm run check` first. The same goes for `pnpm run knip` reporting most of `src` as unused or unresolved: the sync writes `node_modules/$app/tsconfig.json`, which maps `$components` and `$types`, and `.svelte-kit/types`, where `./$types` imports resolve.
 
 ## Code Quality Commands
 
@@ -202,7 +202,7 @@ Use the appropriate tool attribution based on which tool generated the commit:
 2. Run `pnpm run format:fix`
 3. Run `pnpm run check` to perform Svelte validation
 4. Run `pnpm run typecheck` to perform project-wide TS type checking
-5. Run `pnpm run lint` to verify no errors
+5. Run `pnpm run lint` and `pnpm run knip` to verify no errors
 6. Verify the commit type matches the change (e.g., `ci` for CI changes, `feat` only for new features, not config/tooling)
 7. Stage and commit with conventional format
 8. Include the issue number (e.g., `#276`). No issue yet? Create one first (CONTRIBUTING.md asks for an issue per feature) with `gh issue create` along the templates in `.github/ISSUE_TEMPLATE/`, then reference it in every commit and in the PR title so a squash-merge keeps it

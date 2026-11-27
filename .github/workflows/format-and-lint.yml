@@ -34,8 +34,9 @@ jobs:
 
       # Fail on files nothing imports, exports nothing uses and dependencies
       # nothing loads (settings in knip.jsonc). Needs the svelte-kit sync of
-      # the setup step: $components and $types resolve through the generated
-      # .svelte-kit/tsconfig.json.
+      # the setup step: it writes node_modules/$app/tsconfig.json, which maps
+      # $components and $types, and .svelte-kit/types, where ./$types imports
+      # resolve.
       - name: Check for unused files, exports and dependencies
         run: |
           # knip exits 1 for findings and 2 when it fails to run; only the
