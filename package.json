@@ -94,7 +94,7 @@
 		"tailwindcss": "^4.3.5",
 		"typescript": "^6.0.3",
 		"vite": "^8.3.8",
-		"vitest": "^5.1.1"
+		"vitest": "^5.1.2"
 	},
 	"packageManager": "pnpm@11.21.0",
 	"imports": {
