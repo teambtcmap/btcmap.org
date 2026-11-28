@@ -49,7 +49,7 @@
 		"d3-geo": "^3.1.2",
 		"date-fns": "^4.3.0",
 		"dayjs": "^1.11.23",
-		"dompurify": "^3.4.18",
+		"dompurify": "^3.5.0",
 		"i18n-iso-countries": "^7.14.0",
 		"js-confetti": "^0.13.1",
 		"localforage": "^1.10.0",
