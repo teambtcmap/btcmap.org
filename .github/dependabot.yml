@@ -12,43 +12,20 @@ updates:
       - dependency-name: '@types/node'
         versions: ['>=25.0.0']
     groups:
-      lint:
-        patterns:
-          - '@biomejs/*'
-          - 'lint-staged'
-          - 'husky'
-          - 'knip'
-      svelte:
-        patterns:
-          - 'svelte'
-          - '@sveltejs/*'
-          - 'svelte-*'
-      tailwind:
-        patterns:
-          - 'tailwindcss'
-          - '@tailwindcss/*'
-      playwright:
-        patterns:
-          - '@playwright/*'
-      maplibre:
-        patterns:
-          - '@maplibre/*'
-          - 'maplibre-gl'
-      tanstack:
-        patterns:
-          - '@tanstack/*'
-      vite:
-        patterns:
-          - 'vite'
-          - 'vitest'
-          - 'jsdom'
-      iconify:
-        patterns:
-          - '@iconify/*'
-          - '@iconify-json/*'
+      # Every minor and patch bump lands in one weekly PR. A major gets a PR
+      # of its own: it usually needs migration work and would hold up the
+      # rest. Security updates ignore version-update groups and stay single.
+      minor-and-patch:
+        patterns: ['*']
+        update-types: ['minor', 'patch']
 
   - package-ecosystem: 'github-actions'
     directory: '/'
     schedule:
       interval: 'weekly'
     open-pull-requests-limit: 5
+    groups:
+      # Workflows pin actions to a major tag, so these bumps are all majors,
+      # but small ones: they share one PR as well
+      actions:
+        patterns: ['*']
