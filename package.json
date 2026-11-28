@@ -68,7 +68,7 @@
 		"tippy.js": "^6.3.7"
 	},
 	"devDependencies": {
-		"@biomejs/biome": "^2.6.8",
+		"@biomejs/biome": "^2.6.9",
 		"@iconify-json/fa6-brands": "^1.2.6",
 		"@iconify-json/fa6-solid": "^1.2.4",
 		"@iconify-json/ic": "^1.2.4",
@@ -87,7 +87,7 @@
 		"husky": "^9.1.7",
 		"jsdom": "^31.0.1",
 		"knip": "^6.48.0",
-		"lint-staged": "^17.6.1",
+		"lint-staged": "^17.6.2",
 		"postcss": "^8.5.33",
 		"svelte": "^5.59.1",
 		"svelte-check": "^4.7.8",
