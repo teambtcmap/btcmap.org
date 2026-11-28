@@ -17,6 +17,7 @@ updates:
           - '@biomejs/*'
           - 'lint-staged'
           - 'husky'
+          - 'knip'
       svelte:
         patterns:
           - 'svelte'

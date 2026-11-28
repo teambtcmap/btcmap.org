@@ -7,7 +7,6 @@
 // the editor falls back to a raw text field so nothing is lost.
 
 export const OSM_DAYS = ["Mo", "Tu", "We", "Th", "Fr", "Sa", "Su"] as const;
-export type OsmDay = (typeof OSM_DAYS)[number];
 
 export type TimeRange = { from: string; to: string };
 export type DayState = { open: boolean; is24: boolean; ranges: TimeRange[] };

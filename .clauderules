@@ -5,8 +5,9 @@
 2. Run `pnpm run check`
 3. Run `pnpm run typecheck`
 4. Run `pnpm run lint`
-5. Run `pnpm run test --run`
-6. Use conventional commits: `type(scope): description #issue`
+5. Run `pnpm run knip`
+6. Run `pnpm run test --run`
+7. Use conventional commits: `type(scope): description #issue`
 
 ## Conventional Commit Types
 feat, fix, refactor, docs, test, chore, style, perf

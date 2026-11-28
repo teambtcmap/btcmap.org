@@ -1,8 +1,3 @@
-export interface OrganizationDisplayName {
-	id: string;
-	displayName: string;
-}
-
 export const organizationDisplayNames: Record<string, string> = {
 	"2140-meetups": "2140 Meetups",
 	bitcoin4india: "Bitcoin4India",
@@ -31,11 +26,4 @@ export const organizationDisplayNames: Record<string, string> = {
 //Function will return the raw `organization` tag if it is not in the list of known organizations above.`
 export const getOrganizationDisplayName = (organizationId: string): string => {
 	return organizationDisplayNames[organizationId] || organizationId;
-};
-
-export const getAllOrganizations = (): OrganizationDisplayName[] => {
-	return Object.entries(organizationDisplayNames).map(([id, displayName]) => ({
-		id,
-		displayName,
-	}));
 };

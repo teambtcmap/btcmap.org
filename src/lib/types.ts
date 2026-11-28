@@ -258,15 +258,6 @@ export type Tagger = {
 
 export type Boost = { id: number; name: string; boost: string } | undefined;
 
-// Search types for places search API
-export interface SearchItem {
-	type: "element" | "user" | "area";
-	id: number;
-	name: string | null;
-	address?: string;
-	icon?: string;
-}
-
 export type PayMerchant =
 	| { type: string; url?: string; username?: string }
 	| undefined;

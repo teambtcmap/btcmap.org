@@ -32,6 +32,22 @@ jobs:
       - name: Run Biome lint
         run: pnpm run lint
 
+      # Fail on files nothing imports, exports nothing uses and dependencies
+      # nothing loads (settings in knip.jsonc). Needs the svelte-kit sync of
+      # the setup step: it writes node_modules/$app/tsconfig.json, which maps
+      # $components and $types, and .svelte-kit/types, where ./$types imports
+      # resolve.
+      - name: Check for unused files, exports and dependencies
+        run: |
+          # knip exits 1 for findings and 2 when it fails to run; only the
+          # former gets the fix hint.
+          status=0
+          pnpm run knip || status=$?
+          if [ "$status" -eq 1 ]; then
+            echo "::error title=Unused code::knip found unused files, exports or dependencies (listed above). Delete them. If something is used in a way knip can't see, add it to knip.jsonc."
+          fi
+          exit "$status"
+
       # Fail if the committed offline icon bundle is stale — e.g. a new
       # materialExceptions entry or <Icon> usage landed without regenerating.
       # Deterministic from the committed vocabulary + pinned icon-set packages;

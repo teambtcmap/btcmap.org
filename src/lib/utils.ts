@@ -44,20 +44,6 @@ export const sanitizeUrl = (url: string | undefined): string | undefined => {
 	return undefined;
 };
 
-// Converts Material Design icon names to human-readable labels
-export const humanizeIconName = (icon: string): string => {
-	const specialCases: Record<string, string> = {
-		content_cut: "Barber",
-		local_atm: "ATM",
-	};
-	if (specialCases[icon]) return specialCases[icon];
-
-	return icon
-		.replace(/^local_/, "")
-		.replace(/_/g, " ")
-		.replace(/\b\w/g, (c) => c.toUpperCase());
-};
-
 // Formats the nearby count for the badge pill: '' when 0, '>250' above the list cap, 'N' otherwise
 export const formatNearbyPillCount = (count: number): string => {
 	if (count <= 0) return "";

@@ -19,6 +19,7 @@
 - `pnpm run lint`
 - `pnpm run check`
 - `pnpm run typecheck`
+- `pnpm run knip`
 - `pnpm run test --run`
 
 ### Local API development

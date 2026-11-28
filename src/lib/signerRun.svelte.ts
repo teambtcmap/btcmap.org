@@ -573,5 +573,3 @@ export const createSignerRun = ({
 		},
 	};
 };
-
-export type SignerRun = ReturnType<typeof createSignerRun>;
