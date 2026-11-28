@@ -10,7 +10,7 @@
 7. Use conventional commits: `type(scope): description #issue`
 
 ## Conventional Commit Types
-feat, fix, refactor, docs, test, chore, style, perf
+feat, fix, refactor, perf, style, docs, test, ci, chore, revert
 
 ## Code Style
 - NO JSDoc comments - use inline // comments only

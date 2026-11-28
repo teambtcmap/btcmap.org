@@ -12,43 +12,23 @@ updates:
       - dependency-name: '@types/node'
         versions: ['>=25.0.0']
     groups:
-      lint:
-        patterns:
-          - '@biomejs/*'
-          - 'lint-staged'
-          - 'husky'
-          - 'knip'
-      svelte:
-        patterns:
-          - 'svelte'
-          - '@sveltejs/*'
-          - 'svelte-*'
-      tailwind:
-        patterns:
-          - 'tailwindcss'
-          - '@tailwindcss/*'
-      playwright:
-        patterns:
-          - '@playwright/*'
-      maplibre:
-        patterns:
-          - '@maplibre/*'
-          - 'maplibre-gl'
-      tanstack:
-        patterns:
-          - '@tanstack/*'
-      vite:
-        patterns:
-          - 'vite'
-          - 'vitest'
-          - 'jsdom'
-      iconify:
-        patterns:
-          - '@iconify/*'
-          - '@iconify-json/*'
+      # Every minor and patch bump lands in one weekly PR. A major gets a PR
+      # of its own: it usually needs migration work and would hold up the
+      # rest. Dependabot counts 0.5 -> 0.6 as a minor, though, so a breaking
+      # 0.x bump rides in the group. Security updates skip this group.
+      minor-and-patch:
+        patterns: ['*']
+        update-types: ['minor', 'patch']
 
   - package-ecosystem: 'github-actions'
-    directory: '/'
+    # '/' reaches only .github/workflows and a root action.yml; the
+    # composite actions under .github/actions need their own entry.
+    directories: ['/', '/.github/actions/*']
     schedule:
       interval: 'weekly'
     open-pull-requests-limit: 5
+    groups:
+      # Workflows and composite actions pin actions to a major tag, so these
+      # bumps are all majors, but small ones: they share one PR as well.
+      actions:
+        patterns: ['*']
